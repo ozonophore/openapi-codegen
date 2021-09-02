@@ -1,0 +1,35 @@
+openapi: "3.0.0"
+info:
+  title: Request for deposit prolongation
+  version: DEV-SNAPSHOT
+  description: OpenAPI Specification for Prolongation request
+
+paths:
+  /public/prolongate/request/create:
+    get:
+      tags:
+          - Simple
+      operationId: GetCallWithoutParametersAndResponse
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: prolongation/request/create/prolongationCreateResponseDTO.json
+    post:
+      tags:
+        - Simple
+      operationId: PostCallWithOptionalParam
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: prolongation/common_request/accountDTO.json
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: prolongation/request/create/prolongationCreateResponseDTO.json
