@@ -33,6 +33,8 @@ jobs:
         uses: actions/setup-node@v1
       - name: Install yarn
         run: npm install --global yarn
+      - name: Install packages
+        run: yarn install
       - name: Build library
         run: yarn run release
       - name: Run unit tests
