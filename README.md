@@ -25,7 +25,7 @@
 ## Install
 
 ```
-npm install openapi-typescript-codegen --save-dev
+npm install openapi-codegen --save-dev
 ```
 
 
@@ -69,13 +69,13 @@ $ openapi --help
 **NPX**
 
 ```
-npx openapi-typescript-codegen --input ./spec.json --output ./dist
+npx openapi-codegen --input ./spec.json --output ./dist
 ```
 
 **Node.js API**
 
 ```javascript
-const OpenAPI = require('openapi-typescript-codegen');
+const OpenAPI = require('openapi-codegen');
 
 OpenAPI.generate({
     input: './spec.json',
@@ -476,20 +476,4 @@ in your `tsconfig.json` file.
 }
 ```
 
-
-[npm-url]: https://npmjs.org/package/openapi-typescript-codegen
-[npm-image]: https://img.shields.io/npm/v/openapi-typescript-codegen.svg
 [license-url]: LICENSE
-[license-image]: http://img.shields.io/npm/l/openapi-typescript-codegen.svg
-[travis-url]: https://travis-ci.org/ferdikoomen/openapi-typescript-codegen
-[travis-image]: https://img.shields.io/travis/ferdikoomen/openapi-typescript-codegen.svg
-[deps-url]: https://david-dm.org/ferdikoomen/openapi-typescript-codegen
-[deps-image]: https://img.shields.io/david/ferdikoomen/openapi-typescript-codegen.svg
-[coverage-url]: https://codecov.io/gh/ferdikoomen/openapi-typescript-codegen
-[coverage-image]: https://img.shields.io/codecov/c/github/ferdikoomen/openapi-typescript-codegen.svg
-[quality-url]: https://lgtm.com/projects/g/ferdikoomen/openapi-typescript-codegen
-[quality-image]: https://img.shields.io/lgtm/grade/javascript/g/ferdikoomen/openapi-typescript-codegen.svg
-[climate-url]: https://codeclimate.com/github/ferdikoomen/openapi-typescript-codegen
-[climate-image]: https://img.shields.io/codeclimate/maintainability/ferdikoomen/openapi-typescript-codegen.svg
-[downloads-url]: http://npm-stat.com/charts.html?package=openapi-typescript-codegen
-[downloads-image]: http://img.shields.io/npm/dm/openapi-typescript-codegen.svg
