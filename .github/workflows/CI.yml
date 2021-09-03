@@ -23,25 +23,25 @@ jobs:
         run: sudo yarn run test:e2e
       - name: Submit to Codecov
         run: sudo yarn run codecov
-  test-windows:
-    name: Node in Windows
-    runs-on: windows-latest
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v2
-      - name: Install node
-        uses: actions/setup-node@v1
-        with:
-          node-version: '14'
-      - name: Install yarn
-        run: npm install --global yarn
-      - name: Install packages
-        run: yarn install
-      - name: Build library
-        run: yarn run release
-      - name: Run unit tests
-        run: yarn run test:coverage
-      - name: Run e2e tests
-        run: sudo yarn run test:e2e
-      - name: Submit to Codecov
-        run: yarn run codecov
+#   test-windows:
+#     name: Node in Windows
+#     runs-on: windows-latest
+#     steps:
+#       - name: Checkout source
+#         uses: actions/checkout@v2
+#       - name: Install node
+#         uses: actions/setup-node@v1
+#         with:
+#           node-version: '14'
+#       - name: Install yarn
+#         run: npm install --global yarn
+#       - name: Install packages
+#         run: yarn install
+#       - name: Build library
+#         run: yarn run release
+#       - name: Run unit tests
+#         run: yarn run test:coverage
+#       - name: Run e2e tests
+#         run: sudo yarn run test:e2e
+#       - name: Submit to Codecov
+#         run: yarn run codecov
