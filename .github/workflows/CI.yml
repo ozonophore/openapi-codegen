@@ -1,0 +1,25 @@
+name: CI
+
+on: [ push, pull_request ]
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+      - name: Install yarn
+        uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: install
+      - name: Build library
+        run: yarn run release
+      - name: Run unit tests
+        run: yarn run test:coverage
+      - name: Run e2e tests
+        run: yarn run test:e2e
+      - name: Submit to Codecov
+        run: yarn run codecov
