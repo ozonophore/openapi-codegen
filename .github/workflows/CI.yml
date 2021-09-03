@@ -34,10 +34,10 @@ jobs:
       - name: Install yarn
         run: npm install --global yarn
       - name: Build library
-        run: sudo yarn run release
+        run: yarn run release
       - name: Run unit tests
-        run: sudo yarn run test:coverage
+        run: yarn run test:coverage
       - name: Run e2e tests
         run: sudo yarn run test:e2e
       - name: Submit to Codecov
-        run: sudo yarn run codecov
+        run: yarn run codecov
