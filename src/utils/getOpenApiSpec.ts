@@ -1,21 +1,9 @@
 import RefParser from 'json-schema-ref-parser';
 import path from 'path';
 
+import { exists } from './fileSystem';
 import { getClassName } from './getClassName';
-
-function replaceRef(obj: any, rootPath: string, refRoot: string, refs: any) {
-    for (const key of Object.keys(obj)) {
-        if (key === '$ref') {
-            const absolutePath = path.resolve(refRoot, obj.$ref);
-            const className = getClassName(absolutePath.substring(rootPath.length, absolutePath.length - path.extname(absolutePath).length));
-            if (refs.hasOwnProperty(absolutePath)) {
-                obj.$ref = `#/components/schemas/${className}`;
-            }
-        } else if (obj[key] instanceof Object) {
-            replaceRef(obj[key], rootPath, refRoot, refs);
-        }
-    }
-}
+import { replaceRef } from './replaceRef';
 
 /**
  * Load and parse te open api spec. If the file extension is ".yml" or ".yaml"
@@ -24,8 +12,17 @@ function replaceRef(obj: any, rootPath: string, refRoot: string, refs: any) {
  * @param input
  */
 export async function getOpenApiSpec(input: string): Promise<any> {
+        const filePath = path.resolve(process.cwd(), input);
+    if (!input) {
+        throw new Error(`Could not find OpenApi spec: "${filePath}"`);
+   }
+    const fileExists = await exists(filePath);
     const parser = new RefParser();
-    await parser.resolve(input);
+    if (fileExists) {
+        await parser.resolve(input);
+    } else {
+        throw new Error(`Could not read OpenApi spec: "${filePath}"`);
+    }
     const values = parser.$refs.values('file');
     const keys = Object.keys(values);
     const rootPath = path.dirname(keys[0]);
@@ -47,8 +44,7 @@ export async function getOpenApiSpec(input: string): Promise<any> {
     }
     for (const key of keys) {
         const refRootPath = path.dirname(key);
-        const value = values[key];
-        replaceRef(value, rootPath, refRootPath, values);
+        values[key] = replaceRef(values[key], rootPath, refRootPath, values);
     }
     let result = <any>parser.schema;
     if (keys.length > 1) {
@@ -63,5 +59,5 @@ export async function getOpenApiSpec(input: string): Promise<any> {
             result = Object.assign(result, { components: componentsFromFile });
         }
     }
-    return parser.bundle(result);
+    return await parser.bundle(result);
 }
