@@ -32,9 +32,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v1
       - name: Install yarn
-        uses: borales/actions-yarn@v2.3.0
-        with:
-          cmd: install
+        run: npm install --global yarn
       - name: Build library
         run: sudo yarn run release
       - name: Run unit tests
