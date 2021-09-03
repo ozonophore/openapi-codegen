@@ -5,16 +5,6 @@
 const path = require('path');
 const program = require('commander');
 const pkg = require('../package.json');
-//const fs = require('fs');
-
-// fs.stat('openapi.config.json', (err, stats) => {
-//     if (err !== null && err.code === 'ENOENT') {
-//         fs.writeFile('openapi.config.json', 'test', function (err) {
-//             if (err) return console.log(err);
-//               console.log('Hello World > openapu.config.json');
-//           })
-//     }
-// })
 
 const params = program
     .name('openapi')

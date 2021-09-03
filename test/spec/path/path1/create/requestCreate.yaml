@@ -5,11 +5,11 @@ post:
     content:
       application/json:
         schema:
-          $ref: prolongationCreateRequestDTO.json
+          $ref: createRequestDTO.json
   responses:
     '200':
       description: OK
       content:
         application/json:
           schema:
-            $ref: prolongationCreateResponseDTO.json
+            $ref: createResponseDTO.json

@@ -5,7 +5,6 @@ const compileWithTypescript = require('./scripts/compileWithTypescript');
 const server = require('./scripts/server');
 
 describe('v3.node', () => {
-
     beforeAll(async () => {
         await generate('v3/node', 'v3', 'node');
         compileWithTypescript('v3/node');
@@ -18,7 +17,7 @@ describe('v3.node', () => {
 
     it('requests token', async () => {
         const { OpenAPI, SimpleService } = require('./generated/v3/node/index.js');
-        const tokenRequest = jest.fn().mockResolvedValue('MY_TOKEN')
+        const tokenRequest = jest.fn().mockResolvedValue('MY_TOKEN');
         OpenAPI.TOKEN = tokenRequest;
         OpenAPI.USERNAME = undefined;
         OpenAPI.PASSWORD = undefined;
@@ -41,11 +40,10 @@ describe('v3.node', () => {
         const result = await ComplexService.complexTypes({
             first: {
                 second: {
-                    third: 'Hello World!'
-                }
-            }
+                    third: 'Hello World!',
+                },
+            },
         });
         expect(result).toBeDefined();
     });
-
 });

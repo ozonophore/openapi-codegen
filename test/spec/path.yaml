@@ -1,0 +1,10 @@
+openapi: "3.0.0"
+info:
+  title: Request for deposit path
+  version: DEV-SNAPSHOT
+  description: OpenAPI Specification for Prolongation request
+
+paths:
+  /public/path/path1/create:
+    $ref: path/path1/create/requestCreate.yaml
+

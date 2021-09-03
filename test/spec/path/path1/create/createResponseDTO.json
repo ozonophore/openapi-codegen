@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Response for creation",
+  "description": "Some description",
+  "type": "object",
+  "properties": {
+    "termDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Term date"
+    },
+    "endDate": {
+      "type": "string",
+      "format": "date",
+      "description": "End date"
+    },
+    "isEqual": {
+      "type": "boolean",
+      "description": "Is equal"
+    },
+    "replenishmentType": {
+      "type": "string",
+      "description": "Some type"
+    },
+    "code": {
+      "type": "string",
+      "description": "Some code"
+    },
+    "GUID": {
+      "type": "string",
+      "description": "GUID as string"
+    },
+    "externalFile": {
+        "$ref": "../../common_response/simpleDTO.json"
+    }
+  },
+  "additionalProperties": false
+}

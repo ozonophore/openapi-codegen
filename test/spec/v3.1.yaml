@@ -1,11 +1,11 @@
 openapi: "3.0.0"
 info:
-  title: Request for deposit prolongation
+  title: Test
   version: DEV-SNAPSHOT
-  description: OpenAPI Specification for Prolongation request
+  description: OpenAPI Specification
 
 paths:
-  /public/prolongate/request/create:
+  /public/path/path1/create:
     get:
       tags:
           - Simple
@@ -16,7 +16,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: prolongation/request/create/prolongationCreateResponseDTO.json
+                $ref: path/path1/create/createResponseDTO.json
     post:
       tags:
         - Simple
@@ -25,11 +25,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: prolongation/common_request/accountDTO.json
+              $ref: path/common_request/simpleDTO.json
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: prolongation/request/create/prolongationCreateResponseDTO.json
+                $ref: path/path1/create/createResponseDTO.json
