@@ -1,6 +1,6 @@
 {
-    "name": "openapi-gen",
-    "version": "0.0.1",
+    "name": "@ozonophore/openapi-codegen",
+    "version": "0.1.2",
     "description": "Library that generates Typescript clients based on the OpenAPI specification. It bases on openapi-typescript-codegen",
     "author": "Alexey Zverev",
     "homepage": "https://github.com/ozonophore/openapi-codegen.git",
@@ -12,6 +12,7 @@
         "url": "https://github.com/ozonophore/openapi-codegen.git"
     },
     "license": "MIT",
+    "languageName": "node",
     "keywords": [
         "openapi",
         "swagger",
