@@ -4,6 +4,7 @@
 [![License][license-image]][license-url]
 [![Build Status][travis-image]][travis-url]
 [![Downloads][downloads-image]][downloads-url]
+[![Downloads][coverage-image]][coverage-url]
 
 > Node.js library that generates Typescript clients based on the OpenAPI specification.
 
@@ -480,3 +481,5 @@ in your `tsconfig.json` file.
 [downloads-image]: http://img.shields.io/npm/dm/ts-openapi-codegen.svg
 [travis-url]: https://app.travis-ci.com/github/ozonophore/openapi-codegen
 [travis-image]: https://app.travis-ci.com/ozonophore/openapi-codegen.svg?branch=master
+[coverage-url]: https://codecov.io/gh/ozonophore/openapi-codegen
+[coverage-image]: https://codecov.io/gh/ozonophore/openapi-codegen/branch/master/graph/badge.svg?token=RBPZ01BW0Y
