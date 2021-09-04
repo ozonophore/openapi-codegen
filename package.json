@@ -59,7 +59,7 @@
         "prettier": "prettier \"./src/**/*.ts\" \"./bin/index.js\" \"./types/index.d.ts\" --check",
         "prettier:fix": "prettier \"./src/**/*.ts\" \"./bin/index.js\" \"./types/index.d.ts\" --write",
         "prepublish": "yarn run clean && yarn run release",
-        "codecov": "codecov --token=66c30c23-8954-4892-bef9-fbaed0a2e42b"
+        "codecov": "codecov --token=65a281c5-b9a8-4e9e-a9b3-27fa4084f312"
     },
     "dependencies": {
         "camelcase": "^6.2.0",
