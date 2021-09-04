@@ -2,11 +2,6 @@
 
 [![NPM][npm-image]][npm-url]
 [![License][license-image]][license-url]
-[![Build Status][travis-image]][travis-url]
-[![Dependency Status][deps-image]][deps-url]
-[![Coverage][coverage-image]][coverage-url]
-[![Quality][quality-image]][quality-url]
-[![Code Climate][climate-image]][climate-url]
 [![Downloads][downloads-image]][downloads-url]
 
 > Node.js library that generates Typescript clients based on the OpenAPI specification.
@@ -25,7 +20,7 @@
 ## Install
 
 ```
-npm install openapi-codegen --save-dev
+npm install ts-openapi-codegen --save-dev
 ```
 
 
@@ -476,4 +471,9 @@ in your `tsconfig.json` file.
 }
 ```
 
+[npm-url]: https://www.npmjs.com/package/ts-openapi-codegen
+[npm-image]: https://img.shields.io/npm/v/ts-openapi-codegen.svg
 [license-url]: LICENSE
+[license-image]: http://img.shields.io/npm/l/ts-openapi-codegen.svg
+[downloads-url]: http://npm-stat.com/charts.html?package=ts-openapi-codegen
+[downloads-image]: http://img.shields.io/npm/dm/ts-openapi-codegen.svg
