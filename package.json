@@ -1,5 +1,5 @@
 {
-    "name": "@ozonophore/openapi-codegen",
+    "name": "ts-openapi-codegen",
     "version": "0.1.2",
     "description": "Library that generates Typescript clients based on the OpenAPI specification. It bases on openapi-typescript-codegen",
     "author": "Alexey Zverev",
