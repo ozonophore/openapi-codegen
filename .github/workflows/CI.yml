@@ -24,7 +24,9 @@ jobs:
       - name: Run e2e tests
         run: yarn run test:e2e
       - name: Submit to Codecov
-        run: yarn run codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV }}
       - name: Publish
         if: github.ref == 'refs/heads/master'
         uses: JS-DevTools/npm-publish@v1
