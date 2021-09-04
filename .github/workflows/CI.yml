@@ -23,6 +23,13 @@ jobs:
         run: sudo yarn run test:e2e
       - name: Submit to Codecov
         run: sudo yarn run codecov
+      - name: Publish
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_AUTH_TOKEN }}
+      - if: steps.publish.outputs.type != 'none'
+        run: |
+          echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
 #   test-windows:
 #     name: Node in Windows
 #     runs-on: windows-latest
