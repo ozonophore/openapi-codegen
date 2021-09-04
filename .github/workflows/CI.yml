@@ -18,13 +18,13 @@ jobs:
       - name: Install packages
         run: yarn install
       - name: Build library
-        run: sudo yarn run release
+        run: yarn run release
       - name: Run unit tests
-        run: sudo yarn run test:coverage
+        run: yarn run test:coverage
       - name: Run e2e tests
-        run: sudo yarn run test:e2e
+        run: yarn run test:e2e
       - name: Submit to Codecov
-        run: sudo yarn run codecov
+        run: yarn run codecov
       - name: Publish
         uses: JS-DevTools/npm-publish@v1
         with:
