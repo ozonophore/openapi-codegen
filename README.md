@@ -497,7 +497,7 @@ in your `tsconfig.json` file.
 [typescript-url]: https://www.typescriptlang.org
 [typescript-image]: https://badgen.net/badge/icon/typescript?icon=typescript&label
 [CI-url]: https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml
-[CI-image]: https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml/badge.svg?event=pull_request
+[CI-image]: https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml/badge.svg?branch=master
 [license-url]: https://raw.githubusercontent.com/ozonophore/openapi-codegen/master/LICENSE
 [license-image]: https://img.shields.io/github/license/ozonophore/openapi-codegen.svg
 [issues-url]: https://github.com/ozonophore/openapi-codegen/issues
