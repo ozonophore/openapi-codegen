@@ -5,6 +5,17 @@
 [![Build Status][travis-image]][travis-url]
 [![Downloads][downloads-image]][downloads-url]
 [![Downloads][coverage-image]][coverage-url]
+[![TypeScript][typescript-image]][typescript-url]
+[![CI][CI-image]][CI-url]
+[![LICENSE][license-image]][license-url]
+[![ISSUES][issues-image]][issues-url]
+[![issues-pr][issues-pr-image]][issues-pr-url]
+[![issues-pr-closed][issues-pr-closed-image]][issues-pr-closed-url]
+[![stars-closed][stars-image]][stars-url]
+![librariesio-image]
+![lines-image]
+![Minimum node.js version](https://badgen.net/npm/node/next)
+
 
 > Node.js library that generates Typescript clients based on the OpenAPI specification.
 
@@ -483,3 +494,19 @@ in your `tsconfig.json` file.
 [travis-image]: https://app.travis-ci.com/ozonophore/openapi-codegen.svg?branch=master
 [coverage-url]: https://codecov.io/gh/ozonophore/openapi-codegen
 [coverage-image]: https://codecov.io/gh/ozonophore/openapi-codegen/branch/master/graph/badge.svg?token=RBPZ01BW0Y
+[typescript-url]: https://www.typescriptlang.org
+[typescript-image]: https://badgen.net/badge/icon/typescript?icon=typescript&label
+[CI-url]: https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml
+[CI-image]: https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml/badge.svg?event=pull_request
+[license-url]: https://raw.githubusercontent.com/ozonophore/openapi-codegen/master/LICENSE
+[license-image]: https://img.shields.io/github/license/ozonophore/openapi-codegen.svg
+[issues-url]: https://github.com/ozonophore/openapi-codegen/issues
+[issues-image]: https://img.shields.io/github/issues/ozonophore/openapi-codegen.svg
+[issues-pr-url]: https://github.com/ozonophore/openapi-codegen/pulls
+[issues-pr-image]: https://img.shields.io/github/issues-pr/ozonophore/openapi-codegen.svg
+[issues-pr-closed-url]: https://github.com/ozonophore/openapi-codegen/pulls?q=is%3Apr+is%3Aclosed
+[issues-pr-closed-image]: https://img.shields.io/github/issues-pr-closed/ozonophore/openapi-codegen.svg
+[stars-url]: https://github.com/ozonophore/openapi-codegen/stargazers
+[stars-image]: https://img.shields.io/github/stars/ozonophore/openapi-codegen.svg
+[librariesio-image]: https://img.shields.io/librariesio/github/ozonophore/openapi-codegen
+[lines-image]: https://img.shields.io/tokei/lines/github/ozonophore/openapi-codegen
