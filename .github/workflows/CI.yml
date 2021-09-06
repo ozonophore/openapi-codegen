@@ -1,9 +1,16 @@
 name: CI
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
 
 jobs:
-  test-ubuntu:
+  build:
     name: Node in Ubuntu
     runs-on: ubuntu-latest
     steps:
