@@ -23,7 +23,7 @@ function generate(config) {
         request: config.request,
     })
         .then(() => {
-            process.exit(0);
+            console.log(`Generation from "${input}" was finished`);
         })
         .catch(error => {
             console.log(error);
@@ -53,7 +53,7 @@ if (OpenAPI) {
             .option('--exportServices <value>', 'Write services to disk', true)
             .option('--exportModels <value>', 'Write models to disk', true)
             .option('--exportSchemas <value>', 'Write schemas to disk', false)
-            .option('--clean <value>', 'Clean a directory before generation')
+            .option('--clean <value>', 'Clean a directory before generation', true)
             .option('--request <value>', 'Path to custom request file')
             .parse(process.argv)
             .opts();
