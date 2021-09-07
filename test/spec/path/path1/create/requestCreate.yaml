@@ -1,5 +1,5 @@
 post:
-  operationId: createProlongation
+  operationId: createProcedure
   requestBody:
     required: true
     content:
