@@ -23,7 +23,7 @@ function generate(config) {
         request: config.request,
     })
         .then(() => {
-            console.log(`Generation from "${input}" was finished`);
+            console.log(`Generation from "${config.input}" was finished`);
         })
         .catch(error => {
             console.log(error);
