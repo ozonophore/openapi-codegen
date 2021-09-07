@@ -12,7 +12,7 @@ import { replaceRef } from './replaceRef';
  * @param input
  */
 export async function getOpenApiSpec(input: string): Promise<any> {
-        const filePath = path.resolve(process.cwd(), input);
+    const filePath = path.resolve(process.cwd(), input);
     if (!input) {
         throw new Error(`Could not find OpenApi spec: "${filePath}"`);
    }

@@ -19,6 +19,7 @@ function generate(config) {
         exportServices: JSON.parse(config.exportServices) === true,
         exportModels: JSON.parse(config.exportModels) === true,
         exportSchemas: JSON.parse(config.exportSchemas) === true,
+        clean: JSON.parse(config.clean) === true,
         request: config.request,
     })
         .then(() => {
@@ -52,6 +53,7 @@ if (OpenAPI) {
             .option('--exportServices <value>', 'Write services to disk', true)
             .option('--exportModels <value>', 'Write models to disk', true)
             .option('--exportSchemas <value>', 'Write schemas to disk', false)
+            .option('--clean <value>', 'Clean a directory before generation')
             .option('--request <value>', 'Path to custom request file')
             .parse(process.argv)
             .opts();

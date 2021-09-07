@@ -60,6 +60,7 @@ $ openapi --help
     --exportServices <value>  Write services to disk (default: true)
     --exportModels <value>    Write models to disk (default: true)
     --exportSchemas <value>   Write schemas to disk (default: false)
+    --clean <value>           Clean a directory before generation (default: true)
 
   Examples
     $ openapi --input ./spec.json
