@@ -33,6 +33,15 @@ describe('getType', () => {
         expect(type.imports).toEqual(['Link']);
     });
 
+    it('should convert template with path', () => {
+        const type = getType('#/components/schemas/first/second/Link[string]');
+        expect(type.type).toEqual('Link<string>');
+        expect(type.base).toEqual('Link');
+        expect(type.template).toEqual('string');
+        expect(type.path).toEqual('first/second/');
+        expect(type.imports).toEqual(['first/second/Link']);
+    });
+
     it('should convert template with model', () => {
         const type = getType('#/components/schemas/Link[Model]');
         expect(type.type).toEqual('Link<Model>');

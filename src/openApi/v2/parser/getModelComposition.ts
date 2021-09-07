@@ -38,6 +38,7 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
         });
         composition.properties.push({
             name: 'properties',
+            path: '',
             export: 'interface',
             type: 'any',
             base: 'any',

@@ -1,3 +1,4 @@
+import { mkdir, mkdirSync } from "fs";
 import { resolve } from 'path';
 
 import type { Model } from '../client/interfaces/Model';
@@ -16,7 +17,12 @@ import { Templates } from './registerHandlebarTemplates';
  */
 export async function writeClientModels(models: Model[], templates: Templates, outputPath: string, httpClient: HttpClient, useUnionTypes: boolean): Promise<void> {
     for (const model of models) {
-        const file = resolve(outputPath, `${model.name}.ts`);
+        if (model.path) {
+            const directory = resolve(outputPath, `${model.path}`);
+            // @ts-ignore
+            mkdirSync(directory, { recursive: true });
+        }
+        const file = resolve(outputPath, `${model.path}`, `${model.name}.ts`);
         const templateResult = templates.exports.model({
             ...model,
             httpClient,

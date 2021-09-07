@@ -2,19 +2,26 @@ import type { Model } from '../../../client/interfaces/Model';
 import type { OpenApi } from '../interfaces/OpenApi';
 import { getModel } from './getModel';
 import { getType } from './getType';
+import { getRefs } from '../../../utils/getRefs';
+import { pathToArray } from '../../../utils/pathToArray';
 
 export function getModels(openApi: OpenApi): Model[] {
     const models: Model[] = [];
     if (openApi.components) {
-        for (const definitionName in openApi.components.schemas) {
-            const deepModel = getDeepModel(openApi, openApi.components.schemas, definitionName);
-            if (deepModel) {
-                models.push(deepModel);
+        const refs = getRefs(openApi);
+        for (const ref of refs) {
+            const path = pathToArray(ref);
+            let definition: any = openApi;
+            let hadProp = false;
+            for (const field of path) {
+                if (definition.hasOwnProperty(field)) {
+                    definition = definition[field];
+                    hadProp = true;
+                }
             }
-            else if (openApi.components.schemas.hasOwnProperty(definitionName)) {
-                const definition = openApi.components.schemas[definitionName];
-                const definitionType = getType(definitionName);
-                const model = getModel(openApi, definition, true, definitionType.base);
+            if (hadProp) {
+                const definitionType = getType(ref);
+                const model = getModel(openApi, definition, true, definitionType.base, definitionType.path);
                 models.push(model);
             }
         }
@@ -34,6 +41,6 @@ function getDeepModel(openApi: OpenApi, schemas: any, definitionName: string) {
             getDeepModel(openApi, schemas[key], key);
         }
     }
-    
+
     return model;
 }

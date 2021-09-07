@@ -13,6 +13,7 @@ import { getType } from './getType';
 
 export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
     const operationParameter: OperationParameter = {
+        path: '',
         in: parameter.in,
         prop: parameter.name,
         export: 'interface',
@@ -42,7 +43,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
         enum: [],
         enums: [],
         properties: [],
-        mediaType: null,
+        mediaType: null
     };
 
     if (parameter.$ref) {
@@ -53,6 +54,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
         operationParameter.template = definitionRef.template;
         operationParameter.imports.push(...definitionRef.imports);
         operationParameter.default = getOperationParameterDefault(parameter, operationParameter);
+        operationParameter.path = definitionRef.path;
         return operationParameter;
     }
 
