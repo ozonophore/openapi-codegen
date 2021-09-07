@@ -7,6 +7,7 @@ import { isString } from './utils/isString';
 import { postProcessClient } from './utils/postProcessClient';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { writeClient } from './utils/writeClient';
+import { getFileName } from './utils/getFileName';
 
 export { HttpClient } from './HttpClient';
 
@@ -73,7 +74,7 @@ export async function generate({
         }
 
         case OpenApiVersion.V3: {
-            const client = parseV3(openApi);
+            const client = parseV3(openApi, getFileName(input));
             const clientFinal = postProcessClient(client);
             if (!write) break;
             await writeClient(clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request);

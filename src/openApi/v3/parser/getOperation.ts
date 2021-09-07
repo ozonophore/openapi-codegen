@@ -15,9 +15,14 @@ import { getOperationResults } from './getOperationResults';
 import { getRef } from './getRef';
 import { getServiceClassName } from './getServiceClassName';
 import { sortByRequired } from './sortByRequired';
+import { getClassName } from "../../../utils/getClassName";
 
-export function getOperation(openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters): Operation {
-    const serviceName = op.tags?.[0] || 'Service';
+function getServiceName(op: OpenApiOperation, fileName: string): string {
+    return op.tags?.[0] || `${getClassName(fileName)}Service`;
+}
+
+export function getOperation(openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, fileName: string): Operation {
+    const serviceName = getServiceName(op, fileName);
     const serviceClassName = getServiceClassName(serviceName);
     const operationNameFallback = `${method}${serviceClassName}`;
     const operationName = getOperationName(op.operationId || operationNameFallback);
