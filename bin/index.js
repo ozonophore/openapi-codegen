@@ -8,7 +8,7 @@ const pkg = require('../package.json');
 
 const OpenAPI = require(path.resolve(__dirname, '../dist/index.js'));
 
-function generate(config): void {
+function generate(config) {
     return OpenAPI.generate({
         input: config.input,
         output: config.output,
