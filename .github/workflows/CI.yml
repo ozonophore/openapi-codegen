@@ -20,6 +20,10 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '14'
+          ref: ${{ github.event.release.target_commitish }}
+      - name: Validate and extract release information
+        id: release
+        uses: manovotny/github-releases-for-automated-package-publishing-action@v1.0.0
       - name: Install yarn
         run: npm install --global yarn
       - name: Install packages
@@ -34,9 +38,6 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV }}
-      - name: Validate and extract release information
-        id: release
-        uses: manovotny/github-releases-for-automated-package-publishing-action@v1.0.0
       - name: Publish tagged version
         if: steps.release.outputs.tag != ''
         run: yarn publish --new-version ${{ steps.release.outputs.version }} --tag ${{ steps.release.outputs.tag }}
