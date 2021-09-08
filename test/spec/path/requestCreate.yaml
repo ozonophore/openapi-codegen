@@ -1,0 +1,15 @@
+post:
+  operationId: createProcedure
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: createRequestDTO.json
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: createResponseDTO.json
