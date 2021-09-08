@@ -21,16 +21,18 @@ jobs:
         with:
           node-version: '14'
           always-auth: true
-      - name: get-npm-version
+      - name: Get the npm version
         id: release
         uses: martinbeentjes/npm-get-version-action@master
       - run: |
            echo "Version: ${{ steps.release.outputs.current-version }}"
-      - name: Get the version
+      - name: Get the tag version
         id: tag_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with:
+          fallback: ''
       - run: |
-           echo "Tag version: ${{ steps.tag_version.outputs.VERSION }}"
+           echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
       - name: Install yarn
         run: npm install --global yarn
       - name: Install packages
@@ -46,12 +48,12 @@ jobs:
         with:
           token: ${{ secrets.CODECOV }}
       - name: Publish tagged version
-        if: steps.tag_version.outputs.VERSION != ''
-        run: yarn publish --new-version ${{ steps.release.outputs.current-version }} --tag ${{ steps.tag_version.outputs.VERSION }}
+        if: steps.tag_version.outputs.tag != ''
+        run: yarn publish --new-version ${{ steps.release.outputs.current-version }} --tag ${{ steps.tag_version.outputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       - name: Publish version
-        if: steps.tag_version.outputs.VERSION == ''
+        if: steps.tag_version.outputs.tag == ''
         run: yarn publish --new-version ${{ steps.release.outputs.current-version }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
