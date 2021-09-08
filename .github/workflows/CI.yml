@@ -27,7 +27,11 @@ jobs:
       - run: |
            echo "Version: ${{ steps.release.outputs.current-version }}"
       - name: Get the tag version
-        uses: actions-ecosystem/action-get-latest-tag@v1
+        uses: oprypin/find-latest-tag@v1
+        with:
+          repository: ozonophore/openapi-code-gen
+          releases-only: true
+          token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
            echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
       - name: Install yarn
