@@ -30,7 +30,7 @@ jobs:
         id: tag_version
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
         with:
-          fallback: ''
+          fallback: 0.0.0
       - run: |
            echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
       - name: Install yarn
@@ -48,12 +48,12 @@ jobs:
         with:
           token: ${{ secrets.CODECOV }}
       - name: Publish tagged version
-        if: steps.tag_version.outputs.tag != ''
+        if: steps.tag_version.outputs.tag != '0.0.0'
         run: yarn publish --new-version ${{ steps.release.outputs.current-version }} --tag ${{ steps.tag_version.outputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       - name: Publish version
-        if: steps.tag_version.outputs.tag == ''
+        if: steps.tag_version.outputs.tag == '0.0.0'
         run: yarn publish --new-version ${{ steps.release.outputs.current-version }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
