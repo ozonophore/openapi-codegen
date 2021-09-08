@@ -29,7 +29,7 @@ jobs:
       - name: Get the tag version
         uses: oprypin/find-latest-tag@v1
         with:
-          repository: ozonophore/openapi-code-gen
+          repository: ozonophore/openapi-codegen
           releases-only: true
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
