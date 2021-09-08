@@ -34,17 +34,30 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV }}
-      - name: Publish
-        id: publish
-        if: github.ref == 'refs/heads/master'
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_AUTH_TOKEN }}
-          check-version: true
-          access: public
-      - if: steps.Publish.outputs.type != 'none'
-        run: |
-          echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
+      - name: Validate and extract release information
+        id: release
+        uses: manovotny/github-releases-for-automated-package-publishing-action@v1.0.0
+      - name: Publish tagged version
+        if: steps.release.outputs.tag != ''
+        run: yarn publish --new-version ${{ steps.release.outputs.version }} --tag ${{ steps.release.outputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      - name: Publish version
+        if: steps.release.outputs.tag == ''
+        run: yarn publish --new-version ${{ steps.release.outputs.version }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+#       - name: Publish
+#         id: publish
+#         if: github.ref == 'refs/heads/master'
+#         uses: JS-DevTools/npm-publish@v1
+#         with:
+#           token: ${{ secrets.NPM_AUTH_TOKEN }}
+#           check-version: true
+#           access: public
+#       - if: steps.Publish.outputs.type != 'none'
+#         run: |
+#           echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
 #   test-windows:
 #     name: Node in Windows
 #     runs-on: windows-latest
