@@ -27,13 +27,14 @@ jobs:
       - run: |
            echo "Version: ${{ steps.release.outputs.current-version }}"
       - name: Get the tag version
+        id: some_step_id
         uses: oprypin/find-latest-tag@v1
         with:
           repository: ozonophore/openapi-codegen
-          releases-only: false
+          releases-only: true
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-           echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
+           echo "Tag version: ${{ steps.some_step_id.outputs.tag }}"
       - name: Install yarn
         run: npm install --global yarn
       - name: Install packages
