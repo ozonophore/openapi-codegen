@@ -52,11 +52,13 @@ jobs:
         run: yarn publish --new-version ${{ steps.release.outputs.current-version }} --tag ${{ steps.tag_version.outputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish version
         if: steps.tag_version.outputs.tag == '0.0.0'
         run: yarn publish --new-version ${{ steps.release.outputs.current-version }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #       - name: Publish
 #         id: publish
 #         if: github.ref == 'refs/heads/master'
