@@ -26,13 +26,6 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@master
       - run: |
            echo "Version: ${{ steps.release.outputs.current-version }}"
-      - name: Get the tag version
-        id: tag_version
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
-        with:
-          fallback: 0.0.0
-      - run: |
-           echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
       - name: Install yarn
         run: npm install --global yarn
       - name: Install packages
@@ -47,6 +40,13 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV }}
+      - name: Get the tag version
+        id: tag_version
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with:
+          fallback: 0.0.0
+      - run: |
+           echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
       - name: Create Release
         id: create_release
         if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
