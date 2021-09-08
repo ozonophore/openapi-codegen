@@ -20,12 +20,12 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '14'
-          ref: ${{ github.event.release.target_commitish }}
-      - name: Validate and extract release information
+      - name: get-npm-version
         id: release
-        uses: manovotny/github-releases-for-automated-package-publishing-action@v1.0.0
-        with:
-          draft: false
+        uses: martinbeentjes/npm-get-version-action@master
+      - name: Get the version
+        id: tag_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       - name: Install yarn
         run: npm install --global yarn
       - name: Install packages
@@ -41,13 +41,13 @@ jobs:
         with:
           token: ${{ secrets.CODECOV }}
       - name: Publish tagged version
-        if: steps.release.outputs.tag != ''
-        run: yarn publish --new-version ${{ steps.release.outputs.version }} --tag ${{ steps.release.outputs.tag }}
+        if: steps.tag_version.outputs.VERSION != ''
+        run: yarn publish --new-version ${{ steps.release.outputs.current-version }} --tag ${{ steps.tag_version.outputs.VERSION }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       - name: Publish version
-        if: steps.release.outputs.tag == ''
-        run: yarn publish --new-version ${{ steps.release.outputs.version }}
+        if: steps.tag_version.outputs.VERSION == ''
+        run: yarn publish --new-version ${{ steps.release.outputs.current-version }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 #       - name: Publish
