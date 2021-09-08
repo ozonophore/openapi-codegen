@@ -24,6 +24,8 @@ jobs:
       - name: Validate and extract release information
         id: release
         uses: manovotny/github-releases-for-automated-package-publishing-action@v1.0.0
+        with:
+          draft: false
       - name: Install yarn
         run: npm install --global yarn
       - name: Install packages
