@@ -26,6 +26,10 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@master
       - run: |
            echo "Version: ${{ steps.release.outputs.current-version }}"
+      - name: Get the tag version
+        uses: actions-ecosystem/action-get-latest-tag@v1
+      - run: |
+           echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
       - name: Install yarn
         run: npm install --global yarn
       - name: Install packages
