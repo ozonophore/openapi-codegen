@@ -35,6 +35,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV }}
       - name: Publish
+        id: publish
         if: github.ref == 'refs/heads/master'
         uses: JS-DevTools/npm-publish@v1
         with:
@@ -43,7 +44,7 @@ jobs:
           access: public
       - if: steps.Publish.outputs.type != 'none'
         run: |
-          echo "Version changed: ${{ steps.Publish.outputs.old-version }} => ${{ steps.Publish.outputs.version }}"
+          echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
 #   test-windows:
 #     name: Node in Windows
 #     runs-on: windows-latest
