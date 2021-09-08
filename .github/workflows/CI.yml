@@ -20,12 +20,17 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '14'
+          always-auth: true
       - name: get-npm-version
         id: release
         uses: martinbeentjes/npm-get-version-action@master
+      - run: |
+           echo "Version: ${{ steps.release.outputs.current-version }}"
       - name: Get the version
         id: tag_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - run: |
+           echo "Tag version: ${{ steps.tag_version.outputs.VERSION }}"
       - name: Install yarn
         run: npm install --global yarn
       - name: Install packages
