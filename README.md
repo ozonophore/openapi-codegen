@@ -7,7 +7,6 @@
 [![Downloads][coverage-image]][coverage-url]
 [![TypeScript][typescript-image]][typescript-url]
 [![CI][CI-image]][CI-url]
-[![LICENSE][license-image]][license-url]
 [![ISSUES][issues-image]][issues-url]
 [![issues-pr][issues-pr-image]][issues-pr-url]
 [![issues-pr-closed][issues-pr-closed-image]][issues-pr-closed-url]
@@ -526,8 +525,6 @@ in your `tsconfig.json` file.
 [typescript-image]: https://badgen.net/badge/icon/typescript?icon=typescript&label
 [CI-url]: https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml
 [CI-image]: https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml/badge.svg?branch=master
-[license-url]: https://raw.githubusercontent.com/ozonophore/openapi-codegen/master/LICENSE
-[license-image]: https://img.shields.io/github/license/ozonophore/openapi-codegen.svg
 [issues-url]: https://github.com/ozonophore/openapi-codegen/issues
 [issues-image]: https://img.shields.io/github/issues/ozonophore/openapi-codegen.svg
 [issues-pr-url]: https://github.com/ozonophore/openapi-codegen/pulls
