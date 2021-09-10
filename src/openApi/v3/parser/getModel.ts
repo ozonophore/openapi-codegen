@@ -14,6 +14,7 @@ import { getType } from './getType';
 export function getModel(openApi: OpenApi, definition: OpenApiSchema, isDefinition: boolean = false, name: string = '', path: string = ''): Model {
     const model: Model = {
         name,
+        alias: '',
         path,
         export: 'interface',
         type: 'any',

@@ -13,19 +13,5 @@ export function getModels(openApi: OpenApi): Model[] {
             models.push(model);
         }
     }
-    function getFields(obj: any): String[] {
-        const result = [];
-        const refs = Object.keys(obj);
-        for (const ref of refs) {
-            const value = obj[ref];
-            if (ref === '$ref') {
-                result.push(value)
-            } else if (value instanceof Object) {
-                result.push(...getFields(value));
-            }
-        }
-        return result;
-    }
-    const refs = getFields(openApi);
     return models;
 }

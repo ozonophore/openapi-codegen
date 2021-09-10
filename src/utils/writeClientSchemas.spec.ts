@@ -12,6 +12,8 @@ describe('writeClientSchemas', () => {
             {
                 export: 'interface',
                 name: 'MyModel',
+                alias: '',
+                path: '',
                 type: 'MyModel',
                 base: 'MyModel',
                 template: null,

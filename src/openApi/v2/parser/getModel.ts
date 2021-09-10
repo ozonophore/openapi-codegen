@@ -14,6 +14,7 @@ export function getModel(openApi: OpenApi, definition: OpenApiSchema, isDefiniti
     const model: Model = {
         name,
         path,
+        alias: '',
         export: 'interface',
         type: 'any',
         base: 'any',

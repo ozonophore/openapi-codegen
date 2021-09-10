@@ -10,7 +10,11 @@ export interface {{{name}}} {
      * {{{description}}}
      */
     {{/if}}
+    {{#if alias}}
+    {{>isReadOnly}}{{{name}}}{{>isRequired}}: {{{alias}}};
+    {{else}}
     {{>isReadOnly}}{{{name}}}{{>isRequired}}: {{>type parent=../name}};
+    {{/if}}
     {{/each}}
 }
 {{#if enums}}

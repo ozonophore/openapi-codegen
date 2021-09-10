@@ -1,4 +1,4 @@
-import { mkdir, mkdirSync } from "fs";
+import { mkdirSync } from 'fs';
 import { resolve } from 'path';
 
 import type { Model } from '../client/interfaces/Model';

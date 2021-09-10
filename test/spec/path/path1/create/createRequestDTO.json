@@ -11,6 +11,9 @@
       "id": {
           "type": "string",
           "description": "ID as string"
+      },
+      "externalFile": {
+          "$ref": "../../common_request/simpleDTO.json"
       }
   }
 }

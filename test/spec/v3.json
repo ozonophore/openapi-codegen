@@ -1020,7 +1020,10 @@
                                             "type": "object",
                                             "properties": {
                                                 "third": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "arrayWithArray": {
+                                                        "$ref": "#/components/schemas/ArrayWithArray"
+                                                    }
                                                 }
                                             }
                                         }

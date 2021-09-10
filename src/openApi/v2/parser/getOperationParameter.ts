@@ -18,6 +18,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
         prop: parameter.name,
         export: 'interface',
         name: getOperationParameterName(parameter.name),
+        alias: '',
         type: 'any',
         base: 'any',
         template: null,
@@ -43,7 +44,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
         enum: [],
         enums: [],
         properties: [],
-        mediaType: null
+        mediaType: null,
     };
 
     if (parameter.$ref) {

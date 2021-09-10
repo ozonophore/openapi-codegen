@@ -3,6 +3,7 @@ import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
 import type { getModel } from './getModel';
 import { getModelProperties } from './getModelProperties';
+import { unique } from "../../../utils/unique";
 
 // Fix for circular dependency
 export type GetModelFn = typeof getModel;
@@ -33,11 +34,12 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
     if (definition.properties) {
         const properties = getModelProperties(openApi, definition, getModel);
         properties.forEach(property => {
-            composition.imports.push(...property.imports);
+            composition.imports = [...new Set(composition.imports.concat(property.imports))];
             composition.enums.push(...property.enums);
         });
         composition.properties.push({
             name: 'properties',
+            alias: '',
             path: '',
             export: 'interface',
             type: 'any',

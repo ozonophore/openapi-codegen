@@ -11,6 +11,7 @@ export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse
     const operationResponse: OperationResponse = {
         in: 'response',
         name: '',
+        alias: '',
         path: '',
         code: responseCode,
         description: getComment(response.description)!,

@@ -14,6 +14,7 @@ export function getOperationRequestBody(openApi: OpenApi, parameter: OpenApiRequ
         prop: 'body',
         export: 'interface',
         name: 'requestBody',
+        alias: '',
         path: '',
         type: 'any',
         base: 'any',

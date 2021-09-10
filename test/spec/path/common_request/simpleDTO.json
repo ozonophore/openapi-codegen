@@ -13,8 +13,7 @@
       "description": "Some name"
     },
     "value": {
-      "type": "string",
-      "description": "Some value"
+      "$ref": "../subtype/type.json"
     }
   },
   "additionalProperties": false

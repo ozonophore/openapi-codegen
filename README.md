@@ -41,7 +41,7 @@ npm install ts-openapi-codegen --save-dev
 Two ways of configuration exist.
 First, through the command line. Second, through a configuration file.
 
-###First
+### First
 
 ```
 $ openapi --help
@@ -65,10 +65,11 @@ $ openapi --help
     $ openapi --input ./spec.json --output ./dist
     $ openapi --input ./spec.json --output ./dist --client xhr
 ```
-###Second
-You should create a file in the root of a project with the name 'openapi.config.json', where you can describe configurations for several files with openapi specification.\
-Example:
+### Second
+You should create a file in the root of a project with the name 'openapi.config.json', where you can describe configurations for several files with openapi specification.
+## Example:
 
+**openapi.config.json**
 ```json
 [{
     "input": "./first.yml",

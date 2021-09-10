@@ -35,7 +35,7 @@ describe('index', () => {
 describe('index', () => {
     it('should generate object', async () => {
         await OpenAPI.generate({
-            input: './test/spec/v3.1.yaml',
+            input: './test/spec/openapi2.yml',
             output: './generated/v3.1/',
             httpClient: OpenAPI.HttpClient.FETCH,
             useOptions: false,

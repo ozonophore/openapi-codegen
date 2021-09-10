@@ -77,7 +77,7 @@ export function getType(value?: string, template?: string): Type {
         const type = getTypeName(valueClean);
         result.type = type;
         result.base = type;
-        result.imports.push(getImport(valueClean));
+        result.imports.push({ name: type, alias: '', path: getImport(valueClean) });
     }
 
     // If the property that we found matched the parent template class
