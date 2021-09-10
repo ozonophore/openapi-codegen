@@ -6,7 +6,7 @@ import type { Model } from '../client/interfaces/Model';
  * @param model
  */
 export function postProcessModelEnum(model: Model): Enum[] {
-    return model?.enum?.filter((property, index, arr) => {
+    return model.enum.filter((property, index, arr) => {
         return arr.findIndex(item => item.name === property.name) === index;
     });
 }

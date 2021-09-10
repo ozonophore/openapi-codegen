@@ -7,8 +7,8 @@ import { unique } from './unique';
  * @param model The model that is post-processed
  */
 export function postProcessModelImports(model: Model): string[] {
-    return model?.imports
-        ?.filter(unique)
-        ?.sort(sort)
-        ?.filter(name => model.name !== name);
+    return model.imports
+        .filter(unique)
+        .sort(sort)
+        .filter(name => model.name !== name);
 }
