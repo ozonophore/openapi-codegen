@@ -7,6 +7,7 @@ import { isString } from './utils/isString';
 import { postProcessClient } from './utils/postProcessClient';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { writeClient } from './utils/writeClient';
+import { getFileName } from './utils/getFileName';
 
 export { HttpClient } from './HttpClient';
 
@@ -20,6 +21,7 @@ export type Options = {
     exportServices?: boolean;
     exportModels?: boolean;
     exportSchemas?: boolean;
+    clean?: boolean;
     request?: string;
     write?: boolean;
 };
@@ -50,6 +52,7 @@ export async function generate({
     exportServices = true,
     exportModels = true,
     exportSchemas = false,
+    clean = true,
     request,
     write = true,
 }: Options): Promise<void> {
@@ -66,15 +69,15 @@ export async function generate({
             const client = parseV2(openApi);
             const clientFinal = postProcessClient(client);
             if (!write) break;
-            await writeClient(clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, request);
+            await writeClient(clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request);
             break;
         }
 
         case OpenApiVersion.V3: {
-            const client = parseV3(openApi);
+            const client = parseV3(openApi, getFileName(input));
             const clientFinal = postProcessClient(client);
             if (!write) break;
-            await writeClient(clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, request);
+            await writeClient(clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request);
             break;
         }
     }

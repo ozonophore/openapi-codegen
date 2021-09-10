@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Request for creation",
+  "description": "Some description",
+  "type": "object",
+  "properties": {
+      "senderSystem": {
+          "type": "string",
+          "description": "Some description"
+      },
+      "id": {
+          "type": "string",
+          "description": "ID as string"
+      }
+  }
+}

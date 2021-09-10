@@ -7,7 +7,6 @@
 [![Downloads][coverage-image]][coverage-url]
 [![TypeScript][typescript-image]][typescript-url]
 [![CI][CI-image]][CI-url]
-[![LICENSE][license-image]][license-url]
 [![ISSUES][issues-image]][issues-url]
 [![issues-pr][issues-pr-image]][issues-pr-url]
 [![issues-pr-closed][issues-pr-closed-image]][issues-pr-closed-url]
@@ -42,7 +41,7 @@ npm install ts-openapi-codegen --save-dev
 Two ways of configuration exist.
 First, through the command line. Second, through a configuration file.
 
-###First
+### First
 
 ```
 $ openapi --help
@@ -60,13 +59,14 @@ $ openapi --help
     --exportServices <value>  Write services to disk (default: true)
     --exportModels <value>    Write models to disk (default: true)
     --exportSchemas <value>   Write schemas to disk (default: false)
+    --clean <value>           Clean a directory before generation (default: true)
 
   Examples
     $ openapi --input ./spec.json
     $ openapi --input ./spec.json --output ./dist
     $ openapi --input ./spec.json --output ./dist --client xhr
 ```
-###Second
+### Second
 You should create a file in the root of a project with the name 'openapi.config.json', where you can describe configurations for several files with openapi specification.\
 Example:
 
@@ -525,8 +525,6 @@ in your `tsconfig.json` file.
 [typescript-image]: https://badgen.net/badge/icon/typescript?icon=typescript&label
 [CI-url]: https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml
 [CI-image]: https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml/badge.svg?branch=master
-[license-url]: https://raw.githubusercontent.com/ozonophore/openapi-codegen/master/LICENSE
-[license-image]: https://img.shields.io/github/license/ozonophore/openapi-codegen.svg
 [issues-url]: https://github.com/ozonophore/openapi-codegen/issues
 [issues-image]: https://img.shields.io/github/issues/ozonophore/openapi-codegen.svg
 [issues-pr-url]: https://github.com/ozonophore/openapi-codegen/pulls
