@@ -2,6 +2,7 @@ import type { Service } from '../../../client/interfaces/Service';
 import type { OpenApi } from '../interfaces/OpenApi';
 import { getOperation } from './getOperation';
 import { getOperationParameters } from './getOperationParameters';
+import { getRef } from './getRef';
 
 /**
  * Get the OpenAPI services
@@ -11,7 +12,7 @@ export function getServices(openApi: OpenApi, fileName: string): Service[] {
     for (const url in openApi.paths) {
         if (openApi.paths.hasOwnProperty(url)) {
             // Grab path and parse any global path parameters
-            const path = openApi.paths[url];
+            const path = getRef(openApi, openApi.paths[url]);
             const pathParams = getOperationParameters(openApi, path.parameters || []);
 
             // Parse all the methods for this path

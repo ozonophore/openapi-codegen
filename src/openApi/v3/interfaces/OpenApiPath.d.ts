@@ -1,11 +1,12 @@
 import type { OpenApiOperation } from './OpenApiOperation';
 import type { OpenApiParameter } from './OpenApiParameter';
 import type { OpenApiServer } from './OpenApiServer';
+import { OpenApiReference } from "./OpenApiReference";
 
 /**
  * https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#pathItemObject
  */
-export interface OpenApiPath {
+export interface OpenApiPath extends OpenApiReference {
     summary?: string;
     description?: string;
     get?: OpenApiOperation;
