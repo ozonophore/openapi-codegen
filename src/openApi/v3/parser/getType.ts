@@ -47,8 +47,8 @@ export function getType(value?: string, template?: string): Type {
     if (/\[.*\]$/g.test(valueClean)) {
         const matches = valueClean.match(/(.*?)\[(.*)\]$/);
         if (matches?.length) {
-            const match1 = getType(encode(matches[1]));
-            const match2 = getType(encode(matches[2]));
+            const match1 = getType(matches[1]);
+            const match2 = getType(matches[2]);
 
             if (match1.type === 'any[]') {
                 result.type = `${match2.type}[]`;
