@@ -7,12 +7,12 @@
 [![Downloads][coverage-image]][coverage-url]
 [![TypeScript][typescript-image]][typescript-url]
 [![CI][CI-image]][CI-url]
-[![LICENSE][license-image]][license-url]
 [![ISSUES][issues-image]][issues-url]
 [![issues-pr][issues-pr-image]][issues-pr-url]
 [![issues-pr-closed][issues-pr-closed-image]][issues-pr-closed-url]
 [![stars-closed][stars-image]][stars-url]
 ![librariesio-image]
+![lines-image]
 ![Minimum node.js version](https://badgen.net/npm/node/next)
 
 
@@ -59,6 +59,7 @@ $ openapi --help
     --exportServices <value>  Write services to disk (default: true)
     --exportModels <value>    Write models to disk (default: true)
     --exportSchemas <value>   Write schemas to disk (default: false)
+    --clean <value>           Clean a directory before generation (default: true)
 
   Examples
     $ openapi --input ./spec.json

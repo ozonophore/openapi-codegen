@@ -6,18 +6,5 @@ info:
 
 paths:
   /public/path/path1/create:
-    post:
-      operationId: createProcedure
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: path/path1/create/createRequestDTO.json
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: path/path1/create/createResponseDTO.json
+    $ref: path/requestCreate.yaml
 

@@ -23,6 +23,7 @@ import { writeClientServices } from './writeClientServices';
  * @param exportServices: Generate services
  * @param exportModels: Generate models
  * @param exportSchemas: Generate schemas
+ * @param clean: Clean a directory before generation
  * @param request: Path to custom request file
  */
 export async function writeClient(
@@ -36,6 +37,7 @@ export async function writeClient(
     exportServices: boolean,
     exportModels: boolean,
     exportSchemas: boolean,
+    clean: boolean,
     request?: string
 ): Promise<void> {
     const outputPath = resolve(process.cwd(), output);
@@ -49,25 +51,33 @@ export async function writeClient(
     }
 
     if (exportCore) {
-        await rmdir(outputPathCore);
+        if (clean) {
+            await rmdir(outputPathCore);
+        }
         await mkdir(outputPathCore);
         await writeClientCore(client, templates, outputPathCore, httpClient, request);
     }
 
     if (exportServices) {
-        await rmdir(outputPathServices);
+        if (clean) {
+            await rmdir(outputPathServices);
+        }
         await mkdir(outputPathServices);
         await writeClientServices(client.services, templates, outputPathServices, httpClient, useUnionTypes, useOptions);
     }
 
     if (exportSchemas) {
-        await rmdir(outputPathSchemas);
+        if (clean) {
+            await rmdir(outputPathSchemas);
+        }
         await mkdir(outputPathSchemas);
         await writeClientSchemas(client.models, templates, outputPathSchemas, httpClient, useUnionTypes);
     }
 
     if (exportModels) {
-        await rmdir(outputPathModels);
+        if (clean) {
+            await rmdir(outputPathModels);
+        }
         await mkdir(outputPathModels);
         await writeClientModels(client.models, templates, outputPathModels, httpClient, useUnionTypes);
     }
