@@ -3,7 +3,6 @@ import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
 import type { getModel } from './getModel';
 import { getModelProperties } from './getModelProperties';
-import { unique } from "../../../utils/unique";
 
 // Fix for circular dependency
 export type GetModelFn = typeof getModel;
@@ -16,7 +15,7 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
         properties: [],
     };
 
-    const models = definitions.map(definition => getModel(openApi, definition));
+    const models = definitions.map(definition => getModel({ openApi: openApi, definition: definition }));
     models
         .filter(model => {
             const hasProperties = model.properties.length;

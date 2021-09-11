@@ -17,7 +17,7 @@ export function getModels(openApi: OpenApi): Model[] {
             const definition: any = getDefinition(ref, openApi);
             if (definition) {
                 const definitionType = getType(ref);
-                const model = getModel(openApi, definition, true, definitionType.base, definitionType.path);
+                const model = getModel({ openApi: openApi, definition: definition, isDefinition: true, name: definitionType.base, path: definitionType.path });
                 models.push(model);
             }
         }
@@ -25,7 +25,7 @@ export function getModels(openApi: OpenApi): Model[] {
             if (openApi.components.schemas.hasOwnProperty(definitionName)) {
                 const definition = openApi.components.schemas[definitionName];
                 const definitionType = getType(definitionName);
-                const model = getModel(openApi, definition, true, definitionType.base);
+                const model = getModel({ openApi: openApi, definition: definition, isDefinition: true, name: definitionType.base, path: definitionType.path });
                 models.push(model);
             }
         }

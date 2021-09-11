@@ -52,7 +52,7 @@ export function getModelProperties(openApi: OpenApi, definition: OpenApiSchema, 
                     properties: [],
                 });
             } else {
-                const model = getModel(openApi, property);
+                const model = getModel({ openApi: openApi, definition: property });
                 models.push({
                     name: escapeName(propertyName),
                     alias: '',
