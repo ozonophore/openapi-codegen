@@ -14,6 +14,8 @@ export function getOperationRequestBody(openApi: OpenApi, parameter: OpenApiRequ
         prop: 'body',
         export: 'interface',
         name: 'requestBody',
+        alias: '',
+        path: '',
         type: 'any',
         base: 'any',
         template: null,
@@ -44,7 +46,7 @@ export function getOperationRequestBody(openApi: OpenApi, parameter: OpenApiRequ
                 requestBody.imports.push(...model.imports);
                 return requestBody;
             } else {
-                const model = getModel(openApi, schema);
+                const model = getModel({ openApi: openApi, definition: schema });
                 requestBody.export = model.export;
                 requestBody.type = model.type;
                 requestBody.base = model.base;

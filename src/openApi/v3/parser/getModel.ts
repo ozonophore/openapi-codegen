@@ -1,7 +1,6 @@
 import type { Model } from '../../../client/interfaces/Model';
 import { getPattern } from '../../../utils/getPattern';
-import type { OpenApi } from '../interfaces/OpenApi';
-import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
+import { ModelConfig } from '../interfaces/ModelConfig';
 import { extendEnum } from './extendEnum';
 import { getComment } from './getComment';
 import { getEnum } from './getEnum';
@@ -11,9 +10,12 @@ import { getModelDefault } from './getModelDefault';
 import { getModelProperties } from './getModelProperties';
 import { getType } from './getType';
 
-export function getModel(openApi: OpenApi, definition: OpenApiSchema, isDefinition: boolean = false, name: string = ''): Model {
+export function getModel(config: ModelConfig): Model {
+    const { openApi, definition, isDefinition = false, name = '', path = '' } = config;
     const model: Model = {
         name,
+        alias: '',
+        path,
         export: 'interface',
         type: 'any',
         base: 'any',
@@ -91,7 +93,7 @@ export function getModel(openApi: OpenApi, definition: OpenApiSchema, isDefiniti
             model.default = getModelDefault(definition, model);
             return model;
         } else {
-            const arrayItems = getModel(openApi, definition.items);
+            const arrayItems = getModel({ openApi: openApi, definition: definition.items });
             model.export = 'array';
             model.type = arrayItems.type;
             model.base = arrayItems.base;
@@ -114,7 +116,7 @@ export function getModel(openApi: OpenApi, definition: OpenApiSchema, isDefiniti
             model.default = getModelDefault(definition, model);
             return model;
         } else {
-            const additionalProperties = getModel(openApi, definition.additionalProperties);
+            const additionalProperties = getModel({ openApi: openApi, definition: definition.additionalProperties });
             model.export = 'dictionary';
             model.type = additionalProperties.type;
             model.base = additionalProperties.base;

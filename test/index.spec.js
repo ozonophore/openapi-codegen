@@ -46,11 +46,11 @@ describe('v3', () => {
     });
 });
 
-describe('v3', () => {
+describe('v3.1', () => {
     it('should generate path', async () => {
         await OpenAPI.generate({
-            input: './test/spec/v3.1.yaml',
-            output: './test/generated/v3.1/',
+            input: './test/spec/openapi2.yml',
+            output: './test/generated/openapi2/',
             httpClient: OpenAPI.HttpClient.FETCH,
             useOptions: true,
             useUnionTypes: true,

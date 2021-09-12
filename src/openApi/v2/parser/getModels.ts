@@ -9,23 +9,9 @@ export function getModels(openApi: OpenApi): Model[] {
         if (openApi.definitions.hasOwnProperty(definitionName)) {
             const definition = openApi.definitions[definitionName];
             const definitionType = getType(definitionName);
-            const model = getModel(openApi, definition, true, definitionType.base);
+            const model = getModel({ openApi: openApi, definition: definition, isDefinition: true, name: definitionType.base, path: definitionType.path });
             models.push(model);
         }
     }
-    function getFields(obj: any): String[] {
-        const result = [];
-        const refs = Object.keys(obj);
-        for (const ref of refs) {
-            const value = obj[ref];
-            if (ref === '$ref') {
-                result.push(value)
-            } else if (value instanceof Object) {
-                result.push(...getFields(value));
-            }
-        }
-        return result;
-    }
-    const refs = getFields(openApi);
     return models;
 }

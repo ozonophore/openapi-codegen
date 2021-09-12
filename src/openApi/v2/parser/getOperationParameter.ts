@@ -13,10 +13,12 @@ import { getType } from './getType';
 
 export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
     const operationParameter: OperationParameter = {
+        path: '',
         in: parameter.in,
         prop: parameter.name,
         export: 'interface',
         name: getOperationParameterName(parameter.name),
+        alias: '',
         type: 'any',
         base: 'any',
         template: null,
@@ -53,6 +55,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
         operationParameter.template = definitionRef.template;
         operationParameter.imports.push(...definitionRef.imports);
         operationParameter.default = getOperationParameterDefault(parameter, operationParameter);
+        operationParameter.path = definitionRef.path;
         return operationParameter;
     }
 
@@ -114,7 +117,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
             operationParameter.default = getOperationParameterDefault(parameter, operationParameter);
             return operationParameter;
         } else {
-            const model = getModel(openApi, parameter.schema);
+            const model = getModel({ openApi: openApi, definition: parameter.schema });
             operationParameter.export = model.export;
             operationParameter.type = model.type;
             operationParameter.base = model.base;

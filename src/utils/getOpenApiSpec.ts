@@ -3,6 +3,7 @@ import path from 'path';
 
 import { exists } from './fileSystem';
 import { getClassName } from './getClassName';
+import { mergeDeep } from './mergeDeep';
 import { replaceRef } from './replaceRef';
 
 /**
@@ -15,7 +16,7 @@ export async function getOpenApiSpec(input: string): Promise<any> {
     const filePath = path.resolve(process.cwd(), input);
     if (!input) {
         throw new Error(`Could not find OpenApi spec: "${filePath}"`);
-   }
+    }
     const fileExists = await exists(filePath);
     const parser = new RefParser();
     if (fileExists) {
@@ -33,12 +34,20 @@ export async function getOpenApiSpec(input: string): Promise<any> {
         if (refRootPath === rootPath) {
             continue;
         }
-        const className = getClassName(key.substring(rootPath.length, key.length - path.extname(key).length));
+        const fileName = path.basename(key);
+        const filePath = key.substring(rootPath.length, key.length - fileName.length);
+        const className = path.resolve(filePath, getClassName(fileName.substring(0, fileName.length - path.extname(fileName).length)));
+        let valueeObj: Record<string, any> = { ...value };
+        for (const v of className.split(/\//g).filter(Boolean).reverse()) {
+            valueeObj = {
+                [v]: valueeObj,
+            };
+        }
         componentsFromFile = {
             ...componentsFromFile,
             schemas: {
                 ...componentsFromFile.schemas,
-                [className]: value,
+                ...mergeDeep(componentsFromFile.schemas, valueeObj),
             },
         };
     }

@@ -7,8 +7,6 @@ info:
 paths:
   /public/path/path1/create:
     get:
-      tags:
-          - Simple
       operationId: GetCallWithoutParametersAndResponse
       responses:
         '200':
@@ -18,8 +16,6 @@ paths:
               schema:
                 $ref: path/path1/create/createResponseDTO.json
     post:
-      tags:
-        - Simple
       operationId: PostCallWithOptionalParam
       requestBody:
         content:

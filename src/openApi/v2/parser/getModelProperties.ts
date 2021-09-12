@@ -20,6 +20,8 @@ export function getModelProperties(openApi: OpenApi, definition: OpenApiSchema, 
                 const model = getType(property.$ref);
                 models.push({
                     name: escapeName(propertyName),
+                    alias: '',
+                    path: '',
                     export: 'reference',
                     type: model.type,
                     base: model.base,
@@ -50,9 +52,11 @@ export function getModelProperties(openApi: OpenApi, definition: OpenApiSchema, 
                     properties: [],
                 });
             } else {
-                const model = getModel(openApi, property);
+                const model = getModel({ openApi: openApi, definition: property });
                 models.push({
                     name: escapeName(propertyName),
+                    alias: '',
+                    path: model.path,
                     export: model.export,
                     type: model.type,
                     base: model.base,

@@ -15,7 +15,7 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
         properties: [],
     };
 
-    const models = definitions.map(definition => getModel(openApi, definition));
+    const models = definitions.map(definition => getModel({ openApi: openApi, definition: definition }));
     models
         .filter(model => {
             const hasProperties = model.properties.length;
@@ -33,11 +33,13 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
     if (definition.properties) {
         const properties = getModelProperties(openApi, definition, getModel);
         properties.forEach(property => {
-            composition.imports.push(...property.imports);
+            composition.imports = [...new Set(composition.imports.concat(property.imports))];
             composition.enums.push(...property.enums);
         });
         composition.properties.push({
             name: 'properties',
+            alias: '',
+            path: '',
             export: 'interface',
             type: 'any',
             base: 'any',

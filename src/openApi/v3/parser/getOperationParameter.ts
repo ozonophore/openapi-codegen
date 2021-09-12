@@ -14,6 +14,8 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
         prop: parameter.name,
         export: 'interface',
         name: getOperationParameterName(parameter.name),
+        alias: '',
+        path: '',
         type: 'any',
         base: 'any',
         template: null,
@@ -51,7 +53,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
             operationParameter.default = getModelDefault(parameter.schema);
             return operationParameter;
         } else {
-            const model = getModel(openApi, parameter.schema);
+            const model = getModel({ openApi: openApi, definition: parameter.schema });
             operationParameter.export = model.export;
             operationParameter.type = model.type;
             operationParameter.base = model.base;

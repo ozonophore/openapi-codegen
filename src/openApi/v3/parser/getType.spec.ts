@@ -30,7 +30,17 @@ describe('getType', () => {
         expect(type.type).toEqual('Link<string>');
         expect(type.base).toEqual('Link');
         expect(type.template).toEqual('string');
-        expect(type.imports).toEqual(['Link']);
+        expect(type.path).toEqual('');
+        expect(type.imports).toEqual([{ name: 'Link', alias: '', path: 'Link' }]);
+    });
+
+    it('should convert template with path', () => {
+        const type = getType('#/components/schemas/first/second/Link[string]');
+        expect(type.type).toEqual('Link<string>');
+        expect(type.base).toEqual('Link');
+        expect(type.template).toEqual('string');
+        expect(type.path).toEqual('first/second/');
+        expect(type.imports).toEqual([{ name: 'Link', alias: '', path: 'first/second/Link' }]);
     });
 
     it('should convert template with model', () => {
@@ -38,7 +48,18 @@ describe('getType', () => {
         expect(type.type).toEqual('Link<Model>');
         expect(type.base).toEqual('Link');
         expect(type.template).toEqual('Model');
-        expect(type.imports).toEqual(['Link', 'Model']);
+        expect(type.imports).toEqual([
+            {
+                name: 'Link',
+                alias: '',
+                path: 'Link',
+            },
+            {
+                name: 'Model',
+                alias: '',
+                path: 'Model',
+            },
+        ]);
     });
 
     it('should have double imports', () => {
@@ -46,7 +67,18 @@ describe('getType', () => {
         expect(type.type).toEqual('Link<Link>');
         expect(type.base).toEqual('Link');
         expect(type.template).toEqual('Link');
-        expect(type.imports).toEqual(['Link', 'Link']);
+        expect(type.imports).toEqual([
+            {
+                name: 'Link',
+                alias: '',
+                path: 'Link',
+            },
+            {
+                name: 'Link',
+                alias: '',
+                path: 'Link',
+            },
+        ]);
     });
 
     it('should convert generic', () => {
@@ -62,7 +94,13 @@ describe('getType', () => {
         expect(type.type).toEqual('model_000');
         expect(type.base).toEqual('model_000');
         expect(type.template).toEqual(null);
-        expect(type.imports).toEqual(['model_000']);
+        expect(type.imports).toEqual([
+            {
+                name: 'model_000',
+                alias: '',
+                path: 'model_000',
+            },
+        ]);
     });
 
     it('should support dashes', () => {
@@ -70,7 +108,13 @@ describe('getType', () => {
         expect(type.type).toEqual('some_special_schema');
         expect(type.base).toEqual('some_special_schema');
         expect(type.template).toEqual(null);
-        expect(type.imports).toEqual(['some_special_schema']);
+        expect(type.imports).toEqual([
+            {
+                name: 'some_special_schema',
+                alias: '',
+                path: 'some_special_schema',
+            },
+        ]);
     });
 
     it('should support dollar sign', () => {
@@ -78,6 +122,12 @@ describe('getType', () => {
         expect(type.type).toEqual('$some_special_schema');
         expect(type.base).toEqual('$some_special_schema');
         expect(type.template).toEqual(null);
-        expect(type.imports).toEqual(['$some_special_schema']);
+        expect(type.imports).toEqual([
+            {
+                name: '$some_special_schema',
+                alias: '',
+                path: '$some_special_schema',
+            },
+        ]);
     });
 });

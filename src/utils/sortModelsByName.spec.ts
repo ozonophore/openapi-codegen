@@ -4,6 +4,8 @@ import { sortModelsByName } from './sortModelsByName';
 describe('sortModelsByName', () => {
     it('should return sorted list', () => {
         const john: Model = {
+            alias: '',
+            path: '',
             export: 'interface',
             name: 'John',
             type: 'John',
@@ -21,6 +23,8 @@ describe('sortModelsByName', () => {
             properties: [],
         };
         const jane: Model = {
+            alias: '',
+            path: '',
             export: 'interface',
             name: 'Jane',
             type: 'Jane',
@@ -38,6 +42,8 @@ describe('sortModelsByName', () => {
             properties: [],
         };
         const doe: Model = {
+            alias: '',
+            path: '',
             export: 'interface',
             name: 'Doe',
             type: 'Doe',

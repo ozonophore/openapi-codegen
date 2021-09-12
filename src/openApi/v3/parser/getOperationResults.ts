@@ -24,6 +24,8 @@ export function getOperationResults(operationResponses: OperationResponse[]): Op
         operationResults.push({
             in: 'response',
             name: '',
+            alias: '',
+            path: '',
             code: 200,
             description: '',
             export: 'generic',

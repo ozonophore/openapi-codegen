@@ -67,9 +67,10 @@ $ openapi --help
     $ openapi --input ./spec.json --output ./dist --client xhr
 ```
 ### Second
-You should create a file in the root of a project with the name 'openapi.config.json', where you can describe configurations for several files with openapi specification.\
-Example:
+You should create a file in the root of a project with the name 'openapi.config.json', where you can describe configurations for several files with openapi specification.
+## Example:
 
+**openapi.config.json**
 ```json
 [{
     "input": "./first.yml",

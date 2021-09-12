@@ -15,7 +15,7 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
         properties: [],
     };
 
-    const models = definitions.map(definition => getModel(openApi, definition));
+    const models = definitions.map(definition => getModel({ openApi: openApi, definition: definition }));
     models
         .filter(model => {
             const hasProperties = model.properties.length;
@@ -38,6 +38,8 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
         });
         composition.properties.push({
             name: 'properties',
+            alias: '',
+            path: '',
             export: 'interface',
             type: 'any',
             base: 'any',

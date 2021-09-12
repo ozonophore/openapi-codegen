@@ -6,6 +6,28 @@ function encode(value: string): string {
     return value.replace(/^[^a-zA-Z_$]+/g, '').replace(/[^\w$]+/g, '_');
 }
 
+function getTypeName(value: string): string {
+    const index = value.lastIndexOf('/');
+    if (index === -1) {
+        return encode(value);
+    }
+    return encode(value.substring(index, value.length));
+}
+
+function getPath(value?: string): string {
+    if (!value) {
+        return '';
+    }
+    const index = value.lastIndexOf('/');
+    if (index === -1) {
+        return '';
+    }
+    return value.substring(0, index + 1);
+}
+
+function getImport(value: string): string {
+    return value.replace(/^[^a-zA-Z_$]+/g, '').replace(/[^\w^\/$]+/g, '_');
+}
 /**
  * Parse any string value into a type object.
  * @param value String value like "integer" or "Link[Model]".
@@ -17,15 +39,16 @@ export function getType(value?: string, template?: string): Type {
         base: 'any',
         template: null,
         imports: [],
+        path: '',
     };
 
     const valueClean = stripNamespace(value || '');
-
+    result.path = getPath(valueClean);
     if (/\[.*\]$/g.test(valueClean)) {
         const matches = valueClean.match(/(.*?)\[(.*)\]$/);
         if (matches?.length) {
-            const match1 = getType(encode(matches[1]));
-            const match2 = getType(encode(matches[2]));
+            const match1 = getType(matches[1]);
+            const match2 = getType(matches[2]);
 
             if (match1.type === 'any[]') {
                 result.type = `${match2.type}[]`;
@@ -51,10 +74,10 @@ export function getType(value?: string, template?: string): Type {
             result.base = mapped;
         }
     } else if (valueClean) {
-        const type = encode(valueClean);
+        const type = getTypeName(valueClean);
         result.type = type;
         result.base = type;
-        result.imports.push(type);
+        result.imports.push({ name: type, alias: '', path: getImport(valueClean) });
     }
 
     // If the property that we found matched the parent template class
@@ -64,6 +87,5 @@ export function getType(value?: string, template?: string): Type {
         result.base = 'T'; // Template;
         result.imports = [];
     }
-
     return result;
 }

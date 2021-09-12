@@ -1,7 +1,8 @@
+import { Import } from './Import';
 import type { OperationParameter } from './OperationParameter';
 
 export interface OperationParameters {
-    imports: string[];
+    imports: Import[];
     parameters: OperationParameter[];
     parametersPath: OperationParameter[];
     parametersQuery: OperationParameter[];

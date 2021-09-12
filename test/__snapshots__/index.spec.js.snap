@@ -2147,8 +2147,8 @@ exports[`v2 should generate: ./test/generated/v2/services/ResponseService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ModelThatExtends } from '../models/ModelThatExtends';
 import type { ModelThatExtendsExtends } from '../models/ModelThatExtendsExtends';
+import type { ModelThatExtends } from '../models/ModelThatExtends';
 import type { ModelWithString } from '../models/ModelWithString';
 import { request as __request } from '../core/request';
 import { OpenAPI } from '../core/OpenAPI';
@@ -2701,6 +2701,7 @@ export type { SimpleBoolean } from './models/SimpleBoolean';
 export type { SimpleFile } from './models/SimpleFile';
 export type { SimpleInteger } from './models/SimpleInteger';
 export type { SimpleReference } from './models/SimpleReference';
+export type { SimpleRequestBody } from './models/SimpleRequestBody';
 export type { SimpleString } from './models/SimpleString';
 export type { SimpleStringWithPattern } from './models/SimpleStringWithPattern';
 
@@ -2749,6 +2750,7 @@ export { $SimpleBoolean } from './schemas/$SimpleBoolean';
 export { $SimpleFile } from './schemas/$SimpleFile';
 export { $SimpleInteger } from './schemas/$SimpleInteger';
 export { $SimpleReference } from './schemas/$SimpleReference';
+export { $SimpleRequestBody } from './schemas/$SimpleRequestBody';
 export { $SimpleString } from './schemas/$SimpleString';
 export { $SimpleStringWithPattern } from './schemas/$SimpleStringWithPattern';
 
@@ -3533,6 +3535,19 @@ import type { ModelWithString } from './ModelWithString';
  * This is a simple reference
  */
 export type SimpleReference = ModelWithString;"
+`;
+
+exports[`v3 should generate: ./test/generated/v3/models/SimpleRequestBody.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * A reusable request body
+ */
+export interface SimpleRequestBody {
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/models/SimpleString.ts 1`] = `
@@ -4359,6 +4374,16 @@ export const $SimpleReference = {
 };"
 `;
 
+exports[`v3 should generate: ./test/generated/v3/schemas/$SimpleRequestBody.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const $SimpleRequestBody = {
+    properties: {
+    },
+};"
+`;
+
 exports[`v3 should generate: ./test/generated/v3/schemas/$SimpleString.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
@@ -4916,8 +4941,8 @@ exports[`v3 should generate: ./test/generated/v3/services/ResponseService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ModelThatExtends } from '../models/ModelThatExtends';
 import type { ModelThatExtendsExtends } from '../models/ModelThatExtendsExtends';
+import type { ModelThatExtends } from '../models/ModelThatExtends';
 import type { ModelWithString } from '../models/ModelWithString';
 import { request as __request } from '../core/request';
 import { OpenAPI } from '../core/OpenAPI';
