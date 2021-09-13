@@ -56,12 +56,14 @@ if (OpenAPI) {
     const fs = require('fs');
     const params = params();
     if (fs.existsSync('openapi.config.json')) {
-        if (params.clean) {
-            rmdirSync(params.output, { recursive: true, force: true });
-        }
         const dataString = fs.readFileSync('openapi.config.json');
         const configs = JSON.parse(dataString);
-        configs.map(config => {
+        if (params.clean) {
+            configs.forEach(config => {
+                rmdirSync(config.output, { recursive: true, force: true });
+            });
+        }
+        configs.forEach(config => {
             generate(config);
         });
     } else {
