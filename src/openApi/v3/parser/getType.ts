@@ -1,10 +1,7 @@
 import type { Type } from '../../../client/interfaces/Type';
+import { encode } from '../../../utils/encode';
 import { getMappedType, hasMappedType } from './getMappedType';
 import { stripNamespace } from './stripNamespace';
-
-function encode(value: string): string {
-    return value.replace(/^[^a-zA-Z_$]+/g, '').replace(/[^\w$]+/g, '_');
-}
 
 function getTypeName(value: string): string {
     const index = value.lastIndexOf('/');
@@ -25,9 +22,6 @@ function getPath(value?: string): string {
     return value.substring(0, index + 1);
 }
 
-function getImport(value: string): string {
-    return value.replace(/^[^a-zA-Z_$]+/g, '').replace(/[^\w^\/$]+/g, '_');
-}
 /**
  * Parse any string value into a type object.
  * @param value String value like "integer" or "Link[Model]".
@@ -77,7 +71,7 @@ export function getType(value?: string, template?: string): Type {
         const type = getTypeName(valueClean);
         result.type = type;
         result.base = type;
-        result.imports.push({ name: type, alias: '', path: getImport(valueClean) });
+        result.imports.push({ name: type, alias: '', path: valueClean });
     }
 
     // If the property that we found matched the parent template class

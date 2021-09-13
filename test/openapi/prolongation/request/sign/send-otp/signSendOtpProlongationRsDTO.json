@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Sign send-otp responce for prolongation",
+  "description": "Получение СМС для подписи Пролонгации",
+  "type": "object",
+  "properties": {
+    "smsCountdownTime": {
+      "type": "number",
+      "description": "Стартовое время по умолчанию до запроса нового СМС-кода"
+    },
+    "smsCountdownTimeLeft": {
+      "type": "number",
+      "description": "Время в секундах, оставшееся до запроса нового СМС-кода"
+    },
+    "smsAttemptsCount": {
+      "type": "number",
+      "description": "Количество оставшихся попыток ввода СМС-кода"
+    },
+    "errors": {
+      "$ref": "../../../common_response/errorsDTO.json"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "smsCountdownTime",
+    "smsCountdownTimeLeft",
+    "smsAttemptsCount"
+  ]
+}

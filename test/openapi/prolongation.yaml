@@ -1,0 +1,25 @@
+openapi: "3.0.0"
+info:
+  title: Request for deposit prolongation
+  version: DEV-SNAPSHOT
+  description: OpenAPI Specification for Prolongation request
+
+paths:
+  /public/prolongate/request/create:
+    $ref: prolongation/request/create/requestCreate.yaml
+  /public/prolongate/request/prefill:
+    $ref: prolongation/request/prefill/requestPrefill.yaml
+  /public/prolongate/request/view:
+    $ref: prolongation/request/view/requestView.yaml
+  /public/prolongate/request/edit:
+    $ref: prolongation/request/edit/requestEdit.yaml
+  /public/prolongate/request/sign/check-otp:
+    $ref: prolongation/request/sign/check-otp/path-items.yaml
+  /public/prolongate/request/sign/send-otp:
+    $ref: prolongation/request/sign/send-otp/path-items.yaml
+  /public/prolongate/request/token/pre-sign:
+    $ref: prolongation/request/token/pre-sign/path-items.yaml
+  /public/prolongate/request/token/save-sign:
+    $ref: prolongation/request/token/save-sign/path-items.yaml
+  /public/prolongate/request/delete:
+    $ref: prolongation/request/delete/requestDelete.yaml

@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Response with Errors for delete",
+  "description": "Ответ на удаление заявления на Пролонгацию",
+  "type": "object",
+  "properties": {
+    "errors": {
+      "$ref": "../../common_response/errorsDTO.json"
+    }
+  },
+  "additionalProperties": false
+}

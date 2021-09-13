@@ -1,0 +1,16 @@
+get:
+  operationId: viewProlongation
+  parameters:
+    - in: query
+      name: documentGUID
+      description: GUID документа
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: prolongationViewResponseDTO.json

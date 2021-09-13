@@ -6,6 +6,10 @@ import { getClassName } from './getClassName';
 import { mergeDeep } from './mergeDeep';
 import { replaceRef } from './replaceRef';
 
+interface IPaths {
+    paths: Record<string, any>;
+}
+
 /**
  * Load and parse te open api spec. If the file extension is ".yml" or ".yaml"
  * we will try to parse the file as a YAML spec, otherwise we will fallback
@@ -27,6 +31,22 @@ export async function getOpenApiSpec(input: string): Promise<any> {
     const values = parser.$refs.values('file');
     const keys = Object.keys(values);
     const rootPath = path.dirname(keys[0]);
+    const paths = <IPaths>parser.schema;
+    let newPaths = {};
+    // If paths contain $ref then they must be changed to object
+    for (const pathValue of Object.entries(paths.paths)) {
+        const key = pathValue[0];
+        const object = pathValue[1];
+        if (object.hasOwnProperty('$ref')) {
+            const absoluteKey = path.resolve(rootPath, object['$ref']);
+            if (values.hasOwnProperty(absoluteKey)) {
+                newPaths = Object.assign(newPaths, { [key]: values[absoluteKey] });
+            }
+        } else {
+            Object.assign(newPaths, { [key]: object });
+        }
+    }
+    parser.schema = Object.assign(parser.schema, { paths: newPaths });
     let componentsFromFile = { schemas: {} };
     for (const key of keys) {
         const refRootPath = path.dirname(key);

@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Errors",
+  "type": "object",
+  "description": "Информация об ошибках",
+  "properties": {
+    "errorCode": {
+      "type": "string",
+      "description": "Код ошибки"
+    },
+    "errorName": {
+      "type": "string",
+      "description": "Наименование ошибки"
+    },
+    "errorDesc": {
+      "type": "string",
+      "description": "Описание ошибки"
+    }
+  },
+  "required": [
+    "errorCode",
+    "errorName",
+    "errorDesc"
+  ],
+  "additionalProperties": false
+}

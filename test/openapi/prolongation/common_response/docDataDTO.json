@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Document Data",
+  "description": "Данные документа",
+  "type": "object",
+  "properties": {
+    "docNumber": {
+      "type": "string",
+      "description": "Номер заявления в СББОЛ"
+    },
+    "docDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Дата заявления"
+    },
+    "documentGUID": {
+      "type": "string",
+      "description": "GUID документа"
+    },
+    "documentVersion": {
+      "type": "integer",
+      "description": "Версия документа"
+    },
+    "docStatus": {
+      "type": "string",
+      "description": "Статус запроса"
+    },
+    "noteRefuseClient": {
+      "type": "string",
+      "description": "Причина отказа клиенту"
+    }
+  },
+  "required": [
+    "documentGUID",
+    "docNumber",
+    "docDate",
+    "documentVersion",
+    "docStatus"
+  ],
+  "additionalProperties": false
+}

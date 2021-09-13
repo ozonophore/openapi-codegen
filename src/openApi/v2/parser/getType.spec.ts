@@ -94,7 +94,7 @@ describe('getType', () => {
             {
                 name: 'model_000',
                 alias: '',
-                path: 'model_000',
+                path: 'model.000',
             },
         ]);
     });
@@ -108,7 +108,7 @@ describe('getType', () => {
             {
                 name: 'some_special_schema',
                 alias: '',
-                path: 'some_special_schema',
+                path: 'some_special-schema',
             },
         ]);
     });
@@ -122,7 +122,7 @@ describe('getType', () => {
             {
                 name: '$some_special_schema',
                 alias: '',
-                path: '$some_special_schema',
+                path: '$some+special+schema',
             },
         ]);
     });

@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Pre sign request for prolongation",
+  "description": "Запрос данных для подписи токеном",
+  "type": "object",
+  "properties": {
+    "documentGUID": {
+      "type": "string",
+      "description": "Идентификатор документа"
+    },
+    "cryptoProfileId": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Идентификатор криптопрофиля"
+    },
+    "documentVersion": {
+      "type": "integer",
+      "format": "int32",
+      "description": "Версия документа"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "documentGUID",
+    "cryptoProfileId",
+    "documentVersion"
+  ]
+}
