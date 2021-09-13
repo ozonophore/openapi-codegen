@@ -11,9 +11,6 @@
     "bugs": {
         "url": "https://github.com/ozonophore/openapi-codegen.git"
     },
-    "publishConfig": {
-        "registry":"https://www.npmjs.com/package/ts-openapi-codegen"
-    },
     "license": "MIT",
     "languageName": "node",
     "keywords": [
