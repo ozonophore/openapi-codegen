@@ -21,14 +21,6 @@ export function getModels(openApi: OpenApi): Model[] {
                 models.push(model);
             }
         }
-        for (const definitionName in openApi.components.schemas) {
-            if (openApi.components.schemas.hasOwnProperty(definitionName)) {
-                const definition = openApi.components.schemas[definitionName];
-                const definitionType = getType(definitionName);
-                const model = getModel({ openApi: openApi, definition: definition, isDefinition: true, name: definitionType.base, path: definitionType.path });
-                models.push(model);
-            }
-        }
         models = sortModelsByName(models.filter(unique));
         let previous: any;
         let index = 1;

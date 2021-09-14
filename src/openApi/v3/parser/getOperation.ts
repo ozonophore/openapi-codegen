@@ -24,7 +24,6 @@ function getServiceName(op: OpenApiOperation, fileName: string): string {
 export function getOperation(openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, fileName: string): Operation {
     const serviceName = getServiceName(op, fileName);
     const serviceClassName = getServiceClassName(serviceName);
-    console.log(serviceClassName);
     const operationNameFallback = `${method}${serviceClassName}`;
     const operationName = getOperationName(op.operationId || operationNameFallback);
     const operationPath = getOperationPath(url);
