@@ -47,19 +47,4 @@ describe('index', () => {
             request: './test/custom/request.ts',
         });
     });
-
-    it('should generate path openapi', async () => {
-        await OpenAPI.generate({
-            input: './test/openapi/prolongation.yaml',
-            output: './test/generated/prolongation/',
-            httpClient: OpenAPI.HttpClient.FETCH,
-            useOptions: true,
-            useUnionTypes: true,
-            exportCore: true,
-            exportSchemas: true,
-            exportModels: true,
-            exportServices: true,
-            request: './test/custom/request.ts',
-        });
-    });
 });
