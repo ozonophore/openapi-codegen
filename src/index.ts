@@ -1,13 +1,13 @@
 import { HttpClient } from './HttpClient';
 import { parse as parseV2 } from './openApi/v2';
 import { parse as parseV3 } from './openApi/v3';
+import { getFileName } from './utils/getFileName';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { isString } from './utils/isString';
 import { postProcessClient } from './utils/postProcessClient';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { writeClient } from './utils/writeClient';
-import { getFileName } from './utils/getFileName';
 
 export { HttpClient } from './HttpClient';
 
