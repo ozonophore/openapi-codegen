@@ -1,5 +1,5 @@
 import type { OpenApi } from '../interfaces/OpenApi';
-import type { OpenApiReference } from '../interfaces/OpenApiReference';
+import type { OpenApiReference } from '../../interfaces/OpenApiReference';
 
 export function getRef<T>(openApi: OpenApi, item: T & OpenApiReference): T {
     if (item.$ref) {

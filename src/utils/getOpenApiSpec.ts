@@ -1,13 +1,24 @@
 import RefParser from 'json-schema-ref-parser';
-import path from 'path';
+import path, { isAbsolute } from 'path';
 
+import { CommonOpenApi } from '../core/CommonOpenApi';
+import { Context } from '../core/Context';
+import { OpenApiReference } from '../openApi/interfaces/OpenApiReference';
 import { exists } from './fileSystem';
-import { getClassName } from './getClassName';
-import { mergeDeep } from './mergeDeep';
-import { replaceRef } from './replaceRef';
 
-interface IPaths {
-    paths: Record<string, any>;
+function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: string): T {
+    if (object.$ref && !isAbsolute(object.$ref) && !object.$ref.match(/^(http:\/\/|https:\/\/|#\/)/g)) {
+        object.$ref = path.join(parentRef, object.$ref);
+    } else {
+        for (const key of Object.keys(object)) {
+            // @ts-ignore
+            if (object[key] instanceof Object) {
+                // @ts-ignore
+                replaceRef(object[key], context, parentRef);
+            }
+        }
+    }
+    return <T>object;
 }
 
 /**
@@ -16,77 +27,31 @@ interface IPaths {
  * on parsing the file as JSON.
  * @param input
  */
-export async function getOpenApiSpec(input: string): Promise<any> {
-    const filePath = path.resolve(process.cwd(), input);
+export async function getOpenApiSpec(input: string, context: Context): Promise<any> {
+    const absoluteInput = path.resolve(process.cwd(), input);
     if (!input) {
-        throw new Error(`Could not find OpenApi spec: "${filePath}"`);
+        throw new Error(`Could not find OpenApi spec: "${absoluteInput}"`);
     }
-    const fileExists = await exists(filePath);
+    const fileExists = await exists(absoluteInput);
+    if (!fileExists) {
+        throw new Error(`Could not read OpenApi spec: "${absoluteInput}"`);
+    }
     const parser = new RefParser();
-    if (fileExists) {
-        await parser.resolve(input);
-    } else {
-        throw new Error(`Could not read OpenApi spec: "${filePath}"`);
-    }
-    const values = parser.$refs.values('file');
-    const keys = Object.keys(values);
-    const rootPath = path.dirname(keys[0]);
-    const paths = <IPaths>parser.schema;
+    context.addRefs(await parser.resolve(input));
+    const openApi = { ...parser.schema } as CommonOpenApi;
     let newPaths = {};
     // If paths contain $ref then they must be changed to object
-    for (const pathValue of Object.entries(paths.paths)) {
+    for (const pathValue of Object.entries(openApi.paths)) {
         const key = pathValue[0];
-        const object = pathValue[1];
-        if (object.hasOwnProperty('$ref')) {
-            const absoluteKey = path.resolve(rootPath, object['$ref']);
-            if (values.hasOwnProperty(absoluteKey)) {
-                newPaths = Object.assign(newPaths, { [key]: values[absoluteKey] });
-            }
+        const object = pathValue[1] as OpenApiReference;
+        if (object.$ref) {
+            let objectValue = context.get(object.$ref);
+            objectValue = replaceRef(objectValue as OpenApiReference, context, path.dirname(object.$ref));
+            newPaths = Object.assign(newPaths, { [key]: objectValue });
         } else {
             Object.assign(newPaths, { [key]: object });
         }
     }
     parser.schema = Object.assign(parser.schema, { paths: newPaths });
-    let componentsFromFile = { schemas: {} };
-    for (const key of keys) {
-        const refRootPath = path.dirname(key);
-        const value = values[key];
-        if (refRootPath === rootPath) {
-            continue;
-        }
-        const fileName = path.basename(key);
-        const filePath = key.substring(rootPath.length, key.length - fileName.length);
-        const className = path.resolve(filePath, getClassName(fileName.substring(0, fileName.length - path.extname(fileName).length)));
-        let valueeObj: Record<string, any> = { ...value };
-        for (const v of className.split(/\//g).filter(Boolean).reverse()) {
-            valueeObj = {
-                [v]: valueeObj,
-            };
-        }
-        componentsFromFile = {
-            ...componentsFromFile,
-            schemas: {
-                ...componentsFromFile.schemas,
-                ...mergeDeep(componentsFromFile.schemas, valueeObj),
-            },
-        };
-    }
-    for (const key of keys) {
-        const refRootPath = path.dirname(key);
-        values[key] = replaceRef(values[key], rootPath, refRootPath, values);
-    }
-    let result = <any>parser.schema;
-    if (keys.length > 1) {
-        if (result.hasOwnProperty('components')) {
-            const objectComponents = result.components;
-            if (objectComponents.hasOwnProperty('schemas')) {
-                objectComponents.schemas = Object.assign(objectComponents.schemas, componentsFromFile.schemas);
-            } else {
-                result.components = Object.assign(result.components, componentsFromFile);
-            }
-        } else {
-            result = Object.assign(result, { components: componentsFromFile });
-        }
-    }
-    return await parser.bundle(result);
+    return new Promise(resolve => resolve(parser.schema));
 }

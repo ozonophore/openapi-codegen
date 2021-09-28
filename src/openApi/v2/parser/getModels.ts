@@ -1,17 +1,21 @@
 import type { Model } from '../../../client/interfaces/Model';
+import { Context } from '../../../core/Context';
+import { getRefFromSchema } from '../../../utils/getRefFromSchema';
+import { unique } from '../../../utils/unique';
 import type { OpenApi } from '../interfaces/OpenApi';
 import { getModel } from './getModel';
 import { getType } from './getType';
 
-export function getModels(openApi: OpenApi): Model[] {
+export function getModels(context: Context, openApi: OpenApi): Model[] {
     const models: Model[] = [];
-    for (const definitionName in openApi.definitions) {
-        if (openApi.definitions.hasOwnProperty(definitionName)) {
-            const definition = openApi.definitions[definitionName];
-            const definitionType = getType(definitionName);
+    const listOfModelsRef = getRefFromSchema(context, openApi);
+    if (listOfModelsRef) {
+        for (const modelRef of listOfModelsRef) {
+            const definition: any = context.get(modelRef);
+            const definitionType = getType(modelRef);
             const model = getModel({ openApi: openApi, definition: definition, isDefinition: true, name: definitionType.base, path: definitionType.path });
             models.push(model);
         }
     }
-    return models;
+    return models.filter(unique);
 }

@@ -5,7 +5,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: createRequestDTO.json
+          $ref: ./createRequestDTO.json
   responses:
     '200':
       description: OK

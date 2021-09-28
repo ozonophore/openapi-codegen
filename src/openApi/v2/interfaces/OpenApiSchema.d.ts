@@ -2,7 +2,7 @@ import type { Dictionary } from '../../../utils/types';
 import type { WithEnumExtension } from './Extensions/WithEnumExtension';
 import type { WithNullableExtension } from './Extensions/WithNullableExtension';
 import type { OpenApiExternalDocs } from './OpenApiExternalDocs';
-import type { OpenApiReference } from './OpenApiReference';
+import type { OpenApiReference } from '../../interfaces/OpenApiReference';
 import type { OpenApiXml } from './OpenApiXml';
 
 /**
