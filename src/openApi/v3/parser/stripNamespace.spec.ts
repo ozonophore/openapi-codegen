@@ -11,5 +11,7 @@ describe('stripNamespace', () => {
         expect(stripNamespace('#/components/securitySchemes/Item')).toEqual('Item');
         expect(stripNamespace('#/components/links/Item')).toEqual('Item');
         expect(stripNamespace('#/components/callbacks/Item')).toEqual('Item');
+        expect(stripNamespace('/components/callbacks/item')).toEqual('/components/callbacks/Item');
+        expect(stripNamespace('/components/callbacks/some_special_item')).toEqual('/components/callbacks/SomeSpecialItem');
     });
 });

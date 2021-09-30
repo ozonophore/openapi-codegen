@@ -1,3 +1,4 @@
+import { Context } from './core/Context';
 import { HttpClient } from './HttpClient';
 import { parse as parseV2 } from './openApi/v2';
 import { parse as parseV3 } from './openApi/v3';
@@ -56,7 +57,8 @@ export async function generate({
     request,
     write = true,
 }: Options): Promise<void> {
-    const openApi = isString(input) ? await getOpenApiSpec(input) : input;
+    const CONTEXT = new Context(input);
+    const openApi = isString(input) ? await getOpenApiSpec(input, CONTEXT) : input;
     const openApiVersion = getOpenApiVersion(openApi);
     const templates = registerHandlebarTemplates({
         httpClient,
@@ -66,7 +68,7 @@ export async function generate({
 
     switch (openApiVersion) {
         case OpenApiVersion.V2: {
-            const client = parseV2(openApi);
+            const client = parseV2(CONTEXT, openApi);
             const clientFinal = postProcessClient(client);
             if (!write) break;
             await writeClient(clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request);
@@ -74,7 +76,7 @@ export async function generate({
         }
 
         case OpenApiVersion.V3: {
-            const client = parseV3(openApi, getFileName(input));
+            const client = parseV3(CONTEXT, openApi);
             const clientFinal = postProcessClient(client);
             if (!write) break;
             await writeClient(clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request);

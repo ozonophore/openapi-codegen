@@ -1,6 +1,6 @@
 import type { OpenApiOperation } from './OpenApiOperation';
 import type { OpenApiParameter } from './OpenApiParameter';
-import type { OpenApiReference } from './OpenApiReference';
+import type { OpenApiReference } from '../../interfaces/OpenApiReference';
 
 /**
  * https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#pathItemObject

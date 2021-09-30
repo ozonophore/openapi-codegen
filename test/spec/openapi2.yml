@@ -7,4 +7,18 @@ info:
 paths:
   /public/path/path1/create:
     $ref: path/requestCreate.yaml
-
+  /public/path/path1/delete:
+    get:
+      operationId: GetCallWithoutParametersAndResponse
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MultilineComment"
+components:
+  schemas:
+    MultilineComment:
+      description: "Testing multiline comments.\nThis must go to the next line.\n\nThis will contain a break."
+      type: integer

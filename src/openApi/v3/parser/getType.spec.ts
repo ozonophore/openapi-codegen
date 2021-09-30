@@ -130,4 +130,18 @@ describe('getType', () => {
             },
         ]);
     });
+
+    it('should support file with ext', () => {
+        const type = getType('components/schemas/someSpecialSchema.json');
+        expect(type.type).toEqual('SomeSpecialSchema');
+        expect(type.base).toEqual('SomeSpecialSchema');
+        expect(type.template).toEqual(null);
+        expect(type.imports).toEqual([
+            {
+                name: 'SomeSpecialSchema',
+                alias: '',
+                path: 'components/schemas/SomeSpecialSchema',
+            },
+        ]);
+    });
 });

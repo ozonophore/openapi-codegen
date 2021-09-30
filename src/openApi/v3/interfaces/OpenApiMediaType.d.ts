@@ -1,7 +1,7 @@
 import type { Dictionary } from '../../../utils/types';
 import type { OpenApiEncoding } from './OpenApiEncoding';
 import type { OpenApiExample } from './OpenApiExample';
-import type { OpenApiReference } from './OpenApiReference';
+import type { OpenApiReference } from '../../interfaces/OpenApiReference';
 import type { OpenApiSchema } from './OpenApiSchema';
 
 /**
