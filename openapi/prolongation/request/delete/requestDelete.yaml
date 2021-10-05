@@ -1,0 +1,16 @@
+delete:
+  operationId: requestDelete
+  parameters:
+    - in: query
+      name: documentGUID
+      description: Уникальный идентификатор документа
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: deleteProlongationResponseDTO.json

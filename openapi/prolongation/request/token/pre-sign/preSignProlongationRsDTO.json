@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Pre sign response for properties change",
+  "description": "Модель, содержащая параметры необходимые для подписи документа",
+  "type": "object",
+  "properties": {
+    "digest": {
+      "type": "string",
+      "description": "дайджест документа"
+    },
+    "digestHash": {
+      "type": "string",
+      "description": "hash от digest"
+    },
+    "issuer": {
+      "type": "string",
+      "description": "Поставщик сертификата"
+    },
+    "serial": {
+      "type": "string",
+      "description": "id сертификата"
+    },
+    "cryptoAlgorithmStandard": {
+      "type": "string",
+      "description": "Стандарт алгоритма формирования и проверки ЭП"
+    },
+    "errors": {
+      "$ref": "../../../common_response/errorsDTO.json"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "digest",
+    "digestHash",
+    "issuer",
+    "serial",
+    "cryptoAlgorithmStandard"
+  ]
+}

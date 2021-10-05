@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Save sign request for prolongation",
+  "description": "Запрос на сохранение токенной подписи",
+  "type": "object",
+  "properties": {
+    "documentGUID": {
+      "type": "string",
+      "description": "Идентификатор документа"
+    },
+    "cryptoProfileId": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Идентификатор криптопрофиля"
+    },
+    "sign": {
+      "type": "string",
+      "description": "Подпись"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "documentGUID",
+    "cryptoProfileId",
+    "sign"
+  ]
+}

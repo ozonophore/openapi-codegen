@@ -1,0 +1,15 @@
+post:
+  operationId: signSendOtp
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: signSendOtpProlongationRqDTO.json
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: signSendOtpProlongationRsDTO.json
