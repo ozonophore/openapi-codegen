@@ -27,22 +27,38 @@ const params = program
     .parse(process.argv)
     .opts();
 
+function isValidJson(value) {
+    if (!!value && typeof value !== 'string') {
+        return false;
+    }
+
+    try {
+        JSON.parse(value);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 function generate(config) {
     return OpenAPI.generate({
         input: config.input,
         output: config.output,
         httpClient: config.client,
-        useOptions: config.useOptions,
-        useUnionTypes: config.useUnionTypes,
-        exportCore: JSON.parse(config.exportCore) === true,
-        exportServices: JSON.parse(config.exportServices) === true,
-        exportModels: JSON.parse(config.exportModels) === true,
-        exportSchemas: JSON.parse(config.exportSchemas) === true,
-        clean: JSON.parse(config.clean) === true,
+        useOptions: isValidJson(config.useOptions) ? JSON.parse(config.useOptions) : false,
+        useUnionTypes: isValidJson(config.useUnionTypes) ? JSON.parse(config.useUnionTypes) : false,
+        exportCore: isValidJson(config.exportCore) ? JSON.parse(config.exportCore) : false,
+        exportServices: isValidJson(config.exportServices) ? JSON.parse(config.exportServices) : false,
+        exportModels: isValidJson(config.exportModels) ? JSON.parse(config.exportModels) : false,
+        exportSchemas: isValidJson(config.exportSchemas) ? JSON.parse(config.exportSchemas) : false,
+        clean: isValidJson(config.clean) ? JSON.parse(config.clean) : false,
         request: config.request,
     })
         .then(() => {
-            console.log(`Generation from "${config.input}" was finished`);
+            console.group(`Generation from "${config.input}"`);
+            console.log(`Generation from "${config.input}" was finished\n`);
+            console.log(`Output folder: ${path.resolve(process.cwd(), config.output)}\n`);
+            console.groupEnd();
         })
         .catch(error => {
             console.log(error);
@@ -55,7 +71,7 @@ if (OpenAPI) {
     const configFile = path.resolve(process.cwd(), 'openapi.config.json');
     if (fs.existsSync(configFile)) {
         const dataString = fs.readFileSync(configFile);
-        const configs = JSON.parse(dataString);
+        const configs = isValidJson(dataString) ? JSON.parse(dataString) : [];
         if (params.clean) {
             configs.forEach(config => {
                 rmdirSync(config.output, { recursive: true, force: true });

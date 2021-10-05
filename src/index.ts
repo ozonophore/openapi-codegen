@@ -2,7 +2,6 @@ import { Context } from './core/Context';
 import { HttpClient } from './HttpClient';
 import { parse as parseV2 } from './openApi/v2';
 import { parse as parseV3 } from './openApi/v3';
-import { getFileName } from './utils/getFileName';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { isString } from './utils/isString';
@@ -40,6 +39,7 @@ export type Options = {
  * @param exportServices: Generate services
  * @param exportModels: Generate models
  * @param exportSchemas: Generate schemas
+ * @param clean Clean a directory before generation
  * @param request: Path to custom request file
  * @param write Write the files to disk (true or false)
  */
