@@ -75,7 +75,7 @@ You should create a file in the root of a project with the name 'openapi.config.
 [{
     "input": "./first.yml",
     "output": "./dist",
-    "httpClient": "xhr",
+    "client": "xhr",
     "exportCore": true,
     "exportServices": true,
     "exportModels": true,
@@ -83,7 +83,7 @@ You should create a file in the root of a project with the name 'openapi.config.
 },{
     "input": "./second.yml",
     "output": "./dist",
-    "httpClient": "xhr",
+    "client": "xhr",
     "exportCore": true,
     "exportServices": true,
     "exportModels": true,
