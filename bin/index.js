@@ -52,9 +52,9 @@ function generate(config) {
 
 if (OpenAPI) {
     const fs = require('fs');
-
-    if (fs.existsSync('openapi.config.json')) {
-        const dataString = fs.readFileSync('openapi.config.json');
+    const configFile = path.resolve(process.cwd(), 'openapi.config.json');
+    if (fs.existsSync(configFile)) {
+        const dataString = fs.readFileSync(configFile);
         const configs = JSON.parse(dataString);
         if (params.clean) {
             configs.forEach(config => {
