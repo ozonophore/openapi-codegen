@@ -16,8 +16,8 @@ const params = program
     .option('-i, --input <value>', 'OpenAPI specification, can be a path, url or string content (required)')
     .option('-o, --output <value>', 'Output directory (required)')
     .option('-c, --client <value>', 'HTTP client to generate [fetch, xhr, node]', 'fetch')
-    .option('--useOptions', 'Use options instead of arguments')
-    .option('--useUnionTypes', 'Use union types instead of enums')
+    .option('--useOptions <value>', 'Use options instead of arguments', false)
+    .option('--useUnionTypes <value>', 'Use union types instead of enums', false)
     .option('--exportCore <value>', 'Write core files to disk', true)
     .option('--exportServices <value>', 'Write services to disk', true)
     .option('--exportModels <value>', 'Write models to disk', true)
@@ -28,10 +28,6 @@ const params = program
     .opts();
 
 function isValidJson(value) {
-    if (!!value && typeof value !== 'string') {
-        return false;
-    }
-
     try {
         JSON.parse(value);
         return true;
@@ -70,7 +66,7 @@ if (OpenAPI) {
     const fs = require('fs');
     const configFile = path.resolve(process.cwd(), 'openapi.config.json');
     if (fs.existsSync(configFile)) {
-        const dataString = fs.readFileSync(configFile);
+        const dataString = fs.readFileSync(configFile, { encoding: `UTF-8` });
         const configs = isValidJson(dataString) ? JSON.parse(dataString) : [];
         if (params.clean) {
             configs.forEach(config => {
