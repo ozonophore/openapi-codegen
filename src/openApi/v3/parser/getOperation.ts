@@ -1,5 +1,7 @@
 import type { Operation } from '../../../client/interfaces/Operation';
 import type { OperationParameters } from '../../../client/interfaces/OperationParameters';
+import { Context } from '../../../core/Context';
+import { getClassName } from '../../../utils/getClassName';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiOperation } from '../interfaces/OpenApiOperation';
 import type { OpenApiRequestBody } from '../interfaces/OpenApiRequestBody';
@@ -12,16 +14,14 @@ import { getOperationRequestBody } from './getOperationRequestBody';
 import { getOperationResponseHeader } from './getOperationResponseHeader';
 import { getOperationResponses } from './getOperationResponses';
 import { getOperationResults } from './getOperationResults';
-import { getRef } from './getRef';
 import { getServiceClassName } from './getServiceClassName';
 import { sortByRequired } from './sortByRequired';
-import { getClassName } from '../../../utils/getClassName';
 
 function getServiceName(op: OpenApiOperation, fileName: string): string {
     return op.tags?.[0] || `${getClassName(fileName)}Service`;
 }
 
-export function getOperation(openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, fileName: string): Operation {
+export function getOperation(context: Context, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, fileName: string): Operation {
     const serviceName = getServiceName(op, fileName);
     const serviceClassName = getServiceClassName(serviceName);
     const operationNameFallback = `${method}${serviceClassName}`;
@@ -52,7 +52,7 @@ export function getOperation(openApi: OpenApi, url: string, method: string, op: 
 
     // Parse the operation parameters (path, query, body, etc).
     if (op.parameters) {
-        const parameters = getOperationParameters(openApi, op.parameters);
+        const parameters = getOperationParameters(context, openApi, op.parameters);
         operation.imports.push(...parameters.imports);
         operation.parameters.push(...parameters.parameters);
         operation.parametersPath.push(...parameters.parametersPath);
@@ -65,7 +65,7 @@ export function getOperation(openApi: OpenApi, url: string, method: string, op: 
 
     // TODO: form data goes wrong here: https://github.com/ferdikoomen/openapi-typescript-codegen/issues/257§
     if (op.requestBody) {
-        const requestBodyDef = getRef<OpenApiRequestBody>(openApi, op.requestBody);
+        const requestBodyDef = (op.requestBody.$ref ? context.get(op.requestBody.$ref) : op.requestBody) as OpenApiRequestBody;
         const requestBody = getOperationRequestBody(openApi, requestBodyDef);
         operation.imports.push(...requestBody.imports);
         operation.parameters.push(requestBody);
@@ -75,7 +75,7 @@ export function getOperation(openApi: OpenApi, url: string, method: string, op: 
 
     // Parse the operation responses.
     if (op.responses) {
-        const operationResponses = getOperationResponses(openApi, op.responses);
+        const operationResponses = getOperationResponses(context, openApi, op.responses);
         const operationResults = getOperationResults(operationResponses);
         operation.errors = getOperationErrors(operationResponses);
         operation.responseHeader = getOperationResponseHeader(operationResults);

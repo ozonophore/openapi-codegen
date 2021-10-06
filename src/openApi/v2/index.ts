@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import type { Client } from '../../client/interfaces/Client';
 import { Context } from '../../core/Context';
 import type { OpenApi } from './interfaces/OpenApi';
@@ -16,7 +17,7 @@ export function parse(context: Context, openApi: OpenApi): Client {
     const version = getServiceVersion(openApi.info.version);
     const server = getServer(openApi);
     const models = getModels(context, openApi);
-    const services = getServices(openApi);
+    const services = getServices(context, openApi);
 
     return { version, server, models, services };
 }

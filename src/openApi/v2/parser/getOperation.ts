@@ -1,5 +1,6 @@
 import type { Operation } from '../../../client/interfaces/Operation';
 import type { OperationParameters } from '../../../client/interfaces/OperationParameters';
+import { Context } from '../../../core/Context';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiOperation } from '../interfaces/OpenApiOperation';
 import { getComment } from './getComment';
@@ -12,7 +13,7 @@ import { getOperationResponses } from './getOperationResponses';
 import { getOperationResults } from './getOperationResults';
 import { getServiceClassName } from './getServiceClassName';
 
-export function getOperation(openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters): Operation {
+export function getOperation(context: Context, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters): Operation {
     const serviceName = op.tags?.[0] || 'Service';
     const serviceClassName = getServiceClassName(serviceName);
     const operationNameFallback = `${method}${serviceClassName}`;
@@ -43,7 +44,7 @@ export function getOperation(openApi: OpenApi, url: string, method: string, op: 
 
     // Parse the operation parameters (path, query, body, etc).
     if (op.parameters) {
-        const parameters = getOperationParameters(openApi, op.parameters);
+        const parameters = getOperationParameters(context, openApi, op.parameters);
         operation.imports.push(...parameters.imports);
         operation.parameters.push(...parameters.parameters);
         operation.parametersPath.push(...parameters.parametersPath);
@@ -56,7 +57,7 @@ export function getOperation(openApi: OpenApi, url: string, method: string, op: 
 
     // Parse the operation responses.
     if (op.responses) {
-        const operationResponses = getOperationResponses(openApi, op.responses);
+        const operationResponses = getOperationResponses(context, openApi, op.responses);
         const operationResults = getOperationResults(operationResponses);
         operation.errors = getOperationErrors(operationResponses);
         operation.responseHeader = getOperationResponseHeader(operationResults);
