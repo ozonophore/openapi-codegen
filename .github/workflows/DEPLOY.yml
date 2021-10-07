@@ -1,0 +1,73 @@
+name: DEPLOY
+
+on:
+  pull_request:
+    branches:
+      - master
+    types: [closed]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish project
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14'
+          always-auth: true
+      - name: Get the npm version
+        id: release
+        uses: martinbeentjes/npm-get-version-action@master
+      - run: |
+           echo "Version: ${{ steps.release.outputs.current-version }}"
+      - name: Install yarn
+        run: npm install --global yarn
+      - name: Install packages
+        run: yarn install
+      - name: Build library
+        run: yarn run release
+      - name: Run unit tests
+        run: yarn run test:coverage
+      - name: Run e2e tests
+        run: yarn run test:e2e
+      - name: Submit to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV }}
+      - name: Get the tag version
+        id: tag_version
+        uses: oprypin/find-latest-tag@v1
+        with:
+          repository: ozonophore/openapi-codegen
+          releases-only: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+           echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
+      - name: Create Release
+        id: create_release
+        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ steps.release.outputs.current-version }}
+          release_name: Release ${{ steps.release.outputs.current-version }}
+          draft: false
+          prerelease: false
+      - name: Publish
+        id: publish
+        if: github.ref == 'refs/heads/master'
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_AUTH_TOKEN }}
+          check-version: true
+          access: public
+      - if: steps.Publish.outputs.type != 'none'
+        run: |
+          echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
+
