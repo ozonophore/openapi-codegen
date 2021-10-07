@@ -1,10 +1,9 @@
 name: DEPLOY
 
 on:
-  pull_request:
+  push:
     branches:
       - master
-    types: [ closed ]
   workflow_dispatch:
 
 jobs:
@@ -25,20 +24,6 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@master
       - run: |
            echo "Version: ${{ steps.release.outputs.current-version }}"
-      - name: Install yarn
-        run: npm install --global yarn
-      - name: Install packages
-        run: yarn install
-      - name: Build library
-        run: yarn run release
-      - name: Run unit tests
-        run: yarn run test:coverage
-      - name: Run e2e tests
-        run: yarn run test:e2e
-      - name: Submit to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV }}
       - name: Get the tag version
         id: tag_version
         uses: oprypin/find-latest-tag@v1
@@ -48,6 +33,26 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
            echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
+      - name: Install yarn
+        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        run: npm install --global yarn
+      - name: Install packages
+        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        run: yarn install
+      - name: Build library
+        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        run: yarn run release
+      - name: Run unit tests
+        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        run: yarn run test:coverage
+      - name: Run e2e tests
+        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        run: yarn run test:e2e
+      - name: Submit to Codecov
+        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV }}
       - name: Create Release
         id: create_release
         if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
@@ -61,7 +66,7 @@ jobs:
           prerelease: false
       - name: Publish
         id: publish
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
         uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_AUTH_TOKEN }}
