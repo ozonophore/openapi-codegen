@@ -34,22 +34,22 @@ jobs:
       - run: |
            echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
       - name: Install yarn
-        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        if: github.ref == 'refs/heads/master'
         run: npm install --global yarn
       - name: Install packages
-        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        if: github.ref == 'refs/heads/master'
         run: yarn install
       - name: Build library
-        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        if: github.ref == 'refs/heads/master'
         run: yarn run release
       - name: Run unit tests
-        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        if: github.ref == 'refs/heads/master'
         run: yarn run test:coverage
       - name: Run e2e tests
-        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        if: github.ref == 'refs/heads/master'
         run: yarn run test:e2e
       - name: Submit to Codecov
-        if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
+        if: github.ref == 'refs/heads/master'
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV }}
