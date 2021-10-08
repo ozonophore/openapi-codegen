@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { Context } from './core/Context';
 import { HttpClient } from './HttpClient';
 import { parse as parseV2 } from './openApi/v2';

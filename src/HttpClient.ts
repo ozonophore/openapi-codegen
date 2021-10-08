@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 export enum HttpClient {
     FETCH = 'fetch',
     XHR = 'xhr',

@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import RefParser from 'json-schema-ref-parser';
 import { dirname } from 'path';

@@ -1,12 +1,12 @@
 import type { OperationResponse } from '../../../client/interfaces/OperationResponse';
+import { Context } from '../../../core/Context';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiResponse } from '../interfaces/OpenApiResponse';
 import type { OpenApiResponses } from '../interfaces/OpenApiResponses';
 import { getOperationResponse } from './getOperationResponse';
 import { getOperationResponseCode } from './getOperationResponseCode';
-import { getRef } from './getRef';
 
-export function getOperationResponses(openApi: OpenApi, responses: OpenApiResponses): OperationResponse[] {
+export function getOperationResponses(context: Context, openApi: OpenApi, responses: OpenApiResponses): OperationResponse[] {
     const operationResponses: OperationResponse[] = [];
 
     // Iterate over each response code and get the
@@ -14,7 +14,7 @@ export function getOperationResponses(openApi: OpenApi, responses: OpenApiRespon
     for (const code in responses) {
         if (responses.hasOwnProperty(code)) {
             const responseOrReference = responses[code];
-            const response = getRef<OpenApiResponse>(openApi, responseOrReference);
+            const response = (responseOrReference.$ref ? context.get(responseOrReference.$ref) : responseOrReference) as OpenApiResponse;
             const responseCode = getOperationResponseCode(code);
 
             if (responseCode) {
