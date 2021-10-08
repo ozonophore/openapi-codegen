@@ -10,6 +10,58 @@
         "http"
     ],
     "paths": {
+        "/api/v{api-version}/getModelWithDictionaryReference": {
+            "get": {
+                "operationId": "GetCallWithModelWithDictionaryReference",
+                "responses": {
+                    "default": {
+                        "description": "Message for default response",
+                        "schema": {
+                            "$ref": "#/definitions/DictionaryWithReference"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v{api-version}/getModelWithDictionary": {
+            "get": {
+                "operationId": "GetCallWithModelWithDictionary",
+                "responses": {
+                    "default": {
+                        "description": "Message for default response",
+                        "schema": {
+                            "$ref": "#/definitions/ModelWithDictionary"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v{api-version}/simpleEnum": {
+            "get": {
+                "operationId": "GetCallWithSimpleInteger",
+                "responses": {
+                    "default": {
+                        "description": "Message for default response",
+                        "schema": {
+                            "$ref": "#/definitions/ModelWithEnumInteger"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v{api-version}/getModelWithArray": {
+            "get": {
+                "operationId": "GetCallWithModelArray",
+                "responses": {
+                    "default": {
+                        "description": "Message for default response",
+                        "schema": {
+                            "$ref": "#/definitions/ModelWithArray"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v{api-version}/simple": {
             "get": {
                 "tags": [
@@ -968,6 +1020,16 @@
                 }
             }
         },
+        "ModelWithEnumInteger": {
+            "description": "This is a model with one number property",
+            "type": "object",
+            "properties": {
+                "prop": {
+                    "description": "VALUE_1=1,VALUE_2=2,VALUE_3=3",
+                    "type": "integer"
+                }
+            }
+        },
         "ModelWithBoolean": {
             "description": "This is a model with one boolean property",
             "type": "object",
@@ -1184,6 +1246,7 @@
                     "readOnly": true
                 },
                 "@namespace.integer": {
+                    "description": "Namespace integer",
                     "type": "integer",
                     "readOnly": true
                 }
@@ -1262,6 +1325,9 @@
                 },
                 "propC": {
                     "$ref": "#/definitions/ModelWithString"
+                },
+                "propD": {
+                    "$ref": "#/definitions/ModelWithInteger"
                 }
             }
         },
