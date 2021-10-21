@@ -42,6 +42,7 @@ export function getOperationRequestBody(openApi: OpenApi, parameter: OpenApiRequ
                 requestBody.export = 'reference';
                 requestBody.type = model.type;
                 requestBody.base = model.base;
+                requestBody.path = model.path;
                 requestBody.template = model.template;
                 requestBody.imports.push(...model.imports);
                 return requestBody;
@@ -50,6 +51,7 @@ export function getOperationRequestBody(openApi: OpenApi, parameter: OpenApiRequ
                 requestBody.export = model.export;
                 requestBody.type = model.type;
                 requestBody.base = model.base;
+                requestBody.path = model.path;
                 requestBody.template = model.template;
                 requestBody.link = model.link;
                 requestBody.isReadOnly = model.isReadOnly;

@@ -30,7 +30,7 @@ describe('getType', () => {
         expect(type.type).toEqual('Link<string>');
         expect(type.base).toEqual('Link');
         expect(type.template).toEqual('string');
-        expect(type.path).toEqual('');
+        expect(type.path).toEqual('Link');
         expect(type.imports).toEqual([{ name: 'Link', alias: '', path: 'Link' }]);
     });
 
@@ -39,7 +39,7 @@ describe('getType', () => {
         expect(type.type).toEqual('Link<string>');
         expect(type.base).toEqual('Link');
         expect(type.template).toEqual('string');
-        expect(type.path).toEqual('first/second/');
+        expect(type.path).toEqual('first/second/Link');
         expect(type.imports).toEqual([{ name: 'Link', alias: '', path: 'first/second/Link' }]);
     });
 

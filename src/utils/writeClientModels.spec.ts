@@ -12,7 +12,7 @@ describe('writeClientModels', () => {
             {
                 export: 'interface',
                 name: 'MyModel',
-                path: '',
+                path: 'MyModel',
                 type: 'MyModel',
                 base: 'MyModel',
                 template: null,

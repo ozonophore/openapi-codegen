@@ -37,11 +37,11 @@ export function getType(value?: string, template?: string): Type {
     };
 
     const valueClean = stripNamespace(value || '');
-    result.path = getPath(valueClean);
     if (/\[.*\]$/g.test(valueClean)) {
         const matches = valueClean.match(/(.*?)\[(.*)\]$/);
         if (matches?.length) {
             const match1 = getType(matches[1]);
+            result.path = match1.path;
             const match2 = getType(matches[2]);
 
             if (match1.type === 'any[]') {
@@ -63,17 +63,18 @@ export function getType(value?: string, template?: string): Type {
         }
     } else if (hasMappedType(valueClean)) {
         const mapped = getMappedType(valueClean);
+        result.path = valueClean;
         if (mapped) {
             result.type = mapped;
             result.base = mapped;
         }
     } else if (valueClean) {
         const type = getTypeName(valueClean);
+        result.path = valueClean;
         result.type = type;
         result.base = type;
         result.imports.push({ name: type, alias: '', path: valueClean });
     }
-
     // If the property that we found matched the parent template class
     // Then ignore this whole property and return it as a "T" template property.
     if (result.type === template) {
