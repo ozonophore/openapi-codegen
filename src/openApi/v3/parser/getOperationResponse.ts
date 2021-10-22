@@ -38,6 +38,7 @@ export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse
                 operationResponse.export = 'reference';
                 operationResponse.type = model.type;
                 operationResponse.base = model.base;
+                operationResponse.path = model.path;
                 operationResponse.template = model.template;
                 operationResponse.imports.push(...model.imports);
                 return operationResponse;
@@ -46,6 +47,7 @@ export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse
                 operationResponse.export = model.export;
                 operationResponse.type = model.type;
                 operationResponse.base = model.base;
+                operationResponse.path = model.path;
                 operationResponse.template = model.template;
                 operationResponse.link = model.link;
                 operationResponse.isReadOnly = model.isReadOnly;

@@ -311,13 +311,13 @@ export type { ModelWithDictionary } from './models/ModelWithDictionary';
 export { ModelWithEnumInteger } from './models/ModelWithEnumInteger';
 export type { ModelWithString } from './models/ModelWithString';
 
-export { $DictionaryWithReference } from './schemas/$DictionaryWithReference';
-export { $ModelThatExtends } from './schemas/$ModelThatExtends';
-export { $ModelThatExtendsExtends } from './schemas/$ModelThatExtendsExtends';
-export { $ModelWithArray } from './schemas/$ModelWithArray';
-export { $ModelWithDictionary } from './schemas/$ModelWithDictionary';
-export { $ModelWithEnumInteger } from './schemas/$ModelWithEnumInteger';
-export { $ModelWithString } from './schemas/$ModelWithString';
+export { DictionaryWithReferenceSchema } from './schemas/DictionaryWithReferenceSchema';
+export { ModelThatExtendsSchema } from './schemas/ModelThatExtendsSchema';
+export { ModelThatExtendsExtendsSchema } from './schemas/ModelThatExtendsExtendsSchema';
+export { ModelWithArraySchema } from './schemas/ModelWithArraySchema';
+export { ModelWithDictionarySchema } from './schemas/ModelWithDictionarySchema';
+export { ModelWithEnumIntegerSchema } from './schemas/ModelWithEnumIntegerSchema';
+export { ModelWithStringSchema } from './schemas/ModelWithStringSchema';
 
 export { CollectionFormatService } from './services/CollectionFormatService';
 export { ComplexService } from './services/ComplexService';
@@ -461,11 +461,11 @@ export interface ModelWithString {
 "
 `;
 
-exports[`v2 should generate: ./test/generated/v2/schemas/$DictionaryWithReference.ts 1`] = `
+exports[`v2 should generate: ./test/generated/v2/schemas/DictionaryWithReferenceSchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $DictionaryWithReference = {
+export const DictionaryWithReferenceSchema = {
     type: 'dictionary',
     contains: {
         type: 'ModelWithString',
@@ -473,32 +473,11 @@ export const $DictionaryWithReference = {
 };"
 `;
 
-exports[`v2 should generate: ./test/generated/v2/schemas/$ModelThatExtends.ts 1`] = `
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelThatExtendsExtendsSchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ModelThatExtends = {
-    type: 'all-of',
-    contains: [{
-        type: 'ModelWithString',
-    }, {
-        properties: {
-            propExtendsA: {
-                type: 'string',
-            },
-            propExtendsB: {
-                type: 'ModelWithString',
-            },
-        },
-    }],
-};"
-`;
-
-exports[`v2 should generate: ./test/generated/v2/schemas/$ModelThatExtendsExtends.ts 1`] = `
-"/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-export const $ModelThatExtendsExtends = {
+export const ModelThatExtendsExtendsSchema = {
     type: 'all-of',
     contains: [{
         type: 'ModelWithString',
@@ -517,11 +496,32 @@ export const $ModelThatExtendsExtends = {
 };"
 `;
 
-exports[`v2 should generate: ./test/generated/v2/schemas/$ModelWithArray.ts 1`] = `
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelThatExtendsSchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ModelWithArray = {
+export const ModelThatExtendsSchema = {
+    type: 'all-of',
+    contains: [{
+        type: 'ModelWithString',
+    }, {
+        properties: {
+            propExtendsA: {
+                type: 'string',
+            },
+            propExtendsB: {
+                type: 'ModelWithString',
+            },
+        },
+    }],
+};"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithArraySchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const ModelWithArraySchema = {
     properties: {
         prop: {
             type: 'array',
@@ -545,11 +545,11 @@ export const $ModelWithArray = {
 };"
 `;
 
-exports[`v2 should generate: ./test/generated/v2/schemas/$ModelWithDictionary.ts 1`] = `
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithDictionarySchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ModelWithDictionary = {
+export const ModelWithDictionarySchema = {
     properties: {
         prop: {
             type: 'dictionary',
@@ -561,11 +561,11 @@ export const $ModelWithDictionary = {
 };"
 `;
 
-exports[`v2 should generate: ./test/generated/v2/schemas/$ModelWithEnumInteger.ts 1`] = `
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithEnumIntegerSchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ModelWithEnumInteger = {
+export const ModelWithEnumIntegerSchema = {
     properties: {
         prop: {
             type: 'Enum',
@@ -574,11 +574,11 @@ export const $ModelWithEnumInteger = {
 };"
 `;
 
-exports[`v2 should generate: ./test/generated/v2/schemas/$ModelWithString.ts 1`] = `
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithStringSchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ModelWithString = {
+export const ModelWithStringSchema = {
     properties: {
         prop: {
             type: 'string',
@@ -1556,13 +1556,13 @@ export type { ModelWithDictionary } from './models/ModelWithDictionary';
 export { ModelWithEnum } from './models/ModelWithEnum';
 export type { ModelWithString } from './models/ModelWithString';
 
-export { $ArrayWithArray } from './schemas/$ArrayWithArray';
-export { $ModelThatExtends } from './schemas/$ModelThatExtends';
-export { $ModelThatExtendsExtends } from './schemas/$ModelThatExtendsExtends';
-export { $ModelWithArray } from './schemas/$ModelWithArray';
-export { $ModelWithDictionary } from './schemas/$ModelWithDictionary';
-export { $ModelWithEnum } from './schemas/$ModelWithEnum';
-export { $ModelWithString } from './schemas/$ModelWithString';
+export { ArrayWithArraySchema } from './schemas/ArrayWithArraySchema';
+export { ModelThatExtendsSchema } from './schemas/ModelThatExtendsSchema';
+export { ModelThatExtendsExtendsSchema } from './schemas/ModelThatExtendsExtendsSchema';
+export { ModelWithArraySchema } from './schemas/ModelWithArraySchema';
+export { ModelWithDictionarySchema } from './schemas/ModelWithDictionarySchema';
+export { ModelWithEnumSchema } from './schemas/ModelWithEnumSchema';
+export { ModelWithStringSchema } from './schemas/ModelWithStringSchema';
 
 export { CollectionFormatService } from './services/CollectionFormatService';
 export { ComplexService } from './services/ComplexService';
@@ -1728,11 +1728,11 @@ export interface ModelWithString {
 "
 `;
 
-exports[`v3 should generate: ./test/generated/v3/schemas/$ArrayWithArray.ts 1`] = `
+exports[`v3 should generate: ./test/generated/v3/schemas/ArrayWithArraySchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ArrayWithArray = {
+export const ArrayWithArraySchema = {
     type: 'array',
     contains: {
         type: 'array',
@@ -1743,32 +1743,11 @@ export const $ArrayWithArray = {
 };"
 `;
 
-exports[`v3 should generate: ./test/generated/v3/schemas/$ModelThatExtends.ts 1`] = `
+exports[`v3 should generate: ./test/generated/v3/schemas/ModelThatExtendsExtendsSchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ModelThatExtends = {
-    type: 'all-of',
-    contains: [{
-        type: 'ModelWithString',
-    }, {
-        properties: {
-            propExtendsA: {
-                type: 'string',
-            },
-            propExtendsB: {
-                type: 'ModelWithString',
-            },
-        },
-    }],
-};"
-`;
-
-exports[`v3 should generate: ./test/generated/v3/schemas/$ModelThatExtendsExtends.ts 1`] = `
-"/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-export const $ModelThatExtendsExtends = {
+export const ModelThatExtendsExtendsSchema = {
     type: 'all-of',
     contains: [{
         type: 'ModelWithString',
@@ -1787,11 +1766,32 @@ export const $ModelThatExtendsExtends = {
 };"
 `;
 
-exports[`v3 should generate: ./test/generated/v3/schemas/$ModelWithArray.ts 1`] = `
+exports[`v3 should generate: ./test/generated/v3/schemas/ModelThatExtendsSchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ModelWithArray = {
+export const ModelThatExtendsSchema = {
+    type: 'all-of',
+    contains: [{
+        type: 'ModelWithString',
+    }, {
+        properties: {
+            propExtendsA: {
+                type: 'string',
+            },
+            propExtendsB: {
+                type: 'ModelWithString',
+            },
+        },
+    }],
+};"
+`;
+
+exports[`v3 should generate: ./test/generated/v3/schemas/ModelWithArraySchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const ModelWithArraySchema = {
     properties: {
         prop: {
             type: 'array',
@@ -1815,11 +1815,11 @@ export const $ModelWithArray = {
 };"
 `;
 
-exports[`v3 should generate: ./test/generated/v3/schemas/$ModelWithDictionary.ts 1`] = `
+exports[`v3 should generate: ./test/generated/v3/schemas/ModelWithDictionarySchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ModelWithDictionary = {
+export const ModelWithDictionarySchema = {
     properties: {
         prop: {
             type: 'dictionary',
@@ -1831,11 +1831,11 @@ export const $ModelWithDictionary = {
 };"
 `;
 
-exports[`v3 should generate: ./test/generated/v3/schemas/$ModelWithEnum.ts 1`] = `
+exports[`v3 should generate: ./test/generated/v3/schemas/ModelWithEnumSchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ModelWithEnum = {
+export const ModelWithEnumSchema = {
     properties: {
         test: {
             type: 'Enum',
@@ -1850,11 +1850,11 @@ export const $ModelWithEnum = {
 };"
 `;
 
-exports[`v3 should generate: ./test/generated/v3/schemas/$ModelWithString.ts 1`] = `
+exports[`v3 should generate: ./test/generated/v3/schemas/ModelWithStringSchema.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $ModelWithString = {
+export const ModelWithStringSchema = {
     properties: {
         prop: {
             type: 'string',

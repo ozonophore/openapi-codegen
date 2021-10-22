@@ -21,9 +21,7 @@ function getServiceName(op: OpenApiOperation, fileName: string): string {
     return op.tags?.[0] || `${getClassName(fileName)}Service`;
 }
 
-export function getOperation(context: Context, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, fileName: string): Operation {
-    const serviceName = getServiceName(op, fileName);
-    const serviceClassName = getServiceClassName(serviceName);
+export function getOperation(context: Context, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, serviceClassName: string): Operation {
     const operationNameFallback = `${method}${serviceClassName}`;
     const operationName = getOperationName(op.operationId || operationNameFallback);
     const operationPath = getOperationPath(url);

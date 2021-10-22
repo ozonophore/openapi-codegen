@@ -29,6 +29,7 @@ describe('getType', () => {
         const type = getType('#/definitions/Link[string]');
         expect(type.type).toEqual('Link<string>');
         expect(type.base).toEqual('Link');
+        expect(type.path).toEqual('Link');
         expect(type.template).toEqual('string');
         expect(type.imports).toEqual([
             {

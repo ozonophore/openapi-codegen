@@ -9,13 +9,13 @@ export { OpenAPI } from './core/OpenAPI';
 
 {{#each models}}
 {{#if enum}}
-export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}{{{name}}}';
+export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}';
 {{else if @root.useUnionTypes}}
-export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}{{{name}}}';
+export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}';
 {{else if enums}}
-export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}{{{name}}}';
+export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}';
 {{else}}
-export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}{{{name}}}';
+export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}';
 {{/if}}
 {{/each}}
 {{/if}}
@@ -24,7 +24,7 @@ export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{
 {{#if models}}
 
 {{#each models}}
-export { ${{{name}}}{{#if alias }} as ${{{alias}}}{{/if}} } from './schemas/{{{path}}}${{{name}}}';
+export { {{{name}}}Schema{{#if alias }} as {{{alias}}}Schema{{/if}} } from './schemas/{{{path}}}Schema';
 {{/each}}
 {{/if}}
 {{/if}}

@@ -13,7 +13,7 @@ describe('writeClientSchemas', () => {
                 export: 'interface',
                 name: 'MyModel',
                 alias: '',
-                path: '',
+                path: 'MyModel',
                 type: 'MyModel',
                 base: 'MyModel',
                 template: null,
@@ -48,6 +48,6 @@ describe('writeClientSchemas', () => {
 
         await writeClientSchemas(models, templates, '/', HttpClient.FETCH, false);
 
-        expect(writeFile).toBeCalledWith('/$MyModel.ts', 'schema');
+        expect(writeFile).toBeCalledWith('/MyModelSchema.ts', 'schema');
     });
 });

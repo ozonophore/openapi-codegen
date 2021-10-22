@@ -10,8 +10,22 @@ export function postProcessServiceOperations(service: Service): Operation[] {
 
         // Parse the service parameters and results, very similar to how we parse
         // properties of models. These methods will extend the type if needed.
-        clone.imports.push(...flatMap(clone.parameters, parameter => parameter.imports));
-        clone.imports.push(...flatMap(clone.results, result => result.imports));
+        clone.imports.push(
+            ...flatMap(clone.parameters, parameter =>
+                parameter.imports.map(item => {
+                    const imprts = service.imports.filter(serviceImport => serviceImport.path === item.path);
+                    return imprts[0];
+                })
+            )
+        );
+        clone.imports.push(
+            ...flatMap(clone.results, result =>
+                result.imports.map(item => {
+                    const imprts = service.imports.filter(serviceImport => serviceImport.path === item.path);
+                    return imprts[0];
+                })
+            )
+        );
 
         // Check if the operation name is unique, if not then prefix this with a number
         const name = clone.name;

@@ -2,7 +2,7 @@
 
 {{#if imports}}
 {{#each imports}}
-import type { {{{name}}} } from '../models/{{{path}}}';
+import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '../models/{{{path}}}';
 {{/each}}
 {{/if}}
 import { request as __request } from '../core/request';
