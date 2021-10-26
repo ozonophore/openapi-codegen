@@ -26,6 +26,7 @@ describe('writeClientModels', () => {
                 enum: [],
                 enums: [],
                 properties: [],
+                alias: '',
             },
         ];
 
@@ -45,7 +46,7 @@ describe('writeClientModels', () => {
             },
         };
 
-        await writeClientModels(models, templates, '/', HttpClient.FETCH, false);
+        await writeClientModels({ models, templates, outputPath: '/', httpClient: HttpClient.FETCH, useUnionTypes: false });
 
         expect(writeFile).toBeCalledWith('/MyModel.ts', 'model');
     });

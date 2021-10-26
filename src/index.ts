@@ -72,7 +72,7 @@ export async function generate({
             const client = parseV2(CONTEXT, openApi);
             const clientFinal = postProcessClient(client);
             if (!write) break;
-            await writeClient(clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request);
+            await writeClient({ client: clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request });
             break;
         }
 
@@ -80,7 +80,7 @@ export async function generate({
             const client = parseV3(CONTEXT, openApi);
             const clientFinal = postProcessClient(client);
             if (!write) break;
-            await writeClient(clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request);
+            await writeClient({ client: clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request });
             break;
         }
     }

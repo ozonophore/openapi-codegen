@@ -31,7 +31,7 @@ describe('writeClientCore', () => {
             },
         };
 
-        await writeClientCore(client, templates, '/', HttpClient.FETCH);
+        await writeClientCore({ client, templates, outputPath: '/', httpClient: HttpClient.FETCH });
 
         expect(writeFile).toBeCalledWith('/OpenAPI.ts', 'settings');
         expect(writeFile).toBeCalledWith('/ApiError.ts', 'apiError');
