@@ -31,7 +31,19 @@ describe('writeClient', () => {
             },
         };
 
-        await writeClient(client, templates, './dist', HttpClient.FETCH, false, false, true, true, true, true, true);
+        await writeClient({
+            client,
+            templates,
+            output: './dist',
+            httpClient: HttpClient.FETCH,
+            useOptions: false,
+            useUnionTypes: false,
+            exportCore: true,
+            exportServices: true,
+            exportModels: true,
+            exportSchemas: true,
+            clean: true,
+        });
 
         expect(rmdir).toBeCalled();
         expect(mkdir).toBeCalled();

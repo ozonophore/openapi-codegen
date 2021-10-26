@@ -12,6 +12,35 @@ import { writeClientSchemas } from './writeClientSchemas';
 import { writeClientServices } from './writeClientServices';
 
 /**
+ * @param client Client object with all the models, services, etc.
+ * @param templates Templates wrapper with all loaded Handlebars templates
+ * @param output The relative location of the output directory
+ * @param httpClient The selected httpClient (fetch, xhr or node)
+ * @param useOptions Use options or arguments functions
+ * @param useUnionTypes Use union types instead of enums
+ * @param exportCore: Generate core client classes
+ * @param exportServices: Generate services
+ * @param exportModels: Generate models
+ * @param exportSchemas: Generate schemas
+ * @param clean: Clean a directory before generation
+ * @param request: Path to custom request file
+ */
+interface IWriteCLient {
+    client: Client;
+    templates: Templates;
+    output: string;
+    httpClient: HttpClient;
+    useOptions: boolean;
+    useUnionTypes: boolean;
+    exportCore: boolean;
+    exportServices: boolean;
+    exportModels: boolean;
+    exportSchemas: boolean;
+    clean: boolean;
+    request?: string;
+}
+
+/**
  * Write our OpenAPI client, using the given templates at the given output
  * @param client Client object with all the models, services, etc.
  * @param templates Templates wrapper with all loaded Handlebars templates
@@ -26,20 +55,8 @@ import { writeClientServices } from './writeClientServices';
  * @param clean: Clean a directory before generation
  * @param request: Path to custom request file
  */
-export async function writeClient(
-    client: Client,
-    templates: Templates,
-    output: string,
-    httpClient: HttpClient,
-    useOptions: boolean,
-    useUnionTypes: boolean,
-    exportCore: boolean,
-    exportServices: boolean,
-    exportModels: boolean,
-    exportSchemas: boolean,
-    clean: boolean,
-    request?: string
-): Promise<void> {
+export async function writeClient(options: IWriteCLient): Promise<void> {
+    const { client, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request } = options;
     const outputPath = resolve(process.cwd(), output);
     const outputPathCore = resolve(outputPath, 'core');
     const outputPathModels = resolve(outputPath, 'models');
@@ -55,7 +72,7 @@ export async function writeClient(
             await rmdir(outputPathCore);
         }
         await mkdir(outputPathCore);
-        await writeClientCore(client, templates, outputPathCore, httpClient, request);
+        await writeClientCore({ client, templates, outputPath: outputPathCore, httpClient, request });
     }
 
     if (exportServices) {
@@ -63,7 +80,15 @@ export async function writeClient(
             await rmdir(outputPathServices);
         }
         await mkdir(outputPathServices);
-        await writeClientServices(client.services, templates, outputPathServices, httpClient, useUnionTypes, useOptions);
+        await writeClientServices({
+            services: client.services,
+            templates,
+            outputPath: outputPathServices,
+            httpClient,
+            useUnionTypes,
+            useOptions,
+            useCustomRequest: !!request,
+        });
     }
 
     if (exportSchemas) {
@@ -71,7 +96,7 @@ export async function writeClient(
             await rmdir(outputPathSchemas);
         }
         await mkdir(outputPathSchemas);
-        await writeClientSchemas(client.models, templates, outputPathSchemas, httpClient, useUnionTypes);
+        await writeClientSchemas({ models: client.models, templates, outputPath: outputPathSchemas, httpClient, useUnionTypes });
     }
 
     if (exportModels) {
@@ -79,11 +104,11 @@ export async function writeClient(
             await rmdir(outputPathModels);
         }
         await mkdir(outputPathModels);
-        await writeClientModels(client.models, templates, outputPathModels, httpClient, useUnionTypes);
+        await writeClientModels({ models: client.models, templates, outputPath: outputPathModels, httpClient, useUnionTypes });
     }
 
     if (exportCore || exportServices || exportSchemas || exportModels) {
         await mkdir(outputPath);
-        await writeClientIndex(client, templates, outputPath, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas);
+        await writeClientIndex({ client, templates, outputPath, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas });
     }
 }

@@ -2,12 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApiRequestOptions } from './ApiRequestOptions';
-import type { ApiResult } from './ApiResult';
-import { OpenAPI } from './OpenAPI';
 
-export async function request(options: ApiRequestOptions): Promise<ApiResult> {
-
-    const url = `${OpenAPI.BASE}${options.path}`;
+export async function request(options: ApiRequestOptions): Promise<Record<string, any>> {
+    const url = `${options.path}`;
 
     // Do your request...
 

@@ -6,6 +6,21 @@ import { copyFile, exists, writeFile } from './fileSystem';
 import { Templates } from './registerHandlebarTemplates';
 
 /**
+ * @param client Client object, containing, models, schemas and services
+ * @param templates The loaded handlebar templates
+ * @param outputPath Directory to write the generated files to
+ * @param httpClient The selected httpClient (fetch, xhr or node)
+ * @param request: Path to custom request file
+ */
+interface IWriteClientCore {
+    client: Client;
+    templates: Templates;
+    outputPath: string;
+    httpClient: HttpClient;
+    request?: string;
+}
+
+/**
  * Generate OpenAPI core files, this includes the basic boilerplate code to handle requests.
  * @param client Client object, containing, models, schemas and services
  * @param templates The loaded handlebar templates
@@ -13,7 +28,8 @@ import { Templates } from './registerHandlebarTemplates';
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param request: Path to custom request file
  */
-export async function writeClientCore(client: Client, templates: Templates, outputPath: string, httpClient: HttpClient, request?: string): Promise<void> {
+export async function writeClientCore(options: IWriteClientCore): Promise<void> {
+    const { client, templates, outputPath, httpClient, request } = options;
     const context = {
         httpClient,
         server: client.server,
