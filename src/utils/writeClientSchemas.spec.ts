@@ -46,7 +46,7 @@ describe('writeClientSchemas', () => {
             },
         };
 
-        await writeClientSchemas(models, templates, '/', HttpClient.FETCH, false);
+        await writeClientSchemas({ models, templates, outputPath: '/', httpClient: HttpClient.FETCH, useUnionTypes: false });
 
         expect(writeFile).toBeCalledWith('/MyModelSchema.ts', 'schema');
     });
