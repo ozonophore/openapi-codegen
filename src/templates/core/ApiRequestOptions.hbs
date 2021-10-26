@@ -10,5 +10,6 @@ export type ApiRequestOptions = {
     readonly body?: any;
     readonly mediaType?: string;
     readonly responseHeader?: string;
+    // @ts-ignore
     readonly errors?: Record<number, string>;
 }
