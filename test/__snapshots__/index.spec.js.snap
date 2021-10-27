@@ -37,6 +37,8 @@ export type ApiRequestOptions = {
     readonly body?: any;
     readonly mediaType?: string;
     readonly responseHeader?: string;
+    // TODO TS2344: Redesign the logic for generating errors. Use the string value of the error code.
+    // @ts-ignore
     readonly errors?: Record<number, string>;
 }"
 `;
@@ -1282,6 +1284,8 @@ export type ApiRequestOptions = {
     readonly body?: any;
     readonly mediaType?: string;
     readonly responseHeader?: string;
+    // TODO TS2344: Redesign the logic for generating errors. Use the string value of the error code.
+    // @ts-ignore
     readonly errors?: Record<number, string>;
 }"
 `;
