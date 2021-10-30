@@ -24,6 +24,15 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@master
       - run: |
            echo "Version: ${{ steps.release.outputs.current-version }}"
+      - name: Read Changelog
+        id: read_changelog
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          validation_depth: 10
+          version: ${{ steps.release.outputs.current-version }}"
+          path: ./CHANGELOG.md
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get the tag version
         id: tag_version
         uses: oprypin/find-latest-tag@v1
@@ -62,8 +71,9 @@ jobs:
         with:
           tag_name: ${{ steps.release.outputs.current-version }}
           release_name: Release ${{ steps.release.outputs.current-version }}
-          draft: false
-          prerelease: false
+          body: ${{ steps.read_changelog.outputs.changes }}
+          draft: ${{ steps.read_changelog.outputs.changes  == 'unreleased' }}
+          prerelease: ${{ steps.read_changelog.outputs.changes  == 'prereleased' }}
       - name: Publish
         id: publish
         if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
