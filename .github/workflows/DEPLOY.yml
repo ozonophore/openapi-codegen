@@ -31,8 +31,6 @@ jobs:
           validation_depth: 10
           version: ${{ steps.release.outputs.current-version }}"
           path: ./CHANGELOG.md
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get the tag version
         id: tag_version
         uses: oprypin/find-latest-tag@v1
