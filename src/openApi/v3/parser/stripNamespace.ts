@@ -1,5 +1,6 @@
-import { basename, dirname, extname, join } from 'path';
+import { basename, extname } from 'path';
 
+import { dirName, join } from '../../../core/path';
 import { getClassName } from '../../../utils/getClassName';
 import { hasMappedType } from './getMappedType';
 
@@ -9,10 +10,10 @@ import { hasMappedType } from './getMappedType';
  */
 export function stripNamespace(value: string): string {
     if (!value.match(/^(http:\/\/|https:\/\/|#\/)/g) && !hasMappedType(value) && !value.match(/^array\[[a-z]+\]$/g)) {
-        const dirName = dirname(value);
+        const directoryName = dirName(value);
         const extName = extname(value);
         const baseName = extName.toLowerCase().match(/(\.json|\.yaml|\/yml)$/g) ? getClassName(basename(value, extName)) : getClassName(basename(value));
-        return dirName ? join(dirName, baseName) : baseName;
+        return directoryName ? join(directoryName, baseName) : baseName;
     }
     return value
         .trim()

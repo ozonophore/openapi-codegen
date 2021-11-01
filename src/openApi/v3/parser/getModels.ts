@@ -1,7 +1,6 @@
-import { join, relative } from 'path';
-
 import type { Model } from '../../../client/interfaces/Model';
 import { Context } from '../../../core/Context';
+import { join, relative } from '../../../core/path';
 import { getRefFromSchema } from '../../../utils/getRefFromSchema';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
 import { unique } from '../../../utils/unique';

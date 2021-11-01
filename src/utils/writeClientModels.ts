@@ -2,6 +2,7 @@ import { mkdirSync } from 'fs';
 import { dirname, resolve } from 'path';
 
 import type { Model } from '../client/interfaces/Model';
+import { dirName } from '../core/path';
 import { HttpClient } from '../HttpClient';
 import { writeFile } from './fileSystem';
 import { format } from './format';
@@ -33,7 +34,7 @@ interface IWriteClientModels {
 export async function writeClientModels(options: IWriteClientModels): Promise<void> {
     const { models, templates, outputPath, httpClient, useUnionTypes } = options;
     for (const model of models) {
-        const dir = dirname(model.path);
+        const dir = dirName(model.path);
         if (dir) {
             const directory = resolve(outputPath, dir);
             // @ts-ignore
