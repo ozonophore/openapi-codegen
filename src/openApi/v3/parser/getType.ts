@@ -1,4 +1,5 @@
 import type { Type } from '../../../client/interfaces/Type';
+import { replaceString } from '../../../core/replaceString';
 import { encode } from '../../../utils/encode';
 import { getMappedType, hasMappedType } from './getMappedType';
 import { stripNamespace } from './stripNamespace';
@@ -11,23 +12,14 @@ function getTypeName(value: string): string {
     return encode(value.substring(index, value.length));
 }
 
-function getPath(value?: string): string {
-    if (!value) {
-        return '';
-    }
-    const index = value.lastIndexOf('/');
-    if (index === -1) {
-        return '';
-    }
-    return value.substring(0, index + 1);
-}
-
 /**
  * Parse any string value into a type object.
  * @param value String value like "integer" or "Link[Model]".
  * @param template Optional template class from parent (needed to process generics)
  */
 export function getType(value?: string, template?: string): Type {
+    const normalizedValue = replaceString(value);
+
     const result: Type = {
         type: 'any',
         base: 'any',
@@ -36,7 +28,7 @@ export function getType(value?: string, template?: string): Type {
         path: '',
     };
 
-    const valueClean = stripNamespace(value || '');
+    const valueClean = stripNamespace(normalizedValue || '');
     if (/\[.*\]$/g.test(valueClean)) {
         const matches = valueClean.match(/(.*?)\[(.*)\]$/);
         if (matches?.length) {

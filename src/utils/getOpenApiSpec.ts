@@ -1,14 +1,15 @@
 import RefParser from 'json-schema-ref-parser';
-import path, { isAbsolute } from 'path';
+import { isAbsolute } from 'path';
 
 import { CommonOpenApi } from '../core/CommonOpenApi';
 import { Context } from '../core/Context';
+import { dirName, join, resolve } from '../core/path';
 import { OpenApiReference } from '../openApi/interfaces/OpenApiReference';
 import { exists } from './fileSystem';
 
 function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: string): T {
     if (object.$ref && !isAbsolute(object.$ref) && !object.$ref.match(/^(http:\/\/|https:\/\/|#\/)/g)) {
-        object.$ref = path.join(parentRef, object.$ref);
+        object.$ref = join(parentRef, object.$ref);
     } else {
         for (const key of Object.keys(object)) {
             // @ts-ignore
@@ -28,7 +29,7 @@ function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: st
  * @param input
  */
 export async function getOpenApiSpec(input: string, context: Context): Promise<any> {
-    const absoluteInput = path.resolve(process.cwd(), input);
+    const absoluteInput = resolve(process.cwd(), input);
     if (!input) {
         throw new Error(`Could not find OpenApi spec: "${absoluteInput}"`);
     }
@@ -46,7 +47,7 @@ export async function getOpenApiSpec(input: string, context: Context): Promise<a
         const object = pathValue[1] as OpenApiReference;
         if (object.$ref) {
             let objectValue = context.get(object.$ref);
-            objectValue = replaceRef(objectValue as OpenApiReference, context, path.dirname(object.$ref));
+            objectValue = replaceRef(objectValue as OpenApiReference, context, dirName(object.$ref));
             newPaths = Object.assign(newPaths, { [key]: objectValue });
         } else {
             Object.assign(newPaths, { [key]: object });

@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Node in Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14'
+          always-auth: true
+      - name: Install yarn
+        run: npm install --global yarn
+      - name: Install packages
+        run: yarn install
+      - name: Build library
+        run: yarn run release
+      - name: Run unit tests
+        run: yarn run test:coverage
+      - name: Run e2e tests
+        run: yarn run test:e2e
+      - name: Submit to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV }}

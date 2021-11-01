@@ -1,6 +1,7 @@
 import type { Type } from '../../../client/interfaces/Type';
 import { getMappedType, hasMappedType } from './getMappedType';
 import { stripNamespace } from './stripNamespace';
+import { replaceString } from "../../../core/replaceString";
 
 function encode(value: string): string {
     return value.replace(/^[^a-zA-Z_$]+/g, '').replace(/[^\w$]+/g, '_');
@@ -31,6 +32,7 @@ function getPath(value?: string): string {
  * @param template Optional template class from parent (needed to process generics)
  */
 export function getType(value?: string, template?: string): Type {
+    const normalizedValue = replaceString(value);
     const result: Type = {
         type: 'any',
         base: 'any',
@@ -39,7 +41,7 @@ export function getType(value?: string, template?: string): Type {
         path: '',
     };
 
-    const valueClean = stripNamespace(value || '');
+    const valueClean = stripNamespace(normalizedValue || '');
     result.path = getPath(valueClean);
     if (/\[.*\]$/g.test(valueClean)) {
         const matches = valueClean.match(/(.*?)\[(.*)\]$/);
