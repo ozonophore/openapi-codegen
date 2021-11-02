@@ -1,10 +1,10 @@
 /* istanbul ignore file */
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import RefParser from 'json-schema-ref-parser';
-import { dirname } from 'path';
 
 import { getFileName } from '../utils/getFileName';
 import { isString } from '../utils/isString';
+import { dirName } from './path';
 
 interface $Root {
     path: string;
@@ -18,7 +18,7 @@ export class Context {
     constructor(input: string | Record<string, any>) {
         this._refs = {} as RefParser.$Refs;
         if (isString(input)) {
-            this._root = { path: dirname(input), fileName: getFileName(input) };
+            this._root = { path: dirName(input), fileName: getFileName(input) };
         } else {
             this._root = { path: '' };
         }

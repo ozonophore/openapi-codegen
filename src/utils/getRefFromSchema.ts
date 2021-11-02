@@ -1,7 +1,7 @@
 import equal from 'fast-deep-equal';
-import { dirname, join } from 'path';
 
 import { Context } from '../core/Context';
+import { dirName, join } from '../core/path';
 
 enum TypeRef {
     SCHEMA,
@@ -19,7 +19,7 @@ function includes(references: IRefWithtype[], value: string): boolean {
 
 function gatheringRefs(context: Context, object: Record<string, any>, references: IRefWithtype[] = [], root: string = '', isSchema: boolean = false): IRefWithtype[] {
     if (object.$ref) {
-        const newRef = object.$ref.match(/^(http:\/\/|https:\/\/)/g) ? object.$ref : object.$ref.match(/^(#\/)/g) ? join(root, object.$ref) : join(dirname(root), object.$ref);
+        const newRef = object.$ref.match(/^(http:\/\/|https:\/\/)/g) ? object.$ref : object.$ref.match(/^(#\/)/g) ? join(root, object.$ref) : join(dirName(root), object.$ref);
         if (includes(references, newRef)) {
             return references;
         } else if (isSchema) {
@@ -28,7 +28,7 @@ function gatheringRefs(context: Context, object: Record<string, any>, references
             references.push({ value: newRef, type: TypeRef.OTHERS });
         }
         const newObject = context.get(newRef);
-        const newRoot = object.$ref.match(/^(http:\/\/|https:\/\/)/g) ? '' : object.$ref.match(/^(#\/)/g) ? root : join(dirname(root), object.$ref);
+        const newRoot = object.$ref.match(/^(http:\/\/|https:\/\/)/g) ? '' : object.$ref.match(/^(#\/)/g) ? root : join(dirName(root), object.$ref);
         return gatheringRefs(context, newObject as Record<string, any>, references, newRoot, isSchema);
     } else if (object.schema) {
         Object.values(object).forEach((value, index) => {
