@@ -54,7 +54,7 @@ describe('index', () => {
         await OpenAPI.generate({
             input: './test/spec/v3withAlias.yaml',
             output: './test/generated/v3withAlias/',
-            httpClient: OpenAPI.HttpClient.FETCH,
+            httpClient: OpenAPI.HttpClient.AXIOS,
             useOptions: false,
             useUnionTypes: false,
             exportCore: true,
