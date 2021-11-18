@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2021-10-30
 
+### Fixed [0.1.29]
+
+### Fixed
+
+- Incorrect a file name if one has extension '.yml'
+
 ## [0.1.28] - 2021-11-02
 
 ### Fixed
