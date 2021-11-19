@@ -1,0 +1,17 @@
+function getResponseBody(response: AxiosResponse): any {
+  try {
+    const contentType = response.headers['content-type'];
+    if (contentType) {
+      const isJSON = typeof contentType === 'string' && contentType.toLowerCase().startsWith('application/json');
+
+      if (isJSON && isString(response.data)) {
+        return JSON.parse(response.data);
+      } else {
+        return response.data;
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  return null;
+}

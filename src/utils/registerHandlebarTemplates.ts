@@ -4,6 +4,14 @@ import { HttpClient } from '../HttpClient';
 import templateCoreApiError from '../templates/core/ApiError.hbs';
 import templateCoreApiRequestOptions from '../templates/core/ApiRequestOptions.hbs';
 import templateCoreApiResult from '../templates/core/ApiResult.hbs';
+// axios START
+import axiosGetHeaders from '../templates/core/axios/getHeaders.hbs';
+import axiosGetRequestBody from '../templates/core/axios/getRequestBody.hbs';
+import axiosGetResponseBody from '../templates/core/axios/getResponseBody.hbs';
+import axiosGetResponseHeader from '../templates/core/axios/getResponseHeader.hbs';
+import axiosRequest from '../templates/core/axios/request.hbs';
+import axiosSendRequest from '../templates/core/axios/sendRequest.hbs';
+// axios END
 import fetchGetHeaders from '../templates/core/fetch/getHeaders.hbs';
 import fetchGetRequestBody from '../templates/core/fetch/getRequestBody.hbs';
 import fetchGetResponseBody from '../templates/core/fetch/getResponseBody.hbs';
@@ -173,6 +181,14 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
     Handlebars.registerPartial('node/getResponseHeader', Handlebars.template(nodeGetResponseHeader));
     Handlebars.registerPartial('node/sendRequest', Handlebars.template(nodeSendRequest));
     Handlebars.registerPartial('node/request', Handlebars.template(nodeRequest));
+
+    // Specific files for the axios client implementation
+    Handlebars.registerPartial('axios/getHeaders', Handlebars.template(axiosGetHeaders));
+    Handlebars.registerPartial('axios/getRequestBody', Handlebars.template(axiosGetRequestBody));
+    Handlebars.registerPartial('axios/getResponseBody', Handlebars.template(axiosGetResponseBody));
+    Handlebars.registerPartial('axios/getResponseHeader', Handlebars.template(axiosGetResponseHeader));
+    Handlebars.registerPartial('axios/sendRequest', Handlebars.template(axiosSendRequest));
+    Handlebars.registerPartial('axios/request', Handlebars.template(axiosRequest));
 
     return templates;
 }
