@@ -1,0 +1,79 @@
+{{>header}}
+
+import FormData from 'form-data';
+import axios, { AxiosRequestConfig, AxiosResponse, AxiosRequestHeaders } from 'axios';
+import { types } from 'util';
+
+import { ApiError } from './ApiError';
+import type { ApiRequestOptions } from './ApiRequestOptions';
+import type { ApiResult } from './ApiResult';
+import { OpenAPI } from './OpenAPI';
+
+{{>functions/isDefined}}
+
+
+{{>functions/isString}}
+
+
+{{>functions/isStringWithValue}}
+
+
+{{>functions/isBinary}}
+
+
+{{>functions/isSuccess}}
+
+
+{{>functions/getQueryString}}
+
+
+{{>functions/getUrl}}
+
+
+{{>functions/getFormData}}
+
+
+{{>functions/resolve}}
+
+
+{{>axios/getRequestBody}}
+
+
+{{>axios/sendRequest}}
+
+
+{{>axios/getHeaders}}
+
+
+{{>axios/getResponseHeader}}
+
+
+{{>axios/getResponseBody}}
+
+
+{{>functions/catchErrors}}
+
+
+/**
+ * Request using axios client
+ * @param options The request options from the the service
+ * @returns ApiResult
+ * @throws ApiError
+ */
+ export async function request(options: ApiRequestOptions): Promise<ApiResult> {
+    const url = getUrl(options);
+    const response = await sendRequest(options, url);
+    const responseBody = getResponseBody(response);
+    const responseHeader = getResponseHeader(response, options.responseHeader);
+
+    const result: ApiResult = {
+        url,
+        ok: isSuccess(response.status),
+        status: response.status,
+        statusText: response.statusText,
+        body: responseHeader || responseBody,
+    };
+
+    catchErrors(options, result);
+    return result;
+}
