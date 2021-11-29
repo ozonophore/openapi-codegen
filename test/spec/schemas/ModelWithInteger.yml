@@ -1,0 +1,6 @@
+description: This is a model with one number property
+type: object
+properties:
+  prop:
+    description: This is a simple number property
+    type: integer

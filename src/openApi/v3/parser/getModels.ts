@@ -6,21 +6,23 @@ import { sortModelsByName } from '../../../utils/sortModelsByName';
 import { unique } from '../../../utils/unique';
 import type { OpenApi } from '../interfaces/OpenApi';
 import { getModel } from './getModel';
-import { getType } from './getType';
+import { getType, GetTypeName } from './getType';
 
-export function getModels(context: Context, openApi: OpenApi): Model[] {
+export function getModels(context: Context, openApi: OpenApi, getTypeNameByRef: GetTypeName): Model[] {
     let models: Model[] = [];
     const listOfModelsRef = getRefFromSchema(context, openApi);
     if (listOfModelsRef) {
         for (const modelRef of listOfModelsRef) {
             const definition: any = context.get(modelRef);
-            const definitionType = getType(modelRef);
+            const definitionType = getType(modelRef, '', getTypeNameByRef);
             const model = getModel({
                 openApi: openApi,
                 definition: definition,
                 isDefinition: true,
                 name: definitionType.base,
                 path: definitionType.path,
+                getTypeByRef: getTypeNameByRef,
+                parentRef: modelRef,
             });
             models.push(model);
         }

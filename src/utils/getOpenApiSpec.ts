@@ -28,7 +28,8 @@ function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: st
  * on parsing the file as JSON.
  * @param input
  */
-export async function getOpenApiSpec(input: string, context: Context): Promise<any> {
+export async function getOpenApiSpec(input: string): Promise<any> {
+    const context = Context.getInstance();
     const absoluteInput = resolve(process.cwd(), input);
     if (!input) {
         throw new Error(`Could not find OpenApi spec: "${absoluteInput}"`);

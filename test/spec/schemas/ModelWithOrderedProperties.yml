@@ -1,0 +1,9 @@
+description: This is a model with ordered properties
+type: object
+properties:
+  zebra:
+    type: string
+  apple:
+    type: string
+  hawaii:
+    type: string

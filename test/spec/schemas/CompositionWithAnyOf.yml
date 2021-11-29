@@ -1,0 +1,10 @@
+description: This is a model with one property with a 'any of' relationship
+type: object
+properties:
+  propA:
+    type: object
+    anyOf:
+      - "$ref": "schemas/ModelWithString.yml"
+      - "$ref": "schemas/ModelWithEnum.yml"
+      - "$ref": "schemas/ModelWithArray.yml"
+      - "$ref": "schemas/ModelWithDictionary.yml"

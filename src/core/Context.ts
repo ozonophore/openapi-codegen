@@ -11,17 +11,43 @@ interface $Root {
     fileName?: string;
 }
 
-export class Context {
-    private _refs: RefParser.$Refs;
-    private _root: $Root;
+export interface Prefix {
+    interface: string;
+    enum: string;
+    type: string;
+}
 
-    constructor(input: string | Record<string, any>) {
+/**
+ * A Context wich can share a data between methods
+ */
+export class Context {
+    static instance: Context;
+    private _refs: RefParser.$Refs | undefined;
+    private _root: $Root | undefined;
+    public prefix: Prefix = {
+        interface: 'I',
+        enum: 'E',
+        type: 'T',
+    };
+
+    public static getInstance(): Context {
+        if (!Context.instance) {
+            Context.instance = new Context();
+        }
+        return Context.instance;
+    }
+
+    public init(input: string | Record<string, any>, prefix?: Prefix) {
         this._refs = {} as RefParser.$Refs;
         if (isString(input)) {
             this._root = { path: dirName(input), fileName: getFileName(input) };
         } else {
             this._root = { path: '' };
         }
+        if (prefix) {
+            this.prefix = prefix;
+        }
+        return this;
     }
 
     public addRefs(refs: RefParser.$Refs): Context {
@@ -30,22 +56,37 @@ export class Context {
     }
 
     public values(...types: string[]): Record<string, any> {
+        if (!this._refs) {
+            throw new Error('Context must be initialized');
+        }
         return this._refs.values(...types);
     }
 
     public get($ref: string): JSONSchema4Type | JSONSchema6Type | JSONSchema7Type {
+        if (!this._refs) {
+            throw new Error('Context must be initialized');
+        }
         return this._refs.get($ref);
     }
 
     public paths(...types: string[]): string[] {
+        if (!this._refs) {
+            throw new Error('Context must be initialized');
+        }
         return this._refs.paths(...types);
     }
 
     public exists($ref: string): boolean {
+        if (!this._refs) {
+            throw new Error('Context must be initialized');
+        }
         return this._refs.exists($ref);
     }
 
     public fileName(): string {
+        if (!this._root) {
+            throw new Error('Context must be initialized');
+        }
         return this._root.fileName ? this._root.fileName : '';
     }
 }

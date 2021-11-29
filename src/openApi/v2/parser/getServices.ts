@@ -1,13 +1,14 @@
 import type { Service } from '../../../client/interfaces/Service';
+import { Context } from '../../../core/Context';
 import type { OpenApi } from '../interfaces/OpenApi';
 import { getOperation } from './getOperation';
 import { getOperationParameters } from './getOperationParameters';
-import { Context } from '../../../core/Context';
 
 /**
  * Get the OpenAPI services
  */
-export function getServices(context: Context, openApi: OpenApi): Service[] {
+export function getServices(openApi: OpenApi): Service[] {
+    const context = Context.getInstance();
     const services = new Map<string, Service>();
     for (const url in openApi.paths) {
         if (openApi.paths.hasOwnProperty(url)) {

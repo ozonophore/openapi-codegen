@@ -6,9 +6,9 @@ import { getComment } from './getComment';
 import { getContent } from './getContent';
 import { getMediaType } from './getMediaType';
 import { getModel } from './getModel';
-import { getType } from './getType';
+import { getType, GetTypeName } from './getType';
 
-export function getOperationRequestBody(openApi: OpenApi, parameter: OpenApiRequestBody): OperationParameter {
+export function getOperationRequestBody(openApi: OpenApi, parameter: OpenApiRequestBody, getTypeByRef: GetTypeName, parentRef: string): OperationParameter {
     const requestBody: OperationParameter = {
         in: 'body',
         prop: 'body',
@@ -38,7 +38,7 @@ export function getOperationRequestBody(openApi: OpenApi, parameter: OpenApiRequ
         if (schema) {
             requestBody.mediaType = getMediaType(openApi, parameter.content);
             if (schema?.$ref) {
-                const model = getType(schema.$ref);
+                const model = getType(schema.$ref, parentRef, getTypeByRef);
                 requestBody.export = 'reference';
                 requestBody.type = model.type;
                 requestBody.base = model.base;
@@ -47,7 +47,7 @@ export function getOperationRequestBody(openApi: OpenApi, parameter: OpenApiRequ
                 requestBody.imports.push(...model.imports);
                 return requestBody;
             } else {
-                const model = getModel({ openApi: openApi, definition: schema });
+                const model = getModel({ openApi: openApi, definition: schema, getTypeByRef: getTypeByRef, parentRef: parentRef });
                 requestBody.export = model.export;
                 requestBody.type = model.type;
                 requestBody.base = model.base;

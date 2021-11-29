@@ -1,0 +1,6 @@
+description: This is a string dictionary
+type: object
+additionalProperties:
+  type: object
+  additionalProperties:
+    type: string

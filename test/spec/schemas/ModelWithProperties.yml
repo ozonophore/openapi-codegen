@@ -1,0 +1,35 @@
+description: This is a model with one nested property
+type: object
+required:
+  - required
+  - requiredAndReadOnly
+  - requiredAndNullable
+properties:
+  required:
+    type: string
+  requiredAndReadOnly:
+    type: string
+    readOnly: true
+  requiredAndNullable:
+    type: string
+    nullable: true
+  string:
+    type: string
+  number:
+    type: number
+  boolean:
+    type: boolean
+  reference:
+    "$ref": "ModelWithString.yml"
+  property with space:
+    type: string
+  default:
+    type: string
+  try:
+    type: string
+  "@namespace.string":
+    type: string
+    readOnly: true
+  "@namespace.integer":
+    type: integer
+    readOnly: true

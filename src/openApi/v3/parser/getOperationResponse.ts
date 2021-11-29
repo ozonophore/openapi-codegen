@@ -5,9 +5,9 @@ import type { OpenApiResponse } from '../interfaces/OpenApiResponse';
 import { getComment } from './getComment';
 import { getContent } from './getContent';
 import { getModel } from './getModel';
-import { getType } from './getType';
+import { getType, GetTypeName } from './getType';
 
-export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse, responseCode: number): OperationResponse {
+export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse, responseCode: number, getTypeByRef: GetTypeName, parentRef: string): OperationResponse {
     const operationResponse: OperationResponse = {
         in: 'response',
         name: '',
@@ -34,7 +34,7 @@ export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse
         const schema = getContent(openApi, response.content);
         if (schema) {
             if (schema?.$ref) {
-                const model = getType(schema.$ref);
+                const model = getType(schema.$ref, parentRef, getTypeByRef);
                 operationResponse.export = 'reference';
                 operationResponse.type = model.type;
                 operationResponse.base = model.base;
@@ -43,7 +43,7 @@ export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse
                 operationResponse.imports.push(...model.imports);
                 return operationResponse;
             } else {
-                const model = getModel({ openApi: openApi, definition: schema });
+                const model = getModel({ openApi: openApi, definition: schema, getTypeByRef: getTypeByRef, parentRef: parentRef });
                 operationResponse.export = model.export;
                 operationResponse.type = model.type;
                 operationResponse.base = model.base;

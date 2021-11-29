@@ -1,0 +1,11 @@
+description: This is a model that extends another model
+type: object
+allOf:
+  - "$ref": "ModelWithString.yml"
+  - "$ref": "ModelThatExtends.yml"
+  - type: object
+    properties:
+      propExtendsC:
+        type: string
+      propExtendsD:
+        "$ref": "ModelWithString.yml"

@@ -1,0 +1,5 @@
+description: This is a model with duplicated properties
+type: object
+properties:
+  prop:
+    "$ref": "ModelWithString.yml"

@@ -17,6 +17,14 @@ describe('index', () => {
         });
     });
 
+    it('should generate from different files', async () => {
+        await OpenAPI.generate({
+            input: './test/spec/v3.yml',
+            output: './test/generated/v3_1/',
+            write: true,
+        });
+    });
+
     it('should generate path', async () => {
         await OpenAPI.generate({
             input: './test/spec/path.yaml',

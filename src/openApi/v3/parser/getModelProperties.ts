@@ -5,19 +5,19 @@ import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
 import { escapeName } from './escapeName';
 import { getComment } from './getComment';
 import type { getModel } from './getModel';
-import { getType } from './getType';
+import { getType, GetTypeName } from './getType';
 
 // Fix for circular dependency
 export type GetModelFn = typeof getModel;
 
-export function getModelProperties(openApi: OpenApi, definition: OpenApiSchema, getModel: GetModelFn): Model[] {
+export function getModelProperties(openApi: OpenApi, definition: OpenApiSchema, getModel: GetModelFn, getTypeByRef: GetTypeName, parentRef: string): Model[] {
     const models: Model[] = [];
     for (const propertyName in definition.properties) {
         if (definition.properties.hasOwnProperty(propertyName)) {
             const property = definition.properties[propertyName];
             const propertyRequired = definition.required?.includes(propertyName) || property.default !== undefined;
             if (property.$ref) {
-                const model = getType(property.$ref);
+                const model = getType(property.$ref, parentRef, getTypeByRef);
                 models.push({
                     name: escapeName(propertyName),
                     alias: '',
@@ -52,7 +52,7 @@ export function getModelProperties(openApi: OpenApi, definition: OpenApiSchema, 
                     properties: [],
                 });
             } else {
-                const model = getModel({ openApi: openApi, definition: property });
+                const model = getModel({ openApi: openApi, definition: property, getTypeByRef: getTypeByRef, parentRef: parentRef });
                 models.push({
                     name: escapeName(propertyName),
                     alias: '',

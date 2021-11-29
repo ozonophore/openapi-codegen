@@ -1,0 +1,10 @@
+description: This is a model with one property with a 'one of' relationship
+type: object
+properties:
+  propA:
+    type: object
+    oneOf:
+      - "$ref": "ModelWithString.yml"
+      - "$ref": "ModelWithEnum.yml"
+      - "$ref": "ModelWithArray.yml"
+      - "$ref": "ModelWithDictionary.yml"

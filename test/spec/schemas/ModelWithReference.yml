@@ -1,0 +1,5 @@
+description: This is a model with one property containing a reference
+type: object
+properties:
+  prop:
+    "$ref": "ModelWithProperties.yml"
