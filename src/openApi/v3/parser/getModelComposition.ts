@@ -1,14 +1,23 @@
 import type { ModelComposition } from '../../../client/interfaces/ModelComposition';
+import { unique } from '../../../utils/unique';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
 import type { getModel } from './getModel';
 import { getModelProperties } from './getModelProperties';
-import { unique } from "../../../utils/unique";
+import { GetTypeName } from './getType';
 
 // Fix for circular dependency
 export type GetModelFn = typeof getModel;
 
-export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema, definitions: OpenApiSchema[], type: 'one-of' | 'any-of' | 'all-of', getModel: GetModelFn): ModelComposition {
+export function getModelComposition(
+    openApi: OpenApi,
+    definition: OpenApiSchema,
+    definitions: OpenApiSchema[],
+    type: 'one-of' | 'any-of' | 'all-of',
+    getModel: GetModelFn,
+    getTypeByRef: GetTypeName,
+    parentRef: string
+): ModelComposition {
     const composition: ModelComposition = {
         type,
         imports: [],
@@ -16,7 +25,7 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
         properties: [],
     };
 
-    const models = definitions.map(definition => getModel({ openApi: openApi, definition: definition }));
+    const models = definitions.map(definition => getModel({ openApi: openApi, definition: definition, getTypeByRef: getTypeByRef, parentRef: parentRef }));
     models
         .filter(model => {
             const hasProperties = model.properties.length;
@@ -32,7 +41,7 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
         });
 
     if (definition.properties) {
-        const properties = getModelProperties(openApi, definition, getModel);
+        const properties = getModelProperties(openApi, definition, getModel, getTypeByRef, parentRef);
         properties.forEach(property => {
             composition.imports.push(...property.imports);
             composition.enums.push(...property.enums);

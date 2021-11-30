@@ -1,0 +1,24 @@
+description: This is a model with one nested property
+type: object
+required:
+  - first
+properties:
+  first:
+    type: object
+    required:
+      - second
+    readOnly: true
+    nullable: true
+    properties:
+      second:
+        type: object
+        required:
+          - third
+        readOnly: true
+        nullable: true
+        properties:
+          third:
+            type: string
+            required: true
+            readOnly: true
+            nullable: true

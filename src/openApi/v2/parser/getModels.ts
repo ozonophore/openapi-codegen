@@ -6,7 +6,8 @@ import type { OpenApi } from '../interfaces/OpenApi';
 import { getModel } from './getModel';
 import { getType } from './getType';
 
-export function getModels(context: Context, openApi: OpenApi): Model[] {
+export function getModels(openApi: OpenApi): Model[] {
+    const context = Context.getInstance();
     const models: Model[] = [];
     const listOfModelsRef = getRefFromSchema(context, openApi);
     if (listOfModelsRef) {

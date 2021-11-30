@@ -6,9 +6,9 @@ import { getComment } from './getComment';
 import { getModel } from './getModel';
 import { getModelDefault } from './getModelDefault';
 import { getOperationParameterName } from './getOperationParameterName';
-import { getType } from './getType';
+import { getType, GetTypeName } from './getType';
 
-export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
+export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParameter, getTypeByRef: GetTypeName): OperationParameter {
     const operationParameter: OperationParameter = {
         in: parameter.in,
         prop: parameter.name,
@@ -33,7 +33,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
     };
 
     if (parameter.$ref) {
-        const definitionRef = getType(parameter.$ref);
+        const definitionRef = getType(parameter.$ref, '', getTypeByRef);
         operationParameter.export = 'reference';
         operationParameter.type = definitionRef.type;
         operationParameter.base = definitionRef.base;
@@ -44,7 +44,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
 
     if (parameter.schema) {
         if (parameter.schema.$ref) {
-            const model = getType(parameter.schema.$ref);
+            const model = getType(parameter.schema.$ref, '', getTypeByRef);
             operationParameter.export = 'reference';
             operationParameter.type = model.type;
             operationParameter.base = model.base;
@@ -53,7 +53,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
             operationParameter.default = getModelDefault(parameter.schema);
             return operationParameter;
         } else {
-            const model = getModel({ openApi: openApi, definition: parameter.schema });
+            const model = getModel({ openApi: openApi, definition: parameter.schema, getTypeByRef: getTypeByRef, parentRef: '' });
             operationParameter.export = model.export;
             operationParameter.type = model.type;
             operationParameter.base = model.base;

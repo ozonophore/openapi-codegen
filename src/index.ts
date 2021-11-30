@@ -25,6 +25,9 @@ export type Options = {
     clean?: boolean;
     request?: string;
     write?: boolean;
+    interfacePrefix?: string;
+    enumPrefix?: string;
+    typePrefix?: string;
 };
 
 /**
@@ -57,9 +60,12 @@ export async function generate({
     clean = true,
     request,
     write = true,
+    interfacePrefix = 'I',
+    enumPrefix = 'E',
+    typePrefix = 'T',
 }: Options): Promise<void> {
-    const CONTEXT = new Context(input);
-    const openApi = isString(input) ? await getOpenApiSpec(input, CONTEXT) : input;
+    Context.getInstance().init(input, { interface: interfacePrefix, enum: enumPrefix, type: typePrefix });
+    const openApi = isString(input) ? await getOpenApiSpec(input) : input;
     const openApiVersion = getOpenApiVersion(openApi);
     const templates = registerHandlebarTemplates({
         httpClient,
@@ -69,7 +75,7 @@ export async function generate({
 
     switch (openApiVersion) {
         case OpenApiVersion.V2: {
-            const client = parseV2(CONTEXT, openApi);
+            const client = parseV2(openApi);
             const clientFinal = postProcessClient(client);
             if (!write) break;
             await writeClient({ client: clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request });
@@ -77,7 +83,7 @@ export async function generate({
         }
 
         case OpenApiVersion.V3: {
-            const client = parseV3(CONTEXT, openApi);
+            const client = parseV3(openApi);
             const clientFinal = postProcessClient(client);
             if (!write) break;
             await writeClient({ client: clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request });

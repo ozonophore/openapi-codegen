@@ -1,0 +1,14 @@
+description: This is a model with one property with a 'any of' relationship
+type: object
+properties:
+  propA:
+    nullable: true
+    type: object
+    anyOf:
+      - type: object
+        properties:
+          boolean:
+            type: boolean
+      - "$ref": "ModelWithEnum.yml"
+      - "$ref": "ModelWithArray.yml"
+      - "$ref": "ModelWithDictionary.yml"

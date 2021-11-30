@@ -13,11 +13,11 @@ import { getServiceVersion } from './parser/getServiceVersion';
  * @param context The context of application
  * @param openApi The OpenAPI spec  that we have loaded from disk.
  */
-export function parse(context: Context, openApi: OpenApi): Client {
+export function parse(openApi: OpenApi): Client {
     const version = getServiceVersion(openApi.info.version);
     const server = getServer(openApi);
-    const models = getModels(context, openApi);
-    const services = getServices(context, openApi);
+    const models = getModels(openApi);
+    const services = getServices(openApi);
 
     return { version, server, models, services };
 }

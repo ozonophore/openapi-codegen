@@ -1,0 +1,14 @@
+description: This is a model with one property with a 'one of' relationship where the options are not $ref
+type: object
+properties:
+  propA:
+    type: object
+    oneOf:
+      - description: Anonymous object type
+        type: object
+        properties:
+          propA: string
+      - description: Anonymous string type
+        type: string
+      - description: Anonymous integer type
+        type: integer

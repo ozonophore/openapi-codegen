@@ -1,0 +1,27 @@
+description: This is a model with nested enums
+type: object
+properties:
+  dictionaryWithEnum:
+    type: object
+    additionalProperties:
+      enum:
+        - Success
+        - Warning
+        - Error
+  dictionaryWithEnumFromDescription:
+    type: object
+    additionalProperties:
+      type: integer
+      description: Success=1,Warning=2,Error=3
+  arrayWithEnum:
+    type: array
+    items:
+      enum:
+        - Success
+        - Warning
+        - Error
+  arrayWithDescription:
+    type: array
+    items:
+      type: integer
+      description: Success=1,Warning=2,Error=3

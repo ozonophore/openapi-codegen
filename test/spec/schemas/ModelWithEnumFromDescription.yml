@@ -1,0 +1,6 @@
+description: This is a model with one enum
+type: object
+properties:
+  test:
+    type: integer
+    description: Success=1,Warning=2,Error=3

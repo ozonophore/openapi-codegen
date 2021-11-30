@@ -1,0 +1,9 @@
+description: This is a complex dictionary
+type: object
+additionalProperties:
+  type: object
+  properties:
+    foo:
+      type: string
+    bar:
+      type: string

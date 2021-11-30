@@ -1,0 +1,6 @@
+description: This is a complex dictionary
+type: object
+additionalProperties:
+  type: array
+  items:
+    "$ref": "ModelWithString.yml"

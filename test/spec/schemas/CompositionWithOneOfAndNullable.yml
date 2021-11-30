@@ -1,0 +1,14 @@
+description: This is a model with one property with a 'one of' relationship
+type: object
+properties:
+  propA:
+    nullable: true
+    type: object
+    oneOf:
+      - type: object
+        properties:
+          boolean:
+            type: boolean
+      - "$ref": "schemas/ModelWithEnum.yml"
+      - "$ref": "schemas/ModelWithArray.yml"
+      - "$ref": "schemas/ModelWithDictionary.yml"

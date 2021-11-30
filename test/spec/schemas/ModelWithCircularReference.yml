@@ -1,0 +1,5 @@
+description: This is a model with one property containing a circular reference
+type: object
+properties:
+  prop:
+    "$ref": "ModelWithCircularReference.yml"

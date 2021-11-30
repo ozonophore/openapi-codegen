@@ -1,4 +1,5 @@
 import { Import } from '../../../client/interfaces/Import';
+import { Model } from '../../../client/interfaces/Model';
 import type { Service } from '../../../client/interfaces/Service';
 import { Context } from '../../../core/Context';
 import { getClassName } from '../../../utils/getClassName';
@@ -8,7 +9,7 @@ import { OpenApiOperation } from '../interfaces/OpenApiOperation';
 import { getOperation } from './getOperation';
 import { getOperationParameters } from './getOperationParameters';
 import { getServiceClassName } from './getServiceClassName';
-import { Model } from '../../../client/interfaces/Model';
+import { GetTypeName } from './getType';
 
 function getServiceName(op: OpenApiOperation, fileName: string): string {
     return getServiceClassName(op.tags?.[0] || `${getClassName(fileName)}Service`);
@@ -26,13 +27,13 @@ function fillModelsByAlias(items: Model[], value: Import) {
 /**
  * Get the OpenAPI services
  */
-export function getServices(context: Context, openApi: OpenApi): Service[] {
+export function getServices(context: Context, openApi: OpenApi, getTypeNameByRef: GetTypeName): Service[] {
     const services = new Map<string, Service>();
     for (const url in openApi.paths) {
         if (openApi.paths.hasOwnProperty(url)) {
             // Grab path and parse any global path parameters
             const path = openApi.paths[url];
-            const pathParams = getOperationParameters(context, openApi, path.parameters || []);
+            const pathParams = getOperationParameters(context, openApi, path.parameters || [], getTypeNameByRef);
 
             // Parse all the methods for this path
             for (const method in path) {
@@ -57,7 +58,7 @@ export function getServices(context: Context, openApi: OpenApi): Service[] {
                                     operations: [],
                                     imports: [],
                                 } as Service);
-                            const operation = getOperation(context, openApi, url, method, op, pathParams, serviceName);
+                            const operation = getOperation(context, openApi, url, method, op, pathParams, serviceName, getTypeNameByRef);
 
                             // Push the operation in the service
                             service.operations.push(operation);

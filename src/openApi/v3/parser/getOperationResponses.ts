@@ -5,8 +5,9 @@ import type { OpenApiResponse } from '../interfaces/OpenApiResponse';
 import type { OpenApiResponses } from '../interfaces/OpenApiResponses';
 import { getOperationResponse } from './getOperationResponse';
 import { getOperationResponseCode } from './getOperationResponseCode';
+import { GetTypeName } from './getType';
 
-export function getOperationResponses(context: Context, openApi: OpenApi, responses: OpenApiResponses): OperationResponse[] {
+export function getOperationResponses(context: Context, openApi: OpenApi, responses: OpenApiResponses, getTypeByRef: GetTypeName): OperationResponse[] {
     const operationResponses: OperationResponse[] = [];
 
     // Iterate over each response code and get the
@@ -18,7 +19,7 @@ export function getOperationResponses(context: Context, openApi: OpenApi, respon
             const responseCode = getOperationResponseCode(code);
 
             if (responseCode) {
-                const operationResponse = getOperationResponse(openApi, response, responseCode);
+                const operationResponse = getOperationResponse(openApi, response, responseCode, getTypeByRef, '');
                 operationResponses.push(operationResponse);
             }
         }
