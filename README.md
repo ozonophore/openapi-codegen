@@ -2,7 +2,6 @@
 
 [![NPM][npm-image]][npm-url]
 [![License][license-image]][license-url]
-[![Build Status][travis-image]][travis-url]
 [![Downloads][downloads-image]][downloads-url]
 [![Downloads][coverage-image]][coverage-url]
 [![TypeScript][typescript-image]][typescript-url]
@@ -28,6 +27,7 @@
 - Supports generation through CLI, Node.js and NPX
 - Supports tsc and @babel/plugin-transform-typescript
 - Supports axios
+- Supports customization names of models
 - Supports external references using [`json-schema-ref-parser`](https://github.com/APIDevTools/json-schema-ref-parser/)
 
 ## Install
@@ -61,6 +61,9 @@ $ openapi --help
     --exportModels <value>    Write models to disk (default: true)
     --exportSchemas <value>   Write schemas to disk (default: false)
     --clean <value>           Clean a directory before generation (default: true)
+    --interfacePrefix <value> Prefix for interface model(default: "I")
+    --enumPrefix <value>      Prefix for enum model(default: "E")
+    --typePrefix <value>      Prefix for type model(default: "T")
 
   Examples
     $ openapi --input ./spec.json

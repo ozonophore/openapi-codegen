@@ -46,6 +46,9 @@ export type Options = {
  * @param clean Clean a directory before generation
  * @param request: Path to custom request file
  * @param write Write the files to disk (true or false)
+ * @param interfacePrefix Prefix for interface model(I)
+ * @param enumPrefix Prefix for enum model(E)
+ * @param typePrefix Prefix for type model(T)
  */
 export async function generate({
     input,
