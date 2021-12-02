@@ -1,80 +1,13 @@
+import RefParser from 'json-schema-ref-parser';
+
+import { Context as ContextApp } from '../../../core/Context';
+import { Parser } from '../Parser';
 import { getRefFromSchema } from './getRefFromSchema';
 
 describe('getRefFromSchema', () => {
-    it('should obtain refs from all schemas', () => {
-        const Context = jest.fn();
+    it('should obtain refs from all schemas', async () => {
 
-        Context.mockImplementation(() => {
-            return {
-                get: ($ref: string): any => {
-                    if ($ref === '#/components/requestBodies/SimpleRequestBodyWithModelWithCircularReference') {
-                        return {
-                            SimpleRequestBody: {
-                                content: {
-                                    'application/json': {
-                                        schema: {
-                                            $ref: '#/components/schemas/ModelWithCircularReference',
-                                        },
-                                    },
-                                },
-                            },
-                        };
-                    } else if ($ref === '#/components/requestBodies/SimpleRequestBody') {
-                        return {
-                            SimpleRequestBody: {
-                                content: {
-                                    'application/json': {
-                                        schema: {
-                                            $ref: '#/components/schemas/SimpleInteger',
-                                        },
-                                    },
-                                },
-                            },
-                        };
-                    } else if ($ref === '#/components/schemas/SimpleInteger') {
-                        return {
-                            description: 'This is a simple number',
-                            type: 'integer',
-                        };
-                    } else if ($ref === '#/components/schemas/ModelWithString') {
-                        return {
-                            description: 'This is a simple string',
-                            type: 'string',
-                        };
-                    } else if ($ref === '#/components/schemas/SimpleRef') {
-                        return {
-                            $ref: '#/components/schemas/ModelWithString',
-                        };
-                    } else if ($ref === '#/components/schemas/ModelWithCircularReference') {
-                        return {
-                            type: 'object',
-                            properties: {
-                                prop: {
-                                    $ref: '#/components/schemas/ModelWithCircularReference',
-                                },
-                                simpleProp: {
-                                    $ref: '#/components/schemas/SimpleRef',
-                                },
-                            },
-                        };
-                    }
-                    if ($ref === '#/components/schemas/ArrayWithArray') {
-                        return {
-                            type: 'array',
-                            items: {
-                                type: 'array',
-                                items: {
-                                    $ref: '#/components/schemas/ModelWithString',
-                                },
-                            },
-                        };
-                    }
-                },
-            };
-        });
-
-        const context = new Context();
-        const refs = getRefFromSchema(context, {
+        const object = {
             openapi: '3.0.0',
             info: {
                 version: 'v1.0',
@@ -82,9 +15,6 @@ describe('getRefFromSchema', () => {
             paths: {
                 '/api/first': {
                     $ref: '#/components/requestBodies/SimpleRequestBody',
-                },
-                '/api/second': {
-                    $ref: '#/components/requestBodies/SimpleRequestBodyWithModelWithCircularReference',
                 },
                 'api/third': {
                     get: {
@@ -141,26 +71,44 @@ describe('getRefFromSchema', () => {
                                     },
                                 },
                             },
-                            '400': {
-                                description: '400 server error',
-                            },
-                            '500': {
-                                description: '500 server error',
-                            },
                         },
                     },
                 },
             },
-        });
+            components: {
+                requestBodies: {
+                    SimpleRequestBody: {
+                        type: 'string',
+                    },
+                    SimpleRequestBodyWithModelWithCircularReference: {
+                        type: 'string',
+                    },
+                },
+                schemas: {
+                    ModelWithString: {
+                        type: 'string',
+                    },
+                    SimpleInteger: {
+                        type: 'integer',
+                    },
+                    SimpleRef: {
+                        type: 'string',
+                    },
+                    ArrayWithArray: {
+                        type: 'string',
+                    },
+                    ModelWithCircularReference: {
+                        $ref: '#/components/schemas/ModelWithCircularReference',
+                    },
+                },
+            },
+        };
 
-        expect(refs).toEqual(
-            expect.arrayContaining([
-                '#/components/schemas/SimpleInteger',
-                '#/components/schemas/ModelWithString',
-                '#/components/schemas/SimpleRef',
-                '#/components/schemas/ArrayWithArray',
-                '#/components/schemas/ModelWithCircularReference',
-            ])
-        );
+        const contextApp = new ContextApp(object);
+        const parser = new RefParser();
+        contextApp.addRefs(await parser.resolve(object));
+        const refs = new Parser(contextApp).getRefFromSchema(object);
+
+        expect(refs).toEqual(expect.arrayContaining(['#/components/schemas/ModelWithString', '#/components/schemas/ArrayWithArray']));
     });
 });

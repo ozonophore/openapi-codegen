@@ -2,6 +2,7 @@ import type { Type } from '../../../client/interfaces/Type';
 import { replaceString } from '../../../core/replaceString';
 import { encode } from '../../../utils/encode';
 import { getAbsolutePath } from '../../../utils/getAbsolutePath';
+import { Parser } from '../Parser';
 import { getMappedType, hasMappedType } from './getMappedType';
 import { stripNamespace } from './stripNamespace';
 
@@ -24,9 +25,8 @@ export type GetTypeName = (type: string, ref?: string) => string;
  * Parse any string value into a type object.
  * @param value String value like "integer" or "Link[Model]".
  * @param parentRef Reference to a parent model
- * @param getTypeNameByRef function that returns model by ref
  */
-export function getType(value: string, parentRef: string, getTypeNameByRef: GetTypeName): Type {
+export function getType(this: Parser, value: string, parentRef: string): Type {
     const normalizedValue = replaceString(value);
 
     const result: Type = {
@@ -46,7 +46,7 @@ export function getType(value: string, parentRef: string, getTypeNameByRef: GetT
             result.base = mapped;
         }
     } else if (valueClean) {
-        const type = getTypeNameByRef ? getTypeNameByRef(getTypeName(valueClean), getAbsolutePath(value, parentRef)) : getTypeName(valueClean);
+        const type = this.getTypeNameByRef(getTypeName(valueClean), getAbsolutePath(value, parentRef));
         result.path = valueClean;
         result.type = type;
         result.base = type;

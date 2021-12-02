@@ -2,12 +2,13 @@ import type { OperationResponse } from '../../../client/interfaces/OperationResp
 import { getPattern } from '../../../utils/getPattern';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiResponse } from '../interfaces/OpenApiResponse';
+import { Parser } from '../Parser';
 import { getComment } from './getComment';
 import { getContent } from './getContent';
 import { getModel } from './getModel';
-import { getType, GetTypeName } from './getType';
+import { getType } from './getType';
 
-export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse, responseCode: number, getTypeByRef: GetTypeName, parentRef: string): OperationResponse {
+export function getOperationResponse(this: Parser, openApi: OpenApi, response: OpenApiResponse, responseCode: number, parentRef: string): OperationResponse {
     const operationResponse: OperationResponse = {
         in: 'response',
         name: '',
@@ -34,7 +35,7 @@ export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse
         const schema = getContent(openApi, response.content);
         if (schema) {
             if (schema?.$ref) {
-                const model = getType(schema.$ref, parentRef, getTypeByRef);
+                const model = this.getType(schema.$ref, parentRef);
                 operationResponse.export = 'reference';
                 operationResponse.type = model.type;
                 operationResponse.base = model.base;
@@ -43,7 +44,7 @@ export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse
                 operationResponse.imports.push(...model.imports);
                 return operationResponse;
             } else {
-                const model = getModel({ openApi: openApi, definition: schema, getTypeByRef: getTypeByRef, parentRef: parentRef });
+                const model = this.getModel({ openApi: openApi, definition: schema, parentRef: parentRef });
                 operationResponse.export = model.export;
                 operationResponse.type = model.type;
                 operationResponse.base = model.base;

@@ -1,4 +1,3 @@
-import { GetTypeName } from '../parser/getType';
 import { OpenApi } from './OpenApi';
 import { OpenApiSchema } from './OpenApiSchema';
 
@@ -8,6 +7,5 @@ export interface ModelConfig {
     isDefinition?: boolean;
     name?: string;
     path?: string;
-    getTypeByRef: GetTypeName;
     parentRef: string;
 }

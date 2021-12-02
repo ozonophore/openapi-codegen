@@ -21,7 +21,6 @@ export interface Prefix {
  * A Context wich can share a data between methods
  */
 export class Context {
-    static instance: Context;
     private _refs: RefParser.$Refs | undefined;
     private _root: $Root | undefined;
     public prefix: Prefix = {
@@ -30,14 +29,7 @@ export class Context {
         type: 'T',
     };
 
-    public static getInstance(): Context {
-        if (!Context.instance) {
-            Context.instance = new Context();
-        }
-        return Context.instance;
-    }
-
-    public init(input: string | Record<string, any>, prefix?: Prefix) {
+    constructor(input: string | Record<string, any>, prefix?: Prefix) {
         this._refs = {} as RefParser.$Refs;
         if (isString(input)) {
             this._root = { path: dirName(input), fileName: getFileName(input) };

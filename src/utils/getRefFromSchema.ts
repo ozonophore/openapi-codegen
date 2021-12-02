@@ -2,6 +2,7 @@ import equal from 'fast-deep-equal';
 
 import { Context } from '../core/Context';
 import { dirName, join } from '../core/path';
+import { Parser } from '../openApi/v2/Parser';
 
 enum TypeRef {
     SCHEMA,
