@@ -1,11 +1,11 @@
 import type { OperationParameters } from '../../../client/interfaces/OperationParameters';
-import { Context } from '../../../core/Context';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiParameter } from '../interfaces/OpenApiParameter';
+import { Parser } from '../Parser';
 import { getOperationParameter } from './getOperationParameter';
 import { sortByRequired } from './sortByRequired';
 
-export function getOperationParameters(context: Context, openApi: OpenApi, parameters: OpenApiParameter[]): OperationParameters {
+export function getOperationParameters(this: Parser, openApi: OpenApi, parameters: OpenApiParameter[]): OperationParameters {
     const operationParameters: OperationParameters = {
         imports: [],
         parameters: [],
@@ -19,7 +19,7 @@ export function getOperationParameters(context: Context, openApi: OpenApi, param
 
     // Iterate over the parameters
     parameters.forEach(parameterOrReference => {
-        const parameterDef = (parameterOrReference.$ref ? context.get(parameterOrReference.$ref) : parameterOrReference) as OpenApiParameter;
+        const parameterDef = (parameterOrReference.$ref ? this.context.get(parameterOrReference.$ref) : parameterOrReference) as OpenApiParameter;
         const parameter = getOperationParameter(openApi, parameterDef);
 
         // We ignore the "api-version" param, since we do not want to add this

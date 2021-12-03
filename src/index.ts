@@ -1,8 +1,8 @@
 /* istanbul ignore file */
 import { Context } from './core/Context';
 import { HttpClient } from './HttpClient';
-import { parse as parseV2 } from './openApi/v2';
-import { parse as parseV3 } from './openApi/v3';
+import { Parser as ParserV2 } from './openApi/v2/Parser';
+import { Parser as ParserV3 } from './openApi/v3/Parser';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { isString } from './utils/isString';
@@ -67,8 +67,8 @@ export async function generate({
     enumPrefix = 'E',
     typePrefix = 'T',
 }: Options): Promise<void> {
-    Context.getInstance().init(input, { interface: interfacePrefix, enum: enumPrefix, type: typePrefix });
-    const openApi = isString(input) ? await getOpenApiSpec(input) : input;
+    const context = new Context(input, { interface: interfacePrefix, enum: enumPrefix, type: typePrefix });
+    const openApi = isString(input) ? await getOpenApiSpec(context, input) : input;
     const openApiVersion = getOpenApiVersion(openApi);
     const templates = registerHandlebarTemplates({
         httpClient,
@@ -78,7 +78,7 @@ export async function generate({
 
     switch (openApiVersion) {
         case OpenApiVersion.V2: {
-            const client = parseV2(openApi);
+            const client = new ParserV2(context).parse(openApi);
             const clientFinal = postProcessClient(client);
             if (!write) break;
             await writeClient({ client: clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request });
@@ -86,7 +86,7 @@ export async function generate({
         }
 
         case OpenApiVersion.V3: {
-            const client = parseV3(openApi);
+            const client = new ParserV3(context).parse(openApi);
             const clientFinal = postProcessClient(client);
             if (!write) break;
             await writeClient({ client: clientFinal, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request });

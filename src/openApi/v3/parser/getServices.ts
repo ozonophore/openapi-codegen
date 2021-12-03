@@ -1,15 +1,12 @@
 import { Import } from '../../../client/interfaces/Import';
 import { Model } from '../../../client/interfaces/Model';
 import type { Service } from '../../../client/interfaces/Service';
-import { Context } from '../../../core/Context';
 import { getClassName } from '../../../utils/getClassName';
 import { unique } from '../../../utils/unique';
 import type { OpenApi } from '../interfaces/OpenApi';
 import { OpenApiOperation } from '../interfaces/OpenApiOperation';
-import { getOperation } from './getOperation';
-import { getOperationParameters } from './getOperationParameters';
+import { Parser } from '../Parser';
 import { getServiceClassName } from './getServiceClassName';
-import { GetTypeName } from './getType';
 
 function getServiceName(op: OpenApiOperation, fileName: string): string {
     return getServiceClassName(op.tags?.[0] || `${getClassName(fileName)}Service`);
@@ -27,13 +24,13 @@ function fillModelsByAlias(items: Model[], value: Import) {
 /**
  * Get the OpenAPI services
  */
-export function getServices(context: Context, openApi: OpenApi, getTypeNameByRef: GetTypeName): Service[] {
+export function getServices(this: Parser, openApi: OpenApi): Service[] {
     const services = new Map<string, Service>();
     for (const url in openApi.paths) {
         if (openApi.paths.hasOwnProperty(url)) {
             // Grab path and parse any global path parameters
             const path = openApi.paths[url];
-            const pathParams = getOperationParameters(context, openApi, path.parameters || [], getTypeNameByRef);
+            const pathParams = this.getOperationParameters(openApi, path.parameters || []);
 
             // Parse all the methods for this path
             for (const method in path) {
@@ -48,7 +45,7 @@ export function getServices(context: Context, openApi: OpenApi, getTypeNameByRef
                         case 'patch':
                             // Each method contains an OpenAPI operation, we parse the operation
                             const op = path[method]!;
-                            const serviceName = getServiceName(op, context.fileName());
+                            const serviceName = getServiceName(op, this.context.fileName());
                             // If we have already declared a service, then we should fetch that and
                             // append the new method to it. Otherwise we should create a new service object.
                             const service =
@@ -58,7 +55,7 @@ export function getServices(context: Context, openApi: OpenApi, getTypeNameByRef
                                     operations: [],
                                     imports: [],
                                 } as Service);
-                            const operation = getOperation(context, openApi, url, method, op, pathParams, serviceName, getTypeNameByRef);
+                            const operation = this.getOperation(openApi, url, method, op, pathParams, serviceName);
 
                             // Push the operation in the service
                             service.operations.push(operation);

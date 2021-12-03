@@ -5,19 +5,19 @@ import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
 import { escapeName } from './escapeName';
 import { getComment } from './getComment';
 import type { getModel } from './getModel';
-import { getType, GetTypeName } from './getType';
+import { Parser } from '../Parser';
 
 // Fix for circular dependency
 export type GetModelFn = typeof getModel;
 
-export function getModelProperties(openApi: OpenApi, definition: OpenApiSchema, getModel: GetModelFn, getTypeByRef: GetTypeName, parentRef: string): Model[] {
+export function getModelProperties(this: Parser, openApi: OpenApi, definition: OpenApiSchema, parentRef: string): Model[] {
     const models: Model[] = [];
     for (const propertyName in definition.properties) {
         if (definition.properties.hasOwnProperty(propertyName)) {
             const property = definition.properties[propertyName];
             const propertyRequired = definition.required?.includes(propertyName) || property.default !== undefined;
             if (property.$ref) {
-                const model = getType(property.$ref, parentRef, getTypeByRef);
+                const model = this.getType(property.$ref, parentRef);
                 models.push({
                     name: escapeName(propertyName),
                     alias: '',
@@ -49,10 +49,10 @@ export function getModelProperties(openApi: OpenApi, definition: OpenApiSchema, 
                     imports: model.imports,
                     enum: [],
                     enums: [],
-                    properties: [],
+                    properties: []
                 });
             } else {
-                const model = getModel({ openApi: openApi, definition: property, getTypeByRef: getTypeByRef, parentRef: parentRef });
+                const model = this.getModel({ openApi: openApi, definition: property, parentRef: parentRef });
                 models.push({
                     name: escapeName(propertyName),
                     alias: '',
@@ -84,7 +84,7 @@ export function getModelProperties(openApi: OpenApi, definition: OpenApiSchema, 
                     imports: model.imports,
                     enum: model.enum,
                     enums: model.enums,
-                    properties: model.properties,
+                    properties: model.properties
                 });
             }
         }

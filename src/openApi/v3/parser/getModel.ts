@@ -1,17 +1,15 @@
 import type { Model } from '../../../client/interfaces/Model';
 import { getPattern } from '../../../utils/getPattern';
 import { ModelConfig } from '../interfaces/ModelConfig';
+import { Parser } from '../Parser';
 import { extendEnum } from './extendEnum';
 import { getComment } from './getComment';
 import { getEnum } from './getEnum';
 import { getEnumFromDescription } from './getEnumFromDescription';
-import { getModelComposition } from './getModelComposition';
 import { getModelDefault } from './getModelDefault';
-import { getModelProperties } from './getModelProperties';
-import { getType } from './getType';
 
-export function getModel(config: ModelConfig): Model {
-    const { openApi, definition, isDefinition = false, name = '', path = '', getTypeByRef, parentRef } = config;
+export function getModel(this: Parser, config: ModelConfig): Model {
+    const { openApi, definition, isDefinition = false, name = '', path = '', parentRef } = config;
     const model: Model = {
         name,
         alias: '',
@@ -47,7 +45,7 @@ export function getModel(config: ModelConfig): Model {
     };
 
     if (definition.$ref) {
-        const definitionRef = getType(definition.$ref, parentRef, getTypeByRef);
+        const definitionRef = this.getType(definition.$ref, parentRef);
         model.export = 'reference';
         model.type = definitionRef.type;
         model.base = definitionRef.base;
@@ -83,7 +81,7 @@ export function getModel(config: ModelConfig): Model {
 
     if (definition.type === 'array' && definition.items) {
         if (definition.items.$ref) {
-            const arrayItems = getType(definition.items.$ref, parentRef, getTypeByRef);
+            const arrayItems = this.getType(definition.items.$ref, parentRef);
             model.export = 'array';
             model.type = arrayItems.type;
             model.base = arrayItems.base;
@@ -91,7 +89,7 @@ export function getModel(config: ModelConfig): Model {
             model.default = getModelDefault(definition, model);
             return model;
         } else {
-            const arrayItems = getModel({ openApi: openApi, definition: definition.items, getTypeByRef: getTypeByRef, parentRef: parentRef });
+            const arrayItems = this.getModel({ openApi: openApi, definition: definition.items, parentRef: parentRef });
             model.export = 'array';
             model.type = arrayItems.type;
             model.base = arrayItems.base;
@@ -104,7 +102,7 @@ export function getModel(config: ModelConfig): Model {
 
     if (definition.type === 'object' && typeof definition.additionalProperties === 'object') {
         if (definition.additionalProperties.$ref) {
-            const additionalProperties = getType(definition.additionalProperties.$ref, parentRef, getTypeByRef);
+            const additionalProperties = this.getType(definition.additionalProperties.$ref, parentRef);
             model.export = 'dictionary';
             model.type = additionalProperties.type;
             model.base = additionalProperties.base;
@@ -112,7 +110,11 @@ export function getModel(config: ModelConfig): Model {
             model.default = getModelDefault(definition, model);
             return model;
         } else {
-            const additionalProperties = getModel({ openApi: openApi, definition: definition.additionalProperties, getTypeByRef: getTypeByRef, parentRef: parentRef });
+            const additionalProperties = this.getModel({
+                openApi: openApi,
+                definition: definition.additionalProperties,
+                parentRef: parentRef,
+            });
             model.export = 'dictionary';
             model.type = additionalProperties.type;
             model.base = additionalProperties.base;
@@ -124,7 +126,7 @@ export function getModel(config: ModelConfig): Model {
     }
 
     if (definition.oneOf?.length) {
-        const composition = getModelComposition(openApi, definition, definition.oneOf, 'one-of', getModel, getTypeByRef, parentRef);
+        const composition = this.getModelComposition(openApi, definition, definition.oneOf, 'one-of', parentRef);
         model.export = composition.type;
         model.imports.push(...composition.imports);
         model.properties.push(...composition.properties);
@@ -133,7 +135,7 @@ export function getModel(config: ModelConfig): Model {
     }
 
     if (definition.anyOf?.length) {
-        const composition = getModelComposition(openApi, definition, definition.anyOf, 'any-of', getModel, getTypeByRef, parentRef);
+        const composition = this.getModelComposition(openApi, definition, definition.anyOf, 'any-of', parentRef);
         model.export = composition.type;
         model.imports.push(...composition.imports);
         model.properties.push(...composition.properties);
@@ -142,7 +144,7 @@ export function getModel(config: ModelConfig): Model {
     }
 
     if (definition.allOf?.length) {
-        const composition = getModelComposition(openApi, definition, definition.allOf, 'all-of', getModel, getTypeByRef, parentRef);
+        const composition = this.getModelComposition(openApi, definition, definition.allOf, 'all-of', parentRef);
         model.export = composition.type;
         model.imports.push(...composition.imports);
         model.properties.push(...composition.properties);
@@ -157,7 +159,7 @@ export function getModel(config: ModelConfig): Model {
         model.default = getModelDefault(definition, model);
 
         if (definition.properties) {
-            const properties = getModelProperties(openApi, definition, getModel, getTypeByRef, parentRef);
+            const properties = this.getModelProperties(openApi, definition, parentRef);
             properties.forEach(property => {
                 model.imports.push(...property.imports);
                 model.enums.push(...property.enums);
@@ -172,7 +174,7 @@ export function getModel(config: ModelConfig): Model {
 
     // If the schema has a type than it can be a basic or generic type.
     if (definition.type) {
-        const definitionType = getType(definition.type, parentRef, getTypeByRef);
+        const definitionType = this.getType(definition.type, parentRef);
         model.export = 'generic';
         model.type = definitionType.type;
         model.base = definitionType.base;

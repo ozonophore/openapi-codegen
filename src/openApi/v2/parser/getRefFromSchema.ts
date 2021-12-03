@@ -2,6 +2,7 @@ import equal from 'fast-deep-equal';
 
 import { Context } from '../../../core/Context';
 import { dirName, join } from '../../../core/path';
+import { Parser } from '../Parser';
 
 enum TypeRef {
     SCHEMA,
@@ -31,7 +32,7 @@ function gatheringRefs(context: Context, object: Record<string, any>, references
         const newRoot = object.$ref.match(/^(http:\/\/|https:\/\/)/g) ? '' : object.$ref.match(/^(#\/)/g) ? root : join(dirName(root), object.$ref);
         return gatheringRefs(context, newObject as Record<string, any>, references, newRoot, isSchema);
     } else if (object.schema) {
-        Object.values(object).forEach((value, index) => {
+        Object.values(object.schema).forEach((value, index) => {
             if (value instanceof Object) {
                 gatheringRefs(context, value, references, root, true);
             }
@@ -46,7 +47,7 @@ function gatheringRefs(context: Context, object: Record<string, any>, references
     return references;
 }
 
-export function getRefFromSchema(context: Context, object: Record<string, any>): string[] {
-    const references = gatheringRefs(context, object);
+export function getRefFromSchema(this: Parser, object: Record<string, any>): string[] {
+    const references = gatheringRefs(this.context, object);
     return references.filter(item => item.type === TypeRef.SCHEMA).map(value => value.value);
 }

@@ -2,13 +2,12 @@ import type { OperationParameter } from '../../../client/interfaces/OperationPar
 import { getPattern } from '../../../utils/getPattern';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiParameter } from '../interfaces/OpenApiParameter';
+import { Parser } from '../Parser';
 import { getComment } from './getComment';
-import { getModel } from './getModel';
 import { getModelDefault } from './getModelDefault';
 import { getOperationParameterName } from './getOperationParameterName';
-import { getType, GetTypeName } from './getType';
 
-export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParameter, getTypeByRef: GetTypeName): OperationParameter {
+export function getOperationParameter(this: Parser, openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
     const operationParameter: OperationParameter = {
         in: parameter.in,
         prop: parameter.name,
@@ -33,7 +32,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
     };
 
     if (parameter.$ref) {
-        const definitionRef = getType(parameter.$ref, '', getTypeByRef);
+        const definitionRef = this.getType(parameter.$ref, '');
         operationParameter.export = 'reference';
         operationParameter.type = definitionRef.type;
         operationParameter.base = definitionRef.base;
@@ -44,7 +43,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
 
     if (parameter.schema) {
         if (parameter.schema.$ref) {
-            const model = getType(parameter.schema.$ref, '', getTypeByRef);
+            const model = this.getType(parameter.schema.$ref, '');
             operationParameter.export = 'reference';
             operationParameter.type = model.type;
             operationParameter.base = model.base;
@@ -53,7 +52,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
             operationParameter.default = getModelDefault(parameter.schema);
             return operationParameter;
         } else {
-            const model = getModel({ openApi: openApi, definition: parameter.schema, getTypeByRef: getTypeByRef, parentRef: '' });
+            const model = this.getModel({ openApi: openApi, definition: parameter.schema, parentRef: '' });
             operationParameter.export = model.export;
             operationParameter.type = model.type;
             operationParameter.base = model.base;
