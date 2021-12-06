@@ -32,7 +32,17 @@ describe('writeClientServices', () => {
             },
         };
 
-        await writeClientServices({ services, templates, outputPath: '/', httpClient: HttpClient.FETCH, useOptions: false, useUnionTypes: false, useCustomRequest: false });
+        await writeClientServices({
+            services,
+            templates,
+            outputPath: '/',
+            httpClient: HttpClient.FETCH,
+            useOptions: false,
+            useUnionTypes: false,
+            useCustomRequest: false,
+            outputModels: '../models/',
+            outputCore: '../core/',
+        });
 
         expect(writeFile).toBeCalledWith('/MyService.ts', 'service');
     });

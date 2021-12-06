@@ -10,11 +10,27 @@ import { writeClientIndex } from './writeClientIndex';
 import { writeClientModels } from './writeClientModels';
 import { writeClientSchemas } from './writeClientSchemas';
 import { writeClientServices } from './writeClientServices';
+import { relative } from './path';
+
+/**
+ * @param output The relative location of the output directory(or index)
+ * @param outputCore The relative location of the output directory for core
+ * @param outputServices The relative location of the output directory for services
+ * @param outputModels The relative location of the output directory for models
+ * @param outputSchemas The relative location of the output directory for schemas
+ */
+export interface IOutput {
+    output: string;
+    outputCore?: string;
+    outputServices?: string;
+    outputModels?: string;
+    outputSchemas?: string;
+}
 
 /**
  * @param client Client object with all the models, services, etc.
  * @param templates Templates wrapper with all loaded Handlebars templates
- * @param output The relative location of the output directory
+ * @param output The model of the output directories
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useOptions Use options or arguments functions
  * @param useUnionTypes Use union types instead of enums
@@ -25,10 +41,10 @@ import { writeClientServices } from './writeClientServices';
  * @param clean: Clean a directory before generation
  * @param request: Path to custom request file
  */
-interface IWriteCLient {
+export interface IWriteClient {
     client: Client;
     templates: Templates;
-    output: string;
+    output: IOutput;
     httpClient: HttpClient;
     useOptions: boolean;
     useUnionTypes: boolean;
@@ -44,7 +60,7 @@ interface IWriteCLient {
  * Write our OpenAPI client, using the given templates at the given output
  * @param client Client object with all the models, services, etc.
  * @param templates Templates wrapper with all loaded Handlebars templates
- * @param output The relative location of the output directory
+ * @param output The object of the output directories
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useOptions Use options or arguments functions
  * @param useUnionTypes Use union types instead of enums
@@ -55,16 +71,28 @@ interface IWriteCLient {
  * @param clean: Clean a directory before generation
  * @param request: Path to custom request file
  */
-export async function writeClient(options: IWriteCLient): Promise<void> {
+export async function writeClient(options: IWriteClient): Promise<void> {
     const { client, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, clean, request } = options;
-    const outputPath = resolve(process.cwd(), output);
-    const outputPathCore = resolve(outputPath, 'core');
-    const outputPathModels = resolve(outputPath, 'models');
-    const outputPathSchemas = resolve(outputPath, 'schemas');
-    const outputPathServices = resolve(outputPath, 'services');
+    const outputPath = resolve(process.cwd(), output.output);
+    const outputPathCore = output.outputCore ? resolve(process.cwd(), output.outputCore) : resolve(outputPath, 'core');
+    const outputPathModels = output.outputModels ? resolve(process.cwd(), output.outputModels) : resolve(outputPath, 'models');
+    const outputPathSchemas = output.outputSchemas ? resolve(process.cwd(), output.outputSchemas) : resolve(outputPath, 'schemas');
+    const outputPathServices = output.outputServices ? resolve(process.cwd(), output.outputServices) : resolve(outputPath, 'services');
 
-    if (!isSubDirectory(process.cwd(), output)) {
+    if (!isSubDirectory(process.cwd(), output.output)) {
         throw new Error(`Output folder is not a subdirectory of the current working directory`);
+    }
+    if (output.outputCore && !isSubDirectory(process.cwd(), output.outputCore)) {
+        throw new Error(`Output folder(core) is not a subdirectory of the current working directory`);
+    }
+    if (output.outputSchemas && !isSubDirectory(process.cwd(), output.outputSchemas)) {
+        throw new Error(`Output folder(schemas) is not a subdirectory of the current working directory`);
+    }
+    if (output.outputModels && !isSubDirectory(process.cwd(), output.outputModels)) {
+        throw new Error(`Output folder(models) is not a subdirectory of the current working directory`);
+    }
+    if (output.outputServices && !isSubDirectory(process.cwd(), output.outputServices)) {
+        throw new Error(`Output folder(services) is not a subdirectory of the current working directory`);
     }
 
     if (exportCore) {
@@ -88,6 +116,8 @@ export async function writeClient(options: IWriteCLient): Promise<void> {
             useUnionTypes,
             useOptions,
             useCustomRequest: !!request,
+            outputModels: exportModels ? `${relative(outputPathServices, outputPathModels)}/` : '../models/',
+            outputCore: exportCore ? `${relative(outputPathServices, outputPathCore)}/` : '../core/',
         });
     }
 
@@ -105,10 +135,5 @@ export async function writeClient(options: IWriteCLient): Promise<void> {
         }
         await mkdir(outputPathModels);
         await writeClientModels({ models: client.models, templates, outputPath: outputPathModels, httpClient, useUnionTypes });
-    }
-
-    if (exportCore || exportServices || exportSchemas || exportModels) {
-        await mkdir(outputPath);
-        await writeClientIndex({ client, templates, outputPath, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas });
     }
 }

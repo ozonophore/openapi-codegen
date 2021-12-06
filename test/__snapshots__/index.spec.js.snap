@@ -298,31 +298,6 @@ export async function request(options: ApiRequestOptions): Promise<ApiResult> {
 }"
 `;
 
-exports[`v2 should generate: ./test/generated/v2/index.ts 1`] = `
-"/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-export { ApiError } from './core/ApiError';
-export { OpenAPI } from './core/OpenAPI';
-
-export type { ModelWithString } from './models/ModelWithString';
-
-export { ModelWithStringSchema } from './schemas/ModelWithStringSchema';
-
-export { CollectionFormatService } from './services/CollectionFormatService';
-export { ComplexService } from './services/ComplexService';
-export { DefaultsService } from './services/DefaultsService';
-export { DuplicateService } from './services/DuplicateService';
-export { HeaderService } from './services/HeaderService';
-export { NoContentService } from './services/NoContentService';
-export { ParametersService } from './services/ParametersService';
-export { ResponseService } from './services/ResponseService';
-export { Service } from './services/Service';
-export { SimpleService } from './services/SimpleService';
-export { TypesService } from './services/TypesService';
-"
-`;
-
 exports[`v2 should generate: ./test/generated/v2/models/ModelWithString.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
@@ -1307,46 +1282,6 @@ export async function request(options: ApiRequestOptions): Promise<ApiResult> {
     catchErrors(options, result);
     return result;
 }"
-`;
-
-exports[`v3 should generate from different files: ./test/generated/v3_1/index.ts 1`] = `
-"/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-export { ApiError } from './core/ApiError';
-export { OpenAPI } from './core/OpenAPI';
-
-export type { IModelWithArray } from './models/schemas/ModelWithArray';
-export type { IModelWithCircularReference } from './models/schemas/ModelWithCircularReference';
-export type { IModelWithDictionary } from './models/schemas/ModelWithDictionary';
-export { IModelWithEnum } from './models/schemas/ModelWithEnum';
-export type { IModelWithString } from './models/schemas/ModelWithString';
-export type { TArrayWithArray } from './models/ArrayWithArray';
-export type { TModelThatExtends } from './models/schemas/ModelThatExtends';
-
-export { IModelWithArraySchema } from './schemas/schemas/ModelWithArraySchema';
-export { IModelWithCircularReferenceSchema } from './schemas/schemas/ModelWithCircularReferenceSchema';
-export { IModelWithDictionarySchema } from './schemas/schemas/ModelWithDictionarySchema';
-export { IModelWithEnumSchema } from './schemas/schemas/ModelWithEnumSchema';
-export { IModelWithStringSchema } from './schemas/schemas/ModelWithStringSchema';
-export { TArrayWithArraySchema } from './schemas/ArrayWithArraySchema';
-export { TModelThatExtendsSchema } from './schemas/schemas/ModelThatExtendsSchema';
-
-export { CircularService } from './services/CircularService';
-export { CollectionFormatService } from './services/CollectionFormatService';
-export { ComplexService } from './services/ComplexService';
-export { DefaultsService } from './services/DefaultsService';
-export { DuplicateService } from './services/DuplicateService';
-export { HeaderService } from './services/HeaderService';
-export { MultipartService } from './services/MultipartService';
-export { NoContentService } from './services/NoContentService';
-export { ParametersService } from './services/ParametersService';
-export { RequestBodyService } from './services/RequestBodyService';
-export { ResponseService } from './services/ResponseService';
-export { SimpleService } from './services/SimpleService';
-export { TypesService } from './services/TypesService';
-export { UploadService } from './services/UploadService';
-"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/models/ArrayWithArray.ts 1`] = `
@@ -2709,45 +2644,6 @@ export async function request(options: ApiRequestOptions): Promise<ApiResult> {
     catchErrors(options, result);
     return result;
 }"
-`;
-
-exports[`v3 should generate: ./test/generated/v3/index.ts 1`] = `
-"/* istanbul ignore file */
-/* tslint:disable */
-/* eslint-disable */
-export { ApiError } from './core/ApiError';
-export { OpenAPI } from './core/OpenAPI';
-
-export type { IModelWithArray } from './models/ModelWithArray';
-export type { IModelWithDictionary } from './models/ModelWithDictionary';
-export { IModelWithEnum } from './models/ModelWithEnum';
-export type { IModelWithString } from './models/ModelWithString';
-export type { TArrayWithArray } from './models/ArrayWithArray';
-export type { TModelThatExtends } from './models/ModelThatExtends';
-export type { TModelThatExtendsExtends } from './models/ModelThatExtendsExtends';
-
-export { IModelWithArraySchema } from './schemas/ModelWithArraySchema';
-export { IModelWithDictionarySchema } from './schemas/ModelWithDictionarySchema';
-export { IModelWithEnumSchema } from './schemas/ModelWithEnumSchema';
-export { IModelWithStringSchema } from './schemas/ModelWithStringSchema';
-export { TArrayWithArraySchema } from './schemas/ArrayWithArraySchema';
-export { TModelThatExtendsSchema } from './schemas/ModelThatExtendsSchema';
-export { TModelThatExtendsExtendsSchema } from './schemas/ModelThatExtendsExtendsSchema';
-
-export { CollectionFormatService } from './services/CollectionFormatService';
-export { ComplexService } from './services/ComplexService';
-export { DefaultsService } from './services/DefaultsService';
-export { DuplicateService } from './services/DuplicateService';
-export { HeaderService } from './services/HeaderService';
-export { MultipartService } from './services/MultipartService';
-export { NoContentService } from './services/NoContentService';
-export { ParametersService } from './services/ParametersService';
-export { RequestBodyService } from './services/RequestBodyService';
-export { ResponseService } from './services/ResponseService';
-export { SimpleService } from './services/SimpleService';
-export { TypesService } from './services/TypesService';
-export { UploadService } from './services/UploadService';
-"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/models/ArrayWithArray.ts 1`] = `

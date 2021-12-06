@@ -104,7 +104,7 @@ describe('getRefFromSchema', () => {
             },
         };
 
-        const contextApp = new ContextApp(object);
+        const contextApp = new ContextApp(object, { output: './distr' });
         const parser = new RefParser();
         contextApp.addRefs(await parser.resolve(object));
         const refs = new Parser(contextApp).getRefFromSchema(object);

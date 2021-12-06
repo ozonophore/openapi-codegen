@@ -3,7 +3,7 @@ import { isAbsolute } from 'path';
 
 import { CommonOpenApi } from '../core/CommonOpenApi';
 import { Context } from '../core/Context';
-import { dirName, join, resolve } from '../core/path';
+import { dirName, join, resolve } from './path';
 import { OpenApiReference } from '../openApi/interfaces/OpenApiReference';
 import { exists } from './fileSystem';
 

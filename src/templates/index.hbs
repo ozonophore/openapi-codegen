@@ -1,38 +1,34 @@
 {{>header}}
-{{#if @root.exportCore}}
+{{#if core}}
 
-export { ApiError } from './core/ApiError';
-export { OpenAPI } from './core/OpenAPI';
+{{#each core}}
+export { ApiError{{#notEquals ../core.length 1}} as ApiError${{{@index}}}{{/notEquals}} } from './{{{this}}}ApiError';
+export { OpenAPI{{#notEquals ../core.length 1}}  as OpenAPI${{{@index}}}{{/notEquals}} } from './{{{this}}}OpenAPI';
+{{/each}}
 {{/if}}
-{{#if @root.exportModels}}
 {{#if models}}
 
 {{#each models}}
 {{#if enum}}
-export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}';
+export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
 {{else if @root.useUnionTypes}}
-export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}';
+export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
 {{else if enums}}
-export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}';
+export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
 {{else}}
-export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './models/{{{path}}}';
+export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
 {{/if}}
 {{/each}}
 {{/if}}
-{{/if}}
-{{#if @root.exportSchemas}}
-{{#if models}}
+{{#if schemas}}
 
-{{#each models}}
-export { {{{name}}}Schema{{#if alias }} as {{{alias}}}Schema{{/if}} } from './schemas/{{{path}}}Schema';
+{{#each schemas}}
+export { {{{name}}}Schema{{#if alias }} as {{{alias}}}Schema{{/if}} } from './{{{package}}}{{{path}}}Schema';
 {{/each}}
 {{/if}}
-{{/if}}
-{{#if @root.exportServices}}
 {{#if services}}
 
 {{#each services}}
-export { {{{name}}} } from './services/{{{name}}}';
+export { {{{name}}} } from './{{{package}}}{{{name}}}';
 {{/each}}
-{{/if}}
 {{/if}}

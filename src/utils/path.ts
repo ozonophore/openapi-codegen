@@ -17,3 +17,7 @@ export function relative(from: string, to: string): string {
 export function resolve(...pathSegments: string[]): string {
     return path.resolve(...pathSegments).replace(SEARCH_REGEXP, '/');
 }
+
+export function isAbsolute(p: string): boolean {
+    return path.isAbsolute(p);
+}

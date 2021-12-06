@@ -1,7 +1,7 @@
 import { mkdirSync } from 'fs';
 
 import type { Model } from '../client/interfaces/Model';
-import { dirName, resolve } from '../core/path';
+import { dirName, resolve } from './path';
 import { HttpClient } from '../HttpClient';
 import { writeFile } from './fileSystem';
 import { format } from './format';

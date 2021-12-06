@@ -2,7 +2,7 @@ import { mkdirSync } from 'fs';
 import { dirname, resolve } from 'path';
 
 import type { Model } from '../client/interfaces/Model';
-import { dirName } from '../core/path';
+import { dirName } from './path';
 import { HttpClient } from '../HttpClient';
 import { writeFile } from './fileSystem';
 import { format } from './format';

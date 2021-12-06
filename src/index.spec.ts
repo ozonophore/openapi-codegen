@@ -13,7 +13,7 @@ describe('index', () => {
         await OpenAPI.generate({
             input: './test/spec/v3.json',
             output: './generated/v3/',
-            write: true,
+            write: false,
         });
     });
 
@@ -21,7 +21,8 @@ describe('index', () => {
         await OpenAPI.generate({
             input: './test/spec/v3.yml',
             output: './test/generated/v3_1/',
-            write: true,
+            outputCore: './test/generated/v3/special/core',
+            write: false,
         });
     });
 
@@ -36,6 +37,7 @@ describe('index', () => {
             exportSchemas: true,
             exportModels: true,
             exportServices: true,
+            write: false,
         });
     });
 });
@@ -53,6 +55,7 @@ describe('index', () => {
             exportModels: true,
             exportServices: true,
             request: './test/custom/request.ts',
+            write: false,
         });
     });
 });
@@ -69,6 +72,7 @@ describe('index', () => {
             exportSchemas: true,
             exportModels: true,
             exportServices: true,
+            write: false,
         });
     });
 });

@@ -4,7 +4,8 @@ import RefParser from 'json-schema-ref-parser';
 
 import { getFileName } from '../utils/getFileName';
 import { isString } from '../utils/isString';
-import { dirName } from './path';
+import { dirName, resolve } from '../utils/path';
+import { IOutput } from '../utils/writeClient';
 
 interface $Root {
     path: string;
@@ -23,13 +24,22 @@ export interface Prefix {
 export class Context {
     private _refs: RefParser.$Refs | undefined;
     private _root: $Root | undefined;
+    private _output: IOutput;
     public prefix: Prefix = {
         interface: 'I',
         enum: 'E',
         type: 'T',
     };
 
-    constructor(input: string | Record<string, any>, prefix?: Prefix) {
+    constructor(input: string | Record<string, any>, output: IOutput, prefix?: Prefix) {
+        const outputPath = resolve(process.cwd(), output.output);
+        this._output = {
+            output: outputPath,
+            outputCore: output.outputCore ? resolve(process.cwd(), output.outputCore) : outputPath,
+            outputServices: output.outputServices ? resolve(process.cwd(), output.outputServices) : outputPath,
+            outputModels: output.outputModels ? resolve(process.cwd(), output.outputModels) : outputPath,
+            outputSchemas: output.outputSchemas ? resolve(process.cwd(), output.outputSchemas) : outputPath,
+        };
         this._refs = {} as RefParser.$Refs;
         if (isString(input)) {
             this._root = { path: dirName(input), fileName: getFileName(input) };

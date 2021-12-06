@@ -1,7 +1,7 @@
 import equal from 'fast-deep-equal';
 
 import { Context } from '../../../core/Context';
-import { dirName, join } from '../../../core/path';
+import { dirName, join } from '../../../utils/path';
 import { Parser } from '../Parser';
 
 enum TypeRef {

@@ -6,7 +6,7 @@ import RefParser from 'json-schema-ref-parser';
 describe('getType', () => {
     it('should convert int', async () => {
         const parser = new RefParser();
-        const context = new Context('test/spec/v3.yml');
+        const context = new Context('test/spec/v3.yml', { output: 'test/spec/v3.yml'});
         context.addRefs(await parser.resolve('test/spec/v3.yml'));
         const type = new Parser(context).getType('int', '');
         expect(type.type).toEqual('number');
@@ -17,7 +17,7 @@ describe('getType', () => {
 
     it('should support file with ext', async () => {
         const parser = new RefParser();
-        const context = new Context('test/spec/v3.yml');
+        const context = new Context('test/spec/v3.yml', { output: 'test/spec/v3.yml' });
         context.addRefs(await parser.resolve('test/spec/v3.yml'));
         const type = new Parser(context).getType('schemas/ModelWithString.yml', '');
         expect(type.type).toEqual('IModelWithString');
@@ -44,7 +44,7 @@ describe('getType', () => {
 
     it('should support external generation type', async () => {
         const parser = new RefParser();
-        const context = new Context(object);
+        const context = new Context(object, { output: './distr' });
         context.addRefs(await parser.resolve(object));
         const type = new Parser(context).getType('#/components/schemas/someSpecialSchema', '');
         expect(type.type).toEqual('ISomeSpecialSchema');

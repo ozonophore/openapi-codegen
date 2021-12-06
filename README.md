@@ -50,20 +50,24 @@ $ openapi --help
   Usage: openapi [options]
 
   Options:
-    -V, --version             output the version number
-    -i, --input <value>       OpenAPI specification, can be a path, url or string content (required)
-    -o, --output <value>      Output directory (required)
-    -c, --client <value>      HTTP client to generate [fetch, xhr, node] (default: "fetch")
-    --useOptions <value>      Use options instead of arguments (default: false)
-    --useUnionTypes <value>   Use union types instead of enums (default: false)
-    --exportCore <value>      Write core files to disk (default: true)
-    --exportServices <value>  Write services to disk (default: true)
-    --exportModels <value>    Write models to disk (default: true)
-    --exportSchemas <value>   Write schemas to disk (default: false)
-    --clean <value>           Clean a directory before generation (default: true)
-    --interfacePrefix <value> Prefix for interface model(default: "I")
-    --enumPrefix <value>      Prefix for enum model(default: "E")
-    --typePrefix <value>      Prefix for type model(default: "T")
+    -V, --version                 Output the version number
+    -i, --input <value>           OpenAPI specification, can be a path, url or string content (required)
+    -o, --output <value>          Output directory (required)
+    -oc, --outputCore <value>     Output directory for core files 
+    -os, --outputServices <value> Output directory for services 
+    -om, --outputModels <value>   Output directory for models 
+    -osm, --outputSchemas <value> Output directory for schemas 
+    -c, --client <value>          HTTP client to generate [fetch, xhr, node] (default: "fetch")
+    --useOptions <value>          Use options instead of arguments (default: false)
+    --useUnionTypes <value>       Use union types instead of enums (default: false)
+    --exportCore <value>          Write core files to disk (default: true)
+    --exportServices <value>      Write services to disk (default: true)
+    --exportModels <value>        Write models to disk (default: true)
+    --exportSchemas <value>       Write schemas to disk (default: false)
+    --clean <value>               Clean a directory before generation (default: true)
+    --interfacePrefix <value>     Prefix for interface model(default: "I")
+    --enumPrefix <value>          Prefix for enum model(default: "E")
+    --typePrefix <value>          Prefix for type model(default: "T")
 
   Examples
     $ openapi --input ./spec.json
@@ -94,6 +98,23 @@ You should create a file in the root of a project with the name 'openapi.config.
     "exportSchemas": true
 }]
 ```
+or with common block
+```json
+{
+    "output": "./dist",
+    "client": "xhr",
+    "exportCore": true,
+    "exportServices": true,
+    "exportModels": true,
+    "exportSchemas": true,
+    "items": [{
+        "input": "./first.yml"
+        },{
+        "input": "./second.yml"
+        }]
+}
+```
+
 
 ## Example
 

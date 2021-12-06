@@ -1,5 +1,5 @@
 import type { Model } from '../../../client/interfaces/Model';
-import { join, relative } from '../../../core/path';
+import { join, relative } from '../../../utils/path';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
 import { unique } from '../../../utils/unique';
 import type { OpenApi } from '../interfaces/OpenApi';

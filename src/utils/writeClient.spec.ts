@@ -34,7 +34,7 @@ describe('writeClient', () => {
         await writeClient({
             client,
             templates,
-            output: './dist',
+            output: { output: './dist' },
             httpClient: HttpClient.FETCH,
             useOptions: false,
             useUnionTypes: false,
