@@ -7,4 +7,5 @@ export interface ModelConfig {
     isDefinition?: boolean;
     name?: string;
     path?: string;
+    parentRef: string;
 }

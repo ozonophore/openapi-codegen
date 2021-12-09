@@ -1,5 +1,5 @@
 import { Context } from '../../core/Context';
-import { getModel } from '../v3/parser/getModel';
+import { getModel } from '../v2/parser/getModel';
 import { getModelComposition } from './parser/getModelComposition';
 import { getModelProperties } from './parser/getModelProperties';
 import { getModels } from './parser/getModels';
@@ -11,7 +11,6 @@ import { getOperationResponses } from './parser/getOperationResponses';
 import { getServices } from './parser/getServices';
 import { getType } from './parser/getType';
 import { parse } from './parserV2';
-import { getRefFromSchema } from './parser/getRefFromSchema';
 
 export class Parser {
     public context: Context;
@@ -46,5 +45,4 @@ export class Parser {
     public getOperation = getOperation;
     public getOperationResponses = getOperationResponses;
     public getOperationResponse = getOperationResponse;
-    public getRefFromSchema = getRefFromSchema;
 }

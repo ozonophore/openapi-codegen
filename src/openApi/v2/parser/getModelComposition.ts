@@ -1,13 +1,16 @@
 import type { ModelComposition } from '../../../client/interfaces/ModelComposition';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
-import type { getModel } from './getModel';
-import { getModelProperties } from './getModelProperties';
+import { Parser } from '../Parser';
 
-// Fix for circular dependency
-export type GetModelFn = typeof getModel;
-
-export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema, definitions: OpenApiSchema[], type: 'one-of' | 'any-of' | 'all-of', getModel: GetModelFn): ModelComposition {
+export function getModelComposition(
+    this: Parser,
+    openApi: OpenApi,
+    definition: OpenApiSchema,
+    definitions: OpenApiSchema[],
+    type: 'one-of' | 'any-of' | 'all-of',
+    parentRef: string
+): ModelComposition {
     const composition: ModelComposition = {
         type,
         imports: [],
@@ -15,7 +18,7 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
         properties: [],
     };
 
-    const models = definitions.map(definition => getModel({ openApi: openApi, definition: definition }));
+    const models = definitions.map(definition => this.getModel({ openApi, definition, parentRef }));
     models
         .filter(model => {
             const hasProperties = model.properties.length;
@@ -31,7 +34,7 @@ export function getModelComposition(openApi: OpenApi, definition: OpenApiSchema,
         });
 
     if (definition.properties) {
-        const properties = getModelProperties(openApi, definition, getModel);
+        const properties = this.getModelProperties(openApi, definition, parentRef);
         properties.forEach(property => {
             composition.imports.push(...property.imports);
             composition.enums.push(...property.enums);

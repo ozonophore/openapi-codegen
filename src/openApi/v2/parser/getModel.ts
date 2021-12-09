@@ -1,16 +1,15 @@
 import type { Model } from '../../../client/interfaces/Model';
 import { getPattern } from '../../../utils/getPattern';
 import { ModelConfig } from '../interfaces/ModelConfig';
+import { Parser } from '../Parser';
 import { extendEnum } from './extendEnum';
 import { getComment } from './getComment';
 import { getEnum } from './getEnum';
 import { getEnumFromDescription } from './getEnumFromDescription';
-import { getModelComposition } from './getModelComposition';
-import { getModelProperties } from './getModelProperties';
 import { getType } from './getType';
 
-export function getModel(config: ModelConfig): Model {
-    const { openApi, definition, isDefinition = false, name = '', path = '' } = config;
+export function getModel(this: Parser, config: ModelConfig): Model {
+    const { openApi, definition, isDefinition = false, name = '', path = '', parentRef } = config;
     const model: Model = {
         name,
         path,
@@ -89,7 +88,7 @@ export function getModel(config: ModelConfig): Model {
             model.imports.push(...arrayItems.imports);
             return model;
         } else {
-            const arrayItems = getModel({ openApi: openApi, definition: definition.items });
+            const arrayItems = this.getModel({ openApi: openApi, definition: definition.items, parentRef });
             model.export = 'array';
             model.type = arrayItems.type;
             model.base = arrayItems.base;
@@ -110,7 +109,7 @@ export function getModel(config: ModelConfig): Model {
             model.imports.push(...additionalProperties.imports);
             return model;
         } else {
-            const additionalProperties = getModel({ openApi: openApi, definition: definition.additionalProperties });
+            const additionalProperties = this.getModel({ openApi: openApi, definition: definition.additionalProperties, parentRef });
             model.export = 'dictionary';
             model.type = additionalProperties.type;
             model.base = additionalProperties.base;
@@ -122,7 +121,7 @@ export function getModel(config: ModelConfig): Model {
     }
 
     if (definition.allOf?.length) {
-        const composition = getModelComposition(openApi, definition, definition.allOf, 'all-of', getModel);
+        const composition = this.getModelComposition(openApi, definition, definition.allOf, 'all-of', parentRef);
         model.export = composition.type;
         model.imports.push(...composition.imports);
         model.properties.push(...composition.properties);
@@ -136,7 +135,7 @@ export function getModel(config: ModelConfig): Model {
         model.base = 'any';
 
         if (definition.properties) {
-            const properties = getModelProperties(openApi, definition, getModel);
+            const properties = this.getModelProperties(openApi, definition, parentRef);
             properties.forEach(property => {
                 model.imports.push(...property.imports);
                 model.enums.push(...property.enums);

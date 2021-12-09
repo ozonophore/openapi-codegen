@@ -15,6 +15,10 @@ export { HttpClient } from './HttpClient';
 export type Options = {
     input: string | Record<string, any>;
     output: string;
+    outputCore?: string;
+    outputServices?: string;
+    outputModels?: string;
+    outputSchemas?: string;
     httpClient?: HttpClient;
     useOptions?: boolean;
     useUnionTypes?: boolean;
@@ -36,6 +40,10 @@ export type Options = {
  * service layer, etc.
  * @param input The relative location of the OpenAPI spec
  * @param output The relative location of the output directory
+ * @param outputCore The relative location of the output directory for core
+ * @param outputServices The relative location of the output directory for services
+ * @param outputModels The relative location of the output directory for models
+ * @param outputSchemas The relative location of the output directory for schemas
  * @param httpClient The selected httpClient (fetch or XHR)
  * @param useOptions Use options or arguments functions
  * @param useUnionTypes Use union types instead of enums
@@ -53,6 +61,10 @@ export type Options = {
 export async function generate({
     input,
     output,
+    outputCore,
+    outputServices,
+    outputModels,
+    outputSchemas,
     httpClient = HttpClient.FETCH,
     useOptions = false,
     useUnionTypes = false,

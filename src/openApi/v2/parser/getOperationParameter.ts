@@ -10,8 +10,9 @@ import { getModel } from './getModel';
 import { getOperationParameterDefault } from './getOperationParameterDefault';
 import { getOperationParameterName } from './getOperationParameterName';
 import { getType } from './getType';
+import { Parser } from '../Parser';
 
-export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
+export function getOperationParameter(this: Parser, openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
     const operationParameter: OperationParameter = {
         path: '',
         in: parameter.in,
@@ -117,7 +118,7 @@ export function getOperationParameter(openApi: OpenApi, parameter: OpenApiParame
             operationParameter.default = getOperationParameterDefault(parameter, operationParameter);
             return operationParameter;
         } else {
-            const model = getModel({ openApi: openApi, definition: parameter.schema });
+            const model = this.getModel({ openApi: openApi, definition: parameter.schema, parentRef: '' });
             operationParameter.export = model.export;
             operationParameter.type = model.type;
             operationParameter.base = model.base;

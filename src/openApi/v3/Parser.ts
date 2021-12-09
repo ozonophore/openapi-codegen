@@ -52,5 +52,4 @@ export class Parser {
     public getOperationResponses = getOperationResponses;
     public getOperationResponse = getOperationResponse;
     public getOperationRequestBody = getOperationRequestBody;
-    public getRefFromSchema = getRefFromSchema;
 }

@@ -2,13 +2,9 @@ import type { Model } from '../../../client/interfaces/Model';
 import { getPattern } from '../../../utils/getPattern';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
+import { Parser } from '../Parser';
 import { escapeName } from './escapeName';
 import { getComment } from './getComment';
-import type { getModel } from './getModel';
-import { Parser } from '../Parser';
-
-// Fix for circular dependency
-export type GetModelFn = typeof getModel;
 
 export function getModelProperties(this: Parser, openApi: OpenApi, definition: OpenApiSchema, parentRef: string): Model[] {
     const models: Model[] = [];
@@ -49,7 +45,7 @@ export function getModelProperties(this: Parser, openApi: OpenApi, definition: O
                     imports: model.imports,
                     enum: [],
                     enums: [],
-                    properties: []
+                    properties: [],
                 });
             } else {
                 const model = this.getModel({ openApi: openApi, definition: property, parentRef: parentRef });
@@ -84,7 +80,7 @@ export function getModelProperties(this: Parser, openApi: OpenApi, definition: O
                     imports: model.imports,
                     enum: model.enum,
                     enums: model.enums,
-                    properties: model.properties
+                    properties: model.properties,
                 });
             }
         }
