@@ -2,12 +2,12 @@
 
 {{#if imports}}
 {{#each imports}}
-import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '../models/{{{path}}}';
+import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{@root.outputModels}}}{{{path}}}';
 {{/each}}
 {{/if}}
-import { request as __request } from '../core/request';
+import { request as __request } from '{{{outputCore}}}request';
 {{#if @root.useVersion}}
-import { OpenAPI } from '../core/OpenAPI';
+import { OpenAPI } from '{{{outputCore}}}OpenAPI';
 {{/if}}
 
 export class {{{name}}} {

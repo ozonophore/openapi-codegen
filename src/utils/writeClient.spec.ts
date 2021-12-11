@@ -1,8 +1,8 @@
 import type { Client } from '../client/interfaces/Client';
 import { HttpClient } from '../HttpClient';
-import { mkdir, rmdir, writeFile } from './fileSystem';
+import { mkdir, writeFile } from './fileSystem';
 import { Templates } from './registerHandlebarTemplates';
-import { writeClient } from './writeClient';
+import { WriteClient } from './writeClient';
 
 jest.mock('./fileSystem');
 
@@ -30,11 +30,10 @@ describe('writeClient', () => {
                 request: () => 'request',
             },
         };
-
-        await writeClient({
+        await new WriteClient().writeClient({
             client,
             templates,
-            output: './dist',
+            output: { output: './dist' },
             httpClient: HttpClient.FETCH,
             useOptions: false,
             useUnionTypes: false,
@@ -45,7 +44,6 @@ describe('writeClient', () => {
             clean: true,
         });
 
-        expect(rmdir).toBeCalled();
         expect(mkdir).toBeCalled();
         expect(writeFile).toBeCalled();
     });

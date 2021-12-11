@@ -16,6 +16,8 @@ const VERSION_TEMPLATE_STRING = 'OpenAPI.VERSION';
  * @param useUnionTypes Use union types instead of enums
  * @param useOptions Use options or arguments functions
  * @param useCustomRequest Use custom request file.
+ * @param outputModel The relative path to models
+ * @param outputCore The relative path to the core
  */
 interface IWriteClientServices {
     services: Service[];
@@ -25,6 +27,8 @@ interface IWriteClientServices {
     useUnionTypes: boolean;
     useOptions: boolean;
     useCustomRequest: boolean;
+    outputModels: string;
+    outputCore: string;
 }
 
 /**
@@ -37,7 +41,7 @@ interface IWriteClientServices {
  * @param useOptions Use options or arguments functions
  */
 export async function writeClientServices(options: IWriteClientServices): Promise<void> {
-    const { services, templates, outputPath, httpClient, useUnionTypes, useOptions, useCustomRequest } = options;
+    const { services, templates, outputPath, httpClient, useUnionTypes, useOptions, useCustomRequest, outputCore, outputModels } = options;
     for (const service of services) {
         const file = resolve(outputPath, `${service.name}.ts`);
         const useVersion = service.operations.some(operation => operation.path.includes(VERSION_TEMPLATE_STRING));
@@ -48,6 +52,8 @@ export async function writeClientServices(options: IWriteClientServices): Promis
             useVersion,
             useOptions,
             useCustomRequest,
+            outputCore,
+            outputModels,
         });
         await writeFile(file, format(templateResult));
     }

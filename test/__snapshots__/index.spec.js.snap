@@ -305,21 +305,144 @@ exports[`v2 should generate: ./test/generated/v2/index.ts 1`] = `
 export { ApiError } from './core/ApiError';
 export { OpenAPI } from './core/OpenAPI';
 
+export type { DictionaryWithReference } from './models/DictionaryWithReference';
+export type { ModelThatExtends } from './models/ModelThatExtends';
+export type { ModelThatExtendsExtends } from './models/ModelThatExtendsExtends';
+export type { ModelWithArray } from './models/ModelWithArray';
+export type { ModelWithDictionary } from './models/ModelWithDictionary';
+export { ModelWithEnumInteger } from './models/ModelWithEnumInteger';
 export type { ModelWithString } from './models/ModelWithString';
 
+export { DictionaryWithReferenceSchema } from './schemas/DictionaryWithReferenceSchema';
+export { ModelThatExtendsSchema } from './schemas/ModelThatExtendsSchema';
+export { ModelThatExtendsExtendsSchema } from './schemas/ModelThatExtendsExtendsSchema';
+export { ModelWithArraySchema } from './schemas/ModelWithArraySchema';
+export { ModelWithDictionarySchema } from './schemas/ModelWithDictionarySchema';
+export { ModelWithEnumIntegerSchema } from './schemas/ModelWithEnumIntegerSchema';
 export { ModelWithStringSchema } from './schemas/ModelWithStringSchema';
 
-export { CollectionFormatService } from './services/CollectionFormatService';
-export { ComplexService } from './services/ComplexService';
-export { DefaultsService } from './services/DefaultsService';
-export { DuplicateService } from './services/DuplicateService';
-export { HeaderService } from './services/HeaderService';
-export { NoContentService } from './services/NoContentService';
-export { ParametersService } from './services/ParametersService';
-export { ResponseService } from './services/ResponseService';
 export { Service } from './services/Service';
 export { SimpleService } from './services/SimpleService';
+export { ParametersService } from './services/ParametersService';
+export { DefaultsService } from './services/DefaultsService';
+export { DuplicateService } from './services/DuplicateService';
+export { NoContentService } from './services/NoContentService';
+export { ResponseService } from './services/ResponseService';
+export { CollectionFormatService } from './services/CollectionFormatService';
 export { TypesService } from './services/TypesService';
+export { ComplexService } from './services/ComplexService';
+export { HeaderService } from './services/HeaderService';
+"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/models/DictionaryWithReference.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { ModelWithString } from './ModelWithString';
+
+/**
+ * This is a string reference
+ */
+export type DictionaryWithReference = Record<string, ModelWithString>;"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/models/ModelThatExtends.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { ModelWithString } from './ModelWithString';
+
+/**
+ * This is a model that extends another model
+ */
+export type ModelThatExtends = (ModelWithString & {
+    propExtendsA?: string,
+    propExtendsB?: ModelWithString,
+});
+"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/models/ModelThatExtendsExtends.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { ModelThatExtends } from './ModelThatExtends';
+import type { ModelWithString } from './ModelWithString';
+
+/**
+ * This is a model that extends another model
+ */
+export type ModelThatExtendsExtends = (ModelWithString & ModelThatExtends & {
+    propExtendsC?: string,
+    propExtendsD?: ModelWithString,
+});
+"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/models/ModelWithArray.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { ModelWithString } from './ModelWithString';
+
+/**
+ * This is a model with one property containing an array
+ */
+export interface ModelWithArray {
+    prop?: Array<ModelWithString>;
+    propWithFile?: Array<Blob>;
+    propWithNumber?: Array<number>;
+}
+"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/models/ModelWithDictionary.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a model with one property containing a dictionary
+ */
+export interface ModelWithDictionary {
+    prop?: Record<string, string>;
+}
+"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/models/ModelWithEnumInteger.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a model with one number property
+ */
+export interface ModelWithEnumInteger {
+    /**
+     * VALUE_1=1,VALUE_2=2,VALUE_3=3
+     */
+    prop?: ModelWithEnumInteger.prop;
+}
+
+export namespace ModelWithEnumInteger {
+
+    /**
+     * VALUE_1=1,VALUE_2=2,VALUE_3=3
+     */
+    export enum prop {
+        VALUE_1 = 1,
+        VALUE_2 = 2,
+        VALUE_3 = 3,
+    }
+
+
+}
 "
 `;
 
@@ -338,6 +461,119 @@ export interface ModelWithString {
     prop?: string;
 }
 "
+`;
+
+exports[`v2 should generate: ./test/generated/v2/schemas/DictionaryWithReferenceSchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const DictionaryWithReferenceSchema = {
+    type: 'dictionary',
+    contains: {
+        type: 'ModelWithString',
+    },
+};"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelThatExtendsExtendsSchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const ModelThatExtendsExtendsSchema = {
+    type: 'all-of',
+    contains: [{
+        type: 'ModelWithString',
+    }, {
+        type: 'ModelThatExtends',
+    }, {
+        properties: {
+            propExtendsC: {
+                type: 'string',
+            },
+            propExtendsD: {
+                type: 'ModelWithString',
+            },
+        },
+    }],
+};"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelThatExtendsSchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const ModelThatExtendsSchema = {
+    type: 'all-of',
+    contains: [{
+        type: 'ModelWithString',
+    }, {
+        properties: {
+            propExtendsA: {
+                type: 'string',
+            },
+            propExtendsB: {
+                type: 'ModelWithString',
+            },
+        },
+    }],
+};"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithArraySchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const ModelWithArraySchema = {
+    properties: {
+        prop: {
+            type: 'array',
+            contains: {
+                type: 'ModelWithString',
+            },
+        },
+        propWithFile: {
+            type: 'array',
+            contains: {
+                type: 'File',
+            },
+        },
+        propWithNumber: {
+            type: 'array',
+            contains: {
+                type: 'number',
+            },
+        },
+    },
+};"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithDictionarySchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const ModelWithDictionarySchema = {
+    properties: {
+        prop: {
+            type: 'dictionary',
+            contains: {
+                type: 'string',
+            },
+        },
+    },
+};"
+`;
+
+exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithEnumIntegerSchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const ModelWithEnumIntegerSchema = {
+    properties: {
+        prop: {
+            type: 'Enum',
+        },
+    },
+};"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithStringSchema.ts 1`] = `
@@ -1332,20 +1568,20 @@ export { IModelWithStringSchema } from './schemas/schemas/ModelWithStringSchema'
 export { TArrayWithArraySchema } from './schemas/ArrayWithArraySchema';
 export { TModelThatExtendsSchema } from './schemas/schemas/ModelThatExtendsSchema';
 
-export { CircularService } from './services/CircularService';
-export { CollectionFormatService } from './services/CollectionFormatService';
-export { ComplexService } from './services/ComplexService';
-export { DefaultsService } from './services/DefaultsService';
-export { DuplicateService } from './services/DuplicateService';
-export { HeaderService } from './services/HeaderService';
-export { MultipartService } from './services/MultipartService';
-export { NoContentService } from './services/NoContentService';
+export { SimpleService } from './services/SimpleService';
 export { ParametersService } from './services/ParametersService';
 export { RequestBodyService } from './services/RequestBodyService';
+export { DefaultsService } from './services/DefaultsService';
+export { DuplicateService } from './services/DuplicateService';
+export { NoContentService } from './services/NoContentService';
 export { ResponseService } from './services/ResponseService';
-export { SimpleService } from './services/SimpleService';
+export { CollectionFormatService } from './services/CollectionFormatService';
 export { TypesService } from './services/TypesService';
 export { UploadService } from './services/UploadService';
+export { ComplexService } from './services/ComplexService';
+export { MultipartService } from './services/MultipartService';
+export { HeaderService } from './services/HeaderService';
+export { CircularService } from './services/CircularService';
 "
 `;
 
@@ -2734,19 +2970,19 @@ export { TArrayWithArraySchema } from './schemas/ArrayWithArraySchema';
 export { TModelThatExtendsSchema } from './schemas/ModelThatExtendsSchema';
 export { TModelThatExtendsExtendsSchema } from './schemas/ModelThatExtendsExtendsSchema';
 
-export { CollectionFormatService } from './services/CollectionFormatService';
-export { ComplexService } from './services/ComplexService';
-export { DefaultsService } from './services/DefaultsService';
-export { DuplicateService } from './services/DuplicateService';
-export { HeaderService } from './services/HeaderService';
-export { MultipartService } from './services/MultipartService';
-export { NoContentService } from './services/NoContentService';
+export { SimpleService } from './services/SimpleService';
 export { ParametersService } from './services/ParametersService';
 export { RequestBodyService } from './services/RequestBodyService';
+export { DefaultsService } from './services/DefaultsService';
+export { DuplicateService } from './services/DuplicateService';
+export { NoContentService } from './services/NoContentService';
 export { ResponseService } from './services/ResponseService';
-export { SimpleService } from './services/SimpleService';
+export { CollectionFormatService } from './services/CollectionFormatService';
 export { TypesService } from './services/TypesService';
 export { UploadService } from './services/UploadService';
+export { ComplexService } from './services/ComplexService';
+export { MultipartService } from './services/MultipartService';
+export { HeaderService } from './services/HeaderService';
 "
 `;
 

@@ -38,6 +38,21 @@ jobs:
           repository: ozonophore/openapi-codegen
           releases-only: true
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Split Action
+        id: split
+        uses: rishabhgupta/split-by@v1
+        with:
+          # String to split
+          string: ${{ steps.release.outputs.current-version }}
+          # The delimiter to split the string
+          split-by: '-'
+      - name: Determine Checkout Depth
+        uses: haya14busa/action-cond@v1
+        id: tag
+        with:
+          cond: ${{ steps.split.outputs._1 == '' }}
+          if_true: 'latest'  # string value
+          if_false: ${{ steps.split.outputs._1 }}
       - run: |
            echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
       - name: Install yarn
@@ -80,6 +95,7 @@ jobs:
           token: ${{ secrets.NPM_AUTH_TOKEN }}
           check-version: true
           access: public
+          tag: ${{ steps.tag.outputs.value }}
       - if: steps.Publish.outputs.type != 'none'
         run: |
           echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"

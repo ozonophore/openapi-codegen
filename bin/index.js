@@ -7,7 +7,6 @@ const program = require('commander');
 const pkg = require('../package.json');
 
 const OpenAPI = require(path.resolve(__dirname, '../dist/index.js'));
-const { rmdirSync } = require('fs');
 
 const params = program
     .name('openapi')
@@ -69,37 +68,43 @@ function prepareRootOptions(options) {
 }
 
 /**
- * Preparation the configuration from secont level
+ * Preparation the configuration from second level
  */
 function prepareOptions(options, rootOptions) {
-    return {
-        input: options.input,
-        output: options.output ? options.output : rootOptions ? rootOptions.output : '',
-        outputCore: options.outputCore ? options.outputCore : rootOptions ? rootOptions.outputCore : '',
-        outputServices: options.outputServices ? options.outputServices : rootOptions ? rootOptions.outputServices : '',
-        outputModels: options.outputModels ? options.outputModels : rootOptions ? rootOptions.outputModels : '',
-        outputSchemas: options.outputSchemas ? options.outputSchemas : rootOptions ? rootOptions.outputSchemas: '',
-        httpClient: options.client ? options.client : rootOptions ? rootOptions.client : '',
-        useOptions: isValidJson(options.useOptions) ? JSON.parse(options.useOptions) : rootOptions ? rootOptions.useOptions : false,
-        useUnionTypes: isValidJson(options.useUnionTypes) ? JSON.parse(options.useUnionTypes) : rootOptions ? rootOptions.useUnionTypes : false,
-        exportCore: isValidJson(options.exportCore) ? JSON.parse(options.exportCore) : rootOptions ? rootOptions.exportCore : false,
-        exportServices: isValidJson(options.exportServices) ? JSON.parse(options.exportServices) : rootOptions ? rootOptions.exportServices : false,
-        exportModels: isValidJson(options.exportModels) ? JSON.parse(options.exportModels) : rootOptions ? rootOptions.exportModels : false,
-        exportSchemas: isValidJson(options.exportSchemas) ? JSON.parse(options.exportSchemas) : rootOptions ? rootOptions.exportSchemas : false,
-        clean: isValidJson(options.clean) ? JSON.parse(options.clean) : rootOptions ? rootOptions.clean : false,
-        request: options.request ? options.request : rootOptions ? rootOptions.request : '',
-        interfacePrefix: options.interfacePrefix ? options.interfacePrefix : rootOptions ? rootOptions.interfacePrefix : 'I',
-        enumPrefix: options.enumPrefix ? options.enumPrefix : rootOptions ? rootOptions.enumPrefix : 'E',
-        typePrefix: options.typePrefix ? options.typePrefix : rootOptions ? rootOptions.typePrefix : 'T',
-    };
+    return options.map(option => {
+        return {
+            input: option.input,
+            output: option.output ? option.output : rootOptions ? rootOptions.output : '',
+            outputCore: option.outputCore ? option.outputCore : rootOptions ? rootOptions.outputCore : '',
+            outputServices: option.outputServices ? option.outputServices : rootOptions ? rootOptions.outputServices : '',
+            outputModels: option.outputModels ? option.outputModels : rootOptions ? rootOptions.outputModels : '',
+            outputSchemas: option.outputSchemas ? option.outputSchemas : rootOptions ? rootOptions.outputSchemas : '',
+            httpClient: option.client ? option.client : rootOptions ? rootOptions.client : '',
+            useOptions: isValidJson(option.useOptions) ? JSON.parse(option.useOptions) : rootOptions ? rootOptions.useOptions : false,
+            useUnionTypes: isValidJson(option.useUnionTypes) ? JSON.parse(option.useUnionTypes) : rootOptions ? rootOptions.useUnionTypes : false,
+            exportCore: isValidJson(option.exportCore) ? JSON.parse(option.exportCore) : rootOptions ? rootOptions.exportCore : false,
+            exportServices: isValidJson(option.exportServices) ? JSON.parse(option.exportServices) : rootOptions ? rootOptions.exportServices : false,
+            exportModels: isValidJson(option.exportModels) ? JSON.parse(option.exportModels) : rootOptions ? rootOptions.exportModels : false,
+            exportSchemas: isValidJson(option.exportSchemas) ? JSON.parse(option.exportSchemas) : rootOptions ? rootOptions.exportSchemas : false,
+            clean: isValidJson(option.clean) ? JSON.parse(option.clean) : rootOptions ? rootOptions.clean : false,
+            request: option.request ? option.request : rootOptions ? rootOptions.request : '',
+            interfacePrefix: option.interfacePrefix ? option.interfacePrefix : rootOptions ? rootOptions.interfacePrefix : 'I',
+            enumPrefix: option.enumPrefix ? option.enumPrefix : rootOptions ? rootOptions.enumPrefix : 'E',
+            typePrefix: option.typePrefix ? option.typePrefix : rootOptions ? rootOptions.typePrefix : 'T',
+        };
+    });
 }
 
 function generate(options) {
     return OpenAPI.generate(options)
         .then(() => {
-            console.group(`Generation from "${options.input}"`);
-            console.log(`Generation from "${options.input}" was finished\n`);
-            console.log(`Output folder: ${path.resolve(process.cwd(), options.output)}\n`);
+            console.group(`Generation from has been finished`);
+            const group = Array.isArray(options) ? options : Array.of(options);
+            group.forEach(option => {
+                console.log(`Generation from "${option.input}" was finished`);
+                console.log(`Output folder: ${path.resolve(process.cwd(), option.output)}`);
+                console.log('==================================');
+            });
             console.groupEnd();
         })
         .catch(error => {
@@ -114,15 +119,8 @@ if (OpenAPI) {
     if (fs.existsSync(configFile)) {
         const dataString = fs.readFileSync(configFile, { encoding: `UTF-8` });
         const configs = isValidJson(dataString) ? JSON.parse(dataString) : [];
-        let operations = Array.isArray(configs) ? prepareOptions(configs) : prepareOptions(configs.items, prepareRootOptions(configs));
-        if (params.clean) {
-            configs.forEach(config => {
-                rmdirSync(config.output, { recursive: true, force: true });
-            });
-        }
-        operations.forEach(config => {
-            generate(config);
-        });
+        let operations = Array.isArray(configs) ? Array.of(prepareOptions(configs)) : prepareOptions(configs.items, prepareRootOptions(configs));
+        generate(operations);
     } else {
         generate(prepareOptions(params));
     }
