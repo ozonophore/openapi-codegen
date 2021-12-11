@@ -1552,6 +1552,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/index.ts
 export { ApiError } from './core/ApiError';
 export { OpenAPI } from './core/OpenAPI';
 
+export { EEnumWithNumbers } from './models/schemas/EnumWithNumbers';
+export { EEnumWithStrings } from './models/schemas/EnumWithStrings';
 export type { IModelWithArray } from './models/schemas/ModelWithArray';
 export type { IModelWithCircularReference } from './models/schemas/ModelWithCircularReference';
 export type { IModelWithDictionary } from './models/schemas/ModelWithDictionary';
@@ -1560,6 +1562,8 @@ export type { IModelWithString } from './models/schemas/ModelWithString';
 export type { TArrayWithArray } from './models/ArrayWithArray';
 export type { TModelThatExtends } from './models/schemas/ModelThatExtends';
 
+export { EEnumWithNumbersSchema } from './schemas/schemas/EnumWithNumbersSchema';
+export { EEnumWithStringsSchema } from './schemas/schemas/EnumWithStringsSchema';
 export { IModelWithArraySchema } from './schemas/schemas/ModelWithArraySchema';
 export { IModelWithCircularReferenceSchema } from './schemas/schemas/ModelWithCircularReferenceSchema';
 export { IModelWithDictionarySchema } from './schemas/schemas/ModelWithDictionarySchema';
@@ -1582,6 +1586,7 @@ export { ComplexService } from './services/ComplexService';
 export { MultipartService } from './services/MultipartService';
 export { HeaderService } from './services/HeaderService';
 export { CircularService } from './services/CircularService';
+export { EnumsService } from './services/EnumsService';
 "
 `;
 
@@ -1596,6 +1601,48 @@ import type { IModelWithString } from './schemas/ModelWithString';
  * This is a simple array containing an array
  */
 export type TArrayWithArray = Array<Array<IModelWithString>>;"
+`;
+
+exports[`v3 should generate from different files: ./test/generated/v3_1/models/schemas/EnumWithNumbers.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a simple enum with numbers
+ */
+export enum EEnumWithNumbers {
+    '_1' = 1,
+    '_2' = 2,
+    '_3' = 3,
+    '_1.1' = 1.1,
+    '_1.2' = 1.2,
+    '_1.3' = 1.3,
+    '_100' = 100,
+    '_200' = 200,
+    '_300' = 300,
+    '_-100' = -100,
+    '_-200' = -200,
+    '_-300' = -300,
+    '_-1.1' = -1.1,
+    '_-1.2' = -1.2,
+    '_-1.3' = -1.3,
+}"
+`;
+
+exports[`v3 should generate from different files: ./test/generated/v3_1/models/schemas/EnumWithStrings.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a simple enum with strings
+ */
+export enum EEnumWithStrings {
+    SUCCESS = 'Success',
+    WARNING = 'Warning',
+    ERROR = 'Error',
+}"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/models/schemas/ModelThatExtends.ts 1`] = `
@@ -1741,6 +1788,24 @@ export const TArrayWithArraySchema = {
             type: 'IModelWithString',
         },
     },
+};"
+`;
+
+exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/schemas/EnumWithNumbersSchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const EEnumWithNumbersSchema = {
+    type: 'Enum',
+};"
+`;
+
+exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/schemas/EnumWithStringsSchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const EEnumWithStringsSchema = {
+    type: 'Enum',
 };"
 `;
 
@@ -2154,6 +2219,33 @@ export class DuplicateService {
         const result = await __request({
             method: 'DELETE',
             path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+        });
+        return result.body;
+    }
+
+}"
+`;
+
+exports[`v3 should generate from different files: ./test/generated/v3_1/services/EnumsService.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+import { request as __request } from '../core/request';
+import { OpenAPI } from '../core/OpenAPI';
+
+export class EnumsService {
+
+    /**
+     * @param requestBody
+     * @throws ApiError
+     */
+    public static async callWithEnums(
+        requestBody?: any,
+    ): Promise<void> {
+        const result = await __request({
+            method: 'POST',
+            path: \`/api/v\${OpenAPI.VERSION}/enums\`,
+            body: requestBody,
         });
         return result.body;
     }
@@ -2954,6 +3046,9 @@ exports[`v3 should generate: ./test/generated/v3/index.ts 1`] = `
 export { ApiError } from './core/ApiError';
 export { OpenAPI } from './core/OpenAPI';
 
+export { EEnumWithNumbers } from './models/EnumWithNumbers';
+export { EEnumWithStrings } from './models/EnumWithStrings';
+export { EEnumWithStringsWithType } from './models/EnumWithStringsWithType';
 export type { IModelWithArray } from './models/ModelWithArray';
 export type { IModelWithDictionary } from './models/ModelWithDictionary';
 export { IModelWithEnum } from './models/ModelWithEnum';
@@ -2962,6 +3057,9 @@ export type { TArrayWithArray } from './models/ArrayWithArray';
 export type { TModelThatExtends } from './models/ModelThatExtends';
 export type { TModelThatExtendsExtends } from './models/ModelThatExtendsExtends';
 
+export { EEnumWithNumbersSchema } from './schemas/EnumWithNumbersSchema';
+export { EEnumWithStringsSchema } from './schemas/EnumWithStringsSchema';
+export { EEnumWithStringsWithTypeSchema } from './schemas/EnumWithStringsWithTypeSchema';
 export { IModelWithArraySchema } from './schemas/ModelWithArraySchema';
 export { IModelWithDictionarySchema } from './schemas/ModelWithDictionarySchema';
 export { IModelWithEnumSchema } from './schemas/ModelWithEnumSchema';
@@ -2983,6 +3081,7 @@ export { UploadService } from './services/UploadService';
 export { ComplexService } from './services/ComplexService';
 export { MultipartService } from './services/MultipartService';
 export { HeaderService } from './services/HeaderService';
+export { EnumsService } from './services/EnumsService';
 "
 `;
 
@@ -2997,6 +3096,62 @@ import type { IModelWithString } from './ModelWithString';
  * This is a simple array containing an array
  */
 export type TArrayWithArray = Array<Array<IModelWithString>>;"
+`;
+
+exports[`v3 should generate: ./test/generated/v3/models/EnumWithNumbers.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a simple enum with numbers
+ */
+export enum EEnumWithNumbers {
+    '_1' = 1,
+    '_2' = 2,
+    '_3' = 3,
+    '_1.1' = 1.1,
+    '_1.2' = 1.2,
+    '_1.3' = 1.3,
+    '_100' = 100,
+    '_200' = 200,
+    '_300' = 300,
+    '_-100' = -100,
+    '_-200' = -200,
+    '_-300' = -300,
+    '_-1.1' = -1.1,
+    '_-1.2' = -1.2,
+    '_-1.3' = -1.3,
+}"
+`;
+
+exports[`v3 should generate: ./test/generated/v3/models/EnumWithStrings.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a simple enum with strings
+ */
+export enum EEnumWithStrings {
+    SUCCESS = 'Success',
+    WARNING = 'Warning',
+    ERROR = 'Error',
+}"
+`;
+
+exports[`v3 should generate: ./test/generated/v3/models/EnumWithStringsWithType.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a simple enum with strings and type
+ */
+export enum EEnumWithStringsWithType {
+    VALUE1 = 'VALUE1',
+    VALUE2 = 'VALUE2',
+}"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/models/ModelThatExtends.ts 1`] = `
@@ -3146,6 +3301,33 @@ export const TArrayWithArraySchema = {
             type: 'IModelWithString',
         },
     },
+};"
+`;
+
+exports[`v3 should generate: ./test/generated/v3/schemas/EnumWithNumbersSchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const EEnumWithNumbersSchema = {
+    type: 'Enum',
+};"
+`;
+
+exports[`v3 should generate: ./test/generated/v3/schemas/EnumWithStringsSchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const EEnumWithStringsSchema = {
+    type: 'Enum',
+};"
+`;
+
+exports[`v3 should generate: ./test/generated/v3/schemas/EnumWithStringsWithTypeSchema.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export const EEnumWithStringsWithTypeSchema = {
+    type: 'Enum',
 };"
 `;
 
@@ -3544,6 +3726,33 @@ export class DuplicateService {
         const result = await __request({
             method: 'DELETE',
             path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+        });
+        return result.body;
+    }
+
+}"
+`;
+
+exports[`v3 should generate: ./test/generated/v3/services/EnumsService.ts 1`] = `
+"/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+import { request as __request } from '../core/request';
+import { OpenAPI } from '../core/OpenAPI';
+
+export class EnumsService {
+
+    /**
+     * @param requestBody
+     * @throws ApiError
+     */
+    public static async callWithEnums(
+        requestBody?: any,
+    ): Promise<void> {
+        const result = await __request({
+            method: 'POST',
+            path: \`/api/v\${OpenAPI.VERSION}/enums\`,
+            body: requestBody,
         });
         return result.body;
     }

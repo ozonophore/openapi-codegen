@@ -1,0 +1,2 @@
+description: "This is a simple enum with strings"
+enum: [ "Success", "Warning", "Error" ]

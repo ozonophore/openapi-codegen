@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The common configuration is moved from the array to the root block
 - Output paths for models, services, schemas and core can be set up separately
 
+### Fixed
+
+- Bug with an incorrect prefix which set to an enum if one has property - "type"
+
 ## [0.1.32] - 2021-12-03
 
 ### Fixed

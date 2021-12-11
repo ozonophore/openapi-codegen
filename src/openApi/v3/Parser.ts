@@ -28,10 +28,10 @@ export class Parser {
     public getTypeNameByRef(value: string, ref?: string): string {
         if (ref) {
             const definition: any = this.context.get(ref);
-            if (definition.oneOf || definition.anyOf || definition.allOf || ['string', 'number', 'integer', 'boolean', 'array'].includes(definition.type)) {
-                return `${this.context.prefix.type}${value}`;
-            } else if (definition.enum && definition !== 'boolean') {
+            if (definition.enum && definition !== 'boolean') {
                 return `${this.context.prefix.enum}${value}`;
+            } else if (definition.oneOf || definition.anyOf || definition.allOf || ['string', 'number', 'integer', 'boolean', 'array'].includes(definition.type)) {
+                return `${this.context.prefix.type}${value}`;
             } else if (definition.type === 'object') {
                 return `${this.context.prefix.interface}${value}`;
             }
