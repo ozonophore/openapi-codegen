@@ -1,5 +1,6 @@
 import type { Model } from '../../../client/interfaces/Model';
 import { join, relative } from '../../../core/path';
+import { getRefFromSchema } from '../../../utils/getRefFromSchema';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
 import { unique } from '../../../utils/unique';
 import type { OpenApi } from '../interfaces/OpenApi';
@@ -7,7 +8,7 @@ import { Parser } from '../Parser';
 
 export function getModels(this: Parser, openApi: OpenApi): Model[] {
     let models: Model[] = [];
-    const listOfModelsRef = this.getRefFromSchema(this.context, openApi);
+    const listOfModelsRef = getRefFromSchema(this.context, openApi);
     if (listOfModelsRef) {
         for (const modelRef of listOfModelsRef) {
             const definition: any = this.context.get(modelRef);

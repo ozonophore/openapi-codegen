@@ -841,6 +841,22 @@ paths:
               description: Message for default response
               schema:
                 "$ref": "schemas/ModelWithCircularReference.yml"
+  "/api/v{api-version}/enums":
+    post:
+      tags:
+        - Enums
+      operationId: CallWithEnums
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              type: object
+              properties:
+                enumWithNumbers:
+                  $ref: schemas/EnumWithNumbers.yml
+                enumWithStrings:
+                  $ref: schemas/EnumWithStrings.yml
+
 components:
   requestBodies:
     SimpleRequestBody:

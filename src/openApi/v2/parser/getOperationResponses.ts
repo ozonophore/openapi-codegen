@@ -3,7 +3,6 @@ import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiResponse } from '../interfaces/OpenApiResponse';
 import type { OpenApiResponses } from '../interfaces/OpenApiResponses';
 import { Parser } from '../Parser';
-import { getOperationResponse } from './getOperationResponse';
 import { getOperationResponseCode } from './getOperationResponseCode';
 
 export function getOperationResponses(this: Parser, openApi: OpenApi, responses: OpenApiResponses): OperationResponse[] {
@@ -18,7 +17,7 @@ export function getOperationResponses(this: Parser, openApi: OpenApi, responses:
             const responseCode = getOperationResponseCode(code);
 
             if (responseCode) {
-                const operationResponse = getOperationResponse(openApi, response, responseCode);
+                const operationResponse = this.getOperationResponse(openApi, response, responseCode);
                 operationResponses.push(operationResponse);
             }
         }

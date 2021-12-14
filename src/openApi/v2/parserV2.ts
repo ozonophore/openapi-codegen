@@ -1,12 +1,9 @@
 /* istanbul ignore file */
 import type { Client } from '../../client/interfaces/Client';
-import { Context } from '../../core/Context';
 import type { OpenApi } from './interfaces/OpenApi';
-import { getModels } from './parser/getModels';
-import { getServer } from './parser/getServer';
-import { getServices } from './parser/getServices';
-import { getServiceVersion } from './parser/getServiceVersion';
 import { Parser } from './Parser';
+import { getServer } from './parser/getServer';
+import { getServiceVersion } from './parser/getServiceVersion';
 
 /**
  * Parse the OpenAPI specification to a Client model that contains

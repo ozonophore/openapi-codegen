@@ -2,11 +2,11 @@ import type { OperationResponse } from '../../../client/interfaces/OperationResp
 import { getPattern } from '../../../utils/getPattern';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiResponse } from '../interfaces/OpenApiResponse';
+import { Parser } from '../Parser';
 import { getComment } from './getComment';
-import { getModel } from './getModel';
 import { getType } from './getType';
 
-export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse, responseCode: number): OperationResponse {
+export function getOperationResponse(this: Parser, openApi: OpenApi, response: OpenApiResponse, responseCode: number): OperationResponse {
     const operationResponse: OperationResponse = {
         in: 'response',
         name: '',
@@ -43,7 +43,7 @@ export function getOperationResponse(openApi: OpenApi, response: OpenApiResponse
             operationResponse.imports.push(...model.imports);
             return operationResponse;
         } else {
-            const model = getModel({ openApi: openApi, definition: response.schema });
+            const model = this.getModel({ openApi: openApi, definition: response.schema, parentRef: '' });
             operationResponse.export = model.export;
             operationResponse.type = model.type;
             operationResponse.base = model.base;

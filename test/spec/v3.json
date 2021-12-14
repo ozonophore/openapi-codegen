@@ -1255,6 +1255,34 @@
                     }
                 }
             }
+        },
+        "/api/v{api-version}/enums": {
+            "post": {
+                "tags": [
+                    "Enums"
+                ],
+                "operationId": "CallWithEnums",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=utf-8": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "enumWithNumbers": {
+                                        "$ref": "#/components/schemas/EnumWithNumbers"
+                                    },
+                                    "enumWithStrings": {
+                                        "$ref": "#/components/schemas/EnumWithStrings"
+                                    },
+                                    "enumWithStringsWithType": {
+                                        "$ref": "#/components/schemas/EnumWithStringsWithType"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1303,6 +1331,14 @@
                 "nullable": true,
                 "maxLength": 64,
                 "pattern": "^[a-zA-Z0-9_]*$"
+            },
+            "EnumWithStringsWithType": {
+                "description": "This is a simple enum with strings and type",
+                "type": "string",
+                "enum": [
+                    "VALUE1",
+                    "VALUE2"
+                ]
             },
             "EnumWithStrings": {
                 "description": "This is a simple enum with strings",
