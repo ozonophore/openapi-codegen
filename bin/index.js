@@ -119,7 +119,7 @@ if (OpenAPI) {
     if (fs.existsSync(configFile)) {
         const dataString = fs.readFileSync(configFile, { encoding: `UTF-8` });
         const configs = isValidJson(dataString) ? JSON.parse(dataString) : [];
-        let operations = Array.isArray(configs) ? Array.of(prepareOptions(configs)) : prepareOptions(configs.items, prepareRootOptions(configs));
+        let operations = Array.isArray(configs) ? prepareOptions(configs) : prepareOptions(configs.items, prepareRootOptions(configs));
         generate(operations);
     } else {
         generate(prepareOptions(params));
