@@ -5,6 +5,7 @@ import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
 import { Parser } from '../Parser';
 import { escapeName } from './escapeName';
 import { getComment } from './getComment';
+import { getClassName } from '../../../utils/getClassName';
 
 export function getModelProperties(this: Parser, openApi: OpenApi, definition: OpenApiSchema, parentRef: string): Model[] {
     const models: Model[] = [];
@@ -51,7 +52,7 @@ export function getModelProperties(this: Parser, openApi: OpenApi, definition: O
                 const model = this.getModel({ openApi: openApi, definition: property, parentRef: parentRef });
                 models.push({
                     name: escapeName(propertyName),
-                    alias: '',
+                    alias: model.export === 'enum' ? `${this.context.prefix.enum}${getClassName(escapeName(propertyName))}` : '',
                     path: model.path,
                     export: model.export,
                     type: model.type,

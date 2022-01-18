@@ -1720,11 +1720,11 @@ export interface IModelWithEnum {
     /**
      * This is a simple enum with strings
      */
-    test?: IModelWithEnum.test;
+    test?: IModelWithEnum.ETest;
     /**
      * These are the HTTP error code enums
      */
-    statusCode?: IModelWithEnum.statusCode;
+    statusCode?: IModelWithEnum.EStatusCode;
     /**
      * Simple boolean enum
      */
@@ -1736,7 +1736,7 @@ export namespace IModelWithEnum {
     /**
      * This is a simple enum with strings
      */
-    export enum test {
+    export enum ETest {
         SUCCESS = 'Success',
         WARNING = 'Warning',
         ERROR = 'Error',
@@ -1745,7 +1745,7 @@ export namespace IModelWithEnum {
     /**
      * These are the HTTP error code enums
      */
-    export enum statusCode {
+    export enum EStatusCode {
         _100 = '100',
         _200_FOO = '200 FOO',
         _300_FOO_BAR = '300 FOO_BAR',
@@ -3233,11 +3233,11 @@ export interface IModelWithEnum {
     /**
      * This is a simple enum with strings
      */
-    test?: IModelWithEnum.test;
+    test?: IModelWithEnum.ETest;
     /**
      * These are the HTTP error code enums
      */
-    statusCode?: IModelWithEnum.statusCode;
+    statusCode?: IModelWithEnum.EStatusCode;
     /**
      * Simple boolean enum
      */
@@ -3249,7 +3249,7 @@ export namespace IModelWithEnum {
     /**
      * This is a simple enum with strings
      */
-    export enum test {
+    export enum ETest {
         SUCCESS = 'Success',
         WARNING = 'Warning',
         ERROR = 'Error',
@@ -3258,7 +3258,7 @@ export namespace IModelWithEnum {
     /**
      * These are the HTTP error code enums
      */
-    export enum statusCode {
+    export enum EStatusCode {
         _100 = '100',
         _200_FOO = '200 FOO',
         _300_FOO_BAR = '300 FOO_BAR',

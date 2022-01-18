@@ -1,2 +1,5 @@
-{{#enumerator enum parent name}}{{this}}{{/enumerator}}{{>isNullable}}
-
+{{~#if alias~}}
+{{~#enumerator enum parent alias}}{{this}}{{/enumerator~}}{{~>isNullable~}}
+{{~else~}}
+{{~#enumerator enum parent name~}}{{this}}{{/enumerator}}{{~>isNullable~}}
+{{~/if~}}
