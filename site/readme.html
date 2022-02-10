@@ -1,0 +1,585 @@
+<h1 id="openapitypescriptcodegen">OpenAPI Typescript Codegen</h1>
+
+<p><a href="https://www.npmjs.com/package/ts-openapi-codegen"><img src="https://img.shields.io/npm/v/ts-openapi-codegen.svg" alt="NPM" /></a>
+<a href="LICENSE"><img src="http://img.shields.io/npm/l/ts-openapi-codegen.svg" alt="License" /></a>
+<a href="http://npm-stat.com/charts.html?package=ts-openapi-codegen"><img src="http://img.shields.io/npm/dm/ts-openapi-codegen.svg" alt="Downloads" /></a>
+<a href="https://codecov.io/gh/ozonophore/openapi-codegen"><img src="https://codecov.io/gh/ozonophore/openapi-codegen/branch/master/graph/badge.svg?token=RBPZ01BW0Y" alt="Downloads" /></a>
+<a href="https://www.typescriptlang.org"><img src="https://badgen.net/badge/icon/typescript?icon=typescript&amp;label" alt="TypeScript" /></a>
+<a href="https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml"><img src="https://github.com/ozonophore/openapi-codegen/actions/workflows/CI.yml/badge.svg?branch=master" alt="CI" /></a>
+<a href="https://github.com/ozonophore/openapi-codegen/issues"><img src="https://img.shields.io/github/issues/ozonophore/openapi-codegen.svg" alt="ISSUES" /></a>
+<a href="https://github.com/ozonophore/openapi-codegen/pulls"><img src="https://img.shields.io/github/issues-pr/ozonophore/openapi-codegen.svg" alt="issues-pr" /></a>
+<a href="https://github.com/ozonophore/openapi-codegen/pulls?q=is%3Apr+is%3Aclosed"><img src="https://img.shields.io/github/issues-pr-closed/ozonophore/openapi-codegen.svg" alt="issues-pr-closed" /></a>
+<a href="https://github.com/ozonophore/openapi-codegen/stargazers"><img src="https://img.shields.io/github/stars/ozonophore/openapi-codegen.svg" alt="stars-closed" /></a>
+!<a href="https://img.shields.io/librariesio/github/ozonophore/openapi-codegen">librariesio-image</a>
+!<a href="https://img.shields.io/tokei/lines/github/ozonophore/openapi-codegen">lines-image</a>
+<img src="https://badgen.net/npm/node/next" alt="Minimum node.js version" /></p>
+
+<blockquote>
+  <p>Node.js library that generates Typescript clients based on the OpenAPI specification.</p>
+</blockquote>
+
+<h2 id="why">Why?</h2>
+
+<ul>
+<li>Frontend ❤️ OpenAPI, but we do not want to use JAVA codegen in our builds</li>
+
+<li>Quick, lightweight, robust and framework agnostic 🚀</li>
+
+<li>Supports generation of TypeScript clients</li>
+
+<li>Supports generations of fetch and XHR http clients</li>
+
+<li>Supports OpenAPI specification v2.0 and v3.0</li>
+
+<li>Supports JSON and YAML files for input</li>
+
+<li>Supports generation through CLI, Node.js and NPX</li>
+
+<li>Supports tsc and @babel/plugin-transform-typescript</li>
+
+<li>Supports axios</li>
+
+<li>Supports customization names of models</li>
+
+<li>Supports external references using <a href="https://github.com/APIDevTools/json-schema-ref-parser/"><code>json-schema-ref-parser</code></a></li>
+</ul>
+
+<h2 id="install">Install</h2>
+
+<pre><code>npm install ts-openapi-codegen --save-dev
+</code></pre>
+
+<h2 id="usage">Usage</h2>
+
+<p>Two ways of configuration exist.
+First, through the command line. Second, through a configuration file.</p>
+
+<h3 id="first">First</h3>
+
+<pre><code>$ openapi --help
+
+  Usage: openapi [options]
+
+  Options:
+    -V, --version                 Output the version number
+    -i, --input &lt;value&gt;           OpenAPI specification, can be a path, url or string content (required)
+    -o, --output &lt;value&gt;          Output directory (required)
+    -oc, --outputCore &lt;value&gt;     Output directory for core files 
+    -os, --outputServices &lt;value&gt; Output directory for services 
+    -om, --outputModels &lt;value&gt;   Output directory for models 
+    -osm, --outputSchemas &lt;value&gt; Output directory for schemas 
+    -c, --client &lt;value&gt;          HTTP client to generate [fetch, xhr, node] (default: "fetch")
+    --useOptions &lt;value&gt;          Use options instead of arguments (default: false)
+    --useUnionTypes &lt;value&gt;       Use union types instead of enums (default: false)
+    --exportCore &lt;value&gt;          Write core files to disk (default: true)
+    --exportServices &lt;value&gt;      Write services to disk (default: true)
+    --exportModels &lt;value&gt;        Write models to disk (default: true)
+    --exportSchemas &lt;value&gt;       Write schemas to disk (default: false)
+    --clean &lt;value&gt;               Clean a directory before generation (default: true)
+    --interfacePrefix &lt;value&gt;     Prefix for interface model(default: "I")
+    --enumPrefix &lt;value&gt;          Prefix for enum model(default: "E")
+    --typePrefix &lt;value&gt;          Prefix for type model(default: "T")
+
+  Examples
+    $ openapi --input ./spec.json
+    $ openapi --input ./spec.json --output ./dist
+    $ openapi --input ./spec.json --output ./dist --client xhr
+</code></pre>
+
+<h3 id="second">Second</h3>
+
+<p>You should create a file in the root of a project with the name 'openapi.config.json', where you can describe configurations for several files with openapi specification.</p>
+
+<h2 id="example">Example:</h2>
+
+<p><strong>openapi.config.json</strong></p>
+
+<pre><code class="json language-json">[{
+    "input": "./first.yml",
+    "output": "./dist",
+    "client": "xhr",
+    "exportCore": true,
+    "exportServices": true,
+    "exportModels": true,
+    "exportSchemas": true
+},{
+    "input": "./second.yml",
+    "output": "./dist",
+    "client": "xhr",
+    "exportCore": true,
+    "exportServices": true,
+    "exportModels": true,
+    "exportSchemas": true
+}]
+</code></pre>
+
+<p>or with common block</p>
+
+<pre><code class="json language-json">{
+    "output": "./dist",
+    "client": "xhr",
+    "exportCore": true,
+    "exportServices": true,
+    "exportModels": true,
+    "exportSchemas": true,
+    "items": [{
+        "input": "./first.yml"
+        },{
+        "input": "./second.yml"
+        }]
+}
+</code></pre>
+
+<p>| Name           | Item           | type        | Default  | Description                                               |
+|----------------|----------------|-------------|----------|-----------------------------------------------------------|
+|output          |                | string      |          |The relative location of the output directory              |
+|outputCore      |                | string      | {output} |The relative location of the output directory for core     |
+|outputServices  |                | string      | {output} |The relative location of the output directory for services |
+|outputModels    |                | string      | {output} |The relative location of the output directory for models   |
+|outputSchemas   |                | string      | {output} |The relative location of the output directory for schemas  |
+|httpClient      |                | string      |'fetch'   |The selected httpClient (fetch or XHR)                     |
+|useOptions      |                | boolean     |false     |Use options or arguments functions                         |
+|useUnionTypes   |                | boolean     |false     |Use union types instead of enums                           |
+|exportCore      |                | boolean     |true      |Generate core client classes                               |
+|exportServices  |                | boolean     |true      |Generate services                                          |
+|exportModels    |                | boolean     |true      |Generate models                                            |
+|exportSchemas   |                | boolean     |false     |Generate schemas                                           |
+|clean           |                | boolean     |true      |Clean a directory before generation                        |
+|request         |                | string      |          |Path to custom request file                                |
+|interfacePrefix |                | string      |'I'       |Prefix for interface model                                 |
+|enumPrefix      |                | string      |'E'       |Prefix for enum model                                      |
+|typePrefix      |                | string      |'T'       |Prefix for type model                                      |
+|items           |                | array       |          |                                                           |
+|                |input           | string      |          |The relative location of the OpenAPI spec                  |
+|                |output          | string      |          |                                                           |
+|                |outputCore      | string      |          |                                                           |
+|                |outputServices  | string      |          |                                                           |
+|                |outputModels    | string      |          |                                                           |
+|                |outputSchemas   | string      |          |                                                           |
+|                |httpClient      | string      |'fetch'   |The selected httpClient (fetch or XHR)                     |
+|                |useOptions      | boolean     |false     |Use options or arguments functions                         |
+|                |useUnionTypes   | boolean     |false     |Use union types instead of enums                           |
+|                |exportCore      | boolean     |true      |Generate core client classes                               |
+|                |exportServices  | boolean     |true      |Generate services client classes                           | 
+|                |exportModels    | boolean     |true      |Generate models client classes                             |
+|                |exportSchemas   | boolean     |true      |Generate schemas client classes                            |
+|                |clean           | boolean     |true      |Clean a directory before generation                        |
+|                |request         | string      |          |Path to custom request file                                |
+|                |write           | boolean     |true      |Write the files to disk (true or false)                    |
+|                |interfacePrefix | string      |          |Prefix for interface model(I)                              |
+|                |enumPrefix      | string      |          |Prefix for enum model(E)                                   |
+|                |typePrefix      | string      |          |Prefix for type model(T)                                   |</p>
+
+<h2 id="example-1">Example</h2>
+
+<p><strong>package.json</strong></p>
+
+<pre><code class="json language-json">{
+    "scripts": {
+        "generate": "openapi --input ./spec.json --output ./dist"
+    }
+}
+</code></pre>
+
+<p><strong>NPX</strong></p>
+
+<pre><code>npx openapi-codegen --input ./spec.json --output ./dist
+</code></pre>
+
+<p><strong>Node.js API</strong></p>
+
+<pre><code class="javascript language-javascript">const OpenAPI = require('openapi-codegen');
+
+OpenAPI.generate({
+    input: './spec.json',
+    output: './dist'
+});
+
+// Or by providing the content of the spec directly 🚀
+OpenAPI.generate({
+    input: require('./spec.json'),
+    output: './dist'
+});
+</code></pre>
+
+<h2 id="features">Features</h2>
+
+<h3 id="argumentstylevsobjectstyleuseoptions">Argument style vs. Object style <code>--useOptions</code></h3>
+
+<p>There's no <a href="https://en.wikipedia.org/wiki/Named_parameter">named parameter</a> in JavaScript or TypeScript, because of
+that, we offer the flag <code>--useOptions</code> to generate code in two different styles.</p>
+
+<p><strong>Argument-style:</strong></p>
+
+<pre><code class="typescript language-typescript">function createUser(name: string, password: string, type?: string, address?: string) {
+    // ...
+}
+
+// Usage
+createUser('Jack', '123456', undefined, 'NY US');
+</code></pre>
+
+<p><strong>Object-style:</strong></p>
+
+<pre><code class="typescript language-typescript">function createUser({ name, password, type, address }: {
+    name: string,
+    password: string,
+    type?: string
+    address?: string
+}) {
+    // ...
+}
+
+// Usage
+createUser({
+    name: 'Jack',
+    password: '123456',
+    address: 'NY US'
+});
+</code></pre>
+
+<h3 id="enumsvsuniontypesuseuniontypes">Enums vs. Union Types <code>--useUnionTypes</code></h3>
+
+<p>The OpenAPI spec allows you to define <a href="https://swagger.io/docs/specification/data-models/enums/">enums</a> inside the
+data model. By default, we convert these enums definitions to <a href="https://www.typescriptlang.org/docs/handbook/enums.html">TypeScript enums</a>.
+However, these enums are merged inside the namespace of the model, this is unsupported by Babel, <a href="https://babeljs.io/docs/en/babel-plugin-transform-typescript#impartial-namespace-support">see docs</a>.
+Because we also want to support projects that use Babel <a href="https://babeljs.io/docs/en/babel-plugin-transform-typescript">@babel/plugin-transform-typescript</a>,
+we offer the flag <code>--useUnionTypes</code> to generate <a href="https://www.typescriptlang.org/docs/handbook/unions-and-intersections.html#union-types">union types</a>
+instead of the traditional enums. The difference can be seen below:</p>
+
+<p><strong>Enums:</strong></p>
+
+<pre><code class="typescript language-typescript">// Model
+export interface Order {
+    id?: number;
+    quantity?: number;
+    status?: Order.status;
+}
+
+export namespace Order {
+    export enum status {
+        PLACED = 'placed',
+        APPROVED = 'approved',
+        DELIVERED = 'delivered',
+    }
+}
+
+// Usage
+const order: Order = {
+    id: 1,
+    quantity: 40,
+    status: Order.status.PLACED
+}
+</code></pre>
+
+<p><strong>Union Types:</strong></p>
+
+<pre><code class="typescript language-typescript">// Model
+export interface Order {
+    id?: number;
+    quantity?: number;
+    status?: 'placed' | 'approved' | 'delivered';
+}
+
+// Usage
+const order: Order = {
+    id: 1,
+    quantity: 40,
+    status: 'placed'
+}
+</code></pre>
+
+<h3 id="runtimeschemasexportschemas">Runtime schemas <code>--exportSchemas</code></h3>
+
+<p>By default, the OpenAPI generator only exports interfaces for your models. These interfaces will help you during
+development, but will not be available in JavaScript during runtime. However, Swagger allows you to define properties
+that can be useful during runtime, for instance: <code>maxLength</code> of a string or a <code>pattern</code> to match, etc. Let's say
+we have the following model:</p>
+
+<pre><code class="json language-json">{
+    "MyModel": {
+        "required": [
+            "key",
+            "name"
+        ],
+        "type": "object",
+        "properties": {
+            "key": {
+                "maxLength": 64,
+                "pattern": "^[a-zA-Z0-9_]*$",
+                "type": "string"
+            },
+            "name": {
+                "maxLength": 255,
+                "type": "string"
+            },
+            "enabled": {
+                "type": "boolean",
+                "readOnly": true
+            },
+            "modified": {
+                "type": "string",
+                "format": "date-time",
+                "readOnly": true
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>This will generate the following interface:</p>
+
+<pre><code class="typescript language-typescript">export interface MyModel {
+    key: string;
+    name: string;
+    readonly enabled?: boolean;
+    readonly modified?: string;
+}
+</code></pre>
+
+<p>The interface does not contain any properties like <code>maxLength</code> or <code>pattern</code>. However, they could be useful
+if we wanted to create some form where a user could create such a model. In that form you would iterate
+over the properties to render form fields based on their type and validate the input based on the <code>maxLength</code>
+or <code>pattern</code> property. This requires us to have this information somewhere... For this we can use the
+flag <code>--exportSchemas</code> to generate a runtime model next to the normal interface:</p>
+
+<pre><code class="typescript language-typescript">export const $MyModel = {
+    properties: {
+        key: {
+            type: 'string',
+            isRequired: true,
+            maxLength: 64,
+            pattern: '^[a-zA-Z0-9_]*$',
+        },
+        name: {
+            type: 'string',
+            isRequired: true,
+            maxLength: 255,
+        },
+        enabled: {
+            type: 'boolean',
+            isReadOnly: true,
+        },
+        modified: {
+            type: 'string',
+            isReadOnly: true,
+            format: 'date-time',
+        },
+    },
+};
+</code></pre>
+
+<p>These runtime object are prefixed with a <code>$</code> character and expose all the interesting attributes of a model
+and its properties. We can now use this object to generate the form:</p>
+
+<pre><code class="typescript jsx language-typescript jsx">import { $MyModel } from './generated';
+
+// Some pseudo code to iterate over the properties and return a form field
+// the form field could be some abstract component that renders the correct
+// field type and validation rules based on the given input.
+const formFields = Object.entries($MyModel.properties).map(([key, value]) =&gt; (
+    &lt;FormField
+        name={key}
+        type={value.type}
+        format={value.format}
+        maxLength={value.maxLength}
+        pattern={value.pattern}
+        isReadOnly={value.isReadOnly}
+    /&gt;
+));
+
+const MyForm = () =&gt; (
+    &lt;form&gt;
+        {formFields}
+    &lt;/form&gt;
+);
+</code></pre>
+
+<h3 id="enumwithcustomnamesanddescriptions">Enum with custom names and descriptions</h3>
+
+<p>You can use <code>x-enum-varnames</code> and <code>x-enum-descriptions</code> in your spec to generate enum with custom names and descriptions.
+It's not in official <a href="https://github.com/OAI/OpenAPI-Specification/issues/681">spec</a> yet. But it's a supported extension
+that can help developers use more meaningful enumerators.</p>
+
+<pre><code class="json language-json">{
+    "EnumWithStrings": {
+        "description": "This is a simple enum with strings",
+        "enum": [
+            0,
+            1,
+            2
+        ],
+        "x-enum-varnames": [
+            "Success",
+            "Warning",
+            "Error"
+        ],
+        "x-enum-descriptions": [
+            "Used when the status of something is successful",
+            "Used when the status of something has a warning",
+            "Used when the status of something has an error"
+        ]
+    }
+}
+</code></pre>
+
+<p>Generated code:</p>
+
+<pre><code class="typescript language-typescript">enum EnumWithStrings {
+    /*
+    * Used when the status of something is successful
+    */
+    Success = 0,
+    /*
+    * Used when the status of something has a warning
+    */
+    Waring = 1,
+    /*
+    * Used when the status of something has an error
+    */
+    Error = 2,
+}
+</code></pre>
+
+<h3 id="nullableinopenapiv2">Nullable in OpenAPI v2</h3>
+
+<p>In the OpenAPI v3 spec you can create properties that can be NULL, by providing a <code>nullable: true</code> in your schema.
+However, the v2 spec does not allow you to do this. You can use the unofficial <code>x-nullable</code> in your specification
+to generate nullable properties in OpenApi v2.</p>
+
+<pre><code class="json language-json">{
+    "ModelWithNullableString": {
+        "required": ["requiredProp"],
+        "description": "This is a model with one string property",
+        "type": "object",
+        "properties": {
+            "prop": {
+                "description": "This is a simple string property",
+                "type": "string",
+                "x-nullable": true
+            },
+            "requiredProp": {
+                "description": "This is a simple string property",
+                "type": "string",
+                "x-nullable": true
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>Generated code:</p>
+
+<pre><code class="typescript language-typescript">interface ModelWithNullableString {
+    prop?: string | null,
+    requiredProp: string | null,
+}
+</code></pre>
+
+<h3 id="authorization">Authorization</h3>
+
+<p>The OpenAPI generator supports Bearer Token authorization. In order to enable the sending
+of tokens in each request you can set the token using the global OpenAPI configuration:</p>
+
+<pre><code class="typescript language-typescript">import { OpenAPI } from './generated';
+
+OpenAPI.TOKEN = 'some-bearer-token';
+</code></pre>
+
+<p>Alternatively, we also support an async method that provides the token for each request.
+You can simply assign this method to the same <code>TOKEN</code>property in the global OpenAPI object.</p>
+
+<pre><code class="typescript language-typescript">import { OpenAPI } from './generated';
+
+const getToken = async () =&gt; {
+    // Some code that requests a token...
+    return 'SOME_TOKEN';
+}
+
+OpenAPI.TOKEN = getToken;
+</code></pre>
+
+<h3 id="references">References</h3>
+
+<p>Local references to schema definitions (those beginning with <code>#/definitions/schemas/</code>)
+will be converted to type references to the equivalent, generated top-level type.</p>
+
+<p>The OpenAPI generator also supports external references, which allows you to break
+down your openapi.yml into multiple sub-files, or incorporate third-party schemas
+as part of your types to ensure everything is able to be TypeScript generated.</p>
+
+<p>External references may be:</p>
+
+<ul>
+<li><p><em>relative references</em> - references to other files at the same location e.g.
+<code>{ $ref: 'schemas/customer.yml' }</code></p></li>
+
+<li><p><em>remote references</em> - fully qualified references to another remote location
+ e.g. <code>{ $ref: 'https://myexampledomain.com/schemas/customer_schema.yml' }</code></p>
+
+<p>For remote references, both files (when the file is on the current filesystem)
+and http(s) URLs are supported.</p></li>
+</ul>
+
+<p>External references may also contain internal paths in the external schema (e.g.
+<code>schemas/collection.yml#/definitions/schemas/Customer</code>) and back-references to
+the base openapi file or between files (so that you can reference another
+schema in the main file as a type of an object or array property, for example).</p>
+
+<p>At start-up, an OpenAPI or Swagger file with external references will be "bundled",
+so that all external references and back-references will be resolved (but local
+references preserved).</p>
+
+<h3 id="comparetoothergenerators">Compare to other generators</h3>
+
+<p>Depending on which swagger generator you use, you will see different output.
+For instance: Different ways of generating models, services, level of quality,
+HTTP client, etc. I've compiled a list with the results per area and how they
+compare against the openapi-typescript-codegen.</p>
+
+<p><a href="https://htmlpreview.github.io/?https://github.com/ferdikoomen/openapi-typescript-codegen/blob/master/samples/index.html">Click here to see the comparison</a></p>
+
+<h1 id="faq">FAQ</h1>
+
+<h3 id="babelsupport">Babel support</h3>
+
+<p>If you use enums inside your models / definitions then those enums are by default inside a namespace with the same name
+as your model. This is called declaration merging. However, the <a href="https://babeljs.io/docs/en/babel-plugin-transform-typescript">@babel/plugin-transform-typescript</a>
+does not support these namespaces, so if you are using babel in your project please use the <code>--useUnionTypes</code> flag
+to generate union types instead of traditional enums. More info can be found here: <a href="#enums-vs-union-types---useuniontypes">Enums vs. Union Types</a>.</p>
+
+<p><strong>Note:</strong> If you are using Babel 7 and Typescript 3.8 (or higher) then you should enable the <code>onlyRemoveTypeImports</code> to
+ignore any 'type only' imports, see https://babeljs.io/docs/en/babel-preset-typescript#onlyremovetypeimports for more info</p>
+
+<pre><code class="javascript language-javascript">module.exports = {
+    presets: [
+        ['@babel/preset-typescript', {
+            onlyRemoveTypeImports: true,
+        }],
+    ],
+};
+</code></pre>
+
+<h3 id="nodejssupport">Node.js support</h3>
+
+<p>By default, this library will generate a client that is compatible with the (browser based) <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">fetch API</a>,
+however this client will not work inside the Node.js environment. If you want to generate a Node.js compatible client then
+you can specify <code>--client node</code> in the openapi call:</p>
+
+<p><code>openapi --input ./spec.json --output ./dist --client node</code></p>
+
+<p>This will generate a client that uses <a href="https://www.npmjs.com/package/node-fetch"><code>node-fetch</code></a> internally. However,
+in order to compile and run this client, you will need to install the <code>node-fetch</code> dependencies:</p>
+
+<pre><code>npm install @types/node-fetch --save-dev
+npm install node-fetch --save-dev
+npm install form-data --save-dev
+</code></pre>
+
+<p>In order to compile the project and resolve the imports, you will need to enable the <code>allowSyntheticDefaultImports</code>
+in your <code>tsconfig.json</code> file.</p>
+
+<pre><code class="json language-json">{
+    "allowSyntheticDefaultImports": true
+}
+</code></pre>
