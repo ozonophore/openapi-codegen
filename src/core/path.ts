@@ -11,7 +11,9 @@ export function join(...paths: string[]): string {
 }
 
 export function relative(from: string, to: string): string {
-    return path.relative(from, to).replace(SEARCH_REGEXP, '/');
+    const value = `./${path.relative(from, to)}`;
+    const hasSlash = value.length > 0 && value.endsWith('/');
+    return `${value.replace(SEARCH_REGEXP, '/')}`.concat(hasSlash ? '' : '/');
 }
 
 export function resolve(...pathSegments: string[]): string {

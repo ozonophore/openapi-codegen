@@ -302,36 +302,36 @@ exports[`v2 should generate: ./test/generated/v2/index.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export { ApiError } from './core/ApiError';
-export { OpenAPI } from './core/OpenAPI';
+export { ApiError } from '././core/ApiError';
+export { OpenAPI } from '././core/OpenAPI';
 
-export type { DictionaryWithReference } from './models/DictionaryWithReference';
-export type { ModelThatExtends } from './models/ModelThatExtends';
-export type { ModelThatExtendsExtends } from './models/ModelThatExtendsExtends';
-export type { ModelWithArray } from './models/ModelWithArray';
-export type { ModelWithDictionary } from './models/ModelWithDictionary';
-export { ModelWithEnumInteger } from './models/ModelWithEnumInteger';
-export type { ModelWithString } from './models/ModelWithString';
+export type { DictionaryWithReference } from '././models/DictionaryWithReference';
+export type { ModelThatExtends } from '././models/ModelThatExtends';
+export type { ModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
+export type { ModelWithArray } from '././models/ModelWithArray';
+export type { ModelWithDictionary } from '././models/ModelWithDictionary';
+export { ModelWithEnumInteger } from '././models/ModelWithEnumInteger';
+export type { ModelWithString } from '././models/ModelWithString';
 
-export { DictionaryWithReferenceSchema } from './schemas/DictionaryWithReferenceSchema';
-export { ModelThatExtendsSchema } from './schemas/ModelThatExtendsSchema';
-export { ModelThatExtendsExtendsSchema } from './schemas/ModelThatExtendsExtendsSchema';
-export { ModelWithArraySchema } from './schemas/ModelWithArraySchema';
-export { ModelWithDictionarySchema } from './schemas/ModelWithDictionarySchema';
-export { ModelWithEnumIntegerSchema } from './schemas/ModelWithEnumIntegerSchema';
-export { ModelWithStringSchema } from './schemas/ModelWithStringSchema';
+export { DictionaryWithReferenceSchema } from '././schemas/DictionaryWithReferenceSchema';
+export { ModelThatExtendsSchema } from '././schemas/ModelThatExtendsSchema';
+export { ModelThatExtendsExtendsSchema } from '././schemas/ModelThatExtendsExtendsSchema';
+export { ModelWithArraySchema } from '././schemas/ModelWithArraySchema';
+export { ModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
+export { ModelWithEnumIntegerSchema } from '././schemas/ModelWithEnumIntegerSchema';
+export { ModelWithStringSchema } from '././schemas/ModelWithStringSchema';
 
-export { Service } from './services/Service';
-export { SimpleService } from './services/SimpleService';
-export { ParametersService } from './services/ParametersService';
-export { DefaultsService } from './services/DefaultsService';
-export { DuplicateService } from './services/DuplicateService';
-export { NoContentService } from './services/NoContentService';
-export { ResponseService } from './services/ResponseService';
-export { CollectionFormatService } from './services/CollectionFormatService';
-export { TypesService } from './services/TypesService';
-export { ComplexService } from './services/ComplexService';
-export { HeaderService } from './services/HeaderService';
+export { Service } from '././services/Service';
+export { SimpleService } from '././services/SimpleService';
+export { ParametersService } from '././services/ParametersService';
+export { DefaultsService } from '././services/DefaultsService';
+export { DuplicateService } from '././services/DuplicateService';
+export { NoContentService } from '././services/NoContentService';
+export { ResponseService } from '././services/ResponseService';
+export { CollectionFormatService } from '././services/CollectionFormatService';
+export { TypesService } from '././services/TypesService';
+export { ComplexService } from '././services/ComplexService';
+export { HeaderService } from '././services/HeaderService';
 "
 `;
 
@@ -593,8 +593,8 @@ exports[`v2 should generate: ./test/generated/v2/services/CollectionFormatServic
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class CollectionFormatService {
 
@@ -634,9 +634,9 @@ exports[`v2 should generate: ./test/generated/v2/services/ComplexService.ts 1`] 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { ModelWithString } from './../models/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class ComplexService {
 
@@ -678,9 +678,9 @@ exports[`v2 should generate: ./test/generated/v2/services/DefaultsService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { ModelWithString } from './../models/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class DefaultsService {
 
@@ -785,8 +785,8 @@ exports[`v2 should generate: ./test/generated/v2/services/DuplicateService.ts 1`
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class DuplicateService {
 
@@ -841,8 +841,8 @@ exports[`v2 should generate: ./test/generated/v2/services/HeaderService.ts 1`] =
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class HeaderService {
 
@@ -870,8 +870,8 @@ exports[`v2 should generate: ./test/generated/v2/services/NoContentService.ts 1`
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class NoContentService {
 
@@ -894,8 +894,8 @@ exports[`v2 should generate: ./test/generated/v2/services/ParametersService.ts 1
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class ParametersService {
 
@@ -977,11 +977,11 @@ exports[`v2 should generate: ./test/generated/v2/services/ResponseService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ModelThatExtendsExtends } from '../models/ModelThatExtendsExtends';
-import type { ModelThatExtends } from '../models/ModelThatExtends';
-import type { ModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { ModelThatExtendsExtends } from './../models/ModelThatExtendsExtends';
+import type { ModelThatExtends } from './../models/ModelThatExtends';
+import type { ModelWithString } from './../models/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class ResponseService {
 
@@ -1045,12 +1045,12 @@ exports[`v2 should generate: ./test/generated/v2/services/Service.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DictionaryWithReference } from '../models/DictionaryWithReference';
-import type { ModelWithArray } from '../models/ModelWithArray';
-import type { ModelWithDictionary } from '../models/ModelWithDictionary';
-import type { ModelWithEnumInteger } from '../models/ModelWithEnumInteger';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { DictionaryWithReference } from './../models/DictionaryWithReference';
+import type { ModelWithArray } from './../models/ModelWithArray';
+import type { ModelWithDictionary } from './../models/ModelWithDictionary';
+import type { ModelWithEnumInteger } from './../models/ModelWithEnumInteger';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class Service {
 
@@ -1109,8 +1109,8 @@ exports[`v2 should generate: ./test/generated/v2/services/SimpleService.ts 1`] =
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class SimpleService {
 
@@ -1198,8 +1198,8 @@ exports[`v2 should generate: ./test/generated/v2/services/TypesService.ts 1`] = 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class TypesService {
 
@@ -1549,44 +1549,44 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/index.ts
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export { ApiError } from './core/ApiError';
-export { OpenAPI } from './core/OpenAPI';
+export { ApiError } from '././core/ApiError';
+export { OpenAPI } from '././core/OpenAPI';
 
-export { EEnumWithNumbers } from './models/schemas/EnumWithNumbers';
-export { EEnumWithStrings } from './models/schemas/EnumWithStrings';
-export type { IModelWithArray } from './models/schemas/ModelWithArray';
-export type { IModelWithCircularReference } from './models/schemas/ModelWithCircularReference';
-export type { IModelWithDictionary } from './models/schemas/ModelWithDictionary';
-export { IModelWithEnum } from './models/schemas/ModelWithEnum';
-export type { IModelWithString } from './models/schemas/ModelWithString';
-export type { TArrayWithArray } from './models/ArrayWithArray';
-export type { TModelThatExtends } from './models/schemas/ModelThatExtends';
+export { EEnumWithNumbers } from '././models/schemas/EnumWithNumbers';
+export { EEnumWithStrings } from '././models/schemas/EnumWithStrings';
+export type { IModelWithArray } from '././models/schemas/ModelWithArray';
+export type { IModelWithCircularReference } from '././models/schemas/ModelWithCircularReference';
+export type { IModelWithDictionary } from '././models/schemas/ModelWithDictionary';
+export { IModelWithEnum } from '././models/schemas/ModelWithEnum';
+export type { IModelWithString } from '././models/schemas/ModelWithString';
+export type { TArrayWithArray } from '././models/ArrayWithArray';
+export type { TModelThatExtends } from '././models/schemas/ModelThatExtends';
 
-export { EEnumWithNumbersSchema } from './schemas/schemas/EnumWithNumbersSchema';
-export { EEnumWithStringsSchema } from './schemas/schemas/EnumWithStringsSchema';
-export { IModelWithArraySchema } from './schemas/schemas/ModelWithArraySchema';
-export { IModelWithCircularReferenceSchema } from './schemas/schemas/ModelWithCircularReferenceSchema';
-export { IModelWithDictionarySchema } from './schemas/schemas/ModelWithDictionarySchema';
-export { IModelWithEnumSchema } from './schemas/schemas/ModelWithEnumSchema';
-export { IModelWithStringSchema } from './schemas/schemas/ModelWithStringSchema';
-export { TArrayWithArraySchema } from './schemas/ArrayWithArraySchema';
-export { TModelThatExtendsSchema } from './schemas/schemas/ModelThatExtendsSchema';
+export { EEnumWithNumbersSchema } from '././schemas/schemas/EnumWithNumbersSchema';
+export { EEnumWithStringsSchema } from '././schemas/schemas/EnumWithStringsSchema';
+export { IModelWithArraySchema } from '././schemas/schemas/ModelWithArraySchema';
+export { IModelWithCircularReferenceSchema } from '././schemas/schemas/ModelWithCircularReferenceSchema';
+export { IModelWithDictionarySchema } from '././schemas/schemas/ModelWithDictionarySchema';
+export { IModelWithEnumSchema } from '././schemas/schemas/ModelWithEnumSchema';
+export { IModelWithStringSchema } from '././schemas/schemas/ModelWithStringSchema';
+export { TArrayWithArraySchema } from '././schemas/ArrayWithArraySchema';
+export { TModelThatExtendsSchema } from '././schemas/schemas/ModelThatExtendsSchema';
 
-export { SimpleService } from './services/SimpleService';
-export { ParametersService } from './services/ParametersService';
-export { RequestBodyService } from './services/RequestBodyService';
-export { DefaultsService } from './services/DefaultsService';
-export { DuplicateService } from './services/DuplicateService';
-export { NoContentService } from './services/NoContentService';
-export { ResponseService } from './services/ResponseService';
-export { CollectionFormatService } from './services/CollectionFormatService';
-export { TypesService } from './services/TypesService';
-export { UploadService } from './services/UploadService';
-export { ComplexService } from './services/ComplexService';
-export { MultipartService } from './services/MultipartService';
-export { HeaderService } from './services/HeaderService';
-export { CircularService } from './services/CircularService';
-export { EnumsService } from './services/EnumsService';
+export { SimpleService } from '././services/SimpleService';
+export { ParametersService } from '././services/ParametersService';
+export { RequestBodyService } from '././services/RequestBodyService';
+export { DefaultsService } from '././services/DefaultsService';
+export { DuplicateService } from '././services/DuplicateService';
+export { NoContentService } from '././services/NoContentService';
+export { ResponseService } from '././services/ResponseService';
+export { CollectionFormatService } from '././services/CollectionFormatService';
+export { TypesService } from '././services/TypesService';
+export { UploadService } from '././services/UploadService';
+export { ComplexService } from '././services/ComplexService';
+export { MultipartService } from '././services/MultipartService';
+export { HeaderService } from '././services/HeaderService';
+export { CircularService } from '././services/CircularService';
+export { EnumsService } from '././services/EnumsService';
 "
 `;
 
@@ -1923,9 +1923,9 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithCircularReference } from '../models/schemas/ModelWithCircularReference';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { IModelWithCircularReference } from './../models/schemas/ModelWithCircularReference';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class CircularService {
 
@@ -1948,8 +1948,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class CollectionFormatService {
 
@@ -1989,12 +1989,12 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithArray } from '../models/schemas/ModelWithArray';
-import type { IModelWithDictionary } from '../models/schemas/ModelWithDictionary';
-import type { IModelWithEnum } from '../models/schemas/ModelWithEnum';
-import type { IModelWithString } from '../models/schemas/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { IModelWithArray } from './../models/schemas/ModelWithArray';
+import type { IModelWithDictionary } from './../models/schemas/ModelWithDictionary';
+import type { IModelWithEnum } from './../models/schemas/ModelWithEnum';
+import type { IModelWithString } from './../models/schemas/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class ComplexService {
 
@@ -2067,9 +2067,9 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from '../models/schemas/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { IModelWithString } from './../models/schemas/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class DefaultsService {
 
@@ -2174,8 +2174,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class DuplicateService {
 
@@ -2230,8 +2230,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class EnumsService {
 
@@ -2257,8 +2257,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class HeaderService {
 
@@ -2286,8 +2286,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class MultipartService {
 
@@ -2316,8 +2316,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class NoContentService {
 
@@ -2340,9 +2340,9 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from '../models/schemas/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { IModelWithString } from './../models/schemas/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class ParametersService {
 
@@ -2478,9 +2478,9 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from '../models/schemas/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { IModelWithString } from './../models/schemas/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class RequestBodyService {
 
@@ -2507,10 +2507,10 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TModelThatExtends } from '../models/schemas/ModelThatExtends';
-import type { IModelWithString } from '../models/schemas/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { TModelThatExtends } from './../models/schemas/ModelThatExtends';
+import type { IModelWithString } from './../models/schemas/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class ResponseService {
 
@@ -2573,8 +2573,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class SimpleService {
 
@@ -2662,8 +2662,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class TypesService {
 
@@ -2715,8 +2715,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class UploadService {
 
@@ -3043,45 +3043,45 @@ exports[`v3 should generate: ./test/generated/v3/index.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export { ApiError } from './core/ApiError';
-export { OpenAPI } from './core/OpenAPI';
+export { ApiError } from '././core/ApiError';
+export { OpenAPI } from '././core/OpenAPI';
 
-export { EEnumWithNumbers } from './models/EnumWithNumbers';
-export { EEnumWithStrings } from './models/EnumWithStrings';
-export { EEnumWithStringsWithType } from './models/EnumWithStringsWithType';
-export type { IModelWithArray } from './models/ModelWithArray';
-export type { IModelWithDictionary } from './models/ModelWithDictionary';
-export { IModelWithEnum } from './models/ModelWithEnum';
-export type { IModelWithString } from './models/ModelWithString';
-export type { TArrayWithArray } from './models/ArrayWithArray';
-export type { TModelThatExtends } from './models/ModelThatExtends';
-export type { TModelThatExtendsExtends } from './models/ModelThatExtendsExtends';
+export { EEnumWithNumbers } from '././models/EnumWithNumbers';
+export { EEnumWithStrings } from '././models/EnumWithStrings';
+export { EEnumWithStringsWithType } from '././models/EnumWithStringsWithType';
+export type { IModelWithArray } from '././models/ModelWithArray';
+export type { IModelWithDictionary } from '././models/ModelWithDictionary';
+export { IModelWithEnum } from '././models/ModelWithEnum';
+export type { IModelWithString } from '././models/ModelWithString';
+export type { TArrayWithArray } from '././models/ArrayWithArray';
+export type { TModelThatExtends } from '././models/ModelThatExtends';
+export type { TModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
 
-export { EEnumWithNumbersSchema } from './schemas/EnumWithNumbersSchema';
-export { EEnumWithStringsSchema } from './schemas/EnumWithStringsSchema';
-export { EEnumWithStringsWithTypeSchema } from './schemas/EnumWithStringsWithTypeSchema';
-export { IModelWithArraySchema } from './schemas/ModelWithArraySchema';
-export { IModelWithDictionarySchema } from './schemas/ModelWithDictionarySchema';
-export { IModelWithEnumSchema } from './schemas/ModelWithEnumSchema';
-export { IModelWithStringSchema } from './schemas/ModelWithStringSchema';
-export { TArrayWithArraySchema } from './schemas/ArrayWithArraySchema';
-export { TModelThatExtendsSchema } from './schemas/ModelThatExtendsSchema';
-export { TModelThatExtendsExtendsSchema } from './schemas/ModelThatExtendsExtendsSchema';
+export { EEnumWithNumbersSchema } from '././schemas/EnumWithNumbersSchema';
+export { EEnumWithStringsSchema } from '././schemas/EnumWithStringsSchema';
+export { EEnumWithStringsWithTypeSchema } from '././schemas/EnumWithStringsWithTypeSchema';
+export { IModelWithArraySchema } from '././schemas/ModelWithArraySchema';
+export { IModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
+export { IModelWithEnumSchema } from '././schemas/ModelWithEnumSchema';
+export { IModelWithStringSchema } from '././schemas/ModelWithStringSchema';
+export { TArrayWithArraySchema } from '././schemas/ArrayWithArraySchema';
+export { TModelThatExtendsSchema } from '././schemas/ModelThatExtendsSchema';
+export { TModelThatExtendsExtendsSchema } from '././schemas/ModelThatExtendsExtendsSchema';
 
-export { SimpleService } from './services/SimpleService';
-export { ParametersService } from './services/ParametersService';
-export { RequestBodyService } from './services/RequestBodyService';
-export { DefaultsService } from './services/DefaultsService';
-export { DuplicateService } from './services/DuplicateService';
-export { NoContentService } from './services/NoContentService';
-export { ResponseService } from './services/ResponseService';
-export { CollectionFormatService } from './services/CollectionFormatService';
-export { TypesService } from './services/TypesService';
-export { UploadService } from './services/UploadService';
-export { ComplexService } from './services/ComplexService';
-export { MultipartService } from './services/MultipartService';
-export { HeaderService } from './services/HeaderService';
-export { EnumsService } from './services/EnumsService';
+export { SimpleService } from '././services/SimpleService';
+export { ParametersService } from '././services/ParametersService';
+export { RequestBodyService } from '././services/RequestBodyService';
+export { DefaultsService } from '././services/DefaultsService';
+export { DuplicateService } from '././services/DuplicateService';
+export { NoContentService } from '././services/NoContentService';
+export { ResponseService } from '././services/ResponseService';
+export { CollectionFormatService } from '././services/CollectionFormatService';
+export { TypesService } from '././services/TypesService';
+export { UploadService } from '././services/UploadService';
+export { ComplexService } from '././services/ComplexService';
+export { MultipartService } from '././services/MultipartService';
+export { HeaderService } from '././services/HeaderService';
+export { EnumsService } from '././services/EnumsService';
 "
 `;
 
@@ -3455,8 +3455,8 @@ exports[`v3 should generate: ./test/generated/v3/services/CollectionFormatServic
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class CollectionFormatService {
 
@@ -3496,12 +3496,12 @@ exports[`v3 should generate: ./test/generated/v3/services/ComplexService.ts 1`] 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithArray } from '../models/ModelWithArray';
-import type { IModelWithDictionary } from '../models/ModelWithDictionary';
-import type { IModelWithEnum } from '../models/ModelWithEnum';
-import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { IModelWithArray } from './../models/ModelWithArray';
+import type { IModelWithDictionary } from './../models/ModelWithDictionary';
+import type { IModelWithEnum } from './../models/ModelWithEnum';
+import type { IModelWithString } from './../models/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class ComplexService {
 
@@ -3574,9 +3574,9 @@ exports[`v3 should generate: ./test/generated/v3/services/DefaultsService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { IModelWithString } from './../models/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class DefaultsService {
 
@@ -3681,8 +3681,8 @@ exports[`v3 should generate: ./test/generated/v3/services/DuplicateService.ts 1`
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class DuplicateService {
 
@@ -3737,8 +3737,8 @@ exports[`v3 should generate: ./test/generated/v3/services/EnumsService.ts 1`] = 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class EnumsService {
 
@@ -3764,8 +3764,8 @@ exports[`v3 should generate: ./test/generated/v3/services/HeaderService.ts 1`] =
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class HeaderService {
 
@@ -3793,8 +3793,8 @@ exports[`v3 should generate: ./test/generated/v3/services/MultipartService.ts 1`
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class MultipartService {
 
@@ -3823,8 +3823,8 @@ exports[`v3 should generate: ./test/generated/v3/services/NoContentService.ts 1`
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class NoContentService {
 
@@ -3847,9 +3847,9 @@ exports[`v3 should generate: ./test/generated/v3/services/ParametersService.ts 1
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { IModelWithString } from './../models/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class ParametersService {
 
@@ -3985,9 +3985,9 @@ exports[`v3 should generate: ./test/generated/v3/services/RequestBodyService.ts 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { IModelWithString } from './../models/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class RequestBodyService {
 
@@ -4014,11 +4014,11 @@ exports[`v3 should generate: ./test/generated/v3/services/ResponseService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TModelThatExtendsExtends } from '../models/ModelThatExtendsExtends';
-import type { TModelThatExtends } from '../models/ModelThatExtends';
-import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import type { TModelThatExtendsExtends } from './../models/ModelThatExtendsExtends';
+import type { TModelThatExtends } from './../models/ModelThatExtends';
+import type { IModelWithString } from './../models/ModelWithString';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class ResponseService {
 
@@ -4082,8 +4082,8 @@ exports[`v3 should generate: ./test/generated/v3/services/SimpleService.ts 1`] =
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class SimpleService {
 
@@ -4171,8 +4171,8 @@ exports[`v3 should generate: ./test/generated/v3/services/TypesService.ts 1`] = 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class TypesService {
 
@@ -4224,8 +4224,8 @@ exports[`v3 should generate: ./test/generated/v3/services/UploadService.ts 1`] =
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import { request as __request } from '../core/request';
-import { OpenAPI } from '../core/OpenAPI';
+import { request as __request } from './../core/request';
+import { OpenAPI } from './../core/OpenAPI';
 
 export class UploadService {
 
