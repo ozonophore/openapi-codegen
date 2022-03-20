@@ -149,8 +149,8 @@ export class WriteClient {
                 useUnionTypes,
                 useOptions,
                 useCustomRequest: !!request,
-                outputModels: exportModels ? `${relative(outputPathServices, outputPathModels)}/` : '../models/',
-                outputCore: exportCore ? `${relative(outputPathServices, outputPathCore)}/` : '../core/',
+                outputModels: exportModels ? `${relative(outputPathServices, outputPathModels)}` : '../models/',
+                outputCore: exportCore ? `${relative(outputPathServices, outputPathCore)}` : '../core/',
             });
         }
 
@@ -233,15 +233,15 @@ export class WriteClient {
                     result.set(`${key}`, clientIndex);
                 }
                 if (exportCore) {
-                    const relativePath = `${relative(key, outputCore)}/`;
+                    const relativePath = `${relative(key, outputCore)}`;
                     const clientCore = clientIndex.core.find(item => item === relativePath);
                     if (!clientCore) {
                         clientIndex.core.push(relativePath);
                     }
                 }
                 if (exportModels || exportSchemas) {
-                    const relativePathModel = `${relative(key, outputModels)}/`;
-                    const relativePathSchema = `${relative(key, outputSchemas)}/`;
+                    const relativePathModel = `${relative(key, outputModels)}`;
+                    const relativePathSchema = `${relative(key, outputSchemas)}`;
                     for (const model of client.models) {
                         const modelFinal = {
                             name: model.name,
@@ -276,7 +276,7 @@ export class WriteClient {
                     }
                 }
                 if (exportServices) {
-                    const relativeService = `${relative(key, outputServices)}/`;
+                    const relativeService = `${relative(key, outputServices)}`;
                     for (const service of client.services) {
                         const valueIndex = clientIndex.services.find(item => item.name === service.name && item.package === relativeService);
                         if (!valueIndex) {
