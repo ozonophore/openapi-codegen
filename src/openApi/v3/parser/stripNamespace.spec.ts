@@ -2,6 +2,7 @@ import { stripNamespace } from './stripNamespace';
 
 describe('stripNamespace', () => {
     it('should strip namespace', () => {
+        expect(stripNamespace('package/componentClass.yml#/components/TestComponent')).toEqual('package/TestComponent');
         expect(stripNamespace('package/componentClass.yml')).toEqual('package/ComponentClass');
         expect(stripNamespace('#/components/schemas/Item')).toEqual('Item');
         expect(stripNamespace('#/components/responses/Item')).toEqual('Item');
