@@ -13,7 +13,9 @@ export function stripNamespace(value: string): string {
         return value;
     }
     if (!value.match(/^(http:\/\/|https:\/\/|#\/)/g) && !hasMappedType(value) && !value.match(/^array\[[a-z]+\]$/g)) {
-        const directoryName = dirName(value);
+        const foundFile = value.match(/^(.*)#/);
+        const directoryName = foundFile ? dirName(foundFile[1]) : dirName(value);
+
         const extName = extname(value);
         const baseName = extName.toLowerCase().match(/(\.json|\.yaml|\.yml)$/g) ? getClassName(basename(value, extName)) : getClassName(basename(value));
         return directoryName ? join(directoryName, baseName) : baseName;
