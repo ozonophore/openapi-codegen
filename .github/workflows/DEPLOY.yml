@@ -55,21 +55,18 @@ jobs:
           if_false: ${{ steps.split.outputs._1 }}
       - run: |
            echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
-      - name: Install yarn
-        if: github.ref == 'refs/heads/master'
-        run: npm install --global yarn
       - name: Install packages
         if: github.ref == 'refs/heads/master'
-        run: yarn install
+        run: npm install
       - name: Build library
         if: github.ref == 'refs/heads/master'
-        run: yarn run release
+        run: npm run release
       - name: Run unit tests
         if: github.ref == 'refs/heads/master'
-        run: yarn run test:coverage
+        run: npm run test:coverage
       - name: Run e2e tests
         if: github.ref == 'refs/heads/master'
-        run: yarn run test:e2e
+        run: npm run test:e2e
       - name: Submit to Codecov
         if: github.ref == 'refs/heads/master'
         uses: codecov/codecov-action@v2

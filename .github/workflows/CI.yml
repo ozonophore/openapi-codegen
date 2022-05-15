@@ -23,16 +23,14 @@ jobs:
 #         uses: martinbeentjes/npm-get-version-action@master
 #       - run: |
 #            echo "Version: ${{ steps.release.outputs.current-version }}"
-      - name: Install yarn
-        run: npm install --global yarn
       - name: Install packages
-        run: yarn install
+        run: npm install
       - name: Build library
-        run: yarn run release
+        run: npm run release
       - name: Run unit tests
-        run: yarn run test:coverage
+        run: npm run test:coverage
       - name: Run e2e tests
-        run: yarn run test:e2e
+        run: npm run test:e2e
       - name: Submit to Codecov
         uses: codecov/codecov-action@v2
         with:
