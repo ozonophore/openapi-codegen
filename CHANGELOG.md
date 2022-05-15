@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.4] - 2022-05-15
 
-###Added
+### Added
 
 - Support sibling element from an external file
 - Extracted yarn
