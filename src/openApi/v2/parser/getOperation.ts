@@ -7,10 +7,8 @@ import { Parser } from '../Parser';
 import { getComment } from './getComment';
 import { getOperationErrors } from './getOperationErrors';
 import { getOperationName } from './getOperationName';
-import { getOperationParameters } from './getOperationParameters';
 import { getOperationPath } from './getOperationPath';
 import { getOperationResponseHeader } from './getOperationResponseHeader';
-import { getOperationResponses } from './getOperationResponses';
 import { getOperationResults } from './getOperationResults';
 import { getServiceClassName } from './getServiceClassName';
 

@@ -57,6 +57,7 @@ import partialIsNullable from '../templates/partials/isNullable.hbs';
 import partialIsReadOnly from '../templates/partials/isReadOnly.hbs';
 import partialIsRequired from '../templates/partials/isRequired.hbs';
 import partialParameters from '../templates/partials/parameters.hbs';
+import partialParameterValues from '../templates/partials/parameterValues.hbs';
 import partialResult from '../templates/partials/result.hbs';
 import partialSchema from '../templates/partials/schema.hbs';
 import partialSchemaArray from '../templates/partials/schemaArray.hbs';
@@ -65,6 +66,7 @@ import partialSchemaDictionary from '../templates/partials/schemaDictionary.hbs'
 import partialSchemaEnum from '../templates/partials/schemaEnum.hbs';
 import partialSchemaGeneric from '../templates/partials/schemaGeneric.hbs';
 import partialSchemaInterface from '../templates/partials/schemaInterface.hbs';
+import partialServiceOption from '../templates/partials/serviceOption.hbs';
 import partialType from '../templates/partials/type.hbs';
 import partialTypeArray from '../templates/partials/typeArray.hbs';
 import partialTypeDictionary from '../templates/partials/typeDictionary.hbs';
@@ -126,7 +128,9 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
     Handlebars.registerPartial('isReadOnly', Handlebars.template(partialIsReadOnly));
     Handlebars.registerPartial('isRequired', Handlebars.template(partialIsRequired));
     Handlebars.registerPartial('parameters', Handlebars.template(partialParameters));
+    Handlebars.registerPartial('parameterValues', Handlebars.template(partialParameterValues));
     Handlebars.registerPartial('result', Handlebars.template(partialResult));
+    Handlebars.registerPartial('serviceOption', Handlebars.template(partialServiceOption));
     Handlebars.registerPartial('schema', Handlebars.template(partialSchema));
     Handlebars.registerPartial('schemaArray', Handlebars.template(partialSchemaArray));
     Handlebars.registerPartial('schemaDictionary', Handlebars.template(partialSchemaDictionary));

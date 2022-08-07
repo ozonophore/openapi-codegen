@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unversion
 
+## [0.2.4-beta] - 2022-08-07
+
 ###Added
 
 - Support sibling element from an external file
+- Extract request parameters for service in an particularly type
 
 ## [0.2.3] - 2022-03-20
 
