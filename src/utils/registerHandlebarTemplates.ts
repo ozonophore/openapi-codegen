@@ -57,6 +57,7 @@ import partialIsNullable from '../templates/partials/isNullable.hbs';
 import partialIsReadOnly from '../templates/partials/isReadOnly.hbs';
 import partialIsRequired from '../templates/partials/isRequired.hbs';
 import partialParameters from '../templates/partials/parameters.hbs';
+import partialParametersDefinition from '../templates/partials/parametersDefinition.hbs';
 import partialParameterValues from '../templates/partials/parameterValues.hbs';
 import partialResult from '../templates/partials/result.hbs';
 import partialSchema from '../templates/partials/schema.hbs';
@@ -128,6 +129,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
     Handlebars.registerPartial('isReadOnly', Handlebars.template(partialIsReadOnly));
     Handlebars.registerPartial('isRequired', Handlebars.template(partialIsRequired));
     Handlebars.registerPartial('parameters', Handlebars.template(partialParameters));
+    Handlebars.registerPartial('parametersDefinition', Handlebars.template(partialParametersDefinition));
     Handlebars.registerPartial('parameterValues', Handlebars.template(partialParameterValues));
     Handlebars.registerPartial('result', Handlebars.template(partialResult));
     Handlebars.registerPartial('serviceOption', Handlebars.template(partialServiceOption));

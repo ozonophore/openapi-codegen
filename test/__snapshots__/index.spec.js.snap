@@ -594,7 +594,7 @@ exports[`v2 should generate: ./test/generated/v2/services/CollectionFormatServic
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const collectionFormat = (
@@ -667,7 +667,7 @@ exports[`v2 should generate: ./test/generated/v2/services/ComplexService.ts 1`] 
 /* eslint-disable */
 import type { ModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const complexTypes = (
@@ -745,7 +745,7 @@ exports[`v2 should generate: ./test/generated/v2/services/DefaultsService.ts 1`]
 /* eslint-disable */
 import type { ModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithDefaultParameters = (
@@ -790,51 +790,47 @@ const callWithDefaultOptionalParameters = (
 
 const callToTestOrderOfParams = (
     parameterStringWithNoDefault: string,
+    parameterStringWithDefault: string = 'Hello World!',
+    parameterStringWithEmptyDefault: string = '',
     parameterOptionalStringWithDefault: string = 'Hello World!',
     parameterOptionalStringWithEmptyDefault: string = '',
     parameterOptionalStringWithNoDefault?: string,
-    parameterStringWithDefault: string = 'Hello World!',
-    parameterStringWithEmptyDefault: string = '',
 ): ApiRequestOptions => ({
     method: 'PUT',
     path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
     query: {
         'parameterStringWithNoDefault': parameterStringWithNoDefault,
+        'parameterStringWithDefault': parameterStringWithDefault,
+        'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
         'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
         'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
         'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
-        'parameterStringWithDefault': parameterStringWithDefault,
-        'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
     },
 });
 
 
 export type TDefaultsServiceOptions = {
     callWithDefaultParameters: (
-        parameterString: string = 'Hello World!',
-        parameterNumber: number = 123,
-        parameterBoolean: boolean = true,
-        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: ModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
-        },
+        parameterString: string,
+        parameterNumber: number,
+        parameterBoolean: boolean,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: ModelWithString,
     ) => ApiRequestOptions;
     callWithDefaultOptionalParameters: (
-        parameterString: string = 'Hello World!',
-        parameterNumber: number = 123,
-        parameterBoolean: boolean = true,
-        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: ModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
-        },
+        parameterString: string,
+        parameterNumber: number,
+        parameterBoolean: boolean,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: ModelWithString,
     ) => ApiRequestOptions;
     callToTestOrderOfParams: (
         parameterStringWithNoDefault: string,
-        parameterOptionalStringWithDefault: string = 'Hello World!',
-        parameterOptionalStringWithEmptyDefault: string = '',
+        parameterStringWithDefault: string,
+        parameterStringWithEmptyDefault: string,
+        parameterOptionalStringWithDefault: string,
+        parameterOptionalStringWithEmptyDefault: string,
         parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault: string = 'Hello World!',
-        parameterStringWithEmptyDefault: string = '',
     ) => ApiRequestOptions;
 }
 
@@ -865,13 +861,11 @@ export class DefaultsService {
     ): Promise<void> {
         const result = await __request(
             DefaultsServiceOptions.callWithDefaultParameters(
-                parameterString = 'Hello World!',
-                parameterNumber = 123,
-                parameterBoolean = true,
-                parameterEnum = 'Success',
-                parameterModel = {
-                    \\"prop\\": \\"Hello World!\\"
-                },
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
             ));
             return result.body;
         }
@@ -895,42 +889,40 @@ export class DefaultsService {
         ): Promise<void> {
             const result = await __request(
                 DefaultsServiceOptions.callWithDefaultOptionalParameters(
-                    parameterString = 'Hello World!',
-                    parameterNumber = 123,
-                    parameterBoolean = true,
-                    parameterEnum = 'Success',
-                    parameterModel = {
-                        \\"prop\\": \\"Hello World!\\"
-                    },
+                    parameterString,
+                    parameterNumber,
+                    parameterBoolean,
+                    parameterEnum,
+                    parameterModel,
                 ));
                 return result.body;
             }
 
             /**
              * @param parameterStringWithNoDefault This is a string with no default
+             * @param parameterStringWithDefault This is a string with default
+             * @param parameterStringWithEmptyDefault This is a string with empty default
              * @param parameterOptionalStringWithDefault This is a optional string with default
              * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
              * @param parameterOptionalStringWithNoDefault This is a optional string with no default
-             * @param parameterStringWithDefault This is a string with default
-             * @param parameterStringWithEmptyDefault This is a string with empty default
              * @throws ApiError
              */
             public static async callToTestOrderOfParams(
                 parameterStringWithNoDefault: string,
+                parameterStringWithDefault: string = 'Hello World!',
+                parameterStringWithEmptyDefault: string = '',
                 parameterOptionalStringWithDefault: string = 'Hello World!',
                 parameterOptionalStringWithEmptyDefault: string = '',
                 parameterOptionalStringWithNoDefault?: string,
-                parameterStringWithDefault: string = 'Hello World!',
-                parameterStringWithEmptyDefault: string = '',
             ): Promise<void> {
                 const result = await __request(
                     DefaultsServiceOptions.callToTestOrderOfParams(
                         parameterStringWithNoDefault,
-                        parameterOptionalStringWithDefault = 'Hello World!',
-                        parameterOptionalStringWithEmptyDefault = '',
+                        parameterStringWithDefault,
+                        parameterStringWithEmptyDefault,
+                        parameterOptionalStringWithDefault,
+                        parameterOptionalStringWithEmptyDefault,
                         parameterOptionalStringWithNoDefault,
-                        parameterStringWithDefault = 'Hello World!',
-                        parameterStringWithEmptyDefault = '',
                     ));
                     return result.body;
                 }
@@ -943,7 +935,7 @@ exports[`v2 should generate: ./test/generated/v2/services/DuplicateService.ts 1`
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const duplicateName = (): ApiRequestOptions => ({
@@ -1027,7 +1019,7 @@ exports[`v2 should generate: ./test/generated/v2/services/HeaderService.ts 1`] =
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResultFromHeader = (): ApiRequestOptions => ({
@@ -1069,7 +1061,7 @@ exports[`v2 should generate: ./test/generated/v2/services/NoContentService.ts 1`
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithNoContentResponse = (): ApiRequestOptions => ({
@@ -1106,7 +1098,7 @@ exports[`v2 should generate: ./test/generated/v2/services/ParametersService.ts 1
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithParameters = (
@@ -1255,7 +1247,7 @@ import type { ModelThatExtendsExtends } from './../models/ModelThatExtendsExtend
 import type { ModelThatExtends } from './../models/ModelThatExtends';
 import type { ModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResponse = (): ApiRequestOptions => ({
@@ -1347,7 +1339,7 @@ import type { ModelWithArray } from './../models/ModelWithArray';
 import type { ModelWithDictionary } from './../models/ModelWithDictionary';
 import type { ModelWithEnumInteger } from './../models/ModelWithEnumInteger';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const getCallWithModelWithDictionaryReference = (): ApiRequestOptions => ({
@@ -1435,7 +1427,7 @@ exports[`v2 should generate: ./test/generated/v2/services/SimpleService.ts 1`] =
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
@@ -1567,7 +1559,7 @@ exports[`v2 should generate: ./test/generated/v2/services/TypesService.ts 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const types = (
@@ -1599,10 +1591,10 @@ export type TTypesServiceOptions = {
         parameterArray: Array<string>,
         parameterDictionary: Record<string, string>,
         parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterNumber: number = 123,
-        parameterString: string = 'default',
-        parameterBoolean: boolean = true,
-        parameterObject: any = null,
+        parameterNumber: number,
+        parameterString: string,
+        parameterBoolean: boolean,
+        parameterObject: any,
         id?: number,
     ) => ApiRequestOptions;
 }
@@ -1643,10 +1635,10 @@ export class TypesService {
                 parameterArray,
                 parameterDictionary,
                 parameterEnum,
-                parameterNumber = 123,
-                parameterString = 'default',
-                parameterBoolean = true,
-                parameterObject = null,
+                parameterNumber,
+                parameterString,
+                parameterBoolean,
+                parameterObject,
                 id,
             ));
             return result.body;
@@ -2333,7 +2325,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* eslint-disable */
 import type { IModelWithCircularReference } from './../models/schemas/ModelWithCircularReference';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithCircularModel = (): ApiRequestOptions => ({
@@ -2370,7 +2362,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const collectionFormat = (
@@ -2446,7 +2438,7 @@ import type { IModelWithDictionary } from './../models/schemas/ModelWithDictiona
 import type { IModelWithEnum } from './../models/schemas/ModelWithEnum';
 import type { IModelWithString } from './../models/schemas/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const complexTypes = (
@@ -2593,7 +2585,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* eslint-disable */
 import type { IModelWithString } from './../models/schemas/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithDefaultParameters = (
@@ -2640,9 +2632,9 @@ const callToTestOrderOfParams = (
     parameterStringWithNoDefault: string,
     parameterOptionalStringWithDefault: string = 'Hello World!',
     parameterOptionalStringWithEmptyDefault: string = '',
-    parameterOptionalStringWithNoDefault?: string,
     parameterStringWithDefault: string = 'Hello World!',
     parameterStringWithEmptyDefault: string = '',
+    parameterOptionalStringWithNoDefault?: string,
 ): ApiRequestOptions => ({
     method: 'PUT',
     path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
@@ -2650,39 +2642,35 @@ const callToTestOrderOfParams = (
         'parameterStringWithNoDefault': parameterStringWithNoDefault,
         'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
         'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
-        'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
         'parameterStringWithDefault': parameterStringWithDefault,
         'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
+        'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
     },
 });
 
 
 export type TDefaultsOptions = {
     callWithDefaultParameters: (
-        parameterString: string | null = 'Hello World!',
-        parameterNumber: number | null = 123,
-        parameterBoolean: boolean | null = true,
-        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: IModelWithString | null = {
-            \\"prop\\": \\"Hello World!\\"
-        },
+        parameterString: string | null,
+        parameterNumber: number | null,
+        parameterBoolean: boolean | null,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: IModelWithString | null,
     ) => ApiRequestOptions;
     callWithDefaultOptionalParameters: (
-        parameterString: string = 'Hello World!',
-        parameterNumber: number = 123,
-        parameterBoolean: boolean = true,
-        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: IModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
-        },
+        parameterString: string,
+        parameterNumber: number,
+        parameterBoolean: boolean,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: IModelWithString,
     ) => ApiRequestOptions;
     callToTestOrderOfParams: (
         parameterStringWithNoDefault: string,
-        parameterOptionalStringWithDefault: string = 'Hello World!',
-        parameterOptionalStringWithEmptyDefault: string = '',
+        parameterOptionalStringWithDefault: string,
+        parameterOptionalStringWithEmptyDefault: string,
+        parameterStringWithDefault: string,
+        parameterStringWithEmptyDefault: string,
         parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault: string = 'Hello World!',
-        parameterStringWithEmptyDefault: string = '',
     ) => ApiRequestOptions;
 }
 
@@ -2713,13 +2701,11 @@ export class DefaultsService {
     ): Promise<void> {
         const result = await __request(
             DefaultsOptions.callWithDefaultParameters(
-                parameterString = 'Hello World!',
-                parameterNumber = 123,
-                parameterBoolean = true,
-                parameterEnum = 'Success',
-                parameterModel = {
-                    \\"prop\\": \\"Hello World!\\"
-                },
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
             ));
             return result.body;
         }
@@ -2743,13 +2729,11 @@ export class DefaultsService {
         ): Promise<void> {
             const result = await __request(
                 DefaultsOptions.callWithDefaultOptionalParameters(
-                    parameterString = 'Hello World!',
-                    parameterNumber = 123,
-                    parameterBoolean = true,
-                    parameterEnum = 'Success',
-                    parameterModel = {
-                        \\"prop\\": \\"Hello World!\\"
-                    },
+                    parameterString,
+                    parameterNumber,
+                    parameterBoolean,
+                    parameterEnum,
+                    parameterModel,
                 ));
                 return result.body;
             }
@@ -2758,27 +2742,27 @@ export class DefaultsService {
              * @param parameterStringWithNoDefault This is a string with no default
              * @param parameterOptionalStringWithDefault This is a optional string with default
              * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
-             * @param parameterOptionalStringWithNoDefault This is a optional string with no default
              * @param parameterStringWithDefault This is a string with default
              * @param parameterStringWithEmptyDefault This is a string with empty default
+             * @param parameterOptionalStringWithNoDefault This is a optional string with no default
              * @throws ApiError
              */
             public static async callToTestOrderOfParams(
                 parameterStringWithNoDefault: string,
                 parameterOptionalStringWithDefault: string = 'Hello World!',
                 parameterOptionalStringWithEmptyDefault: string = '',
-                parameterOptionalStringWithNoDefault?: string,
                 parameterStringWithDefault: string = 'Hello World!',
                 parameterStringWithEmptyDefault: string = '',
+                parameterOptionalStringWithNoDefault?: string,
             ): Promise<void> {
                 const result = await __request(
                     DefaultsOptions.callToTestOrderOfParams(
                         parameterStringWithNoDefault,
-                        parameterOptionalStringWithDefault = 'Hello World!',
-                        parameterOptionalStringWithEmptyDefault = '',
+                        parameterOptionalStringWithDefault,
+                        parameterOptionalStringWithEmptyDefault,
+                        parameterStringWithDefault,
+                        parameterStringWithEmptyDefault,
                         parameterOptionalStringWithNoDefault,
-                        parameterStringWithDefault = 'Hello World!',
-                        parameterStringWithEmptyDefault = '',
                     ));
                     return result.body;
                 }
@@ -2791,7 +2775,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const duplicateName = (): ApiRequestOptions => ({
@@ -2875,7 +2859,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithEnums = (
@@ -2921,7 +2905,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResultFromHeader = (): ApiRequestOptions => ({
@@ -2963,7 +2947,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const multipartResponse = (): ApiRequestOptions => ({
@@ -3006,7 +2990,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithNoContentResponse = (): ApiRequestOptions => ({
@@ -3044,7 +3028,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* eslint-disable */
 import type { IModelWithString } from './../models/schemas/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithParameters = (
@@ -3279,7 +3263,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* eslint-disable */
 import type { IModelWithString } from './../models/schemas/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const postRequestBodyService = (
@@ -3328,7 +3312,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 import type { TModelThatExtends } from './../models/schemas/ModelThatExtends';
 import type { IModelWithString } from './../models/schemas/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResponse = (): ApiRequestOptions => ({
@@ -3415,7 +3399,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
@@ -3547,7 +3531,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const types = (
@@ -3579,10 +3563,10 @@ export type TTypesOptions = {
         parameterArray: Array<string> | null,
         parameterDictionary: any,
         parameterEnum: 'Success' | 'Warning' | 'Error' | null,
-        parameterNumber: number = 123,
-        parameterString: string | null = 'default',
-        parameterBoolean: boolean | null = true,
-        parameterObject: any = null,
+        parameterNumber: number,
+        parameterString: string | null,
+        parameterBoolean: boolean | null,
+        parameterObject: any,
         id?: number,
     ) => ApiRequestOptions;
 }
@@ -3623,10 +3607,10 @@ export class TypesService {
                 parameterArray,
                 parameterDictionary,
                 parameterEnum,
-                parameterNumber = 123,
-                parameterString = 'default',
-                parameterBoolean = true,
-                parameterObject = null,
+                parameterNumber,
+                parameterString,
+                parameterBoolean,
+                parameterObject,
                 id,
             ));
             return result.body;
@@ -3640,7 +3624,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const uploadFile = (
@@ -4399,7 +4383,7 @@ exports[`v3 should generate: ./test/generated/v3/services/CollectionFormatServic
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const collectionFormat = (
@@ -4475,7 +4459,7 @@ import type { IModelWithDictionary } from './../models/ModelWithDictionary';
 import type { IModelWithEnum } from './../models/ModelWithEnum';
 import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const complexTypes = (
@@ -4622,7 +4606,7 @@ exports[`v3 should generate: ./test/generated/v3/services/DefaultsService.ts 1`]
 /* eslint-disable */
 import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithDefaultParameters = (
@@ -4669,9 +4653,9 @@ const callToTestOrderOfParams = (
     parameterStringWithNoDefault: string,
     parameterOptionalStringWithDefault: string = 'Hello World!',
     parameterOptionalStringWithEmptyDefault: string = '',
-    parameterOptionalStringWithNoDefault?: string,
     parameterStringWithDefault: string = 'Hello World!',
     parameterStringWithEmptyDefault: string = '',
+    parameterOptionalStringWithNoDefault?: string,
 ): ApiRequestOptions => ({
     method: 'PUT',
     path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
@@ -4679,39 +4663,35 @@ const callToTestOrderOfParams = (
         'parameterStringWithNoDefault': parameterStringWithNoDefault,
         'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
         'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
-        'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
         'parameterStringWithDefault': parameterStringWithDefault,
         'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
+        'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
     },
 });
 
 
 export type TDefaultsOptions = {
     callWithDefaultParameters: (
-        parameterString: string | null = 'Hello World!',
-        parameterNumber: number | null = 123,
-        parameterBoolean: boolean | null = true,
-        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: IModelWithString | null = {
-            \\"prop\\": \\"Hello World!\\"
-        },
+        parameterString: string | null,
+        parameterNumber: number | null,
+        parameterBoolean: boolean | null,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: IModelWithString | null,
     ) => ApiRequestOptions;
     callWithDefaultOptionalParameters: (
-        parameterString: string = 'Hello World!',
-        parameterNumber: number = 123,
-        parameterBoolean: boolean = true,
-        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: IModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
-        },
+        parameterString: string,
+        parameterNumber: number,
+        parameterBoolean: boolean,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: IModelWithString,
     ) => ApiRequestOptions;
     callToTestOrderOfParams: (
         parameterStringWithNoDefault: string,
-        parameterOptionalStringWithDefault: string = 'Hello World!',
-        parameterOptionalStringWithEmptyDefault: string = '',
+        parameterOptionalStringWithDefault: string,
+        parameterOptionalStringWithEmptyDefault: string,
+        parameterStringWithDefault: string,
+        parameterStringWithEmptyDefault: string,
         parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault: string = 'Hello World!',
-        parameterStringWithEmptyDefault: string = '',
     ) => ApiRequestOptions;
 }
 
@@ -4742,13 +4722,11 @@ export class DefaultsService {
     ): Promise<void> {
         const result = await __request(
             DefaultsOptions.callWithDefaultParameters(
-                parameterString = 'Hello World!',
-                parameterNumber = 123,
-                parameterBoolean = true,
-                parameterEnum = 'Success',
-                parameterModel = {
-                    \\"prop\\": \\"Hello World!\\"
-                },
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
             ));
             return result.body;
         }
@@ -4772,13 +4750,11 @@ export class DefaultsService {
         ): Promise<void> {
             const result = await __request(
                 DefaultsOptions.callWithDefaultOptionalParameters(
-                    parameterString = 'Hello World!',
-                    parameterNumber = 123,
-                    parameterBoolean = true,
-                    parameterEnum = 'Success',
-                    parameterModel = {
-                        \\"prop\\": \\"Hello World!\\"
-                    },
+                    parameterString,
+                    parameterNumber,
+                    parameterBoolean,
+                    parameterEnum,
+                    parameterModel,
                 ));
                 return result.body;
             }
@@ -4787,27 +4763,27 @@ export class DefaultsService {
              * @param parameterStringWithNoDefault This is a string with no default
              * @param parameterOptionalStringWithDefault This is a optional string with default
              * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
-             * @param parameterOptionalStringWithNoDefault This is a optional string with no default
              * @param parameterStringWithDefault This is a string with default
              * @param parameterStringWithEmptyDefault This is a string with empty default
+             * @param parameterOptionalStringWithNoDefault This is a optional string with no default
              * @throws ApiError
              */
             public static async callToTestOrderOfParams(
                 parameterStringWithNoDefault: string,
                 parameterOptionalStringWithDefault: string = 'Hello World!',
                 parameterOptionalStringWithEmptyDefault: string = '',
-                parameterOptionalStringWithNoDefault?: string,
                 parameterStringWithDefault: string = 'Hello World!',
                 parameterStringWithEmptyDefault: string = '',
+                parameterOptionalStringWithNoDefault?: string,
             ): Promise<void> {
                 const result = await __request(
                     DefaultsOptions.callToTestOrderOfParams(
                         parameterStringWithNoDefault,
-                        parameterOptionalStringWithDefault = 'Hello World!',
-                        parameterOptionalStringWithEmptyDefault = '',
+                        parameterOptionalStringWithDefault,
+                        parameterOptionalStringWithEmptyDefault,
+                        parameterStringWithDefault,
+                        parameterStringWithEmptyDefault,
                         parameterOptionalStringWithNoDefault,
-                        parameterStringWithDefault = 'Hello World!',
-                        parameterStringWithEmptyDefault = '',
                     ));
                     return result.body;
                 }
@@ -4820,7 +4796,7 @@ exports[`v3 should generate: ./test/generated/v3/services/DuplicateService.ts 1`
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const duplicateName = (): ApiRequestOptions => ({
@@ -4904,7 +4880,7 @@ exports[`v3 should generate: ./test/generated/v3/services/EnumsService.ts 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithEnums = (
@@ -4950,7 +4926,7 @@ exports[`v3 should generate: ./test/generated/v3/services/HeaderService.ts 1`] =
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResultFromHeader = (): ApiRequestOptions => ({
@@ -4992,7 +4968,7 @@ exports[`v3 should generate: ./test/generated/v3/services/MultipartService.ts 1`
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const multipartResponse = (): ApiRequestOptions => ({
@@ -5035,7 +5011,7 @@ exports[`v3 should generate: ./test/generated/v3/services/NoContentService.ts 1`
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithNoContentResponse = (): ApiRequestOptions => ({
@@ -5073,7 +5049,7 @@ exports[`v3 should generate: ./test/generated/v3/services/ParametersService.ts 1
 /* eslint-disable */
 import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithParameters = (
@@ -5308,7 +5284,7 @@ exports[`v3 should generate: ./test/generated/v3/services/RequestBodyService.ts 
 /* eslint-disable */
 import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const postRequestBodyService = (
@@ -5358,7 +5334,7 @@ import type { TModelThatExtendsExtends } from './../models/ModelThatExtendsExten
 import type { TModelThatExtends } from './../models/ModelThatExtends';
 import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResponse = (): ApiRequestOptions => ({
@@ -5446,7 +5422,7 @@ exports[`v3 should generate: ./test/generated/v3/services/SimpleService.ts 1`] =
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
@@ -5578,7 +5554,7 @@ exports[`v3 should generate: ./test/generated/v3/services/TypesService.ts 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const types = (
@@ -5610,10 +5586,10 @@ export type TTypesOptions = {
         parameterArray: Array<string> | null,
         parameterDictionary: any,
         parameterEnum: 'Success' | 'Warning' | 'Error' | null,
-        parameterNumber: number = 123,
-        parameterString: string | null = 'default',
-        parameterBoolean: boolean | null = true,
-        parameterObject: any = null,
+        parameterNumber: number,
+        parameterString: string | null,
+        parameterBoolean: boolean | null,
+        parameterObject: any,
         id?: number,
     ) => ApiRequestOptions;
 }
@@ -5654,10 +5630,10 @@ export class TypesService {
                 parameterArray,
                 parameterDictionary,
                 parameterEnum,
-                parameterNumber = 123,
-                parameterString = 'default',
-                parameterBoolean = true,
-                parameterObject = null,
+                parameterNumber,
+                parameterString,
+                parameterBoolean,
+                parameterObject,
                 id,
             ));
             return result.body;
@@ -5671,7 +5647,7 @@ exports[`v3 should generate: ./test/generated/v3/services/UploadService.ts 1`] =
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
-import { ApiRequestOptions } from './../core/ApiRequestOptions';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const uploadFile = (

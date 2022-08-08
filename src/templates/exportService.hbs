@@ -6,7 +6,7 @@ import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{@root.out
 {{/each}}
 {{/if}}
 import { request as __request } from '{{{outputCore}}}request';
-import { ApiRequestOptions } from '{{{outputCore}}}ApiRequestOptions';
+import type { ApiRequestOptions } from '{{{outputCore}}}ApiRequestOptions';
 {{#if @root.useVersion}}
 import { OpenAPI } from '{{{outputCore}}}OpenAPI';
 {{/if}}
@@ -20,7 +20,7 @@ const {{{name}}} = ({{>parameters}}): ApiRequestOptions => ({
 
 export type T{{{originName}}}Options = {
 {{#each operations}}
-    {{{name}}}: ({{>parameters}}) => ApiRequestOptions;
+    {{{name}}}: ({{>parametersDefinition}}) => ApiRequestOptions;
 {{/each}}
 }
 
