@@ -32,6 +32,7 @@ export function getServices(this: Parser, openApi: OpenApi): Service[] {
                             // append the new method to it. Otherwise we should create a new service object.
                             const service: Service = services.get(operation.service) || {
                                 name: operation.service,
+                                originName: operation.service,
                                 operations: [],
                                 imports: [],
                             };

@@ -11,6 +11,7 @@ describe('writeClientServices', () => {
         const services: Service[] = [
             {
                 name: 'MyService',
+                originName: 'MyService',
                 operations: [],
                 imports: [],
             },
@@ -32,7 +33,17 @@ describe('writeClientServices', () => {
             },
         };
 
-        await writeClientServices({ services, templates, outputPath: '/', httpClient: HttpClient.FETCH, useOptions: false, useUnionTypes: false, useCustomRequest: false });
+        await writeClientServices({
+            services,
+            templates,
+            outputPath: '/',
+            httpClient: HttpClient.FETCH,
+            useUnionTypes: false,
+            useOptions: false,
+            useCustomRequest: false,
+            outputModels: '/',
+            outputCore: '/',
+        });
 
         expect(writeFile).toBeCalledWith('/MyService.ts', 'service');
     });

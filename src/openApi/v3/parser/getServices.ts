@@ -45,13 +45,15 @@ export function getServices(this: Parser, openApi: OpenApi): Service[] {
                         case 'patch':
                             // Each method contains an OpenAPI operation, we parse the operation
                             const op = path[method]!;
-                            const serviceName = getServiceName(op, this.context.fileName());
+                            const fileName = this.context.fileName();
+                            const serviceName = getServiceName(op, fileName);
                             // If we have already declared a service, then we should fetch that and
                             // append the new method to it. Otherwise we should create a new service object.
                             const service =
                                 services.get(serviceName) ||
                                 ({
                                     name: serviceName,
+                                    originName: getClassName(op.tags?.[0] || fileName),
                                     operations: [],
                                     imports: [],
                                 } as Service);

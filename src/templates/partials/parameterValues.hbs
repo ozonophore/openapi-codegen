@@ -1,0 +1,14 @@
+{{#if parameters}}
+{{#if @root.useOptions~}}
+    {
+    {{#each parameters}}
+        {{{name}}},
+    {{/each}}
+    }
+{{~else}}
+
+    {{#each parameters}}
+        {{{name}}},
+    {{/each}}
+{{/if}}
+{{/if}}

@@ -11,7 +11,7 @@ import { getOperationPath } from './getOperationPath';
 import { getOperationRequestBody } from './getOperationRequestBody';
 import { getOperationResponseHeader } from './getOperationResponseHeader';
 import { getOperationResults } from './getOperationResults';
-import { sortByRequired } from './sortByRequired';
+import { sortByRequired } from '../../../utils/sortByRequired';
 
 export function getOperation(this: Parser, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, serviceClassName: string): Operation {
     const operationNameFallback = `${method}${serviceClassName}`;

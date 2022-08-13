@@ -594,7 +594,41 @@ exports[`v2 should generate: ./test/generated/v2/services/CollectionFormatServic
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const collectionFormat = (
+    parameterArrayCsv: Array<string>,
+    parameterArraySsv: Array<string>,
+    parameterArrayTsv: Array<string>,
+    parameterArrayPipes: Array<string>,
+    parameterArrayMulti: Array<string>,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/collectionFormat\`,
+    query: {
+        'parameterArrayCSV': parameterArrayCsv,
+        'parameterArraySSV': parameterArraySsv,
+        'parameterArrayTSV': parameterArrayTsv,
+        'parameterArrayPipes': parameterArrayPipes,
+        'parameterArrayMulti': parameterArrayMulti,
+    },
+});
+
+
+export type TCollectionFormatServiceOptions = {
+    collectionFormat: (
+        parameterArrayCsv: Array<string>,
+        parameterArraySsv: Array<string>,
+        parameterArrayTsv: Array<string>,
+        parameterArrayPipes: Array<string>,
+        parameterArrayMulti: Array<string>,
+    ) => ApiRequestOptions;
+}
+
+export const CollectionFormatServiceOptions: TCollectionFormatServiceOptions = {
+    collectionFormat: collectionFormat,
+}
 
 export class CollectionFormatService {
 
@@ -613,21 +647,18 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string>,
         parameterArrayMulti: Array<string>,
     ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/collectionFormat\`,
-            query: {
-                'parameterArrayCSV': parameterArrayCsv,
-                'parameterArraySSV': parameterArraySsv,
-                'parameterArrayTSV': parameterArrayTsv,
-                'parameterArrayPipes': parameterArrayPipes,
-                'parameterArrayMulti': parameterArrayMulti,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            CollectionFormatServiceOptions.collectionFormat(
+                parameterArrayCsv,
+                parameterArraySsv,
+                parameterArrayTsv,
+                parameterArrayPipes,
+                parameterArrayMulti,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/ComplexService.ts 1`] = `
@@ -636,7 +667,48 @@ exports[`v2 should generate: ./test/generated/v2/services/ComplexService.ts 1`] 
 /* eslint-disable */
 import type { ModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const complexTypes = (
+    parameterObject: {
+        first?: {
+            second?: {
+                third?: string,
+            },
+        },
+    },
+    parameterReference: ModelWithString,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/complex\`,
+    query: {
+        'parameterObject': parameterObject,
+        'parameterReference': parameterReference,
+    },
+    errors: {
+        400: \`400 server error\`,
+        500: \`500 server error\`,
+    },
+});
+
+
+export type TComplexServiceOptions = {
+    complexTypes: (
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string,
+                },
+            },
+        },
+        parameterReference: ModelWithString,
+    ) => ApiRequestOptions;
+}
+
+export const ComplexServiceOptions: TComplexServiceOptions = {
+    complexTypes: complexTypes,
+}
 
 export class ComplexService {
 
@@ -656,22 +728,15 @@ export class ComplexService {
         },
         parameterReference: ModelWithString,
     ): Promise<Array<ModelWithString>> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/complex\`,
-            query: {
-                'parameterObject': parameterObject,
-                'parameterReference': parameterReference,
-            },
-            errors: {
-                400: \`400 server error\`,
-                500: \`500 server error\`,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            ComplexServiceOptions.complexTypes(
+                parameterObject,
+                parameterReference,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/DefaultsService.ts 1`] = `
@@ -680,7 +745,100 @@ exports[`v2 should generate: ./test/generated/v2/services/DefaultsService.ts 1`]
 /* eslint-disable */
 import type { ModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithDefaultParameters = (
+    parameterString: string = 'Hello World!',
+    parameterNumber: number = 123,
+    parameterBoolean: boolean = true,
+    parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+    parameterModel: ModelWithString = {
+        \\"prop\\": \\"Hello World!\\"
+    },
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    query: {
+        'parameterString': parameterString,
+        'parameterNumber': parameterNumber,
+        'parameterBoolean': parameterBoolean,
+        'parameterEnum': parameterEnum,
+        'parameterModel': parameterModel,
+    },
+});
+
+const callWithDefaultOptionalParameters = (
+    parameterString: string = 'Hello World!',
+    parameterNumber: number = 123,
+    parameterBoolean: boolean = true,
+    parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+    parameterModel: ModelWithString = {
+        \\"prop\\": \\"Hello World!\\"
+    },
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    query: {
+        'parameterString': parameterString,
+        'parameterNumber': parameterNumber,
+        'parameterBoolean': parameterBoolean,
+        'parameterEnum': parameterEnum,
+        'parameterModel': parameterModel,
+    },
+});
+
+const callToTestOrderOfParams = (
+    parameterStringWithNoDefault: string,
+    parameterStringWithDefault: string = 'Hello World!',
+    parameterStringWithEmptyDefault: string = '',
+    parameterOptionalStringWithDefault: string = 'Hello World!',
+    parameterOptionalStringWithEmptyDefault: string = '',
+    parameterOptionalStringWithNoDefault?: string,
+): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    query: {
+        'parameterStringWithNoDefault': parameterStringWithNoDefault,
+        'parameterStringWithDefault': parameterStringWithDefault,
+        'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
+        'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
+        'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
+        'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
+    },
+});
+
+
+export type TDefaultsServiceOptions = {
+    callWithDefaultParameters: (
+        parameterString: string,
+        parameterNumber: number,
+        parameterBoolean: boolean,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: ModelWithString,
+    ) => ApiRequestOptions;
+    callWithDefaultOptionalParameters: (
+        parameterString: string,
+        parameterNumber: number,
+        parameterBoolean: boolean,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: ModelWithString,
+    ) => ApiRequestOptions;
+    callToTestOrderOfParams: (
+        parameterStringWithNoDefault: string,
+        parameterStringWithDefault: string,
+        parameterStringWithEmptyDefault: string,
+        parameterOptionalStringWithDefault: string,
+        parameterOptionalStringWithEmptyDefault: string,
+        parameterOptionalStringWithNoDefault?: string,
+    ) => ApiRequestOptions;
+}
+
+export const DefaultsServiceOptions: TDefaultsServiceOptions = {
+    callWithDefaultParameters: callWithDefaultParameters,
+    callWithDefaultOptionalParameters: callWithDefaultOptionalParameters,
+    callToTestOrderOfParams: callToTestOrderOfParams,
+}
 
 export class DefaultsService {
 
@@ -701,84 +859,75 @@ export class DefaultsService {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
-            query: {
-                'parameterString': parameterString,
-                'parameterNumber': parameterNumber,
-                'parameterBoolean': parameterBoolean,
-                'parameterEnum': parameterEnum,
-                'parameterModel': parameterModel,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            DefaultsServiceOptions.callWithDefaultParameters(
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
+            ));
+            return result.body;
+        }
 
-    /**
-     * @param parameterString This is a simple string that is optional with default value
-     * @param parameterNumber This is a simple number that is optional with default value
-     * @param parameterBoolean This is a simple boolean that is optional with default value
-     * @param parameterEnum This is a simple enum that is optional with default value
-     * @param parameterModel This is a simple model that is optional with default value
-     * @throws ApiError
-     */
-    public static async callWithDefaultOptionalParameters(
-        parameterString: string = 'Hello World!',
-        parameterNumber: number = 123,
-        parameterBoolean: boolean = true,
-        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: ModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
-        },
-    ): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
-            query: {
-                'parameterString': parameterString,
-                'parameterNumber': parameterNumber,
-                'parameterBoolean': parameterBoolean,
-                'parameterEnum': parameterEnum,
-                'parameterModel': parameterModel,
+        /**
+         * @param parameterString This is a simple string that is optional with default value
+         * @param parameterNumber This is a simple number that is optional with default value
+         * @param parameterBoolean This is a simple boolean that is optional with default value
+         * @param parameterEnum This is a simple enum that is optional with default value
+         * @param parameterModel This is a simple model that is optional with default value
+         * @throws ApiError
+         */
+        public static async callWithDefaultOptionalParameters(
+            parameterString: string = 'Hello World!',
+            parameterNumber: number = 123,
+            parameterBoolean: boolean = true,
+            parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+            parameterModel: ModelWithString = {
+                \\"prop\\": \\"Hello World!\\"
             },
-        });
-        return result.body;
-    }
+        ): Promise<void> {
+            const result = await __request(
+                DefaultsServiceOptions.callWithDefaultOptionalParameters(
+                    parameterString,
+                    parameterNumber,
+                    parameterBoolean,
+                    parameterEnum,
+                    parameterModel,
+                ));
+                return result.body;
+            }
 
-    /**
-     * @param parameterStringWithNoDefault This is a string with no default
-     * @param parameterOptionalStringWithDefault This is a optional string with default
-     * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
-     * @param parameterOptionalStringWithNoDefault This is a optional string with no default
-     * @param parameterStringWithDefault This is a string with default
-     * @param parameterStringWithEmptyDefault This is a string with empty default
-     * @throws ApiError
-     */
-    public static async callToTestOrderOfParams(
-        parameterStringWithNoDefault: string,
-        parameterOptionalStringWithDefault: string = 'Hello World!',
-        parameterOptionalStringWithEmptyDefault: string = '',
-        parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault: string = 'Hello World!',
-        parameterStringWithEmptyDefault: string = '',
-    ): Promise<void> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
-            query: {
-                'parameterStringWithNoDefault': parameterStringWithNoDefault,
-                'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
-                'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
-                'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
-                'parameterStringWithDefault': parameterStringWithDefault,
-                'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
-            },
-        });
-        return result.body;
-    }
+            /**
+             * @param parameterStringWithNoDefault This is a string with no default
+             * @param parameterStringWithDefault This is a string with default
+             * @param parameterStringWithEmptyDefault This is a string with empty default
+             * @param parameterOptionalStringWithDefault This is a optional string with default
+             * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
+             * @param parameterOptionalStringWithNoDefault This is a optional string with no default
+             * @throws ApiError
+             */
+            public static async callToTestOrderOfParams(
+                parameterStringWithNoDefault: string,
+                parameterStringWithDefault: string = 'Hello World!',
+                parameterStringWithEmptyDefault: string = '',
+                parameterOptionalStringWithDefault: string = 'Hello World!',
+                parameterOptionalStringWithEmptyDefault: string = '',
+                parameterOptionalStringWithNoDefault?: string,
+            ): Promise<void> {
+                const result = await __request(
+                    DefaultsServiceOptions.callToTestOrderOfParams(
+                        parameterStringWithNoDefault,
+                        parameterStringWithDefault,
+                        parameterStringWithEmptyDefault,
+                        parameterOptionalStringWithDefault,
+                        parameterOptionalStringWithEmptyDefault,
+                        parameterOptionalStringWithNoDefault,
+                    ));
+                    return result.body;
+                }
 
-}"
+            }"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/DuplicateService.ts 1`] = `
@@ -786,7 +935,43 @@ exports[`v2 should generate: ./test/generated/v2/services/DuplicateService.ts 1`
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const duplicateName = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+const duplicateName1 = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+const duplicateName2 = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+const duplicateName3 = (): ApiRequestOptions => ({
+    method: 'DELETE',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+
+export type TDuplicateServiceOptions = {
+    duplicateName: () => ApiRequestOptions;
+    duplicateName1: () => ApiRequestOptions;
+    duplicateName2: () => ApiRequestOptions;
+    duplicateName3: () => ApiRequestOptions;
+}
+
+export const DuplicateServiceOptions: TDuplicateServiceOptions = {
+    duplicateName: duplicateName,
+    duplicateName1: duplicateName1,
+    duplicateName2: duplicateName2,
+    duplicateName3: duplicateName3,
+}
 
 export class DuplicateService {
 
@@ -794,47 +979,39 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static async duplicateName(): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            DuplicateServiceOptions.duplicateName(            ));
+            return result.body;
+        }
 
-    /**
-     * @throws ApiError
-     */
-    public static async duplicateName1(): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+        /**
+         * @throws ApiError
+         */
+        public static async duplicateName1(): Promise<void> {
+            const result = await __request(
+                DuplicateServiceOptions.duplicateName1(            ));
+                return result.body;
+            }
 
-    /**
-     * @throws ApiError
-     */
-    public static async duplicateName2(): Promise<void> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+            /**
+             * @throws ApiError
+             */
+            public static async duplicateName2(): Promise<void> {
+                const result = await __request(
+                    DuplicateServiceOptions.duplicateName2(            ));
+                    return result.body;
+                }
 
-    /**
-     * @throws ApiError
-     */
-    public static async duplicateName3(): Promise<void> {
-        const result = await __request({
-            method: 'DELETE',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+                /**
+                 * @throws ApiError
+                 */
+                public static async duplicateName3(): Promise<void> {
+                    const result = await __request(
+                        DuplicateServiceOptions.duplicateName3(            ));
+                        return result.body;
+                    }
 
-}"
+                }"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/HeaderService.ts 1`] = `
@@ -842,7 +1019,27 @@ exports[`v2 should generate: ./test/generated/v2/services/HeaderService.ts 1`] =
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithResultFromHeader = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/header\`,
+    responseHeader: 'operation-location',
+    errors: {
+        400: \`400 server error\`,
+        500: \`500 server error\`,
+    },
+});
+
+
+export type THeaderServiceOptions = {
+    callWithResultFromHeader: () => ApiRequestOptions;
+}
+
+export const HeaderServiceOptions: THeaderServiceOptions = {
+    callWithResultFromHeader: callWithResultFromHeader,
+}
 
 export class HeaderService {
 
@@ -851,19 +1048,12 @@ export class HeaderService {
      * @throws ApiError
      */
     public static async callWithResultFromHeader(): Promise<string> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/header\`,
-            responseHeader: 'operation-location',
-            errors: {
-                400: \`400 server error\`,
-                500: \`500 server error\`,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            HeaderServiceOptions.callWithResultFromHeader(            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/NoContentService.ts 1`] = `
@@ -871,7 +1061,22 @@ exports[`v2 should generate: ./test/generated/v2/services/NoContentService.ts 1`
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithNoContentResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/no-content\`,
+});
+
+
+export type TNoContentServiceOptions = {
+    callWithNoContentResponse: () => ApiRequestOptions;
+}
+
+export const NoContentServiceOptions: TNoContentServiceOptions = {
+    callWithNoContentResponse: callWithNoContentResponse,
+}
 
 export class NoContentService {
 
@@ -880,14 +1085,12 @@ export class NoContentService {
      * @throws ApiError
      */
     public static async callWithNoContentResponse(): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/no-content\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            NoContentServiceOptions.callWithNoContentResponse(            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/ParametersService.ts 1`] = `
@@ -895,7 +1098,80 @@ exports[`v2 should generate: ./test/generated/v2/services/ParametersService.ts 1
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithParameters = (
+    parameterHeader: string,
+    parameterQuery: string,
+    parameterForm: string,
+    parameterBody: string,
+    parameterPath: string,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath}\`,
+    headers: {
+        'parameterHeader': parameterHeader,
+    },
+    query: {
+        'parameterQuery': parameterQuery,
+    },
+    formData: {
+        'parameterForm': parameterForm,
+    },
+    body: parameterBody,
+});
+
+const callWithWeirdParameterNames = (
+    parameterHeader: string,
+    parameterQuery: string,
+    parameterForm: string,
+    parameterBody: string,
+    parameterPath1?: string,
+    parameterPath2?: string,
+    parameterPath3?: string,
+    _default?: string,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
+    headers: {
+        'parameter.header': parameterHeader,
+    },
+    query: {
+        'parameter-query': parameterQuery,
+        'default': _default,
+    },
+    formData: {
+        'parameter_form': parameterForm,
+    },
+    body: parameterBody,
+});
+
+
+export type TParametersServiceOptions = {
+    callWithParameters: (
+        parameterHeader: string,
+        parameterQuery: string,
+        parameterForm: string,
+        parameterBody: string,
+        parameterPath: string,
+    ) => ApiRequestOptions;
+    callWithWeirdParameterNames: (
+        parameterHeader: string,
+        parameterQuery: string,
+        parameterForm: string,
+        parameterBody: string,
+        parameterPath1?: string,
+        parameterPath2?: string,
+        parameterPath3?: string,
+        _default?: string,
+    ) => ApiRequestOptions;
+}
+
+export const ParametersServiceOptions: TParametersServiceOptions = {
+    callWithParameters: callWithParameters,
+    callWithWeirdParameterNames: callWithWeirdParameterNames,
+}
 
 export class ParametersService {
 
@@ -914,63 +1190,53 @@ export class ParametersService {
         parameterBody: string,
         parameterPath: string,
     ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath}\`,
-            headers: {
-                'parameterHeader': parameterHeader,
-            },
-            query: {
-                'parameterQuery': parameterQuery,
-            },
-            formData: {
-                'parameterForm': parameterForm,
-            },
-            body: parameterBody,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            ParametersServiceOptions.callWithParameters(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterBody,
+                parameterPath,
+            ));
+            return result.body;
+        }
 
-    /**
-     * @param parameterHeader This is the parameter that goes into the request header
-     * @param parameterQuery This is the parameter that goes into the request query params
-     * @param parameterForm This is the parameter that goes into the request form data
-     * @param parameterBody This is the parameter that is send as request body
-     * @param parameterPath1 This is the parameter that goes into the path
-     * @param parameterPath2 This is the parameter that goes into the path
-     * @param parameterPath3 This is the parameter that goes into the path
-     * @param _default This is the parameter with a reserved keyword
-     * @throws ApiError
-     */
-    public static async callWithWeirdParameterNames(
-        parameterHeader: string,
-        parameterQuery: string,
-        parameterForm: string,
-        parameterBody: string,
-        parameterPath1?: string,
-        parameterPath2?: string,
-        parameterPath3?: string,
-        _default?: string,
-    ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
-            headers: {
-                'parameter.header': parameterHeader,
-            },
-            query: {
-                'parameter-query': parameterQuery,
-                'default': _default,
-            },
-            formData: {
-                'parameter_form': parameterForm,
-            },
-            body: parameterBody,
-        });
-        return result.body;
-    }
+        /**
+         * @param parameterHeader This is the parameter that goes into the request header
+         * @param parameterQuery This is the parameter that goes into the request query params
+         * @param parameterForm This is the parameter that goes into the request form data
+         * @param parameterBody This is the parameter that is send as request body
+         * @param parameterPath1 This is the parameter that goes into the path
+         * @param parameterPath2 This is the parameter that goes into the path
+         * @param parameterPath3 This is the parameter that goes into the path
+         * @param _default This is the parameter with a reserved keyword
+         * @throws ApiError
+         */
+        public static async callWithWeirdParameterNames(
+            parameterHeader: string,
+            parameterQuery: string,
+            parameterForm: string,
+            parameterBody: string,
+            parameterPath1?: string,
+            parameterPath2?: string,
+            parameterPath3?: string,
+            _default?: string,
+        ): Promise<void> {
+            const result = await __request(
+                ParametersServiceOptions.callWithWeirdParameterNames(
+                    parameterHeader,
+                    parameterQuery,
+                    parameterForm,
+                    parameterBody,
+                    parameterPath1,
+                    parameterPath2,
+                    parameterPath3,
+                    _default,
+                ));
+                return result.body;
+            }
 
-}"
+        }"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/ResponseService.ts 1`] = `
@@ -981,7 +1247,46 @@ import type { ModelThatExtendsExtends } from './../models/ModelThatExtendsExtend
 import type { ModelThatExtends } from './../models/ModelThatExtends';
 import type { ModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+});
+
+const callWithDuplicateResponses = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    errors: {
+        500: \`Message for 500 error\`,
+        501: \`Message for 501 error\`,
+        502: \`Message for 502 error\`,
+    },
+});
+
+const callWithResponses = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    errors: {
+        500: \`Message for 500 error\`,
+        501: \`Message for 501 error\`,
+        502: \`Message for 502 error\`,
+    },
+});
+
+
+export type TResponseServiceOptions = {
+    callWithResponse: () => ApiRequestOptions;
+    callWithDuplicateResponses: () => ApiRequestOptions;
+    callWithResponses: () => ApiRequestOptions;
+}
+
+export const ResponseServiceOptions: TResponseServiceOptions = {
+    callWithResponse: callWithResponse,
+    callWithDuplicateResponses: callWithDuplicateResponses,
+    callWithResponses: callWithResponses,
+}
 
 export class ResponseService {
 
@@ -990,55 +1295,39 @@ export class ResponseService {
      * @throws ApiError
      */
     public static async callWithResponse(): Promise<ModelWithString> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/response\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            ResponseServiceOptions.callWithResponse(            ));
+            return result.body;
+        }
 
-    /**
-     * @returns ModelWithString Message for default response
-     * @throws ApiError
-     */
-    public static async callWithDuplicateResponses(): Promise<ModelWithString> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/response\`,
-            errors: {
-                500: \`Message for 500 error\`,
-                501: \`Message for 501 error\`,
-                502: \`Message for 502 error\`,
-            },
-        });
-        return result.body;
-    }
+        /**
+         * @returns ModelWithString Message for default response
+         * @throws ApiError
+         */
+        public static async callWithDuplicateResponses(): Promise<ModelWithString> {
+            const result = await __request(
+                ResponseServiceOptions.callWithDuplicateResponses(            ));
+                return result.body;
+            }
 
-    /**
-     * @returns any Message for 200 response
-     * @returns ModelWithString Message for default response
-     * @returns ModelThatExtends Message for 201 response
-     * @returns ModelThatExtendsExtends Message for 202 response
-     * @throws ApiError
-     */
-    public static async callWithResponses(): Promise<{
-        readonly '@namespace.string'?: string,
-        readonly '@namespace.integer'?: number,
-        readonly value?: Array<ModelWithString>,
-    } | ModelWithString | ModelThatExtends | ModelThatExtendsExtends> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/response\`,
-            errors: {
-                500: \`Message for 500 error\`,
-                501: \`Message for 501 error\`,
-                502: \`Message for 502 error\`,
-            },
-        });
-        return result.body;
-    }
+            /**
+             * @returns any Message for 200 response
+             * @returns ModelWithString Message for default response
+             * @returns ModelThatExtends Message for 201 response
+             * @returns ModelThatExtendsExtends Message for 202 response
+             * @throws ApiError
+             */
+            public static async callWithResponses(): Promise<{
+                readonly '@namespace.string'?: string,
+                readonly '@namespace.integer'?: number,
+                readonly value?: Array<ModelWithString>,
+            } | ModelWithString | ModelThatExtends | ModelThatExtendsExtends> {
+                const result = await __request(
+                    ResponseServiceOptions.callWithResponses(            ));
+                    return result.body;
+                }
 
-}"
+            }"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/Service.ts 1`] = `
@@ -1050,7 +1339,43 @@ import type { ModelWithArray } from './../models/ModelWithArray';
 import type { ModelWithDictionary } from './../models/ModelWithDictionary';
 import type { ModelWithEnumInteger } from './../models/ModelWithEnumInteger';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const getCallWithModelWithDictionaryReference = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/getModelWithDictionaryReference\`,
+});
+
+const getCallWithModelWithDictionary = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/getModelWithDictionary\`,
+});
+
+const getCallWithSimpleInteger = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/simpleEnum\`,
+});
+
+const getCallWithModelArray = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/getModelWithArray\`,
+});
+
+
+export type TServiceOptions = {
+    getCallWithModelWithDictionaryReference: () => ApiRequestOptions;
+    getCallWithModelWithDictionary: () => ApiRequestOptions;
+    getCallWithSimpleInteger: () => ApiRequestOptions;
+    getCallWithModelArray: () => ApiRequestOptions;
+}
+
+export const ServiceOptions: TServiceOptions = {
+    getCallWithModelWithDictionaryReference: getCallWithModelWithDictionaryReference,
+    getCallWithModelWithDictionary: getCallWithModelWithDictionary,
+    getCallWithSimpleInteger: getCallWithSimpleInteger,
+    getCallWithModelArray: getCallWithModelArray,
+}
 
 export class Service {
 
@@ -1059,50 +1384,42 @@ export class Service {
      * @throws ApiError
      */
     public static async getCallWithModelWithDictionaryReference(): Promise<DictionaryWithReference> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/getModelWithDictionaryReference\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            ServiceOptions.getCallWithModelWithDictionaryReference(            ));
+            return result.body;
+        }
 
-    /**
-     * @returns ModelWithDictionary Message for default response
-     * @throws ApiError
-     */
-    public static async getCallWithModelWithDictionary(): Promise<ModelWithDictionary> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/getModelWithDictionary\`,
-        });
-        return result.body;
-    }
+        /**
+         * @returns ModelWithDictionary Message for default response
+         * @throws ApiError
+         */
+        public static async getCallWithModelWithDictionary(): Promise<ModelWithDictionary> {
+            const result = await __request(
+                ServiceOptions.getCallWithModelWithDictionary(            ));
+                return result.body;
+            }
 
-    /**
-     * @returns ModelWithEnumInteger Message for default response
-     * @throws ApiError
-     */
-    public static async getCallWithSimpleInteger(): Promise<ModelWithEnumInteger> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/simpleEnum\`,
-        });
-        return result.body;
-    }
+            /**
+             * @returns ModelWithEnumInteger Message for default response
+             * @throws ApiError
+             */
+            public static async getCallWithSimpleInteger(): Promise<ModelWithEnumInteger> {
+                const result = await __request(
+                    ServiceOptions.getCallWithSimpleInteger(            ));
+                    return result.body;
+                }
 
-    /**
-     * @returns ModelWithArray Message for default response
-     * @throws ApiError
-     */
-    public static async getCallWithModelArray(): Promise<ModelWithArray> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/getModelWithArray\`,
-        });
-        return result.body;
-    }
+                /**
+                 * @returns ModelWithArray Message for default response
+                 * @throws ApiError
+                 */
+                public static async getCallWithModelArray(): Promise<ModelWithArray> {
+                    const result = await __request(
+                        ServiceOptions.getCallWithModelArray(            ));
+                        return result.body;
+                    }
 
-}"
+                }"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/SimpleService.ts 1`] = `
@@ -1110,7 +1427,64 @@ exports[`v2 should generate: ./test/generated/v2/services/SimpleService.ts 1`] =
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const putCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const postCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const deleteCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'DELETE',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const optionsCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'OPTIONS',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const headCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'HEAD',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const patchCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'PATCH',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+
+export type TSimpleServiceOptions = {
+    getCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    putCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    postCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    deleteCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    optionsCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    headCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    patchCallWithoutParametersAndResponse: () => ApiRequestOptions;
+}
+
+export const SimpleServiceOptions: TSimpleServiceOptions = {
+    getCallWithoutParametersAndResponse: getCallWithoutParametersAndResponse,
+    putCallWithoutParametersAndResponse: putCallWithoutParametersAndResponse,
+    postCallWithoutParametersAndResponse: postCallWithoutParametersAndResponse,
+    deleteCallWithoutParametersAndResponse: deleteCallWithoutParametersAndResponse,
+    optionsCallWithoutParametersAndResponse: optionsCallWithoutParametersAndResponse,
+    headCallWithoutParametersAndResponse: headCallWithoutParametersAndResponse,
+    patchCallWithoutParametersAndResponse: patchCallWithoutParametersAndResponse,
+}
 
 export class SimpleService {
 
@@ -1118,80 +1492,66 @@ export class SimpleService {
      * @throws ApiError
      */
     public static async getCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            SimpleServiceOptions.getCallWithoutParametersAndResponse(            ));
+            return result.body;
+        }
 
-    /**
-     * @throws ApiError
-     */
-    public static async putCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+        /**
+         * @throws ApiError
+         */
+        public static async putCallWithoutParametersAndResponse(): Promise<void> {
+            const result = await __request(
+                SimpleServiceOptions.putCallWithoutParametersAndResponse(            ));
+                return result.body;
+            }
 
-    /**
-     * @throws ApiError
-     */
-    public static async postCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+            /**
+             * @throws ApiError
+             */
+            public static async postCallWithoutParametersAndResponse(): Promise<void> {
+                const result = await __request(
+                    SimpleServiceOptions.postCallWithoutParametersAndResponse(            ));
+                    return result.body;
+                }
 
-    /**
-     * @throws ApiError
-     */
-    public static async deleteCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'DELETE',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                /**
+                 * @throws ApiError
+                 */
+                public static async deleteCallWithoutParametersAndResponse(): Promise<void> {
+                    const result = await __request(
+                        SimpleServiceOptions.deleteCallWithoutParametersAndResponse(            ));
+                        return result.body;
+                    }
 
-    /**
-     * @throws ApiError
-     */
-    public static async optionsCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'OPTIONS',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                    /**
+                     * @throws ApiError
+                     */
+                    public static async optionsCallWithoutParametersAndResponse(): Promise<void> {
+                        const result = await __request(
+                            SimpleServiceOptions.optionsCallWithoutParametersAndResponse(            ));
+                            return result.body;
+                        }
 
-    /**
-     * @throws ApiError
-     */
-    public static async headCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'HEAD',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                        /**
+                         * @throws ApiError
+                         */
+                        public static async headCallWithoutParametersAndResponse(): Promise<void> {
+                            const result = await __request(
+                                SimpleServiceOptions.headCallWithoutParametersAndResponse(            ));
+                                return result.body;
+                            }
 
-    /**
-     * @throws ApiError
-     */
-    public static async patchCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'PATCH',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                            /**
+                             * @throws ApiError
+                             */
+                            public static async patchCallWithoutParametersAndResponse(): Promise<void> {
+                                const result = await __request(
+                                    SimpleServiceOptions.patchCallWithoutParametersAndResponse(            ));
+                                    return result.body;
+                                }
 
-}"
+                            }"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/TypesService.ts 1`] = `
@@ -1199,7 +1559,49 @@ exports[`v2 should generate: ./test/generated/v2/services/TypesService.ts 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const types = (
+    parameterArray: Array<string>,
+    parameterDictionary: Record<string, string>,
+    parameterEnum: 'Success' | 'Warning' | 'Error',
+    parameterNumber: number = 123,
+    parameterString: string = 'default',
+    parameterBoolean: boolean = true,
+    parameterObject: any = null,
+    id?: number,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/types\`,
+    query: {
+        'parameterArray': parameterArray,
+        'parameterDictionary': parameterDictionary,
+        'parameterEnum': parameterEnum,
+        'parameterNumber': parameterNumber,
+        'parameterString': parameterString,
+        'parameterBoolean': parameterBoolean,
+        'parameterObject': parameterObject,
+    },
+});
+
+
+export type TTypesServiceOptions = {
+    types: (
+        parameterArray: Array<string>,
+        parameterDictionary: Record<string, string>,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterNumber: number,
+        parameterString: string,
+        parameterBoolean: boolean,
+        parameterObject: any,
+        id?: number,
+    ) => ApiRequestOptions;
+}
+
+export const TypesServiceOptions: TTypesServiceOptions = {
+    types: types,
+}
 
 export class TypesService {
 
@@ -1228,23 +1630,21 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/types\`,
-            query: {
-                'parameterArray': parameterArray,
-                'parameterDictionary': parameterDictionary,
-                'parameterEnum': parameterEnum,
-                'parameterNumber': parameterNumber,
-                'parameterString': parameterString,
-                'parameterBoolean': parameterBoolean,
-                'parameterObject': parameterObject,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            TypesServiceOptions.types(
+                parameterArray,
+                parameterDictionary,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterBoolean,
+                parameterObject,
+                id,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/core/ApiError.ts 1`] = `
@@ -1925,7 +2325,22 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* eslint-disable */
 import type { IModelWithCircularReference } from './../models/schemas/ModelWithCircularReference';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithCircularModel = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/circular\`,
+});
+
+
+export type TCircularOptions = {
+    callWithCircularModel: () => ApiRequestOptions;
+}
+
+export const CircularOptions: TCircularOptions = {
+    callWithCircularModel: callWithCircularModel,
+}
 
 export class CircularService {
 
@@ -1934,14 +2349,12 @@ export class CircularService {
      * @throws ApiError
      */
     public static async callWithCircularModel(): Promise<IModelWithCircularReference> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/circular\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            CircularOptions.callWithCircularModel(            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/CollectionFormatService.ts 1`] = `
@@ -1949,7 +2362,41 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const collectionFormat = (
+    parameterArrayCsv: Array<string> | null,
+    parameterArraySsv: Array<string> | null,
+    parameterArrayTsv: Array<string> | null,
+    parameterArrayPipes: Array<string> | null,
+    parameterArrayMulti: Array<string> | null,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/collectionFormat\`,
+    query: {
+        'parameterArrayCSV': parameterArrayCsv,
+        'parameterArraySSV': parameterArraySsv,
+        'parameterArrayTSV': parameterArrayTsv,
+        'parameterArrayPipes': parameterArrayPipes,
+        'parameterArrayMulti': parameterArrayMulti,
+    },
+});
+
+
+export type TCollectionFormatOptions = {
+    collectionFormat: (
+        parameterArrayCsv: Array<string> | null,
+        parameterArraySsv: Array<string> | null,
+        parameterArrayTsv: Array<string> | null,
+        parameterArrayPipes: Array<string> | null,
+        parameterArrayMulti: Array<string> | null,
+    ) => ApiRequestOptions;
+}
+
+export const CollectionFormatOptions: TCollectionFormatOptions = {
+    collectionFormat: collectionFormat,
+}
 
 export class CollectionFormatService {
 
@@ -1968,21 +2415,18 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
     ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/collectionFormat\`,
-            query: {
-                'parameterArrayCSV': parameterArrayCsv,
-                'parameterArraySSV': parameterArraySsv,
-                'parameterArrayTSV': parameterArrayTsv,
-                'parameterArrayPipes': parameterArrayPipes,
-                'parameterArrayMulti': parameterArrayMulti,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            CollectionFormatOptions.collectionFormat(
+                parameterArrayCsv,
+                parameterArraySsv,
+                parameterArrayTsv,
+                parameterArrayPipes,
+                parameterArrayMulti,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/ComplexService.ts 1`] = `
@@ -1994,7 +2438,87 @@ import type { IModelWithDictionary } from './../models/schemas/ModelWithDictiona
 import type { IModelWithEnum } from './../models/schemas/ModelWithEnum';
 import type { IModelWithString } from './../models/schemas/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const complexTypes = (
+    parameterObject: {
+        first?: {
+            second?: {
+                third?: string,
+            },
+        },
+    },
+    parameterReference: IModelWithString,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/complex\`,
+    query: {
+        'parameterObject': parameterObject,
+        'parameterReference': parameterReference,
+    },
+    errors: {
+        400: \`400 server error\`,
+        500: \`500 server error\`,
+    },
+});
+
+const complexParams = (
+    id: number,
+    requestBody?: {
+        readonly key: string | null,
+        name: string | null,
+        enabled: boolean,
+        readonly type: 'Monkey' | 'Horse' | 'Bird',
+        listOfModels?: Array<IModelWithString> | null,
+        listOfStrings?: Array<string> | null,
+        parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+        readonly user?: {
+            readonly id?: number,
+            readonly name?: string | null,
+        },
+    },
+): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/complex/\${id}\`,
+    body: requestBody,
+    mediaType: 'application/json-patch+json',
+});
+
+
+export type TComplexOptions = {
+    complexTypes: (
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string,
+                },
+            },
+        },
+        parameterReference: IModelWithString,
+    ) => ApiRequestOptions;
+    complexParams: (
+        id: number,
+        requestBody?: {
+            readonly key: string | null,
+            name: string | null,
+            enabled: boolean,
+            readonly type: 'Monkey' | 'Horse' | 'Bird',
+            listOfModels?: Array<IModelWithString> | null,
+            listOfStrings?: Array<string> | null,
+            parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+            readonly user?: {
+                readonly id?: number,
+                readonly name?: string | null,
+            },
+        },
+    ) => ApiRequestOptions;
+}
+
+export const ComplexOptions: TComplexOptions = {
+    complexTypes: complexTypes,
+    complexParams: complexParams,
+}
 
 export class ComplexService {
 
@@ -2014,53 +2538,45 @@ export class ComplexService {
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/complex\`,
-            query: {
-                'parameterObject': parameterObject,
-                'parameterReference': parameterReference,
-            },
-            errors: {
-                400: \`400 server error\`,
-                500: \`500 server error\`,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            ComplexOptions.complexTypes(
+                parameterObject,
+                parameterReference,
+            ));
+            return result.body;
+        }
 
-    /**
-     * @param id
-     * @param requestBody
-     * @returns IModelWithString Success
-     * @throws ApiError
-     */
-    public static async complexParams(
-        id: number,
-        requestBody?: {
-            readonly key: string | null,
-            name: string | null,
-            enabled: boolean,
-            readonly type: 'Monkey' | 'Horse' | 'Bird',
-            listOfModels?: Array<IModelWithString> | null,
-            listOfStrings?: Array<string> | null,
-            parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
-            readonly user?: {
-                readonly id?: number,
-                readonly name?: string | null,
+        /**
+         * @param id
+         * @param requestBody
+         * @returns IModelWithString Success
+         * @throws ApiError
+         */
+        public static async complexParams(
+            id: number,
+            requestBody?: {
+                readonly key: string | null,
+                name: string | null,
+                enabled: boolean,
+                readonly type: 'Monkey' | 'Horse' | 'Bird',
+                listOfModels?: Array<IModelWithString> | null,
+                listOfStrings?: Array<string> | null,
+                parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+                readonly user?: {
+                    readonly id?: number,
+                    readonly name?: string | null,
+                },
             },
-        },
-    ): Promise<IModelWithString> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/complex/\${id}\`,
-            body: requestBody,
-            mediaType: 'application/json-patch+json',
-        });
-        return result.body;
-    }
+        ): Promise<IModelWithString> {
+            const result = await __request(
+                ComplexOptions.complexParams(
+                    id,
+                    requestBody,
+                ));
+                return result.body;
+            }
 
-}"
+        }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/DefaultsService.ts 1`] = `
@@ -2069,7 +2585,100 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* eslint-disable */
 import type { IModelWithString } from './../models/schemas/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithDefaultParameters = (
+    parameterString: string | null = 'Hello World!',
+    parameterNumber: number | null = 123,
+    parameterBoolean: boolean | null = true,
+    parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+    parameterModel: IModelWithString | null = {
+        \\"prop\\": \\"Hello World!\\"
+    },
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    query: {
+        'parameterString': parameterString,
+        'parameterNumber': parameterNumber,
+        'parameterBoolean': parameterBoolean,
+        'parameterEnum': parameterEnum,
+        'parameterModel': parameterModel,
+    },
+});
+
+const callWithDefaultOptionalParameters = (
+    parameterString: string = 'Hello World!',
+    parameterNumber: number = 123,
+    parameterBoolean: boolean = true,
+    parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+    parameterModel: IModelWithString = {
+        \\"prop\\": \\"Hello World!\\"
+    },
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    query: {
+        'parameterString': parameterString,
+        'parameterNumber': parameterNumber,
+        'parameterBoolean': parameterBoolean,
+        'parameterEnum': parameterEnum,
+        'parameterModel': parameterModel,
+    },
+});
+
+const callToTestOrderOfParams = (
+    parameterStringWithNoDefault: string,
+    parameterOptionalStringWithDefault: string = 'Hello World!',
+    parameterOptionalStringWithEmptyDefault: string = '',
+    parameterStringWithDefault: string = 'Hello World!',
+    parameterStringWithEmptyDefault: string = '',
+    parameterOptionalStringWithNoDefault?: string,
+): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    query: {
+        'parameterStringWithNoDefault': parameterStringWithNoDefault,
+        'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
+        'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
+        'parameterStringWithDefault': parameterStringWithDefault,
+        'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
+        'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
+    },
+});
+
+
+export type TDefaultsOptions = {
+    callWithDefaultParameters: (
+        parameterString: string | null,
+        parameterNumber: number | null,
+        parameterBoolean: boolean | null,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: IModelWithString | null,
+    ) => ApiRequestOptions;
+    callWithDefaultOptionalParameters: (
+        parameterString: string,
+        parameterNumber: number,
+        parameterBoolean: boolean,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: IModelWithString,
+    ) => ApiRequestOptions;
+    callToTestOrderOfParams: (
+        parameterStringWithNoDefault: string,
+        parameterOptionalStringWithDefault: string,
+        parameterOptionalStringWithEmptyDefault: string,
+        parameterStringWithDefault: string,
+        parameterStringWithEmptyDefault: string,
+        parameterOptionalStringWithNoDefault?: string,
+    ) => ApiRequestOptions;
+}
+
+export const DefaultsOptions: TDefaultsOptions = {
+    callWithDefaultParameters: callWithDefaultParameters,
+    callWithDefaultOptionalParameters: callWithDefaultOptionalParameters,
+    callToTestOrderOfParams: callToTestOrderOfParams,
+}
 
 export class DefaultsService {
 
@@ -2090,84 +2699,75 @@ export class DefaultsService {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
-            query: {
-                'parameterString': parameterString,
-                'parameterNumber': parameterNumber,
-                'parameterBoolean': parameterBoolean,
-                'parameterEnum': parameterEnum,
-                'parameterModel': parameterModel,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            DefaultsOptions.callWithDefaultParameters(
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
+            ));
+            return result.body;
+        }
 
-    /**
-     * @param parameterString This is a simple string that is optional with default value
-     * @param parameterNumber This is a simple number that is optional with default value
-     * @param parameterBoolean This is a simple boolean that is optional with default value
-     * @param parameterEnum This is a simple enum that is optional with default value
-     * @param parameterModel This is a simple model that is optional with default value
-     * @throws ApiError
-     */
-    public static async callWithDefaultOptionalParameters(
-        parameterString: string = 'Hello World!',
-        parameterNumber: number = 123,
-        parameterBoolean: boolean = true,
-        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: IModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
-        },
-    ): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
-            query: {
-                'parameterString': parameterString,
-                'parameterNumber': parameterNumber,
-                'parameterBoolean': parameterBoolean,
-                'parameterEnum': parameterEnum,
-                'parameterModel': parameterModel,
+        /**
+         * @param parameterString This is a simple string that is optional with default value
+         * @param parameterNumber This is a simple number that is optional with default value
+         * @param parameterBoolean This is a simple boolean that is optional with default value
+         * @param parameterEnum This is a simple enum that is optional with default value
+         * @param parameterModel This is a simple model that is optional with default value
+         * @throws ApiError
+         */
+        public static async callWithDefaultOptionalParameters(
+            parameterString: string = 'Hello World!',
+            parameterNumber: number = 123,
+            parameterBoolean: boolean = true,
+            parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+            parameterModel: IModelWithString = {
+                \\"prop\\": \\"Hello World!\\"
             },
-        });
-        return result.body;
-    }
+        ): Promise<void> {
+            const result = await __request(
+                DefaultsOptions.callWithDefaultOptionalParameters(
+                    parameterString,
+                    parameterNumber,
+                    parameterBoolean,
+                    parameterEnum,
+                    parameterModel,
+                ));
+                return result.body;
+            }
 
-    /**
-     * @param parameterStringWithNoDefault This is a string with no default
-     * @param parameterOptionalStringWithDefault This is a optional string with default
-     * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
-     * @param parameterOptionalStringWithNoDefault This is a optional string with no default
-     * @param parameterStringWithDefault This is a string with default
-     * @param parameterStringWithEmptyDefault This is a string with empty default
-     * @throws ApiError
-     */
-    public static async callToTestOrderOfParams(
-        parameterStringWithNoDefault: string,
-        parameterOptionalStringWithDefault: string = 'Hello World!',
-        parameterOptionalStringWithEmptyDefault: string = '',
-        parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault: string = 'Hello World!',
-        parameterStringWithEmptyDefault: string = '',
-    ): Promise<void> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
-            query: {
-                'parameterStringWithNoDefault': parameterStringWithNoDefault,
-                'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
-                'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
-                'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
-                'parameterStringWithDefault': parameterStringWithDefault,
-                'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
-            },
-        });
-        return result.body;
-    }
+            /**
+             * @param parameterStringWithNoDefault This is a string with no default
+             * @param parameterOptionalStringWithDefault This is a optional string with default
+             * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
+             * @param parameterStringWithDefault This is a string with default
+             * @param parameterStringWithEmptyDefault This is a string with empty default
+             * @param parameterOptionalStringWithNoDefault This is a optional string with no default
+             * @throws ApiError
+             */
+            public static async callToTestOrderOfParams(
+                parameterStringWithNoDefault: string,
+                parameterOptionalStringWithDefault: string = 'Hello World!',
+                parameterOptionalStringWithEmptyDefault: string = '',
+                parameterStringWithDefault: string = 'Hello World!',
+                parameterStringWithEmptyDefault: string = '',
+                parameterOptionalStringWithNoDefault?: string,
+            ): Promise<void> {
+                const result = await __request(
+                    DefaultsOptions.callToTestOrderOfParams(
+                        parameterStringWithNoDefault,
+                        parameterOptionalStringWithDefault,
+                        parameterOptionalStringWithEmptyDefault,
+                        parameterStringWithDefault,
+                        parameterStringWithEmptyDefault,
+                        parameterOptionalStringWithNoDefault,
+                    ));
+                    return result.body;
+                }
 
-}"
+            }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/DuplicateService.ts 1`] = `
@@ -2175,7 +2775,43 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const duplicateName = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+const duplicateName1 = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+const duplicateName2 = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+const duplicateName3 = (): ApiRequestOptions => ({
+    method: 'DELETE',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+
+export type TDuplicateOptions = {
+    duplicateName: () => ApiRequestOptions;
+    duplicateName1: () => ApiRequestOptions;
+    duplicateName2: () => ApiRequestOptions;
+    duplicateName3: () => ApiRequestOptions;
+}
+
+export const DuplicateOptions: TDuplicateOptions = {
+    duplicateName: duplicateName,
+    duplicateName1: duplicateName1,
+    duplicateName2: duplicateName2,
+    duplicateName3: duplicateName3,
+}
 
 export class DuplicateService {
 
@@ -2183,47 +2819,39 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static async duplicateName(): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            DuplicateOptions.duplicateName(            ));
+            return result.body;
+        }
 
-    /**
-     * @throws ApiError
-     */
-    public static async duplicateName1(): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+        /**
+         * @throws ApiError
+         */
+        public static async duplicateName1(): Promise<void> {
+            const result = await __request(
+                DuplicateOptions.duplicateName1(            ));
+                return result.body;
+            }
 
-    /**
-     * @throws ApiError
-     */
-    public static async duplicateName2(): Promise<void> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+            /**
+             * @throws ApiError
+             */
+            public static async duplicateName2(): Promise<void> {
+                const result = await __request(
+                    DuplicateOptions.duplicateName2(            ));
+                    return result.body;
+                }
 
-    /**
-     * @throws ApiError
-     */
-    public static async duplicateName3(): Promise<void> {
-        const result = await __request({
-            method: 'DELETE',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+                /**
+                 * @throws ApiError
+                 */
+                public static async duplicateName3(): Promise<void> {
+                    const result = await __request(
+                        DuplicateOptions.duplicateName3(            ));
+                        return result.body;
+                    }
 
-}"
+                }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/EnumsService.ts 1`] = `
@@ -2231,7 +2859,27 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithEnums = (
+    requestBody?: any,
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/enums\`,
+    body: requestBody,
+});
+
+
+export type TEnumsOptions = {
+    callWithEnums: (
+        requestBody?: any,
+    ) => ApiRequestOptions;
+}
+
+export const EnumsOptions: TEnumsOptions = {
+    callWithEnums: callWithEnums,
+}
 
 export class EnumsService {
 
@@ -2242,15 +2890,14 @@ export class EnumsService {
     public static async callWithEnums(
         requestBody?: any,
     ): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/enums\`,
-            body: requestBody,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            EnumsOptions.callWithEnums(
+                requestBody,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/HeaderService.ts 1`] = `
@@ -2258,7 +2905,27 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithResultFromHeader = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/header\`,
+    responseHeader: 'operation-location',
+    errors: {
+        400: \`400 server error\`,
+        500: \`500 server error\`,
+    },
+});
+
+
+export type THeaderOptions = {
+    callWithResultFromHeader: () => ApiRequestOptions;
+}
+
+export const HeaderOptions: THeaderOptions = {
+    callWithResultFromHeader: callWithResultFromHeader,
+}
 
 export class HeaderService {
 
@@ -2267,19 +2934,12 @@ export class HeaderService {
      * @throws ApiError
      */
     public static async callWithResultFromHeader(): Promise<string> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/header\`,
-            responseHeader: 'operation-location',
-            errors: {
-                400: \`400 server error\`,
-                500: \`500 server error\`,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            HeaderOptions.callWithResultFromHeader(            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/MultipartService.ts 1`] = `
@@ -2287,7 +2947,22 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const multipartResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/multipart\`,
+});
+
+
+export type TMultipartOptions = {
+    multipartResponse: () => ApiRequestOptions;
+}
+
+export const MultipartOptions: TMultipartOptions = {
+    multipartResponse: multipartResponse,
+}
 
 export class MultipartService {
 
@@ -2302,14 +2977,12 @@ export class MultipartService {
             bar?: string,
         },
     }> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/multipart\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            MultipartOptions.multipartResponse(            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/NoContentService.ts 1`] = `
@@ -2317,7 +2990,22 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithNoContentResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/no-content\`,
+});
+
+
+export type TNoContentOptions = {
+    callWithNoContentResponse: () => ApiRequestOptions;
+}
+
+export const NoContentOptions: TNoContentOptions = {
+    callWithNoContentResponse: callWithNoContentResponse,
+}
 
 export class NoContentService {
 
@@ -2326,14 +3014,12 @@ export class NoContentService {
      * @throws ApiError
      */
     public static async callWithNoContentResponse(): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/no-content\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            NoContentOptions.callWithNoContentResponse(            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/ParametersService.ts 1`] = `
@@ -2342,7 +3028,128 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* eslint-disable */
 import type { IModelWithString } from './../models/schemas/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithParameters = (
+    parameterHeader: string | null,
+    parameterQuery: string | null,
+    parameterForm: string | null,
+    parameterCookie: string | null,
+    parameterPath: string | null,
+    requestBody: IModelWithString | null,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath}\`,
+    cookies: {
+        'parameterCookie': parameterCookie,
+    },
+    headers: {
+        'parameterHeader': parameterHeader,
+    },
+    query: {
+        'parameterQuery': parameterQuery,
+    },
+    formData: {
+        'parameterForm': parameterForm,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+const callWithWeirdParameterNames = (
+    parameterHeader: string | null,
+    parameterQuery: string | null,
+    parameterForm: string | null,
+    parameterCookie: string | null,
+    requestBody: IModelWithString | null,
+    parameterPath1?: string,
+    parameterPath2?: string,
+    parameterPath3?: string,
+    _default?: string,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
+    cookies: {
+        'PARAMETER-COOKIE': parameterCookie,
+    },
+    headers: {
+        'parameter.header': parameterHeader,
+    },
+    query: {
+        'parameter-query': parameterQuery,
+        'default': _default,
+    },
+    formData: {
+        'parameter_form': parameterForm,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+const getCallWithOptionalParam = (
+    requestBody: IModelWithString,
+    parameter?: string,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
+    query: {
+        'parameter': parameter,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+const postCallWithOptionalParam = (
+    parameter: string,
+    requestBody?: IModelWithString,
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
+    query: {
+        'parameter': parameter,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+
+export type TParametersOptions = {
+    callWithParameters: (
+        parameterHeader: string | null,
+        parameterQuery: string | null,
+        parameterForm: string | null,
+        parameterCookie: string | null,
+        parameterPath: string | null,
+        requestBody: IModelWithString | null,
+    ) => ApiRequestOptions;
+    callWithWeirdParameterNames: (
+        parameterHeader: string | null,
+        parameterQuery: string | null,
+        parameterForm: string | null,
+        parameterCookie: string | null,
+        requestBody: IModelWithString | null,
+        parameterPath1?: string,
+        parameterPath2?: string,
+        parameterPath3?: string,
+        _default?: string,
+    ) => ApiRequestOptions;
+    getCallWithOptionalParam: (
+        requestBody: IModelWithString,
+        parameter?: string,
+    ) => ApiRequestOptions;
+    postCallWithOptionalParam: (
+        parameter: string,
+        requestBody?: IModelWithString,
+    ) => ApiRequestOptions;
+}
+
+export const ParametersOptions: TParametersOptions = {
+    callWithParameters: callWithParameters,
+    callWithWeirdParameterNames: callWithWeirdParameterNames,
+    getCallWithOptionalParam: getCallWithOptionalParam,
+    postCallWithOptionalParam: postCallWithOptionalParam,
+}
 
 export class ParametersService {
 
@@ -2363,115 +3170,91 @@ export class ParametersService {
         parameterPath: string | null,
         requestBody: IModelWithString | null,
     ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath}\`,
-            cookies: {
-                'parameterCookie': parameterCookie,
-            },
-            headers: {
-                'parameterHeader': parameterHeader,
-            },
-            query: {
-                'parameterQuery': parameterQuery,
-            },
-            formData: {
-                'parameterForm': parameterForm,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-        return result.body;
-    }
+        const result = await __request(
+            ParametersOptions.callWithParameters(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterCookie,
+                parameterPath,
+                requestBody,
+            ));
+            return result.body;
+        }
 
-    /**
-     * @param parameterHeader This is the parameter that goes into the request header
-     * @param parameterQuery This is the parameter that goes into the request query params
-     * @param parameterForm This is the parameter that goes into the request form data
-     * @param parameterCookie This is the parameter that goes into the cookie
-     * @param requestBody This is the parameter that goes into the body
-     * @param parameterPath1 This is the parameter that goes into the path
-     * @param parameterPath2 This is the parameter that goes into the path
-     * @param parameterPath3 This is the parameter that goes into the path
-     * @param _default This is the parameter with a reserved keyword
-     * @throws ApiError
-     */
-    public static async callWithWeirdParameterNames(
-        parameterHeader: string | null,
-        parameterQuery: string | null,
-        parameterForm: string | null,
-        parameterCookie: string | null,
-        requestBody: IModelWithString | null,
-        parameterPath1?: string,
-        parameterPath2?: string,
-        parameterPath3?: string,
-        _default?: string,
-    ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
-            cookies: {
-                'PARAMETER-COOKIE': parameterCookie,
-            },
-            headers: {
-                'parameter.header': parameterHeader,
-            },
-            query: {
-                'parameter-query': parameterQuery,
-                'default': _default,
-            },
-            formData: {
-                'parameter_form': parameterForm,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-        return result.body;
-    }
+        /**
+         * @param parameterHeader This is the parameter that goes into the request header
+         * @param parameterQuery This is the parameter that goes into the request query params
+         * @param parameterForm This is the parameter that goes into the request form data
+         * @param parameterCookie This is the parameter that goes into the cookie
+         * @param requestBody This is the parameter that goes into the body
+         * @param parameterPath1 This is the parameter that goes into the path
+         * @param parameterPath2 This is the parameter that goes into the path
+         * @param parameterPath3 This is the parameter that goes into the path
+         * @param _default This is the parameter with a reserved keyword
+         * @throws ApiError
+         */
+        public static async callWithWeirdParameterNames(
+            parameterHeader: string | null,
+            parameterQuery: string | null,
+            parameterForm: string | null,
+            parameterCookie: string | null,
+            requestBody: IModelWithString | null,
+            parameterPath1?: string,
+            parameterPath2?: string,
+            parameterPath3?: string,
+            _default?: string,
+        ): Promise<void> {
+            const result = await __request(
+                ParametersOptions.callWithWeirdParameterNames(
+                    parameterHeader,
+                    parameterQuery,
+                    parameterForm,
+                    parameterCookie,
+                    requestBody,
+                    parameterPath1,
+                    parameterPath2,
+                    parameterPath3,
+                    _default,
+                ));
+                return result.body;
+            }
 
-    /**
-     * @param requestBody This is a required parameter
-     * @param parameter This is an optional parameter
-     * @throws ApiError
-     */
-    public static async getCallWithOptionalParam(
-        requestBody: IModelWithString,
-        parameter?: string,
-    ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
-            query: {
-                'parameter': parameter,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-        return result.body;
-    }
+            /**
+             * @param requestBody This is a required parameter
+             * @param parameter This is an optional parameter
+             * @throws ApiError
+             */
+            public static async getCallWithOptionalParam(
+                requestBody: IModelWithString,
+                parameter?: string,
+            ): Promise<void> {
+                const result = await __request(
+                    ParametersOptions.getCallWithOptionalParam(
+                        requestBody,
+                        parameter,
+                    ));
+                    return result.body;
+                }
 
-    /**
-     * @param parameter This is a required parameter
-     * @param requestBody This is an optional parameter
-     * @throws ApiError
-     */
-    public static async postCallWithOptionalParam(
-        parameter: string,
-        requestBody?: IModelWithString,
-    ): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
-            query: {
-                'parameter': parameter,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-        return result.body;
-    }
+                /**
+                 * @param parameter This is a required parameter
+                 * @param requestBody This is an optional parameter
+                 * @throws ApiError
+                 */
+                public static async postCallWithOptionalParam(
+                    parameter: string,
+                    requestBody?: IModelWithString,
+                ): Promise<void> {
+                    const result = await __request(
+                        ParametersOptions.postCallWithOptionalParam(
+                            parameter,
+                            requestBody,
+                        ));
+                        return result.body;
+                    }
 
-}"
+                }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/RequestBodyService.ts 1`] = `
@@ -2480,7 +3263,28 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* eslint-disable */
 import type { IModelWithString } from './../models/schemas/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const postRequestBodyService = (
+    requestBody?: IModelWithString,
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/requestBody/\`,
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+
+export type TRequestBodyOptions = {
+    postRequestBodyService: (
+        requestBody?: IModelWithString,
+    ) => ApiRequestOptions;
+}
+
+export const RequestBodyOptions: TRequestBodyOptions = {
+    postRequestBodyService: postRequestBodyService,
+}
 
 export class RequestBodyService {
 
@@ -2491,16 +3295,14 @@ export class RequestBodyService {
     public static async postRequestBodyService(
         requestBody?: IModelWithString,
     ): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/requestBody/\`,
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-        return result.body;
-    }
+        const result = await __request(
+            RequestBodyOptions.postRequestBodyService(
+                requestBody,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/ResponseService.ts 1`] = `
@@ -2510,7 +3312,46 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 import type { TModelThatExtends } from './../models/schemas/ModelThatExtends';
 import type { IModelWithString } from './../models/schemas/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+});
+
+const callWithDuplicateResponses = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    errors: {
+        500: \`Message for 500 error\`,
+        501: \`Message for 501 error\`,
+        502: \`Message for 502 error\`,
+    },
+});
+
+const callWithResponses = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    errors: {
+        500: \`Message for 500 error\`,
+        501: \`Message for 501 error\`,
+        502: \`Message for 502 error\`,
+    },
+});
+
+
+export type TResponseOptions = {
+    callWithResponse: () => ApiRequestOptions;
+    callWithDuplicateResponses: () => ApiRequestOptions;
+    callWithResponses: () => ApiRequestOptions;
+}
+
+export const ResponseOptions: TResponseOptions = {
+    callWithResponse: callWithResponse,
+    callWithDuplicateResponses: callWithDuplicateResponses,
+    callWithResponses: callWithResponses,
+}
 
 export class ResponseService {
 
@@ -2519,54 +3360,38 @@ export class ResponseService {
      * @throws ApiError
      */
     public static async callWithResponse(): Promise<IModelWithString> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/response\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            ResponseOptions.callWithResponse(            ));
+            return result.body;
+        }
 
-    /**
-     * @returns IModelWithString Message for default response
-     * @throws ApiError
-     */
-    public static async callWithDuplicateResponses(): Promise<IModelWithString> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/response\`,
-            errors: {
-                500: \`Message for 500 error\`,
-                501: \`Message for 501 error\`,
-                502: \`Message for 502 error\`,
-            },
-        });
-        return result.body;
-    }
+        /**
+         * @returns IModelWithString Message for default response
+         * @throws ApiError
+         */
+        public static async callWithDuplicateResponses(): Promise<IModelWithString> {
+            const result = await __request(
+                ResponseOptions.callWithDuplicateResponses(            ));
+                return result.body;
+            }
 
-    /**
-     * @returns any Message for 200 response
-     * @returns IModelWithString Message for default response
-     * @returns TModelThatExtends Message for 201 response
-     * @throws ApiError
-     */
-    public static async callWithResponses(): Promise<{
-        readonly '@namespace.string'?: string,
-        readonly '@namespace.integer'?: number,
-        readonly value?: Array<IModelWithString>,
-    } | IModelWithString | TModelThatExtends> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/response\`,
-            errors: {
-                500: \`Message for 500 error\`,
-                501: \`Message for 501 error\`,
-                502: \`Message for 502 error\`,
-            },
-        });
-        return result.body;
-    }
+            /**
+             * @returns any Message for 200 response
+             * @returns IModelWithString Message for default response
+             * @returns TModelThatExtends Message for 201 response
+             * @throws ApiError
+             */
+            public static async callWithResponses(): Promise<{
+                readonly '@namespace.string'?: string,
+                readonly '@namespace.integer'?: number,
+                readonly value?: Array<IModelWithString>,
+            } | IModelWithString | TModelThatExtends> {
+                const result = await __request(
+                    ResponseOptions.callWithResponses(            ));
+                    return result.body;
+                }
 
-}"
+            }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/SimpleService.ts 1`] = `
@@ -2574,7 +3399,64 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const putCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const postCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const deleteCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'DELETE',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const optionsCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'OPTIONS',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const headCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'HEAD',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const patchCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'PATCH',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+
+export type TSimpleOptions = {
+    getCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    putCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    postCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    deleteCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    optionsCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    headCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    patchCallWithoutParametersAndResponse: () => ApiRequestOptions;
+}
+
+export const SimpleOptions: TSimpleOptions = {
+    getCallWithoutParametersAndResponse: getCallWithoutParametersAndResponse,
+    putCallWithoutParametersAndResponse: putCallWithoutParametersAndResponse,
+    postCallWithoutParametersAndResponse: postCallWithoutParametersAndResponse,
+    deleteCallWithoutParametersAndResponse: deleteCallWithoutParametersAndResponse,
+    optionsCallWithoutParametersAndResponse: optionsCallWithoutParametersAndResponse,
+    headCallWithoutParametersAndResponse: headCallWithoutParametersAndResponse,
+    patchCallWithoutParametersAndResponse: patchCallWithoutParametersAndResponse,
+}
 
 export class SimpleService {
 
@@ -2582,80 +3464,66 @@ export class SimpleService {
      * @throws ApiError
      */
     public static async getCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            SimpleOptions.getCallWithoutParametersAndResponse(            ));
+            return result.body;
+        }
 
-    /**
-     * @throws ApiError
-     */
-    public static async putCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+        /**
+         * @throws ApiError
+         */
+        public static async putCallWithoutParametersAndResponse(): Promise<void> {
+            const result = await __request(
+                SimpleOptions.putCallWithoutParametersAndResponse(            ));
+                return result.body;
+            }
 
-    /**
-     * @throws ApiError
-     */
-    public static async postCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+            /**
+             * @throws ApiError
+             */
+            public static async postCallWithoutParametersAndResponse(): Promise<void> {
+                const result = await __request(
+                    SimpleOptions.postCallWithoutParametersAndResponse(            ));
+                    return result.body;
+                }
 
-    /**
-     * @throws ApiError
-     */
-    public static async deleteCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'DELETE',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                /**
+                 * @throws ApiError
+                 */
+                public static async deleteCallWithoutParametersAndResponse(): Promise<void> {
+                    const result = await __request(
+                        SimpleOptions.deleteCallWithoutParametersAndResponse(            ));
+                        return result.body;
+                    }
 
-    /**
-     * @throws ApiError
-     */
-    public static async optionsCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'OPTIONS',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                    /**
+                     * @throws ApiError
+                     */
+                    public static async optionsCallWithoutParametersAndResponse(): Promise<void> {
+                        const result = await __request(
+                            SimpleOptions.optionsCallWithoutParametersAndResponse(            ));
+                            return result.body;
+                        }
 
-    /**
-     * @throws ApiError
-     */
-    public static async headCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'HEAD',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                        /**
+                         * @throws ApiError
+                         */
+                        public static async headCallWithoutParametersAndResponse(): Promise<void> {
+                            const result = await __request(
+                                SimpleOptions.headCallWithoutParametersAndResponse(            ));
+                                return result.body;
+                            }
 
-    /**
-     * @throws ApiError
-     */
-    public static async patchCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'PATCH',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                            /**
+                             * @throws ApiError
+                             */
+                            public static async patchCallWithoutParametersAndResponse(): Promise<void> {
+                                const result = await __request(
+                                    SimpleOptions.patchCallWithoutParametersAndResponse(            ));
+                                    return result.body;
+                                }
 
-}"
+                            }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/TypesService.ts 1`] = `
@@ -2663,7 +3531,49 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const types = (
+    parameterArray: Array<string> | null,
+    parameterDictionary: any,
+    parameterEnum: 'Success' | 'Warning' | 'Error' | null,
+    parameterNumber: number = 123,
+    parameterString: string | null = 'default',
+    parameterBoolean: boolean | null = true,
+    parameterObject: any = null,
+    id?: number,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/types\`,
+    query: {
+        'parameterArray': parameterArray,
+        'parameterDictionary': parameterDictionary,
+        'parameterEnum': parameterEnum,
+        'parameterNumber': parameterNumber,
+        'parameterString': parameterString,
+        'parameterBoolean': parameterBoolean,
+        'parameterObject': parameterObject,
+    },
+});
+
+
+export type TTypesOptions = {
+    types: (
+        parameterArray: Array<string> | null,
+        parameterDictionary: any,
+        parameterEnum: 'Success' | 'Warning' | 'Error' | null,
+        parameterNumber: number,
+        parameterString: string | null,
+        parameterBoolean: boolean | null,
+        parameterObject: any,
+        id?: number,
+    ) => ApiRequestOptions;
+}
+
+export const TypesOptions: TTypesOptions = {
+    types: types,
+}
 
 export class TypesService {
 
@@ -2692,23 +3602,21 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/types\`,
-            query: {
-                'parameterArray': parameterArray,
-                'parameterDictionary': parameterDictionary,
-                'parameterEnum': parameterEnum,
-                'parameterNumber': parameterNumber,
-                'parameterString': parameterString,
-                'parameterBoolean': parameterBoolean,
-                'parameterObject': parameterObject,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            TypesOptions.types(
+                parameterArray,
+                parameterDictionary,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterBoolean,
+                parameterObject,
+                id,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/UploadService.ts 1`] = `
@@ -2716,7 +3624,29 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const uploadFile = (
+    file: Blob,
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/upload\`,
+    formData: {
+        'file': file,
+    },
+});
+
+
+export type TUploadOptions = {
+    uploadFile: (
+        file: Blob,
+    ) => ApiRequestOptions;
+}
+
+export const UploadOptions: TUploadOptions = {
+    uploadFile: uploadFile,
+}
 
 export class UploadService {
 
@@ -2728,17 +3658,14 @@ export class UploadService {
     public static async uploadFile(
         file: Blob,
     ): Promise<boolean> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/upload\`,
-            formData: {
-                'file': file,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            UploadOptions.uploadFile(
+                file,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/core/ApiError.ts 1`] = `
@@ -3456,7 +4383,41 @@ exports[`v3 should generate: ./test/generated/v3/services/CollectionFormatServic
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const collectionFormat = (
+    parameterArrayCsv: Array<string> | null,
+    parameterArraySsv: Array<string> | null,
+    parameterArrayTsv: Array<string> | null,
+    parameterArrayPipes: Array<string> | null,
+    parameterArrayMulti: Array<string> | null,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/collectionFormat\`,
+    query: {
+        'parameterArrayCSV': parameterArrayCsv,
+        'parameterArraySSV': parameterArraySsv,
+        'parameterArrayTSV': parameterArrayTsv,
+        'parameterArrayPipes': parameterArrayPipes,
+        'parameterArrayMulti': parameterArrayMulti,
+    },
+});
+
+
+export type TCollectionFormatOptions = {
+    collectionFormat: (
+        parameterArrayCsv: Array<string> | null,
+        parameterArraySsv: Array<string> | null,
+        parameterArrayTsv: Array<string> | null,
+        parameterArrayPipes: Array<string> | null,
+        parameterArrayMulti: Array<string> | null,
+    ) => ApiRequestOptions;
+}
+
+export const CollectionFormatOptions: TCollectionFormatOptions = {
+    collectionFormat: collectionFormat,
+}
 
 export class CollectionFormatService {
 
@@ -3475,21 +4436,18 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
     ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/collectionFormat\`,
-            query: {
-                'parameterArrayCSV': parameterArrayCsv,
-                'parameterArraySSV': parameterArraySsv,
-                'parameterArrayTSV': parameterArrayTsv,
-                'parameterArrayPipes': parameterArrayPipes,
-                'parameterArrayMulti': parameterArrayMulti,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            CollectionFormatOptions.collectionFormat(
+                parameterArrayCsv,
+                parameterArraySsv,
+                parameterArrayTsv,
+                parameterArrayPipes,
+                parameterArrayMulti,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/ComplexService.ts 1`] = `
@@ -3501,7 +4459,87 @@ import type { IModelWithDictionary } from './../models/ModelWithDictionary';
 import type { IModelWithEnum } from './../models/ModelWithEnum';
 import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const complexTypes = (
+    parameterObject: {
+        first?: {
+            second?: {
+                third?: string,
+            },
+        },
+    },
+    parameterReference: IModelWithString,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/complex\`,
+    query: {
+        'parameterObject': parameterObject,
+        'parameterReference': parameterReference,
+    },
+    errors: {
+        400: \`400 server error\`,
+        500: \`500 server error\`,
+    },
+});
+
+const complexParams = (
+    id: number,
+    requestBody?: {
+        readonly key: string | null,
+        name: string | null,
+        enabled: boolean,
+        readonly type: 'Monkey' | 'Horse' | 'Bird',
+        listOfModels?: Array<IModelWithString> | null,
+        listOfStrings?: Array<string> | null,
+        parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+        readonly user?: {
+            readonly id?: number,
+            readonly name?: string | null,
+        },
+    },
+): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/complex/\${id}\`,
+    body: requestBody,
+    mediaType: 'application/json-patch+json',
+});
+
+
+export type TComplexOptions = {
+    complexTypes: (
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string,
+                },
+            },
+        },
+        parameterReference: IModelWithString,
+    ) => ApiRequestOptions;
+    complexParams: (
+        id: number,
+        requestBody?: {
+            readonly key: string | null,
+            name: string | null,
+            enabled: boolean,
+            readonly type: 'Monkey' | 'Horse' | 'Bird',
+            listOfModels?: Array<IModelWithString> | null,
+            listOfStrings?: Array<string> | null,
+            parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+            readonly user?: {
+                readonly id?: number,
+                readonly name?: string | null,
+            },
+        },
+    ) => ApiRequestOptions;
+}
+
+export const ComplexOptions: TComplexOptions = {
+    complexTypes: complexTypes,
+    complexParams: complexParams,
+}
 
 export class ComplexService {
 
@@ -3521,53 +4559,45 @@ export class ComplexService {
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/complex\`,
-            query: {
-                'parameterObject': parameterObject,
-                'parameterReference': parameterReference,
-            },
-            errors: {
-                400: \`400 server error\`,
-                500: \`500 server error\`,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            ComplexOptions.complexTypes(
+                parameterObject,
+                parameterReference,
+            ));
+            return result.body;
+        }
 
-    /**
-     * @param id
-     * @param requestBody
-     * @returns IModelWithString Success
-     * @throws ApiError
-     */
-    public static async complexParams(
-        id: number,
-        requestBody?: {
-            readonly key: string | null,
-            name: string | null,
-            enabled: boolean,
-            readonly type: 'Monkey' | 'Horse' | 'Bird',
-            listOfModels?: Array<IModelWithString> | null,
-            listOfStrings?: Array<string> | null,
-            parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
-            readonly user?: {
-                readonly id?: number,
-                readonly name?: string | null,
+        /**
+         * @param id
+         * @param requestBody
+         * @returns IModelWithString Success
+         * @throws ApiError
+         */
+        public static async complexParams(
+            id: number,
+            requestBody?: {
+                readonly key: string | null,
+                name: string | null,
+                enabled: boolean,
+                readonly type: 'Monkey' | 'Horse' | 'Bird',
+                listOfModels?: Array<IModelWithString> | null,
+                listOfStrings?: Array<string> | null,
+                parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+                readonly user?: {
+                    readonly id?: number,
+                    readonly name?: string | null,
+                },
             },
-        },
-    ): Promise<IModelWithString> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/complex/\${id}\`,
-            body: requestBody,
-            mediaType: 'application/json-patch+json',
-        });
-        return result.body;
-    }
+        ): Promise<IModelWithString> {
+            const result = await __request(
+                ComplexOptions.complexParams(
+                    id,
+                    requestBody,
+                ));
+                return result.body;
+            }
 
-}"
+        }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/DefaultsService.ts 1`] = `
@@ -3576,7 +4606,100 @@ exports[`v3 should generate: ./test/generated/v3/services/DefaultsService.ts 1`]
 /* eslint-disable */
 import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithDefaultParameters = (
+    parameterString: string | null = 'Hello World!',
+    parameterNumber: number | null = 123,
+    parameterBoolean: boolean | null = true,
+    parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+    parameterModel: IModelWithString | null = {
+        \\"prop\\": \\"Hello World!\\"
+    },
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    query: {
+        'parameterString': parameterString,
+        'parameterNumber': parameterNumber,
+        'parameterBoolean': parameterBoolean,
+        'parameterEnum': parameterEnum,
+        'parameterModel': parameterModel,
+    },
+});
+
+const callWithDefaultOptionalParameters = (
+    parameterString: string = 'Hello World!',
+    parameterNumber: number = 123,
+    parameterBoolean: boolean = true,
+    parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+    parameterModel: IModelWithString = {
+        \\"prop\\": \\"Hello World!\\"
+    },
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    query: {
+        'parameterString': parameterString,
+        'parameterNumber': parameterNumber,
+        'parameterBoolean': parameterBoolean,
+        'parameterEnum': parameterEnum,
+        'parameterModel': parameterModel,
+    },
+});
+
+const callToTestOrderOfParams = (
+    parameterStringWithNoDefault: string,
+    parameterOptionalStringWithDefault: string = 'Hello World!',
+    parameterOptionalStringWithEmptyDefault: string = '',
+    parameterStringWithDefault: string = 'Hello World!',
+    parameterStringWithEmptyDefault: string = '',
+    parameterOptionalStringWithNoDefault?: string,
+): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    query: {
+        'parameterStringWithNoDefault': parameterStringWithNoDefault,
+        'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
+        'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
+        'parameterStringWithDefault': parameterStringWithDefault,
+        'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
+        'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
+    },
+});
+
+
+export type TDefaultsOptions = {
+    callWithDefaultParameters: (
+        parameterString: string | null,
+        parameterNumber: number | null,
+        parameterBoolean: boolean | null,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: IModelWithString | null,
+    ) => ApiRequestOptions;
+    callWithDefaultOptionalParameters: (
+        parameterString: string,
+        parameterNumber: number,
+        parameterBoolean: boolean,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterModel: IModelWithString,
+    ) => ApiRequestOptions;
+    callToTestOrderOfParams: (
+        parameterStringWithNoDefault: string,
+        parameterOptionalStringWithDefault: string,
+        parameterOptionalStringWithEmptyDefault: string,
+        parameterStringWithDefault: string,
+        parameterStringWithEmptyDefault: string,
+        parameterOptionalStringWithNoDefault?: string,
+    ) => ApiRequestOptions;
+}
+
+export const DefaultsOptions: TDefaultsOptions = {
+    callWithDefaultParameters: callWithDefaultParameters,
+    callWithDefaultOptionalParameters: callWithDefaultOptionalParameters,
+    callToTestOrderOfParams: callToTestOrderOfParams,
+}
 
 export class DefaultsService {
 
@@ -3597,84 +4720,75 @@ export class DefaultsService {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
-            query: {
-                'parameterString': parameterString,
-                'parameterNumber': parameterNumber,
-                'parameterBoolean': parameterBoolean,
-                'parameterEnum': parameterEnum,
-                'parameterModel': parameterModel,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            DefaultsOptions.callWithDefaultParameters(
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
+            ));
+            return result.body;
+        }
 
-    /**
-     * @param parameterString This is a simple string that is optional with default value
-     * @param parameterNumber This is a simple number that is optional with default value
-     * @param parameterBoolean This is a simple boolean that is optional with default value
-     * @param parameterEnum This is a simple enum that is optional with default value
-     * @param parameterModel This is a simple model that is optional with default value
-     * @throws ApiError
-     */
-    public static async callWithDefaultOptionalParameters(
-        parameterString: string = 'Hello World!',
-        parameterNumber: number = 123,
-        parameterBoolean: boolean = true,
-        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: IModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
-        },
-    ): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
-            query: {
-                'parameterString': parameterString,
-                'parameterNumber': parameterNumber,
-                'parameterBoolean': parameterBoolean,
-                'parameterEnum': parameterEnum,
-                'parameterModel': parameterModel,
+        /**
+         * @param parameterString This is a simple string that is optional with default value
+         * @param parameterNumber This is a simple number that is optional with default value
+         * @param parameterBoolean This is a simple boolean that is optional with default value
+         * @param parameterEnum This is a simple enum that is optional with default value
+         * @param parameterModel This is a simple model that is optional with default value
+         * @throws ApiError
+         */
+        public static async callWithDefaultOptionalParameters(
+            parameterString: string = 'Hello World!',
+            parameterNumber: number = 123,
+            parameterBoolean: boolean = true,
+            parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+            parameterModel: IModelWithString = {
+                \\"prop\\": \\"Hello World!\\"
             },
-        });
-        return result.body;
-    }
+        ): Promise<void> {
+            const result = await __request(
+                DefaultsOptions.callWithDefaultOptionalParameters(
+                    parameterString,
+                    parameterNumber,
+                    parameterBoolean,
+                    parameterEnum,
+                    parameterModel,
+                ));
+                return result.body;
+            }
 
-    /**
-     * @param parameterStringWithNoDefault This is a string with no default
-     * @param parameterOptionalStringWithDefault This is a optional string with default
-     * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
-     * @param parameterOptionalStringWithNoDefault This is a optional string with no default
-     * @param parameterStringWithDefault This is a string with default
-     * @param parameterStringWithEmptyDefault This is a string with empty default
-     * @throws ApiError
-     */
-    public static async callToTestOrderOfParams(
-        parameterStringWithNoDefault: string,
-        parameterOptionalStringWithDefault: string = 'Hello World!',
-        parameterOptionalStringWithEmptyDefault: string = '',
-        parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault: string = 'Hello World!',
-        parameterStringWithEmptyDefault: string = '',
-    ): Promise<void> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
-            query: {
-                'parameterStringWithNoDefault': parameterStringWithNoDefault,
-                'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
-                'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
-                'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
-                'parameterStringWithDefault': parameterStringWithDefault,
-                'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
-            },
-        });
-        return result.body;
-    }
+            /**
+             * @param parameterStringWithNoDefault This is a string with no default
+             * @param parameterOptionalStringWithDefault This is a optional string with default
+             * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
+             * @param parameterStringWithDefault This is a string with default
+             * @param parameterStringWithEmptyDefault This is a string with empty default
+             * @param parameterOptionalStringWithNoDefault This is a optional string with no default
+             * @throws ApiError
+             */
+            public static async callToTestOrderOfParams(
+                parameterStringWithNoDefault: string,
+                parameterOptionalStringWithDefault: string = 'Hello World!',
+                parameterOptionalStringWithEmptyDefault: string = '',
+                parameterStringWithDefault: string = 'Hello World!',
+                parameterStringWithEmptyDefault: string = '',
+                parameterOptionalStringWithNoDefault?: string,
+            ): Promise<void> {
+                const result = await __request(
+                    DefaultsOptions.callToTestOrderOfParams(
+                        parameterStringWithNoDefault,
+                        parameterOptionalStringWithDefault,
+                        parameterOptionalStringWithEmptyDefault,
+                        parameterStringWithDefault,
+                        parameterStringWithEmptyDefault,
+                        parameterOptionalStringWithNoDefault,
+                    ));
+                    return result.body;
+                }
 
-}"
+            }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/DuplicateService.ts 1`] = `
@@ -3682,7 +4796,43 @@ exports[`v3 should generate: ./test/generated/v3/services/DuplicateService.ts 1`
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const duplicateName = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+const duplicateName1 = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+const duplicateName2 = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+const duplicateName3 = (): ApiRequestOptions => ({
+    method: 'DELETE',
+    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+});
+
+
+export type TDuplicateOptions = {
+    duplicateName: () => ApiRequestOptions;
+    duplicateName1: () => ApiRequestOptions;
+    duplicateName2: () => ApiRequestOptions;
+    duplicateName3: () => ApiRequestOptions;
+}
+
+export const DuplicateOptions: TDuplicateOptions = {
+    duplicateName: duplicateName,
+    duplicateName1: duplicateName1,
+    duplicateName2: duplicateName2,
+    duplicateName3: duplicateName3,
+}
 
 export class DuplicateService {
 
@@ -3690,47 +4840,39 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static async duplicateName(): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            DuplicateOptions.duplicateName(            ));
+            return result.body;
+        }
 
-    /**
-     * @throws ApiError
-     */
-    public static async duplicateName1(): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+        /**
+         * @throws ApiError
+         */
+        public static async duplicateName1(): Promise<void> {
+            const result = await __request(
+                DuplicateOptions.duplicateName1(            ));
+                return result.body;
+            }
 
-    /**
-     * @throws ApiError
-     */
-    public static async duplicateName2(): Promise<void> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+            /**
+             * @throws ApiError
+             */
+            public static async duplicateName2(): Promise<void> {
+                const result = await __request(
+                    DuplicateOptions.duplicateName2(            ));
+                    return result.body;
+                }
 
-    /**
-     * @throws ApiError
-     */
-    public static async duplicateName3(): Promise<void> {
-        const result = await __request({
-            method: 'DELETE',
-            path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
-        });
-        return result.body;
-    }
+                /**
+                 * @throws ApiError
+                 */
+                public static async duplicateName3(): Promise<void> {
+                    const result = await __request(
+                        DuplicateOptions.duplicateName3(            ));
+                        return result.body;
+                    }
 
-}"
+                }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/EnumsService.ts 1`] = `
@@ -3738,7 +4880,27 @@ exports[`v3 should generate: ./test/generated/v3/services/EnumsService.ts 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithEnums = (
+    requestBody?: any,
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/enums\`,
+    body: requestBody,
+});
+
+
+export type TEnumsOptions = {
+    callWithEnums: (
+        requestBody?: any,
+    ) => ApiRequestOptions;
+}
+
+export const EnumsOptions: TEnumsOptions = {
+    callWithEnums: callWithEnums,
+}
 
 export class EnumsService {
 
@@ -3749,15 +4911,14 @@ export class EnumsService {
     public static async callWithEnums(
         requestBody?: any,
     ): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/enums\`,
-            body: requestBody,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            EnumsOptions.callWithEnums(
+                requestBody,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/HeaderService.ts 1`] = `
@@ -3765,7 +4926,27 @@ exports[`v3 should generate: ./test/generated/v3/services/HeaderService.ts 1`] =
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithResultFromHeader = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/header\`,
+    responseHeader: 'operation-location',
+    errors: {
+        400: \`400 server error\`,
+        500: \`500 server error\`,
+    },
+});
+
+
+export type THeaderOptions = {
+    callWithResultFromHeader: () => ApiRequestOptions;
+}
+
+export const HeaderOptions: THeaderOptions = {
+    callWithResultFromHeader: callWithResultFromHeader,
+}
 
 export class HeaderService {
 
@@ -3774,19 +4955,12 @@ export class HeaderService {
      * @throws ApiError
      */
     public static async callWithResultFromHeader(): Promise<string> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/header\`,
-            responseHeader: 'operation-location',
-            errors: {
-                400: \`400 server error\`,
-                500: \`500 server error\`,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            HeaderOptions.callWithResultFromHeader(            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/MultipartService.ts 1`] = `
@@ -3794,7 +4968,22 @@ exports[`v3 should generate: ./test/generated/v3/services/MultipartService.ts 1`
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const multipartResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/multipart\`,
+});
+
+
+export type TMultipartOptions = {
+    multipartResponse: () => ApiRequestOptions;
+}
+
+export const MultipartOptions: TMultipartOptions = {
+    multipartResponse: multipartResponse,
+}
 
 export class MultipartService {
 
@@ -3809,14 +4998,12 @@ export class MultipartService {
             bar?: string,
         },
     }> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/multipart\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            MultipartOptions.multipartResponse(            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/NoContentService.ts 1`] = `
@@ -3824,7 +5011,22 @@ exports[`v3 should generate: ./test/generated/v3/services/NoContentService.ts 1`
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithNoContentResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/no-content\`,
+});
+
+
+export type TNoContentOptions = {
+    callWithNoContentResponse: () => ApiRequestOptions;
+}
+
+export const NoContentOptions: TNoContentOptions = {
+    callWithNoContentResponse: callWithNoContentResponse,
+}
 
 export class NoContentService {
 
@@ -3833,14 +5035,12 @@ export class NoContentService {
      * @throws ApiError
      */
     public static async callWithNoContentResponse(): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/no-content\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            NoContentOptions.callWithNoContentResponse(            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/ParametersService.ts 1`] = `
@@ -3849,7 +5049,128 @@ exports[`v3 should generate: ./test/generated/v3/services/ParametersService.ts 1
 /* eslint-disable */
 import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithParameters = (
+    parameterHeader: string | null,
+    parameterQuery: string | null,
+    parameterForm: string | null,
+    parameterCookie: string | null,
+    parameterPath: string | null,
+    requestBody: IModelWithString | null,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath}\`,
+    cookies: {
+        'parameterCookie': parameterCookie,
+    },
+    headers: {
+        'parameterHeader': parameterHeader,
+    },
+    query: {
+        'parameterQuery': parameterQuery,
+    },
+    formData: {
+        'parameterForm': parameterForm,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+const callWithWeirdParameterNames = (
+    parameterHeader: string | null,
+    parameterQuery: string | null,
+    parameterForm: string | null,
+    parameterCookie: string | null,
+    requestBody: IModelWithString | null,
+    parameterPath1?: string,
+    parameterPath2?: string,
+    parameterPath3?: string,
+    _default?: string,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
+    cookies: {
+        'PARAMETER-COOKIE': parameterCookie,
+    },
+    headers: {
+        'parameter.header': parameterHeader,
+    },
+    query: {
+        'parameter-query': parameterQuery,
+        'default': _default,
+    },
+    formData: {
+        'parameter_form': parameterForm,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+const getCallWithOptionalParam = (
+    requestBody: IModelWithString,
+    parameter?: string,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
+    query: {
+        'parameter': parameter,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+const postCallWithOptionalParam = (
+    parameter: string,
+    requestBody?: IModelWithString,
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
+    query: {
+        'parameter': parameter,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+
+export type TParametersOptions = {
+    callWithParameters: (
+        parameterHeader: string | null,
+        parameterQuery: string | null,
+        parameterForm: string | null,
+        parameterCookie: string | null,
+        parameterPath: string | null,
+        requestBody: IModelWithString | null,
+    ) => ApiRequestOptions;
+    callWithWeirdParameterNames: (
+        parameterHeader: string | null,
+        parameterQuery: string | null,
+        parameterForm: string | null,
+        parameterCookie: string | null,
+        requestBody: IModelWithString | null,
+        parameterPath1?: string,
+        parameterPath2?: string,
+        parameterPath3?: string,
+        _default?: string,
+    ) => ApiRequestOptions;
+    getCallWithOptionalParam: (
+        requestBody: IModelWithString,
+        parameter?: string,
+    ) => ApiRequestOptions;
+    postCallWithOptionalParam: (
+        parameter: string,
+        requestBody?: IModelWithString,
+    ) => ApiRequestOptions;
+}
+
+export const ParametersOptions: TParametersOptions = {
+    callWithParameters: callWithParameters,
+    callWithWeirdParameterNames: callWithWeirdParameterNames,
+    getCallWithOptionalParam: getCallWithOptionalParam,
+    postCallWithOptionalParam: postCallWithOptionalParam,
+}
 
 export class ParametersService {
 
@@ -3870,115 +5191,91 @@ export class ParametersService {
         parameterPath: string | null,
         requestBody: IModelWithString | null,
     ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath}\`,
-            cookies: {
-                'parameterCookie': parameterCookie,
-            },
-            headers: {
-                'parameterHeader': parameterHeader,
-            },
-            query: {
-                'parameterQuery': parameterQuery,
-            },
-            formData: {
-                'parameterForm': parameterForm,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-        return result.body;
-    }
+        const result = await __request(
+            ParametersOptions.callWithParameters(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterCookie,
+                parameterPath,
+                requestBody,
+            ));
+            return result.body;
+        }
 
-    /**
-     * @param parameterHeader This is the parameter that goes into the request header
-     * @param parameterQuery This is the parameter that goes into the request query params
-     * @param parameterForm This is the parameter that goes into the request form data
-     * @param parameterCookie This is the parameter that goes into the cookie
-     * @param requestBody This is the parameter that goes into the body
-     * @param parameterPath1 This is the parameter that goes into the path
-     * @param parameterPath2 This is the parameter that goes into the path
-     * @param parameterPath3 This is the parameter that goes into the path
-     * @param _default This is the parameter with a reserved keyword
-     * @throws ApiError
-     */
-    public static async callWithWeirdParameterNames(
-        parameterHeader: string | null,
-        parameterQuery: string | null,
-        parameterForm: string | null,
-        parameterCookie: string | null,
-        requestBody: IModelWithString | null,
-        parameterPath1?: string,
-        parameterPath2?: string,
-        parameterPath3?: string,
-        _default?: string,
-    ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
-            cookies: {
-                'PARAMETER-COOKIE': parameterCookie,
-            },
-            headers: {
-                'parameter.header': parameterHeader,
-            },
-            query: {
-                'parameter-query': parameterQuery,
-                'default': _default,
-            },
-            formData: {
-                'parameter_form': parameterForm,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-        return result.body;
-    }
+        /**
+         * @param parameterHeader This is the parameter that goes into the request header
+         * @param parameterQuery This is the parameter that goes into the request query params
+         * @param parameterForm This is the parameter that goes into the request form data
+         * @param parameterCookie This is the parameter that goes into the cookie
+         * @param requestBody This is the parameter that goes into the body
+         * @param parameterPath1 This is the parameter that goes into the path
+         * @param parameterPath2 This is the parameter that goes into the path
+         * @param parameterPath3 This is the parameter that goes into the path
+         * @param _default This is the parameter with a reserved keyword
+         * @throws ApiError
+         */
+        public static async callWithWeirdParameterNames(
+            parameterHeader: string | null,
+            parameterQuery: string | null,
+            parameterForm: string | null,
+            parameterCookie: string | null,
+            requestBody: IModelWithString | null,
+            parameterPath1?: string,
+            parameterPath2?: string,
+            parameterPath3?: string,
+            _default?: string,
+        ): Promise<void> {
+            const result = await __request(
+                ParametersOptions.callWithWeirdParameterNames(
+                    parameterHeader,
+                    parameterQuery,
+                    parameterForm,
+                    parameterCookie,
+                    requestBody,
+                    parameterPath1,
+                    parameterPath2,
+                    parameterPath3,
+                    _default,
+                ));
+                return result.body;
+            }
 
-    /**
-     * @param requestBody This is a required parameter
-     * @param parameter This is an optional parameter
-     * @throws ApiError
-     */
-    public static async getCallWithOptionalParam(
-        requestBody: IModelWithString,
-        parameter?: string,
-    ): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
-            query: {
-                'parameter': parameter,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-        return result.body;
-    }
+            /**
+             * @param requestBody This is a required parameter
+             * @param parameter This is an optional parameter
+             * @throws ApiError
+             */
+            public static async getCallWithOptionalParam(
+                requestBody: IModelWithString,
+                parameter?: string,
+            ): Promise<void> {
+                const result = await __request(
+                    ParametersOptions.getCallWithOptionalParam(
+                        requestBody,
+                        parameter,
+                    ));
+                    return result.body;
+                }
 
-    /**
-     * @param parameter This is a required parameter
-     * @param requestBody This is an optional parameter
-     * @throws ApiError
-     */
-    public static async postCallWithOptionalParam(
-        parameter: string,
-        requestBody?: IModelWithString,
-    ): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
-            query: {
-                'parameter': parameter,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-        return result.body;
-    }
+                /**
+                 * @param parameter This is a required parameter
+                 * @param requestBody This is an optional parameter
+                 * @throws ApiError
+                 */
+                public static async postCallWithOptionalParam(
+                    parameter: string,
+                    requestBody?: IModelWithString,
+                ): Promise<void> {
+                    const result = await __request(
+                        ParametersOptions.postCallWithOptionalParam(
+                            parameter,
+                            requestBody,
+                        ));
+                        return result.body;
+                    }
 
-}"
+                }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/RequestBodyService.ts 1`] = `
@@ -3987,7 +5284,28 @@ exports[`v3 should generate: ./test/generated/v3/services/RequestBodyService.ts 
 /* eslint-disable */
 import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const postRequestBodyService = (
+    requestBody?: IModelWithString,
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/requestBody/\`,
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+
+export type TRequestBodyOptions = {
+    postRequestBodyService: (
+        requestBody?: IModelWithString,
+    ) => ApiRequestOptions;
+}
+
+export const RequestBodyOptions: TRequestBodyOptions = {
+    postRequestBodyService: postRequestBodyService,
+}
 
 export class RequestBodyService {
 
@@ -3998,16 +5316,14 @@ export class RequestBodyService {
     public static async postRequestBodyService(
         requestBody?: IModelWithString,
     ): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/requestBody/\`,
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-        return result.body;
-    }
+        const result = await __request(
+            RequestBodyOptions.postRequestBodyService(
+                requestBody,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/ResponseService.ts 1`] = `
@@ -4018,7 +5334,46 @@ import type { TModelThatExtendsExtends } from './../models/ModelThatExtendsExten
 import type { TModelThatExtends } from './../models/ModelThatExtends';
 import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const callWithResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+});
+
+const callWithDuplicateResponses = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    errors: {
+        500: \`Message for 500 error\`,
+        501: \`Message for 501 error\`,
+        502: \`Message for 502 error\`,
+    },
+});
+
+const callWithResponses = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    errors: {
+        500: \`Message for 500 error\`,
+        501: \`Message for 501 error\`,
+        502: \`Message for 502 error\`,
+    },
+});
+
+
+export type TResponseOptions = {
+    callWithResponse: () => ApiRequestOptions;
+    callWithDuplicateResponses: () => ApiRequestOptions;
+    callWithResponses: () => ApiRequestOptions;
+}
+
+export const ResponseOptions: TResponseOptions = {
+    callWithResponse: callWithResponse,
+    callWithDuplicateResponses: callWithDuplicateResponses,
+    callWithResponses: callWithResponses,
+}
 
 export class ResponseService {
 
@@ -4027,55 +5382,39 @@ export class ResponseService {
      * @throws ApiError
      */
     public static async callWithResponse(): Promise<IModelWithString> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/response\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            ResponseOptions.callWithResponse(            ));
+            return result.body;
+        }
 
-    /**
-     * @returns IModelWithString Message for default response
-     * @throws ApiError
-     */
-    public static async callWithDuplicateResponses(): Promise<IModelWithString> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/response\`,
-            errors: {
-                500: \`Message for 500 error\`,
-                501: \`Message for 501 error\`,
-                502: \`Message for 502 error\`,
-            },
-        });
-        return result.body;
-    }
+        /**
+         * @returns IModelWithString Message for default response
+         * @throws ApiError
+         */
+        public static async callWithDuplicateResponses(): Promise<IModelWithString> {
+            const result = await __request(
+                ResponseOptions.callWithDuplicateResponses(            ));
+                return result.body;
+            }
 
-    /**
-     * @returns any Message for 200 response
-     * @returns IModelWithString Message for default response
-     * @returns TModelThatExtends Message for 201 response
-     * @returns TModelThatExtendsExtends Message for 202 response
-     * @throws ApiError
-     */
-    public static async callWithResponses(): Promise<{
-        readonly '@namespace.string'?: string,
-        readonly '@namespace.integer'?: number,
-        readonly value?: Array<IModelWithString>,
-    } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/response\`,
-            errors: {
-                500: \`Message for 500 error\`,
-                501: \`Message for 501 error\`,
-                502: \`Message for 502 error\`,
-            },
-        });
-        return result.body;
-    }
+            /**
+             * @returns any Message for 200 response
+             * @returns IModelWithString Message for default response
+             * @returns TModelThatExtends Message for 201 response
+             * @returns TModelThatExtendsExtends Message for 202 response
+             * @throws ApiError
+             */
+            public static async callWithResponses(): Promise<{
+                readonly '@namespace.string'?: string,
+                readonly '@namespace.integer'?: number,
+                readonly value?: Array<IModelWithString>,
+            } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends> {
+                const result = await __request(
+                    ResponseOptions.callWithResponses(            ));
+                    return result.body;
+                }
 
-}"
+            }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/SimpleService.ts 1`] = `
@@ -4083,7 +5422,64 @@ exports[`v3 should generate: ./test/generated/v3/services/SimpleService.ts 1`] =
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const putCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const postCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const deleteCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'DELETE',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const optionsCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'OPTIONS',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const headCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'HEAD',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+const patchCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+    method: 'PATCH',
+    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+});
+
+
+export type TSimpleOptions = {
+    getCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    putCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    postCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    deleteCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    optionsCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    headCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    patchCallWithoutParametersAndResponse: () => ApiRequestOptions;
+}
+
+export const SimpleOptions: TSimpleOptions = {
+    getCallWithoutParametersAndResponse: getCallWithoutParametersAndResponse,
+    putCallWithoutParametersAndResponse: putCallWithoutParametersAndResponse,
+    postCallWithoutParametersAndResponse: postCallWithoutParametersAndResponse,
+    deleteCallWithoutParametersAndResponse: deleteCallWithoutParametersAndResponse,
+    optionsCallWithoutParametersAndResponse: optionsCallWithoutParametersAndResponse,
+    headCallWithoutParametersAndResponse: headCallWithoutParametersAndResponse,
+    patchCallWithoutParametersAndResponse: patchCallWithoutParametersAndResponse,
+}
 
 export class SimpleService {
 
@@ -4091,80 +5487,66 @@ export class SimpleService {
      * @throws ApiError
      */
     public static async getCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+        const result = await __request(
+            SimpleOptions.getCallWithoutParametersAndResponse(            ));
+            return result.body;
+        }
 
-    /**
-     * @throws ApiError
-     */
-    public static async putCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'PUT',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+        /**
+         * @throws ApiError
+         */
+        public static async putCallWithoutParametersAndResponse(): Promise<void> {
+            const result = await __request(
+                SimpleOptions.putCallWithoutParametersAndResponse(            ));
+                return result.body;
+            }
 
-    /**
-     * @throws ApiError
-     */
-    public static async postCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+            /**
+             * @throws ApiError
+             */
+            public static async postCallWithoutParametersAndResponse(): Promise<void> {
+                const result = await __request(
+                    SimpleOptions.postCallWithoutParametersAndResponse(            ));
+                    return result.body;
+                }
 
-    /**
-     * @throws ApiError
-     */
-    public static async deleteCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'DELETE',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                /**
+                 * @throws ApiError
+                 */
+                public static async deleteCallWithoutParametersAndResponse(): Promise<void> {
+                    const result = await __request(
+                        SimpleOptions.deleteCallWithoutParametersAndResponse(            ));
+                        return result.body;
+                    }
 
-    /**
-     * @throws ApiError
-     */
-    public static async optionsCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'OPTIONS',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                    /**
+                     * @throws ApiError
+                     */
+                    public static async optionsCallWithoutParametersAndResponse(): Promise<void> {
+                        const result = await __request(
+                            SimpleOptions.optionsCallWithoutParametersAndResponse(            ));
+                            return result.body;
+                        }
 
-    /**
-     * @throws ApiError
-     */
-    public static async headCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'HEAD',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                        /**
+                         * @throws ApiError
+                         */
+                        public static async headCallWithoutParametersAndResponse(): Promise<void> {
+                            const result = await __request(
+                                SimpleOptions.headCallWithoutParametersAndResponse(            ));
+                                return result.body;
+                            }
 
-    /**
-     * @throws ApiError
-     */
-    public static async patchCallWithoutParametersAndResponse(): Promise<void> {
-        const result = await __request({
-            method: 'PATCH',
-            path: \`/api/v\${OpenAPI.VERSION}/simple\`,
-        });
-        return result.body;
-    }
+                            /**
+                             * @throws ApiError
+                             */
+                            public static async patchCallWithoutParametersAndResponse(): Promise<void> {
+                                const result = await __request(
+                                    SimpleOptions.patchCallWithoutParametersAndResponse(            ));
+                                    return result.body;
+                                }
 
-}"
+                            }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/TypesService.ts 1`] = `
@@ -4172,7 +5554,49 @@ exports[`v3 should generate: ./test/generated/v3/services/TypesService.ts 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const types = (
+    parameterArray: Array<string> | null,
+    parameterDictionary: any,
+    parameterEnum: 'Success' | 'Warning' | 'Error' | null,
+    parameterNumber: number = 123,
+    parameterString: string | null = 'default',
+    parameterBoolean: boolean | null = true,
+    parameterObject: any = null,
+    id?: number,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: \`/api/v\${OpenAPI.VERSION}/types\`,
+    query: {
+        'parameterArray': parameterArray,
+        'parameterDictionary': parameterDictionary,
+        'parameterEnum': parameterEnum,
+        'parameterNumber': parameterNumber,
+        'parameterString': parameterString,
+        'parameterBoolean': parameterBoolean,
+        'parameterObject': parameterObject,
+    },
+});
+
+
+export type TTypesOptions = {
+    types: (
+        parameterArray: Array<string> | null,
+        parameterDictionary: any,
+        parameterEnum: 'Success' | 'Warning' | 'Error' | null,
+        parameterNumber: number,
+        parameterString: string | null,
+        parameterBoolean: boolean | null,
+        parameterObject: any,
+        id?: number,
+    ) => ApiRequestOptions;
+}
+
+export const TypesOptions: TTypesOptions = {
+    types: types,
+}
 
 export class TypesService {
 
@@ -4201,23 +5625,21 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        const result = await __request({
-            method: 'GET',
-            path: \`/api/v\${OpenAPI.VERSION}/types\`,
-            query: {
-                'parameterArray': parameterArray,
-                'parameterDictionary': parameterDictionary,
-                'parameterEnum': parameterEnum,
-                'parameterNumber': parameterNumber,
-                'parameterString': parameterString,
-                'parameterBoolean': parameterBoolean,
-                'parameterObject': parameterObject,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            TypesOptions.types(
+                parameterArray,
+                parameterDictionary,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterBoolean,
+                parameterObject,
+                id,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/UploadService.ts 1`] = `
@@ -4225,7 +5647,29 @@ exports[`v3 should generate: ./test/generated/v3/services/UploadService.ts 1`] =
 /* tslint:disable */
 /* eslint-disable */
 import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
+
+const uploadFile = (
+    file: Blob,
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v\${OpenAPI.VERSION}/upload\`,
+    formData: {
+        'file': file,
+    },
+});
+
+
+export type TUploadOptions = {
+    uploadFile: (
+        file: Blob,
+    ) => ApiRequestOptions;
+}
+
+export const UploadOptions: TUploadOptions = {
+    uploadFile: uploadFile,
+}
 
 export class UploadService {
 
@@ -4237,15 +5681,12 @@ export class UploadService {
     public static async uploadFile(
         file: Blob,
     ): Promise<boolean> {
-        const result = await __request({
-            method: 'POST',
-            path: \`/api/v\${OpenAPI.VERSION}/upload\`,
-            formData: {
-                'file': file,
-            },
-        });
-        return result.body;
-    }
+        const result = await __request(
+            UploadOptions.uploadFile(
+                file,
+            ));
+            return result.body;
+        }
 
-}"
+    }"
 `;
