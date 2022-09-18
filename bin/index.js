@@ -79,7 +79,7 @@ function prepareOptions(options, rootOptions) {
             outputServices: option.outputServices ? option.outputServices : rootOptions ? rootOptions.outputServices : '',
             outputModels: option.outputModels ? option.outputModels : rootOptions ? rootOptions.outputModels : '',
             outputSchemas: option.outputSchemas ? option.outputSchemas : rootOptions ? rootOptions.outputSchemas : '',
-            httpClient: option.client ? option.client : rootOptions ? rootOptions.client : '',
+            httpClient: option.client ? option.client : rootOptions ? rootOptions.httpClient : '',
             useOptions: isValidJson(option.useOptions) ? JSON.parse(option.useOptions) : rootOptions ? rootOptions.useOptions : false,
             useUnionTypes: isValidJson(option.useUnionTypes) ? JSON.parse(option.useUnionTypes) : rootOptions ? rootOptions.useUnionTypes : false,
             exportCore: isValidJson(option.exportCore) ? JSON.parse(option.exportCore) : rootOptions ? rootOptions.exportCore : false,

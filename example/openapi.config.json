@@ -1,0 +1,12 @@
+{
+    "output": "./generated",
+    "client": "axios",
+    "exportCore": true,
+    "exportServices": true,
+    "exportModels": true,
+    "exportSchemas": true,
+    "clean": true,
+    "items": [{
+        "input": "./openapi/spec.yml"
+    }]
+}
