@@ -2,19 +2,24 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ApiRequestOptions } from './ApiRequestOptions';
+import { CancelablePromise } from './CancelablePromise';
 
-export async function request(options: ApiRequestOptions): Promise<Record<string, any>> {
-    const url = `${options.path}`;
+export function request<T>(options: ApiRequestOptions): CancelablePromise<T> {
+    return new CancelablePromise((resolve, reject, onCancel) => {
+        const url = `${options.path}`;
+        try {
+            // Do your request...
 
-    // Do your request...
+            const timeout = setTimeout(() => {
+                resolve({ ...options });
+            }, 500);
 
-    return {
-        url,
-        ok: true,
-        status: 200,
-        statusText: 'dummy',
-        body: {
-            ...options
-        },
-    };
+            // Cancel your request...
+            onCancel(() => {
+                clearTimeout(timeout);
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
 }

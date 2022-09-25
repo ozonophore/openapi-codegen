@@ -1,12 +1,24 @@
-async function sendRequest(options: ApiRequestOptions, url: string): Promise<AxiosResponse> {
-  const config: AxiosRequestConfig = {
+async function sendRequest<T>(options: ApiRequestOptions, url: string, onCancel: (cancelHandler: () => void) => void): Promise<AxiosResponse<T>> {
+  const source = axios.CancelToken.source();
+  
+  const requestConfig: AxiosRequestConfig = {
     method: options.method,
     headers: await getHeaders(options),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     data: getRequestBody(options),
     url,
-    timeout: 1000,
+    cancelToken: source.token,
   };
 
-  return axios(config).then((response) => response);
+  onCancel(() => source.cancel('The user aborted a request.'));
+
+  try {
+		return await axios.request(requestConfig);
+	} catch (error) {
+		const axiosError = error as AxiosError<T>;
+		if (axiosError.response) {
+			return axiosError.response;
+		}
+		throw error;
+	}
 }

@@ -9,7 +9,7 @@ describe('v2.axios', () => {
         await generate('v2/axios', 'v2', 'axios');
         compileWithTypescript('v2/axios');
         await server.start('v2/axios');
-    }, 30000);
+    });
 
     afterAll(async () => {
         await server.stop();

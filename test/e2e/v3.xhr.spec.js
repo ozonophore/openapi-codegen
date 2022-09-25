@@ -9,11 +9,12 @@ const browser = require('./scripts/browser');
 describe('v3.xhr', () => {
     beforeAll(async () => {
         await generate('v3/xhr', 'v3', 'xhr');
-        await copy('v3/xhr');
+        await copy('index.html', 'v3/xhr/index.html');
+        await copy('script.js', 'v3/xhr/script.js');
         compileWithTypescript('v3/xhr');
         await server.start('v3/xhr');
         await browser.start();
-    }, 30000);
+    });
 
     afterAll(async () => {
         await server.stop();
@@ -55,5 +56,22 @@ describe('v3.xhr', () => {
             });
         });
         expect(result).toBeDefined();
+    });
+
+    it('can abort the request', async () => {
+        let error;
+        try {
+            await browser.evaluate(async () => {
+                const { SimpleService } = window.api;
+                const promise = SimpleService.getCallWithoutParametersAndResponse();
+                setTimeout(() => {
+                    promise.cancel();
+                }, 10);
+                await promise;
+            });
+        } catch (e) {
+            error = e.message;
+        }
+        expect(error).toContain('CancelError: Request aborted');
     });
 });

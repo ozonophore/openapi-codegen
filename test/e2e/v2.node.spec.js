@@ -5,12 +5,11 @@ const compileWithTypescript = require('./scripts/compileWithTypescript');
 const server = require('./scripts/server');
 
 describe('v2.node', () => {
-
     beforeAll(async () => {
         await generate('v2/node', 'v2', 'node');
         compileWithTypescript('v2/node');
         await server.start('v2/node');
-    }, 30000);
+    });
 
     afterAll(async () => {
         await server.stop();
@@ -18,7 +17,7 @@ describe('v2.node', () => {
 
     it('requests token', async () => {
         const { OpenAPI, SimpleService } = require('./generated/v2/node/index.js');
-        const tokenRequest = jest.fn().mockResolvedValue('MY_TOKEN')
+        const tokenRequest = jest.fn().mockResolvedValue('MY_TOKEN');
         OpenAPI.TOKEN = tokenRequest;
         const result = await SimpleService.getCallWithoutParametersAndResponse();
         expect(tokenRequest.mock.calls.length).toBe(1);
@@ -30,11 +29,10 @@ describe('v2.node', () => {
         const result = await ComplexService.complexTypes({
             first: {
                 second: {
-                    third: 'Hello World!'
-                }
-            }
+                    third: 'Hello World!',
+                },
+            },
         });
         expect(result).toBeDefined();
     });
-
 });

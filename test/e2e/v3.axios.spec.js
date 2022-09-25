@@ -9,7 +9,7 @@ describe('v3.axios', () => {
         await generate('v3/axios', 'v3', 'axios');
         compileWithTypescript('v3/axios');
         await server.start('v3/axios');
-    }, 30000);
+    });
 
     afterAll(async () => {
         await server.stop();
@@ -45,5 +45,20 @@ describe('v3.axios', () => {
             },
         });
         expect(result).toBeDefined();
+    });
+    
+    it('can abort the request', async () => {
+        let error;
+        try {
+            const { SimpleService } = require('./generated/v3/axios/index.js');
+            const promise = SimpleService.getCallWithoutParametersAndResponse();
+            setTimeout(() => {
+                promise.cancel();
+            }, 10);
+            await promise;
+        } catch (e) {
+            error = e.message;
+        }
+        expect(error).toContain('Request aborted');
     });
 });

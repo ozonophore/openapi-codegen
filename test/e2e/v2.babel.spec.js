@@ -7,14 +7,14 @@ const server = require('./scripts/server');
 const browser = require('./scripts/browser');
 
 describe('v2.fetch', () => {
-
     beforeAll(async () => {
         await generate('v2/babel', 'v2', 'fetch', true, true);
-        await copy('v2/babel');
+        await copy('index.html', 'v2/babel/index.html');
+        await copy('script.js', 'v2/babel/script.js');
         compileWithBabel('v2/babel');
         await server.start('v2/babel');
         await browser.start();
-    }, 30000);
+    });
 
     afterAll(async () => {
         await server.stop();
@@ -37,9 +37,9 @@ describe('v2.fetch', () => {
             return await ComplexService.complexTypes({
                 first: {
                     second: {
-                        third: 'Hello World!'
-                    }
-                }
+                        third: 'Hello World!',
+                    },
+                },
             });
         });
         expect(result).toBeDefined();

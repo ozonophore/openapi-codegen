@@ -9,11 +9,12 @@ const browser = require('./scripts/browser');
 describe('v3.fetch', () => {
     beforeAll(async () => {
         await generate('v3/babel', 'v3', 'fetch', true, true);
-        await copy('v3/babel');
+        await copy('index.html', 'v3/babel/index.html');
+        await copy('script.js', 'v3/babel/script.js');
         compileWithBabel('v3/babel');
         await server.start('v3/babel');
         await browser.start();
-    }, 30000);
+    });
 
     afterAll(async () => {
         await server.stop();
@@ -55,5 +56,22 @@ describe('v3.fetch', () => {
             });
         });
         expect(result).toBeDefined();
+    });
+
+    it('can abort the request', async () => {
+        let error;
+        try {
+            await browser.evaluate(async () => {
+                const { SimpleService } = window.api;
+                const promise = SimpleService.getCallWithoutParametersAndResponse();
+                setTimeout(() => {
+                    promise.cancel();
+                }, 10);
+                await promise;
+            });
+        } catch (e) {
+            error = e.message;
+        }
+        expect(error).toContain('CancelError: Request aborted');
     });
 });

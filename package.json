@@ -1,6 +1,6 @@
 {
     "name": "ts-openapi-codegen",
-    "version": "0.2.6",
+    "version": "0.2.7",
     "description": "Library that generates Typescript clients based on the OpenAPI specification. It bases on openapi-typescript-codegen",
     "author": "Alexey Zverev",
     "homepage": "https://github.com/ozonophore/openapi-codegen.git",
@@ -24,7 +24,8 @@
         "json",
         "fetch",
         "xhr",
-        "node"
+        "node",
+        "axios"
     ],
     "maintainers": [
         {
@@ -86,6 +87,7 @@
         "@types/qs": "6.9.7",
         "@typescript-eslint/eslint-plugin": "4.28.5",
         "@typescript-eslint/parser": "4.28.5",
+        "abort-controller": "^3.0.0",
         "codecov": "3.8.3",
         "eslint": "7.32.0",
         "eslint-config-prettier": "8.3.0",

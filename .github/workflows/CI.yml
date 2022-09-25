@@ -16,7 +16,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v1
         with:
-          node-version: '14'
+          node-version: '14.20.1'
           always-auth: true
 #       - name: Get the npm version
 #         id: release
