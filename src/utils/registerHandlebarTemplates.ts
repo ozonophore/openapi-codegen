@@ -1,9 +1,11 @@
+/* eslint-disable simple-import-sort/imports */
 import * as Handlebars from 'handlebars/runtime';
 
 import { HttpClient } from '../HttpClient';
 import templateCoreApiError from '../templates/core/ApiError.hbs';
 import templateCoreApiRequestOptions from '../templates/core/ApiRequestOptions.hbs';
 import templateCoreApiResult from '../templates/core/ApiResult.hbs';
+import templateHttpStatuses from '../templates/core/HttpStatusCode.hbs';
 // axios START
 import axiosGetHeaders from '../templates/core/axios/getHeaders.hbs';
 import axiosGetRequestBody from '../templates/core/axios/getRequestBody.hbs';
@@ -36,6 +38,7 @@ import nodeGetResponseHeader from '../templates/core/node/getResponseHeader.hbs'
 import nodeRequest from '../templates/core/node/request.hbs';
 import nodeSendRequest from '../templates/core/node/sendRequest.hbs';
 import templateCoreSettings from '../templates/core/OpenAPI.hbs';
+import templateCancellablePromise from '../templates/core/CancelablePromise.hbs';
 import templateCoreRequest from '../templates/core/request.hbs';
 import xhrGetHeaders from '../templates/core/xhr/getHeaders.hbs';
 import xhrGetRequestBody from '../templates/core/xhr/getRequestBody.hbs';
@@ -92,6 +95,8 @@ export interface Templates {
         apiRequestOptions: Handlebars.TemplateDelegate;
         apiResult: Handlebars.TemplateDelegate;
         request: Handlebars.TemplateDelegate;
+        cancelablePromise: Handlebars.TemplateDelegate;
+        httpStatusCode: Handlebars.TemplateDelegate;
     };
 }
 
@@ -116,6 +121,8 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
             apiRequestOptions: Handlebars.template(templateCoreApiRequestOptions),
             apiResult: Handlebars.template(templateCoreApiResult),
             request: Handlebars.template(templateCoreRequest),
+            cancelablePromise: Handlebars.template(templateCancellablePromise),
+            httpStatusCode: Handlebars.template(templateHttpStatuses),
         },
     };
 

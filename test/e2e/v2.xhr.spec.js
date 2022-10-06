@@ -7,14 +7,14 @@ const server = require('./scripts/server');
 const browser = require('./scripts/browser');
 
 describe('v2.xhr', () => {
-
     beforeAll(async () => {
         await generate('v2/xhr', 'v2', 'xhr');
-        await copy('v2/xhr');
+        await copy('index.html', 'v2/xhr/index.html');
+        await copy('script.js', 'v2/xhr/script.js');
         compileWithTypescript('v2/xhr');
         await server.start('v2/xhr');
         await browser.start();
-    }, 30000);
+    });
 
     afterAll(async () => {
         await server.stop();
@@ -37,9 +37,9 @@ describe('v2.xhr', () => {
             return await ComplexService.complexTypes({
                 first: {
                     second: {
-                        third: 'Hello World!'
-                    }
-                }
+                        third: 'Hello World!',
+                    },
+                },
             });
         });
         expect(result).toBeDefined();

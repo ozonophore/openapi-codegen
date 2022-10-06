@@ -28,6 +28,8 @@ describe('writeClient', () => {
                 apiRequestOptions: () => 'apiRequestOptions',
                 apiResult: () => 'apiResult',
                 request: () => 'request',
+                cancelablePromise: () => 'cancelablePromise',
+                httpStatusCode: () => 'httpStatusCode',
             },
         };
         await new WriteClient().writeClient({

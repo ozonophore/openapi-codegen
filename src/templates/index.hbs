@@ -3,6 +3,7 @@
 
 {{#each core}}
 export { ApiError{{#notEquals ../core.length 1}} as ApiError${{{@index}}}{{/notEquals}} } from './{{{this}}}ApiError';
+export { CancelablePromise } from './{{{this}}}CancelablePromise';
 export { OpenAPI{{#notEquals ../core.length 1}}  as OpenAPI${{{@index}}}{{/notEquals}} } from './{{{this}}}OpenAPI';
 {{/each}}
 {{/if}}

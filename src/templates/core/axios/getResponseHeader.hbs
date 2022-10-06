@@ -1,6 +1,6 @@
 function getResponseHeader(response: AxiosResponse, responseHeader?: string): string | null {
     if (responseHeader) {
-        let content = undefined;
+        let content = '';
 
         Object.keys(response.headers).forEach((header) => {
             if (header === responseHeader) {

@@ -9,7 +9,7 @@ describe('v3.node', () => {
         await generate('v3/node', 'v3', 'node');
         compileWithTypescript('v3/node');
         await server.start('v3/node');
-    }, 30000);
+    });
 
     afterAll(async () => {
         await server.stop();
@@ -45,5 +45,20 @@ describe('v3.node', () => {
             },
         });
         expect(result).toBeDefined();
+    });
+
+    it('can abort the request', async () => {
+        let error;
+        try {
+            const { SimpleService } = require('./generated/v3/node/index.js');
+            const promise = SimpleService.getCallWithoutParametersAndResponse();
+            setTimeout(() => {
+                promise.cancel();
+            }, 10);
+            await promise;
+        } catch (e) {
+            error = e.message;
+        }
+        expect(error).toContain('Request aborted');
     });
 });

@@ -10,6 +10,7 @@ module.exports = {
             moduleNameMapper: {
                 '\\.hbs$': '<rootDir>/src/templates/__mocks__/index.js',
             },
+            setupFilesAfterEnv: ['<rootDir>/tools/jestSetup.ts'],
         },
         {
             displayName: 'E2E',
@@ -26,6 +27,7 @@ module.exports = {
                 '<rootDir>/test/e2e/v3.node.spec.js',
                 '<rootDir>/test/e2e/v3.babel.spec.js',
             ],
+            setupFilesAfterEnv: ['<rootDir>/tools/jestSetup.ts'],
         },
     ],
     collectCoverageFrom: ['<rootDir>/src/**/*.ts', '!<rootDir>/src/**/*.d.ts', '!<rootDir>/bin', '!<rootDir>/dist'],

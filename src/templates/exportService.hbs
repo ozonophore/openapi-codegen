@@ -5,6 +5,7 @@
 import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{@root.outputModels}}}{{{path}}}';
 {{/each}}
 {{/if}}
+import type { CancelablePromise } from '{{{outputCore}}}CancelablePromise';
 import { request as __request } from '{{{outputCore}}}request';
 import type { ApiRequestOptions } from '{{{outputCore}}}ApiRequestOptions';
 {{#if @root.useVersion}}
@@ -55,19 +56,8 @@ export class {{{name}}} {
     {{/each}}
      * @throws ApiError
      */
-    public static async {{{name}}}({{>parameters}}): Promise<{{>result}}> {
-        {{#if @root.useCustomRequest}}
-        return await __request<{{>result}}>(
-        {{else}}
-        const result = await __request(
-        {{/if}}
-            {{../originName}}Options.{{{name}}}({{>parameterValues~}}
-        {{#if @root.useCustomRequest}}
-            )).then((resp) => resp);
-        {{else}}
-            ));
-        return result.body;
-        {{/if}}
+    public static {{{name}}}({{>parameters}}): CancelablePromise<{{>result}}> {
+        return __request<{{>result}}>({{../originName}}Options.{{{name}}}({{>parameterValues~}}));
     }
 
     {{/each}}

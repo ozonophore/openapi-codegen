@@ -40,6 +40,8 @@ export async function writeClientCore(options: IWriteClientCore): Promise<void> 
     await writeFile(resolve(outputPath, 'ApiError.ts'), templates.core.apiError({}));
     await writeFile(resolve(outputPath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
     await writeFile(resolve(outputPath, 'ApiResult.ts'), templates.core.apiResult({}));
+    await writeFile(resolve(outputPath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
+    await writeFile(resolve(outputPath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
     await writeFile(resolve(outputPath, 'request.ts'), templates.core.request(context));
 
     if (request) {

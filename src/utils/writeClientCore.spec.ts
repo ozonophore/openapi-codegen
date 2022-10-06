@@ -28,6 +28,8 @@ describe('writeClientCore', () => {
                 apiRequestOptions: () => 'apiRequestOptions',
                 apiResult: () => 'apiResult',
                 request: () => 'request',
+                cancelablePromise: () => 'cancelablePromise',
+                httpStatusCode: () => 'httpStatusCode',
             },
         };
 
@@ -38,5 +40,7 @@ describe('writeClientCore', () => {
         expect(writeFile).toBeCalledWith('/ApiRequestOptions.ts', 'apiRequestOptions');
         expect(writeFile).toBeCalledWith('/ApiResult.ts', 'apiResult');
         expect(writeFile).toBeCalledWith('/request.ts', 'request');
+        expect(writeFile).toBeCalledWith('/CancelablePromise.ts', 'cancelablePromise');
+        expect(writeFile).toBeCalledWith('/HttpStatusCode.ts', 'httpStatusCode');
     });
 });

@@ -9,11 +9,12 @@ const browser = require('./scripts/browser');
 describe('v2.fetch', () => {
     beforeAll(async () => {
         await generate('v2/fetch', 'v2', 'fetch');
-        await copy('v2/fetch');
+        await copy('index.html', 'v2/fetch/index.html');
+        await copy('script.js', 'v2/fetch/script.js');
         compileWithTypescript('v2/fetch');
         await server.start('v2/fetch');
         await browser.start();
-    }, 30000);
+    });
 
     afterAll(async () => {
         await server.stop();
