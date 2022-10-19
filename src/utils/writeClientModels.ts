@@ -1,9 +1,9 @@
 import { mkdirSync } from 'fs';
-import { dirname, resolve } from 'path';
 
 import type { Model } from '../client/interfaces/Model';
-import { dirName } from '../core/path';
+import { dirName, resolve } from '../core/path';
 import { HttpClient } from '../HttpClient';
+import { replaceTransitionToDirLevelAbove } from './checkTransitionToDirLevelAbove';
 import { writeFile } from './fileSystem';
 import { format } from './format';
 import { Templates } from './registerHandlebarTemplates';
@@ -34,13 +34,14 @@ interface IWriteClientModels {
 export async function writeClientModels(options: IWriteClientModels): Promise<void> {
     const { models, templates, outputPath, httpClient, useUnionTypes } = options;
     for (const model of models) {
-        const dir = dirName(model.path);
+        const currentpath = replaceTransitionToDirLevelAbove(model.path);
+        const dir = dirName(currentpath);
         if (dir) {
             const directory = resolve(outputPath, dir);
             // @ts-ignore
             mkdirSync(directory, { recursive: true });
         }
-        const file = resolve(outputPath, `${model.path}.ts`);
+        const file = resolve(outputPath, `${currentpath}.ts`);
         const templateResult = templates.exports.model({
             ...model,
             httpClient,
