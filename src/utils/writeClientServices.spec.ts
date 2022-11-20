@@ -30,6 +30,8 @@ describe('writeClientServices', () => {
                 apiRequestOptions: () => 'apiRequestOptions',
                 apiResult: () => 'apiResult',
                 request: () => 'request',
+                cancelablePromise: () => 'cancelablePromise',
+                httpStatusCode: () => 'httpStatusCode',
             },
         };
 
@@ -40,7 +42,7 @@ describe('writeClientServices', () => {
             httpClient: HttpClient.FETCH,
             useUnionTypes: false,
             useOptions: false,
-            useCustomRequest: false,
+            useCancelableRequest: false,
             outputModels: '/',
             outputCore: '/',
         });

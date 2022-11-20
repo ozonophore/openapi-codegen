@@ -34,6 +34,7 @@ export type Options = {
     interfacePrefix?: string;
     enumPrefix?: string;
     typePrefix?: string;
+    useCancelableRequest?: boolean;
 };
 
 /**
@@ -81,6 +82,7 @@ async function generateFrom(
         interfacePrefix = 'I',
         enumPrefix = 'E',
         typePrefix = 'T',
+        useCancelableRequest = false,
     }: Options,
     writeClient: WriteClient
 ): Promise<void> {
@@ -118,6 +120,7 @@ async function generateFrom(
                 exportSchemas,
                 clean,
                 request,
+                useCancelableRequest,
             });
             break;
         }
@@ -139,6 +142,7 @@ async function generateFrom(
                 exportSchemas,
                 clean,
                 request,
+                useCancelableRequest,
             });
             break;
         }
