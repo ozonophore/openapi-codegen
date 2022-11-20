@@ -37,28 +37,16 @@ describe('v3.axios', () => {
 
     it('complexService', async () => {
         const { ComplexService } = require('./generated/v3/axios/index.js');
-        const result = await ComplexService.complexTypes({
-            first: {
-                second: {
-                    third: 'Hello World!',
+        const result = await ComplexService.complexTypes(
+            {
+                first: {
+                    second: {
+                        third: 'Hello World!',
+                    },
                 },
             },
-        });
+            {}
+        );
         expect(result).toBeDefined();
-    });
-    
-    it('can abort the request', async () => {
-        let error;
-        try {
-            const { SimpleService } = require('./generated/v3/axios/index.js');
-            const promise = SimpleService.getCallWithoutParametersAndResponse();
-            setTimeout(() => {
-                promise.cancel();
-            }, 10);
-            await promise;
-        } catch (e) {
-            error = e.message;
-        }
-        expect(error).toContain('Request aborted');
     });
 });

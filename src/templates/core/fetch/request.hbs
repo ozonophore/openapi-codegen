@@ -3,7 +3,9 @@
 import { ApiError } from './ApiError';
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
+{{#if @root.useCancelableRequest}}
 import { CancelablePromise } from './CancelablePromise';
+{{/if}}
 import { OpenAPI } from './OpenAPI';
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
@@ -55,6 +57,7 @@ import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
  * @returns ApiResult
  * @throws ApiError
  */
+{{#if @root.useCancelableRequest}}
 export function request<T>(options: ApiRequestOptions): CancelablePromise<T> {
     return new CancelablePromise(async(resolve, reject, onCancel) => {
         try {
@@ -79,3 +82,28 @@ export function request<T>(options: ApiRequestOptions): CancelablePromise<T> {
         }
     });
 }
+{{else}}
+export async function request<T>(options: ApiRequestOptions): Promise<T> {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const url = getUrl(options);
+            const response = await sendRequest(options, url);
+            const responseBody = await getResponseBody(response);
+            const responseHeader = getResponseHeader(response, options.responseHeader);
+
+            const result: ApiResult = {
+                url,
+                ok: response.ok,
+                status: response.status,
+                statusText: response.statusText,
+                body: responseHeader || responseBody,
+            };
+
+            catchErrors(options, result);
+            resolve(result.body);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+{{/if}}

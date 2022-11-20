@@ -1,5 +1,9 @@
+{{#if @root.useCancelableRequest}}
 async function sendRequest<T>(options: ApiRequestOptions, url: string, onCancel: (cancelHandler: () => void) => void): Promise<AxiosResponse<T>> {
   const source = axios.CancelToken.source();
+{{else}}
+async function sendRequest<T>(options: ApiRequestOptions, url: string): Promise<AxiosResponse<T>> {
+{{/if}}
   
   const requestConfig: AxiosRequestConfig = {
     method: options.method,
@@ -7,10 +11,14 @@ async function sendRequest<T>(options: ApiRequestOptions, url: string, onCancel:
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     data: getRequestBody(options),
     url,
+    {{#if @root.useCancelableRequest}}
     cancelToken: source.token,
+    {{/if}}
   };
 
+  {{#if @root.useCancelableRequest}}
   onCancel(() => source.cancel('The user aborted a request.'));
+  {{/if}}
 
   try {
 		return await axios.request(requestConfig);

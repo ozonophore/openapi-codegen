@@ -30,6 +30,8 @@ describe('writeClientServices', () => {
                 apiRequestOptions: () => 'apiRequestOptions',
                 apiResult: () => 'apiResult',
                 request: () => 'request',
+                cancelablePromise: () => 'cancelablePromise',
+                httpStatusCode: () => 'httpStatusCode',
             },
         };
 
@@ -40,9 +42,9 @@ describe('writeClientServices', () => {
             httpClient: HttpClient.FETCH,
             useUnionTypes: false,
             useOptions: false,
-            useCustomRequest: false,
             outputModels: '/',
             outputCore: '/',
+            useCancelableRequest: false,
         });
 
         expect(writeFile).toBeCalledWith('/MyService.ts', 'service');
