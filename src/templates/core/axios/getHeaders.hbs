@@ -4,11 +4,11 @@ async function getHeaders(options: ApiRequestOptions): Promise<AxiosRequestHeade
     const password = await resolve(options, OpenAPI.PASSWORD);
     const defaultHeaders = await resolve(options, OpenAPI.HEADERS);
 
-    const headers: AxiosRequestHeaders = {
+    const headers = {
         Accept: 'application/json',
         ...defaultHeaders,
         ...options.headers,
-    };
+    } as AxiosRequestHeaders;
 
     if (isStringWithValue(token)) {
         headers['Authorization'] = `Bearer ${token}`;

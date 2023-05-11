@@ -5,7 +5,9 @@
 import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{@root.outputModels}}}{{{path}}}';
 {{/each}}
 {{/if}}
+{{#if @root.useCancelableRequest}}
 import type { CancelablePromise } from '{{{outputCore}}}CancelablePromise';
+{{/if}}
 import { request as __request } from '{{{outputCore}}}request';
 import type { ApiRequestOptions } from '{{{outputCore}}}ApiRequestOptions';
 {{#if @root.useVersion}}
@@ -56,9 +58,12 @@ export class {{{name}}} {
     {{/each}}
      * @throws ApiError
      */
+    {{#if @root.useCancelableRequest}}
     public static {{{name}}}({{>parameters}}): CancelablePromise<{{>result}}> {
+    {{else}}
+    public static {{{name}}}({{>parameters}}): Promise<{{>result}}> {
+    {{/if}}
         return __request<{{>result}}>({{../originName}}Options.{{{name}}}({{>parameterValues~}}));
     }
-
     {{/each}}
 }

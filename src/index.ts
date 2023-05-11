@@ -34,6 +34,7 @@ export type Options = {
     interfacePrefix?: string;
     enumPrefix?: string;
     typePrefix?: string;
+    useCancelableRequest?: boolean;
 };
 
 /**
@@ -59,6 +60,7 @@ export type Options = {
  * @param interfacePrefix: Prefix for interface model(I)
  * @param enumPrefix: Prefix for enum model(E)
  * @param typePrefix: Prefix for type model(T)
+ * @param useCancelableRequest Use cancelable request type.
  */
 async function generateFrom(
     {
@@ -81,6 +83,7 @@ async function generateFrom(
         interfacePrefix = 'I',
         enumPrefix = 'E',
         typePrefix = 'T',
+        useCancelableRequest = false,
     }: Options,
     writeClient: WriteClient
 ): Promise<void> {
@@ -118,6 +121,7 @@ async function generateFrom(
                 exportSchemas,
                 clean,
                 request,
+                useCancelableRequest,
             });
             break;
         }
@@ -139,6 +143,7 @@ async function generateFrom(
                 exportSchemas,
                 clean,
                 request,
+                useCancelableRequest,
             });
             break;
         }

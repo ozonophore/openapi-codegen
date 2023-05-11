@@ -1,4 +1,8 @@
+{{#if @root.useCancelableRequest}}
 async function sendRequest(options: ApiRequestOptions, url: string, onCancel: (cancelHandler: () => void) => void): Promise<XMLHttpRequest> {
+{{else}}
+async function sendRequest(options: ApiRequestOptions, url: string): Promise<XMLHttpRequest> {
+{{/if}}
 
     const xhr = new XMLHttpRequest();
     xhr.open(options.method, url, true);
@@ -9,19 +13,27 @@ async function sendRequest(options: ApiRequestOptions, url: string, onCancel: (c
         xhr.setRequestHeader(key, value);
     });
 
+    {{#if @root.useCancelableRequest}}
     return new Promise<XMLHttpRequest>((resolve, reject) => {
+    {{else}}
+    return new Promise<XMLHttpRequest>((resolve) => {
+    {{/if}}
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 resolve(xhr);
             }
+            {{#if @root.useCancelableRequest}}
             // TODO разобраться с ситуацией!
             console.log(xhr.readyState);
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 reject();
             }
+            {{/if}}
         };
         xhr.send(getRequestBody(options));
 
+        {{#if @root.useCancelableRequest}}
         onCancel(() => xhr.abort());
+        {{/if}}
     });
 }

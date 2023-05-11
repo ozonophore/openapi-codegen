@@ -11,6 +11,7 @@ import { Templates } from './registerHandlebarTemplates';
  * @param outputPath Directory to write the generated files to
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param request: Path to custom request file
+ * @param useCancelableRequest Use cancelable request type
  */
 interface IWriteClientCore {
     client: Client;
@@ -18,6 +19,7 @@ interface IWriteClientCore {
     outputPath: string;
     httpClient: HttpClient;
     request?: string;
+    useCancelableRequest?: boolean;
 }
 
 /**
@@ -27,20 +29,24 @@ interface IWriteClientCore {
  * @param outputPath Directory to write the generated files to
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param request: Path to custom request file
+ * @param useCancelableRequest Use cancelable request type
  */
 export async function writeClientCore(options: IWriteClientCore): Promise<void> {
-    const { client, templates, outputPath, httpClient, request } = options;
+    const { client, templates, outputPath, httpClient, request, useCancelableRequest } = options;
     const context = {
         httpClient,
         server: client.server,
         version: client.version,
+        useCancelableRequest,
     };
 
     await writeFile(resolve(outputPath, 'OpenAPI.ts'), templates.core.settings(context));
     await writeFile(resolve(outputPath, 'ApiError.ts'), templates.core.apiError({}));
     await writeFile(resolve(outputPath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
     await writeFile(resolve(outputPath, 'ApiResult.ts'), templates.core.apiResult({}));
-    await writeFile(resolve(outputPath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
+    if (useCancelableRequest) {
+        await writeFile(resolve(outputPath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
+    }
     await writeFile(resolve(outputPath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
     await writeFile(resolve(outputPath, 'request.ts'), templates.core.request(context));
 

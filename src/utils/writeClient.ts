@@ -5,13 +5,13 @@ import { mkdir } from './fileSystem';
 import { isSubDirectory } from './isSubdirectory';
 import { IOutput } from './output';
 import { Templates } from './registerHandlebarTemplates';
+import { unique } from './unique';
 import { writeClientCore } from './writeClientCore';
-import { IClientIndex, IModel, IService } from './writeClientIndex';
+import { IClientIndex, IModel } from './writeClientIndex';
 import { writeClientIndex } from './writeClientIndex';
 import { writeClientModels } from './writeClientModels';
 import { writeClientSchemas } from './writeClientSchemas';
 import { writeClientServices } from './writeClientServices';
-import { unique } from './unique';
 
 function sortModelByName(a: IModel, b: IModel): number {
     if (a.name > b.name) {
@@ -53,6 +53,7 @@ function prepareAlias(models: IModel[]) {
  * @param exportSchemas: Generate schemas
  * @param clean: Clean a directory before generation
  * @param request: Path to custom request file
+ * @param useCancelableRequest Use cancelable request type.
  */
 interface IWriteClient {
     client: Client;
@@ -67,6 +68,7 @@ interface IWriteClient {
     exportSchemas: boolean;
     clean: boolean;
     request?: string;
+    useCancelableRequest?: boolean;
 }
 
 /**
@@ -109,9 +111,10 @@ export class WriteClient {
      * @param exportSchemas: Generate schemas
      * @param clean: Clean a directory before generation
      * @param request: Path to custom request file
+     * @param useCancelableRequest Use cancelable request type.
      */
     async writeClient(options: IWriteClient): Promise<void> {
-        const { client, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, request } = options;
+        const { client, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, request, useCancelableRequest = false } = options;
         const outputPath = resolve(process.cwd(), output.output);
         const outputPathCore = output.outputCore ? resolve(process.cwd(), output.outputCore) : resolve(outputPath, 'core');
         const outputPathModels = output.outputModels ? resolve(process.cwd(), output.outputModels) : resolve(outputPath, 'models');
@@ -136,7 +139,7 @@ export class WriteClient {
 
         if (exportCore) {
             await mkdir(outputPathCore);
-            await writeClientCore({ client, templates, outputPath: outputPathCore, httpClient, request });
+            await writeClientCore({ client, templates, outputPath: outputPathCore, httpClient, request, useCancelableRequest });
         }
 
         if (exportServices) {
@@ -148,9 +151,9 @@ export class WriteClient {
                 httpClient,
                 useUnionTypes,
                 useOptions,
-                useCustomRequest: !!request,
                 outputModels: exportModels ? `${relative(outputPathServices, outputPathModels)}` : '../models/',
                 outputCore: exportCore ? `${relative(outputPathServices, outputPathCore)}` : '../core/',
+                useCancelableRequest,
             });
         }
 
