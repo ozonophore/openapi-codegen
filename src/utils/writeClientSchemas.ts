@@ -3,9 +3,9 @@ import { mkdirSync } from 'fs';
 import type { Model } from '../client/interfaces/Model';
 import { dirName, resolve } from '../core/path';
 import { HttpClient } from '../HttpClient';
+import { replaceTransitionToDirLevelAbove } from './checkTransitionToDirLevelAbove';
 import { writeFile } from './fileSystem';
 import { format } from './format';
-import { preProcessWriteModel } from './preProcessWriteModel';
 import { Templates } from './registerHandlebarTemplates';
 
 /**
@@ -34,17 +34,16 @@ interface IWriteClientSchemas {
 export async function writeClientSchemas(options: IWriteClientSchemas): Promise<void> {
     const { models, templates, outputPath, httpClient, useUnionTypes } = options;
     for (const model of models) {
-        const currentModel = preProcessWriteModel(model, outputPath);
-        const modelFolderPath = currentModel?.path; // mapModelPaths(outputPath, model);
-        const dir = dirName(modelFolderPath);
+        const currentpath = replaceTransitionToDirLevelAbove(model.path);
+        const dir = dirName(currentpath);
         if (dir) {
             const directory = resolve(outputPath, dir);
             // @ts-ignore
             mkdirSync(directory, { recursive: true });
         }
-        const file = resolve(outputPath, `${modelFolderPath}Schema.ts`);
+        const file = resolve(outputPath, `${currentpath}Schema.ts`);
         const templateResult = templates.exports.schema({
-            ...currentModel, // ...model,
+            ...model,
             httpClient,
             useUnionTypes,
         });
