@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1-beta.1] - 2023-05-15
+
+### Added
+- Added unit test for function getRelativeModelImportPath
+- Added unit test for function getRelativeModelImportPath
+
+### Fixed
+- Fixed function of relative path calculation for model import. Now the incorrect value of the relative path to the model parameter is taken into account.
+
 ## [0.3.1] - 2023-05-11
 
 ### Fixed
