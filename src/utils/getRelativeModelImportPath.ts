@@ -2,6 +2,7 @@ import path from 'path';
 
 import { resolve } from '../core/path';
 import { getRelativeModelPath } from './getRelativeModelPath';
+import { isPathWithRoot } from './isPathWithRoot';
 
 /**
  * The function calculates the relative import path for model.
@@ -17,7 +18,12 @@ export function getRelativeModelImportPath(rootPath: string, relativePath: strin
         return normalizedRelative;
     }
 
-    const absoluteModelPath = resolve(rootPath, modelPath);
+    let modelRelativePath = modelPath;
+    const isWithRoot = isPathWithRoot(rootPath, modelRelativePath);
+    if (!isWithRoot) {
+        modelRelativePath = getRelativeModelPath(rootPath, modelRelativePath);
+    }
+    const absoluteModelPath = resolve(rootPath, modelRelativePath);
     const updatedRelativePath = getRelativeModelPath(rootPath, normalizedRelative);
     const absoluteImportPath = resolve(rootPath, updatedRelativePath);
 
@@ -27,10 +33,10 @@ export function getRelativeModelImportPath(rootPath: string, relativePath: strin
 }
 
 /**
- *
- * @param firstPath
- * @param secondPath
- * @returns
+ * The function calculates the correct relative path.
+ * @param firstPath Root path.
+ * @param secondPath RelativePath.
+ * @returns Current relative model import path.
  */
 function calculateRelativePath(firstPath: string, secondPath: string): string {
     const firstPathArr = firstPath.split('/');
