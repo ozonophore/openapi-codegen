@@ -5,7 +5,6 @@ import { dirName, resolve } from '../core/path';
 import { HttpClient } from '../HttpClient';
 import { writeFile } from './fileSystem';
 import { format } from './format';
-import { preProcessWriteModel } from './preProcessWriteModel';
 import { Templates } from './registerHandlebarTemplates';
 
 /**
@@ -34,8 +33,7 @@ interface IWriteClientSchemas {
 export async function writeClientSchemas(options: IWriteClientSchemas): Promise<void> {
     const { models, templates, outputPath, httpClient, useUnionTypes } = options;
     for (const model of models) {
-        const currentModel = preProcessWriteModel(model, outputPath);
-        const modelFolderPath = currentModel?.path; // mapModelPaths(outputPath, model);
+        const modelFolderPath = model?.path;
         const dir = dirName(modelFolderPath);
         if (dir) {
             const directory = resolve(outputPath, dir);
@@ -44,7 +42,7 @@ export async function writeClientSchemas(options: IWriteClientSchemas): Promise<
         }
         const file = resolve(outputPath, `${modelFolderPath}Schema.ts`);
         const templateResult = templates.exports.schema({
-            ...currentModel, // ...model,
+            ...model,
             httpClient,
             useUnionTypes,
         });

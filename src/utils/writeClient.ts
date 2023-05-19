@@ -2,7 +2,6 @@ import type { Client } from '../client/interfaces/Client';
 import { relative, resolve } from '../core/path';
 import { HttpClient } from '../HttpClient';
 import { mkdir } from './fileSystem';
-import { getRelativeModelPath } from './getRelativeModelPath';
 import { isSubDirectory } from './isSubdirectory';
 import { IOutput } from './output';
 import { Templates } from './registerHandlebarTemplates';
@@ -294,21 +293,9 @@ export class WriteClient {
             }
         }
         for (const value of result.values()) {
-            value.models = value.models
-                .filter(unique)
-                .sort(sortModelByName)
-                .map(model => ({
-                    ...model,
-                    path: getRelativeModelPath(resolve(value.outputPath, 'models'), model?.path),
-                }));
+            value.models = value.models.filter(unique).sort(sortModelByName);
             prepareAlias(value.models);
-            value.schemas = value.schemas
-                .filter(unique)
-                .sort(sortModelByName)
-                .map(schema => ({
-                    ...schema,
-                    path: getRelativeModelPath(resolve(value.outputPath, 'schemas'), schema?.path),
-                }));
+            value.schemas = value.schemas.filter(unique).sort(sortModelByName);
             prepareAlias(value.schemas);
             await writeClientIndex(value);
         }

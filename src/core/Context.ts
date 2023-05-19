@@ -91,4 +91,11 @@ export class Context {
         }
         return this._root.fileName ? this._root.fileName : '';
     }
+
+    public get output() {
+        if (!this._output) {
+            throw new Error('Context must be initialized');
+        }
+        return this._output;
+    }
 }

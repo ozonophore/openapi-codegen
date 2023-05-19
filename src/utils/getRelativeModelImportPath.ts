@@ -11,7 +11,10 @@ import { isPathWithRoot } from './isPathWithRoot';
  * @param modelPath Model relative path.
  * @returns Current relative model import path.
  */
-export function getRelativeModelImportPath(rootPath: string, relativePath: string, modelPath: string) {
+export function getRelativeModelImportPath(rootPath: string | undefined, relativePath: string, modelPath: string) {
+    if (!rootPath) {
+        return relativePath;
+    }
     const normalizedRelative = path.normalize(relativePath);
 
     if (!normalizedRelative.startsWith('..')) {

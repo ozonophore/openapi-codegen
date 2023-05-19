@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1-beta.2] - 2023-05-24
+
+### Fixed
+- Removed function preProcessWriteModel
+- Made a small refactoring of the code for generating models and schemes
+- When forming a relative path, the situation is taken into account when the root folder is not set
+- The formation of the relative path of the model and import of the model is moved to the getModels function
+
 ## [0.3.1-beta.1] - 2023-05-15
 
 ### Added
