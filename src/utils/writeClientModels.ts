@@ -5,7 +5,6 @@ import { dirName, resolve } from '../core/path';
 import { HttpClient } from '../HttpClient';
 import { writeFile } from './fileSystem';
 import { format } from './format';
-import { preProcessWriteModel } from './preProcessWriteModel';
 import { Templates } from './registerHandlebarTemplates';
 
 /**
@@ -34,8 +33,7 @@ interface IWriteClientModels {
 export async function writeClientModels(options: IWriteClientModels): Promise<void> {
     const { models, templates, outputPath, httpClient, useUnionTypes } = options;
     for (const model of models) {
-        const currentModel = preProcessWriteModel(model, outputPath);
-        const modelFolderPath = currentModel?.path;
+        const modelFolderPath = model?.path;
 
         if (!modelFolderPath) {
             return;
@@ -50,7 +48,7 @@ export async function writeClientModels(options: IWriteClientModels): Promise<vo
         const file = resolve(outputPath, `${modelFolderPath}.ts`);
 
         const templateResult = templates.exports.model({
-            ...currentModel,
+            ...model,
             httpClient,
             useUnionTypes,
         });

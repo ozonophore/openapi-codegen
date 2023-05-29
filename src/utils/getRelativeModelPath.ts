@@ -7,7 +7,10 @@ import path from 'path';
  * @param relativeModelPath Relative path to the model.
  * @returns Correct relative model path.
  */
-export function getRelativeModelPath(folderPath: string, relativeModelPath: string) {
+export function getRelativeModelPath(folderPath: string | undefined, relativeModelPath: string) {
+    if (!folderPath) {
+        return relativeModelPath;
+    }
     let mappedPaths = '';
     let modelPath = relativeModelPath;
     if (modelPath.startsWith('../')) {

@@ -1,6 +1,8 @@
 import type { Model } from '../../../client/interfaces/Model';
 import { join, relative } from '../../../core/path';
 import { getRefFromSchema } from '../../../utils/getRefFromSchema';
+import { getRelativeModelImportPath } from '../../../utils/getRelativeModelImportPath';
+import { getRelativeModelPath } from '../../../utils/getRelativeModelPath';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
 import { unique } from '../../../utils/unique';
 import type { OpenApi } from '../interfaces/OpenApi';
@@ -13,12 +15,13 @@ export function getModels(this: Parser, openApi: OpenApi): Model[] {
         for (const modelRef of listOfModelsRef) {
             const definition: any = this.context.get(modelRef);
             const definitionType = this.getType(modelRef, '');
+            const modelPath = getRelativeModelPath(this.context.output?.outputModels, definitionType.path);
             const model = this.getModel({
                 openApi: openApi,
                 definition: definition,
                 isDefinition: true,
                 name: definitionType.base,
-                path: definitionType.path,
+                path: modelPath,
                 parentRef: modelRef,
             });
             models.push(model);
@@ -43,13 +46,12 @@ export function getModels(this: Parser, openApi: OpenApi): Model[] {
         models.forEach(model => {
             model.imports = model.imports.map(imprt => {
                 const importModel = models.filter(value => `${value.path}${value.name}` === imprt.path && value.name === imprt.name);
-                if (importModel.length > 0) {
-                    return Object.assign(imprt, {
-                        alias: importModel[0].alias,
-                        path: join(relative(model.path, importModel[0].path), imprt.name),
-                    });
-                }
-                return imprt;
+                const importAlias = importModel.length > 0 ? importModel[0].alias : imprt?.alias;
+                const importPath = importModel.length > 0 ? join(relative(model.path, importModel[0].path), imprt.name) : imprt.path;
+                return Object.assign(imprt, {
+                    alias: importAlias,
+                    path: getRelativeModelImportPath(this.context.output?.outputModels, importPath, model.path),
+                });
             });
         });
     }

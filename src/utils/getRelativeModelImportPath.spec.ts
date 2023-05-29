@@ -1,6 +1,12 @@
 import { getRelativeModelImportPath } from './getRelativeModelImportPath';
 
 describe('getRelativeModelImportPath', () => {
+    it('should return relative path of the model import', () => {
+        const modelRelativePath = './models/truck';
+        const relativePath = '../../common/car';
+        expect(getRelativeModelImportPath(undefined, relativePath, modelRelativePath)).toEqual('../../common/car');
+    });
+
     it('should return the correct relative path of the model import, taking into account the navigation characters', () => {
         const rootPath = '/home/generated';
         let modelRelativePath = './models/truck';
