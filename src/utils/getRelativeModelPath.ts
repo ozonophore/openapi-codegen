@@ -1,5 +1,7 @@
+import os from 'os';
 import path from 'path';
 
+const isWin = os.platform() === 'win32';
 /**
  * The function calculates the relative path to the model.
  * Removes the transition to the directory with a level above.
@@ -23,7 +25,12 @@ export function getRelativeModelPath(folderPath: string | undefined, relativeMod
         modelPath = pathArray.join(path.sep);
     }
     const resolvedPath = path.resolve(folderPath, modelPath);
-    if (resolvedPath.startsWith(folderPath)) {
+    
+    let _folderPath = folderPath;
+    if (isWin) {
+        _folderPath = _folderPath.replace(/\//g, '\\');
+    }
+    if (resolvedPath.startsWith(_folderPath)) {
         mappedPaths = modelPath;
     }
 
