@@ -1,5 +1,8 @@
 import path from 'path';
 
+import { replaceString } from '../core/replaceString';
+import { stripNamespace } from './stripNamespace';
+
 /**
  * The function calculates the relative path to the model.
  * Removes the transition to the directory with a level above.
@@ -27,5 +30,7 @@ export function getRelativeModelPath(folderPath: string | undefined, relativeMod
         mappedPaths = modelPath;
     }
 
+    const normalizedValue = replaceString(mappedPaths);
+    mappedPaths = stripNamespace(normalizedValue || '');
     return mappedPaths;
 }

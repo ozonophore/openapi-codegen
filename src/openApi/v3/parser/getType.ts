@@ -2,9 +2,9 @@ import type { Type } from '../../../client/interfaces/Type';
 import { replaceString } from '../../../core/replaceString';
 import { encode } from '../../../utils/encode';
 import { getAbsolutePath } from '../../../utils/getAbsolutePath';
+import { getMappedType, hasMappedType } from '../../../utils/getMappedType';
+import { stripNamespace } from '../../../utils/stripNamespace';
 import { Parser } from '../Parser';
-import { getMappedType, hasMappedType } from './getMappedType';
-import { stripNamespace } from './stripNamespace';
 
 function getTypeName(value: string): string {
     const index = value.lastIndexOf('/');

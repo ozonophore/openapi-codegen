@@ -12,11 +12,11 @@ describe('getRelativeModelImportPath', () => {
         let modelRelativePath = './models/truck';
         let relativePath = '../../common/car';
 
-        expect(getRelativeModelImportPath(rootPath, relativePath, modelRelativePath)).toEqual('../common/car');
+        expect(getRelativeModelImportPath(rootPath, relativePath, modelRelativePath)).toEqual('../common/Car');
 
         modelRelativePath = './models/model/truck';
         relativePath = '../../models/car';
-        expect(getRelativeModelImportPath(rootPath, relativePath, modelRelativePath)).toEqual('../car');
+        expect(getRelativeModelImportPath(rootPath, relativePath, modelRelativePath)).toEqual('../Car');
     });
 
     it('should return the correct relative path of the models import if an incorrect relative path to the model is passed', () => {
@@ -24,6 +24,6 @@ describe('getRelativeModelImportPath', () => {
         const modelRelativePath = '../../../models/truck';
         const relativePath = '../../common/car';
 
-        expect(getRelativeModelImportPath(rootPath, relativePath, modelRelativePath)).toEqual('../common/car');
+        expect(getRelativeModelImportPath(rootPath, relativePath, modelRelativePath)).toEqual('../common/Car');
     });
 });

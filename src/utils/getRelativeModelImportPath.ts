@@ -1,8 +1,10 @@
 import path from 'path';
 
 import { resolve } from '../core/path';
+import { replaceString } from '../core/replaceString';
 import { getRelativeModelPath } from './getRelativeModelPath';
 import { isPathWithRoot } from './isPathWithRoot';
+import { stripNamespace } from './stripNamespace';
 
 /**
  * The function calculates the relative import path for model.
@@ -52,7 +54,8 @@ function calculateRelativePath(firstPath: string, secondPath: string): string {
 
     const backtracking = '../'.repeat(firstPathArr.length - i - 1);
     const forwardPath = secondPathArr.slice(i).join('/');
-    const relativePath = backtracking + forwardPath;
-
+    let relativePath = backtracking + forwardPath;
+    const normalizedValue = replaceString(relativePath);
+    relativePath = stripNamespace(normalizedValue || '');
     return relativePath;
 }
