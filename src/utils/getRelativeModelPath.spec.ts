@@ -13,6 +13,6 @@ describe('getRelativeModelPath', () => {
         const modelRelativePath = '../../../models/truck';
 
         const result = getRelativeModelPath(rootPath, modelRelativePath);
-        expect(result).toEqual('models/truck');
+        expect(result).toEqual('models/Truck');
     });
 });

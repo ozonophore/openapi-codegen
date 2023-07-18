@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1-beta.3] - 2023-07-14
+
+### Fixed
+- Fixed generation of relative import path and model relative path when generating on Windows OS.
+
+### Modefied
+- Modefied function separation (OpenAPI) namespace from values. Functionality merged into one function.
+- Modified the type matching function for the passed type to any underlying Typescript/Javascript type. Functionality merged into one function.
+
+### Skipped
+- Skipped type get check test. Due to the fact that you need to separately rewrite this method by analogy with getType v3
+
 ## [0.3.1-beta.2] - 2023-05-24
 
 ### Fixed

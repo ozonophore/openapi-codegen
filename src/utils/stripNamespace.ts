@@ -1,7 +1,7 @@
 import { basename, extname } from 'path';
 
-import { dirName, join } from '../../../core/path';
-import { getClassName } from '../../../utils/getClassName';
+import { dirName, join } from '../core/path';
+import { getClassName } from './getClassName';
 import { hasMappedType } from './getMappedType';
 
 /**
@@ -30,7 +30,12 @@ export function stripNamespace(value: string): string {
         .replace(/^#\/components\/headers\//, '')
         .replace(/^#\/components\/securitySchemes\//, '')
         .replace(/^#\/components\/links\//, '')
-        .replace(/^#\/components\/callbacks\//, '');
+        .replace(/^#\/components\/callbacks\//, '')
+        .replace(/^#\/definitions\//, '')
+        .replace(/^#\/parameters\//, '')
+        .replace(/^#\/responses\//, '')
+        .replace(/^#\/securityDefinitions\//, '');
+
     const directoryName = dirName(clearValue);
     const baseName = getClassName(basename(clearValue));
     return directoryName ? join(directoryName, baseName) : baseName;

@@ -1,7 +1,7 @@
 import type { Type } from '../../../client/interfaces/Type';
 import { replaceString } from '../../../core/replaceString';
-import { getMappedType, hasMappedType } from './getMappedType';
-import { stripNamespace } from './stripNamespace';
+import { getMappedType, hasMappedType } from '../../../utils/getMappedType';
+import { stripNamespace } from '../../../utils/stripNamespace';
 
 function encode(value: string): string {
     return value.replace(/^[^a-zA-Z_$]+/g, '').replace(/[^\w$]+/g, '_');
