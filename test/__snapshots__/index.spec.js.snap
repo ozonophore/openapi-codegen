@@ -339,21 +339,21 @@ exports[`v2 should generate: ./test/generated/v2/index.ts 1`] = `
 export { ApiError } from '././core/ApiError';
 export { OpenAPI } from '././core/OpenAPI';
 
-export type { DictionaryWithReference } from '././models/DictionaryWithReference';
-export type { ModelThatExtends } from '././models/ModelThatExtends';
-export type { ModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
-export type { ModelWithArray } from '././models/ModelWithArray';
-export type { ModelWithDictionary } from '././models/ModelWithDictionary';
-export { ModelWithEnumInteger } from '././models/ModelWithEnumInteger';
-export type { ModelWithString } from '././models/ModelWithString';
+export type { IDictionaryWithReference } from '././models/DictionaryWithReference';
+export type { IModelWithArray } from '././models/ModelWithArray';
+export type { IModelWithDictionary } from '././models/ModelWithDictionary';
+export { IModelWithEnumInteger } from '././models/ModelWithEnumInteger';
+export type { IModelWithString } from '././models/ModelWithString';
+export type { TModelThatExtends } from '././models/ModelThatExtends';
+export type { TModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
 
-export { DictionaryWithReferenceSchema } from '././schemas/DictionaryWithReferenceSchema';
-export { ModelThatExtendsSchema } from '././schemas/ModelThatExtendsSchema';
-export { ModelThatExtendsExtendsSchema } from '././schemas/ModelThatExtendsExtendsSchema';
-export { ModelWithArraySchema } from '././schemas/ModelWithArraySchema';
-export { ModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
-export { ModelWithEnumIntegerSchema } from '././schemas/ModelWithEnumIntegerSchema';
-export { ModelWithStringSchema } from '././schemas/ModelWithStringSchema';
+export { IDictionaryWithReferenceSchema } from '././schemas/DictionaryWithReferenceSchema';
+export { IModelWithArraySchema } from '././schemas/ModelWithArraySchema';
+export { IModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
+export { IModelWithEnumIntegerSchema } from '././schemas/ModelWithEnumIntegerSchema';
+export { IModelWithStringSchema } from '././schemas/ModelWithStringSchema';
+export { TModelThatExtendsSchema } from '././schemas/ModelThatExtendsSchema';
+export { TModelThatExtendsExtendsSchema } from '././schemas/ModelThatExtendsExtendsSchema';
 
 export { Service } from '././services/Service';
 export { SimpleService } from '././services/SimpleService';
@@ -374,12 +374,12 @@ exports[`v2 should generate: ./test/generated/v2/models/DictionaryWithReference.
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ModelWithString } from './ModelWithString';
+import type { IModelWithString } from './ModelWithString';
 
 /**
  * This is a string reference
  */
-export type DictionaryWithReference = Record<string, ModelWithString>;"
+export type IDictionaryWithReference = Record<string, IModelWithString>;"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/models/ModelThatExtends.ts 1`] = `
@@ -387,14 +387,14 @@ exports[`v2 should generate: ./test/generated/v2/models/ModelThatExtends.ts 1`] 
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ModelWithString } from './ModelWithString';
+import type { IModelWithString } from './ModelWithString';
 
 /**
  * This is a model that extends another model
  */
-export type ModelThatExtends = (ModelWithString & {
+export type TModelThatExtends = (IModelWithString & {
     propExtendsA?: string,
-    propExtendsB?: ModelWithString,
+    propExtendsB?: IModelWithString,
 });
 "
 `;
@@ -404,15 +404,15 @@ exports[`v2 should generate: ./test/generated/v2/models/ModelThatExtendsExtends.
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ModelThatExtends } from './ModelThatExtends';
-import type { ModelWithString } from './ModelWithString';
+import type { TModelThatExtends } from './ModelThatExtends';
+import type { IModelWithString } from './ModelWithString';
 
 /**
  * This is a model that extends another model
  */
-export type ModelThatExtendsExtends = (ModelWithString & ModelThatExtends & {
+export type TModelThatExtendsExtends = (IModelWithString & TModelThatExtends & {
     propExtendsC?: string,
-    propExtendsD?: ModelWithString,
+    propExtendsD?: IModelWithString,
 });
 "
 `;
@@ -422,13 +422,13 @@ exports[`v2 should generate: ./test/generated/v2/models/ModelWithArray.ts 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ModelWithString } from './ModelWithString';
+import type { IModelWithString } from './ModelWithString';
 
 /**
  * This is a model with one property containing an array
  */
-export interface ModelWithArray {
-    prop?: Array<ModelWithString>;
+export interface IModelWithArray {
+    prop?: Array<IModelWithString>;
     propWithFile?: Array<Blob>;
     propWithNumber?: Array<number>;
 }
@@ -443,7 +443,7 @@ exports[`v2 should generate: ./test/generated/v2/models/ModelWithDictionary.ts 1
 /**
  * This is a model with one property containing a dictionary
  */
-export interface ModelWithDictionary {
+export interface IModelWithDictionary {
     prop?: Record<string, string>;
 }
 "
@@ -457,14 +457,14 @@ exports[`v2 should generate: ./test/generated/v2/models/ModelWithEnumInteger.ts 
 /**
  * This is a model with one number property
  */
-export interface ModelWithEnumInteger {
+export interface IModelWithEnumInteger {
     /**
      * VALUE_1=1,VALUE_2=2,VALUE_3=3
      */
-    prop?: ModelWithEnumInteger.prop;
+    prop?: IModelWithEnumInteger.prop;
 }
 
-export namespace ModelWithEnumInteger {
+export namespace IModelWithEnumInteger {
 
     /**
      * VALUE_1=1,VALUE_2=2,VALUE_3=3
@@ -488,7 +488,7 @@ exports[`v2 should generate: ./test/generated/v2/models/ModelWithString.ts 1`] =
 /**
  * This is a model with one string property
  */
-export interface ModelWithString {
+export interface IModelWithString {
     /**
      * This is a simple string property
      */
@@ -501,10 +501,10 @@ exports[`v2 should generate: ./test/generated/v2/schemas/DictionaryWithReference
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const DictionaryWithReferenceSchema = {
+export const IDictionaryWithReferenceSchema = {
     type: 'dictionary',
     contains: {
-        type: 'ModelWithString',
+        type: 'IModelWithString',
     },
 };"
 `;
@@ -513,19 +513,19 @@ exports[`v2 should generate: ./test/generated/v2/schemas/ModelThatExtendsExtends
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const ModelThatExtendsExtendsSchema = {
+export const TModelThatExtendsExtendsSchema = {
     type: 'all-of',
     contains: [{
-        type: 'ModelWithString',
+        type: 'IModelWithString',
     }, {
-        type: 'ModelThatExtends',
+        type: 'TModelThatExtends',
     }, {
         properties: {
             propExtendsC: {
                 type: 'string',
             },
             propExtendsD: {
-                type: 'ModelWithString',
+                type: 'IModelWithString',
             },
         },
     }],
@@ -536,17 +536,17 @@ exports[`v2 should generate: ./test/generated/v2/schemas/ModelThatExtendsSchema.
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const ModelThatExtendsSchema = {
+export const TModelThatExtendsSchema = {
     type: 'all-of',
     contains: [{
-        type: 'ModelWithString',
+        type: 'IModelWithString',
     }, {
         properties: {
             propExtendsA: {
                 type: 'string',
             },
             propExtendsB: {
-                type: 'ModelWithString',
+                type: 'IModelWithString',
             },
         },
     }],
@@ -557,12 +557,12 @@ exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithArraySchema.ts
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const ModelWithArraySchema = {
+export const IModelWithArraySchema = {
     properties: {
         prop: {
             type: 'array',
             contains: {
-                type: 'ModelWithString',
+                type: 'IModelWithString',
             },
         },
         propWithFile: {
@@ -585,7 +585,7 @@ exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithDictionarySche
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const ModelWithDictionarySchema = {
+export const IModelWithDictionarySchema = {
     properties: {
         prop: {
             type: 'dictionary',
@@ -601,7 +601,7 @@ exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithEnumIntegerSch
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const ModelWithEnumIntegerSchema = {
+export const IModelWithEnumIntegerSchema = {
     properties: {
         prop: {
             type: 'Enum',
@@ -614,7 +614,7 @@ exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithStringSchema.t
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const ModelWithStringSchema = {
+export const IModelWithStringSchema = {
     properties: {
         prop: {
             type: 'string',
@@ -696,7 +696,7 @@ exports[`v2 should generate: ./test/generated/v2/services/ComplexService.ts 1`] 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ModelWithString } from './../models/ModelWithString';
+import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -709,7 +709,7 @@ const complexTypes = (
             },
         },
     },
-    parameterReference: ModelWithString,
+    parameterReference: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v\${OpenAPI.VERSION}/complex\`,
@@ -733,7 +733,7 @@ export type TComplexServiceOptions = {
                 },
             },
         },
-        parameterReference: ModelWithString,
+        parameterReference: IModelWithString,
     ) => ApiRequestOptions;
 }
 
@@ -746,7 +746,7 @@ export class ComplexService {
     /**
      * @param parameterObject Parameter containing object
      * @param parameterReference Parameter containing reference
-     * @returns ModelWithString Successful response
+     * @returns IModelWithString Successful response
      * @throws ApiError
      */
     public static complexTypes(
@@ -757,9 +757,9 @@ export class ComplexService {
                 },
             },
         },
-        parameterReference: ModelWithString,
-    ): Promise<Array<ModelWithString>> {
-        return __request<Array<ModelWithString>>(ComplexServiceOptions.complexTypes(
+        parameterReference: IModelWithString,
+    ): Promise<Array<IModelWithString>> {
+        return __request<Array<IModelWithString>>(ComplexServiceOptions.complexTypes(
             parameterObject,
             parameterReference,
         ));
@@ -771,7 +771,7 @@ exports[`v2 should generate: ./test/generated/v2/services/DefaultsService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ModelWithString } from './../models/ModelWithString';
+import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -781,7 +781,7 @@ const callWithDefaultParameters = (
     parameterNumber: number = 123,
     parameterBoolean: boolean = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-    parameterModel: ModelWithString = {
+    parameterModel: IModelWithString = {
         \\"prop\\": \\"Hello World!\\"
     },
 ): ApiRequestOptions => ({
@@ -801,7 +801,7 @@ const callWithDefaultOptionalParameters = (
     parameterNumber: number = 123,
     parameterBoolean: boolean = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-    parameterModel: ModelWithString = {
+    parameterModel: IModelWithString = {
         \\"prop\\": \\"Hello World!\\"
     },
 ): ApiRequestOptions => ({
@@ -843,14 +843,14 @@ export type TDefaultsServiceOptions = {
         parameterNumber: number,
         parameterBoolean: boolean,
         parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterModel: ModelWithString,
+        parameterModel: IModelWithString,
     ) => ApiRequestOptions;
     callWithDefaultOptionalParameters: (
         parameterString: string,
         parameterNumber: number,
         parameterBoolean: boolean,
         parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterModel: ModelWithString,
+        parameterModel: IModelWithString,
     ) => ApiRequestOptions;
     callToTestOrderOfParams: (
         parameterStringWithNoDefault: string,
@@ -883,7 +883,7 @@ export class DefaultsService {
         parameterNumber: number = 123,
         parameterBoolean: boolean = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: ModelWithString = {
+        parameterModel: IModelWithString = {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
@@ -908,7 +908,7 @@ export class DefaultsService {
         parameterNumber: number = 123,
         parameterBoolean: boolean = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel: ModelWithString = {
+        parameterModel: IModelWithString = {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
@@ -1238,9 +1238,9 @@ exports[`v2 should generate: ./test/generated/v2/services/ResponseService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ModelThatExtendsExtends } from './../models/ModelThatExtendsExtends';
-import type { ModelThatExtends } from './../models/ModelThatExtends';
-import type { ModelWithString } from './../models/ModelWithString';
+import type { TModelThatExtendsExtends } from './../models/ModelThatExtendsExtends';
+import type { TModelThatExtends } from './../models/ModelThatExtends';
+import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -1286,36 +1286,36 @@ export const ResponseServiceOptions: TResponseServiceOptions = {
 export class ResponseService {
 
     /**
-     * @returns ModelWithString Message for default response
+     * @returns IModelWithString Message for default response
      * @throws ApiError
      */
-    public static callWithResponse(): Promise<ModelWithString> {
-        return __request<ModelWithString>(ResponseServiceOptions.callWithResponse());
+    public static callWithResponse(): Promise<IModelWithString> {
+        return __request<IModelWithString>(ResponseServiceOptions.callWithResponse());
     }
     /**
-     * @returns ModelWithString Message for default response
+     * @returns IModelWithString Message for default response
      * @throws ApiError
      */
-    public static callWithDuplicateResponses(): Promise<ModelWithString> {
-        return __request<ModelWithString>(ResponseServiceOptions.callWithDuplicateResponses());
+    public static callWithDuplicateResponses(): Promise<IModelWithString> {
+        return __request<IModelWithString>(ResponseServiceOptions.callWithDuplicateResponses());
     }
     /**
      * @returns any Message for 200 response
-     * @returns ModelWithString Message for default response
-     * @returns ModelThatExtends Message for 201 response
-     * @returns ModelThatExtendsExtends Message for 202 response
+     * @returns IModelWithString Message for default response
+     * @returns TModelThatExtends Message for 201 response
+     * @returns TModelThatExtendsExtends Message for 202 response
      * @throws ApiError
      */
     public static callWithResponses(): Promise<{
         readonly '@namespace.string'?: string,
         readonly '@namespace.integer'?: number,
-        readonly value?: Array<ModelWithString>,
-    } | ModelWithString | ModelThatExtends | ModelThatExtendsExtends> {
+        readonly value?: Array<IModelWithString>,
+    } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends> {
         return __request<{
             readonly '@namespace.string'?: string,
             readonly '@namespace.integer'?: number,
-            readonly value?: Array<ModelWithString>,
-        } | ModelWithString | ModelThatExtends | ModelThatExtendsExtends>(ResponseServiceOptions.callWithResponses());
+            readonly value?: Array<IModelWithString>,
+        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(ResponseServiceOptions.callWithResponses());
     }
 }"
 `;
@@ -1324,10 +1324,10 @@ exports[`v2 should generate: ./test/generated/v2/services/Service.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DictionaryWithReference } from './../models/DictionaryWithReference';
-import type { ModelWithArray } from './../models/ModelWithArray';
-import type { ModelWithDictionary } from './../models/ModelWithDictionary';
-import type { ModelWithEnumInteger } from './../models/ModelWithEnumInteger';
+import type { IDictionaryWithReference } from './../models/DictionaryWithReference';
+import type { IModelWithArray } from './../models/ModelWithArray';
+import type { IModelWithDictionary } from './../models/ModelWithDictionary';
+import type { IModelWithEnumInteger } from './../models/ModelWithEnumInteger';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -1370,32 +1370,32 @@ export const ServiceOptions: TServiceOptions = {
 export class Service {
 
     /**
-     * @returns DictionaryWithReference Message for default response
+     * @returns IDictionaryWithReference Message for default response
      * @throws ApiError
      */
-    public static getCallWithModelWithDictionaryReference(): Promise<DictionaryWithReference> {
-        return __request<DictionaryWithReference>(ServiceOptions.getCallWithModelWithDictionaryReference());
+    public static getCallWithModelWithDictionaryReference(): Promise<IDictionaryWithReference> {
+        return __request<IDictionaryWithReference>(ServiceOptions.getCallWithModelWithDictionaryReference());
     }
     /**
-     * @returns ModelWithDictionary Message for default response
+     * @returns IModelWithDictionary Message for default response
      * @throws ApiError
      */
-    public static getCallWithModelWithDictionary(): Promise<ModelWithDictionary> {
-        return __request<ModelWithDictionary>(ServiceOptions.getCallWithModelWithDictionary());
+    public static getCallWithModelWithDictionary(): Promise<IModelWithDictionary> {
+        return __request<IModelWithDictionary>(ServiceOptions.getCallWithModelWithDictionary());
     }
     /**
-     * @returns ModelWithEnumInteger Message for default response
+     * @returns IModelWithEnumInteger Message for default response
      * @throws ApiError
      */
-    public static getCallWithSimpleInteger(): Promise<ModelWithEnumInteger> {
-        return __request<ModelWithEnumInteger>(ServiceOptions.getCallWithSimpleInteger());
+    public static getCallWithSimpleInteger(): Promise<IModelWithEnumInteger> {
+        return __request<IModelWithEnumInteger>(ServiceOptions.getCallWithSimpleInteger());
     }
     /**
-     * @returns ModelWithArray Message for default response
+     * @returns IModelWithArray Message for default response
      * @throws ApiError
      */
-    public static getCallWithModelArray(): Promise<ModelWithArray> {
-        return __request<ModelWithArray>(ServiceOptions.getCallWithModelArray());
+    public static getCallWithModelArray(): Promise<IModelWithArray> {
+        return __request<IModelWithArray>(ServiceOptions.getCallWithModelArray());
     }
 }"
 `;

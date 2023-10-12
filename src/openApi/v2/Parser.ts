@@ -13,10 +13,14 @@ import { getType } from './parser/getType';
 import { parse } from './parserV2';
 
 export class Parser {
-    public context: Context;
+    public _context: Context;
 
     constructor(context: Context) {
-        this.context = context;
+        this._context = context;
+    }
+
+    get context(): Context {
+        return this._context;
     }
 
     public getTypeNameByRef(value: string, ref?: string): string {

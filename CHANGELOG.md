@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1-rc.0] - 2023-10-12
+
+### Fixed
+- Fixed the conversion of lines into an array of lines inside the function calculateRelationPath (incoming parameters).
+- Fixed typification of generator options used in the function generate.
+- Fixed the use of the function of obtaining a relative path of the model.
+- Fixed the logic of the getType function to specify version 2.
+- Fixed the installation of the prefix for the interface (interfacePrefix).
+- Fixed the installation of the prefix for the enum (enumPrefix).
+- Fixed the installation of the prefix for the type (typePrefix).
+
+### Updated
+- Updated the unit test for the function getType.
+- Updated the class Parser to specify version 2.
+
+### Deleted
+- Deleted all unused imports and unused utiliities.
+
 ## [0.3.1-beta.3] - 2023-07-14
 
 ### Fixed

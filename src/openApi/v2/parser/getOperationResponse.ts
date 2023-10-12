@@ -4,9 +4,8 @@ import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiResponse } from '../interfaces/OpenApiResponse';
 import { Parser } from '../Parser';
 import { getComment } from './getComment';
-import { getType } from './getType';
 
-export function getOperationResponse(this: Parser, openApi: OpenApi, response: OpenApiResponse, responseCode: number): OperationResponse {
+export function getOperationResponse(this: Parser, openApi: OpenApi, response: OpenApiResponse, responseCode: number, parentRef: string): OperationResponse {
     const operationResponse: OperationResponse = {
         in: 'response',
         name: '',
@@ -35,7 +34,7 @@ export function getOperationResponse(this: Parser, openApi: OpenApi, response: O
     // then we need to parse the schema!
     if (response.schema) {
         if (response.schema.$ref) {
-            const model = getType(response.schema.$ref);
+            const model = this.getType(response.schema.$ref, parentRef);
             operationResponse.export = 'reference';
             operationResponse.type = model.type;
             operationResponse.base = model.base;
@@ -43,7 +42,7 @@ export function getOperationResponse(this: Parser, openApi: OpenApi, response: O
             operationResponse.imports.push(...model.imports);
             return operationResponse;
         } else {
-            const model = this.getModel({ openApi: openApi, definition: response.schema, parentRef: '' });
+            const model = this.getModel({ openApi: openApi, definition: response.schema, parentRef: parentRef });
             operationResponse.export = model.export;
             operationResponse.type = model.type;
             operationResponse.base = model.base;

@@ -19,3 +19,7 @@ export function relative(from: string, to: string): string {
 export function resolve(...pathSegments: string[]): string {
     return path.resolve(...pathSegments).replace(SEARCH_REGEXP, '/');
 }
+
+export function normalize(p: string): string {
+    return path.normalize(p).replace(SEARCH_REGEXP, '/');
+}

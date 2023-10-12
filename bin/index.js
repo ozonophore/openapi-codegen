@@ -8,6 +8,26 @@ const pkg = require('../package.json');
 
 const OpenAPI = require(path.resolve(__dirname, '../dist/index.js'));
 
+/**
+ * Checks if `value` is `null` or `undefined`.
+ *
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is nullish, else `false`.
+ * @example
+ *
+ * isNil(null)
+ * // => true
+ *
+ * isNil(void 0)
+ * // => true
+ *
+ * isNil(NaN)
+ * // => false
+ */
+function isNil(value) {
+    return value == null;
+}
+
 const params = program
     .name('openapi')
     .usage('[options]')
@@ -61,9 +81,9 @@ function prepareRootOptions(options) {
         exportSchemas: isValidJson(options.exportSchemas) ? JSON.parse(options.exportSchemas) : false,
         clean: isValidJson(options.clean) ? JSON.parse(options.clean) : false,
         request: options.request,
-        interfacePrefix: options.interfacePrefix ? options.interfacePrefix : 'I',
-        enumPrefix: options.enumPrefix ? options.enumPrefix : 'E',
-        typePrefix: options.typePrefix ? options.typePrefix : 'T',
+        interfacePrefix: !isNil(options.interfacePrefix) ? options.interfacePrefix : 'I',
+        enumPrefix: !isNil(options.enumPrefix) ? options.enumPrefix : 'E',
+        typePrefix: !isNil(options.typePrefix) ? options.typePrefix : 'T',
     };
 }
 
@@ -88,9 +108,9 @@ function prepareOptions(options, rootOptions) {
             exportSchemas: isValidJson(option.exportSchemas) ? JSON.parse(option.exportSchemas) : rootOptions ? rootOptions.exportSchemas : false,
             clean: isValidJson(option.clean) ? JSON.parse(option.clean) : rootOptions ? rootOptions.clean : false,
             request: option.request ? option.request : rootOptions ? rootOptions.request : '',
-            interfacePrefix: option.interfacePrefix ? option.interfacePrefix : rootOptions ? rootOptions.interfacePrefix : 'I',
-            enumPrefix: option.enumPrefix ? option.enumPrefix : rootOptions ? rootOptions.enumPrefix : 'E',
-            typePrefix: option.typePrefix ? option.typePrefix : rootOptions ? rootOptions.typePrefix : 'T',
+            interfacePrefix: !isNil(option.interfacePrefix) ? option.interfacePrefix : rootOptions ? rootOptions.interfacePrefix : 'I',
+            enumPrefix: !isNil(option.enumPrefix) ? option.enumPrefix : rootOptions ? rootOptions.enumPrefix : 'E',
+            typePrefix: !isNil(option.typePrefix) ? option.typePrefix : rootOptions ? rootOptions.typePrefix : 'T',
         };
     });
 }

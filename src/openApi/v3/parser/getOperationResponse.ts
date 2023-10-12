@@ -5,8 +5,6 @@ import type { OpenApiResponse } from '../interfaces/OpenApiResponse';
 import { Parser } from '../Parser';
 import { getComment } from './getComment';
 import { getContent } from './getContent';
-import { getModel } from './getModel';
-import { getType } from './getType';
 
 export function getOperationResponse(this: Parser, openApi: OpenApi, response: OpenApiResponse, responseCode: number, parentRef: string): OperationResponse {
     const operationResponse: OperationResponse = {

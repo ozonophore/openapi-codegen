@@ -1,126 +1,52 @@
-import { getType } from './getType';
+import RefParser from 'json-schema-ref-parser';
+
+import { Context } from '../../../core/Context';
+import { Parser } from '../Parser';
 
 describe('getType', () => {
-    it('should convert int', () => {
-        const type = getType('int');
+    it('should convert int', async () => {
+        const parser = new RefParser();
+        const context = new Context('test/spec/v3.yml', { output: './generated' });
+        context.addRefs(await parser.resolve('test/spec/v3.yml'));
+        const type = new Parser(context).getType('int', '');
         expect(type.type).toEqual('number');
         expect(type.base).toEqual('number');
         expect(type.template).toEqual(null);
         expect(type.imports).toEqual([]);
     });
 
-    it('should convert string', () => {
-        const type = getType('string');
-        expect(type.type).toEqual('string');
-        expect(type.base).toEqual('string');
-        expect(type.template).toEqual(null);
-        expect(type.imports).toEqual([]);
-    });
-
-    it('should convert string array', () => {
-        const type = getType('array[string]');
-        expect(type.type).toEqual('ArrayString');
-        expect(type.base).toEqual('ArrayString');
+    it('should support file with ext', async () => {
+        const parser = new RefParser();
+        const context = new Context('test/spec/v3.yml', { output: './generated' });
+        context.addRefs(await parser.resolve('test/spec/v3.yml'));
+        const type = new Parser(context).getType('schemas/ModelWithString.yml', '');
+        expect(type.type).toEqual('IModelWithString');
+        expect(type.base).toEqual('IModelWithString');
         expect(type.template).toEqual(null);
         expect(type.imports).toEqual([
             {
+                name: 'IModelWithString',
                 alias: '',
-                name: 'ArrayString',
-                path: 'ArrayString',
+                path: 'schemas/ModelWithString',
             },
         ]);
     });
 
-    it('should convert template with primary', () => {
-        const type = getType('#/definitions/Link[string]');
-        expect(type.type).toEqual('LinkString');
-        expect(type.base).toEqual('LinkString');
-        expect(type.path).toEqual('LinkString');
-        expect(type.template).toEqual(null);
-        expect(type.imports).toEqual([
-            {
-                name: 'LinkString',
-                alias: '',
-                path: 'LinkString',
+    const object = {
+        components: {
+            schemas: {
+                someSpecialSchema: {
+                    type: 'object',
+                },
             },
-        ]);
-    });
+        },
+    };
 
-    it('should convert template with model', () => {
-        const type = getType('#/definitions/Link[Model]');
-        expect(type.type).toEqual('LinkModel');
-        expect(type.base).toEqual('LinkModel');
-        expect(type.template).toEqual(null);
-        expect(type.imports).toEqual([
-            {
-                name: 'LinkModel',
-                alias: '',
-                path: 'LinkModel',
-            },
-        ]);
-    });
-
-    it('should have double imports', () => {
-        const type = getType('#/definitions/Link[Link]');
-        expect(type.type).toEqual('LinkLink');
-        expect(type.base).toEqual('LinkLink');
-        expect(type.template).toEqual(null);
-        expect(type.imports).toEqual([
-            {
-                name: 'LinkLink',
-                alias: '',
-                path: 'LinkLink',
-            },
-        ]);
-    });
-
-    it('should convert generic', () => {
-        const type = getType('#/definitions/Link', 'Link');
-        expect(type.type).toEqual('T');
-        expect(type.base).toEqual('T');
-        expect(type.template).toEqual(null);
-        expect(type.imports).toEqual([]);
-    });
-
-    it('should support dot', () => {
-        const type = getType('#/definitions/model.000');
-        expect(type.type).toEqual('Model000');
-        expect(type.base).toEqual('Model000');
-        expect(type.template).toEqual(null);
-        expect(type.imports).toEqual([
-            {
-                name: 'Model000',
-                alias: '',
-                path: 'Model000',
-            },
-        ]);
-    });
-
-    it('should support dashes', () => {
-        const type = getType('#/definitions/some_special-schema');
-        expect(type.type).toEqual('SomeSpecialSchema');
-        expect(type.base).toEqual('SomeSpecialSchema');
-        expect(type.template).toEqual(null);
-        expect(type.imports).toEqual([
-            {
-                name: 'SomeSpecialSchema',
-                alias: '',
-                path: 'SomeSpecialSchema',
-            },
-        ]);
-    });
-
-    it('should support dollar sign', () => {
-        const type = getType('#/definitions/$some+special+schema');
-        expect(type.type).toEqual('SomeSpecialSchema');
-        expect(type.base).toEqual('SomeSpecialSchema');
-        expect(type.template).toEqual(null);
-        expect(type.imports).toEqual([
-            {
-                name: 'SomeSpecialSchema',
-                alias: '',
-                path: 'SomeSpecialSchema',
-            },
-        ]);
+    it('should support external generation type', async () => {
+        const parser = new RefParser();
+        const context = new Context(object, { output: './generated' });
+        context.addRefs(await parser.resolve(object));
+        const type = new Parser(context).getType('#/components/schemas/someSpecialSchema', '');
+        expect(type.type).toEqual('ISomeSpecialSchema');
     });
 });

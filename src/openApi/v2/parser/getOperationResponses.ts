@@ -17,7 +17,7 @@ export function getOperationResponses(this: Parser, openApi: OpenApi, responses:
             const responseCode = getOperationResponseCode(code);
 
             if (responseCode) {
-                const operationResponse = this.getOperationResponse(openApi, response, responseCode);
+                const operationResponse = this.getOperationResponse(openApi, response, responseCode, '');
                 operationResponses.push(operationResponse);
             }
         }

@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { resolve } from '../core/path';
+import { normalize, resolve } from '../core/path';
 import { replaceString } from '../core/replaceString';
 import { getRelativeModelPath } from './getRelativeModelPath';
 import { isPathWithRoot } from './isPathWithRoot';
@@ -44,18 +44,22 @@ export function getRelativeModelImportPath(rootPath: string | undefined, relativ
  * @returns Current relative model import path.
  */
 function calculateRelativePath(firstPath: string, secondPath: string): string {
-    const firstPathArr = firstPath.split('/');
-    const secondPathArr = secondPath.split('/');
+    try {
+        const firstPathArr = normalize(firstPath).split('/');
+        const secondPathArr = normalize(secondPath).split('/');
 
-    let i = 0;
-    while (i < firstPathArr.length && i < secondPathArr.length && firstPathArr[i] === secondPathArr[i]) {
-        i++;
+        let i = 0;
+        while (i < firstPathArr.length && i < secondPathArr.length && firstPathArr[i] === secondPathArr[i]) {
+            i++;
+        }
+
+        const backtracking = '../'.repeat(firstPathArr.length - i - 1);
+        const forwardPath = secondPathArr.slice(i).join('/');
+        let relativePath = backtracking + forwardPath;
+        const normalizedValue = replaceString(relativePath);
+        relativePath = stripNamespace(normalizedValue || '');
+        return relativePath;
+    } catch (error) {
+        throw error;
     }
-
-    const backtracking = '../'.repeat(firstPathArr.length - i - 1);
-    const forwardPath = secondPathArr.slice(i).join('/');
-    let relativePath = backtracking + forwardPath;
-    const normalizedValue = replaceString(relativePath);
-    relativePath = stripNamespace(normalizedValue || '');
-    return relativePath;
 }

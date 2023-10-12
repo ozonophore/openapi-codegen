@@ -5,7 +5,6 @@ import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
 import { Parser } from '../Parser';
 import { escapeName } from './escapeName';
 import { getComment } from './getComment';
-import { getType } from './getType';
 
 export function getModelProperties(this: Parser, openApi: OpenApi, definition: OpenApiSchema, parentRef: string): Model[] {
     const models: Model[] = [];
@@ -14,7 +13,7 @@ export function getModelProperties(this: Parser, openApi: OpenApi, definition: O
             const property = definition.properties[propertyName];
             const propertyRequired = definition.required?.includes(propertyName) || property.default !== undefined;
             if (property.$ref) {
-                const model = getType(property.$ref);
+                const model = this.getType(property.$ref, parentRef);
                 models.push({
                     name: escapeName(propertyName),
                     alias: '',

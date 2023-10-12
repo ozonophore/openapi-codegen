@@ -2,7 +2,6 @@ import type { Model } from '../../../client/interfaces/Model';
 import { join, relative } from '../../../core/path';
 import { getRefFromSchema } from '../../../utils/getRefFromSchema';
 import { getRelativeModelImportPath } from '../../../utils/getRelativeModelImportPath';
-import { getRelativeModelPath } from '../../../utils/getRelativeModelPath';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
 import { unique } from '../../../utils/unique';
 import type { OpenApi } from '../interfaces/OpenApi';
@@ -15,13 +14,12 @@ export function getModels(this: Parser, openApi: OpenApi): Model[] {
         for (const modelRef of listOfModelsRef) {
             const definition: any = this.context.get(modelRef);
             const definitionType = this.getType(modelRef, '');
-            const modelPath = getRelativeModelPath(this.context.output?.outputModels, definitionType.path);
             const model = this.getModel({
                 openApi: openApi,
                 definition: definition,
                 isDefinition: true,
                 name: definitionType.base,
-                path: modelPath,
+                path: definitionType.path,
                 parentRef: modelRef,
             });
             models.push(model);
