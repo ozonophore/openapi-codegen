@@ -6,7 +6,6 @@ import { extendEnum } from './extendEnum';
 import { getComment } from './getComment';
 import { getEnum } from './getEnum';
 import { getEnumFromDescription } from './getEnumFromDescription';
-import { getType } from './getType';
 
 export function getModel(this: Parser, config: ModelConfig): Model {
     const { openApi, definition, isDefinition = false, name = '', path = '', parentRef } = config;
@@ -46,7 +45,7 @@ export function getModel(this: Parser, config: ModelConfig): Model {
     };
 
     if (definition.$ref) {
-        const definitionRef = getType(definition.$ref);
+        const definitionRef = this.getType(definition.$ref, parentRef);
         model.export = 'reference';
         model.type = definitionRef.type;
         model.base = definitionRef.base;
@@ -80,7 +79,7 @@ export function getModel(this: Parser, config: ModelConfig): Model {
 
     if (definition.type === 'array' && definition.items) {
         if (definition.items.$ref) {
-            const arrayItems = getType(definition.items.$ref);
+            const arrayItems = this.getType(definition.items.$ref, parentRef);
             model.export = 'array';
             model.type = arrayItems.type;
             model.base = arrayItems.base;
@@ -101,7 +100,7 @@ export function getModel(this: Parser, config: ModelConfig): Model {
 
     if (definition.type === 'object' && typeof definition.additionalProperties === 'object') {
         if (definition.additionalProperties.$ref) {
-            const additionalProperties = getType(definition.additionalProperties.$ref);
+            const additionalProperties = this.getType(definition.additionalProperties.$ref, parentRef);
             model.export = 'dictionary';
             model.type = additionalProperties.type;
             model.base = additionalProperties.base;
@@ -150,7 +149,7 @@ export function getModel(this: Parser, config: ModelConfig): Model {
 
     // If the schema has a type than it can be a basic or generic type.
     if (definition.type) {
-        const definitionType = getType(definition.type);
+        const definitionType = this.getType(definition.type, parentRef);
         model.export = 'generic';
         model.type = definitionType.type;
         model.base = definitionType.base;

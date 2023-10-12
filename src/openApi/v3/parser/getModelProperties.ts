@@ -1,11 +1,11 @@
 import type { Model } from '../../../client/interfaces/Model';
+import { getClassName } from '../../../utils/getClassName';
 import { getPattern } from '../../../utils/getPattern';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
 import { Parser } from '../Parser';
 import { escapeName } from './escapeName';
 import { getComment } from './getComment';
-import { getClassName } from '../../../utils/getClassName';
 
 export function getModelProperties(this: Parser, openApi: OpenApi, definition: OpenApiSchema, parentRef: string): Model[] {
     const models: Model[] = [];

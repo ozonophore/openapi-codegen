@@ -3,6 +3,7 @@ import { replaceString } from '../../../core/replaceString';
 import { encode } from '../../../utils/encode';
 import { getAbsolutePath } from '../../../utils/getAbsolutePath';
 import { getMappedType, hasMappedType } from '../../../utils/getMappedType';
+import { getRelativeModelPath } from '../../../utils/getRelativeModelPath';
 import { stripNamespace } from '../../../utils/stripNamespace';
 import { Parser } from '../Parser';
 
@@ -13,13 +14,6 @@ function getTypeName(value: string): string {
     }
     return encode(value.substring(index, value.length));
 }
-
-/**
- * Returns type name that depends on ref
- * @param type String - original type name
- * @param ref String - optional reference to object
- */
-export type GetTypeName = (type: string, ref?: string) => string;
 
 /**
  * Parse any string value into a type object.
@@ -38,16 +32,17 @@ export function getType(this: Parser, value: string, parentRef: string): Type {
     };
 
     const valueClean = stripNamespace(normalizedValue || '');
+    const valuePath = getRelativeModelPath(this.context.output?.outputModels, valueClean);
     if (hasMappedType(valueClean)) {
         const mapped = getMappedType(valueClean);
-        result.path = valueClean;
+        result.path = valuePath;
         if (mapped) {
             result.type = mapped;
             result.base = mapped;
         }
     } else if (valueClean) {
         const type = this.getTypeNameByRef(getTypeName(valueClean), getAbsolutePath(value, parentRef));
-        result.path = valueClean;
+        result.path = valuePath;
         result.type = type;
         result.base = type;
         result.imports.push({ name: type, alias: '', path: valueClean });

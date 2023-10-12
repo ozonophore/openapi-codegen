@@ -2,7 +2,6 @@ import RefParser from 'json-schema-ref-parser';
 
 import { Context } from '../../../core/Context';
 import { Parser } from '../Parser';
-import { getType } from './getType';
 
 describe('getType', () => {
     it('should convert int', async () => {

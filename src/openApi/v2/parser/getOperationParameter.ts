@@ -2,15 +2,13 @@ import type { OperationParameter } from '../../../client/interfaces/OperationPar
 import { getPattern } from '../../../utils/getPattern';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiParameter } from '../interfaces/OpenApiParameter';
+import { Parser } from '../Parser';
 import { extendEnum } from './extendEnum';
 import { getComment } from './getComment';
 import { getEnum } from './getEnum';
 import { getEnumFromDescription } from './getEnumFromDescription';
-import { getModel } from './getModel';
 import { getOperationParameterDefault } from './getOperationParameterDefault';
 import { getOperationParameterName } from './getOperationParameterName';
-import { getType } from './getType';
-import { Parser } from '../Parser';
 
 export function getOperationParameter(this: Parser, openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
     const operationParameter: OperationParameter = {
@@ -49,7 +47,7 @@ export function getOperationParameter(this: Parser, openApi: OpenApi, parameter:
     };
 
     if (parameter.$ref) {
-        const definitionRef = getType(parameter.$ref);
+        const definitionRef = this.getType(parameter.$ref, '');
         operationParameter.export = 'reference';
         operationParameter.type = definitionRef.type;
         operationParameter.base = definitionRef.base;
@@ -85,8 +83,8 @@ export function getOperationParameter(this: Parser, openApi: OpenApi, parameter:
         }
     }
 
-    if (parameter.type === 'array' && parameter.items) {
-        const items = getType(parameter.items.type);
+    if (parameter.type === 'array' && parameter?.items?.type) {
+        const items = this.getType(parameter.items.type, '');
         operationParameter.export = 'array';
         operationParameter.type = items.type;
         operationParameter.base = items.base;
@@ -96,8 +94,8 @@ export function getOperationParameter(this: Parser, openApi: OpenApi, parameter:
         return operationParameter;
     }
 
-    if (parameter.type === 'object' && parameter.items) {
-        const items = getType(parameter.items.type);
+    if (parameter.type === 'object' && parameter?.items?.type) {
+        const items = this.getType(parameter.items.type, '');
         operationParameter.export = 'dictionary';
         operationParameter.type = items.type;
         operationParameter.base = items.base;
@@ -109,7 +107,7 @@ export function getOperationParameter(this: Parser, openApi: OpenApi, parameter:
 
     if (parameter.schema) {
         if (parameter.schema.$ref) {
-            const model = getType(parameter.schema.$ref);
+            const model = this.getType(parameter.schema.$ref, '');
             operationParameter.export = 'reference';
             operationParameter.type = model.type;
             operationParameter.base = model.base;
@@ -135,7 +133,7 @@ export function getOperationParameter(this: Parser, openApi: OpenApi, parameter:
 
     // If the parameter has a type than it can be a basic or generic type.
     if (parameter.type) {
-        const definitionType = getType(parameter.type);
+        const definitionType = this.getType(parameter.type, '');
         operationParameter.export = 'generic';
         operationParameter.type = definitionType.type;
         operationParameter.base = definitionType.base;

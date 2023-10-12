@@ -8,6 +8,10 @@ export declare enum HttpClient {
 export type Options = {
     input: string | Record<string, any>;
     output: string;
+    outputCore?: string;
+    outputServices?: string;
+    outputModels?: string;
+    outputSchemas?: string;
     httpClient?: HttpClient;
     useOptions?: boolean;
     useUnionTypes?: boolean;
@@ -15,8 +19,13 @@ export type Options = {
     exportServices?: boolean;
     exportModels?: boolean;
     exportSchemas?: boolean;
+    clean?: boolean;
     request?: string;
     write?: boolean;
+    interfacePrefix?: string;
+    enumPrefix?: string;
+    typePrefix?: string;
+    useCancelableRequest?: boolean;
 };
 
-export declare function generate(options: Options): Promise<void>;
+export declare function generate(options: Options | Options[]): Promise<void>;
