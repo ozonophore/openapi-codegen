@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1-rc.1] - 2023-10-18
+
+### Fixed
+- Fixed the normalization of the relative path during the calculation of the relative path of the model.
+- Fixed a mechanism for calculating the required number of transitions to the dictory above.
+- Fixed the value of the path separator for the formation of a relative path.
+
 ## [0.3.1-rc.0] - 2023-10-12
 
 ### Fixed
