@@ -1,5 +1,4 @@
-import path from 'path';
-
+import { resolve } from '../core/path';
 import { replaceString } from '../core/replaceString';
 import { stripNamespace } from './stripNamespace';
 
@@ -14,18 +13,19 @@ export function getRelativeModelPath(folderPath: string | undefined, relativeMod
     if (!folderPath) {
         return relativeModelPath;
     }
+    const pathSep = '/';
     let mappedPaths = '';
     let modelPath = relativeModelPath;
     if (modelPath.startsWith('../')) {
-        const pathArray = modelPath.split(path.sep).filter(Boolean);
+        const pathArray = modelPath.split(pathSep).filter(Boolean);
 
         while (pathArray[0] === '..') {
             pathArray.shift();
         }
 
-        modelPath = pathArray.join(path.sep);
+        modelPath = pathArray.join(pathSep);
     }
-    const resolvedPath = path.resolve(folderPath, modelPath);
+    const resolvedPath = resolve(folderPath, modelPath);
     if (resolvedPath.startsWith(folderPath)) {
         mappedPaths = modelPath;
     }

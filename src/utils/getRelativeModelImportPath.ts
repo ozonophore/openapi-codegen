@@ -1,5 +1,3 @@
-import path from 'path';
-
 import { normalize, resolve } from '../core/path';
 import { replaceString } from '../core/replaceString';
 import { getRelativeModelPath } from './getRelativeModelPath';
@@ -17,7 +15,7 @@ export function getRelativeModelImportPath(rootPath: string | undefined, relativ
     if (!rootPath) {
         return relativePath;
     }
-    const normalizedRelative = path.normalize(relativePath);
+    const normalizedRelative = normalize(relativePath);
 
     if (!normalizedRelative.startsWith('..')) {
         return normalizedRelative;
@@ -53,7 +51,8 @@ function calculateRelativePath(firstPath: string, secondPath: string): string {
             i++;
         }
 
-        const backtracking = '../'.repeat(firstPathArr.length - i - 1);
+        const repeatCount = Math.max(0, firstPathArr.length - i - 1);
+        const backtracking = '../'.repeat(repeatCount);
         const forwardPath = secondPathArr.slice(i).join('/');
         let relativePath = backtracking + forwardPath;
         const normalizedValue = replaceString(relativePath);
