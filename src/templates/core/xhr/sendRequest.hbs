@@ -1,14 +1,14 @@
 {{#if @root.useCancelableRequest}}
-async function sendRequest(options: ApiRequestOptions, url: string, onCancel: (cancelHandler: () => void) => void): Promise<XMLHttpRequest> {
+async function sendRequest(options: ApiRequestOptions, url: string, config: TOpenAPIConfig, onCancel: (cancelHandler: () => void) => void): Promise<XMLHttpRequest> {
 {{else}}
-async function sendRequest(options: ApiRequestOptions, url: string): Promise<XMLHttpRequest> {
+async function sendRequest(options: ApiRequestOptions, url: string, config: TOpenAPIConfig): Promise<XMLHttpRequest> {
 {{/if}}
 
     const xhr = new XMLHttpRequest();
     xhr.open(options.method, url, true);
-    xhr.withCredentials = OpenAPI.WITH_CREDENTIALS;
+    xhr.withCredentials = config.WITH_CREDENTIALS;
 
-    const headers = await getHeaders(options);
+    const headers = await getHeaders(options, config);
     headers.forEach((value: string, key: string) => {
         xhr.setRequestHeader(key, value);
     });

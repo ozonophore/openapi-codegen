@@ -1,15 +1,15 @@
-'use strict';
-
-const generate = require('./scripts/generate');
-const compileWithTypescript = require('./scripts/compileWithTypescript');
-const server = require('./scripts/server');
+import { cleanup } from './scripts/cleanup';
+import { compileWithTypescript } from './scripts/compileWithTypescript';
+import { generate } from './scripts/generate';
+import server from './scripts/server';
 
 describe('v3.node', () => {
     beforeAll(async () => {
-        await generate('v3/node', 'v3', 'node');
+        cleanup('v3/node');
+        await generate('v3/node', 'v3', 'node' as any);
         compileWithTypescript('v3/node');
         await server.start('v3/node');
-    });
+    }, 30000);
 
     afterAll(async () => {
         await server.stop();

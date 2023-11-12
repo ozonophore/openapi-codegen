@@ -87,7 +87,7 @@ import type { ApiRequestOptions } from './ApiRequestOptions';
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
 
-type Config = {
+export type OpenAPIConfig = {
     BASE: string;
     VERSION: string;
     WITH_CREDENTIALS: boolean;
@@ -97,7 +97,7 @@ type Config = {
     HEADERS?: Headers | Resolver<Headers>;
 }
 
-export const OpenAPI: Config = {
+export const OpenAPI: OpenAPIConfig = {
     BASE: 'http://localhost:3000/base',
     VERSION: '1.0',
     WITH_CREDENTIALS: false,
@@ -115,7 +115,7 @@ exports[`v2 should generate: ./test/generated/v2/core/request.ts 1`] = `
 import { ApiError } from './ApiError';
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
-import { OpenAPI } from './OpenAPI';
+import { OpenAPI, OpenAPIConfig } from './OpenAPI';
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 function isDefined<T>(value: T | null | undefined): value is Exclude<T, null | undefined> {
@@ -154,9 +154,11 @@ function getQueryString(params: Record<string, any>): string {
     return '';
 }
 
-function getUrl(options: ApiRequestOptions): string {
-    const path = options.path.replace(/[:]/g, '_');
-    const url = \`\${OpenAPI.BASE}\${path}\`;
+function getUrl(config: OpenAPIConfig, options: ApiRequestOptions): string {
+    const path = options.path
+        .replace('{api-version}', config.VERSION)
+        .replace(/[:]/g, '_');
+    const url = \`\${config.BASE}\${path}\`;
 
     if (options.query) {
         return \`\${url}\${getQueryString(options.query)}\`;
@@ -184,11 +186,11 @@ async function resolve<T>(options: ApiRequestOptions, resolver?: T | Resolver<T>
     return resolver;
 }
 
-async function getHeaders(options: ApiRequestOptions): Promise<Headers> {
-    const token = await resolve(options, OpenAPI.TOKEN);
-    const username = await resolve(options, OpenAPI.USERNAME);
-    const password = await resolve(options, OpenAPI.PASSWORD);
-    const defaultHeaders = await resolve(options, OpenAPI.HEADERS);
+async function getHeaders(config: OpenAPIConfig, options: ApiRequestOptions): Promise<Headers> {
+    const token = await resolve(options, config.TOKEN);
+    const username = await resolve(options, config.USERNAME);
+    const password = await resolve(options, config.PASSWORD);
+    const defaultHeaders = await resolve(options, config.HEADERS);
 
     const headers = new Headers({
         Accept: 'application/json',
@@ -235,15 +237,15 @@ function getRequestBody(options: ApiRequestOptions): BodyInit | undefined {
     return undefined;
 }
 
-async function sendRequest(options: ApiRequestOptions, url: string): Promise<Response> {
+async function sendRequest(config: OpenAPIConfig, options: ApiRequestOptions, url: string): Promise<Response> {
 
     const request: RequestInit = {
         method: options.method,
-        headers: await getHeaders(options),
+        headers: await getHeaders(config, options),
         body: getRequestBody(options),
     };
 
-    if (OpenAPI.WITH_CREDENTIALS) {
+    if (config.WITH_CREDENTIALS) {
         request.credentials = 'include';
     }
 
@@ -302,15 +304,16 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
 
 /**
  * Request using fetch client
+ * @param config The OpenAPI configuration object
  * @param options The request options from the the service
  * @returns ApiResult
  * @throws ApiError
  */
-export async function request<T>(options: ApiRequestOptions): Promise<T> {
+export async function request<T>(config: OpenAPIConfig,options: ApiRequestOptions): Promise<T> {
     return new Promise(async (resolve, reject) => {
         try {
-            const url = getUrl(options);
-            const response = await sendRequest(options, url);
+            const url = getUrl(config, options);
+            const response = await sendRequest(config, options, url);
             const responseBody = await getResponseBody(response);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 
@@ -639,7 +642,7 @@ const collectionFormat = (
     parameterArrayMulti: Array<string>,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/collectionFormat\`,
+    path: \`/api/v{api-version}/collectionFormat\`,
     query: {
         'parameterArrayCSV': parameterArrayCsv,
         'parameterArraySSV': parameterArraySsv,
@@ -681,7 +684,7 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string>,
         parameterArrayMulti: Array<string>,
     ): Promise<void> {
-        return __request<void>(CollectionFormatServiceOptions.collectionFormat(
+        return __request<void>(OpenAPI, CollectionFormatServiceOptions.collectionFormat(
             parameterArrayCsv,
             parameterArraySsv,
             parameterArrayTsv,
@@ -712,7 +715,7 @@ const complexTypes = (
     parameterReference: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/complex\`,
+    path: \`/api/v{api-version}/complex\`,
     query: {
         'parameterObject': parameterObject,
         'parameterReference': parameterReference,
@@ -759,7 +762,7 @@ export class ComplexService {
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(ComplexServiceOptions.complexTypes(
+        return __request<Array<IModelWithString>>(OpenAPI, ComplexServiceOptions.complexTypes(
             parameterObject,
             parameterReference,
         ));
@@ -786,7 +789,7 @@ const callWithDefaultParameters = (
     },
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    path: \`/api/v{api-version}/defaults\`,
     query: {
         'parameterString': parameterString,
         'parameterNumber': parameterNumber,
@@ -806,7 +809,7 @@ const callWithDefaultOptionalParameters = (
     },
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    path: \`/api/v{api-version}/defaults\`,
     query: {
         'parameterString': parameterString,
         'parameterNumber': parameterNumber,
@@ -825,7 +828,7 @@ const callToTestOrderOfParams = (
     parameterOptionalStringWithNoDefault?: string,
 ): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    path: \`/api/v{api-version}/defaults\`,
     query: {
         'parameterStringWithNoDefault': parameterStringWithNoDefault,
         'parameterStringWithDefault': parameterStringWithDefault,
@@ -887,7 +890,7 @@ export class DefaultsService {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
-        return __request<void>(DefaultsServiceOptions.callWithDefaultParameters(
+        return __request<void>(OpenAPI, DefaultsServiceOptions.callWithDefaultParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
@@ -912,7 +915,7 @@ export class DefaultsService {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
-        return __request<void>(DefaultsServiceOptions.callWithDefaultOptionalParameters(
+        return __request<void>(OpenAPI, DefaultsServiceOptions.callWithDefaultOptionalParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
@@ -937,7 +940,7 @@ export class DefaultsService {
         parameterOptionalStringWithEmptyDefault: string = '',
         parameterOptionalStringWithNoDefault?: string,
     ): Promise<void> {
-        return __request<void>(DefaultsServiceOptions.callToTestOrderOfParams(
+        return __request<void>(OpenAPI, DefaultsServiceOptions.callToTestOrderOfParams(
             parameterStringWithNoDefault,
             parameterStringWithDefault,
             parameterStringWithEmptyDefault,
@@ -959,22 +962,22 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const duplicateName = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 const duplicateName1 = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 const duplicateName2 = (): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 const duplicateName3 = (): ApiRequestOptions => ({
     method: 'DELETE',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 
@@ -998,25 +1001,25 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static duplicateName(): Promise<void> {
-        return __request<void>(DuplicateServiceOptions.duplicateName());
+        return __request<void>(OpenAPI, DuplicateServiceOptions.duplicateName());
     }
     /**
      * @throws ApiError
      */
     public static duplicateName1(): Promise<void> {
-        return __request<void>(DuplicateServiceOptions.duplicateName1());
+        return __request<void>(OpenAPI, DuplicateServiceOptions.duplicateName1());
     }
     /**
      * @throws ApiError
      */
     public static duplicateName2(): Promise<void> {
-        return __request<void>(DuplicateServiceOptions.duplicateName2());
+        return __request<void>(OpenAPI, DuplicateServiceOptions.duplicateName2());
     }
     /**
      * @throws ApiError
      */
     public static duplicateName3(): Promise<void> {
-        return __request<void>(DuplicateServiceOptions.duplicateName3());
+        return __request<void>(OpenAPI, DuplicateServiceOptions.duplicateName3());
     }
 }"
 `;
@@ -1031,7 +1034,7 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResultFromHeader = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/header\`,
+    path: \`/api/v{api-version}/header\`,
     responseHeader: 'operation-location',
     errors: {
         400: \`400 server error\`,
@@ -1055,7 +1058,7 @@ export class HeaderService {
      * @throws ApiError
      */
     public static callWithResultFromHeader(): Promise<string> {
-        return __request<string>(HeaderServiceOptions.callWithResultFromHeader());
+        return __request<string>(OpenAPI, HeaderServiceOptions.callWithResultFromHeader());
     }
 }"
 `;
@@ -1070,7 +1073,7 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithNoContentResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/no-content\`,
+    path: \`/api/v{api-version}/no-content\`,
 });
 
 
@@ -1089,7 +1092,7 @@ export class NoContentService {
      * @throws ApiError
      */
     public static callWithNoContentResponse(): Promise<void> {
-        return __request<void>(NoContentServiceOptions.callWithNoContentResponse());
+        return __request<void>(OpenAPI, NoContentServiceOptions.callWithNoContentResponse());
     }
 }"
 `;
@@ -1110,7 +1113,7 @@ const callWithParameters = (
     parameterPath: string,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath}\`,
+    path: \`/api/v{api-version}/parameters/\${parameterPath}\`,
     headers: {
         'parameterHeader': parameterHeader,
     },
@@ -1134,7 +1137,7 @@ const callWithWeirdParameterNames = (
     _default?: string,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
+    path: \`/api/v{api-version}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
     headers: {
         'parameter.header': parameterHeader,
     },
@@ -1191,7 +1194,7 @@ export class ParametersService {
         parameterBody: string,
         parameterPath: string,
     ): Promise<void> {
-        return __request<void>(ParametersServiceOptions.callWithParameters(
+        return __request<void>(OpenAPI, ParametersServiceOptions.callWithParameters(
             parameterHeader,
             parameterQuery,
             parameterForm,
@@ -1220,7 +1223,7 @@ export class ParametersService {
         parameterPath3?: string,
         _default?: string,
     ): Promise<void> {
-        return __request<void>(ParametersServiceOptions.callWithWeirdParameterNames(
+        return __request<void>(OpenAPI, ParametersServiceOptions.callWithWeirdParameterNames(
             parameterHeader,
             parameterQuery,
             parameterForm,
@@ -1247,12 +1250,12 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    path: \`/api/v{api-version}/response\`,
 });
 
 const callWithDuplicateResponses = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    path: \`/api/v{api-version}/response\`,
     errors: {
         500: \`Message for 500 error\`,
         501: \`Message for 501 error\`,
@@ -1262,7 +1265,7 @@ const callWithDuplicateResponses = (): ApiRequestOptions => ({
 
 const callWithResponses = (): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    path: \`/api/v{api-version}/response\`,
     errors: {
         500: \`Message for 500 error\`,
         501: \`Message for 501 error\`,
@@ -1290,14 +1293,14 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithResponse(): Promise<IModelWithString> {
-        return __request<IModelWithString>(ResponseServiceOptions.callWithResponse());
+        return __request<IModelWithString>(OpenAPI, ResponseServiceOptions.callWithResponse());
     }
     /**
      * @returns IModelWithString Message for default response
      * @throws ApiError
      */
     public static callWithDuplicateResponses(): Promise<IModelWithString> {
-        return __request<IModelWithString>(ResponseServiceOptions.callWithDuplicateResponses());
+        return __request<IModelWithString>(OpenAPI, ResponseServiceOptions.callWithDuplicateResponses());
     }
     /**
      * @returns any Message for 200 response
@@ -1315,7 +1318,7 @@ export class ResponseService {
             readonly '@namespace.string'?: string,
             readonly '@namespace.integer'?: number,
             readonly value?: Array<IModelWithString>,
-        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(ResponseServiceOptions.callWithResponses());
+        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(OpenAPI, ResponseServiceOptions.callWithResponses());
     }
 }"
 `;
@@ -1334,22 +1337,22 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const getCallWithModelWithDictionaryReference = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/getModelWithDictionaryReference\`,
+    path: \`/api/v{api-version}/getModelWithDictionaryReference\`,
 });
 
 const getCallWithModelWithDictionary = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/getModelWithDictionary\`,
+    path: \`/api/v{api-version}/getModelWithDictionary\`,
 });
 
 const getCallWithSimpleInteger = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/simpleEnum\`,
+    path: \`/api/v{api-version}/simpleEnum\`,
 });
 
 const getCallWithModelArray = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/getModelWithArray\`,
+    path: \`/api/v{api-version}/getModelWithArray\`,
 });
 
 
@@ -1374,28 +1377,28 @@ export class Service {
      * @throws ApiError
      */
     public static getCallWithModelWithDictionaryReference(): Promise<IDictionaryWithReference> {
-        return __request<IDictionaryWithReference>(ServiceOptions.getCallWithModelWithDictionaryReference());
+        return __request<IDictionaryWithReference>(OpenAPI, ServiceOptions.getCallWithModelWithDictionaryReference());
     }
     /**
      * @returns IModelWithDictionary Message for default response
      * @throws ApiError
      */
     public static getCallWithModelWithDictionary(): Promise<IModelWithDictionary> {
-        return __request<IModelWithDictionary>(ServiceOptions.getCallWithModelWithDictionary());
+        return __request<IModelWithDictionary>(OpenAPI, ServiceOptions.getCallWithModelWithDictionary());
     }
     /**
      * @returns IModelWithEnumInteger Message for default response
      * @throws ApiError
      */
     public static getCallWithSimpleInteger(): Promise<IModelWithEnumInteger> {
-        return __request<IModelWithEnumInteger>(ServiceOptions.getCallWithSimpleInteger());
+        return __request<IModelWithEnumInteger>(OpenAPI, ServiceOptions.getCallWithSimpleInteger());
     }
     /**
      * @returns IModelWithArray Message for default response
      * @throws ApiError
      */
     public static getCallWithModelArray(): Promise<IModelWithArray> {
-        return __request<IModelWithArray>(ServiceOptions.getCallWithModelArray());
+        return __request<IModelWithArray>(OpenAPI, ServiceOptions.getCallWithModelArray());
     }
 }"
 `;
@@ -1410,37 +1413,37 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const putCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const postCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const deleteCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'DELETE',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const optionsCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'OPTIONS',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const headCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'HEAD',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const patchCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'PATCH',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 
@@ -1470,43 +1473,43 @@ export class SimpleService {
      * @throws ApiError
      */
     public static getCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleServiceOptions.getCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleServiceOptions.getCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static putCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleServiceOptions.putCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleServiceOptions.putCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static postCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleServiceOptions.postCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleServiceOptions.postCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static deleteCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleServiceOptions.deleteCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleServiceOptions.deleteCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static optionsCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleServiceOptions.optionsCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleServiceOptions.optionsCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static headCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleServiceOptions.headCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleServiceOptions.headCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleServiceOptions.patchCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleServiceOptions.patchCallWithoutParametersAndResponse());
     }
 }"
 `;
@@ -1530,7 +1533,7 @@ const types = (
     id?: number,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/types\`,
+    path: \`/api/v{api-version}/types\`,
     query: {
         'parameterArray': parameterArray,
         'parameterDictionary': parameterDictionary,
@@ -1587,7 +1590,7 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        return __request<number | string | boolean | any>(TypesServiceOptions.types(
+        return __request<number | string | boolean | any>(OpenAPI, TypesServiceOptions.types(
             parameterArray,
             parameterDictionary,
             parameterEnum,
@@ -1688,7 +1691,7 @@ import type { ApiRequestOptions } from './ApiRequestOptions';
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
 
-type Config = {
+export type OpenAPIConfig = {
     BASE: string;
     VERSION: string;
     WITH_CREDENTIALS: boolean;
@@ -1698,7 +1701,7 @@ type Config = {
     HEADERS?: Headers | Resolver<Headers>;
 }
 
-export const OpenAPI: Config = {
+export const OpenAPI: OpenAPIConfig = {
     BASE: 'http://localhost:3000/base',
     VERSION: '1.0',
     WITH_CREDENTIALS: false,
@@ -1716,7 +1719,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/core/req
 import { ApiError } from './ApiError';
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
-import { OpenAPI } from './OpenAPI';
+import { OpenAPI, OpenAPIConfig } from './OpenAPI';
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 function isDefined<T>(value: T | null | undefined): value is Exclude<T, null | undefined> {
@@ -1755,9 +1758,11 @@ function getQueryString(params: Record<string, any>): string {
     return '';
 }
 
-function getUrl(options: ApiRequestOptions): string {
-    const path = options.path.replace(/[:]/g, '_');
-    const url = \`\${OpenAPI.BASE}\${path}\`;
+function getUrl(config: OpenAPIConfig, options: ApiRequestOptions): string {
+    const path = options.path
+        .replace('{api-version}', config.VERSION)
+        .replace(/[:]/g, '_');
+    const url = \`\${config.BASE}\${path}\`;
 
     if (options.query) {
         return \`\${url}\${getQueryString(options.query)}\`;
@@ -1785,11 +1790,11 @@ async function resolve<T>(options: ApiRequestOptions, resolver?: T | Resolver<T>
     return resolver;
 }
 
-async function getHeaders(options: ApiRequestOptions): Promise<Headers> {
-    const token = await resolve(options, OpenAPI.TOKEN);
-    const username = await resolve(options, OpenAPI.USERNAME);
-    const password = await resolve(options, OpenAPI.PASSWORD);
-    const defaultHeaders = await resolve(options, OpenAPI.HEADERS);
+async function getHeaders(config: OpenAPIConfig, options: ApiRequestOptions): Promise<Headers> {
+    const token = await resolve(options, config.TOKEN);
+    const username = await resolve(options, config.USERNAME);
+    const password = await resolve(options, config.PASSWORD);
+    const defaultHeaders = await resolve(options, config.HEADERS);
 
     const headers = new Headers({
         Accept: 'application/json',
@@ -1836,15 +1841,15 @@ function getRequestBody(options: ApiRequestOptions): BodyInit | undefined {
     return undefined;
 }
 
-async function sendRequest(options: ApiRequestOptions, url: string): Promise<Response> {
+async function sendRequest(config: OpenAPIConfig, options: ApiRequestOptions, url: string): Promise<Response> {
 
     const request: RequestInit = {
         method: options.method,
-        headers: await getHeaders(options),
+        headers: await getHeaders(config, options),
         body: getRequestBody(options),
     };
 
-    if (OpenAPI.WITH_CREDENTIALS) {
+    if (config.WITH_CREDENTIALS) {
         request.credentials = 'include';
     }
 
@@ -1903,15 +1908,16 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
 
 /**
  * Request using fetch client
+ * @param config The OpenAPI configuration object
  * @param options The request options from the the service
  * @returns ApiResult
  * @throws ApiError
  */
-export async function request<T>(options: ApiRequestOptions): Promise<T> {
+export async function request<T>(config: OpenAPIConfig,options: ApiRequestOptions): Promise<T> {
     return new Promise(async (resolve, reject) => {
         try {
-            const url = getUrl(options);
-            const response = await sendRequest(options, url);
+            const url = getUrl(config, options);
+            const response = await sendRequest(config, options, url);
             const responseBody = await getResponseBody(response);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 
@@ -2318,7 +2324,7 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithCircularModel = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/circular\`,
+    path: \`/api/v{api-version}/circular\`,
 });
 
 
@@ -2337,7 +2343,7 @@ export class CircularService {
      * @throws ApiError
      */
     public static callWithCircularModel(): Promise<IModelWithCircularReference> {
-        return __request<IModelWithCircularReference>(CircularOptions.callWithCircularModel());
+        return __request<IModelWithCircularReference>(OpenAPI, CircularOptions.callWithCircularModel());
     }
 }"
 `;
@@ -2358,7 +2364,7 @@ const collectionFormat = (
     parameterArrayMulti: Array<string> | null,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/collectionFormat\`,
+    path: \`/api/v{api-version}/collectionFormat\`,
     query: {
         'parameterArrayCSV': parameterArrayCsv,
         'parameterArraySSV': parameterArraySsv,
@@ -2400,7 +2406,7 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
     ): Promise<void> {
-        return __request<void>(CollectionFormatOptions.collectionFormat(
+        return __request<void>(OpenAPI, CollectionFormatOptions.collectionFormat(
             parameterArrayCsv,
             parameterArraySsv,
             parameterArrayTsv,
@@ -2434,7 +2440,7 @@ const complexTypes = (
     parameterReference: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/complex\`,
+    path: \`/api/v{api-version}/complex\`,
     query: {
         'parameterObject': parameterObject,
         'parameterReference': parameterReference,
@@ -2462,7 +2468,7 @@ const complexParams = (
     },
 ): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/complex/\${id}\`,
+    path: \`/api/v{api-version}/complex/\${id}\`,
     body: requestBody,
     mediaType: 'application/json-patch+json',
 });
@@ -2520,7 +2526,7 @@ export class ComplexService {
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(ComplexOptions.complexTypes(
+        return __request<Array<IModelWithString>>(OpenAPI, ComplexOptions.complexTypes(
             parameterObject,
             parameterReference,
         ));
@@ -2547,7 +2553,7 @@ export class ComplexService {
             },
         },
     ): Promise<IModelWithString> {
-        return __request<IModelWithString>(ComplexOptions.complexParams(
+        return __request<IModelWithString>(OpenAPI, ComplexOptions.complexParams(
             id,
             requestBody,
         ));
@@ -2574,7 +2580,7 @@ const callWithDefaultParameters = (
     },
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    path: \`/api/v{api-version}/defaults\`,
     query: {
         'parameterString': parameterString,
         'parameterNumber': parameterNumber,
@@ -2594,7 +2600,7 @@ const callWithDefaultOptionalParameters = (
     },
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    path: \`/api/v{api-version}/defaults\`,
     query: {
         'parameterString': parameterString,
         'parameterNumber': parameterNumber,
@@ -2613,7 +2619,7 @@ const callToTestOrderOfParams = (
     parameterOptionalStringWithNoDefault?: string,
 ): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    path: \`/api/v{api-version}/defaults\`,
     query: {
         'parameterStringWithNoDefault': parameterStringWithNoDefault,
         'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
@@ -2675,7 +2681,7 @@ export class DefaultsService {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callWithDefaultParameters(
+        return __request<void>(OpenAPI, DefaultsOptions.callWithDefaultParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
@@ -2700,7 +2706,7 @@ export class DefaultsService {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callWithDefaultOptionalParameters(
+        return __request<void>(OpenAPI, DefaultsOptions.callWithDefaultOptionalParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
@@ -2725,7 +2731,7 @@ export class DefaultsService {
         parameterStringWithEmptyDefault: string = '',
         parameterOptionalStringWithNoDefault?: string,
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callToTestOrderOfParams(
+        return __request<void>(OpenAPI, DefaultsOptions.callToTestOrderOfParams(
             parameterStringWithNoDefault,
             parameterOptionalStringWithDefault,
             parameterOptionalStringWithEmptyDefault,
@@ -2747,22 +2753,22 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const duplicateName = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 const duplicateName1 = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 const duplicateName2 = (): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 const duplicateName3 = (): ApiRequestOptions => ({
     method: 'DELETE',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 
@@ -2786,25 +2792,25 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static duplicateName(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName());
+        return __request<void>(OpenAPI, DuplicateOptions.duplicateName());
     }
     /**
      * @throws ApiError
      */
     public static duplicateName1(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName1());
+        return __request<void>(OpenAPI, DuplicateOptions.duplicateName1());
     }
     /**
      * @throws ApiError
      */
     public static duplicateName2(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName2());
+        return __request<void>(OpenAPI, DuplicateOptions.duplicateName2());
     }
     /**
      * @throws ApiError
      */
     public static duplicateName3(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName3());
+        return __request<void>(OpenAPI, DuplicateOptions.duplicateName3());
     }
 }"
 `;
@@ -2821,7 +2827,7 @@ const callWithEnums = (
     requestBody?: any,
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/enums\`,
+    path: \`/api/v{api-version}/enums\`,
     body: requestBody,
 });
 
@@ -2845,7 +2851,7 @@ export class EnumsService {
     public static callWithEnums(
         requestBody?: any,
     ): Promise<void> {
-        return __request<void>(EnumsOptions.callWithEnums(
+        return __request<void>(OpenAPI, EnumsOptions.callWithEnums(
             requestBody,
         ));
     }
@@ -2862,7 +2868,7 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResultFromHeader = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/header\`,
+    path: \`/api/v{api-version}/header\`,
     responseHeader: 'operation-location',
     errors: {
         400: \`400 server error\`,
@@ -2886,7 +2892,7 @@ export class HeaderService {
      * @throws ApiError
      */
     public static callWithResultFromHeader(): Promise<string> {
-        return __request<string>(HeaderOptions.callWithResultFromHeader());
+        return __request<string>(OpenAPI, HeaderOptions.callWithResultFromHeader());
     }
 }"
 `;
@@ -2901,7 +2907,7 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const multipartResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/multipart\`,
+    path: \`/api/v{api-version}/multipart\`,
 });
 
 
@@ -2932,7 +2938,7 @@ export class MultipartService {
                 foo?: string,
                 bar?: string,
             },
-        }>(MultipartOptions.multipartResponse());
+        }>(OpenAPI, MultipartOptions.multipartResponse());
     }
 }"
 `;
@@ -2947,7 +2953,7 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithNoContentResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/no-content\`,
+    path: \`/api/v{api-version}/no-content\`,
 });
 
 
@@ -2966,7 +2972,7 @@ export class NoContentService {
      * @throws ApiError
      */
     public static callWithNoContentResponse(): Promise<void> {
-        return __request<void>(NoContentOptions.callWithNoContentResponse());
+        return __request<void>(OpenAPI, NoContentOptions.callWithNoContentResponse());
     }
 }"
 `;
@@ -2989,7 +2995,7 @@ const callWithParameters = (
     requestBody: IModelWithString | null,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath}\`,
+    path: \`/api/v{api-version}/parameters/\${parameterPath}\`,
     cookies: {
         'parameterCookie': parameterCookie,
     },
@@ -3018,7 +3024,7 @@ const callWithWeirdParameterNames = (
     _default?: string,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
+    path: \`/api/v{api-version}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
     cookies: {
         'PARAMETER-COOKIE': parameterCookie,
     },
@@ -3041,7 +3047,7 @@ const getCallWithOptionalParam = (
     parameter?: string,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
+    path: \`/api/v{api-version}/parameters/\`,
     query: {
         'parameter': parameter,
     },
@@ -3054,7 +3060,7 @@ const postCallWithOptionalParam = (
     requestBody?: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
+    path: \`/api/v{api-version}/parameters/\`,
     query: {
         'parameter': parameter,
     },
@@ -3119,7 +3125,7 @@ export class ParametersService {
         parameterPath: string | null,
         requestBody: IModelWithString | null,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.callWithParameters(
+        return __request<void>(OpenAPI, ParametersOptions.callWithParameters(
             parameterHeader,
             parameterQuery,
             parameterForm,
@@ -3151,7 +3157,7 @@ export class ParametersService {
         parameterPath3?: string,
         _default?: string,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.callWithWeirdParameterNames(
+        return __request<void>(OpenAPI, ParametersOptions.callWithWeirdParameterNames(
             parameterHeader,
             parameterQuery,
             parameterForm,
@@ -3172,7 +3178,7 @@ export class ParametersService {
         requestBody: IModelWithString,
         parameter?: string,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.getCallWithOptionalParam(
+        return __request<void>(OpenAPI, ParametersOptions.getCallWithOptionalParam(
             requestBody,
             parameter,
         ));
@@ -3186,7 +3192,7 @@ export class ParametersService {
         parameter: string,
         requestBody?: IModelWithString,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.postCallWithOptionalParam(
+        return __request<void>(OpenAPI, ParametersOptions.postCallWithOptionalParam(
             parameter,
             requestBody,
         ));
@@ -3207,7 +3213,7 @@ const postRequestBodyService = (
     requestBody?: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/requestBody/\`,
+    path: \`/api/v{api-version}/requestBody/\`,
     body: requestBody,
     mediaType: 'application/json',
 });
@@ -3232,7 +3238,7 @@ export class RequestBodyService {
     public static postRequestBodyService(
         requestBody?: IModelWithString,
     ): Promise<void> {
-        return __request<void>(RequestBodyOptions.postRequestBodyService(
+        return __request<void>(OpenAPI, RequestBodyOptions.postRequestBodyService(
             requestBody,
         ));
     }
@@ -3251,12 +3257,12 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    path: \`/api/v{api-version}/response\`,
 });
 
 const callWithDuplicateResponses = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    path: \`/api/v{api-version}/response\`,
     errors: {
         500: \`Message for 500 error\`,
         501: \`Message for 501 error\`,
@@ -3266,7 +3272,7 @@ const callWithDuplicateResponses = (): ApiRequestOptions => ({
 
 const callWithResponses = (): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    path: \`/api/v{api-version}/response\`,
     errors: {
         500: \`Message for 500 error\`,
         501: \`Message for 501 error\`,
@@ -3294,14 +3300,14 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithResponse(): Promise<IModelWithString> {
-        return __request<IModelWithString>(ResponseOptions.callWithResponse());
+        return __request<IModelWithString>(OpenAPI, ResponseOptions.callWithResponse());
     }
     /**
      * @returns IModelWithString Message for default response
      * @throws ApiError
      */
     public static callWithDuplicateResponses(): Promise<IModelWithString> {
-        return __request<IModelWithString>(ResponseOptions.callWithDuplicateResponses());
+        return __request<IModelWithString>(OpenAPI, ResponseOptions.callWithDuplicateResponses());
     }
     /**
      * @returns any Message for 200 response
@@ -3318,7 +3324,7 @@ export class ResponseService {
             readonly '@namespace.string'?: string,
             readonly '@namespace.integer'?: number,
             readonly value?: Array<IModelWithString>,
-        } | IModelWithString | TModelThatExtends>(ResponseOptions.callWithResponses());
+        } | IModelWithString | TModelThatExtends>(OpenAPI, ResponseOptions.callWithResponses());
     }
 }"
 `;
@@ -3333,37 +3339,37 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const putCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const postCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const deleteCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'DELETE',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const optionsCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'OPTIONS',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const headCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'HEAD',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const patchCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'PATCH',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 
@@ -3393,43 +3399,43 @@ export class SimpleService {
      * @throws ApiError
      */
     public static getCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.getCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.getCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static putCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.putCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.putCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static postCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.postCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.postCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static deleteCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.deleteCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.deleteCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static optionsCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.optionsCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.optionsCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static headCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.headCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.headCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.patchCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.patchCallWithoutParametersAndResponse());
     }
 }"
 `;
@@ -3453,7 +3459,7 @@ const types = (
     id?: number,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/types\`,
+    path: \`/api/v{api-version}/types\`,
     query: {
         'parameterArray': parameterArray,
         'parameterDictionary': parameterDictionary,
@@ -3510,7 +3516,7 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        return __request<number | string | boolean | any>(TypesOptions.types(
+        return __request<number | string | boolean | any>(OpenAPI, TypesOptions.types(
             parameterArray,
             parameterDictionary,
             parameterEnum,
@@ -3536,7 +3542,7 @@ const uploadFile = (
     file: Blob,
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/upload\`,
+    path: \`/api/v{api-version}/upload\`,
     formData: {
         'file': file,
     },
@@ -3563,7 +3569,7 @@ export class UploadService {
     public static uploadFile(
         file: Blob,
     ): Promise<boolean> {
-        return __request<boolean>(UploadOptions.uploadFile(
+        return __request<boolean>(OpenAPI, UploadOptions.uploadFile(
             file,
         ));
     }
@@ -3657,7 +3663,7 @@ import type { ApiRequestOptions } from './ApiRequestOptions';
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
 
-type Config = {
+export type OpenAPIConfig = {
     BASE: string;
     VERSION: string;
     WITH_CREDENTIALS: boolean;
@@ -3667,7 +3673,7 @@ type Config = {
     HEADERS?: Headers | Resolver<Headers>;
 }
 
-export const OpenAPI: Config = {
+export const OpenAPI: OpenAPIConfig = {
     BASE: 'http://localhost:3000/base',
     VERSION: '1.0',
     WITH_CREDENTIALS: false,
@@ -3685,7 +3691,7 @@ exports[`v3 should generate: ./test/generated/v3/core/request.ts 1`] = `
 import { ApiError } from './ApiError';
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
-import { OpenAPI } from './OpenAPI';
+import { OpenAPI, OpenAPIConfig } from './OpenAPI';
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 function isDefined<T>(value: T | null | undefined): value is Exclude<T, null | undefined> {
@@ -3724,9 +3730,11 @@ function getQueryString(params: Record<string, any>): string {
     return '';
 }
 
-function getUrl(options: ApiRequestOptions): string {
-    const path = options.path.replace(/[:]/g, '_');
-    const url = \`\${OpenAPI.BASE}\${path}\`;
+function getUrl(config: OpenAPIConfig, options: ApiRequestOptions): string {
+    const path = options.path
+        .replace('{api-version}', config.VERSION)
+        .replace(/[:]/g, '_');
+    const url = \`\${config.BASE}\${path}\`;
 
     if (options.query) {
         return \`\${url}\${getQueryString(options.query)}\`;
@@ -3754,11 +3762,11 @@ async function resolve<T>(options: ApiRequestOptions, resolver?: T | Resolver<T>
     return resolver;
 }
 
-async function getHeaders(options: ApiRequestOptions): Promise<Headers> {
-    const token = await resolve(options, OpenAPI.TOKEN);
-    const username = await resolve(options, OpenAPI.USERNAME);
-    const password = await resolve(options, OpenAPI.PASSWORD);
-    const defaultHeaders = await resolve(options, OpenAPI.HEADERS);
+async function getHeaders(config: OpenAPIConfig, options: ApiRequestOptions): Promise<Headers> {
+    const token = await resolve(options, config.TOKEN);
+    const username = await resolve(options, config.USERNAME);
+    const password = await resolve(options, config.PASSWORD);
+    const defaultHeaders = await resolve(options, config.HEADERS);
 
     const headers = new Headers({
         Accept: 'application/json',
@@ -3805,15 +3813,15 @@ function getRequestBody(options: ApiRequestOptions): BodyInit | undefined {
     return undefined;
 }
 
-async function sendRequest(options: ApiRequestOptions, url: string): Promise<Response> {
+async function sendRequest(config: OpenAPIConfig, options: ApiRequestOptions, url: string): Promise<Response> {
 
     const request: RequestInit = {
         method: options.method,
-        headers: await getHeaders(options),
+        headers: await getHeaders(config, options),
         body: getRequestBody(options),
     };
 
-    if (OpenAPI.WITH_CREDENTIALS) {
+    if (config.WITH_CREDENTIALS) {
         request.credentials = 'include';
     }
 
@@ -3872,15 +3880,16 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
 
 /**
  * Request using fetch client
+ * @param config The OpenAPI configuration object
  * @param options The request options from the the service
  * @returns ApiResult
  * @throws ApiError
  */
-export async function request<T>(options: ApiRequestOptions): Promise<T> {
+export async function request<T>(config: OpenAPIConfig,options: ApiRequestOptions): Promise<T> {
     return new Promise(async (resolve, reject) => {
         try {
-            const url = getUrl(options);
-            const response = await sendRequest(options, url);
+            const url = getUrl(config, options);
+            const response = await sendRequest(config, options, url);
             const responseBody = await getResponseBody(response);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 
@@ -4330,7 +4339,7 @@ const collectionFormat = (
     parameterArrayMulti: Array<string> | null,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/collectionFormat\`,
+    path: \`/api/v{api-version}/collectionFormat\`,
     query: {
         'parameterArrayCSV': parameterArrayCsv,
         'parameterArraySSV': parameterArraySsv,
@@ -4372,7 +4381,7 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
     ): Promise<void> {
-        return __request<void>(CollectionFormatOptions.collectionFormat(
+        return __request<void>(OpenAPI, CollectionFormatOptions.collectionFormat(
             parameterArrayCsv,
             parameterArraySsv,
             parameterArrayTsv,
@@ -4406,7 +4415,7 @@ const complexTypes = (
     parameterReference: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/complex\`,
+    path: \`/api/v{api-version}/complex\`,
     query: {
         'parameterObject': parameterObject,
         'parameterReference': parameterReference,
@@ -4434,7 +4443,7 @@ const complexParams = (
     },
 ): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/complex/\${id}\`,
+    path: \`/api/v{api-version}/complex/\${id}\`,
     body: requestBody,
     mediaType: 'application/json-patch+json',
 });
@@ -4492,7 +4501,7 @@ export class ComplexService {
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(ComplexOptions.complexTypes(
+        return __request<Array<IModelWithString>>(OpenAPI, ComplexOptions.complexTypes(
             parameterObject,
             parameterReference,
         ));
@@ -4519,7 +4528,7 @@ export class ComplexService {
             },
         },
     ): Promise<IModelWithString> {
-        return __request<IModelWithString>(ComplexOptions.complexParams(
+        return __request<IModelWithString>(OpenAPI, ComplexOptions.complexParams(
             id,
             requestBody,
         ));
@@ -4546,7 +4555,7 @@ const callWithDefaultParameters = (
     },
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    path: \`/api/v{api-version}/defaults\`,
     query: {
         'parameterString': parameterString,
         'parameterNumber': parameterNumber,
@@ -4566,7 +4575,7 @@ const callWithDefaultOptionalParameters = (
     },
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    path: \`/api/v{api-version}/defaults\`,
     query: {
         'parameterString': parameterString,
         'parameterNumber': parameterNumber,
@@ -4585,7 +4594,7 @@ const callToTestOrderOfParams = (
     parameterOptionalStringWithNoDefault?: string,
 ): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/defaults\`,
+    path: \`/api/v{api-version}/defaults\`,
     query: {
         'parameterStringWithNoDefault': parameterStringWithNoDefault,
         'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
@@ -4647,7 +4656,7 @@ export class DefaultsService {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callWithDefaultParameters(
+        return __request<void>(OpenAPI, DefaultsOptions.callWithDefaultParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
@@ -4672,7 +4681,7 @@ export class DefaultsService {
             \\"prop\\": \\"Hello World!\\"
         },
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callWithDefaultOptionalParameters(
+        return __request<void>(OpenAPI, DefaultsOptions.callWithDefaultOptionalParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
@@ -4697,7 +4706,7 @@ export class DefaultsService {
         parameterStringWithEmptyDefault: string = '',
         parameterOptionalStringWithNoDefault?: string,
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callToTestOrderOfParams(
+        return __request<void>(OpenAPI, DefaultsOptions.callToTestOrderOfParams(
             parameterStringWithNoDefault,
             parameterOptionalStringWithDefault,
             parameterOptionalStringWithEmptyDefault,
@@ -4719,22 +4728,22 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const duplicateName = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 const duplicateName1 = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 const duplicateName2 = (): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 const duplicateName3 = (): ApiRequestOptions => ({
     method: 'DELETE',
-    path: \`/api/v\${OpenAPI.VERSION}/duplicate\`,
+    path: \`/api/v{api-version}/duplicate\`,
 });
 
 
@@ -4758,25 +4767,25 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static duplicateName(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName());
+        return __request<void>(OpenAPI, DuplicateOptions.duplicateName());
     }
     /**
      * @throws ApiError
      */
     public static duplicateName1(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName1());
+        return __request<void>(OpenAPI, DuplicateOptions.duplicateName1());
     }
     /**
      * @throws ApiError
      */
     public static duplicateName2(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName2());
+        return __request<void>(OpenAPI, DuplicateOptions.duplicateName2());
     }
     /**
      * @throws ApiError
      */
     public static duplicateName3(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName3());
+        return __request<void>(OpenAPI, DuplicateOptions.duplicateName3());
     }
 }"
 `;
@@ -4793,7 +4802,7 @@ const callWithEnums = (
     requestBody?: any,
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/enums\`,
+    path: \`/api/v{api-version}/enums\`,
     body: requestBody,
 });
 
@@ -4817,7 +4826,7 @@ export class EnumsService {
     public static callWithEnums(
         requestBody?: any,
     ): Promise<void> {
-        return __request<void>(EnumsOptions.callWithEnums(
+        return __request<void>(OpenAPI, EnumsOptions.callWithEnums(
             requestBody,
         ));
     }
@@ -4834,7 +4843,7 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResultFromHeader = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/header\`,
+    path: \`/api/v{api-version}/header\`,
     responseHeader: 'operation-location',
     errors: {
         400: \`400 server error\`,
@@ -4858,7 +4867,7 @@ export class HeaderService {
      * @throws ApiError
      */
     public static callWithResultFromHeader(): Promise<string> {
-        return __request<string>(HeaderOptions.callWithResultFromHeader());
+        return __request<string>(OpenAPI, HeaderOptions.callWithResultFromHeader());
     }
 }"
 `;
@@ -4873,7 +4882,7 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const multipartResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/multipart\`,
+    path: \`/api/v{api-version}/multipart\`,
 });
 
 
@@ -4904,7 +4913,7 @@ export class MultipartService {
                 foo?: string,
                 bar?: string,
             },
-        }>(MultipartOptions.multipartResponse());
+        }>(OpenAPI, MultipartOptions.multipartResponse());
     }
 }"
 `;
@@ -4919,7 +4928,7 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithNoContentResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/no-content\`,
+    path: \`/api/v{api-version}/no-content\`,
 });
 
 
@@ -4938,7 +4947,7 @@ export class NoContentService {
      * @throws ApiError
      */
     public static callWithNoContentResponse(): Promise<void> {
-        return __request<void>(NoContentOptions.callWithNoContentResponse());
+        return __request<void>(OpenAPI, NoContentOptions.callWithNoContentResponse());
     }
 }"
 `;
@@ -4961,7 +4970,7 @@ const callWithParameters = (
     requestBody: IModelWithString | null,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath}\`,
+    path: \`/api/v{api-version}/parameters/\${parameterPath}\`,
     cookies: {
         'parameterCookie': parameterCookie,
     },
@@ -4990,7 +4999,7 @@ const callWithWeirdParameterNames = (
     _default?: string,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
+    path: \`/api/v{api-version}/parameters/\${parameterPath1}/\${parameterPath2}/\${parameterPath3}\`,
     cookies: {
         'PARAMETER-COOKIE': parameterCookie,
     },
@@ -5013,7 +5022,7 @@ const getCallWithOptionalParam = (
     parameter?: string,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
+    path: \`/api/v{api-version}/parameters/\`,
     query: {
         'parameter': parameter,
     },
@@ -5026,7 +5035,7 @@ const postCallWithOptionalParam = (
     requestBody?: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/parameters/\`,
+    path: \`/api/v{api-version}/parameters/\`,
     query: {
         'parameter': parameter,
     },
@@ -5091,7 +5100,7 @@ export class ParametersService {
         parameterPath: string | null,
         requestBody: IModelWithString | null,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.callWithParameters(
+        return __request<void>(OpenAPI, ParametersOptions.callWithParameters(
             parameterHeader,
             parameterQuery,
             parameterForm,
@@ -5123,7 +5132,7 @@ export class ParametersService {
         parameterPath3?: string,
         _default?: string,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.callWithWeirdParameterNames(
+        return __request<void>(OpenAPI, ParametersOptions.callWithWeirdParameterNames(
             parameterHeader,
             parameterQuery,
             parameterForm,
@@ -5144,7 +5153,7 @@ export class ParametersService {
         requestBody: IModelWithString,
         parameter?: string,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.getCallWithOptionalParam(
+        return __request<void>(OpenAPI, ParametersOptions.getCallWithOptionalParam(
             requestBody,
             parameter,
         ));
@@ -5158,7 +5167,7 @@ export class ParametersService {
         parameter: string,
         requestBody?: IModelWithString,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.postCallWithOptionalParam(
+        return __request<void>(OpenAPI, ParametersOptions.postCallWithOptionalParam(
             parameter,
             requestBody,
         ));
@@ -5179,7 +5188,7 @@ const postRequestBodyService = (
     requestBody?: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/requestBody/\`,
+    path: \`/api/v{api-version}/requestBody/\`,
     body: requestBody,
     mediaType: 'application/json',
 });
@@ -5204,7 +5213,7 @@ export class RequestBodyService {
     public static postRequestBodyService(
         requestBody?: IModelWithString,
     ): Promise<void> {
-        return __request<void>(RequestBodyOptions.postRequestBodyService(
+        return __request<void>(OpenAPI, RequestBodyOptions.postRequestBodyService(
             requestBody,
         ));
     }
@@ -5224,12 +5233,12 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    path: \`/api/v{api-version}/response\`,
 });
 
 const callWithDuplicateResponses = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    path: \`/api/v{api-version}/response\`,
     errors: {
         500: \`Message for 500 error\`,
         501: \`Message for 501 error\`,
@@ -5239,7 +5248,7 @@ const callWithDuplicateResponses = (): ApiRequestOptions => ({
 
 const callWithResponses = (): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/response\`,
+    path: \`/api/v{api-version}/response\`,
     errors: {
         500: \`Message for 500 error\`,
         501: \`Message for 501 error\`,
@@ -5267,14 +5276,14 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithResponse(): Promise<IModelWithString> {
-        return __request<IModelWithString>(ResponseOptions.callWithResponse());
+        return __request<IModelWithString>(OpenAPI, ResponseOptions.callWithResponse());
     }
     /**
      * @returns IModelWithString Message for default response
      * @throws ApiError
      */
     public static callWithDuplicateResponses(): Promise<IModelWithString> {
-        return __request<IModelWithString>(ResponseOptions.callWithDuplicateResponses());
+        return __request<IModelWithString>(OpenAPI, ResponseOptions.callWithDuplicateResponses());
     }
     /**
      * @returns any Message for 200 response
@@ -5292,7 +5301,7 @@ export class ResponseService {
             readonly '@namespace.string'?: string,
             readonly '@namespace.integer'?: number,
             readonly value?: Array<IModelWithString>,
-        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(ResponseOptions.callWithResponses());
+        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(OpenAPI, ResponseOptions.callWithResponses());
     }
 }"
 `;
@@ -5307,37 +5316,37 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const putCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'PUT',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const postCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const deleteCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'DELETE',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const optionsCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'OPTIONS',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const headCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'HEAD',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 const patchCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'PATCH',
-    path: \`/api/v\${OpenAPI.VERSION}/simple\`,
+    path: \`/api/v{api-version}/simple\`,
 });
 
 
@@ -5367,43 +5376,43 @@ export class SimpleService {
      * @throws ApiError
      */
     public static getCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.getCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.getCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static putCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.putCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.putCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static postCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.postCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.postCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static deleteCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.deleteCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.deleteCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static optionsCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.optionsCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.optionsCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static headCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.headCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.headCallWithoutParametersAndResponse());
     }
     /**
      * @throws ApiError
      */
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.patchCallWithoutParametersAndResponse());
+        return __request<void>(OpenAPI, SimpleOptions.patchCallWithoutParametersAndResponse());
     }
 }"
 `;
@@ -5427,7 +5436,7 @@ const types = (
     id?: number,
 ): ApiRequestOptions => ({
     method: 'GET',
-    path: \`/api/v\${OpenAPI.VERSION}/types\`,
+    path: \`/api/v{api-version}/types\`,
     query: {
         'parameterArray': parameterArray,
         'parameterDictionary': parameterDictionary,
@@ -5484,7 +5493,7 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        return __request<number | string | boolean | any>(TypesOptions.types(
+        return __request<number | string | boolean | any>(OpenAPI, TypesOptions.types(
             parameterArray,
             parameterDictionary,
             parameterEnum,
@@ -5510,7 +5519,7 @@ const uploadFile = (
     file: Blob,
 ): ApiRequestOptions => ({
     method: 'POST',
-    path: \`/api/v\${OpenAPI.VERSION}/upload\`,
+    path: \`/api/v{api-version}/upload\`,
     formData: {
         'file': file,
     },
@@ -5537,7 +5546,7 @@ export class UploadService {
     public static uploadFile(
         file: Blob,
     ): Promise<boolean> {
-        return __request<boolean>(UploadOptions.uploadFile(
+        return __request<boolean>(OpenAPI, UploadOptions.uploadFile(
             file,
         ));
     }

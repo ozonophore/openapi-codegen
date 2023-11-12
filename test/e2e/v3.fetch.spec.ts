@@ -1,31 +1,31 @@
-'use strict';
-
-const generate = require('./scripts/generate');
-const copy = require('./scripts/copy');
-const compileWithBabel = require('./scripts/compileWithBabel');
-const server = require('./scripts/server');
-const browser = require('./scripts/browser');
+import browser from './scripts/browser';
+import { cleanup } from './scripts/cleanup';
+import { compileWithTypescript } from './scripts/compileWithTypescript';
+import { copyAsset } from './scripts/copyAsset';
+import { generate } from './scripts/generate';
+import server from './scripts/server';
 
 describe('v3.fetch', () => {
     beforeAll(async () => {
-        await generate('v3/babel', 'v3', 'fetch', true, true);
-        await copy('index.html', 'v3/babel/index.html');
-        await copy('script.js', 'v3/babel/script.js');
-        compileWithBabel('v3/babel');
-        await server.start('v3/babel');
+        cleanup('v3/fetch');
+        await generate('v3/fetch', 'v3', 'fetch' as any);
+        copyAsset('index.html', 'v3/fetch/index.html');
+        copyAsset('main.ts', 'v3/fetch/main.ts');
+        compileWithTypescript('v3/fetch');
+        await server.start('v3/fetch');
         await browser.start();
-    });
+    }, 30000);
 
     afterAll(async () => {
-        await server.stop();
         await browser.stop();
+        await server.stop();
     });
 
     it('requests token', async () => {
         await browser.exposeFunction('tokenRequest', jest.fn().mockResolvedValue('MY_TOKEN'));
         const result = await browser.evaluate(async () => {
-            const { OpenAPI, SimpleService } = window.api;
-            OpenAPI.TOKEN = window.tokenRequest;
+            const { OpenAPI, SimpleService } = (window as any).api;
+            OpenAPI.TOKEN = (window as any).tokenRequest;
             OpenAPI.USERNAME = undefined;
             OpenAPI.PASSWORD = undefined;
             return await SimpleService.getCallWithoutParametersAndResponse();
@@ -35,7 +35,7 @@ describe('v3.fetch', () => {
 
     it('uses credentials', async () => {
         const result = await browser.evaluate(async () => {
-            const { OpenAPI, SimpleService } = window.api;
+            const { OpenAPI, SimpleService } = (window as any).api;
             OpenAPI.TOKEN = undefined;
             OpenAPI.USERNAME = 'username';
             OpenAPI.PASSWORD = 'password';
@@ -46,7 +46,7 @@ describe('v3.fetch', () => {
 
     it('complexService', async () => {
         const result = await browser.evaluate(async () => {
-            const { ComplexService } = window.api;
+            const { ComplexService } = (window as any).api;
             return await ComplexService.complexTypes({
                 first: {
                     second: {

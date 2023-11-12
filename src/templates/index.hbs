@@ -7,6 +7,7 @@ export { ApiError{{#notEquals ../core.length 1}} as ApiError${{{@index}}}{{/notE
 export { CancelablePromise } from './{{{this}}}CancelablePromise';
 {{/if}}
 export { OpenAPI{{#notEquals ../core.length 1}}  as OpenAPI${{{@index}}}{{/notEquals}} } from './{{{this}}}OpenAPI';
+export type { TOpenAPIConfig{{#notEquals ../core.length 1}} as TOpenAPIConfig${{{@index}}}{{/notEquals}} } from './{{{this}}}OpenAPI';
 {{/each}}
 {{/if}}
 {{#if models}}

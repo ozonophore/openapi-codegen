@@ -11,7 +11,7 @@ import type { ApiResult } from './ApiResult';
 {{#if @root.useCancelableRequest}}
 import { CancelablePromise } from './CancelablePromise';
 {{/if}}
-import { OpenAPI } from './OpenAPI';
+import type { TOpenAPIConfig } from './OpenAPI';
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 {{>functions/isDefined}}
@@ -61,18 +61,19 @@ import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 /**
  * Request using axios client
+ * @param config The OpenAPI configuration object
  * @param options The request options from the the service
  * @returns ApiResult
  * @throws ApiError
  */
 {{#if @root.useCancelableRequest}}
- export function request<T>(options: ApiRequestOptions): CancelablePromise<T> {
+ export function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): CancelablePromise<T> {
     return new CancelablePromise(async(resolve, reject, onCancel) => {
         try {
-            const url = getUrl(options);
+            const url = getUrl(options, config);
             
             if (!onCancel.isCancelled) {
-                const response = await sendRequest<T>(options, url, onCancel);
+                const response = await sendRequest<T>(options, url, config, onCancel);
                 const responseBody = getResponseBody(response);
                 const responseHeader = getResponseHeader(response, options.responseHeader);
                 const result: ApiResult = {
@@ -92,11 +93,11 @@ import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
     });
 }
 {{else}}
-export async function request<T>(options: ApiRequestOptions): Promise<T> {
+export async function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<T> {
     return new Promise(async (resolve, reject) => {
         try {
-            const url = getUrl(options);
-            const response = await sendRequest(options, url);
+            const url = getUrl(options, config);
+            const response = await sendRequest(options, url, config);
             const responseBody = getResponseBody(response);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 

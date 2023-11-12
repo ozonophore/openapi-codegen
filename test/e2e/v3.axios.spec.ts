@@ -1,15 +1,15 @@
-'use strict';
-
-const generate = require('./scripts/generate');
-const compileWithTypescript = require('./scripts/compileWithTypescript');
-const server = require('./scripts/server');
+import { cleanup } from './scripts/cleanup';
+import { compileWithTypescript } from './scripts/compileWithTypescript';
+import { generate } from './scripts/generate';
+import server from './scripts/server';
 
 describe('v3.axios', () => {
     beforeAll(async () => {
-        await generate('v3/axios', 'v3', 'axios');
+        cleanup('v3/axios');
+        await generate('v3/axios', 'v3', 'axios' as any);
         compileWithTypescript('v3/axios');
         await server.start('v3/axios');
-    });
+    }, 30000);
 
     afterAll(async () => {
         await server.stop();
@@ -35,18 +35,15 @@ describe('v3.axios', () => {
         expect(result.headers.authorization).toBe('Bearer dXNlcm5hbWU6cGFzc3dvcmQ=');
     });
 
-    it('complexService', async () => {
+    it('supports complex params', async () => {
         const { ComplexService } = require('./generated/v3/axios/index.js');
-        const result = await ComplexService.complexTypes(
-            {
-                first: {
-                    second: {
-                        third: 'Hello World!',
-                    },
+        const result = await ComplexService.complexTypes({
+            first: {
+                second: {
+                    third: 'Hello World!',
                 },
             },
-            {}
-        );
+        });
         expect(result).toBeDefined();
     });
 });

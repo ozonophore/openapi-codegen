@@ -10,9 +10,7 @@ import type { CancelablePromise } from '{{{outputCore}}}CancelablePromise';
 {{/if}}
 import { request as __request } from '{{{outputCore}}}request';
 import type { ApiRequestOptions } from '{{{outputCore}}}ApiRequestOptions';
-{{#if @root.useVersion}}
 import { OpenAPI } from '{{{outputCore}}}OpenAPI';
-{{/if}}
 
 {{#each operations}}
 const {{{name}}} = ({{>parameters}}): ApiRequestOptions => ({
@@ -63,7 +61,7 @@ export class {{{name}}} {
     {{else}}
     public static {{{name}}}({{>parameters}}): Promise<{{>result}}> {
     {{/if}}
-        return __request<{{>result}}>({{../originName}}Options.{{{name}}}({{>parameterValues~}}));
+        return __request<{{>result}}>({{../originName}}Options.{{{name}}}({{>parameterValues~}}), OpenAPI);
     }
     {{/each}}
 }
