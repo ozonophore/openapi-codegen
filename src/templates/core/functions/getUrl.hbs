@@ -1,6 +1,6 @@
-function getUrl(options: ApiRequestOptions): string {
-    const path = options.path.replace(/[:]/g, '_');
-    const url = `${OpenAPI.BASE}${path}`;
+function getUrl(options: ApiRequestOptions, config: TOpenAPIConfig): string {
+    const path = options.path.replace('{api-version}', config.VERSION).replace(/[:]/g, '_');
+    const url = `${config.BASE}${path}`;
 
     if (options.query) {
         return `${url}${getQueryString(options.query)}`;

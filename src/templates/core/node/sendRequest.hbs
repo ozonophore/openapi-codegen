@@ -1,13 +1,13 @@
 {{#if @root.useCancelableRequest}}
-async function sendRequest(options: ApiRequestOptions, url: string, onCancel: (cancelHandler: () => void) => void): Promise<Response> {
+async function sendRequest(options: ApiRequestOptions, url: string, config: TOpenAPIConfig, onCancel: (cancelHandler: () => void) => void): Promise<Response> {
     const controller = new AbortController();
 {{else}}
-async function sendRequest(options: ApiRequestOptions, url: string): Promise<Response> {
+async function sendRequest(options: ApiRequestOptions, url: string, config: TOpenAPIConfig): Promise<Response> {
 {{/if}}
 
     const request: RequestInit = {
         method: options.method,
-        headers: await getHeaders(options),
+        headers: await getHeaders(options, config),
         body: getRequestBody(options),
         {{#if @root.useCancelableRequest}}
         signal: controller.signal,

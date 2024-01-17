@@ -44,12 +44,10 @@ export async function writeClientServices(options: IWriteClientServices): Promis
     const { services, templates, outputPath, httpClient, useUnionTypes, useOptions, outputCore, outputModels, useCancelableRequest } = options;
     for (const service of services) {
         const file = resolve(outputPath, `${service.name}.ts`);
-        const useVersion = service.operations.some(operation => operation.path.includes(VERSION_TEMPLATE_STRING));
         const templateResult = templates.exports.service({
             ...service,
             httpClient,
             useUnionTypes,
-            useVersion,
             useOptions,
             outputCore,
             outputModels,

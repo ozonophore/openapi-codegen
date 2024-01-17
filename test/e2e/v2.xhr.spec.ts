@@ -1,31 +1,31 @@
-'use strict';
-
-const generate = require('./scripts/generate');
-const copy = require('./scripts/copy');
-const compileWithTypescript = require('./scripts/compileWithTypescript');
-const server = require('./scripts/server');
-const browser = require('./scripts/browser');
+import browser from './scripts/browser';
+import { cleanup } from './scripts/cleanup';
+import { compileWithTypescript } from './scripts/compileWithTypescript';
+import { copyAsset } from './scripts/copyAsset';
+import { generate } from './scripts/generate';
+import server from './scripts/server';
 
 describe('v2.xhr', () => {
     beforeAll(async () => {
-        await generate('v2/xhr', 'v2', 'xhr');
-        await copy('index.html', 'v2/xhr/index.html');
-        await copy('script.js', 'v2/xhr/script.js');
+        cleanup('v2/xhr');
+        await generate('v2/xhr', 'v2', 'xhr' as any);
+        copyAsset('index.html', 'v2/xhr/index.html');
+        copyAsset('main.ts', 'v2/xhr/main.ts');
         compileWithTypescript('v2/xhr');
         await server.start('v2/xhr');
         await browser.start();
-    });
+    }, 30000);
 
     afterAll(async () => {
-        await server.stop();
         await browser.stop();
+        await server.stop();
     });
 
     it('requests token', async () => {
         await browser.exposeFunction('tokenRequest', jest.fn().mockResolvedValue('MY_TOKEN'));
         const result = await browser.evaluate(async () => {
-            const { OpenAPI, SimpleService } = window.api;
-            OpenAPI.TOKEN = window.tokenRequest;
+            const { OpenAPI, SimpleService } = (window as any).api;
+            OpenAPI.TOKEN = (window as any).tokenRequest;
             return await SimpleService.getCallWithoutParametersAndResponse();
         });
         expect(result.headers.authorization).toBe('Bearer MY_TOKEN');
@@ -33,7 +33,7 @@ describe('v2.xhr', () => {
 
     it('complexService', async () => {
         const result = await browser.evaluate(async () => {
-            const { ComplexService } = window.api;
+            const { ComplexService } = (window as any).api;
             return await ComplexService.complexTypes({
                 first: {
                     second: {

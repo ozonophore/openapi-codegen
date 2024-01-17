@@ -1,22 +1,22 @@
-'use strict';
+import { cleanup } from './scripts/cleanup';
+import { compileWithTypescript } from './scripts/compileWithTypescript';
+import { generate } from './scripts/generate';
+import server from './scripts/server';
 
-const generate = require('./scripts/generate');
-const compileWithTypescript = require('./scripts/compileWithTypescript');
-const server = require('./scripts/server');
-
-describe('v2.node', () => {
+describe('v2.axios', () => {
     beforeAll(async () => {
-        await generate('v2/node', 'v2', 'node');
-        compileWithTypescript('v2/node');
-        await server.start('v2/node');
-    });
+        cleanup('v2/axios');
+        await generate('v2/axios', 'v2', 'axios' as any);
+        compileWithTypescript('v2/axios');
+        await server.start('v2/axios');
+    }, 30000);
 
     afterAll(async () => {
         await server.stop();
     });
 
     it('requests token', async () => {
-        const { OpenAPI, SimpleService } = require('./generated/v2/node/index.js');
+        const { OpenAPI, SimpleService } = require('./generated/v2/axios/index.js');
         const tokenRequest = jest.fn().mockResolvedValue('MY_TOKEN');
         OpenAPI.TOKEN = tokenRequest;
         const result = await SimpleService.getCallWithoutParametersAndResponse();
@@ -25,7 +25,7 @@ describe('v2.node', () => {
     });
 
     it('complexService', async () => {
-        const { ComplexService } = require('./generated/v2/node/index.js');
+        const { ComplexService } = require('./generated/v2/axios/index.js');
         const result = await ComplexService.complexTypes({
             first: {
                 second: {

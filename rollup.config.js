@@ -23,7 +23,7 @@ const handlebarsPlugin = () => ({
         }
         return null;
     },
-    load: (file) => {
+    load: file => {
         if (path.extname(file) === '.hbs') {
             const template = fs.readFileSync(file, 'utf8').toString().trim();
             const templateSpec = handlebars.precompile(template, {
@@ -43,16 +43,20 @@ const handlebarsPlugin = () => ({
             return `export default ${templateSpec};`;
         }
         return null;
-    }
+    },
 });
 
 const getPlugins = () => {
     const plugins = [
-        handlebarsPlugin(),
-        typescript(),
         nodeResolve(),
-        commonjs(),
-    ]
+        commonjs({
+            sourceMap: false,
+        }),
+        handlebarsPlugin(),
+        typescript({
+            module: 'esnext',
+        }),
+    ];
     if (process.env.NODE_ENV === 'development') {
         return plugins;
     }
@@ -65,15 +69,6 @@ module.exports = {
         file: './dist/index.js',
         format: 'cjs',
     },
-    external: [
-        'fs',
-        'os',
-        'util',
-        'path',
-        'http',
-        'https',
-        'handlebars/runtime',
-        ...external,
-    ],
+    external: ['fs', 'os', 'util', 'path', 'http', 'https', 'handlebars/runtime', ...external],
     plugins: getPlugins(),
 };
