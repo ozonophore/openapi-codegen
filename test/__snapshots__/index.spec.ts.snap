@@ -87,7 +87,7 @@ import type { ApiRequestOptions } from './ApiRequestOptions';
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
 
-export type OpenAPIConfig = {
+export type TOpenAPIConfig = {
     BASE: string;
     VERSION: string;
     WITH_CREDENTIALS: boolean;
@@ -97,7 +97,7 @@ export type OpenAPIConfig = {
     HEADERS?: Headers | Resolver<Headers>;
 }
 
-export const OpenAPI: OpenAPIConfig = {
+export const OpenAPI: TOpenAPIConfig = {
     BASE: 'http://localhost:3000/base',
     VERSION: '1.0',
     WITH_CREDENTIALS: false,
@@ -115,7 +115,7 @@ exports[`v2 should generate: ./test/generated/v2/core/request.ts 1`] = `
 import { ApiError } from './ApiError';
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
-import { OpenAPI, OpenAPIConfig } from './OpenAPI';
+import type { TOpenAPIConfig } from './OpenAPI';
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 function isDefined<T>(value: T | null | undefined): value is Exclude<T, null | undefined> {
@@ -154,10 +154,8 @@ function getQueryString(params: Record<string, any>): string {
     return '';
 }
 
-function getUrl(config: OpenAPIConfig, options: ApiRequestOptions): string {
-    const path = options.path
-        .replace('{api-version}', config.VERSION)
-        .replace(/[:]/g, '_');
+function getUrl(options: ApiRequestOptions, config: TOpenAPIConfig): string {
+    const path = options.path.replace('{api-version}', config.VERSION).replace(/[:]/g, '_');
     const url = \`\${config.BASE}\${path}\`;
 
     if (options.query) {
@@ -186,7 +184,7 @@ async function resolve<T>(options: ApiRequestOptions, resolver?: T | Resolver<T>
     return resolver;
 }
 
-async function getHeaders(config: OpenAPIConfig, options: ApiRequestOptions): Promise<Headers> {
+async function getHeaders(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<Headers> {
     const token = await resolve(options, config.TOKEN);
     const username = await resolve(options, config.USERNAME);
     const password = await resolve(options, config.PASSWORD);
@@ -237,11 +235,11 @@ function getRequestBody(options: ApiRequestOptions): BodyInit | undefined {
     return undefined;
 }
 
-async function sendRequest(config: OpenAPIConfig, options: ApiRequestOptions, url: string): Promise<Response> {
+async function sendRequest(options: ApiRequestOptions, url: string, config: TOpenAPIConfig): Promise<Response> {
 
     const request: RequestInit = {
         method: options.method,
-        headers: await getHeaders(config, options),
+        headers: await getHeaders(options, config),
         body: getRequestBody(options),
     };
 
@@ -309,11 +307,11 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
  * @returns ApiResult
  * @throws ApiError
  */
-export async function request<T>(config: OpenAPIConfig,options: ApiRequestOptions): Promise<T> {
+export async function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<T> {
     return new Promise(async (resolve, reject) => {
         try {
-            const url = getUrl(config, options);
-            const response = await sendRequest(config, options, url);
+            const url = getUrl(options, config);
+            const response = await sendRequest(options, url, config);
             const responseBody = await getResponseBody(response);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 
@@ -341,6 +339,7 @@ exports[`v2 should generate: ./test/generated/v2/index.ts 1`] = `
 /* eslint-disable */
 export { ApiError } from '././core/ApiError';
 export { OpenAPI } from '././core/OpenAPI';
+export type { TOpenAPIConfig } from '././core/OpenAPI';
 
 export type { IDictionaryWithReference } from '././models/DictionaryWithReference';
 export type { IModelWithArray } from '././models/ModelWithArray';
@@ -684,13 +683,13 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string>,
         parameterArrayMulti: Array<string>,
     ): Promise<void> {
-        return __request<void>(OpenAPI, CollectionFormatServiceOptions.collectionFormat(
+        return __request<void>(CollectionFormatServiceOptions.collectionFormat(
             parameterArrayCsv,
             parameterArraySsv,
             parameterArrayTsv,
             parameterArrayPipes,
             parameterArrayMulti,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -762,10 +761,10 @@ export class ComplexService {
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(OpenAPI, ComplexServiceOptions.complexTypes(
+        return __request<Array<IModelWithString>>(ComplexServiceOptions.complexTypes(
             parameterObject,
             parameterReference,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -785,7 +784,7 @@ const callWithDefaultParameters = (
     parameterBoolean: boolean = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString = {
-        \\"prop\\": \\"Hello World!\\"
+        "prop": "Hello World!"
     },
 ): ApiRequestOptions => ({
     method: 'GET',
@@ -805,7 +804,7 @@ const callWithDefaultOptionalParameters = (
     parameterBoolean: boolean = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString = {
-        \\"prop\\": \\"Hello World!\\"
+        "prop": "Hello World!"
     },
 ): ApiRequestOptions => ({
     method: 'POST',
@@ -887,16 +886,16 @@ export class DefaultsService {
         parameterBoolean: boolean = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
+            "prop": "Hello World!"
         },
     ): Promise<void> {
-        return __request<void>(OpenAPI, DefaultsServiceOptions.callWithDefaultParameters(
+        return __request<void>(DefaultsServiceOptions.callWithDefaultParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
             parameterEnum,
             parameterModel,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameterString This is a simple string that is optional with default value
@@ -912,16 +911,16 @@ export class DefaultsService {
         parameterBoolean: boolean = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
+            "prop": "Hello World!"
         },
     ): Promise<void> {
-        return __request<void>(OpenAPI, DefaultsServiceOptions.callWithDefaultOptionalParameters(
+        return __request<void>(DefaultsServiceOptions.callWithDefaultOptionalParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
             parameterEnum,
             parameterModel,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameterStringWithNoDefault This is a string with no default
@@ -940,14 +939,14 @@ export class DefaultsService {
         parameterOptionalStringWithEmptyDefault: string = '',
         parameterOptionalStringWithNoDefault?: string,
     ): Promise<void> {
-        return __request<void>(OpenAPI, DefaultsServiceOptions.callToTestOrderOfParams(
+        return __request<void>(DefaultsServiceOptions.callToTestOrderOfParams(
             parameterStringWithNoDefault,
             parameterStringWithDefault,
             parameterStringWithEmptyDefault,
             parameterOptionalStringWithDefault,
             parameterOptionalStringWithEmptyDefault,
             parameterOptionalStringWithNoDefault,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -1001,25 +1000,25 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static duplicateName(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateServiceOptions.duplicateName());
+        return __request<void>(DuplicateServiceOptions.duplicateName(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName1(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateServiceOptions.duplicateName1());
+        return __request<void>(DuplicateServiceOptions.duplicateName1(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName2(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateServiceOptions.duplicateName2());
+        return __request<void>(DuplicateServiceOptions.duplicateName2(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName3(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateServiceOptions.duplicateName3());
+        return __request<void>(DuplicateServiceOptions.duplicateName3(), OpenAPI);
     }
 }"
 `;
@@ -1058,7 +1057,7 @@ export class HeaderService {
      * @throws ApiError
      */
     public static callWithResultFromHeader(): Promise<string> {
-        return __request<string>(OpenAPI, HeaderServiceOptions.callWithResultFromHeader());
+        return __request<string>(HeaderServiceOptions.callWithResultFromHeader(), OpenAPI);
     }
 }"
 `;
@@ -1092,7 +1091,7 @@ export class NoContentService {
      * @throws ApiError
      */
     public static callWithNoContentResponse(): Promise<void> {
-        return __request<void>(OpenAPI, NoContentServiceOptions.callWithNoContentResponse());
+        return __request<void>(NoContentServiceOptions.callWithNoContentResponse(), OpenAPI);
     }
 }"
 `;
@@ -1194,13 +1193,13 @@ export class ParametersService {
         parameterBody: string,
         parameterPath: string,
     ): Promise<void> {
-        return __request<void>(OpenAPI, ParametersServiceOptions.callWithParameters(
+        return __request<void>(ParametersServiceOptions.callWithParameters(
             parameterHeader,
             parameterQuery,
             parameterForm,
             parameterBody,
             parameterPath,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameterHeader This is the parameter that goes into the request header
@@ -1223,7 +1222,7 @@ export class ParametersService {
         parameterPath3?: string,
         _default?: string,
     ): Promise<void> {
-        return __request<void>(OpenAPI, ParametersServiceOptions.callWithWeirdParameterNames(
+        return __request<void>(ParametersServiceOptions.callWithWeirdParameterNames(
             parameterHeader,
             parameterQuery,
             parameterForm,
@@ -1232,7 +1231,7 @@ export class ParametersService {
             parameterPath2,
             parameterPath3,
             _default,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -1293,14 +1292,14 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithResponse(): Promise<IModelWithString> {
-        return __request<IModelWithString>(OpenAPI, ResponseServiceOptions.callWithResponse());
+        return __request<IModelWithString>(ResponseServiceOptions.callWithResponse(), OpenAPI);
     }
     /**
      * @returns IModelWithString Message for default response
      * @throws ApiError
      */
     public static callWithDuplicateResponses(): Promise<IModelWithString> {
-        return __request<IModelWithString>(OpenAPI, ResponseServiceOptions.callWithDuplicateResponses());
+        return __request<IModelWithString>(ResponseServiceOptions.callWithDuplicateResponses(), OpenAPI);
     }
     /**
      * @returns any Message for 200 response
@@ -1318,7 +1317,7 @@ export class ResponseService {
             readonly '@namespace.string'?: string,
             readonly '@namespace.integer'?: number,
             readonly value?: Array<IModelWithString>,
-        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(OpenAPI, ResponseServiceOptions.callWithResponses());
+        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(ResponseServiceOptions.callWithResponses(), OpenAPI);
     }
 }"
 `;
@@ -1377,28 +1376,28 @@ export class Service {
      * @throws ApiError
      */
     public static getCallWithModelWithDictionaryReference(): Promise<IDictionaryWithReference> {
-        return __request<IDictionaryWithReference>(OpenAPI, ServiceOptions.getCallWithModelWithDictionaryReference());
+        return __request<IDictionaryWithReference>(ServiceOptions.getCallWithModelWithDictionaryReference(), OpenAPI);
     }
     /**
      * @returns IModelWithDictionary Message for default response
      * @throws ApiError
      */
     public static getCallWithModelWithDictionary(): Promise<IModelWithDictionary> {
-        return __request<IModelWithDictionary>(OpenAPI, ServiceOptions.getCallWithModelWithDictionary());
+        return __request<IModelWithDictionary>(ServiceOptions.getCallWithModelWithDictionary(), OpenAPI);
     }
     /**
      * @returns IModelWithEnumInteger Message for default response
      * @throws ApiError
      */
     public static getCallWithSimpleInteger(): Promise<IModelWithEnumInteger> {
-        return __request<IModelWithEnumInteger>(OpenAPI, ServiceOptions.getCallWithSimpleInteger());
+        return __request<IModelWithEnumInteger>(ServiceOptions.getCallWithSimpleInteger(), OpenAPI);
     }
     /**
      * @returns IModelWithArray Message for default response
      * @throws ApiError
      */
     public static getCallWithModelArray(): Promise<IModelWithArray> {
-        return __request<IModelWithArray>(OpenAPI, ServiceOptions.getCallWithModelArray());
+        return __request<IModelWithArray>(ServiceOptions.getCallWithModelArray(), OpenAPI);
     }
 }"
 `;
@@ -1473,43 +1472,43 @@ export class SimpleService {
      * @throws ApiError
      */
     public static getCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleServiceOptions.getCallWithoutParametersAndResponse());
+        return __request<void>(SimpleServiceOptions.getCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static putCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleServiceOptions.putCallWithoutParametersAndResponse());
+        return __request<void>(SimpleServiceOptions.putCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static postCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleServiceOptions.postCallWithoutParametersAndResponse());
+        return __request<void>(SimpleServiceOptions.postCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static deleteCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleServiceOptions.deleteCallWithoutParametersAndResponse());
+        return __request<void>(SimpleServiceOptions.deleteCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static optionsCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleServiceOptions.optionsCallWithoutParametersAndResponse());
+        return __request<void>(SimpleServiceOptions.optionsCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static headCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleServiceOptions.headCallWithoutParametersAndResponse());
+        return __request<void>(SimpleServiceOptions.headCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleServiceOptions.patchCallWithoutParametersAndResponse());
+        return __request<void>(SimpleServiceOptions.patchCallWithoutParametersAndResponse(), OpenAPI);
     }
 }"
 `;
@@ -1590,7 +1589,7 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        return __request<number | string | boolean | any>(OpenAPI, TypesServiceOptions.types(
+        return __request<number | string | boolean | any>(TypesServiceOptions.types(
             parameterArray,
             parameterDictionary,
             parameterEnum,
@@ -1599,7 +1598,7 @@ export class TypesService {
             parameterBoolean,
             parameterObject,
             id,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -1691,7 +1690,7 @@ import type { ApiRequestOptions } from './ApiRequestOptions';
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
 
-export type OpenAPIConfig = {
+export type TOpenAPIConfig = {
     BASE: string;
     VERSION: string;
     WITH_CREDENTIALS: boolean;
@@ -1701,7 +1700,7 @@ export type OpenAPIConfig = {
     HEADERS?: Headers | Resolver<Headers>;
 }
 
-export const OpenAPI: OpenAPIConfig = {
+export const OpenAPI: TOpenAPIConfig = {
     BASE: 'http://localhost:3000/base',
     VERSION: '1.0',
     WITH_CREDENTIALS: false,
@@ -1719,7 +1718,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/core/req
 import { ApiError } from './ApiError';
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
-import { OpenAPI, OpenAPIConfig } from './OpenAPI';
+import type { TOpenAPIConfig } from './OpenAPI';
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 function isDefined<T>(value: T | null | undefined): value is Exclude<T, null | undefined> {
@@ -1758,10 +1757,8 @@ function getQueryString(params: Record<string, any>): string {
     return '';
 }
 
-function getUrl(config: OpenAPIConfig, options: ApiRequestOptions): string {
-    const path = options.path
-        .replace('{api-version}', config.VERSION)
-        .replace(/[:]/g, '_');
+function getUrl(options: ApiRequestOptions, config: TOpenAPIConfig): string {
+    const path = options.path.replace('{api-version}', config.VERSION).replace(/[:]/g, '_');
     const url = \`\${config.BASE}\${path}\`;
 
     if (options.query) {
@@ -1790,7 +1787,7 @@ async function resolve<T>(options: ApiRequestOptions, resolver?: T | Resolver<T>
     return resolver;
 }
 
-async function getHeaders(config: OpenAPIConfig, options: ApiRequestOptions): Promise<Headers> {
+async function getHeaders(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<Headers> {
     const token = await resolve(options, config.TOKEN);
     const username = await resolve(options, config.USERNAME);
     const password = await resolve(options, config.PASSWORD);
@@ -1841,11 +1838,11 @@ function getRequestBody(options: ApiRequestOptions): BodyInit | undefined {
     return undefined;
 }
 
-async function sendRequest(config: OpenAPIConfig, options: ApiRequestOptions, url: string): Promise<Response> {
+async function sendRequest(options: ApiRequestOptions, url: string, config: TOpenAPIConfig): Promise<Response> {
 
     const request: RequestInit = {
         method: options.method,
-        headers: await getHeaders(config, options),
+        headers: await getHeaders(options, config),
         body: getRequestBody(options),
     };
 
@@ -1913,11 +1910,11 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
  * @returns ApiResult
  * @throws ApiError
  */
-export async function request<T>(config: OpenAPIConfig,options: ApiRequestOptions): Promise<T> {
+export async function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<T> {
     return new Promise(async (resolve, reject) => {
         try {
-            const url = getUrl(config, options);
-            const response = await sendRequest(config, options, url);
+            const url = getUrl(options, config);
+            const response = await sendRequest(options, url, config);
             const responseBody = await getResponseBody(response);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 
@@ -1945,6 +1942,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/index.ts
 /* eslint-disable */
 export { ApiError } from '././core/ApiError';
 export { OpenAPI } from '././core/OpenAPI';
+export type { TOpenAPIConfig } from '././core/OpenAPI';
 
 export { EEnumWithNumbers } from '././models/schemas/EnumWithNumbers';
 export { EEnumWithStrings } from '././models/schemas/EnumWithStrings';
@@ -2343,7 +2341,7 @@ export class CircularService {
      * @throws ApiError
      */
     public static callWithCircularModel(): Promise<IModelWithCircularReference> {
-        return __request<IModelWithCircularReference>(OpenAPI, CircularOptions.callWithCircularModel());
+        return __request<IModelWithCircularReference>(CircularOptions.callWithCircularModel(), OpenAPI);
     }
 }"
 `;
@@ -2406,13 +2404,13 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
     ): Promise<void> {
-        return __request<void>(OpenAPI, CollectionFormatOptions.collectionFormat(
+        return __request<void>(CollectionFormatOptions.collectionFormat(
             parameterArrayCsv,
             parameterArraySsv,
             parameterArrayTsv,
             parameterArrayPipes,
             parameterArrayMulti,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -2526,10 +2524,10 @@ export class ComplexService {
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(OpenAPI, ComplexOptions.complexTypes(
+        return __request<Array<IModelWithString>>(ComplexOptions.complexTypes(
             parameterObject,
             parameterReference,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param id
@@ -2553,10 +2551,10 @@ export class ComplexService {
             },
         },
     ): Promise<IModelWithString> {
-        return __request<IModelWithString>(OpenAPI, ComplexOptions.complexParams(
+        return __request<IModelWithString>(ComplexOptions.complexParams(
             id,
             requestBody,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -2576,7 +2574,7 @@ const callWithDefaultParameters = (
     parameterBoolean: boolean | null = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString | null = {
-        \\"prop\\": \\"Hello World!\\"
+        "prop": "Hello World!"
     },
 ): ApiRequestOptions => ({
     method: 'GET',
@@ -2596,7 +2594,7 @@ const callWithDefaultOptionalParameters = (
     parameterBoolean: boolean = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString = {
-        \\"prop\\": \\"Hello World!\\"
+        "prop": "Hello World!"
     },
 ): ApiRequestOptions => ({
     method: 'POST',
@@ -2678,16 +2676,16 @@ export class DefaultsService {
         parameterBoolean: boolean | null = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString | null = {
-            \\"prop\\": \\"Hello World!\\"
+            "prop": "Hello World!"
         },
     ): Promise<void> {
-        return __request<void>(OpenAPI, DefaultsOptions.callWithDefaultParameters(
+        return __request<void>(DefaultsOptions.callWithDefaultParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
             parameterEnum,
             parameterModel,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameterString This is a simple string that is optional with default value
@@ -2703,16 +2701,16 @@ export class DefaultsService {
         parameterBoolean: boolean = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
+            "prop": "Hello World!"
         },
     ): Promise<void> {
-        return __request<void>(OpenAPI, DefaultsOptions.callWithDefaultOptionalParameters(
+        return __request<void>(DefaultsOptions.callWithDefaultOptionalParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
             parameterEnum,
             parameterModel,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameterStringWithNoDefault This is a string with no default
@@ -2731,14 +2729,14 @@ export class DefaultsService {
         parameterStringWithEmptyDefault: string = '',
         parameterOptionalStringWithNoDefault?: string,
     ): Promise<void> {
-        return __request<void>(OpenAPI, DefaultsOptions.callToTestOrderOfParams(
+        return __request<void>(DefaultsOptions.callToTestOrderOfParams(
             parameterStringWithNoDefault,
             parameterOptionalStringWithDefault,
             parameterOptionalStringWithEmptyDefault,
             parameterStringWithDefault,
             parameterStringWithEmptyDefault,
             parameterOptionalStringWithNoDefault,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -2792,25 +2790,25 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static duplicateName(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateOptions.duplicateName());
+        return __request<void>(DuplicateOptions.duplicateName(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName1(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateOptions.duplicateName1());
+        return __request<void>(DuplicateOptions.duplicateName1(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName2(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateOptions.duplicateName2());
+        return __request<void>(DuplicateOptions.duplicateName2(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName3(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateOptions.duplicateName3());
+        return __request<void>(DuplicateOptions.duplicateName3(), OpenAPI);
     }
 }"
 `;
@@ -2819,22 +2817,31 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { EEnumWithNumbers } from './../models/schemas/EnumWithNumbers';
+import type { EEnumWithStrings } from './../models/schemas/EnumWithStrings';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithEnums = (
-    requestBody?: any,
+    requestBody?: {
+        enumWithNumbers?: EEnumWithNumbers,
+        enumWithStrings?: EEnumWithStrings,
+    },
 ): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/enums\`,
     body: requestBody,
+    mediaType: 'application/json; charset=utf-8',
 });
 
 
 export type TEnumsOptions = {
     callWithEnums: (
-        requestBody?: any,
+        requestBody?: {
+            enumWithNumbers?: EEnumWithNumbers,
+            enumWithStrings?: EEnumWithStrings,
+        },
     ) => ApiRequestOptions;
 }
 
@@ -2849,11 +2856,14 @@ export class EnumsService {
      * @throws ApiError
      */
     public static callWithEnums(
-        requestBody?: any,
+        requestBody?: {
+            enumWithNumbers?: EEnumWithNumbers,
+            enumWithStrings?: EEnumWithStrings,
+        },
     ): Promise<void> {
-        return __request<void>(OpenAPI, EnumsOptions.callWithEnums(
+        return __request<void>(EnumsOptions.callWithEnums(
             requestBody,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -2892,7 +2902,7 @@ export class HeaderService {
      * @throws ApiError
      */
     public static callWithResultFromHeader(): Promise<string> {
-        return __request<string>(OpenAPI, HeaderOptions.callWithResultFromHeader());
+        return __request<string>(HeaderOptions.callWithResultFromHeader(), OpenAPI);
     }
 }"
 `;
@@ -2938,7 +2948,7 @@ export class MultipartService {
                 foo?: string,
                 bar?: string,
             },
-        }>(OpenAPI, MultipartOptions.multipartResponse());
+        }>(MultipartOptions.multipartResponse(), OpenAPI);
     }
 }"
 `;
@@ -2972,7 +2982,7 @@ export class NoContentService {
      * @throws ApiError
      */
     public static callWithNoContentResponse(): Promise<void> {
-        return __request<void>(OpenAPI, NoContentOptions.callWithNoContentResponse());
+        return __request<void>(NoContentOptions.callWithNoContentResponse(), OpenAPI);
     }
 }"
 `;
@@ -3125,14 +3135,14 @@ export class ParametersService {
         parameterPath: string | null,
         requestBody: IModelWithString | null,
     ): Promise<void> {
-        return __request<void>(OpenAPI, ParametersOptions.callWithParameters(
+        return __request<void>(ParametersOptions.callWithParameters(
             parameterHeader,
             parameterQuery,
             parameterForm,
             parameterCookie,
             parameterPath,
             requestBody,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameterHeader This is the parameter that goes into the request header
@@ -3157,7 +3167,7 @@ export class ParametersService {
         parameterPath3?: string,
         _default?: string,
     ): Promise<void> {
-        return __request<void>(OpenAPI, ParametersOptions.callWithWeirdParameterNames(
+        return __request<void>(ParametersOptions.callWithWeirdParameterNames(
             parameterHeader,
             parameterQuery,
             parameterForm,
@@ -3167,7 +3177,7 @@ export class ParametersService {
             parameterPath2,
             parameterPath3,
             _default,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param requestBody This is a required parameter
@@ -3178,10 +3188,10 @@ export class ParametersService {
         requestBody: IModelWithString,
         parameter?: string,
     ): Promise<void> {
-        return __request<void>(OpenAPI, ParametersOptions.getCallWithOptionalParam(
+        return __request<void>(ParametersOptions.getCallWithOptionalParam(
             requestBody,
             parameter,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameter This is a required parameter
@@ -3192,10 +3202,10 @@ export class ParametersService {
         parameter: string,
         requestBody?: IModelWithString,
     ): Promise<void> {
-        return __request<void>(OpenAPI, ParametersOptions.postCallWithOptionalParam(
+        return __request<void>(ParametersOptions.postCallWithOptionalParam(
             parameter,
             requestBody,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -3238,9 +3248,9 @@ export class RequestBodyService {
     public static postRequestBodyService(
         requestBody?: IModelWithString,
     ): Promise<void> {
-        return __request<void>(OpenAPI, RequestBodyOptions.postRequestBodyService(
+        return __request<void>(RequestBodyOptions.postRequestBodyService(
             requestBody,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -3300,14 +3310,14 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithResponse(): Promise<IModelWithString> {
-        return __request<IModelWithString>(OpenAPI, ResponseOptions.callWithResponse());
+        return __request<IModelWithString>(ResponseOptions.callWithResponse(), OpenAPI);
     }
     /**
      * @returns IModelWithString Message for default response
      * @throws ApiError
      */
     public static callWithDuplicateResponses(): Promise<IModelWithString> {
-        return __request<IModelWithString>(OpenAPI, ResponseOptions.callWithDuplicateResponses());
+        return __request<IModelWithString>(ResponseOptions.callWithDuplicateResponses(), OpenAPI);
     }
     /**
      * @returns any Message for 200 response
@@ -3324,7 +3334,7 @@ export class ResponseService {
             readonly '@namespace.string'?: string,
             readonly '@namespace.integer'?: number,
             readonly value?: Array<IModelWithString>,
-        } | IModelWithString | TModelThatExtends>(OpenAPI, ResponseOptions.callWithResponses());
+        } | IModelWithString | TModelThatExtends>(ResponseOptions.callWithResponses(), OpenAPI);
     }
 }"
 `;
@@ -3399,43 +3409,43 @@ export class SimpleService {
      * @throws ApiError
      */
     public static getCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.getCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.getCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static putCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.putCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.putCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static postCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.postCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.postCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static deleteCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.deleteCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.deleteCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static optionsCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.optionsCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.optionsCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static headCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.headCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.headCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.patchCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), OpenAPI);
     }
 }"
 `;
@@ -3516,7 +3526,7 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        return __request<number | string | boolean | any>(OpenAPI, TypesOptions.types(
+        return __request<number | string | boolean | any>(TypesOptions.types(
             parameterArray,
             parameterDictionary,
             parameterEnum,
@@ -3525,7 +3535,7 @@ export class TypesService {
             parameterBoolean,
             parameterObject,
             id,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -3569,9 +3579,9 @@ export class UploadService {
     public static uploadFile(
         file: Blob,
     ): Promise<boolean> {
-        return __request<boolean>(OpenAPI, UploadOptions.uploadFile(
+        return __request<boolean>(UploadOptions.uploadFile(
             file,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -3663,7 +3673,7 @@ import type { ApiRequestOptions } from './ApiRequestOptions';
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
 
-export type OpenAPIConfig = {
+export type TOpenAPIConfig = {
     BASE: string;
     VERSION: string;
     WITH_CREDENTIALS: boolean;
@@ -3673,7 +3683,7 @@ export type OpenAPIConfig = {
     HEADERS?: Headers | Resolver<Headers>;
 }
 
-export const OpenAPI: OpenAPIConfig = {
+export const OpenAPI: TOpenAPIConfig = {
     BASE: 'http://localhost:3000/base',
     VERSION: '1.0',
     WITH_CREDENTIALS: false,
@@ -3691,7 +3701,7 @@ exports[`v3 should generate: ./test/generated/v3/core/request.ts 1`] = `
 import { ApiError } from './ApiError';
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
-import { OpenAPI, OpenAPIConfig } from './OpenAPI';
+import type { TOpenAPIConfig } from './OpenAPI';
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 function isDefined<T>(value: T | null | undefined): value is Exclude<T, null | undefined> {
@@ -3730,10 +3740,8 @@ function getQueryString(params: Record<string, any>): string {
     return '';
 }
 
-function getUrl(config: OpenAPIConfig, options: ApiRequestOptions): string {
-    const path = options.path
-        .replace('{api-version}', config.VERSION)
-        .replace(/[:]/g, '_');
+function getUrl(options: ApiRequestOptions, config: TOpenAPIConfig): string {
+    const path = options.path.replace('{api-version}', config.VERSION).replace(/[:]/g, '_');
     const url = \`\${config.BASE}\${path}\`;
 
     if (options.query) {
@@ -3762,7 +3770,7 @@ async function resolve<T>(options: ApiRequestOptions, resolver?: T | Resolver<T>
     return resolver;
 }
 
-async function getHeaders(config: OpenAPIConfig, options: ApiRequestOptions): Promise<Headers> {
+async function getHeaders(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<Headers> {
     const token = await resolve(options, config.TOKEN);
     const username = await resolve(options, config.USERNAME);
     const password = await resolve(options, config.PASSWORD);
@@ -3813,11 +3821,11 @@ function getRequestBody(options: ApiRequestOptions): BodyInit | undefined {
     return undefined;
 }
 
-async function sendRequest(config: OpenAPIConfig, options: ApiRequestOptions, url: string): Promise<Response> {
+async function sendRequest(options: ApiRequestOptions, url: string, config: TOpenAPIConfig): Promise<Response> {
 
     const request: RequestInit = {
         method: options.method,
-        headers: await getHeaders(config, options),
+        headers: await getHeaders(options, config),
         body: getRequestBody(options),
     };
 
@@ -3885,11 +3893,11 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
  * @returns ApiResult
  * @throws ApiError
  */
-export async function request<T>(config: OpenAPIConfig,options: ApiRequestOptions): Promise<T> {
+export async function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<T> {
     return new Promise(async (resolve, reject) => {
         try {
-            const url = getUrl(config, options);
-            const response = await sendRequest(config, options, url);
+            const url = getUrl(options, config);
+            const response = await sendRequest(options, url, config);
             const responseBody = await getResponseBody(response);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 
@@ -3917,6 +3925,7 @@ exports[`v3 should generate: ./test/generated/v3/index.ts 1`] = `
 /* eslint-disable */
 export { ApiError } from '././core/ApiError';
 export { OpenAPI } from '././core/OpenAPI';
+export type { TOpenAPIConfig } from '././core/OpenAPI';
 
 export { EEnumWithNumbers } from '././models/EnumWithNumbers';
 export { EEnumWithStrings } from '././models/EnumWithStrings';
@@ -4381,13 +4390,13 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
     ): Promise<void> {
-        return __request<void>(OpenAPI, CollectionFormatOptions.collectionFormat(
+        return __request<void>(CollectionFormatOptions.collectionFormat(
             parameterArrayCsv,
             parameterArraySsv,
             parameterArrayTsv,
             parameterArrayPipes,
             parameterArrayMulti,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -4501,10 +4510,10 @@ export class ComplexService {
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(OpenAPI, ComplexOptions.complexTypes(
+        return __request<Array<IModelWithString>>(ComplexOptions.complexTypes(
             parameterObject,
             parameterReference,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param id
@@ -4528,10 +4537,10 @@ export class ComplexService {
             },
         },
     ): Promise<IModelWithString> {
-        return __request<IModelWithString>(OpenAPI, ComplexOptions.complexParams(
+        return __request<IModelWithString>(ComplexOptions.complexParams(
             id,
             requestBody,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -4551,7 +4560,7 @@ const callWithDefaultParameters = (
     parameterBoolean: boolean | null = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString | null = {
-        \\"prop\\": \\"Hello World!\\"
+        "prop": "Hello World!"
     },
 ): ApiRequestOptions => ({
     method: 'GET',
@@ -4571,7 +4580,7 @@ const callWithDefaultOptionalParameters = (
     parameterBoolean: boolean = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString = {
-        \\"prop\\": \\"Hello World!\\"
+        "prop": "Hello World!"
     },
 ): ApiRequestOptions => ({
     method: 'POST',
@@ -4653,16 +4662,16 @@ export class DefaultsService {
         parameterBoolean: boolean | null = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString | null = {
-            \\"prop\\": \\"Hello World!\\"
+            "prop": "Hello World!"
         },
     ): Promise<void> {
-        return __request<void>(OpenAPI, DefaultsOptions.callWithDefaultParameters(
+        return __request<void>(DefaultsOptions.callWithDefaultParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
             parameterEnum,
             parameterModel,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameterString This is a simple string that is optional with default value
@@ -4678,16 +4687,16 @@ export class DefaultsService {
         parameterBoolean: boolean = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString = {
-            \\"prop\\": \\"Hello World!\\"
+            "prop": "Hello World!"
         },
     ): Promise<void> {
-        return __request<void>(OpenAPI, DefaultsOptions.callWithDefaultOptionalParameters(
+        return __request<void>(DefaultsOptions.callWithDefaultOptionalParameters(
             parameterString,
             parameterNumber,
             parameterBoolean,
             parameterEnum,
             parameterModel,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameterStringWithNoDefault This is a string with no default
@@ -4706,14 +4715,14 @@ export class DefaultsService {
         parameterStringWithEmptyDefault: string = '',
         parameterOptionalStringWithNoDefault?: string,
     ): Promise<void> {
-        return __request<void>(OpenAPI, DefaultsOptions.callToTestOrderOfParams(
+        return __request<void>(DefaultsOptions.callToTestOrderOfParams(
             parameterStringWithNoDefault,
             parameterOptionalStringWithDefault,
             parameterOptionalStringWithEmptyDefault,
             parameterStringWithDefault,
             parameterStringWithEmptyDefault,
             parameterOptionalStringWithNoDefault,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -4767,25 +4776,25 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static duplicateName(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateOptions.duplicateName());
+        return __request<void>(DuplicateOptions.duplicateName(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName1(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateOptions.duplicateName1());
+        return __request<void>(DuplicateOptions.duplicateName1(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName2(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateOptions.duplicateName2());
+        return __request<void>(DuplicateOptions.duplicateName2(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName3(): Promise<void> {
-        return __request<void>(OpenAPI, DuplicateOptions.duplicateName3());
+        return __request<void>(DuplicateOptions.duplicateName3(), OpenAPI);
     }
 }"
 `;
@@ -4794,22 +4803,34 @@ exports[`v3 should generate: ./test/generated/v3/services/EnumsService.ts 1`] = 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { EEnumWithNumbers } from './../models/EnumWithNumbers';
+import type { EEnumWithStrings } from './../models/EnumWithStrings';
+import type { EEnumWithStringsWithType } from './../models/EnumWithStringsWithType';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
 const callWithEnums = (
-    requestBody?: any,
+    requestBody?: {
+        enumWithNumbers?: EEnumWithNumbers,
+        enumWithStrings?: EEnumWithStrings,
+        enumWithStringsWithType?: EEnumWithStringsWithType,
+    },
 ): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/enums\`,
     body: requestBody,
+    mediaType: 'application/json; charset=utf-8',
 });
 
 
 export type TEnumsOptions = {
     callWithEnums: (
-        requestBody?: any,
+        requestBody?: {
+            enumWithNumbers?: EEnumWithNumbers,
+            enumWithStrings?: EEnumWithStrings,
+            enumWithStringsWithType?: EEnumWithStringsWithType,
+        },
     ) => ApiRequestOptions;
 }
 
@@ -4824,11 +4845,15 @@ export class EnumsService {
      * @throws ApiError
      */
     public static callWithEnums(
-        requestBody?: any,
+        requestBody?: {
+            enumWithNumbers?: EEnumWithNumbers,
+            enumWithStrings?: EEnumWithStrings,
+            enumWithStringsWithType?: EEnumWithStringsWithType,
+        },
     ): Promise<void> {
-        return __request<void>(OpenAPI, EnumsOptions.callWithEnums(
+        return __request<void>(EnumsOptions.callWithEnums(
             requestBody,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -4867,7 +4892,7 @@ export class HeaderService {
      * @throws ApiError
      */
     public static callWithResultFromHeader(): Promise<string> {
-        return __request<string>(OpenAPI, HeaderOptions.callWithResultFromHeader());
+        return __request<string>(HeaderOptions.callWithResultFromHeader(), OpenAPI);
     }
 }"
 `;
@@ -4876,6 +4901,7 @@ exports[`v3 should generate: ./test/generated/v3/services/MultipartService.ts 1`
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { IModelWithString } from './../models/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -4885,13 +4911,32 @@ const multipartResponse = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/multipart\`,
 });
 
+const multipartRequest = (
+    formData?: {
+        content?: string,
+        data?: IModelWithString | null,
+    },
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: \`/api/v{api-version}/multipart\`,
+    body: formData,
+    mediaType: 'multipart/form-data',
+});
+
 
 export type TMultipartOptions = {
     multipartResponse: () => ApiRequestOptions;
+    multipartRequest: (
+        formData?: {
+            content?: string,
+            data?: IModelWithString | null,
+        },
+    ) => ApiRequestOptions;
 }
 
 export const MultipartOptions: TMultipartOptions = {
     multipartResponse: multipartResponse,
+    multipartRequest: multipartRequest,
 }
 
 export class MultipartService {
@@ -4913,7 +4958,21 @@ export class MultipartService {
                 foo?: string,
                 bar?: string,
             },
-        }>(OpenAPI, MultipartOptions.multipartResponse());
+        }>(MultipartOptions.multipartResponse(), OpenAPI);
+    }
+    /**
+     * @param formData
+     * @throws ApiError
+     */
+    public static multipartRequest(
+        formData?: {
+            content?: string,
+            data?: IModelWithString | null,
+        },
+    ): Promise<void> {
+        return __request<void>(MultipartOptions.multipartRequest(
+            formData,
+        ), OpenAPI);
     }
 }"
 `;
@@ -4947,7 +5006,7 @@ export class NoContentService {
      * @throws ApiError
      */
     public static callWithNoContentResponse(): Promise<void> {
-        return __request<void>(OpenAPI, NoContentOptions.callWithNoContentResponse());
+        return __request<void>(NoContentOptions.callWithNoContentResponse(), OpenAPI);
     }
 }"
 `;
@@ -5100,14 +5159,14 @@ export class ParametersService {
         parameterPath: string | null,
         requestBody: IModelWithString | null,
     ): Promise<void> {
-        return __request<void>(OpenAPI, ParametersOptions.callWithParameters(
+        return __request<void>(ParametersOptions.callWithParameters(
             parameterHeader,
             parameterQuery,
             parameterForm,
             parameterCookie,
             parameterPath,
             requestBody,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameterHeader This is the parameter that goes into the request header
@@ -5132,7 +5191,7 @@ export class ParametersService {
         parameterPath3?: string,
         _default?: string,
     ): Promise<void> {
-        return __request<void>(OpenAPI, ParametersOptions.callWithWeirdParameterNames(
+        return __request<void>(ParametersOptions.callWithWeirdParameterNames(
             parameterHeader,
             parameterQuery,
             parameterForm,
@@ -5142,7 +5201,7 @@ export class ParametersService {
             parameterPath2,
             parameterPath3,
             _default,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param requestBody This is a required parameter
@@ -5153,10 +5212,10 @@ export class ParametersService {
         requestBody: IModelWithString,
         parameter?: string,
     ): Promise<void> {
-        return __request<void>(OpenAPI, ParametersOptions.getCallWithOptionalParam(
+        return __request<void>(ParametersOptions.getCallWithOptionalParam(
             requestBody,
             parameter,
-        ));
+        ), OpenAPI);
     }
     /**
      * @param parameter This is a required parameter
@@ -5167,10 +5226,10 @@ export class ParametersService {
         parameter: string,
         requestBody?: IModelWithString,
     ): Promise<void> {
-        return __request<void>(OpenAPI, ParametersOptions.postCallWithOptionalParam(
+        return __request<void>(ParametersOptions.postCallWithOptionalParam(
             parameter,
             requestBody,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -5213,9 +5272,9 @@ export class RequestBodyService {
     public static postRequestBodyService(
         requestBody?: IModelWithString,
     ): Promise<void> {
-        return __request<void>(OpenAPI, RequestBodyOptions.postRequestBodyService(
+        return __request<void>(RequestBodyOptions.postRequestBodyService(
             requestBody,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -5276,14 +5335,14 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithResponse(): Promise<IModelWithString> {
-        return __request<IModelWithString>(OpenAPI, ResponseOptions.callWithResponse());
+        return __request<IModelWithString>(ResponseOptions.callWithResponse(), OpenAPI);
     }
     /**
      * @returns IModelWithString Message for default response
      * @throws ApiError
      */
     public static callWithDuplicateResponses(): Promise<IModelWithString> {
-        return __request<IModelWithString>(OpenAPI, ResponseOptions.callWithDuplicateResponses());
+        return __request<IModelWithString>(ResponseOptions.callWithDuplicateResponses(), OpenAPI);
     }
     /**
      * @returns any Message for 200 response
@@ -5301,7 +5360,7 @@ export class ResponseService {
             readonly '@namespace.string'?: string,
             readonly '@namespace.integer'?: number,
             readonly value?: Array<IModelWithString>,
-        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(OpenAPI, ResponseOptions.callWithResponses());
+        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(ResponseOptions.callWithResponses(), OpenAPI);
     }
 }"
 `;
@@ -5376,43 +5435,43 @@ export class SimpleService {
      * @throws ApiError
      */
     public static getCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.getCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.getCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static putCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.putCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.putCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static postCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.postCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.postCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static deleteCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.deleteCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.deleteCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static optionsCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.optionsCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.optionsCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static headCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.headCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.headCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(OpenAPI, SimpleOptions.patchCallWithoutParametersAndResponse());
+        return __request<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), OpenAPI);
     }
 }"
 `;
@@ -5493,7 +5552,7 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        return __request<number | string | boolean | any>(OpenAPI, TypesOptions.types(
+        return __request<number | string | boolean | any>(TypesOptions.types(
             parameterArray,
             parameterDictionary,
             parameterEnum,
@@ -5502,7 +5561,7 @@ export class TypesService {
             parameterBoolean,
             parameterObject,
             id,
-        ));
+        ), OpenAPI);
     }
 }"
 `;
@@ -5546,9 +5605,9 @@ export class UploadService {
     public static uploadFile(
         file: Blob,
     ): Promise<boolean> {
-        return __request<boolean>(OpenAPI, UploadOptions.uploadFile(
+        return __request<boolean>(UploadOptions.uploadFile(
             file,
-        ));
+        ), OpenAPI);
     }
 }"
 `;

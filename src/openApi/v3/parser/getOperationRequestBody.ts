@@ -5,7 +5,6 @@ import type { OpenApiRequestBody } from '../interfaces/OpenApiRequestBody';
 import { Parser } from '../Parser';
 import { getComment } from './getComment';
 import { getContent } from './getContent';
-import { getMediaType } from './getMediaType';
 
 export function getOperationRequestBody(this: Parser, openApi: OpenApi, parameter: OpenApiRequestBody, parentRef: string): OperationParameter {
     const requestBody: OperationParameter = {
@@ -33,11 +32,16 @@ export function getOperationRequestBody(this: Parser, openApi: OpenApi, paramete
     };
 
     if (parameter.content) {
-        const schema = getContent(openApi, parameter.content);
-        if (schema) {
-            requestBody.mediaType = getMediaType(openApi, parameter.content);
-            if (schema?.$ref) {
-                const model = this.getType(schema.$ref, parentRef);
+        const content = getContent(parameter.content);
+        if (content) {
+            requestBody.mediaType = content.mediaType;
+            if (requestBody.mediaType === 'multipart/form-data') {
+                requestBody.in = 'formData',
+                requestBody.name = 'formData',
+                requestBody.prop = 'formData'
+            }
+            if (content?.schema?.$ref) {
+                const model = this.getType(content.schema.$ref, parentRef);
                 requestBody.export = 'reference';
                 requestBody.type = model.type;
                 requestBody.base = model.base;
@@ -46,7 +50,7 @@ export function getOperationRequestBody(this: Parser, openApi: OpenApi, paramete
                 requestBody.imports.push(...model.imports);
                 return requestBody;
             } else {
-                const model = this.getModel({ openApi: openApi, definition: schema, parentRef: parentRef });
+                const model = this.getModel({ openApi: openApi, definition: content.schema, parentRef: parentRef });
                 requestBody.export = model.export;
                 requestBody.type = model.type;
                 requestBody.base = model.base;
