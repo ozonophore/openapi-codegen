@@ -30,10 +30,10 @@ export function getOperationResponse(this: Parser, openApi: OpenApi, response: O
     };
 
     if (response.content) {
-        const schema = getContent(openApi, response.content);
-        if (schema) {
-            if (schema?.$ref) {
-                const model = this.getType(schema.$ref, parentRef);
+        const content = getContent(response.content);
+        if (content) {
+            if (content?.schema?.$ref) {
+                const model = this.getType(content.schema.$ref, parentRef);
                 operationResponse.export = 'reference';
                 operationResponse.type = model.type;
                 operationResponse.base = model.base;
@@ -42,7 +42,7 @@ export function getOperationResponse(this: Parser, openApi: OpenApi, response: O
                 operationResponse.imports.push(...model.imports);
                 return operationResponse;
             } else {
-                const model = this.getModel({ openApi: openApi, definition: schema, parentRef: parentRef });
+                const model = this.getModel({ openApi: openApi, definition: content.schema, parentRef: parentRef });
                 operationResponse.export = model.export;
                 operationResponse.type = model.type;
                 operationResponse.base = model.base;

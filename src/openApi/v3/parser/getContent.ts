@@ -1,30 +1,38 @@
+import { isDefined } from '../../../utils/isDefined';
 import type { Dictionary } from '../../../utils/types';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiMediaType } from '../interfaces/OpenApiMediaType';
 import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
 
-export function getContent(openApi: OpenApi, content: Dictionary<OpenApiMediaType>): OpenApiSchema | null {
-    /* prettier-ignore */
-    return (
-        content['application/json-patch+json'] &&
-        content['application/json-patch+json'].schema
-    ) || (
-        content['application/json'] &&
-        content['application/json'].schema
-    ) || (
-        content['text/json'] &&
-        content['text/json'].schema
-    ) || (
-        content['text/plain'] &&
-        content['text/plain'].schema
-    ) || (
-        content['multipart/mixed'] &&
-        content['multipart/mixed'].schema
-    ) || (
-        content['multipart/related'] &&
-        content['multipart/related'].schema
-    ) || (
-        content['multipart/batch'] &&
-        content['multipart/batch'].schema
-    ) || null;
+type TContent = {
+    mediaType: string;
+    schema: OpenApiSchema;
+}
+
+const CONTENT_MEDIA_TYPES = [
+    'application/json-patch+json',
+    'application/json',
+    'text/json',
+    'text/plain',
+    'multipart/mixed',
+    'multipart/related',
+    'multipart/batch',
+    'multipart/form-data',
+]
+
+export function getContent(content: Dictionary<OpenApiMediaType>): TContent | null {
+    const mediaTypesWithSchema = Object.keys(content).find(mediaType => {
+        const cleanMediaType = mediaType.split(';')[0].trim();
+
+        return CONTENT_MEDIA_TYPES.includes(cleanMediaType) && isDefined(content[mediaType]?.schema);
+    })
+
+    if (mediaTypesWithSchema) {
+        return {
+            mediaType: mediaTypesWithSchema,
+            schema: content[mediaTypesWithSchema].schema as OpenApiSchema,
+        };
+    }
+
+    return null
 }

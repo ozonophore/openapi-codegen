@@ -8,7 +8,6 @@ import { getComment } from './getComment';
 import { getOperationErrors } from './getOperationErrors';
 import { getOperationName } from './getOperationName';
 import { getOperationPath } from './getOperationPath';
-import { getOperationRequestBody } from './getOperationRequestBody';
 import { getOperationResponseHeader } from './getOperationResponseHeader';
 import { getOperationResults } from './getOperationResults';
 import { sortByRequired } from '../../../utils/sortByRequired';
@@ -53,7 +52,6 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
         operation.parametersBody = parameters.parametersBody;
     }
 
-    // TODO: form data goes wrong here: https://github.com/ferdikoomen/openapi-typescript-codegen/issues/257§
     if (op.requestBody) {
         const requestBodyDef = (op.requestBody.$ref ? this.context.get(op.requestBody.$ref) : op.requestBody) as OpenApiRequestBody;
         const requestBody = this.getOperationRequestBody(openApi, requestBodyDef, '');
