@@ -1,16 +1,31 @@
 import { dirName, join } from '../core/path';
 
 export function getAbsolutePath(definitionRef: string | undefined, parentRef: string): string {
-    if (definitionRef) {
-        if (parentRef && parentRef.match(/^(#\/)/g)) {
-            return definitionRef;
-        } else if (definitionRef.match(/^(#\/)/g)) {
-            return `${parentRef}${definitionRef}`;
-        }
-        return join(dirName(parentRef), definitionRef);
+    if (!definitionRef) {
+        return parentRef.match(/^(#\/)/) ? '' : parentRef;
     }
-    if (parentRef.match(/^(#\/)/g)) {
-        return '';
+
+    if (parentRef.match(/^(#\/)/)) {
+        return definitionRef;
     }
-    return parentRef;
+
+    let basePath = parentRef;
+
+    // Если parentRef содержит `#`, обрезаем всё, что идёт после первого `#`
+    const hashIndex = parentRef.indexOf('#');
+    if (hashIndex !== -1) {
+        basePath = parentRef.slice(0, hashIndex);
+    }
+
+    let absolutePath: string;
+
+    if (definitionRef.match(/^(#\/)/)) {
+        // Если definitionRef начинается с `#/`, присоединяем его к basePath
+        absolutePath = `${basePath}${definitionRef}`;
+    } else {
+        // Если definitionRef — относительный путь
+        absolutePath = join(dirName(basePath), definitionRef);
+    }
+
+    return absolutePath;
 }

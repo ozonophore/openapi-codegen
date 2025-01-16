@@ -1,0 +1,44 @@
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      description: Ответ с детализацией ошики
+      properties:
+        system:
+          type: integer
+          description: Идентификатор
+          example: 61
+        error:
+          type: integer
+          description: Код ошибки
+          example: 1
+        type:
+          type: string
+          title: Тип ошибки
+          example: system_error
+    ErrorData:
+      type: object
+      title: Описание ошибки
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        subCode:
+          $ref: '#/components/schemas/ErrorSubCode'
+        message:
+          type: string
+          description: Информация об ошибке
+          example: Ошибка валидации полей
+    ErrorCode:
+      type: string
+      title: Enum типов ошибки
+      enum:
+        - NOT_FOUND
+        - VALIDATION
+        - SYSTEM
+        - INTEGRATION
+    ErrorSubCode:
+      type: string
+      title: Enum подтипов ошибки
+      enum:
+        - EXAMPLE_IN_PROGRESS
+        - EXAMPLE_INVALID_DATA
