@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1-rc.1] - 2025-01-21
+
+### Fixed
+- Fixed an error in generating models according to the specification when the schema referred to the schema in another file. And the schema from the file referred to the schema inside the same file.
+
 ## [0.5.0-beta.0] - 2024-08-01
 
 ### Added
