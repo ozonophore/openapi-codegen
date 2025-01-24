@@ -1,31 +1,21 @@
 import { dirName, join } from '../core/path';
 
 export function getAbsolutePath(definitionRef: string | undefined, parentRef: string): string {
+    // If the definition Ref is missing
     if (!definitionRef) {
-        return parentRef.match(/^(#\/)/) ? '' : parentRef;
+        return parentRef.startsWith('#/') ? '' : parentRef;
     }
 
-    if (parentRef.match(/^(#\/)/)) {
+    if (definitionRef.startsWith('#/')) {
+        // If definitionRef is an absolute reference (#/), replace the part after # in parentRef.
+        const basePath = parentRef.split('#')[0]; // We take everything up to #
+        return `${basePath}${definitionRef}`;
+    }
+
+    if (parentRef.startsWith('#/')) {
+        // If parentRef is an absolute reference, we return definitionRef as it is.
         return definitionRef;
     }
 
-    let basePath = parentRef;
-
-    // If parentRef contains a `#`, we trim everything that comes after the first `#`
-    const hashIndex = parentRef.indexOf('#');
-    if (hashIndex !== -1) {
-        basePath = parentRef.slice(0, hashIndex);
-    }
-
-    let absolutePath: string;
-
-    if (definitionRef.match(/^(#\/)/)) {
-        // If the definitionRef starts with `#/`, attach it to the basePath
-        absolutePath = `${basePath}${definitionRef}`;
-    } else {
-        // If definitionRef is a relative path
-        absolutePath = join(dirName(basePath), definitionRef);
-    }
-
-    return absolutePath;
+    return join(dirName(parentRef), definitionRef);
 }
