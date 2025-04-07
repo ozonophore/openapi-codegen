@@ -43,10 +43,12 @@ describe('writeClientSchemas', () => {
                 apiRequestOptions: () => 'apiRequestOptions',
                 apiResult: () => 'apiResult',
                 request: () => 'request',
+                cancelablePromise: () => 'cancelablePromise',
+                httpStatusCode: () => 'httpStatusCode',
             },
         };
 
-        await writeClientSchemas({ models, templates, outputPath: '/', httpClient: HttpClient.FETCH, useUnionTypes: false });
+        await writeClientSchemas({ models, templates, outputSchemasPath: '/', httpClient: HttpClient.FETCH, useUnionTypes: false });
 
         expect(writeFile).toBeCalledWith('/MyModelSchema.ts', 'schema');
     });

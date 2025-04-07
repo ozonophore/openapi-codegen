@@ -1,4 +1,5 @@
 import type { Client } from '../client/interfaces/Client';
+import { getOutputPaths } from '../core/getOutputPaths';
 import { HttpClient } from '../HttpClient';
 import { mkdir, writeFile } from './fileSystem';
 import { Templates } from './registerHandlebarTemplates';
@@ -32,10 +33,11 @@ describe('writeClient', () => {
                 httpStatusCode: () => 'httpStatusCode',
             },
         };
+        const outputPaths = getOutputPaths({ output: './dist' });
         await new WriteClient().writeClient({
             client,
             templates,
-            output: { output: './dist' },
+            outputPaths,
             httpClient: HttpClient.FETCH,
             useOptions: false,
             useUnionTypes: false,

@@ -43,10 +43,12 @@ describe('writeClientModels', () => {
                 apiRequestOptions: () => 'apiRequestOptions',
                 apiResult: () => 'apiResult',
                 request: () => 'request',
+                cancelablePromise: () => 'cancelablePromise',
+                httpStatusCode: () => 'httpStatusCode',
             },
         };
 
-        await writeClientModels({ models, templates, outputPath: '/', httpClient: HttpClient.FETCH, useUnionTypes: false });
+        await writeClientModels({ models, templates, outputModelsPath: '/', httpClient: HttpClient.FETCH, useUnionTypes: false });
 
         expect(writeFile).toBeCalledWith('/MyModel.ts', 'model');
     });

@@ -1,4 +1,3 @@
-import type { Client } from '../client/interfaces/Client';
 import { writeFile } from './fileSystem';
 import { Templates } from './registerHandlebarTemplates';
 import { writeClientIndex } from './writeClientIndex';
@@ -7,13 +6,6 @@ jest.mock('./fileSystem');
 
 describe('writeClientIndex', () => {
     it('should write to filesystem', async () => {
-        const client: Client = {
-            server: 'http://localhost:8080',
-            version: '1.0',
-            models: [],
-            services: [],
-        };
-
         const templates: Templates = {
             index: () => 'index',
             exports: {
@@ -27,10 +19,12 @@ describe('writeClientIndex', () => {
                 apiRequestOptions: () => 'apiRequestOptions',
                 apiResult: () => 'apiResult',
                 request: () => 'request',
+                cancelablePromise: () => 'cancelablePromise',
+                httpStatusCode: () => 'httpStatusCode',
             },
         };
 
-        await writeClientIndex({ client, templates, outputPath: '/', useUnionTypes: true, exportSchemas: true, exportCore: true, exportModels: true, exportServices: true });
+        await writeClientIndex({ templates, outputPath: '/', core: [], models: [], schemas: [], services: [] });
 
         expect(writeFile).toBeCalledWith('/index.ts', 'index');
     });

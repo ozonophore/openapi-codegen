@@ -10,6 +10,6 @@ describe('isSubDirectory', () => {
         expect(isSubDirectory(resolve('./project'), resolve('../'))).toBeFalsy();
         expect(isSubDirectory(resolve('./project'), resolve('../../'))).toBeFalsy();
         expect(isSubDirectory(resolve('./'), resolve('./output'))).toBeTruthy();
-        expect(isSubDirectory(resolve('./'), resolve('../output'))).toBeTruthy();
+        expect(isSubDirectory(resolve('./'), resolve('../output'))).toBeFalsy();
     });
 });

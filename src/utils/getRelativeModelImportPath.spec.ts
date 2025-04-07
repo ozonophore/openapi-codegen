@@ -1,29 +1,102 @@
 import { getRelativeModelImportPath } from './getRelativeModelImportPath';
 
+const rootPath = '/openapi-codegen/generated/openapi/models';
+let sourcePath = '';
+let targetPath = '';
+
 describe('getRelativeModelImportPath', () => {
-    it('should return relative path of the model import', () => {
-        const modelRelativePath = './models/truck';
-        const relativePath = '../../common/car';
-        expect(getRelativeModelImportPath(undefined, relativePath, modelRelativePath)).toEqual('../../common/car');
+    beforeEach(() => {
+        sourcePath = '';
+        targetPath = '';
     });
 
-    it('should return the correct relative path of the model import, taking into account the navigation characters', () => {
-        const rootPath = '/home/generated';
-        let modelRelativePath = './models/truck';
-        let relativePath = '../../common/car';
-
-        expect(getRelativeModelImportPath(rootPath, relativePath, modelRelativePath)).toEqual('../common/Car');
-
-        modelRelativePath = './models/model/truck';
-        relativePath = '../../models/car';
-        expect(getRelativeModelImportPath(rootPath, relativePath, modelRelativePath)).toEqual('../Car');
+    it('The root folder is not specified', () => {
+        sourcePath = '';
+        targetPath = '../common/ModelWithString.yml';
+        expect(getRelativeModelImportPath(undefined, sourcePath, targetPath)).toEqual('../common/ModelWithString');
     });
 
-    it('should return the correct relative path of the models import if an incorrect relative path to the model is passed', () => {
-        const rootPath = '/home/generated';
-        const modelRelativePath = '../../../models/truck';
-        const relativePath = '../../common/car';
+    it('The path for sourcePath is not specified. Option 1', () => {
+        sourcePath = '';
+        targetPath = 'ModelWithString.yml';
 
-        expect(getRelativeModelImportPath(rootPath, relativePath, modelRelativePath)).toEqual('../common/Car');
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('./ModelWithString');
+    });
+
+    it('The path for sourcePath is not specified. Option 2', () => {
+        sourcePath = '';
+        targetPath = '../ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('./ModelWithString');
+    });
+
+    it('The path for sourcePath is not specified. Option 3', () => {
+        sourcePath = '';
+        targetPath = '../common/ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('./common/ModelWithString');
+    });
+
+    it('The path for sourcePath is the area inside the file. Option 1', () => {
+        sourcePath = '#/components/schemas/SimpleRequestBody';
+        targetPath = 'ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('./ModelWithString');
+    });
+
+    it('The path for sourcePath is the area inside the file. Option 2', () => {
+        sourcePath = '#/components/schemas/SimpleRequestBody';
+        targetPath = '../ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('./ModelWithString');
+    });
+
+    it('The path for sourcePath is the area inside the file. Option 3', () => {
+        sourcePath = '#/components/schemas/SimpleRequestBody';
+        targetPath = '../common/ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('./common/ModelWithString');
+    });
+
+    it('The path for sourcePath contains the folder, the path for targetPath contains the file name.', () => {
+        sourcePath = 'model/SimpleRequestBody.yml';
+        targetPath = 'ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('./ModelWithString');
+    });
+
+    it('The path for source Path contains a folder, the path for targetPath contains one jump to the folder above.', () => {
+        sourcePath = 'model/SimpleRequestBody.yml';
+        targetPath = '../common/ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('../common/ModelWithString');
+    });
+
+    it('The path for sourcePath contains a folder, the path for targetPath contains several transitions to the folder above.', () => {
+        sourcePath = 'model/SimpleRequestBody.yml';
+        targetPath = '../../common/ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('../common/ModelWithString');
+    });
+
+    it('The path for sourcePath goes beyond the root folder, the path for targetPath is the file name.', () => {
+        sourcePath = '../common/SimpleRequestBody.yml';
+        targetPath = 'ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('./ModelWithString');
+    });
+
+    it('The path for sourcePath goes beyond the root folder, the path for targetPath is a file in the same folder.', () => {
+        sourcePath = '../common/SimpleRequestBody.yml';
+        targetPath = './ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('./ModelWithString');
+    });
+
+    it('The path for sourcePath contains several nested folders, the path for targetPath has a jump to the folder above', () => {
+        sourcePath = 'model/list/SimpleRequestBody.yml';
+        targetPath = '../ModelWithString.yml';
+
+        expect(getRelativeModelImportPath(rootPath, sourcePath, targetPath)).toEqual('../ModelWithString');
     });
 });

@@ -1,5 +1,6 @@
 /* istanbul ignore file */
 import { Context } from './core/Context';
+import { getOutputPaths } from './core/getOutputPaths';
 import { HttpClient } from './HttpClient';
 import { Parser as ParserV2 } from './openApi/v2/Parser';
 import { Parser as ParserV3 } from './openApi/v3/Parser';
@@ -87,13 +88,13 @@ async function generateFrom(
     }: Options,
     writeClient: WriteClient
 ): Promise<void> {
-    const outputPaths: IOutput = {
-        output: output,
-        outputCore: outputCore,
-        outputServices: outputServices,
-        outputModels: outputModels,
-        outputSchemas: outputSchemas,
-    };
+    const outputPaths: IOutput = getOutputPaths({
+        output,
+        outputCore,
+        outputServices,
+        outputModels,
+        outputSchemas,
+    });
     const context = new Context(input, outputPaths, { interface: interfacePrefix, enum: enumPrefix, type: typePrefix });
     const openApi = isString(input) ? await getOpenApiSpec(context, input) : input;
     const openApiVersion = getOpenApiVersion(openApi);
@@ -111,7 +112,7 @@ async function generateFrom(
             await writeClient.writeClient({
                 client: clientFinal,
                 templates,
-                output: outputPaths,
+                outputPaths,
                 httpClient,
                 useOptions,
                 useUnionTypes,
@@ -133,7 +134,7 @@ async function generateFrom(
             await writeClient.writeClient({
                 client: clientFinal,
                 templates,
-                output: outputPaths,
+                outputPaths,
                 httpClient,
                 useOptions,
                 useUnionTypes,

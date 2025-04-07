@@ -10,14 +10,14 @@ import { Templates } from './registerHandlebarTemplates';
 /**
  * @param models Array of Models to write
  * @param templates The loaded handlebar templates
- * @param outputPath Directory to write the generated files to
+ * @param outputModelsPath Папку для генерации моделей
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useUnionTypes Use union types instead of enums
  */
 interface IWriteClientModels {
     models: Model[];
     templates: Templates;
-    outputPath: string;
+    outputModelsPath: string;
     httpClient: HttpClient;
     useUnionTypes: boolean;
 }
@@ -26,12 +26,12 @@ interface IWriteClientModels {
  * Generate Models using the Handlebar template and write to disk.
  * @param models Array of Models to write
  * @param templates The loaded handlebar templates
- * @param outputPath Directory to write the generated files to
+ * @param outputModelsPath Папку для генерации моделей
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useUnionTypes Use union types instead of enums
  */
 export async function writeClientModels(options: IWriteClientModels): Promise<void> {
-    const { models, templates, outputPath, httpClient, useUnionTypes } = options;
+    const { models, templates, outputModelsPath, httpClient, useUnionTypes } = options;
     for (const model of models) {
         const modelFolderPath = model?.path;
 
@@ -41,11 +41,11 @@ export async function writeClientModels(options: IWriteClientModels): Promise<vo
 
         const dir = dirName(modelFolderPath);
         if (dir) {
-            const directory = resolve(outputPath, dir);
+            const directory = resolve(outputModelsPath, dir);
             // @ts-ignore
             mkdirSync(directory, { recursive: true });
         }
-        const file = resolve(outputPath, `${modelFolderPath}.ts`);
+        const file = resolve(outputModelsPath, `${modelFolderPath}.ts`);
 
         const templateResult = templates.exports.model({
             ...model,

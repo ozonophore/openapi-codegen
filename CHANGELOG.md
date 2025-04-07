@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1-rc.2] - 2025-04-08
+
+### Updated
+- Updated the end-path calculation mechanism: core, models, services, schemas
+- Updated the tests to reflect the changes made
+- Updated examples of custom options for request
+
+### Fixed
+- Fixed the relative path calculation mechanism for importing a model
+- Fixed broken tests
+
 ## [0.5.1-rc.1] - 2025-01-21
 
 ### Added

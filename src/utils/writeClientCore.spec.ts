@@ -35,7 +35,7 @@ describe('writeClientCore', () => {
 
         const useCancelableRequest = true;
 
-        await writeClientCore({ client, templates, outputPath: '/', httpClient: HttpClient.FETCH, useCancelableRequest });
+        await writeClientCore({ client, templates, outputCorePath: '/', httpClient: HttpClient.FETCH, useCancelableRequest });
 
         expect(writeFile).toBeCalledWith('/OpenAPI.ts', 'settings');
         expect(writeFile).toBeCalledWith('/ApiError.ts', 'apiError');

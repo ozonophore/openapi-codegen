@@ -2,7 +2,6 @@ import type { Client } from '../client/interfaces/Client';
 import { relative, resolve } from '../core/path';
 import { HttpClient } from '../HttpClient';
 import { mkdir } from './fileSystem';
-import { isSubDirectory } from './isSubdirectory';
 import { IOutput } from './output';
 import { Templates } from './registerHandlebarTemplates';
 import { unique } from './unique';
@@ -43,7 +42,7 @@ function prepareAlias(models: IModel[]) {
 /**
  * @param client Client object with all the models, services, etc.
  * @param templates Templates wrapper with all loaded Handlebars templates
- * @param output The relative location of the output directory
+ * @param outputPaths The relative location of the output directory
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useOptions Use options or arguments functions
  * @param useUnionTypes Use union types instead of enums
@@ -58,7 +57,7 @@ function prepareAlias(models: IModel[]) {
 interface IWriteClient {
     client: Client;
     templates: Templates;
-    output: IOutput;
+    outputPaths: IOutput;
     httpClient: HttpClient;
     useOptions: boolean;
     useUnionTypes: boolean;
@@ -72,8 +71,9 @@ interface IWriteClient {
 }
 
 /**
+ * @param client Client object with all the models, services, etc.
  * @param templates The loaded handlebar templates
- * @param outputPath Directory to write the generated files to
+ * @param outputPaths Directory to write the generated files to
  * @param useUnionTypes Use union types instead of enums
  * @param exportCore: Generate core
  * @param exportServices: Generate services
@@ -83,7 +83,7 @@ interface IWriteClient {
 export interface IWriteClientIndex {
     client: Client;
     templates: Templates;
-    output: IOutput;
+    outputPaths: IOutput;
     useUnionTypes: boolean;
     exportCore: boolean;
     exportServices: boolean;
@@ -101,7 +101,7 @@ export class WriteClient {
      * Write our OpenAPI client, using the given templates at the given output
      * @param client Client object with all the models, services, etc.
      * @param templates Templates wrapper with all loaded Handlebars templates
-     * @param output The relative location of the output directory
+     * @param outputPaths Набор параметров с путями для генерации основных разделов (папок)
      * @param httpClient The selected httpClient (fetch, xhr or node)
      * @param useOptions Use options or arguments functions
      * @param useUnionTypes Use union types instead of enums
@@ -114,83 +114,60 @@ export class WriteClient {
      * @param useCancelableRequest Use cancelable request type.
      */
     async writeClient(options: IWriteClient): Promise<void> {
-        const { client, templates, output, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, request, useCancelableRequest = false } = options;
-        const outputPath = resolve(process.cwd(), output.output);
-        const outputPathCore = output.outputCore ? resolve(process.cwd(), output.outputCore) : resolve(outputPath, 'core');
-        const outputPathModels = output.outputModels ? resolve(process.cwd(), output.outputModels) : resolve(outputPath, 'models');
-        const outputPathSchemas = output.outputSchemas ? resolve(process.cwd(), output.outputSchemas) : resolve(outputPath, 'schemas');
-        const outputPathServices = output.outputServices ? resolve(process.cwd(), output.outputServices) : resolve(outputPath, 'services');
-
-        if (!isSubDirectory(process.cwd(), output.output)) {
-            throw new Error(`Output folder is not a subdirectory of the current working directory`);
-        }
-        if (output.outputCore && !isSubDirectory(process.cwd(), output.outputCore)) {
-            throw new Error(`Output folder(core) is not a subdirectory of the current working directory`);
-        }
-        if (output.outputSchemas && !isSubDirectory(process.cwd(), output.outputSchemas)) {
-            throw new Error(`Output folder(schemas) is not a subdirectory of the current working directory`);
-        }
-        if (output.outputModels && !isSubDirectory(process.cwd(), output.outputModels)) {
-            throw new Error(`Output folder(models) is not a subdirectory of the current working directory`);
-        }
-        if (output.outputServices && !isSubDirectory(process.cwd(), output.outputServices)) {
-            throw new Error(`Output folder(services) is not a subdirectory of the current working directory`);
-        }
+        const { client, templates, outputPaths, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, request, useCancelableRequest = false } = options;
+        // const { output, outputCore, outputModels, outputSchemas, outputServices } = outputPaths;
 
         if (exportCore) {
-            await mkdir(outputPathCore);
-            await writeClientCore({ client, templates, outputPath: outputPathCore, httpClient, request, useCancelableRequest });
+            await mkdir(outputPaths.outputCore);
+            await writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest });
         }
 
         if (exportServices) {
-            await mkdir(outputPathServices);
+            const { outputCore, outputServices, outputModels } = outputPaths;
+            await mkdir(outputPaths.outputServices);
             await writeClientServices({
                 services: client.services,
                 templates,
-                outputPath: outputPathServices,
+                outputPaths: {
+                    outputServices,
+                    outputCore: exportCore ? `${relative(outputServices, outputCore)}` : '../core/',
+                    outputModels: exportModels ? `${relative(outputServices, outputModels)}` : '../models/',
+                },
                 httpClient,
                 useUnionTypes,
                 useOptions,
-                outputModels: exportModels ? `${relative(outputPathServices, outputPathModels)}` : '../models/',
-                outputCore: exportCore ? `${relative(outputPathServices, outputPathCore)}` : '../core/',
                 useCancelableRequest,
             });
         }
 
         if (exportSchemas) {
-            await mkdir(outputPathSchemas);
+            await mkdir(outputPaths.outputSchemas);
             await writeClientSchemas({
                 models: client.models,
                 templates,
-                outputPath: outputPathSchemas,
+                outputSchemasPath: outputPaths.outputSchemas,
                 httpClient,
                 useUnionTypes,
             });
         }
 
         if (exportModels) {
-            await mkdir(outputPathModels);
+            await mkdir(outputPaths.outputModels);
             await writeClientModels({
                 models: client.models,
                 templates,
-                outputPath: outputPathModels,
+                outputModelsPath: outputPaths.outputModels,
                 httpClient,
                 useUnionTypes,
             });
         }
 
         if (exportCore || exportServices || exportSchemas || exportModels) {
-            await mkdir(outputPath);
+            await mkdir(outputPaths.output);
             await this.writeClientIndex({
                 client,
                 templates,
-                output: {
-                    output: outputPath,
-                    outputCore: outputPathCore,
-                    outputServices: outputPathServices,
-                    outputModels: outputPathModels,
-                    outputSchemas: outputPathSchemas,
-                },
+                outputPaths,
                 useUnionTypes,
                 exportCore,
                 exportServices,
@@ -205,12 +182,12 @@ export class WriteClient {
      * @param options
      */
     async writeClientIndex(options: IWriteClientIndex): Promise<void> {
-        const { output } = options;
-        const values = this.options.get(output.output);
+        const { outputPaths } = options;
+        const values = this.options.get(outputPaths.output);
         if (values) {
             values.push(options);
         } else {
-            this.options.set(output.output, Array.of(options));
+            this.options.set(outputPaths.output, Array.of(options));
         }
     }
 
@@ -218,11 +195,11 @@ export class WriteClient {
         const result: Map<string, IClientIndex> = new Map<string, IClientIndex>();
         for (const [key, value] of this.options.entries()) {
             for (const item of value) {
-                const { exportCore, output, exportModels, exportSchemas, exportServices, client, templates } = item;
-                const outputCore = output.outputCore ? resolve(process.cwd(), output.outputCore) : resolve(key, 'core');
-                const outputModels = output.outputModels ? resolve(process.cwd(), output.outputModels) : resolve(key, 'models');
-                const outputSchemas = output.outputSchemas ? resolve(process.cwd(), output.outputSchemas) : resolve(key, 'schemas');
-                const outputServices = output.outputServices ? resolve(process.cwd(), output.outputServices) : resolve(key, 'services');
+                const { exportCore, outputPaths, exportModels, exportSchemas, exportServices, client, templates } = item;
+                const outputCore = outputPaths.outputCore ? outputPaths.outputCore : resolve(key, 'core');
+                const outputModels = outputPaths.outputModels ? outputPaths.outputModels : resolve(key, 'models');
+                const outputSchemas = outputPaths.outputSchemas ? outputPaths.outputSchemas : resolve(key, 'schemas');
+                const outputServices = outputPaths.outputServices ? outputPaths.outputServices : resolve(key, 'services');
                 let clientIndex = result.get(`${key}`);
                 if (!clientIndex) {
                     clientIndex = {

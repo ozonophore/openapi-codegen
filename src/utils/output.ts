@@ -8,8 +8,8 @@
  */
 export interface IOutput {
     output: string;
-    outputCore?: string;
-    outputServices?: string;
-    outputModels?: string;
-    outputSchemas?: string;
+    outputCore: string;
+    outputServices: string;
+    outputModels: string;
+    outputSchemas: string;
 }

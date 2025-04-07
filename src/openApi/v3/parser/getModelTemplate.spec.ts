@@ -6,7 +6,14 @@ describe('getModelTemplate', () => {
             type: 'Link<Model>',
             base: 'Link',
             template: 'Model',
-            imports: ['Model'],
+            imports: [
+                {
+                    name: 'Model',
+                    alias: 'Model',
+                    path: 'Model',
+                },
+            ],
+            path: 'Model',
         });
         expect(template).toEqual('<T>');
     });
@@ -17,6 +24,7 @@ describe('getModelTemplate', () => {
             base: 'string',
             template: null,
             imports: [],
+            path: '',
         });
         expect(template).toEqual('');
     });

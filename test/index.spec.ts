@@ -1,7 +1,7 @@
-import {readFileSync} from 'fs'
-import { sync } from 'glob'
+import { readFileSync } from 'fs';
+import { sync } from 'glob';
 
-import { generate, HttpClient } from '../'
+import { generate, HttpClient } from '../';
 
 describe('v2', () => {
     it('should generate', async () => {
