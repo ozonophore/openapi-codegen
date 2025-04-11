@@ -3,6 +3,7 @@ import { replaceString } from '../../../core/replaceString';
 import { encode } from '../../../utils/encode';
 import { getAbsolutePath } from '../../../utils/getAbsolutePath';
 import { getMappedType, hasMappedType } from '../../../utils/getMappedType';
+import { getRelativeModelImportPath } from '../../../utils/getRelativeModelImportPath';
 import { getRelativeModelPath } from '../../../utils/getRelativeModelPath';
 import { stripNamespace } from '../../../utils/stripNamespace';
 import { Parser } from '../Parser';
@@ -41,11 +42,12 @@ export function getType(this: Parser, value: string, parentRef: string): Type {
             result.base = mapped;
         }
     } else if (valueClean) {
+        const valueImportPath = getRelativeModelImportPath(this.context.output.outputModels, parentRef, valueClean);
         const type = this.getTypeNameByRef(getTypeName(valueClean), getAbsolutePath(value, parentRef));
         result.path = valuePath;
         result.type = type;
         result.base = type;
-        result.imports.push({ name: type, alias: '', path: valueClean });
+        result.imports.push({ name: type, alias: '', path: valueImportPath });
     }
 
     return result;

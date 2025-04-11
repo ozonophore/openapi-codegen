@@ -5,7 +5,7 @@ import RefParser from 'json-schema-ref-parser';
 import { getFileName } from '../utils/getFileName';
 import { isString } from '../utils/isString';
 import { IOutput } from '../utils/output';
-import { dirName, resolve } from './path';
+import { dirName } from './path';
 
 interface $Root {
     path: string;
@@ -32,14 +32,7 @@ export class Context {
     };
 
     constructor(input: string | Record<string, any>, output: IOutput, prefix?: Prefix) {
-        const outputPath = resolve(process.cwd(), output.output);
-        this._output = {
-            output: outputPath,
-            outputCore: output.outputCore ? resolve(process.cwd(), output.outputCore) : outputPath,
-            outputServices: output.outputServices ? resolve(process.cwd(), output.outputServices) : outputPath,
-            outputModels: output.outputModels ? resolve(process.cwd(), output.outputModels) : outputPath,
-            outputSchemas: output.outputSchemas ? resolve(process.cwd(), output.outputSchemas) : outputPath,
-        };
+        this._output = output;
         this._refs = {} as RefParser.$Refs;
         if (isString(input)) {
             this._root = { path: dirName(input), fileName: getFileName(input) };

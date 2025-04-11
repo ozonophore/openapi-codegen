@@ -376,7 +376,7 @@ exports[`v2 should generate: ./test/generated/v2/models/DictionaryWithReference.
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './ModelWithString';
+import type { IModelWithString } from '././ModelWithString';
 
 /**
  * This is a string reference
@@ -389,7 +389,7 @@ exports[`v2 should generate: ./test/generated/v2/models/ModelThatExtends.ts 1`] 
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './ModelWithString';
+import type { IModelWithString } from '././ModelWithString';
 
 /**
  * This is a model that extends another model
@@ -406,8 +406,8 @@ exports[`v2 should generate: ./test/generated/v2/models/ModelThatExtendsExtends.
 /* tslint:disable */
 /* eslint-disable */
 
-import type { TModelThatExtends } from './ModelThatExtends';
-import type { IModelWithString } from './ModelWithString';
+import type { TModelThatExtends } from '././ModelThatExtends';
+import type { IModelWithString } from '././ModelWithString';
 
 /**
  * This is a model that extends another model
@@ -424,7 +424,7 @@ exports[`v2 should generate: ./test/generated/v2/models/ModelWithArray.ts 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './ModelWithString';
+import type { IModelWithString } from '././ModelWithString';
 
 /**
  * This is a model with one property containing an array
@@ -698,7 +698,7 @@ exports[`v2 should generate: ./test/generated/v2/services/ComplexService.ts 1`] 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from './../models/ModelWithString';
+import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -773,7 +773,7 @@ exports[`v2 should generate: ./test/generated/v2/services/DefaultsService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from './../models/ModelWithString';
+import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -1240,9 +1240,9 @@ exports[`v2 should generate: ./test/generated/v2/services/ResponseService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TModelThatExtendsExtends } from './../models/ModelThatExtendsExtends';
-import type { TModelThatExtends } from './../models/ModelThatExtends';
-import type { IModelWithString } from './../models/ModelWithString';
+import type { TModelThatExtendsExtends } from './../models/./ModelThatExtendsExtends';
+import type { TModelThatExtends } from './../models/./ModelThatExtends';
+import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -1326,10 +1326,10 @@ exports[`v2 should generate: ./test/generated/v2/services/Service.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IDictionaryWithReference } from './../models/DictionaryWithReference';
-import type { IModelWithArray } from './../models/ModelWithArray';
-import type { IModelWithDictionary } from './../models/ModelWithDictionary';
-import type { IModelWithEnumInteger } from './../models/ModelWithEnumInteger';
+import type { IDictionaryWithReference } from './../models/./DictionaryWithReference';
+import type { IModelWithArray } from './../models/./ModelWithArray';
+import type { IModelWithDictionary } from './../models/./ModelWithDictionary';
+import type { IModelWithEnumInteger } from './../models/./ModelWithEnumInteger';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -1987,7 +1987,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/models/A
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './schemas/ModelWithString';
+import type { IModelWithString } from '././schemas/ModelWithString';
 
 /**
  * This is a simple array containing an array
@@ -2042,7 +2042,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/models/s
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './ModelWithString';
+import type { IModelWithString } from '././ModelWithString';
 
 /**
  * This is a model that extends another model
@@ -2059,7 +2059,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/models/s
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './ModelWithString';
+import type { IModelWithString } from '././ModelWithString';
 
 /**
  * This is a model with one property containing an array
@@ -2315,7 +2315,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithCircularReference } from './../models/schemas/ModelWithCircularReference';
+import type { IModelWithCircularReference } from './../models/./schemas/ModelWithCircularReference';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -2419,10 +2419,10 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithArray } from './../models/schemas/ModelWithArray';
-import type { IModelWithDictionary } from './../models/schemas/ModelWithDictionary';
-import type { IModelWithEnum } from './../models/schemas/ModelWithEnum';
-import type { IModelWithString } from './../models/schemas/ModelWithString';
+import type { IModelWithArray } from './../models/./schemas/ModelWithArray';
+import type { IModelWithDictionary } from './../models/./schemas/ModelWithDictionary';
+import type { IModelWithEnum } from './../models/./schemas/ModelWithEnum';
+import type { IModelWithString } from './../models/./schemas/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -2563,7 +2563,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from './../models/schemas/ModelWithString';
+import type { IModelWithString } from './../models/./schemas/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -2817,8 +2817,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { EEnumWithNumbers } from './../models/schemas/EnumWithNumbers';
-import type { EEnumWithStrings } from './../models/schemas/EnumWithStrings';
+import type { EEnumWithNumbers } from './../models/./schemas/EnumWithNumbers';
+import type { EEnumWithStrings } from './../models/./schemas/EnumWithStrings';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -2991,7 +2991,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from './../models/schemas/ModelWithString';
+import type { IModelWithString } from './../models/./schemas/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -3214,7 +3214,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from './../models/schemas/ModelWithString';
+import type { IModelWithString } from './../models/./schemas/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -3259,8 +3259,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TModelThatExtends } from './../models/schemas/ModelThatExtends';
-import type { IModelWithString } from './../models/schemas/ModelWithString';
+import type { TModelThatExtends } from './../models/./schemas/ModelThatExtends';
+import type { IModelWithString } from './../models/./schemas/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -3971,7 +3971,7 @@ exports[`v3 should generate: ./test/generated/v3/models/ArrayWithArray.ts 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './ModelWithString';
+import type { IModelWithString } from '././ModelWithString';
 
 /**
  * This is a simple array containing an array
@@ -4040,7 +4040,7 @@ exports[`v3 should generate: ./test/generated/v3/models/ModelThatExtends.ts 1`] 
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './ModelWithString';
+import type { IModelWithString } from '././ModelWithString';
 
 /**
  * This is a model that extends another model
@@ -4057,8 +4057,8 @@ exports[`v3 should generate: ./test/generated/v3/models/ModelThatExtendsExtends.
 /* tslint:disable */
 /* eslint-disable */
 
-import type { TModelThatExtends } from './ModelThatExtends';
-import type { IModelWithString } from './ModelWithString';
+import type { TModelThatExtends } from '././ModelThatExtends';
+import type { IModelWithString } from '././ModelWithString';
 
 /**
  * This is a model that extends another model
@@ -4075,7 +4075,7 @@ exports[`v3 should generate: ./test/generated/v3/models/ModelWithArray.ts 1`] = 
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './ModelWithString';
+import type { IModelWithString } from '././ModelWithString';
 
 /**
  * This is a model with one property containing an array
@@ -4405,10 +4405,10 @@ exports[`v3 should generate: ./test/generated/v3/services/ComplexService.ts 1`] 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithArray } from './../models/ModelWithArray';
-import type { IModelWithDictionary } from './../models/ModelWithDictionary';
-import type { IModelWithEnum } from './../models/ModelWithEnum';
-import type { IModelWithString } from './../models/ModelWithString';
+import type { IModelWithArray } from './../models/./ModelWithArray';
+import type { IModelWithDictionary } from './../models/./ModelWithDictionary';
+import type { IModelWithEnum } from './../models/./ModelWithEnum';
+import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -4549,7 +4549,7 @@ exports[`v3 should generate: ./test/generated/v3/services/DefaultsService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from './../models/ModelWithString';
+import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -4803,9 +4803,9 @@ exports[`v3 should generate: ./test/generated/v3/services/EnumsService.ts 1`] = 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { EEnumWithNumbers } from './../models/EnumWithNumbers';
-import type { EEnumWithStrings } from './../models/EnumWithStrings';
-import type { EEnumWithStringsWithType } from './../models/EnumWithStringsWithType';
+import type { EEnumWithNumbers } from './../models/./EnumWithNumbers';
+import type { EEnumWithStrings } from './../models/./EnumWithStrings';
+import type { EEnumWithStringsWithType } from './../models/./EnumWithStringsWithType';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -4901,7 +4901,7 @@ exports[`v3 should generate: ./test/generated/v3/services/MultipartService.ts 1`
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from './../models/ModelWithString';
+import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -5015,7 +5015,7 @@ exports[`v3 should generate: ./test/generated/v3/services/ParametersService.ts 1
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from './../models/ModelWithString';
+import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -5238,7 +5238,7 @@ exports[`v3 should generate: ./test/generated/v3/services/RequestBodyService.ts 
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { IModelWithString } from './../models/ModelWithString';
+import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
@@ -5283,9 +5283,9 @@ exports[`v3 should generate: ./test/generated/v3/services/ResponseService.ts 1`]
 "/* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TModelThatExtendsExtends } from './../models/ModelThatExtendsExtends';
-import type { TModelThatExtends } from './../models/ModelThatExtends';
-import type { IModelWithString } from './../models/ModelWithString';
+import type { TModelThatExtendsExtends } from './../models/./ModelThatExtendsExtends';
+import type { TModelThatExtends } from './../models/./ModelThatExtends';
+import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';

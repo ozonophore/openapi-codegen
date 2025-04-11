@@ -1,64 +1,44 @@
-import { normalize, resolve } from '../core/path';
+import path from 'path';
+
 import { replaceString } from '../core/replaceString';
 import { getRelativeModelPath } from './getRelativeModelPath';
-import { isPathWithRoot } from './isPathWithRoot';
 import { stripNamespace } from './stripNamespace';
 
 /**
  * The function calculates the relative import path for model.
  * @param rootPath Root folder path.
- * @param relativePath Import relative path.
- * @param modelPath Model relative path.
+ * @param sourcePath Import relative path.
+ * @param targetPath Model relative path.
  * @returns Current relative model import path.
  */
-export function getRelativeModelImportPath(rootPath: string | undefined, relativePath: string, modelPath: string) {
+export function getRelativeModelImportPath(rootPath: string | undefined, sourcePath: string, targetPath: string) {
     if (!rootPath) {
-        return relativePath;
-    }
-    const normalizedRelative = normalize(relativePath);
-
-    if (!normalizedRelative.startsWith('..')) {
-        return normalizedRelative;
+        const normalizedValue = replaceString(targetPath);
+        return stripNamespace(normalizedValue || '');
     }
 
-    let modelRelativePath = modelPath;
-    const isWithRoot = isPathWithRoot(rootPath, modelRelativePath);
-    if (!isWithRoot) {
-        modelRelativePath = getRelativeModelPath(rootPath, modelRelativePath);
+    const normalizedSourcePath = stripNamespace(sourcePath);
+    let absSourcePath = path.resolve(rootPath, normalizedSourcePath);
+    if (!absSourcePath.startsWith(rootPath)) {
+        const sourceRelativePath = getRelativeModelPath(rootPath, sourcePath);
+        absSourcePath = path.resolve(rootPath, sourceRelativePath);
     }
-    const absoluteModelPath = resolve(rootPath, modelRelativePath);
-    const updatedRelativePath = getRelativeModelPath(rootPath, normalizedRelative);
-    const absoluteImportPath = resolve(rootPath, updatedRelativePath);
+    const absSourceDir = normalizedSourcePath ? path.dirname(absSourcePath) : rootPath;
 
-    const newRelativePath = calculateRelativePath(absoluteModelPath, absoluteImportPath);
+    let absTargetPath = path.resolve(absSourceDir, targetPath);
 
-    return newRelativePath;
-}
-
-/**
- * The function calculates the correct relative path.
- * @param firstPath Root path.
- * @param secondPath RelativePath.
- * @returns Current relative model import path.
- */
-function calculateRelativePath(firstPath: string, secondPath: string): string {
-    try {
-        const firstPathArr = normalize(firstPath).split('/');
-        const secondPathArr = normalize(secondPath).split('/');
-
-        let i = 0;
-        while (i < firstPathArr.length && i < secondPathArr.length && firstPathArr[i] === secondPathArr[i]) {
-            i++;
-        }
-
-        const repeatCount = Math.max(0, firstPathArr.length - i - 1);
-        const backtracking = '../'.repeat(repeatCount);
-        const forwardPath = secondPathArr.slice(i).join('/');
-        let relativePath = backtracking + forwardPath;
-        const normalizedValue = replaceString(relativePath);
-        relativePath = stripNamespace(normalizedValue || '');
-        return relativePath;
-    } catch (error) {
-        throw error;
+    if (!absTargetPath.startsWith(rootPath)) {
+        const targetRelativePath = getRelativeModelPath(rootPath, targetPath);
+        absTargetPath = path.resolve(rootPath, targetRelativePath);
     }
+
+    let relativePath = path.relative(absSourceDir, absTargetPath);
+    relativePath = replaceString(relativePath) || '';
+    let normalizedValue = stripNamespace(relativePath);
+
+    if (!normalizedValue.startsWith('.') && !normalizedValue.startsWith('/')) {
+        normalizedValue = `./${normalizedValue}`;
+    }
+
+    return normalizedValue;
 }

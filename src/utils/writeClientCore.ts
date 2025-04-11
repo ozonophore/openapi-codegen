@@ -8,7 +8,7 @@ import { Templates } from './registerHandlebarTemplates';
 /**
  * @param client Client object, containing, models, schemas and services
  * @param templates The loaded handlebar templates
- * @param outputPath Directory to write the generated files to
+ * @param outputCorePath Директория для генерации настроек ядра
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param request: Path to custom request file
  * @param useCancelableRequest Use cancelable request type
@@ -16,7 +16,7 @@ import { Templates } from './registerHandlebarTemplates';
 interface IWriteClientCore {
     client: Client;
     templates: Templates;
-    outputPath: string;
+    outputCorePath: string;
     httpClient: HttpClient;
     request?: string;
     useCancelableRequest?: boolean;
@@ -26,13 +26,13 @@ interface IWriteClientCore {
  * Generate OpenAPI core files, this includes the basic boilerplate code to handle requests.
  * @param client Client object, containing, models, schemas and services
  * @param templates The loaded handlebar templates
- * @param outputPath Directory to write the generated files to
+ * @param outputCorePath Директория для генерации настроек ядра
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param request: Path to custom request file
  * @param useCancelableRequest Use cancelable request type
  */
 export async function writeClientCore(options: IWriteClientCore): Promise<void> {
-    const { client, templates, outputPath, httpClient, request, useCancelableRequest } = options;
+    const { client, templates, outputCorePath, httpClient, request, useCancelableRequest } = options;
     const context = {
         httpClient,
         server: client.server,
@@ -40,15 +40,15 @@ export async function writeClientCore(options: IWriteClientCore): Promise<void> 
         useCancelableRequest,
     };
 
-    await writeFile(resolve(outputPath, 'OpenAPI.ts'), templates.core.settings(context));
-    await writeFile(resolve(outputPath, 'ApiError.ts'), templates.core.apiError({}));
-    await writeFile(resolve(outputPath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
-    await writeFile(resolve(outputPath, 'ApiResult.ts'), templates.core.apiResult({}));
+    await writeFile(resolve(outputCorePath, 'OpenAPI.ts'), templates.core.settings(context));
+    await writeFile(resolve(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
+    await writeFile(resolve(outputCorePath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
+    await writeFile(resolve(outputCorePath, 'ApiResult.ts'), templates.core.apiResult({}));
     if (useCancelableRequest) {
-        await writeFile(resolve(outputPath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
+        await writeFile(resolve(outputCorePath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
     }
-    await writeFile(resolve(outputPath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
-    await writeFile(resolve(outputPath, 'request.ts'), templates.core.request(context));
+    await writeFile(resolve(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
+    await writeFile(resolve(outputCorePath, 'request.ts'), templates.core.request(context));
 
     if (request) {
         const requestFile = resolve(process.cwd(), request);
@@ -56,6 +56,6 @@ export async function writeClientCore(options: IWriteClientCore): Promise<void> 
         if (!requestFileExists) {
             throw new Error(`Custom request file "${requestFile}" does not exists`);
         }
-        await copyFile(requestFile, resolve(outputPath, 'request.ts'));
+        await copyFile(requestFile, resolve(outputCorePath, 'request.ts'));
     }
 }

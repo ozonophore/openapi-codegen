@@ -48,7 +48,7 @@ export function getModels(this: Parser, openApi: OpenApi): Model[] {
                 const importPath = importModel.length > 0 ? join(relative(model.path, importModel[0].path), imprt.name) : imprt.path;
                 return Object.assign(imprt, {
                     alias: importAlias,
-                    path: getRelativeModelImportPath(this.context.output?.outputModels, importPath, model.path),
+                    path: importPath,
                 });
             });
         });

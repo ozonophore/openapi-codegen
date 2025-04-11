@@ -38,12 +38,14 @@ describe('writeClientServices', () => {
         await writeClientServices({
             services,
             templates,
-            outputPath: '/',
+            outputPaths: {
+                outputCore: '/',
+                outputModels: '/',
+                outputServices: '/',
+            },
             httpClient: HttpClient.FETCH,
             useUnionTypes: false,
             useOptions: false,
-            outputModels: '/',
-            outputCore: '/',
             useCancelableRequest: false,
         });
 
