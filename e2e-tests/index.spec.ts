@@ -1,6 +1,6 @@
 import { expect, test } from './helps/fixtures';
 
-const testCases = [{ folder: 'v2/fetch' }, { folder: 'v2/node' }, { folder: 'v2/axios' }, { folder: 'v2/babel' }];
+const testCases = [{ folder: 'v2/fetch' }, { folder: 'v2/node' }, { folder: 'v2/axios' }, { folder: 'v2/xhr' }];
 
 test.describe.parallel('API Tests', () => {
     for (const { folder } of testCases) {
