@@ -36,19 +36,14 @@ export const test = base.extend<TestFixtures>({
     apiPage: async ({ browser, folder }, use) => {
         const page = await browser.newPage();
 
-        // Добавляем обработчик для инициализации API
-        await page.addInitScript(() => {
-            // Создаём глобальный объект api
-            (window as any).api = {
-                SimpleService: new (window as any).SimpleService(),
-            };
-        });
+        // Включаем логирование сети
+        page.on('request', request => console.log('Request:', request.url()));
+        page.on('response', response => console.log('Response:', response.status(), response.url()));
 
-        // Загружаем сгенерированные скрипты
         await page.goto(`http://localhost:3000/${folder}/index.html`);
 
-        // Ждём инициализации API
-        // await page.waitForFunction(() => typeof (window as any).api?.SimpleService !== 'undefined', { timeout: 5000 });
+        // Ожидаем загрузки модуля
+        await page.waitForFunction(() => typeof (window as any).api !== 'undefined', { timeout: 5000 });
 
         await use(page);
         await page.close();
