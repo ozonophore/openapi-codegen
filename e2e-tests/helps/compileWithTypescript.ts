@@ -3,14 +3,14 @@ import { resolve } from 'path';
 import { createCompilerHost, createProgram, formatDiagnosticsWithColorAndContext, getPreEmitDiagnostics, parseConfigFileTextToJson, parseJsonConfigFileContent, sys } from 'typescript';
 
 export const compileWithTypescript = (dir: string) => {
-    const cwd = `./test/e2e/generated/${dir}/`;
+    const cwd = `./e2e-tests/generated/${dir}/`;
     const tsconfig = {
         compilerOptions: {
             target: 'es2020',
-            module: 'es2020',
+            module: 'CommonJS',
             moduleResolution: 'node',
             lib: ['es2020', 'dom'],
-            declaration: false,
+            declaration: true,
             declarationMap: false,
             sourceMap: false,
             noImplicitReturns: true,
