@@ -7,7 +7,7 @@ export const compileWithTypescript = (dir: string) => {
     const tsconfig = {
         compilerOptions: {
             target: 'es2020',
-            module: 'CommonJS',
+            module: 'ESNext',
             moduleResolution: 'node',
             lib: ['es2020', 'dom'],
             declaration: true,
@@ -20,6 +20,7 @@ export const compileWithTypescript = (dir: string) => {
             skipLibCheck: true,
             allowSyntheticDefaultImports: true,
             experimentalDecorators: true,
+            esModuleInterop: true,
         },
         include: ['**/*.ts'],
     };

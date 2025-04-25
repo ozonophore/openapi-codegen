@@ -1,3 +1,4 @@
 // @ts-nocheck
-import * as api from './index.js';
-(window as any).api = { ...api };
+import('./index.js').then(module => {
+    (window as any).api = module;
+});
