@@ -5,60 +5,35 @@ import { resolve as resolvePath } from 'path';
 let _app: Express;
 let _server: Server;
 
+/**
+ * Запускает локальный сервер для E2E-тестов.
+ * @param dir Папка внутри "./test/e2e/generated/", откуда будут браться статика и скрипты
+ */
 const start = async (dir: string) => {
     return new Promise<void>(resolve => {
         _app = express();
 
-        // Serve the JavaScript files from the specific folder, since we are using browser
-        // based ES6 modules, this also means that we can just request the js/index.js file
-        // and all other relative paths are resolved from that file.
+        // Парсинг JSON-тел
+        _app.use(express.json());
+
+        // Статическая раздача всех файлов из generated dir
         _app.use(
-            '/js',
-            express.static(`./e2e-tests/generated/${dir}/`, {
-                extensions: ['', 'js'],
-                index: 'index.js',
+            express.static(resolvePath(`./test/e2e/generated/${dir}`), {
+                extensions: ['js', 'html', 'css'],
+                index: 'index.html',
             })
         );
 
-        _app.use(express.json());
-
-        // Serve static assets
-        _app.get('/runtime.js', (req, res) => {
-            res.sendFile(resolvePath(`./e2e-tests/generated/${dir}/runtime.js`));
-        });
-        _app.get('/polyfills.js', (req, res) => {
-            res.sendFile(resolvePath(`./e2e-tests/generated/${dir}/polyfills.js`));
-        });
-        _app.get('/vendor.js', (req, res) => {
-            res.sendFile(resolvePath(`./e2e-tests/generated/${dir}/vendor.js`));
-        });
-        _app.get('/main.js', (req, res) => {
-            res.sendFile(resolvePath(`./e2e-tests/generated/${dir}/main.js`));
-        });
-        _app.get('/styles.css', (req, res) => {
-            res.sendFile(resolvePath(`./e2e-tests/generated/${dir}/styles.css`));
-        });
-        _app.get('/favicon.ico', (req, res) => {
-            res.sendFile(resolvePath(`./e2e-tests/generated/${dir}/favicon.ico`));
-        });
-        _app.get('/', (req, res) => {
-            res.sendFile(resolvePath(`./e2e-tests/generated/${dir}/index.html`));
-        });
-
-        // Register an 'echo' server for testing error codes. This will just grab the
-        // status code from the query and return the default response (and text) from Express.
-        // See the spec files for more information.
+        // Специальный endpoint для эмуляции ошибки
         _app.all('/base/api/v1.0/error', (req, res) => {
-            const status = parseInt(String(req.query.status));
+            const status = parseInt(String(req.query.status), 10) || 500;
             res.status(status).json({
                 status,
                 message: 'hello world',
             });
         });
 
-        // Register an 'echo' server that just returns all data from the API calls.
-        // Although this might not be a 'correct' response, we can use this to test
-        // the majority of API calls.
+        // Общий прокси для остальных API-запросов
         _app.all('/base/api/v1.0/*', (req, res) => {
             setTimeout(() => {
                 res.json({
@@ -73,20 +48,19 @@ const start = async (dir: string) => {
                 });
             }, 100);
         });
+
         _server = _app.listen(3000, () => {
             resolve();
         });
     });
 };
 
+/** Останавливает запущенный сервер */
 const stop = async () => {
     return new Promise<void>((resolve, reject) => {
         _server.close(err => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
-            }
+            if (err) reject(err);
+            else resolve();
         });
     });
 };
