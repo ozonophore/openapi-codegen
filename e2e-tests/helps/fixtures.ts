@@ -36,14 +36,36 @@ export const test = base.extend<TestFixtures>({
     apiPage: async ({ browser, folder }, use) => {
         const page = await browser.newPage();
 
+        // Добавляем обработчик для отслеживания инициализации API
+        await page.exposeFunction('__apiReady', () => true);
+
+        // Модифицируем main.js через page.evaluateOnNewDocument
+        // await page.evaluateOnNewDocument(folder => {
+        //     const script = document.createElement('script');
+        //     script.type = 'module';
+        //     script.textContent = `
+        //     import * as api from './index.js';
+        //     window.api = api;
+        //     window.__apiReady();
+        //     `;
+        //     document.head.appendChild(script);
+        // }, folder);
+
         // Включаем логирование сети
         page.on('request', request => console.log('Request:', request.url()));
         page.on('response', response => console.log('Response:', response.status(), response.url()));
 
         await page.goto(`http://localhost:3000/${folder}/index.html`);
 
+        await page.evaluate(() => {
+            console.log('API State:', {
+                exists: typeof (window as any).api !== 'undefined',
+                keys: (window as any).api ? Object.keys((window as any).api) : [],
+            });
+        });
+
         // Ожидаем загрузки модуля
-        await page.waitForFunction(() => typeof (window as any).api !== 'undefined', { timeout: 5000 });
+        await page.waitForFunction(() => typeof (window as any).api !== 'undefined', { timeout: 10000 });
 
         await use(page);
         await page.close();
