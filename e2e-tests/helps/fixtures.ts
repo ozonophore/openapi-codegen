@@ -52,8 +52,8 @@ export const test = base.extend<TestFixtures>({
         // }, folder);
 
         // Включаем логирование сети
-        page.on('request', request => console.log('Request:', request.url()));
-        page.on('response', response => console.log('Response:', response.status(), response.url()));
+        // page.on('request', request => console.log('Request:', request.url()));
+        // page.on('response', response => console.log('Response:', response.status(), response.url()));
 
         await page.goto(`http://localhost:3000/${folder}/index.html`);
 
