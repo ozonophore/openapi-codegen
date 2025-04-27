@@ -7,7 +7,7 @@ export const compileWithTypescript = (dir: string) => {
     const tsconfig = {
         compilerOptions: {
             target: 'es2020',
-            module: 'ESNext',
+            module: 'CommonJS',
             moduleResolution: 'node',
             lib: ['es2020', 'dom'],
             declaration: true,

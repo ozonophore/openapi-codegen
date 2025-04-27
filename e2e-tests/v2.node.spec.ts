@@ -16,7 +16,7 @@ test.describe('v2.node client', () => {
         await server.stop();
     });
 
-    test.skip('requests token', async () => {
+    test('requests token', async () => {
         const { OpenAPI, SimpleService } = require(path.join(GENERATED, 'index.js'));
 
         tokenCalls = 0;
@@ -30,7 +30,7 @@ test.describe('v2.node client', () => {
         expect(result.headers.authorization).toBe('Bearer MY_TOKEN');
     });
 
-    test.skip('complexService', async () => {
+    test('complexService', async () => {
         const { ComplexService } = require(path.join(GENERATED, 'index.js'));
         const payload = { first: { second: { third: 'Hello World!' } } };
         const result = await ComplexService.complexTypes(payload);

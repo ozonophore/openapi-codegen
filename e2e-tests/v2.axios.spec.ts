@@ -17,7 +17,7 @@ test.describe('v2.axios client', () => {
         await server.stop();
     });
 
-    test.skip('requests token', async () => {
+    test('requests token', async () => {
         const importPath = path.join(GENERATED, 'index.js');
         console.log('=== ', importPath, ' ===');
         // Подключаем сгенерированный JS-клиент
@@ -37,7 +37,7 @@ test.describe('v2.axios client', () => {
         expect(result.headers.authorization).toBe('Bearer MY_TOKEN');
     });
 
-    test.skip('complexService', async () => {
+    test('complexService', async () => {
         const { ComplexService } = require(path.join(GENERATED, 'index.js'));
         const payload = { first: { second: { third: 'Hello World!' } } };
         const result = await ComplexService.complexTypes(payload);
