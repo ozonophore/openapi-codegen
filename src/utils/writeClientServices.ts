@@ -12,7 +12,7 @@ type TServeceOutputsPath = Omit<IOutput, 'output' | 'outputSchemas'>;
 /**
  * @param services Array of Services to write
  * @param templates The loaded handlebar templates
- * @param outputServicePath Параметры папок для генерации ядра, моделей и сервисной части
+ * @param outputServicePath Folder options for generating the core, models, and service part
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useUnionTypes Use union types instead of enums
  * @param useOptions Use options or arguments functions
@@ -32,7 +32,7 @@ interface IWriteClientServices {
  * Generate Services using the Handlebar template and write to disk.
  * @param services Array of Services to write
  * @param templates The loaded handlebar templates
- * @param outputServicePath Параметры папок для генерации ядра, моделей и сервисной части
+ * @param outputServicePath Folder options for generating the core, models, and service part
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useUnionTypes Use union types instead of enums
  * @param useOptions Use options or arguments functions

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1-rc.3] - 2025-05-15
+
+### Added
+- Added formatting of hbs templates using prettier
+
+### Fixed
+- Fixed a cross-platform error when calculating relative paths
+
 ## [0.5.1-rc.2] - 2025-04-08
 
 ### Updated

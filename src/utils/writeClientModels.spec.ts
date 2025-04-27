@@ -50,6 +50,6 @@ describe('writeClientModels', () => {
 
         await writeClientModels({ models, templates, outputModelsPath: '/', httpClient: HttpClient.FETCH, useUnionTypes: false });
 
-        expect(writeFile).toBeCalledWith('/MyModel.ts', 'model');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/MyModel.ts/), expect.stringMatching(/model/));
     });
 });
