@@ -8,7 +8,7 @@ import { Templates } from './registerHandlebarTemplates';
 /**
  * @param client Client object, containing, models, schemas and services
  * @param templates The loaded handlebar templates
- * @param outputCorePath Директория для генерации настроек ядра
+ * @param outputCorePath The directory for generating the kernel settings
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param request: Path to custom request file
  * @param useCancelableRequest Use cancelable request type
@@ -26,7 +26,7 @@ interface IWriteClientCore {
  * Generate OpenAPI core files, this includes the basic boilerplate code to handle requests.
  * @param client Client object, containing, models, schemas and services
  * @param templates The loaded handlebar templates
- * @param outputCorePath Директория для генерации настроек ядра
+ * @param outputCorePath The directory for generating the kernel settings
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param request: Path to custom request file
  * @param useCancelableRequest Use cancelable request type
