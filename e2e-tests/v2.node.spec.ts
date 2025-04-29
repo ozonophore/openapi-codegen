@@ -17,7 +17,7 @@ test.describe('v2.node client', () => {
     });
 
     test('requests token', async () => {
-        const { OpenAPI, SimpleService } = require(path.join(GENERATED, 'index.js'));
+        const { OpenAPI, SimpleService } = require(path.join(GENERATED, 'cjs/index.js'));
 
         tokenCalls = 0;
         OpenAPI.TOKEN = async () => {
@@ -31,7 +31,7 @@ test.describe('v2.node client', () => {
     });
 
     test('complexService', async () => {
-        const { ComplexService } = require(path.join(GENERATED, 'index.js'));
+        const { ComplexService } = require(path.join(GENERATED, 'cjs/index.js'));
         const payload = { first: { second: { third: 'Hello World!' } } };
         const result = await ComplexService.complexTypes(payload);
         expect(result).toBeDefined();

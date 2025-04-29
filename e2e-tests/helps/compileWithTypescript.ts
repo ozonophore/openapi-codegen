@@ -1,45 +1,84 @@
 import { EOL } from 'os';
-import { resolve } from 'path';
-import { createCompilerHost, createProgram, formatDiagnosticsWithColorAndContext, getPreEmitDiagnostics, parseConfigFileTextToJson, parseJsonConfigFileContent, sys } from 'typescript';
+import { join, resolve } from 'path';
+import {
+    createCompilerHost,
+    createProgram,
+    formatDiagnosticsWithColorAndContext,
+    getPreEmitDiagnostics,
+    ModuleKind,
+    parseConfigFileTextToJson,
+    parseJsonConfigFileContent,
+    ScriptTarget,
+    sys,
+} from 'typescript';
+
+interface CompileOptions {
+    target: ScriptTarget;
+    module: ModuleKind;
+    outDir: string;
+}
+
+const defaultBaseConfig = {
+    compilerOptions: {
+        target: ScriptTarget.ES2020,
+        moduleResolution: 2, // node
+        lib: ['es2020', 'dom'],
+        declaration: false,
+        sourceMap: false,
+        strict: true,
+        skipLibCheck: true,
+        esModuleInterop: true,
+    },
+    include: ['**/*.ts'],
+};
 
 export const compileWithTypescript = (dir: string) => {
-    const cwd = `./e2e-tests/generated/${dir}/`;
-    const tsconfig = {
-        compilerOptions: {
-            target: 'es2020',
-            module: 'CommonJS',
-            moduleResolution: 'node',
-            lib: ['es2020', 'dom'],
-            declaration: true,
-            declarationMap: false,
-            sourceMap: false,
-            noImplicitReturns: true,
-            noImplicitThis: true,
-            noImplicitAny: true,
-            strict: true,
-            skipLibCheck: true,
-            allowSyntheticDefaultImports: true,
-            experimentalDecorators: true,
-            esModuleInterop: true,
+    const cwd = resolve(process.cwd(), `./test/e2e/generated/${dir}`);
+    const variants: CompileOptions[] = [
+        {
+            target: ScriptTarget.ES2020,
+            module: ModuleKind.ES2020,
+            outDir: join(cwd, 'esm'),
         },
-        include: ['**/*.ts'],
-    };
+        {
+            target: ScriptTarget.ES2020,
+            module: ModuleKind.CommonJS,
+            outDir: join(cwd, 'cjs'),
+        },
+    ];
 
-    // Compile files to JavaScript (ES6 modules)
-    const configFile = parseConfigFileTextToJson('tsconfig.json', JSON.stringify(tsconfig));
-    const configFileResult = parseJsonConfigFileContent(configFile.config, sys, resolve(process.cwd(), cwd), undefined, 'tsconfig.json');
-    const compilerHost = createCompilerHost(configFileResult.options);
-    const compiler = createProgram(configFileResult.fileNames, configFileResult.options, compilerHost);
-    const result = compiler.emit();
+    for (const { target, module, outDir } of variants) {
+        // Собираем «виртуальный» tsconfig
+        const cfg = {
+            ...defaultBaseConfig,
+            compilerOptions: {
+                ...defaultBaseConfig.compilerOptions,
+                target,
+                module,
+                outDir,
+            },
+        };
+        // Парсим tsconfig → JSON
+        const raw = parseConfigFileTextToJson('tsconfig.json', JSON.stringify(cfg));
+        const parsed = parseJsonConfigFileContent(raw.config, sys, cwd, undefined, 'tsconfig.json');
 
-    // Show errors or warnings (if any)
-    const diagnostics = getPreEmitDiagnostics(compiler).concat(result.diagnostics);
-    if (diagnostics.length) {
-        const message = formatDiagnosticsWithColorAndContext(diagnostics, {
-            getCurrentDirectory: () => sys.getCurrentDirectory(),
-            getCanonicalFileName: f => f,
-            getNewLine: () => EOL,
-        });
-        console.log(message);
+        // Создаём программу и хост
+        const host = createCompilerHost(parsed.options);
+        const program = createProgram(parsed.fileNames, parsed.options, host);
+        const { diagnostics, emitSkipped } = program.emit();
+
+        // Собираем все сообщения
+        const allDiags = getPreEmitDiagnostics(program).concat(diagnostics);
+        if (allDiags.length) {
+            const msg = formatDiagnosticsWithColorAndContext(allDiags, {
+                getCurrentDirectory: sys.getCurrentDirectory,
+                getCanonicalFileName: f => f,
+                getNewLine: () => EOL,
+            });
+            console.error(`\n— ${ModuleKind[module]} build errors:\n`, msg);
+            if (emitSkipped) {
+                throw new Error(`${ModuleKind[module]} build failed, see diagnostics above`);
+            }
+        }
     }
 };

@@ -21,7 +21,7 @@ test.describe('v2.axios client', () => {
         const importPath = path.join(GENERATED, 'index.js');
         console.log('=== ', importPath, ' ===');
         // Подключаем сгенерированный JS-клиент
-        const { OpenAPI, SimpleService } = require(path.join(GENERATED, 'index.js'));
+        const { OpenAPI, SimpleService } = require(path.join(GENERATED, 'cjs/index.js'));
 
         // Мокаем выдачу токена
         tokenCalls = 0;
@@ -38,7 +38,7 @@ test.describe('v2.axios client', () => {
     });
 
     test('complexService', async () => {
-        const { ComplexService } = require(path.join(GENERATED, 'index.js'));
+        const { ComplexService } = require(path.join(GENERATED, 'cjs/index.js'));
         const payload = { first: { second: { third: 'Hello World!' } } };
         const result = await ComplexService.complexTypes(payload);
         expect(result).toBeDefined();

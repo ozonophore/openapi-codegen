@@ -18,7 +18,7 @@ const start = async (dir: string) => {
 
         // Статическая раздача всех файлов из generated dir
         _app.use(
-            express.static(resolvePath(`./test/e2e/generated/${dir}`), {
+            express.static(resolvePath(`./test/e2e/generated/${dir}/esm`), {
                 extensions: ['js', 'html', 'css'],
                 index: 'index.html',
             })
