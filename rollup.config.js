@@ -7,6 +7,7 @@ const typescript = require('rollup-plugin-typescript2');
 const handlebars = require('handlebars');
 const path = require('path');
 const fs = require('fs');
+const json = require('@rollup/plugin-json');
 
 const pkg = require('./package.json');
 const external = Object.keys(pkg.dependencies);
@@ -48,6 +49,7 @@ const handlebarsPlugin = () => ({
 
 const getPlugins = () => {
     const plugins = [
+        json(),
         nodeResolve(),
         commonjs({
             sourceMap: false,

@@ -381,7 +381,8 @@ import type { IModelWithString } from '././ModelWithString';
 /**
  * This is a string reference
  */
-export type IDictionaryWithReference = Record<string, IModelWithString>;"
+export type IDictionaryWithReference = Record<string, IModelWithString>;
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/models/ModelThatExtends.ts 1`] = `
@@ -394,10 +395,10 @@ import type { IModelWithString } from '././ModelWithString';
 /**
  * This is a model that extends another model
  */
-export type TModelThatExtends = (IModelWithString & {
-    propExtendsA?: string,
-    propExtendsB?: IModelWithString,
-});
+export type TModelThatExtends = IModelWithString & {
+    propExtendsA?: string;
+    propExtendsB?: IModelWithString;
+};
 "
 `;
 
@@ -412,10 +413,11 @@ import type { IModelWithString } from '././ModelWithString';
 /**
  * This is a model that extends another model
  */
-export type TModelThatExtendsExtends = (IModelWithString & TModelThatExtends & {
-    propExtendsC?: string,
-    propExtendsD?: IModelWithString,
-});
+export type TModelThatExtendsExtends = IModelWithString &
+    TModelThatExtends & {
+        propExtendsC?: string;
+        propExtendsD?: IModelWithString;
+    };
 "
 `;
 
@@ -467,7 +469,6 @@ export interface IModelWithEnumInteger {
 }
 
 export namespace IModelWithEnumInteger {
-
     /**
      * VALUE_1=1,VALUE_2=2,VALUE_3=3
      */
@@ -476,8 +477,6 @@ export namespace IModelWithEnumInteger {
         VALUE_2 = 2,
         VALUE_3 = 3,
     }
-
-
 }
 "
 `;
@@ -508,7 +507,8 @@ export const IDictionaryWithReferenceSchema = {
     contains: {
         type: 'IModelWithString',
     },
-};"
+};
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/schemas/ModelThatExtendsExtendsSchema.ts 1`] = `
@@ -517,21 +517,26 @@ exports[`v2 should generate: ./test/generated/v2/schemas/ModelThatExtendsExtends
 /* eslint-disable */
 export const TModelThatExtendsExtendsSchema = {
     type: 'all-of',
-    contains: [{
-        type: 'IModelWithString',
-    }, {
-        type: 'TModelThatExtends',
-    }, {
-        properties: {
-            propExtendsC: {
-                type: 'string',
-            },
-            propExtendsD: {
-                type: 'IModelWithString',
+    contains: [
+        {
+            type: 'IModelWithString',
+        },
+        {
+            type: 'TModelThatExtends',
+        },
+        {
+            properties: {
+                propExtendsC: {
+                    type: 'string',
+                },
+                propExtendsD: {
+                    type: 'IModelWithString',
+                },
             },
         },
-    }],
-};"
+    ],
+};
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/schemas/ModelThatExtendsSchema.ts 1`] = `
@@ -540,19 +545,23 @@ exports[`v2 should generate: ./test/generated/v2/schemas/ModelThatExtendsSchema.
 /* eslint-disable */
 export const TModelThatExtendsSchema = {
     type: 'all-of',
-    contains: [{
-        type: 'IModelWithString',
-    }, {
-        properties: {
-            propExtendsA: {
-                type: 'string',
-            },
-            propExtendsB: {
-                type: 'IModelWithString',
+    contains: [
+        {
+            type: 'IModelWithString',
+        },
+        {
+            properties: {
+                propExtendsA: {
+                    type: 'string',
+                },
+                propExtendsB: {
+                    type: 'IModelWithString',
+                },
             },
         },
-    }],
-};"
+    ],
+};
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithArraySchema.ts 1`] = `
@@ -580,7 +589,8 @@ export const IModelWithArraySchema = {
             },
         },
     },
-};"
+};
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithDictionarySchema.ts 1`] = `
@@ -596,7 +606,8 @@ export const IModelWithDictionarySchema = {
             },
         },
     },
-};"
+};
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithEnumIntegerSchema.ts 1`] = `
@@ -609,7 +620,8 @@ export const IModelWithEnumIntegerSchema = {
             type: 'Enum',
         },
     },
-};"
+};
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/schemas/ModelWithStringSchema.ts 1`] = `
@@ -622,7 +634,8 @@ export const IModelWithStringSchema = {
             type: 'string',
         },
     },
-};"
+};
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/CollectionFormatService.ts 1`] = `
@@ -643,14 +656,13 @@ const collectionFormat = (
     method: 'GET',
     path: \`/api/v{api-version}/collectionFormat\`,
     query: {
-        'parameterArrayCSV': parameterArrayCsv,
-        'parameterArraySSV': parameterArraySsv,
-        'parameterArrayTSV': parameterArrayTsv,
-        'parameterArrayPipes': parameterArrayPipes,
-        'parameterArrayMulti': parameterArrayMulti,
+        parameterArrayCSV: parameterArrayCsv,
+        parameterArraySSV: parameterArraySsv,
+        parameterArrayTSV: parameterArrayTsv,
+        parameterArrayPipes: parameterArrayPipes,
+        parameterArrayMulti: parameterArrayMulti,
     },
 });
-
 
 export type TCollectionFormatServiceOptions = {
     collectionFormat: (
@@ -660,14 +672,13 @@ export type TCollectionFormatServiceOptions = {
         parameterArrayPipes: Array<string>,
         parameterArrayMulti: Array<string>,
     ) => ApiRequestOptions;
-}
+};
 
 export const CollectionFormatServiceOptions: TCollectionFormatServiceOptions = {
     collectionFormat: collectionFormat,
-}
+};
 
 export class CollectionFormatService {
-
     /**
      * @param parameterArrayCsv This is an array parameter that is send as csv format (comma-separated values)
      * @param parameterArraySsv This is an array parameter that is send as ssv format (space-separated values)
@@ -683,15 +694,19 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string>,
         parameterArrayMulti: Array<string>,
     ): Promise<void> {
-        return __request<void>(CollectionFormatServiceOptions.collectionFormat(
-            parameterArrayCsv,
-            parameterArraySsv,
-            parameterArrayTsv,
-            parameterArrayPipes,
-            parameterArrayMulti,
-        ), OpenAPI);
+        return __request<void>(
+            CollectionFormatServiceOptions.collectionFormat(
+                parameterArrayCsv,
+                parameterArraySsv,
+                parameterArrayTsv,
+                parameterArrayPipes,
+                parameterArrayMulti,
+            ),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/ComplexService.ts 1`] = `
@@ -707,17 +722,17 @@ const complexTypes = (
     parameterObject: {
         first?: {
             second?: {
-                third?: string,
-            },
-        },
+                third?: string;
+            };
+        };
     },
     parameterReference: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/complex\`,
     query: {
-        'parameterObject': parameterObject,
-        'parameterReference': parameterReference,
+        parameterObject: parameterObject,
+        parameterReference: parameterReference,
     },
     errors: {
         400: \`400 server error\`,
@@ -725,26 +740,24 @@ const complexTypes = (
     },
 });
 
-
 export type TComplexServiceOptions = {
     complexTypes: (
         parameterObject: {
             first?: {
                 second?: {
-                    third?: string,
-                },
-            },
+                    third?: string;
+                };
+            };
         },
         parameterReference: IModelWithString,
     ) => ApiRequestOptions;
-}
+};
 
 export const ComplexServiceOptions: TComplexServiceOptions = {
     complexTypes: complexTypes,
-}
+};
 
 export class ComplexService {
-
     /**
      * @param parameterObject Parameter containing object
      * @param parameterReference Parameter containing reference
@@ -755,18 +768,19 @@ export class ComplexService {
         parameterObject: {
             first?: {
                 second?: {
-                    third?: string,
-                },
-            },
+                    third?: string;
+                };
+            };
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(ComplexServiceOptions.complexTypes(
-            parameterObject,
-            parameterReference,
-        ), OpenAPI);
+        return __request<Array<IModelWithString>>(
+            ComplexServiceOptions.complexTypes(parameterObject, parameterReference),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/DefaultsService.ts 1`] = `
@@ -784,17 +798,17 @@ const callWithDefaultParameters = (
     parameterBoolean: boolean = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString = {
-        "prop": "Hello World!"
+        prop: 'Hello World!',
     },
 ): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/defaults\`,
     query: {
-        'parameterString': parameterString,
-        'parameterNumber': parameterNumber,
-        'parameterBoolean': parameterBoolean,
-        'parameterEnum': parameterEnum,
-        'parameterModel': parameterModel,
+        parameterString: parameterString,
+        parameterNumber: parameterNumber,
+        parameterBoolean: parameterBoolean,
+        parameterEnum: parameterEnum,
+        parameterModel: parameterModel,
     },
 });
 
@@ -804,17 +818,17 @@ const callWithDefaultOptionalParameters = (
     parameterBoolean: boolean = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString = {
-        "prop": "Hello World!"
+        prop: 'Hello World!',
     },
 ): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/defaults\`,
     query: {
-        'parameterString': parameterString,
-        'parameterNumber': parameterNumber,
-        'parameterBoolean': parameterBoolean,
-        'parameterEnum': parameterEnum,
-        'parameterModel': parameterModel,
+        parameterString: parameterString,
+        parameterNumber: parameterNumber,
+        parameterBoolean: parameterBoolean,
+        parameterEnum: parameterEnum,
+        parameterModel: parameterModel,
     },
 });
 
@@ -829,15 +843,14 @@ const callToTestOrderOfParams = (
     method: 'PUT',
     path: \`/api/v{api-version}/defaults\`,
     query: {
-        'parameterStringWithNoDefault': parameterStringWithNoDefault,
-        'parameterStringWithDefault': parameterStringWithDefault,
-        'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
-        'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
-        'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
-        'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
+        parameterStringWithNoDefault: parameterStringWithNoDefault,
+        parameterStringWithDefault: parameterStringWithDefault,
+        parameterStringWithEmptyDefault: parameterStringWithEmptyDefault,
+        parameterOptionalStringWithDefault: parameterOptionalStringWithDefault,
+        parameterOptionalStringWithEmptyDefault: parameterOptionalStringWithEmptyDefault,
+        parameterOptionalStringWithNoDefault: parameterOptionalStringWithNoDefault,
     },
 });
-
 
 export type TDefaultsServiceOptions = {
     callWithDefaultParameters: (
@@ -862,16 +875,15 @@ export type TDefaultsServiceOptions = {
         parameterOptionalStringWithEmptyDefault: string,
         parameterOptionalStringWithNoDefault?: string,
     ) => ApiRequestOptions;
-}
+};
 
 export const DefaultsServiceOptions: TDefaultsServiceOptions = {
     callWithDefaultParameters: callWithDefaultParameters,
     callWithDefaultOptionalParameters: callWithDefaultOptionalParameters,
     callToTestOrderOfParams: callToTestOrderOfParams,
-}
+};
 
 export class DefaultsService {
-
     /**
      * @param parameterString This is a simple string with default value
      * @param parameterNumber This is a simple number with default value
@@ -886,16 +898,19 @@ export class DefaultsService {
         parameterBoolean: boolean = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString = {
-            "prop": "Hello World!"
+            prop: 'Hello World!',
         },
     ): Promise<void> {
-        return __request<void>(DefaultsServiceOptions.callWithDefaultParameters(
-            parameterString,
-            parameterNumber,
-            parameterBoolean,
-            parameterEnum,
-            parameterModel,
-        ), OpenAPI);
+        return __request<void>(
+            DefaultsServiceOptions.callWithDefaultParameters(
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param parameterString This is a simple string that is optional with default value
@@ -911,16 +926,19 @@ export class DefaultsService {
         parameterBoolean: boolean = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString = {
-            "prop": "Hello World!"
+            prop: 'Hello World!',
         },
     ): Promise<void> {
-        return __request<void>(DefaultsServiceOptions.callWithDefaultOptionalParameters(
-            parameterString,
-            parameterNumber,
-            parameterBoolean,
-            parameterEnum,
-            parameterModel,
-        ), OpenAPI);
+        return __request<void>(
+            DefaultsServiceOptions.callWithDefaultOptionalParameters(
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param parameterStringWithNoDefault This is a string with no default
@@ -939,16 +957,20 @@ export class DefaultsService {
         parameterOptionalStringWithEmptyDefault: string = '',
         parameterOptionalStringWithNoDefault?: string,
     ): Promise<void> {
-        return __request<void>(DefaultsServiceOptions.callToTestOrderOfParams(
-            parameterStringWithNoDefault,
-            parameterStringWithDefault,
-            parameterStringWithEmptyDefault,
-            parameterOptionalStringWithDefault,
-            parameterOptionalStringWithEmptyDefault,
-            parameterOptionalStringWithNoDefault,
-        ), OpenAPI);
+        return __request<void>(
+            DefaultsServiceOptions.callToTestOrderOfParams(
+                parameterStringWithNoDefault,
+                parameterStringWithDefault,
+                parameterStringWithEmptyDefault,
+                parameterOptionalStringWithDefault,
+                parameterOptionalStringWithEmptyDefault,
+                parameterOptionalStringWithNoDefault,
+            ),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/DuplicateService.ts 1`] = `
@@ -979,23 +1001,21 @@ const duplicateName3 = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/duplicate\`,
 });
 
-
 export type TDuplicateServiceOptions = {
     duplicateName: () => ApiRequestOptions;
     duplicateName1: () => ApiRequestOptions;
     duplicateName2: () => ApiRequestOptions;
     duplicateName3: () => ApiRequestOptions;
-}
+};
 
 export const DuplicateServiceOptions: TDuplicateServiceOptions = {
     duplicateName: duplicateName,
     duplicateName1: duplicateName1,
     duplicateName2: duplicateName2,
     duplicateName3: duplicateName3,
-}
+};
 
 export class DuplicateService {
-
     /**
      * @throws ApiError
      */
@@ -1020,7 +1040,8 @@ export class DuplicateService {
     public static duplicateName3(): Promise<void> {
         return __request<void>(DuplicateServiceOptions.duplicateName3(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/HeaderService.ts 1`] = `
@@ -1041,17 +1062,15 @@ const callWithResultFromHeader = (): ApiRequestOptions => ({
     },
 });
 
-
 export type THeaderServiceOptions = {
     callWithResultFromHeader: () => ApiRequestOptions;
-}
+};
 
 export const HeaderServiceOptions: THeaderServiceOptions = {
     callWithResultFromHeader: callWithResultFromHeader,
-}
+};
 
 export class HeaderService {
-
     /**
      * @returns string Successful response
      * @throws ApiError
@@ -1059,7 +1078,8 @@ export class HeaderService {
     public static callWithResultFromHeader(): Promise<string> {
         return __request<string>(HeaderServiceOptions.callWithResultFromHeader(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/NoContentService.ts 1`] = `
@@ -1075,17 +1095,15 @@ const callWithNoContentResponse = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/no-content\`,
 });
 
-
 export type TNoContentServiceOptions = {
     callWithNoContentResponse: () => ApiRequestOptions;
-}
+};
 
 export const NoContentServiceOptions: TNoContentServiceOptions = {
     callWithNoContentResponse: callWithNoContentResponse,
-}
+};
 
 export class NoContentService {
-
     /**
      * @returns void
      * @throws ApiError
@@ -1093,7 +1111,8 @@ export class NoContentService {
     public static callWithNoContentResponse(): Promise<void> {
         return __request<void>(NoContentServiceOptions.callWithNoContentResponse(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/ParametersService.ts 1`] = `
@@ -1114,13 +1133,13 @@ const callWithParameters = (
     method: 'GET',
     path: \`/api/v{api-version}/parameters/\${parameterPath}\`,
     headers: {
-        'parameterHeader': parameterHeader,
+        parameterHeader: parameterHeader,
     },
     query: {
-        'parameterQuery': parameterQuery,
+        parameterQuery: parameterQuery,
     },
     formData: {
-        'parameterForm': parameterForm,
+        parameterForm: parameterForm,
     },
     body: parameterBody,
 });
@@ -1142,14 +1161,13 @@ const callWithWeirdParameterNames = (
     },
     query: {
         'parameter-query': parameterQuery,
-        'default': _default,
+        default: _default,
     },
     formData: {
-        'parameter_form': parameterForm,
+        parameter_form: parameterForm,
     },
     body: parameterBody,
 });
-
 
 export type TParametersServiceOptions = {
     callWithParameters: (
@@ -1169,15 +1187,14 @@ export type TParametersServiceOptions = {
         parameterPath3?: string,
         _default?: string,
     ) => ApiRequestOptions;
-}
+};
 
 export const ParametersServiceOptions: TParametersServiceOptions = {
     callWithParameters: callWithParameters,
     callWithWeirdParameterNames: callWithWeirdParameterNames,
-}
+};
 
 export class ParametersService {
-
     /**
      * @param parameterHeader This is the parameter that goes into the header
      * @param parameterQuery This is the parameter that goes into the query params
@@ -1193,13 +1210,16 @@ export class ParametersService {
         parameterBody: string,
         parameterPath: string,
     ): Promise<void> {
-        return __request<void>(ParametersServiceOptions.callWithParameters(
-            parameterHeader,
-            parameterQuery,
-            parameterForm,
-            parameterBody,
-            parameterPath,
-        ), OpenAPI);
+        return __request<void>(
+            ParametersServiceOptions.callWithParameters(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterBody,
+                parameterPath,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param parameterHeader This is the parameter that goes into the request header
@@ -1222,18 +1242,22 @@ export class ParametersService {
         parameterPath3?: string,
         _default?: string,
     ): Promise<void> {
-        return __request<void>(ParametersServiceOptions.callWithWeirdParameterNames(
-            parameterHeader,
-            parameterQuery,
-            parameterForm,
-            parameterBody,
-            parameterPath1,
-            parameterPath2,
-            parameterPath3,
-            _default,
-        ), OpenAPI);
+        return __request<void>(
+            ParametersServiceOptions.callWithWeirdParameterNames(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterBody,
+                parameterPath1,
+                parameterPath2,
+                parameterPath3,
+                _default,
+            ),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/ResponseService.ts 1`] = `
@@ -1272,21 +1296,19 @@ const callWithResponses = (): ApiRequestOptions => ({
     },
 });
 
-
 export type TResponseServiceOptions = {
     callWithResponse: () => ApiRequestOptions;
     callWithDuplicateResponses: () => ApiRequestOptions;
     callWithResponses: () => ApiRequestOptions;
-}
+};
 
 export const ResponseServiceOptions: TResponseServiceOptions = {
     callWithResponse: callWithResponse,
     callWithDuplicateResponses: callWithDuplicateResponses,
     callWithResponses: callWithResponses,
-}
+};
 
 export class ResponseService {
-
     /**
      * @returns IModelWithString Message for default response
      * @throws ApiError
@@ -1308,18 +1330,29 @@ export class ResponseService {
      * @returns TModelThatExtendsExtends Message for 202 response
      * @throws ApiError
      */
-    public static callWithResponses(): Promise<{
-        readonly '@namespace.string'?: string,
-        readonly '@namespace.integer'?: number,
-        readonly value?: Array<IModelWithString>,
-    } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends> {
-        return __request<{
-            readonly '@namespace.string'?: string,
-            readonly '@namespace.integer'?: number,
-            readonly value?: Array<IModelWithString>,
-        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(ResponseServiceOptions.callWithResponses(), OpenAPI);
+    public static callWithResponses(): Promise<
+        | {
+              readonly '@namespace.string'?: string;
+              readonly '@namespace.integer'?: number;
+              readonly value?: Array<IModelWithString>;
+          }
+        | IModelWithString
+        | TModelThatExtends
+        | TModelThatExtendsExtends
+    > {
+        return __request<
+            | {
+                  readonly '@namespace.string'?: string;
+                  readonly '@namespace.integer'?: number;
+                  readonly value?: Array<IModelWithString>;
+              }
+            | IModelWithString
+            | TModelThatExtends
+            | TModelThatExtendsExtends
+        >(ResponseServiceOptions.callWithResponses(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/Service.ts 1`] = `
@@ -1354,23 +1387,21 @@ const getCallWithModelArray = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/getModelWithArray\`,
 });
 
-
 export type TServiceOptions = {
     getCallWithModelWithDictionaryReference: () => ApiRequestOptions;
     getCallWithModelWithDictionary: () => ApiRequestOptions;
     getCallWithSimpleInteger: () => ApiRequestOptions;
     getCallWithModelArray: () => ApiRequestOptions;
-}
+};
 
 export const ServiceOptions: TServiceOptions = {
     getCallWithModelWithDictionaryReference: getCallWithModelWithDictionaryReference,
     getCallWithModelWithDictionary: getCallWithModelWithDictionary,
     getCallWithSimpleInteger: getCallWithSimpleInteger,
     getCallWithModelArray: getCallWithModelArray,
-}
+};
 
 export class Service {
-
     /**
      * @returns IDictionaryWithReference Message for default response
      * @throws ApiError
@@ -1399,7 +1430,8 @@ export class Service {
     public static getCallWithModelArray(): Promise<IModelWithArray> {
         return __request<IModelWithArray>(ServiceOptions.getCallWithModelArray(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/SimpleService.ts 1`] = `
@@ -1445,7 +1477,6 @@ const patchCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/simple\`,
 });
 
-
 export type TSimpleServiceOptions = {
     getCallWithoutParametersAndResponse: () => ApiRequestOptions;
     putCallWithoutParametersAndResponse: () => ApiRequestOptions;
@@ -1454,7 +1485,7 @@ export type TSimpleServiceOptions = {
     optionsCallWithoutParametersAndResponse: () => ApiRequestOptions;
     headCallWithoutParametersAndResponse: () => ApiRequestOptions;
     patchCallWithoutParametersAndResponse: () => ApiRequestOptions;
-}
+};
 
 export const SimpleServiceOptions: TSimpleServiceOptions = {
     getCallWithoutParametersAndResponse: getCallWithoutParametersAndResponse,
@@ -1464,10 +1495,9 @@ export const SimpleServiceOptions: TSimpleServiceOptions = {
     optionsCallWithoutParametersAndResponse: optionsCallWithoutParametersAndResponse,
     headCallWithoutParametersAndResponse: headCallWithoutParametersAndResponse,
     patchCallWithoutParametersAndResponse: patchCallWithoutParametersAndResponse,
-}
+};
 
 export class SimpleService {
-
     /**
      * @throws ApiError
      */
@@ -1510,7 +1540,8 @@ export class SimpleService {
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
         return __request<void>(SimpleServiceOptions.patchCallWithoutParametersAndResponse(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v2 should generate: ./test/generated/v2/services/TypesService.ts 1`] = `
@@ -1534,16 +1565,15 @@ const types = (
     method: 'GET',
     path: \`/api/v{api-version}/types\`,
     query: {
-        'parameterArray': parameterArray,
-        'parameterDictionary': parameterDictionary,
-        'parameterEnum': parameterEnum,
-        'parameterNumber': parameterNumber,
-        'parameterString': parameterString,
-        'parameterBoolean': parameterBoolean,
-        'parameterObject': parameterObject,
+        parameterArray: parameterArray,
+        parameterDictionary: parameterDictionary,
+        parameterEnum: parameterEnum,
+        parameterNumber: parameterNumber,
+        parameterString: parameterString,
+        parameterBoolean: parameterBoolean,
+        parameterObject: parameterObject,
     },
 });
-
 
 export type TTypesServiceOptions = {
     types: (
@@ -1556,14 +1586,13 @@ export type TTypesServiceOptions = {
         parameterObject: any,
         id?: number,
     ) => ApiRequestOptions;
-}
+};
 
 export const TypesServiceOptions: TTypesServiceOptions = {
     types: types,
-}
+};
 
 export class TypesService {
-
     /**
      * @param parameterArray This is an array parameter
      * @param parameterDictionary This is a dictionary parameter
@@ -1589,18 +1618,22 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        return __request<number | string | boolean | any>(TypesServiceOptions.types(
-            parameterArray,
-            parameterDictionary,
-            parameterEnum,
-            parameterNumber,
-            parameterString,
-            parameterBoolean,
-            parameterObject,
-            id,
-        ), OpenAPI);
+        return __request<number | string | boolean | any>(
+            TypesServiceOptions.types(
+                parameterArray,
+                parameterDictionary,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterBoolean,
+                parameterObject,
+                id,
+            ),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/core/ApiError.ts 1`] = `
@@ -1992,7 +2025,8 @@ import type { IModelWithString } from '././schemas/ModelWithString';
 /**
  * This is a simple array containing an array
  */
-export type TArrayWithArray = Array<Array<IModelWithString>>;"
+export type TArrayWithArray = Array<Array<IModelWithString>>;
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/models/schemas/EnumWithNumbers.ts 1`] = `
@@ -2019,7 +2053,8 @@ export enum EEnumWithNumbers {
     '_-1.1' = -1.1,
     '_-1.2' = -1.2,
     '_-1.3' = -1.3,
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/models/schemas/EnumWithStrings.ts 1`] = `
@@ -2034,7 +2069,8 @@ export enum EEnumWithStrings {
     SUCCESS = 'Success',
     WARNING = 'Warning',
     ERROR = 'Error',
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/models/schemas/ModelThatExtends.ts 1`] = `
@@ -2047,10 +2083,10 @@ import type { IModelWithString } from '././ModelWithString';
 /**
  * This is a model that extends another model
  */
-export type TModelThatExtends = (IModelWithString & {
-    propExtendsA?: string,
-    propExtendsB?: IModelWithString,
-});
+export type TModelThatExtends = IModelWithString & {
+    propExtendsA?: string;
+    propExtendsB?: IModelWithString;
+};
 "
 `;
 
@@ -2124,7 +2160,6 @@ export interface IModelWithEnum {
 }
 
 export namespace IModelWithEnum {
-
     /**
      * This is a simple enum with strings
      */
@@ -2145,8 +2180,6 @@ export namespace IModelWithEnum {
         _500_FOO_BAR = '500 foo.bar',
         _600_FOO_BAR = '600 foo&bar',
     }
-
-
 }
 "
 `;
@@ -2180,7 +2213,8 @@ export const TArrayWithArraySchema = {
             type: 'IModelWithString',
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/schemas/EnumWithNumbersSchema.ts 1`] = `
@@ -2189,7 +2223,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/
 /* eslint-disable */
 export const EEnumWithNumbersSchema = {
     type: 'Enum',
-};"
+};
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/schemas/EnumWithStringsSchema.ts 1`] = `
@@ -2198,7 +2233,8 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/
 /* eslint-disable */
 export const EEnumWithStringsSchema = {
     type: 'Enum',
-};"
+};
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/schemas/ModelThatExtendsSchema.ts 1`] = `
@@ -2207,19 +2243,23 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/
 /* eslint-disable */
 export const TModelThatExtendsSchema = {
     type: 'all-of',
-    contains: [{
-        type: 'IModelWithString',
-    }, {
-        properties: {
-            propExtendsA: {
-                type: 'string',
-            },
-            propExtendsB: {
-                type: 'IModelWithString',
+    contains: [
+        {
+            type: 'IModelWithString',
+        },
+        {
+            properties: {
+                propExtendsA: {
+                    type: 'string',
+                },
+                propExtendsB: {
+                    type: 'IModelWithString',
+                },
             },
         },
-    }],
-};"
+    ],
+};
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/schemas/ModelWithArraySchema.ts 1`] = `
@@ -2247,7 +2287,8 @@ export const IModelWithArraySchema = {
             },
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/schemas/ModelWithCircularReferenceSchema.ts 1`] = `
@@ -2260,7 +2301,8 @@ export const IModelWithCircularReferenceSchema = {
             type: 'IModelWithCircularReference',
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/schemas/ModelWithDictionarySchema.ts 1`] = `
@@ -2276,7 +2318,8 @@ export const IModelWithDictionarySchema = {
             },
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/schemas/ModelWithEnumSchema.ts 1`] = `
@@ -2295,7 +2338,8 @@ export const IModelWithEnumSchema = {
             type: 'boolean',
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/schemas/schemas/ModelWithStringSchema.ts 1`] = `
@@ -2308,7 +2352,8 @@ export const IModelWithStringSchema = {
             type: 'string',
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/CircularService.ts 1`] = `
@@ -2325,17 +2370,15 @@ const callWithCircularModel = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/circular\`,
 });
 
-
 export type TCircularOptions = {
     callWithCircularModel: () => ApiRequestOptions;
-}
+};
 
 export const CircularOptions: TCircularOptions = {
     callWithCircularModel: callWithCircularModel,
-}
+};
 
 export class CircularService {
-
     /**
      * @returns IModelWithCircularReference
      * @throws ApiError
@@ -2343,7 +2386,8 @@ export class CircularService {
     public static callWithCircularModel(): Promise<IModelWithCircularReference> {
         return __request<IModelWithCircularReference>(CircularOptions.callWithCircularModel(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/CollectionFormatService.ts 1`] = `
@@ -2364,14 +2408,13 @@ const collectionFormat = (
     method: 'GET',
     path: \`/api/v{api-version}/collectionFormat\`,
     query: {
-        'parameterArrayCSV': parameterArrayCsv,
-        'parameterArraySSV': parameterArraySsv,
-        'parameterArrayTSV': parameterArrayTsv,
-        'parameterArrayPipes': parameterArrayPipes,
-        'parameterArrayMulti': parameterArrayMulti,
+        parameterArrayCSV: parameterArrayCsv,
+        parameterArraySSV: parameterArraySsv,
+        parameterArrayTSV: parameterArrayTsv,
+        parameterArrayPipes: parameterArrayPipes,
+        parameterArrayMulti: parameterArrayMulti,
     },
 });
-
 
 export type TCollectionFormatOptions = {
     collectionFormat: (
@@ -2381,14 +2424,13 @@ export type TCollectionFormatOptions = {
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
     ) => ApiRequestOptions;
-}
+};
 
 export const CollectionFormatOptions: TCollectionFormatOptions = {
     collectionFormat: collectionFormat,
-}
+};
 
 export class CollectionFormatService {
-
     /**
      * @param parameterArrayCsv This is an array parameter that is send as csv format (comma-separated values)
      * @param parameterArraySsv This is an array parameter that is send as ssv format (space-separated values)
@@ -2404,15 +2446,19 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
     ): Promise<void> {
-        return __request<void>(CollectionFormatOptions.collectionFormat(
-            parameterArrayCsv,
-            parameterArraySsv,
-            parameterArrayTsv,
-            parameterArrayPipes,
-            parameterArrayMulti,
-        ), OpenAPI);
+        return __request<void>(
+            CollectionFormatOptions.collectionFormat(
+                parameterArrayCsv,
+                parameterArraySsv,
+                parameterArrayTsv,
+                parameterArrayPipes,
+                parameterArrayMulti,
+            ),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/ComplexService.ts 1`] = `
@@ -2431,17 +2477,17 @@ const complexTypes = (
     parameterObject: {
         first?: {
             second?: {
-                third?: string,
-            },
-        },
+                third?: string;
+            };
+        };
     },
     parameterReference: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/complex\`,
     query: {
-        'parameterObject': parameterObject,
-        'parameterReference': parameterReference,
+        parameterObject: parameterObject,
+        parameterReference: parameterReference,
     },
     errors: {
         400: \`400 server error\`,
@@ -2452,17 +2498,17 @@ const complexTypes = (
 const complexParams = (
     id: number,
     requestBody?: {
-        readonly key: string | null,
-        name: string | null,
-        enabled: boolean,
-        readonly type: 'Monkey' | 'Horse' | 'Bird',
-        listOfModels?: Array<IModelWithString> | null,
-        listOfStrings?: Array<string> | null,
-        parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+        readonly key: string | null;
+        name: string | null;
+        enabled: boolean;
+        readonly type: 'Monkey' | 'Horse' | 'Bird';
+        listOfModels?: Array<IModelWithString> | null;
+        listOfStrings?: Array<string> | null;
+        parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
         readonly user?: {
-            readonly id?: number,
-            readonly name?: string | null,
-        },
+            readonly id?: number;
+            readonly name?: string | null;
+        };
     },
 ): ApiRequestOptions => ({
     method: 'PUT',
@@ -2471,43 +2517,41 @@ const complexParams = (
     mediaType: 'application/json-patch+json',
 });
 
-
 export type TComplexOptions = {
     complexTypes: (
         parameterObject: {
             first?: {
                 second?: {
-                    third?: string,
-                },
-            },
+                    third?: string;
+                };
+            };
         },
         parameterReference: IModelWithString,
     ) => ApiRequestOptions;
     complexParams: (
         id: number,
         requestBody?: {
-            readonly key: string | null,
-            name: string | null,
-            enabled: boolean,
-            readonly type: 'Monkey' | 'Horse' | 'Bird',
-            listOfModels?: Array<IModelWithString> | null,
-            listOfStrings?: Array<string> | null,
-            parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+            readonly key: string | null;
+            name: string | null;
+            enabled: boolean;
+            readonly type: 'Monkey' | 'Horse' | 'Bird';
+            listOfModels?: Array<IModelWithString> | null;
+            listOfStrings?: Array<string> | null;
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
-                readonly id?: number,
-                readonly name?: string | null,
-            },
+                readonly id?: number;
+                readonly name?: string | null;
+            };
         },
     ) => ApiRequestOptions;
-}
+};
 
 export const ComplexOptions: TComplexOptions = {
     complexTypes: complexTypes,
     complexParams: complexParams,
-}
+};
 
 export class ComplexService {
-
     /**
      * @param parameterObject Parameter containing object
      * @param parameterReference Parameter containing reference
@@ -2518,16 +2562,16 @@ export class ComplexService {
         parameterObject: {
             first?: {
                 second?: {
-                    third?: string,
-                },
-            },
+                    third?: string;
+                };
+            };
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(ComplexOptions.complexTypes(
-            parameterObject,
-            parameterReference,
-        ), OpenAPI);
+        return __request<Array<IModelWithString>>(
+            ComplexOptions.complexTypes(parameterObject, parameterReference),
+            OpenAPI,
+        );
     }
     /**
      * @param id
@@ -2538,25 +2582,23 @@ export class ComplexService {
     public static complexParams(
         id: number,
         requestBody?: {
-            readonly key: string | null,
-            name: string | null,
-            enabled: boolean,
-            readonly type: 'Monkey' | 'Horse' | 'Bird',
-            listOfModels?: Array<IModelWithString> | null,
-            listOfStrings?: Array<string> | null,
-            parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+            readonly key: string | null;
+            name: string | null;
+            enabled: boolean;
+            readonly type: 'Monkey' | 'Horse' | 'Bird';
+            listOfModels?: Array<IModelWithString> | null;
+            listOfStrings?: Array<string> | null;
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
-                readonly id?: number,
-                readonly name?: string | null,
-            },
+                readonly id?: number;
+                readonly name?: string | null;
+            };
         },
     ): Promise<IModelWithString> {
-        return __request<IModelWithString>(ComplexOptions.complexParams(
-            id,
-            requestBody,
-        ), OpenAPI);
+        return __request<IModelWithString>(ComplexOptions.complexParams(id, requestBody), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/DefaultsService.ts 1`] = `
@@ -2574,17 +2616,17 @@ const callWithDefaultParameters = (
     parameterBoolean: boolean | null = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString | null = {
-        "prop": "Hello World!"
+        prop: 'Hello World!',
     },
 ): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/defaults\`,
     query: {
-        'parameterString': parameterString,
-        'parameterNumber': parameterNumber,
-        'parameterBoolean': parameterBoolean,
-        'parameterEnum': parameterEnum,
-        'parameterModel': parameterModel,
+        parameterString: parameterString,
+        parameterNumber: parameterNumber,
+        parameterBoolean: parameterBoolean,
+        parameterEnum: parameterEnum,
+        parameterModel: parameterModel,
     },
 });
 
@@ -2594,17 +2636,17 @@ const callWithDefaultOptionalParameters = (
     parameterBoolean: boolean = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString = {
-        "prop": "Hello World!"
+        prop: 'Hello World!',
     },
 ): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/defaults\`,
     query: {
-        'parameterString': parameterString,
-        'parameterNumber': parameterNumber,
-        'parameterBoolean': parameterBoolean,
-        'parameterEnum': parameterEnum,
-        'parameterModel': parameterModel,
+        parameterString: parameterString,
+        parameterNumber: parameterNumber,
+        parameterBoolean: parameterBoolean,
+        parameterEnum: parameterEnum,
+        parameterModel: parameterModel,
     },
 });
 
@@ -2619,15 +2661,14 @@ const callToTestOrderOfParams = (
     method: 'PUT',
     path: \`/api/v{api-version}/defaults\`,
     query: {
-        'parameterStringWithNoDefault': parameterStringWithNoDefault,
-        'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
-        'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
-        'parameterStringWithDefault': parameterStringWithDefault,
-        'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
-        'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
+        parameterStringWithNoDefault: parameterStringWithNoDefault,
+        parameterOptionalStringWithDefault: parameterOptionalStringWithDefault,
+        parameterOptionalStringWithEmptyDefault: parameterOptionalStringWithEmptyDefault,
+        parameterStringWithDefault: parameterStringWithDefault,
+        parameterStringWithEmptyDefault: parameterStringWithEmptyDefault,
+        parameterOptionalStringWithNoDefault: parameterOptionalStringWithNoDefault,
     },
 });
-
 
 export type TDefaultsOptions = {
     callWithDefaultParameters: (
@@ -2652,16 +2693,15 @@ export type TDefaultsOptions = {
         parameterStringWithEmptyDefault: string,
         parameterOptionalStringWithNoDefault?: string,
     ) => ApiRequestOptions;
-}
+};
 
 export const DefaultsOptions: TDefaultsOptions = {
     callWithDefaultParameters: callWithDefaultParameters,
     callWithDefaultOptionalParameters: callWithDefaultOptionalParameters,
     callToTestOrderOfParams: callToTestOrderOfParams,
-}
+};
 
 export class DefaultsService {
-
     /**
      * @param parameterString This is a simple string with default value
      * @param parameterNumber This is a simple number with default value
@@ -2676,16 +2716,19 @@ export class DefaultsService {
         parameterBoolean: boolean | null = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString | null = {
-            "prop": "Hello World!"
+            prop: 'Hello World!',
         },
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callWithDefaultParameters(
-            parameterString,
-            parameterNumber,
-            parameterBoolean,
-            parameterEnum,
-            parameterModel,
-        ), OpenAPI);
+        return __request<void>(
+            DefaultsOptions.callWithDefaultParameters(
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param parameterString This is a simple string that is optional with default value
@@ -2701,16 +2744,19 @@ export class DefaultsService {
         parameterBoolean: boolean = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString = {
-            "prop": "Hello World!"
+            prop: 'Hello World!',
         },
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callWithDefaultOptionalParameters(
-            parameterString,
-            parameterNumber,
-            parameterBoolean,
-            parameterEnum,
-            parameterModel,
-        ), OpenAPI);
+        return __request<void>(
+            DefaultsOptions.callWithDefaultOptionalParameters(
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param parameterStringWithNoDefault This is a string with no default
@@ -2729,16 +2775,20 @@ export class DefaultsService {
         parameterStringWithEmptyDefault: string = '',
         parameterOptionalStringWithNoDefault?: string,
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callToTestOrderOfParams(
-            parameterStringWithNoDefault,
-            parameterOptionalStringWithDefault,
-            parameterOptionalStringWithEmptyDefault,
-            parameterStringWithDefault,
-            parameterStringWithEmptyDefault,
-            parameterOptionalStringWithNoDefault,
-        ), OpenAPI);
+        return __request<void>(
+            DefaultsOptions.callToTestOrderOfParams(
+                parameterStringWithNoDefault,
+                parameterOptionalStringWithDefault,
+                parameterOptionalStringWithEmptyDefault,
+                parameterStringWithDefault,
+                parameterStringWithEmptyDefault,
+                parameterOptionalStringWithNoDefault,
+            ),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/DuplicateService.ts 1`] = `
@@ -2769,23 +2819,21 @@ const duplicateName3 = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/duplicate\`,
 });
 
-
 export type TDuplicateOptions = {
     duplicateName: () => ApiRequestOptions;
     duplicateName1: () => ApiRequestOptions;
     duplicateName2: () => ApiRequestOptions;
     duplicateName3: () => ApiRequestOptions;
-}
+};
 
 export const DuplicateOptions: TDuplicateOptions = {
     duplicateName: duplicateName,
     duplicateName1: duplicateName1,
     duplicateName2: duplicateName2,
     duplicateName3: duplicateName3,
-}
+};
 
 export class DuplicateService {
-
     /**
      * @throws ApiError
      */
@@ -2810,7 +2858,8 @@ export class DuplicateService {
     public static duplicateName3(): Promise<void> {
         return __request<void>(DuplicateOptions.duplicateName3(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/EnumsService.ts 1`] = `
@@ -2823,49 +2872,40 @@ import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
-const callWithEnums = (
-    requestBody?: {
-        enumWithNumbers?: EEnumWithNumbers,
-        enumWithStrings?: EEnumWithStrings,
-    },
-): ApiRequestOptions => ({
+const callWithEnums = (requestBody?: {
+    enumWithNumbers?: EEnumWithNumbers;
+    enumWithStrings?: EEnumWithStrings;
+}): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/enums\`,
     body: requestBody,
     mediaType: 'application/json; charset=utf-8',
 });
 
-
 export type TEnumsOptions = {
-    callWithEnums: (
-        requestBody?: {
-            enumWithNumbers?: EEnumWithNumbers,
-            enumWithStrings?: EEnumWithStrings,
-        },
-    ) => ApiRequestOptions;
-}
+    callWithEnums: (requestBody?: {
+        enumWithNumbers?: EEnumWithNumbers;
+        enumWithStrings?: EEnumWithStrings;
+    }) => ApiRequestOptions;
+};
 
 export const EnumsOptions: TEnumsOptions = {
     callWithEnums: callWithEnums,
-}
+};
 
 export class EnumsService {
-
     /**
      * @param requestBody
      * @throws ApiError
      */
-    public static callWithEnums(
-        requestBody?: {
-            enumWithNumbers?: EEnumWithNumbers,
-            enumWithStrings?: EEnumWithStrings,
-        },
-    ): Promise<void> {
-        return __request<void>(EnumsOptions.callWithEnums(
-            requestBody,
-        ), OpenAPI);
+    public static callWithEnums(requestBody?: {
+        enumWithNumbers?: EEnumWithNumbers;
+        enumWithStrings?: EEnumWithStrings;
+    }): Promise<void> {
+        return __request<void>(EnumsOptions.callWithEnums(requestBody), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/HeaderService.ts 1`] = `
@@ -2886,17 +2926,15 @@ const callWithResultFromHeader = (): ApiRequestOptions => ({
     },
 });
 
-
 export type THeaderOptions = {
     callWithResultFromHeader: () => ApiRequestOptions;
-}
+};
 
 export const HeaderOptions: THeaderOptions = {
     callWithResultFromHeader: callWithResultFromHeader,
-}
+};
 
 export class HeaderService {
-
     /**
      * @returns string Successful response
      * @throws ApiError
@@ -2904,7 +2942,8 @@ export class HeaderService {
     public static callWithResultFromHeader(): Promise<string> {
         return __request<string>(HeaderOptions.callWithResultFromHeader(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/MultipartService.ts 1`] = `
@@ -2920,37 +2959,36 @@ const multipartResponse = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/multipart\`,
 });
 
-
 export type TMultipartOptions = {
     multipartResponse: () => ApiRequestOptions;
-}
+};
 
 export const MultipartOptions: TMultipartOptions = {
     multipartResponse: multipartResponse,
-}
+};
 
 export class MultipartService {
-
     /**
      * @returns any OK
      * @throws ApiError
      */
     public static multipartResponse(): Promise<{
-        file?: string,
+        file?: string;
         metadata?: {
-            foo?: string,
-            bar?: string,
-        },
+            foo?: string;
+            bar?: string;
+        };
     }> {
         return __request<{
-            file?: string,
+            file?: string;
             metadata?: {
-                foo?: string,
-                bar?: string,
-            },
+                foo?: string;
+                bar?: string;
+            };
         }>(MultipartOptions.multipartResponse(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/NoContentService.ts 1`] = `
@@ -2966,17 +3004,15 @@ const callWithNoContentResponse = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/no-content\`,
 });
 
-
 export type TNoContentOptions = {
     callWithNoContentResponse: () => ApiRequestOptions;
-}
+};
 
 export const NoContentOptions: TNoContentOptions = {
     callWithNoContentResponse: callWithNoContentResponse,
-}
+};
 
 export class NoContentService {
-
     /**
      * @returns void
      * @throws ApiError
@@ -2984,7 +3020,8 @@ export class NoContentService {
     public static callWithNoContentResponse(): Promise<void> {
         return __request<void>(NoContentOptions.callWithNoContentResponse(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/ParametersService.ts 1`] = `
@@ -3007,16 +3044,16 @@ const callWithParameters = (
     method: 'GET',
     path: \`/api/v{api-version}/parameters/\${parameterPath}\`,
     cookies: {
-        'parameterCookie': parameterCookie,
+        parameterCookie: parameterCookie,
     },
     headers: {
-        'parameterHeader': parameterHeader,
+        parameterHeader: parameterHeader,
     },
     query: {
-        'parameterQuery': parameterQuery,
+        parameterQuery: parameterQuery,
     },
     formData: {
-        'parameterForm': parameterForm,
+        parameterForm: parameterForm,
     },
     body: requestBody,
     mediaType: 'application/json',
@@ -3043,41 +3080,34 @@ const callWithWeirdParameterNames = (
     },
     query: {
         'parameter-query': parameterQuery,
-        'default': _default,
+        default: _default,
     },
     formData: {
-        'parameter_form': parameterForm,
+        parameter_form: parameterForm,
     },
     body: requestBody,
     mediaType: 'application/json',
 });
 
-const getCallWithOptionalParam = (
-    requestBody: IModelWithString,
-    parameter?: string,
-): ApiRequestOptions => ({
+const getCallWithOptionalParam = (requestBody: IModelWithString, parameter?: string): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/parameters/\`,
     query: {
-        'parameter': parameter,
+        parameter: parameter,
     },
     body: requestBody,
     mediaType: 'application/json',
 });
 
-const postCallWithOptionalParam = (
-    parameter: string,
-    requestBody?: IModelWithString,
-): ApiRequestOptions => ({
+const postCallWithOptionalParam = (parameter: string, requestBody?: IModelWithString): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/parameters/\`,
     query: {
-        'parameter': parameter,
+        parameter: parameter,
     },
     body: requestBody,
     mediaType: 'application/json',
 });
-
 
 export type TParametersOptions = {
     callWithParameters: (
@@ -3099,25 +3129,18 @@ export type TParametersOptions = {
         parameterPath3?: string,
         _default?: string,
     ) => ApiRequestOptions;
-    getCallWithOptionalParam: (
-        requestBody: IModelWithString,
-        parameter?: string,
-    ) => ApiRequestOptions;
-    postCallWithOptionalParam: (
-        parameter: string,
-        requestBody?: IModelWithString,
-    ) => ApiRequestOptions;
-}
+    getCallWithOptionalParam: (requestBody: IModelWithString, parameter?: string) => ApiRequestOptions;
+    postCallWithOptionalParam: (parameter: string, requestBody?: IModelWithString) => ApiRequestOptions;
+};
 
 export const ParametersOptions: TParametersOptions = {
     callWithParameters: callWithParameters,
     callWithWeirdParameterNames: callWithWeirdParameterNames,
     getCallWithOptionalParam: getCallWithOptionalParam,
     postCallWithOptionalParam: postCallWithOptionalParam,
-}
+};
 
 export class ParametersService {
-
     /**
      * @param parameterHeader This is the parameter that goes into the header
      * @param parameterQuery This is the parameter that goes into the query params
@@ -3135,14 +3158,17 @@ export class ParametersService {
         parameterPath: string | null,
         requestBody: IModelWithString | null,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.callWithParameters(
-            parameterHeader,
-            parameterQuery,
-            parameterForm,
-            parameterCookie,
-            parameterPath,
-            requestBody,
-        ), OpenAPI);
+        return __request<void>(
+            ParametersOptions.callWithParameters(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterCookie,
+                parameterPath,
+                requestBody,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param parameterHeader This is the parameter that goes into the request header
@@ -3167,47 +3193,39 @@ export class ParametersService {
         parameterPath3?: string,
         _default?: string,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.callWithWeirdParameterNames(
-            parameterHeader,
-            parameterQuery,
-            parameterForm,
-            parameterCookie,
-            requestBody,
-            parameterPath1,
-            parameterPath2,
-            parameterPath3,
-            _default,
-        ), OpenAPI);
+        return __request<void>(
+            ParametersOptions.callWithWeirdParameterNames(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterCookie,
+                requestBody,
+                parameterPath1,
+                parameterPath2,
+                parameterPath3,
+                _default,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param requestBody This is a required parameter
      * @param parameter This is an optional parameter
      * @throws ApiError
      */
-    public static getCallWithOptionalParam(
-        requestBody: IModelWithString,
-        parameter?: string,
-    ): Promise<void> {
-        return __request<void>(ParametersOptions.getCallWithOptionalParam(
-            requestBody,
-            parameter,
-        ), OpenAPI);
+    public static getCallWithOptionalParam(requestBody: IModelWithString, parameter?: string): Promise<void> {
+        return __request<void>(ParametersOptions.getCallWithOptionalParam(requestBody, parameter), OpenAPI);
     }
     /**
      * @param parameter This is a required parameter
      * @param requestBody This is an optional parameter
      * @throws ApiError
      */
-    public static postCallWithOptionalParam(
-        parameter: string,
-        requestBody?: IModelWithString,
-    ): Promise<void> {
-        return __request<void>(ParametersOptions.postCallWithOptionalParam(
-            parameter,
-            requestBody,
-        ), OpenAPI);
+    public static postCallWithOptionalParam(parameter: string, requestBody?: IModelWithString): Promise<void> {
+        return __request<void>(ParametersOptions.postCallWithOptionalParam(parameter, requestBody), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/RequestBodyService.ts 1`] = `
@@ -3219,40 +3237,31 @@ import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
-const postRequestBodyService = (
-    requestBody?: IModelWithString,
-): ApiRequestOptions => ({
+const postRequestBodyService = (requestBody?: IModelWithString): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/requestBody/\`,
     body: requestBody,
     mediaType: 'application/json',
 });
 
-
 export type TRequestBodyOptions = {
-    postRequestBodyService: (
-        requestBody?: IModelWithString,
-    ) => ApiRequestOptions;
-}
+    postRequestBodyService: (requestBody?: IModelWithString) => ApiRequestOptions;
+};
 
 export const RequestBodyOptions: TRequestBodyOptions = {
     postRequestBodyService: postRequestBodyService,
-}
+};
 
 export class RequestBodyService {
-
     /**
      * @param requestBody A reusable request body
      * @throws ApiError
      */
-    public static postRequestBodyService(
-        requestBody?: IModelWithString,
-    ): Promise<void> {
-        return __request<void>(RequestBodyOptions.postRequestBodyService(
-            requestBody,
-        ), OpenAPI);
+    public static postRequestBodyService(requestBody?: IModelWithString): Promise<void> {
+        return __request<void>(RequestBodyOptions.postRequestBodyService(requestBody), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/ResponseService.ts 1`] = `
@@ -3290,21 +3299,19 @@ const callWithResponses = (): ApiRequestOptions => ({
     },
 });
 
-
 export type TResponseOptions = {
     callWithResponse: () => ApiRequestOptions;
     callWithDuplicateResponses: () => ApiRequestOptions;
     callWithResponses: () => ApiRequestOptions;
-}
+};
 
 export const ResponseOptions: TResponseOptions = {
     callWithResponse: callWithResponse,
     callWithDuplicateResponses: callWithDuplicateResponses,
     callWithResponses: callWithResponses,
-}
+};
 
 export class ResponseService {
-
     /**
      * @returns IModelWithString
      * @throws ApiError
@@ -3325,18 +3332,27 @@ export class ResponseService {
      * @returns TModelThatExtends Message for 201 response
      * @throws ApiError
      */
-    public static callWithResponses(): Promise<{
-        readonly '@namespace.string'?: string,
-        readonly '@namespace.integer'?: number,
-        readonly value?: Array<IModelWithString>,
-    } | IModelWithString | TModelThatExtends> {
-        return __request<{
-            readonly '@namespace.string'?: string,
-            readonly '@namespace.integer'?: number,
-            readonly value?: Array<IModelWithString>,
-        } | IModelWithString | TModelThatExtends>(ResponseOptions.callWithResponses(), OpenAPI);
+    public static callWithResponses(): Promise<
+        | {
+              readonly '@namespace.string'?: string;
+              readonly '@namespace.integer'?: number;
+              readonly value?: Array<IModelWithString>;
+          }
+        | IModelWithString
+        | TModelThatExtends
+    > {
+        return __request<
+            | {
+                  readonly '@namespace.string'?: string;
+                  readonly '@namespace.integer'?: number;
+                  readonly value?: Array<IModelWithString>;
+              }
+            | IModelWithString
+            | TModelThatExtends
+        >(ResponseOptions.callWithResponses(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/SimpleService.ts 1`] = `
@@ -3382,7 +3398,6 @@ const patchCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/simple\`,
 });
 
-
 export type TSimpleOptions = {
     getCallWithoutParametersAndResponse: () => ApiRequestOptions;
     putCallWithoutParametersAndResponse: () => ApiRequestOptions;
@@ -3391,7 +3406,7 @@ export type TSimpleOptions = {
     optionsCallWithoutParametersAndResponse: () => ApiRequestOptions;
     headCallWithoutParametersAndResponse: () => ApiRequestOptions;
     patchCallWithoutParametersAndResponse: () => ApiRequestOptions;
-}
+};
 
 export const SimpleOptions: TSimpleOptions = {
     getCallWithoutParametersAndResponse: getCallWithoutParametersAndResponse,
@@ -3401,10 +3416,9 @@ export const SimpleOptions: TSimpleOptions = {
     optionsCallWithoutParametersAndResponse: optionsCallWithoutParametersAndResponse,
     headCallWithoutParametersAndResponse: headCallWithoutParametersAndResponse,
     patchCallWithoutParametersAndResponse: patchCallWithoutParametersAndResponse,
-}
+};
 
 export class SimpleService {
-
     /**
      * @throws ApiError
      */
@@ -3447,7 +3461,8 @@ export class SimpleService {
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
         return __request<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/TypesService.ts 1`] = `
@@ -3471,16 +3486,15 @@ const types = (
     method: 'GET',
     path: \`/api/v{api-version}/types\`,
     query: {
-        'parameterArray': parameterArray,
-        'parameterDictionary': parameterDictionary,
-        'parameterEnum': parameterEnum,
-        'parameterNumber': parameterNumber,
-        'parameterString': parameterString,
-        'parameterBoolean': parameterBoolean,
-        'parameterObject': parameterObject,
+        parameterArray: parameterArray,
+        parameterDictionary: parameterDictionary,
+        parameterEnum: parameterEnum,
+        parameterNumber: parameterNumber,
+        parameterString: parameterString,
+        parameterBoolean: parameterBoolean,
+        parameterObject: parameterObject,
     },
 });
-
 
 export type TTypesOptions = {
     types: (
@@ -3493,14 +3507,13 @@ export type TTypesOptions = {
         parameterObject: any,
         id?: number,
     ) => ApiRequestOptions;
-}
+};
 
 export const TypesOptions: TTypesOptions = {
     types: types,
-}
+};
 
 export class TypesService {
-
     /**
      * @param parameterArray This is an array parameter
      * @param parameterDictionary This is a dictionary parameter
@@ -3526,18 +3539,22 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        return __request<number | string | boolean | any>(TypesOptions.types(
-            parameterArray,
-            parameterDictionary,
-            parameterEnum,
-            parameterNumber,
-            parameterString,
-            parameterBoolean,
-            parameterObject,
-            id,
-        ), OpenAPI);
+        return __request<number | string | boolean | any>(
+            TypesOptions.types(
+                parameterArray,
+                parameterDictionary,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterBoolean,
+                parameterObject,
+                id,
+            ),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/services/UploadService.ts 1`] = `
@@ -3548,42 +3565,33 @@ import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
-const uploadFile = (
-    file: Blob,
-): ApiRequestOptions => ({
+const uploadFile = (file: Blob): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/upload\`,
     formData: {
-        'file': file,
+        file: file,
     },
 });
 
-
 export type TUploadOptions = {
-    uploadFile: (
-        file: Blob,
-    ) => ApiRequestOptions;
-}
+    uploadFile: (file: Blob) => ApiRequestOptions;
+};
 
 export const UploadOptions: TUploadOptions = {
     uploadFile: uploadFile,
-}
+};
 
 export class UploadService {
-
     /**
      * @param file Supply a file reference for upload
      * @returns boolean
      * @throws ApiError
      */
-    public static uploadFile(
-        file: Blob,
-    ): Promise<boolean> {
-        return __request<boolean>(UploadOptions.uploadFile(
-            file,
-        ), OpenAPI);
+    public static uploadFile(file: Blob): Promise<boolean> {
+        return __request<boolean>(UploadOptions.uploadFile(file), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/core/ApiError.ts 1`] = `
@@ -3976,7 +3984,8 @@ import type { IModelWithString } from '././ModelWithString';
 /**
  * This is a simple array containing an array
  */
-export type TArrayWithArray = Array<Array<IModelWithString>>;"
+export type TArrayWithArray = Array<Array<IModelWithString>>;
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/models/EnumWithNumbers.ts 1`] = `
@@ -4003,7 +4012,8 @@ export enum EEnumWithNumbers {
     '_-1.1' = -1.1,
     '_-1.2' = -1.2,
     '_-1.3' = -1.3,
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/models/EnumWithStrings.ts 1`] = `
@@ -4018,7 +4028,8 @@ export enum EEnumWithStrings {
     SUCCESS = 'Success',
     WARNING = 'Warning',
     ERROR = 'Error',
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/models/EnumWithStringsWithType.ts 1`] = `
@@ -4032,7 +4043,8 @@ exports[`v3 should generate: ./test/generated/v3/models/EnumWithStringsWithType.
 export enum EEnumWithStringsWithType {
     VALUE1 = 'VALUE1',
     VALUE2 = 'VALUE2',
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/models/ModelThatExtends.ts 1`] = `
@@ -4045,10 +4057,10 @@ import type { IModelWithString } from '././ModelWithString';
 /**
  * This is a model that extends another model
  */
-export type TModelThatExtends = (IModelWithString & {
-    propExtendsA?: string,
-    propExtendsB?: IModelWithString,
-});
+export type TModelThatExtends = IModelWithString & {
+    propExtendsA?: string;
+    propExtendsB?: IModelWithString;
+};
 "
 `;
 
@@ -4063,10 +4075,11 @@ import type { IModelWithString } from '././ModelWithString';
 /**
  * This is a model that extends another model
  */
-export type TModelThatExtendsExtends = (IModelWithString & TModelThatExtends & {
-    propExtendsC?: string,
-    propExtendsD?: IModelWithString,
-});
+export type TModelThatExtendsExtends = IModelWithString &
+    TModelThatExtends & {
+        propExtendsC?: string;
+        propExtendsD?: IModelWithString;
+    };
 "
 `;
 
@@ -4126,7 +4139,6 @@ export interface IModelWithEnum {
 }
 
 export namespace IModelWithEnum {
-
     /**
      * This is a simple enum with strings
      */
@@ -4147,8 +4159,6 @@ export namespace IModelWithEnum {
         _500_FOO_BAR = '500 foo.bar',
         _600_FOO_BAR = '600 foo&bar',
     }
-
-
 }
 "
 `;
@@ -4182,7 +4192,8 @@ export const TArrayWithArraySchema = {
             type: 'IModelWithString',
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/schemas/EnumWithNumbersSchema.ts 1`] = `
@@ -4191,7 +4202,8 @@ exports[`v3 should generate: ./test/generated/v3/schemas/EnumWithNumbersSchema.t
 /* eslint-disable */
 export const EEnumWithNumbersSchema = {
     type: 'Enum',
-};"
+};
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/schemas/EnumWithStringsSchema.ts 1`] = `
@@ -4200,7 +4212,8 @@ exports[`v3 should generate: ./test/generated/v3/schemas/EnumWithStringsSchema.t
 /* eslint-disable */
 export const EEnumWithStringsSchema = {
     type: 'Enum',
-};"
+};
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/schemas/EnumWithStringsWithTypeSchema.ts 1`] = `
@@ -4209,7 +4222,8 @@ exports[`v3 should generate: ./test/generated/v3/schemas/EnumWithStringsWithType
 /* eslint-disable */
 export const EEnumWithStringsWithTypeSchema = {
     type: 'Enum',
-};"
+};
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/schemas/ModelThatExtendsExtendsSchema.ts 1`] = `
@@ -4218,21 +4232,26 @@ exports[`v3 should generate: ./test/generated/v3/schemas/ModelThatExtendsExtends
 /* eslint-disable */
 export const TModelThatExtendsExtendsSchema = {
     type: 'all-of',
-    contains: [{
-        type: 'IModelWithString',
-    }, {
-        type: 'TModelThatExtends',
-    }, {
-        properties: {
-            propExtendsC: {
-                type: 'string',
-            },
-            propExtendsD: {
-                type: 'IModelWithString',
+    contains: [
+        {
+            type: 'IModelWithString',
+        },
+        {
+            type: 'TModelThatExtends',
+        },
+        {
+            properties: {
+                propExtendsC: {
+                    type: 'string',
+                },
+                propExtendsD: {
+                    type: 'IModelWithString',
+                },
             },
         },
-    }],
-};"
+    ],
+};
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/schemas/ModelThatExtendsSchema.ts 1`] = `
@@ -4241,19 +4260,23 @@ exports[`v3 should generate: ./test/generated/v3/schemas/ModelThatExtendsSchema.
 /* eslint-disable */
 export const TModelThatExtendsSchema = {
     type: 'all-of',
-    contains: [{
-        type: 'IModelWithString',
-    }, {
-        properties: {
-            propExtendsA: {
-                type: 'string',
-            },
-            propExtendsB: {
-                type: 'IModelWithString',
+    contains: [
+        {
+            type: 'IModelWithString',
+        },
+        {
+            properties: {
+                propExtendsA: {
+                    type: 'string',
+                },
+                propExtendsB: {
+                    type: 'IModelWithString',
+                },
             },
         },
-    }],
-};"
+    ],
+};
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/schemas/ModelWithArraySchema.ts 1`] = `
@@ -4281,7 +4304,8 @@ export const IModelWithArraySchema = {
             },
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/schemas/ModelWithDictionarySchema.ts 1`] = `
@@ -4297,7 +4321,8 @@ export const IModelWithDictionarySchema = {
             },
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/schemas/ModelWithEnumSchema.ts 1`] = `
@@ -4316,7 +4341,8 @@ export const IModelWithEnumSchema = {
             type: 'boolean',
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/schemas/ModelWithStringSchema.ts 1`] = `
@@ -4329,7 +4355,8 @@ export const IModelWithStringSchema = {
             type: 'string',
         },
     },
-};"
+};
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/CollectionFormatService.ts 1`] = `
@@ -4350,14 +4377,13 @@ const collectionFormat = (
     method: 'GET',
     path: \`/api/v{api-version}/collectionFormat\`,
     query: {
-        'parameterArrayCSV': parameterArrayCsv,
-        'parameterArraySSV': parameterArraySsv,
-        'parameterArrayTSV': parameterArrayTsv,
-        'parameterArrayPipes': parameterArrayPipes,
-        'parameterArrayMulti': parameterArrayMulti,
+        parameterArrayCSV: parameterArrayCsv,
+        parameterArraySSV: parameterArraySsv,
+        parameterArrayTSV: parameterArrayTsv,
+        parameterArrayPipes: parameterArrayPipes,
+        parameterArrayMulti: parameterArrayMulti,
     },
 });
-
 
 export type TCollectionFormatOptions = {
     collectionFormat: (
@@ -4367,14 +4393,13 @@ export type TCollectionFormatOptions = {
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
     ) => ApiRequestOptions;
-}
+};
 
 export const CollectionFormatOptions: TCollectionFormatOptions = {
     collectionFormat: collectionFormat,
-}
+};
 
 export class CollectionFormatService {
-
     /**
      * @param parameterArrayCsv This is an array parameter that is send as csv format (comma-separated values)
      * @param parameterArraySsv This is an array parameter that is send as ssv format (space-separated values)
@@ -4390,15 +4415,19 @@ export class CollectionFormatService {
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
     ): Promise<void> {
-        return __request<void>(CollectionFormatOptions.collectionFormat(
-            parameterArrayCsv,
-            parameterArraySsv,
-            parameterArrayTsv,
-            parameterArrayPipes,
-            parameterArrayMulti,
-        ), OpenAPI);
+        return __request<void>(
+            CollectionFormatOptions.collectionFormat(
+                parameterArrayCsv,
+                parameterArraySsv,
+                parameterArrayTsv,
+                parameterArrayPipes,
+                parameterArrayMulti,
+            ),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/ComplexService.ts 1`] = `
@@ -4417,17 +4446,17 @@ const complexTypes = (
     parameterObject: {
         first?: {
             second?: {
-                third?: string,
-            },
-        },
+                third?: string;
+            };
+        };
     },
     parameterReference: IModelWithString,
 ): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/complex\`,
     query: {
-        'parameterObject': parameterObject,
-        'parameterReference': parameterReference,
+        parameterObject: parameterObject,
+        parameterReference: parameterReference,
     },
     errors: {
         400: \`400 server error\`,
@@ -4438,17 +4467,17 @@ const complexTypes = (
 const complexParams = (
     id: number,
     requestBody?: {
-        readonly key: string | null,
-        name: string | null,
-        enabled: boolean,
-        readonly type: 'Monkey' | 'Horse' | 'Bird',
-        listOfModels?: Array<IModelWithString> | null,
-        listOfStrings?: Array<string> | null,
-        parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+        readonly key: string | null;
+        name: string | null;
+        enabled: boolean;
+        readonly type: 'Monkey' | 'Horse' | 'Bird';
+        listOfModels?: Array<IModelWithString> | null;
+        listOfStrings?: Array<string> | null;
+        parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
         readonly user?: {
-            readonly id?: number,
-            readonly name?: string | null,
-        },
+            readonly id?: number;
+            readonly name?: string | null;
+        };
     },
 ): ApiRequestOptions => ({
     method: 'PUT',
@@ -4457,43 +4486,41 @@ const complexParams = (
     mediaType: 'application/json-patch+json',
 });
 
-
 export type TComplexOptions = {
     complexTypes: (
         parameterObject: {
             first?: {
                 second?: {
-                    third?: string,
-                },
-            },
+                    third?: string;
+                };
+            };
         },
         parameterReference: IModelWithString,
     ) => ApiRequestOptions;
     complexParams: (
         id: number,
         requestBody?: {
-            readonly key: string | null,
-            name: string | null,
-            enabled: boolean,
-            readonly type: 'Monkey' | 'Horse' | 'Bird',
-            listOfModels?: Array<IModelWithString> | null,
-            listOfStrings?: Array<string> | null,
-            parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+            readonly key: string | null;
+            name: string | null;
+            enabled: boolean;
+            readonly type: 'Monkey' | 'Horse' | 'Bird';
+            listOfModels?: Array<IModelWithString> | null;
+            listOfStrings?: Array<string> | null;
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
-                readonly id?: number,
-                readonly name?: string | null,
-            },
+                readonly id?: number;
+                readonly name?: string | null;
+            };
         },
     ) => ApiRequestOptions;
-}
+};
 
 export const ComplexOptions: TComplexOptions = {
     complexTypes: complexTypes,
     complexParams: complexParams,
-}
+};
 
 export class ComplexService {
-
     /**
      * @param parameterObject Parameter containing object
      * @param parameterReference Parameter containing reference
@@ -4504,16 +4531,16 @@ export class ComplexService {
         parameterObject: {
             first?: {
                 second?: {
-                    third?: string,
-                },
-            },
+                    third?: string;
+                };
+            };
         },
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(ComplexOptions.complexTypes(
-            parameterObject,
-            parameterReference,
-        ), OpenAPI);
+        return __request<Array<IModelWithString>>(
+            ComplexOptions.complexTypes(parameterObject, parameterReference),
+            OpenAPI,
+        );
     }
     /**
      * @param id
@@ -4524,25 +4551,23 @@ export class ComplexService {
     public static complexParams(
         id: number,
         requestBody?: {
-            readonly key: string | null,
-            name: string | null,
-            enabled: boolean,
-            readonly type: 'Monkey' | 'Horse' | 'Bird',
-            listOfModels?: Array<IModelWithString> | null,
-            listOfStrings?: Array<string> | null,
-            parameters: (IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary),
+            readonly key: string | null;
+            name: string | null;
+            enabled: boolean;
+            readonly type: 'Monkey' | 'Horse' | 'Bird';
+            listOfModels?: Array<IModelWithString> | null;
+            listOfStrings?: Array<string> | null;
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
-                readonly id?: number,
-                readonly name?: string | null,
-            },
+                readonly id?: number;
+                readonly name?: string | null;
+            };
         },
     ): Promise<IModelWithString> {
-        return __request<IModelWithString>(ComplexOptions.complexParams(
-            id,
-            requestBody,
-        ), OpenAPI);
+        return __request<IModelWithString>(ComplexOptions.complexParams(id, requestBody), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/DefaultsService.ts 1`] = `
@@ -4560,17 +4585,17 @@ const callWithDefaultParameters = (
     parameterBoolean: boolean | null = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString | null = {
-        "prop": "Hello World!"
+        prop: 'Hello World!',
     },
 ): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/defaults\`,
     query: {
-        'parameterString': parameterString,
-        'parameterNumber': parameterNumber,
-        'parameterBoolean': parameterBoolean,
-        'parameterEnum': parameterEnum,
-        'parameterModel': parameterModel,
+        parameterString: parameterString,
+        parameterNumber: parameterNumber,
+        parameterBoolean: parameterBoolean,
+        parameterEnum: parameterEnum,
+        parameterModel: parameterModel,
     },
 });
 
@@ -4580,17 +4605,17 @@ const callWithDefaultOptionalParameters = (
     parameterBoolean: boolean = true,
     parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
     parameterModel: IModelWithString = {
-        "prop": "Hello World!"
+        prop: 'Hello World!',
     },
 ): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/defaults\`,
     query: {
-        'parameterString': parameterString,
-        'parameterNumber': parameterNumber,
-        'parameterBoolean': parameterBoolean,
-        'parameterEnum': parameterEnum,
-        'parameterModel': parameterModel,
+        parameterString: parameterString,
+        parameterNumber: parameterNumber,
+        parameterBoolean: parameterBoolean,
+        parameterEnum: parameterEnum,
+        parameterModel: parameterModel,
     },
 });
 
@@ -4605,15 +4630,14 @@ const callToTestOrderOfParams = (
     method: 'PUT',
     path: \`/api/v{api-version}/defaults\`,
     query: {
-        'parameterStringWithNoDefault': parameterStringWithNoDefault,
-        'parameterOptionalStringWithDefault': parameterOptionalStringWithDefault,
-        'parameterOptionalStringWithEmptyDefault': parameterOptionalStringWithEmptyDefault,
-        'parameterStringWithDefault': parameterStringWithDefault,
-        'parameterStringWithEmptyDefault': parameterStringWithEmptyDefault,
-        'parameterOptionalStringWithNoDefault': parameterOptionalStringWithNoDefault,
+        parameterStringWithNoDefault: parameterStringWithNoDefault,
+        parameterOptionalStringWithDefault: parameterOptionalStringWithDefault,
+        parameterOptionalStringWithEmptyDefault: parameterOptionalStringWithEmptyDefault,
+        parameterStringWithDefault: parameterStringWithDefault,
+        parameterStringWithEmptyDefault: parameterStringWithEmptyDefault,
+        parameterOptionalStringWithNoDefault: parameterOptionalStringWithNoDefault,
     },
 });
-
 
 export type TDefaultsOptions = {
     callWithDefaultParameters: (
@@ -4638,16 +4662,15 @@ export type TDefaultsOptions = {
         parameterStringWithEmptyDefault: string,
         parameterOptionalStringWithNoDefault?: string,
     ) => ApiRequestOptions;
-}
+};
 
 export const DefaultsOptions: TDefaultsOptions = {
     callWithDefaultParameters: callWithDefaultParameters,
     callWithDefaultOptionalParameters: callWithDefaultOptionalParameters,
     callToTestOrderOfParams: callToTestOrderOfParams,
-}
+};
 
 export class DefaultsService {
-
     /**
      * @param parameterString This is a simple string with default value
      * @param parameterNumber This is a simple number with default value
@@ -4662,16 +4685,19 @@ export class DefaultsService {
         parameterBoolean: boolean | null = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString | null = {
-            "prop": "Hello World!"
+            prop: 'Hello World!',
         },
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callWithDefaultParameters(
-            parameterString,
-            parameterNumber,
-            parameterBoolean,
-            parameterEnum,
-            parameterModel,
-        ), OpenAPI);
+        return __request<void>(
+            DefaultsOptions.callWithDefaultParameters(
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param parameterString This is a simple string that is optional with default value
@@ -4687,16 +4713,19 @@ export class DefaultsService {
         parameterBoolean: boolean = true,
         parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
         parameterModel: IModelWithString = {
-            "prop": "Hello World!"
+            prop: 'Hello World!',
         },
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callWithDefaultOptionalParameters(
-            parameterString,
-            parameterNumber,
-            parameterBoolean,
-            parameterEnum,
-            parameterModel,
-        ), OpenAPI);
+        return __request<void>(
+            DefaultsOptions.callWithDefaultOptionalParameters(
+                parameterString,
+                parameterNumber,
+                parameterBoolean,
+                parameterEnum,
+                parameterModel,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param parameterStringWithNoDefault This is a string with no default
@@ -4715,16 +4744,20 @@ export class DefaultsService {
         parameterStringWithEmptyDefault: string = '',
         parameterOptionalStringWithNoDefault?: string,
     ): Promise<void> {
-        return __request<void>(DefaultsOptions.callToTestOrderOfParams(
-            parameterStringWithNoDefault,
-            parameterOptionalStringWithDefault,
-            parameterOptionalStringWithEmptyDefault,
-            parameterStringWithDefault,
-            parameterStringWithEmptyDefault,
-            parameterOptionalStringWithNoDefault,
-        ), OpenAPI);
+        return __request<void>(
+            DefaultsOptions.callToTestOrderOfParams(
+                parameterStringWithNoDefault,
+                parameterOptionalStringWithDefault,
+                parameterOptionalStringWithEmptyDefault,
+                parameterStringWithDefault,
+                parameterStringWithEmptyDefault,
+                parameterOptionalStringWithNoDefault,
+            ),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/DuplicateService.ts 1`] = `
@@ -4755,23 +4788,21 @@ const duplicateName3 = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/duplicate\`,
 });
 
-
 export type TDuplicateOptions = {
     duplicateName: () => ApiRequestOptions;
     duplicateName1: () => ApiRequestOptions;
     duplicateName2: () => ApiRequestOptions;
     duplicateName3: () => ApiRequestOptions;
-}
+};
 
 export const DuplicateOptions: TDuplicateOptions = {
     duplicateName: duplicateName,
     duplicateName1: duplicateName1,
     duplicateName2: duplicateName2,
     duplicateName3: duplicateName3,
-}
+};
 
 export class DuplicateService {
-
     /**
      * @throws ApiError
      */
@@ -4796,7 +4827,8 @@ export class DuplicateService {
     public static duplicateName3(): Promise<void> {
         return __request<void>(DuplicateOptions.duplicateName3(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/EnumsService.ts 1`] = `
@@ -4810,52 +4842,43 @@ import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
-const callWithEnums = (
-    requestBody?: {
-        enumWithNumbers?: EEnumWithNumbers,
-        enumWithStrings?: EEnumWithStrings,
-        enumWithStringsWithType?: EEnumWithStringsWithType,
-    },
-): ApiRequestOptions => ({
+const callWithEnums = (requestBody?: {
+    enumWithNumbers?: EEnumWithNumbers;
+    enumWithStrings?: EEnumWithStrings;
+    enumWithStringsWithType?: EEnumWithStringsWithType;
+}): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/enums\`,
     body: requestBody,
     mediaType: 'application/json; charset=utf-8',
 });
 
-
 export type TEnumsOptions = {
-    callWithEnums: (
-        requestBody?: {
-            enumWithNumbers?: EEnumWithNumbers,
-            enumWithStrings?: EEnumWithStrings,
-            enumWithStringsWithType?: EEnumWithStringsWithType,
-        },
-    ) => ApiRequestOptions;
-}
+    callWithEnums: (requestBody?: {
+        enumWithNumbers?: EEnumWithNumbers;
+        enumWithStrings?: EEnumWithStrings;
+        enumWithStringsWithType?: EEnumWithStringsWithType;
+    }) => ApiRequestOptions;
+};
 
 export const EnumsOptions: TEnumsOptions = {
     callWithEnums: callWithEnums,
-}
+};
 
 export class EnumsService {
-
     /**
      * @param requestBody
      * @throws ApiError
      */
-    public static callWithEnums(
-        requestBody?: {
-            enumWithNumbers?: EEnumWithNumbers,
-            enumWithStrings?: EEnumWithStrings,
-            enumWithStringsWithType?: EEnumWithStringsWithType,
-        },
-    ): Promise<void> {
-        return __request<void>(EnumsOptions.callWithEnums(
-            requestBody,
-        ), OpenAPI);
+    public static callWithEnums(requestBody?: {
+        enumWithNumbers?: EEnumWithNumbers;
+        enumWithStrings?: EEnumWithStrings;
+        enumWithStringsWithType?: EEnumWithStringsWithType;
+    }): Promise<void> {
+        return __request<void>(EnumsOptions.callWithEnums(requestBody), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/HeaderService.ts 1`] = `
@@ -4876,17 +4899,15 @@ const callWithResultFromHeader = (): ApiRequestOptions => ({
     },
 });
 
-
 export type THeaderOptions = {
     callWithResultFromHeader: () => ApiRequestOptions;
-}
+};
 
 export const HeaderOptions: THeaderOptions = {
     callWithResultFromHeader: callWithResultFromHeader,
-}
+};
 
 export class HeaderService {
-
     /**
      * @returns string Successful response
      * @throws ApiError
@@ -4894,7 +4915,8 @@ export class HeaderService {
     public static callWithResultFromHeader(): Promise<string> {
         return __request<string>(HeaderOptions.callWithResultFromHeader(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/MultipartService.ts 1`] = `
@@ -4911,70 +4933,52 @@ const multipartResponse = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/multipart\`,
 });
 
-const multipartRequest = (
-    formData?: {
-        content?: string,
-        data?: IModelWithString | null,
-    },
-): ApiRequestOptions => ({
+const multipartRequest = (formData?: { content?: string; data?: IModelWithString | null }): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/multipart\`,
     body: formData,
     mediaType: 'multipart/form-data',
 });
 
-
 export type TMultipartOptions = {
     multipartResponse: () => ApiRequestOptions;
-    multipartRequest: (
-        formData?: {
-            content?: string,
-            data?: IModelWithString | null,
-        },
-    ) => ApiRequestOptions;
-}
+    multipartRequest: (formData?: { content?: string; data?: IModelWithString | null }) => ApiRequestOptions;
+};
 
 export const MultipartOptions: TMultipartOptions = {
     multipartResponse: multipartResponse,
     multipartRequest: multipartRequest,
-}
+};
 
 export class MultipartService {
-
     /**
      * @returns any OK
      * @throws ApiError
      */
     public static multipartResponse(): Promise<{
-        file?: string,
+        file?: string;
         metadata?: {
-            foo?: string,
-            bar?: string,
-        },
+            foo?: string;
+            bar?: string;
+        };
     }> {
         return __request<{
-            file?: string,
+            file?: string;
             metadata?: {
-                foo?: string,
-                bar?: string,
-            },
+                foo?: string;
+                bar?: string;
+            };
         }>(MultipartOptions.multipartResponse(), OpenAPI);
     }
     /**
      * @param formData
      * @throws ApiError
      */
-    public static multipartRequest(
-        formData?: {
-            content?: string,
-            data?: IModelWithString | null,
-        },
-    ): Promise<void> {
-        return __request<void>(MultipartOptions.multipartRequest(
-            formData,
-        ), OpenAPI);
+    public static multipartRequest(formData?: { content?: string; data?: IModelWithString | null }): Promise<void> {
+        return __request<void>(MultipartOptions.multipartRequest(formData), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/NoContentService.ts 1`] = `
@@ -4990,17 +4994,15 @@ const callWithNoContentResponse = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/no-content\`,
 });
 
-
 export type TNoContentOptions = {
     callWithNoContentResponse: () => ApiRequestOptions;
-}
+};
 
 export const NoContentOptions: TNoContentOptions = {
     callWithNoContentResponse: callWithNoContentResponse,
-}
+};
 
 export class NoContentService {
-
     /**
      * @returns void
      * @throws ApiError
@@ -5008,7 +5010,8 @@ export class NoContentService {
     public static callWithNoContentResponse(): Promise<void> {
         return __request<void>(NoContentOptions.callWithNoContentResponse(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/ParametersService.ts 1`] = `
@@ -5031,16 +5034,16 @@ const callWithParameters = (
     method: 'GET',
     path: \`/api/v{api-version}/parameters/\${parameterPath}\`,
     cookies: {
-        'parameterCookie': parameterCookie,
+        parameterCookie: parameterCookie,
     },
     headers: {
-        'parameterHeader': parameterHeader,
+        parameterHeader: parameterHeader,
     },
     query: {
-        'parameterQuery': parameterQuery,
+        parameterQuery: parameterQuery,
     },
     formData: {
-        'parameterForm': parameterForm,
+        parameterForm: parameterForm,
     },
     body: requestBody,
     mediaType: 'application/json',
@@ -5067,41 +5070,34 @@ const callWithWeirdParameterNames = (
     },
     query: {
         'parameter-query': parameterQuery,
-        'default': _default,
+        default: _default,
     },
     formData: {
-        'parameter_form': parameterForm,
+        parameter_form: parameterForm,
     },
     body: requestBody,
     mediaType: 'application/json',
 });
 
-const getCallWithOptionalParam = (
-    requestBody: IModelWithString,
-    parameter?: string,
-): ApiRequestOptions => ({
+const getCallWithOptionalParam = (requestBody: IModelWithString, parameter?: string): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/parameters/\`,
     query: {
-        'parameter': parameter,
+        parameter: parameter,
     },
     body: requestBody,
     mediaType: 'application/json',
 });
 
-const postCallWithOptionalParam = (
-    parameter: string,
-    requestBody?: IModelWithString,
-): ApiRequestOptions => ({
+const postCallWithOptionalParam = (parameter: string, requestBody?: IModelWithString): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/parameters/\`,
     query: {
-        'parameter': parameter,
+        parameter: parameter,
     },
     body: requestBody,
     mediaType: 'application/json',
 });
-
 
 export type TParametersOptions = {
     callWithParameters: (
@@ -5123,25 +5119,18 @@ export type TParametersOptions = {
         parameterPath3?: string,
         _default?: string,
     ) => ApiRequestOptions;
-    getCallWithOptionalParam: (
-        requestBody: IModelWithString,
-        parameter?: string,
-    ) => ApiRequestOptions;
-    postCallWithOptionalParam: (
-        parameter: string,
-        requestBody?: IModelWithString,
-    ) => ApiRequestOptions;
-}
+    getCallWithOptionalParam: (requestBody: IModelWithString, parameter?: string) => ApiRequestOptions;
+    postCallWithOptionalParam: (parameter: string, requestBody?: IModelWithString) => ApiRequestOptions;
+};
 
 export const ParametersOptions: TParametersOptions = {
     callWithParameters: callWithParameters,
     callWithWeirdParameterNames: callWithWeirdParameterNames,
     getCallWithOptionalParam: getCallWithOptionalParam,
     postCallWithOptionalParam: postCallWithOptionalParam,
-}
+};
 
 export class ParametersService {
-
     /**
      * @param parameterHeader This is the parameter that goes into the header
      * @param parameterQuery This is the parameter that goes into the query params
@@ -5159,14 +5148,17 @@ export class ParametersService {
         parameterPath: string | null,
         requestBody: IModelWithString | null,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.callWithParameters(
-            parameterHeader,
-            parameterQuery,
-            parameterForm,
-            parameterCookie,
-            parameterPath,
-            requestBody,
-        ), OpenAPI);
+        return __request<void>(
+            ParametersOptions.callWithParameters(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterCookie,
+                parameterPath,
+                requestBody,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param parameterHeader This is the parameter that goes into the request header
@@ -5191,47 +5183,39 @@ export class ParametersService {
         parameterPath3?: string,
         _default?: string,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.callWithWeirdParameterNames(
-            parameterHeader,
-            parameterQuery,
-            parameterForm,
-            parameterCookie,
-            requestBody,
-            parameterPath1,
-            parameterPath2,
-            parameterPath3,
-            _default,
-        ), OpenAPI);
+        return __request<void>(
+            ParametersOptions.callWithWeirdParameterNames(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterCookie,
+                requestBody,
+                parameterPath1,
+                parameterPath2,
+                parameterPath3,
+                _default,
+            ),
+            OpenAPI,
+        );
     }
     /**
      * @param requestBody This is a required parameter
      * @param parameter This is an optional parameter
      * @throws ApiError
      */
-    public static getCallWithOptionalParam(
-        requestBody: IModelWithString,
-        parameter?: string,
-    ): Promise<void> {
-        return __request<void>(ParametersOptions.getCallWithOptionalParam(
-            requestBody,
-            parameter,
-        ), OpenAPI);
+    public static getCallWithOptionalParam(requestBody: IModelWithString, parameter?: string): Promise<void> {
+        return __request<void>(ParametersOptions.getCallWithOptionalParam(requestBody, parameter), OpenAPI);
     }
     /**
      * @param parameter This is a required parameter
      * @param requestBody This is an optional parameter
      * @throws ApiError
      */
-    public static postCallWithOptionalParam(
-        parameter: string,
-        requestBody?: IModelWithString,
-    ): Promise<void> {
-        return __request<void>(ParametersOptions.postCallWithOptionalParam(
-            parameter,
-            requestBody,
-        ), OpenAPI);
+    public static postCallWithOptionalParam(parameter: string, requestBody?: IModelWithString): Promise<void> {
+        return __request<void>(ParametersOptions.postCallWithOptionalParam(parameter, requestBody), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/RequestBodyService.ts 1`] = `
@@ -5243,40 +5227,31 @@ import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
-const postRequestBodyService = (
-    requestBody?: IModelWithString,
-): ApiRequestOptions => ({
+const postRequestBodyService = (requestBody?: IModelWithString): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/requestBody/\`,
     body: requestBody,
     mediaType: 'application/json',
 });
 
-
 export type TRequestBodyOptions = {
-    postRequestBodyService: (
-        requestBody?: IModelWithString,
-    ) => ApiRequestOptions;
-}
+    postRequestBodyService: (requestBody?: IModelWithString) => ApiRequestOptions;
+};
 
 export const RequestBodyOptions: TRequestBodyOptions = {
     postRequestBodyService: postRequestBodyService,
-}
+};
 
 export class RequestBodyService {
-
     /**
      * @param requestBody A reusable request body
      * @throws ApiError
      */
-    public static postRequestBodyService(
-        requestBody?: IModelWithString,
-    ): Promise<void> {
-        return __request<void>(RequestBodyOptions.postRequestBodyService(
-            requestBody,
-        ), OpenAPI);
+    public static postRequestBodyService(requestBody?: IModelWithString): Promise<void> {
+        return __request<void>(RequestBodyOptions.postRequestBodyService(requestBody), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/ResponseService.ts 1`] = `
@@ -5315,21 +5290,19 @@ const callWithResponses = (): ApiRequestOptions => ({
     },
 });
 
-
 export type TResponseOptions = {
     callWithResponse: () => ApiRequestOptions;
     callWithDuplicateResponses: () => ApiRequestOptions;
     callWithResponses: () => ApiRequestOptions;
-}
+};
 
 export const ResponseOptions: TResponseOptions = {
     callWithResponse: callWithResponse,
     callWithDuplicateResponses: callWithDuplicateResponses,
     callWithResponses: callWithResponses,
-}
+};
 
 export class ResponseService {
-
     /**
      * @returns IModelWithString
      * @throws ApiError
@@ -5351,18 +5324,29 @@ export class ResponseService {
      * @returns TModelThatExtendsExtends Message for 202 response
      * @throws ApiError
      */
-    public static callWithResponses(): Promise<{
-        readonly '@namespace.string'?: string,
-        readonly '@namespace.integer'?: number,
-        readonly value?: Array<IModelWithString>,
-    } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends> {
-        return __request<{
-            readonly '@namespace.string'?: string,
-            readonly '@namespace.integer'?: number,
-            readonly value?: Array<IModelWithString>,
-        } | IModelWithString | TModelThatExtends | TModelThatExtendsExtends>(ResponseOptions.callWithResponses(), OpenAPI);
+    public static callWithResponses(): Promise<
+        | {
+              readonly '@namespace.string'?: string;
+              readonly '@namespace.integer'?: number;
+              readonly value?: Array<IModelWithString>;
+          }
+        | IModelWithString
+        | TModelThatExtends
+        | TModelThatExtendsExtends
+    > {
+        return __request<
+            | {
+                  readonly '@namespace.string'?: string;
+                  readonly '@namespace.integer'?: number;
+                  readonly value?: Array<IModelWithString>;
+              }
+            | IModelWithString
+            | TModelThatExtends
+            | TModelThatExtendsExtends
+        >(ResponseOptions.callWithResponses(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/SimpleService.ts 1`] = `
@@ -5408,7 +5392,6 @@ const patchCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     path: \`/api/v{api-version}/simple\`,
 });
 
-
 export type TSimpleOptions = {
     getCallWithoutParametersAndResponse: () => ApiRequestOptions;
     putCallWithoutParametersAndResponse: () => ApiRequestOptions;
@@ -5417,7 +5400,7 @@ export type TSimpleOptions = {
     optionsCallWithoutParametersAndResponse: () => ApiRequestOptions;
     headCallWithoutParametersAndResponse: () => ApiRequestOptions;
     patchCallWithoutParametersAndResponse: () => ApiRequestOptions;
-}
+};
 
 export const SimpleOptions: TSimpleOptions = {
     getCallWithoutParametersAndResponse: getCallWithoutParametersAndResponse,
@@ -5427,10 +5410,9 @@ export const SimpleOptions: TSimpleOptions = {
     optionsCallWithoutParametersAndResponse: optionsCallWithoutParametersAndResponse,
     headCallWithoutParametersAndResponse: headCallWithoutParametersAndResponse,
     patchCallWithoutParametersAndResponse: patchCallWithoutParametersAndResponse,
-}
+};
 
 export class SimpleService {
-
     /**
      * @throws ApiError
      */
@@ -5473,7 +5455,8 @@ export class SimpleService {
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
         return __request<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), OpenAPI);
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/TypesService.ts 1`] = `
@@ -5497,16 +5480,15 @@ const types = (
     method: 'GET',
     path: \`/api/v{api-version}/types\`,
     query: {
-        'parameterArray': parameterArray,
-        'parameterDictionary': parameterDictionary,
-        'parameterEnum': parameterEnum,
-        'parameterNumber': parameterNumber,
-        'parameterString': parameterString,
-        'parameterBoolean': parameterBoolean,
-        'parameterObject': parameterObject,
+        parameterArray: parameterArray,
+        parameterDictionary: parameterDictionary,
+        parameterEnum: parameterEnum,
+        parameterNumber: parameterNumber,
+        parameterString: parameterString,
+        parameterBoolean: parameterBoolean,
+        parameterObject: parameterObject,
     },
 });
-
 
 export type TTypesOptions = {
     types: (
@@ -5519,14 +5501,13 @@ export type TTypesOptions = {
         parameterObject: any,
         id?: number,
     ) => ApiRequestOptions;
-}
+};
 
 export const TypesOptions: TTypesOptions = {
     types: types,
-}
+};
 
 export class TypesService {
-
     /**
      * @param parameterArray This is an array parameter
      * @param parameterDictionary This is a dictionary parameter
@@ -5552,18 +5533,22 @@ export class TypesService {
         parameterObject: any = null,
         id?: number,
     ): Promise<number | string | boolean | any> {
-        return __request<number | string | boolean | any>(TypesOptions.types(
-            parameterArray,
-            parameterDictionary,
-            parameterEnum,
-            parameterNumber,
-            parameterString,
-            parameterBoolean,
-            parameterObject,
-            id,
-        ), OpenAPI);
+        return __request<number | string | boolean | any>(
+            TypesOptions.types(
+                parameterArray,
+                parameterDictionary,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterBoolean,
+                parameterObject,
+                id,
+            ),
+            OpenAPI,
+        );
     }
-}"
+}
+"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/services/UploadService.ts 1`] = `
@@ -5574,40 +5559,31 @@ import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
 
-const uploadFile = (
-    file: Blob,
-): ApiRequestOptions => ({
+const uploadFile = (file: Blob): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/upload\`,
     formData: {
-        'file': file,
+        file: file,
     },
 });
 
-
 export type TUploadOptions = {
-    uploadFile: (
-        file: Blob,
-    ) => ApiRequestOptions;
-}
+    uploadFile: (file: Blob) => ApiRequestOptions;
+};
 
 export const UploadOptions: TUploadOptions = {
     uploadFile: uploadFile,
-}
+};
 
 export class UploadService {
-
     /**
      * @param file Supply a file reference for upload
      * @returns boolean
      * @throws ApiError
      */
-    public static uploadFile(
-        file: Blob,
-    ): Promise<boolean> {
-        return __request<boolean>(UploadOptions.uploadFile(
-            file,
-        ), OpenAPI);
+    public static uploadFile(file: Blob): Promise<boolean> {
+        return __request<boolean>(UploadOptions.uploadFile(file), OpenAPI);
     }
-}"
+}
+"
 `;

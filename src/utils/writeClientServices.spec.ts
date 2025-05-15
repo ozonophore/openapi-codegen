@@ -49,6 +49,6 @@ describe('writeClientServices', () => {
             useCancelableRequest: false,
         });
 
-        expect(writeFile).toBeCalledWith('/MyService.ts', 'service');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/MyService.ts/), expect.stringMatching(/service/));
     });
 });

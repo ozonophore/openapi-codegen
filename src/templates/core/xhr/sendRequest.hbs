@@ -23,8 +23,6 @@ async function sendRequest(options: ApiRequestOptions, url: string, config: TOpe
                 resolve(xhr);
             }
             {{#if @root.useCancelableRequest}}
-            // TODO разобраться с ситуацией!
-            console.log(xhr.readyState);
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 reject();
             }

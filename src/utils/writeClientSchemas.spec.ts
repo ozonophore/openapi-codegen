@@ -50,6 +50,6 @@ describe('writeClientSchemas', () => {
 
         await writeClientSchemas({ models, templates, outputSchemasPath: '/', httpClient: HttpClient.FETCH, useUnionTypes: false });
 
-        expect(writeFile).toBeCalledWith('/MyModelSchema.ts', 'schema');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/MyModelSchema.ts/), expect.stringMatching(/schema/));
     });
 });

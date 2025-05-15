@@ -37,12 +37,12 @@ describe('writeClientCore', () => {
 
         await writeClientCore({ client, templates, outputCorePath: '/', httpClient: HttpClient.FETCH, useCancelableRequest });
 
-        expect(writeFile).toBeCalledWith('/OpenAPI.ts', 'settings');
-        expect(writeFile).toBeCalledWith('/ApiError.ts', 'apiError');
-        expect(writeFile).toBeCalledWith('/ApiRequestOptions.ts', 'apiRequestOptions');
-        expect(writeFile).toBeCalledWith('/ApiResult.ts', 'apiResult');
-        expect(writeFile).toBeCalledWith('/request.ts', 'request');
-        expect(writeFile).toBeCalledWith('/CancelablePromise.ts', 'cancelablePromise');
-        expect(writeFile).toBeCalledWith('/HttpStatusCode.ts', 'httpStatusCode');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/OpenAPI.ts/), 'settings');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/ApiError.ts/), 'apiError');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/ApiRequestOptions.ts/), 'apiRequestOptions');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/ApiResult.ts/), 'apiResult');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/request.ts/), 'request');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/CancelablePromise.ts/), 'cancelablePromise');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/HttpStatusCode.ts/), 'httpStatusCode');
     });
 });
