@@ -2,6 +2,8 @@ import path from 'path';
 
 import { replaceString } from '../core/replaceString';
 import { getRelativeModelPath } from './getRelativeModelPath';
+import { isInsideDirectory } from './isInsideDirectory';
+import { normalizedAbsolutePath } from './normalizedAbsolutePath';
 import { stripNamespace } from './stripNamespace';
 
 /**
@@ -17,19 +19,20 @@ export function getRelativeModelImportPath(rootPath: string | undefined, sourceP
         return stripNamespace(normalizedValue || '');
     }
 
+    const absoluteRoot = normalizedAbsolutePath(rootPath);
     const normalizedSourcePath = stripNamespace(sourcePath);
-    let absSourcePath = path.resolve(rootPath, normalizedSourcePath);
-    if (!absSourcePath.startsWith(rootPath)) {
-        const sourceRelativePath = getRelativeModelPath(rootPath, sourcePath);
-        absSourcePath = path.resolve(rootPath, sourceRelativePath);
+    let absSourcePath = normalizedAbsolutePath(path.resolve(absoluteRoot, normalizedSourcePath));
+    if (!isInsideDirectory(absSourcePath, absoluteRoot)) {
+        const sourceRelativePath = getRelativeModelPath(absoluteRoot, sourcePath);
+        absSourcePath = path.resolve(absoluteRoot, sourceRelativePath);
     }
-    const absSourceDir = normalizedSourcePath ? path.dirname(absSourcePath) : rootPath;
+    const absSourceDir = normalizedSourcePath ? path.dirname(absSourcePath) : absoluteRoot;
 
     let absTargetPath = path.resolve(absSourceDir, targetPath);
 
-    if (!absTargetPath.startsWith(rootPath)) {
-        const targetRelativePath = getRelativeModelPath(rootPath, targetPath);
-        absTargetPath = path.resolve(rootPath, targetRelativePath);
+    if (!isInsideDirectory(absTargetPath, rootPath)) {
+        const targetRelativePath = getRelativeModelPath(absoluteRoot, targetPath);
+        absTargetPath = path.resolve(absoluteRoot, targetRelativePath);
     }
 
     let relativePath = path.relative(absSourceDir, absTargetPath);

@@ -10,7 +10,7 @@ import { Templates } from './registerHandlebarTemplates';
 /**
  * @param models Array of Models to write
  * @param templates The loaded handlebar templates
- * @param outputModelsPath Папку для генерации моделей
+ * @param outputModelsPath The folder for generating models
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useUnionTypes Use union types instead of enums
  */
@@ -26,7 +26,7 @@ interface IWriteClientModels {
  * Generate Models using the Handlebar template and write to disk.
  * @param models Array of Models to write
  * @param templates The loaded handlebar templates
- * @param outputModelsPath Папку для генерации моделей
+ * @param outputModelsPath The folder for generating models
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useUnionTypes Use union types instead of enums
  */

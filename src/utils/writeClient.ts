@@ -101,7 +101,7 @@ export class WriteClient {
      * Write our OpenAPI client, using the given templates at the given output
      * @param client Client object with all the models, services, etc.
      * @param templates Templates wrapper with all loaded Handlebars templates
-     * @param outputPaths Набор параметров с путями для генерации основных разделов (папок)
+     * @param outputPaths A set of parameters with paths for generating main sections (folders)
      * @param httpClient The selected httpClient (fetch, xhr or node)
      * @param useOptions Use options or arguments functions
      * @param useUnionTypes Use union types instead of enums

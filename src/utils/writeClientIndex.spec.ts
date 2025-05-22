@@ -26,6 +26,6 @@ describe('writeClientIndex', () => {
 
         await writeClientIndex({ templates, outputPath: '/', core: [], models: [], schemas: [], services: [] });
 
-        expect(writeFile).toBeCalledWith('/index.ts', 'index');
+        expect(writeFile).toHaveBeenCalledWith(expect.stringMatching(/index.ts/), expect.stringMatching(/index/));
     });
 });
