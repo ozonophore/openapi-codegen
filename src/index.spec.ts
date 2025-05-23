@@ -20,7 +20,7 @@ describe('index', () => {
     it('should generate from different files', async () => {
         await OpenAPI.generate({
             input: './test/spec/v3.yml',
-            output: './test/generated/v3_1/',
+            output: './generated/v3_1/',
             write: true,
         });
     });
@@ -61,7 +61,7 @@ describe('index', () => {
     it('should generate object with alias', async () => {
         await OpenAPI.generate({
             input: './test/spec/v3withAlias.yaml',
-            output: './test/generated/v3withAlias/',
+            output: './generated/v3withAlias/',
             httpClient: OpenAPI.HttpClient.FETCH,
             useOptions: false,
             useUnionTypes: false,

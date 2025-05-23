@@ -14,7 +14,7 @@ export function format(input: string): string {
             arrowParens: 'avoid',
             endOfLine: 'auto',
         });
-    
+
         return formatedCode;
     } catch {
         throw new Error('Could not to format the value via prettier');

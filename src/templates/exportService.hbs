@@ -6,11 +6,11 @@ import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{@root.out
 {{/each}}
 {{/if}}
 {{#if @root.useCancelableRequest}}
-import type { CancelablePromise } from '{{{outputCore}}}CancelablePromise';
+import type { CancelablePromise } from '{{{@root.outputCore}}}CancelablePromise';
 {{/if}}
-import { request as __request } from '{{{outputCore}}}request';
-import type { ApiRequestOptions } from '{{{outputCore}}}ApiRequestOptions';
-import { OpenAPI } from '{{{outputCore}}}OpenAPI';
+import { request as __request } from '{{{@root.outputCore}}}request';
+import type { ApiRequestOptions } from '{{{@root.outputCore}}}ApiRequestOptions';
+import { OpenAPI } from '{{{@root.outputCore}}}OpenAPI';
 
 {{#each operations}}
 const {{{name}}} = ({{>parameters}}): ApiRequestOptions => ({
@@ -57,11 +57,11 @@ export class {{{name}}} {
      * @throws ApiError
      */
     {{#if @root.useCancelableRequest}}
-    public static {{{name}}}({{>parameters}}): CancelablePromise<{{>result}}> {
+    public static {{{name}}}({{>parameters}}): CancelablePromise<{{>result default="void"}}> {
     {{else}}
-    public static {{{name}}}({{>parameters}}): Promise<{{>result}}> {
+    public static {{{name}}}({{>parameters}}): Promise<{{>result default="void"}}> {
     {{/if}}
-        return __request<{{>result}}>({{../originName}}Options.{{{name}}}({{>parameterValues~}}), OpenAPI);
+        return __request<{{>result default="void"}}>({{../originName}}Options.{{{name}}}({{>parameterValues~}}), OpenAPI);
     }
     {{/each}}
 }
