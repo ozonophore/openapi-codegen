@@ -115,7 +115,6 @@ export class WriteClient {
      */
     async writeClient(options: IWriteClient): Promise<void> {
         const { client, templates, outputPaths, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, request, useCancelableRequest = false } = options;
-        // const { output, outputCore, outputModels, outputSchemas, outputServices } = outputPaths;
 
         if (exportCore) {
             await mkdir(outputPaths.outputCore);
