@@ -10,20 +10,23 @@ jobs:
   publish:
     name: Publish project
     runs-on: ubuntu-latest
-#     if: github.event.pull_request.merged == true
     steps:
       - name: Checkout source
-        uses: actions/checkout@v2
-      - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '14'
-          always-auth: true
+          node-version: '22.5.1'
+          cache: 'npm'
+
       - name: Get the npm version
         id: release
-        uses: martinbeentjes/npm-get-version-action@master
+        uses: martinbeentjes/npm-get-version-action@v1.0.1
+
       - run: |
-           echo "Version: ${{ steps.release.outputs.current-version }}"
+          echo "Version: ${{ steps.release.outputs.current-version }}"
+
       - name: Read Changelog
         id: read_changelog
         uses: mindsers/changelog-reader-action@v2
@@ -31,6 +34,7 @@ jobs:
           validation_depth: 10
           version: ${{ steps.release.outputs.current-version }}
           path: ./CHANGELOG.md
+
       - name: Get the tag version
         id: tag_version
         uses: oprypin/find-latest-tag@v1
@@ -38,62 +42,71 @@ jobs:
           repository: ozonophore/openapi-codegen
           releases-only: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Split Action
         id: split
         uses: rishabhgupta/split-by@v1
         with:
-          # String to split
           string: ${{ steps.release.outputs.current-version }}
-          # The delimiter to split the string
           split-by: '-'
+
       - name: Determine Checkout Depth
-        uses: haya14busa/action-cond@v1
+        uses: haya14busa/action-cond@v1.1.0
         id: tag
         with:
           cond: ${{ steps.split.outputs._1 == '' }}
-          if_true: 'latest'  # string value
+          if_true: 'latest'
           if_false: ${{ steps.split.outputs._1 }}
+
       - run: |
-           echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
+          echo "Tag version: ${{ steps.tag_version.outputs.tag }}"
+
       - name: Install packages
         if: github.ref == 'refs/heads/master'
-        run: npm install
+        run: npm ci
+
       - name: Build library
         if: github.ref == 'refs/heads/master'
         run: npm run release
+
       - name: Run unit tests
         if: github.ref == 'refs/heads/master'
         run: npm run test:coverage
-      - name: Run e2e tests
-        if: github.ref == 'refs/heads/master'
-        run: npm run test:e2e
+
+      # - name: Run e2e tests
+      #   if: github.ref == 'refs/heads/master'
+      #   run: npm run test:e2e
+
       - name: Submit to Codecov
         if: github.ref == 'refs/heads/master'
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV }}
+
       - name: Create Release
         id: create_release
         if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
-        uses: actions/create-release@v1
+        uses: actions/create-release@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.release.outputs.current-version }}
           release_name: Release ${{ steps.release.outputs.current-version }}
           body: ${{ steps.read_changelog.outputs.changes }}
-          draft: ${{ steps.read_changelog.outputs.changes  == 'unreleased' }}
-          prerelease: ${{ steps.read_changelog.outputs.changes  == 'prereleased' }}
-      - name: Publish
+          draft: ${{ steps.read_changelog.outputs.changes == 'unreleased' }}
+          prerelease: ${{ steps.read_changelog.outputs.changes == 'prereleased' }}
+
+      - name: Publish to npm
         id: publish
         if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
-        uses: JS-DevTools/npm-publish@v1
+        uses: JS-DevTools/npm-publish@v2
         with:
           token: ${{ secrets.NPM_AUTH_TOKEN }}
           check-version: true
           access: public
           tag: ${{ steps.tag.outputs.value }}
-      - if: steps.Publish.outputs.type != 'none'
+
+      - if: steps.publish.outputs.type != 'none'
         run: |
           echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
 

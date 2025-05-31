@@ -1,0 +1,106 @@
+import assert from 'node:assert';
+import { describe, test } from 'node:test';
+
+import { OperationParameter } from '../../types/shared/OperationParameter.model';
+import { sortByRequired } from '../sortByRequired';
+
+describe('sortByRequired', () => {
+    test('@unit: should sort params', () => {
+        const paramOptional: OperationParameter = {
+            in: 'query',
+            prop: 'parameterOptionalStringWithNoDefault',
+            export: 'generic',
+            name: 'parameterOptionalStringWithNoDefault',
+            alias: '',
+            path: '',
+            type: 'string',
+            base: 'string',
+            template: null,
+            link: null,
+            description: '3. This is a optional string with no default',
+            isDefinition: false,
+            isReadOnly: false,
+            isRequired: false,
+            isNullable: false,
+            imports: [],
+            enum: [],
+            enums: [],
+            properties: [],
+            mediaType: null,
+        };
+        const paramOptionalWithDefault: OperationParameter = {
+            in: 'query',
+            prop: 'parameterOptionalStringWithNoDefault',
+            export: 'generic',
+            name: 'parameterOptionalStringWithNoDefault',
+            alias: '',
+            path: '',
+            type: 'string',
+            base: 'string',
+            template: null,
+            link: null,
+            description: '3. This is a optional string with no default',
+            isDefinition: false,
+            isReadOnly: false,
+            isRequired: false,
+            isNullable: false,
+            imports: [],
+            enum: [],
+            enums: [],
+            properties: [],
+            mediaType: null,
+            default: 'Hello World!',
+        };
+        const paramRequiredWithDefault: OperationParameter = {
+            in: 'query',
+            prop: 'parameterStringWithDefault',
+            export: 'generic',
+            name: 'parameterStringWithDefault',
+            alias: '',
+            path: '',
+            type: 'string',
+            base: 'string',
+            template: null,
+            link: null,
+            description: '2. This is a string with default',
+            isDefinition: false,
+            isReadOnly: false,
+            isRequired: true,
+            isNullable: false,
+            imports: [],
+            enum: [],
+            enums: [],
+            properties: [],
+            mediaType: null,
+            default: 'Hello World!',
+        };
+        const paramRequiredWithoutDefault: OperationParameter = {
+            in: 'query',
+            prop: 'parameterStringWithoutDefault',
+            export: 'generic',
+            name: 'parameterStringWithoutDefault',
+            alias: '',
+            path: '',
+            type: 'string',
+            base: 'string',
+            template: null,
+            link: null,
+            description: '1. This is a string without default',
+            isDefinition: false,
+            isReadOnly: false,
+            isRequired: true,
+            isNullable: false,
+            imports: [],
+            enum: [],
+            enums: [],
+            properties: [],
+            mediaType: null,
+        };
+        assert.deepStrictEqual([paramOptionalWithDefault, paramOptional, paramRequiredWithDefault, paramRequiredWithoutDefault].sort(sortByRequired), [
+            paramRequiredWithoutDefault,
+            paramRequiredWithDefault,
+            paramOptionalWithDefault,
+            paramOptional,
+        ]);
+    });
+});

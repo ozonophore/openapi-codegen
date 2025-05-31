@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.0] - 2025-06-12
+
+### Added
+- Added the use of nodejs native tests (unit tests);
+
+### Deleted
+- The "samples" and "site" sections have been removed;
+- Jest has been remobed;
+
+### Updated
+- Changed the folder structure of the project;
+- Template files (hbs) go through a pre-compilation process before use;
+- Rollup has been removed, the assembly is based on tsc tools;
+- Changed the settings of github workflows (CI, Deploy);
+- Changes have been made to the eslint settings to improve code purity;
+- The typescript version has been raised;
+- The nodejs version has been raised;
+
 ## [0.5.1] - 2025-05-15
 
 ### Fixed
