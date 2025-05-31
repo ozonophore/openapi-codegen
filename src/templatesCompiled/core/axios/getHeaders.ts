@@ -1,0 +1,9 @@
+// Это автоматически сгенерированный файл для hbs шаблона.
+// Не нужно его изменять, для обновления запусти npm run build:hbs
+/* istanbul ignore file */
+/* tslint: disable */
+/* eslint: disable */
+// @ts-nocheck
+export default {"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "async function getHeaders(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<AxiosRequestHeaders> {\n    const token = await resolve(options, config.TOKEN);\n    const username = await resolve(options, config.USERNAME);\n    const password = await resolve(options, config.PASSWORD);\n    const defaultHeaders = await resolve(options, config.HEADERS);\n\n    const headers = {\n        Accept: 'application/json',\n        ...defaultHeaders,\n        ...options.headers,\n    } as AxiosRequestHeaders;\n\n    if (isStringWithValue(token)) {\n        headers['Authorization'] = `Bearer ${token}`;\n    }\n\n    if (isStringWithValue(username) && isStringWithValue(password)) {\n        const credentials = Buffer.from(`${username}:${password}`).toString('base64');\n        headers['Authorization'] = `Bearer ${credentials}`;\n    }\n\n    if (options.body) {\n        if (options.mediaType) {\n            headers['Content-Type'] = options.mediaType;\n        } else if (isBinary(options.body)) {\n            headers['Content-Type'] = 'application/octet-stream';\n        } else if (isString(options.body)) {\n            headers['Content-Type'] = 'text/plain';\n        } else {\n            headers['Content-Type'] = 'application/json';\n        }\n    }\n    return headers;\n}\n";
+},"useData":true}
