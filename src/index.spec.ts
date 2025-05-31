@@ -1,4 +1,4 @@
-import * as OpenAPI from './index';
+import * as OpenAPI from './core/index';
 
 describe('index', () => {
     it('parses v2 without issues', async () => {

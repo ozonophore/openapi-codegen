@@ -1,5 +1,5 @@
 import type { Client } from '../client/interfaces/Client';
-import { relative, resolve } from '../core/utils/pathHelpers';
+import { relative, resolve } from '../core/path';
 import { HttpClient } from '../HttpClient';
 import { mkdir } from './fileSystem';
 import { IOutput } from './output';
