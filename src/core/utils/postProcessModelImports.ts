@@ -1,5 +1,5 @@
-import { Import } from '../client/interfaces/Import';
-import type { Model } from '../client/interfaces/Model';
+import { Import } from '../types/shared/Import';
+import type { Model } from '../types/shared/Model';
 import { sort } from './sort';
 import { unique } from './unique';
 

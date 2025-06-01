@@ -1,4 +1,4 @@
-import { normalize, resolve } from '../core/path';
+import { normalize, resolve } from '../utils/pathHelpers';
 
 /**
  * Converts the path to an absolute one and normalizes it.

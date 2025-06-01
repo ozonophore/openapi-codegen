@@ -1,7 +1,7 @@
-import type { OperationResponse } from '../../../client/interfaces/OperationResponse';
+import type { OperationResponse } from '../../../types/shared/OperationResponse';
 import { getPattern } from '../../../utils/getPattern';
-import type { OpenApi } from '../interfaces/OpenApi';
-import type { OpenApiResponse } from '../interfaces/OpenApiResponse';
+import type { OpenApi } from '../types/OpenApi';
+import type { OpenApiResponse } from '../types/OpenApiResponse';
 import { Parser } from '../Parser';
 import { getComment } from './getComment';
 

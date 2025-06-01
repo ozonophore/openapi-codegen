@@ -1,4 +1,4 @@
-import { sort } from './sort';
+import { sort } from '../sort';
 
 describe('sort', () => {
     it('should return correct index', () => {

@@ -1,5 +1,5 @@
-import type { Enum } from '../../../client/interfaces/Enum';
-import type { WithEnumExtension } from '../interfaces/Extensions/WithEnumExtension';
+import type { Enum } from '../../../types/shared/Enum';
+import type { WithEnumExtension } from '../types/Extensions/WithEnumExtension';
 
 /**
  * Extend the enum with the x-enum properties. This adds the capability

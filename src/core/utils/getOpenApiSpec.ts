@@ -1,10 +1,10 @@
 import RefParser from 'json-schema-ref-parser';
 import { isAbsolute } from 'path';
 
-import { CommonOpenApi } from '../core/types/shared/CommonOpenApi';
-import { Context } from '../core/Context';
-import { dirName, join, resolve } from '../core/path';
-import { OpenApiReference } from '../openApi/interfaces/OpenApiReference';
+import { Context } from '../Context';
+import { CommonOpenApi } from '../types/shared/CommonOpenApi';
+import { OpenApiReference } from '../types/shared/OpenApiReference';
+import { dirName, join, resolve } from '../utils/pathHelpers';
 import { exists } from './fileSystem';
 
 function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: string): T {

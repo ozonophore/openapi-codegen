@@ -1,5 +1,5 @@
-import type { Model } from '../../../client/interfaces/Model';
-import type { OperationResponse } from '../../../client/interfaces/OperationResponse';
+import type { Model } from '../../../types/shared/Model';
+import type { OperationResponse } from '../../../types/shared/OperationResponse';
 
 function areEqual(a: Model, b: Model): boolean {
     const equal = a.type === b.type && a.base === b.base && a.template === b.template;

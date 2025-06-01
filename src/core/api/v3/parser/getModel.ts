@@ -1,6 +1,6 @@
-import type { Model } from '../../../client/interfaces/Model';
+import type { Model } from '../../../types/shared/Model';
 import { getPattern } from '../../../utils/getPattern';
-import { ModelConfig } from '../interfaces/ModelConfig';
+import { ModelConfig } from '../types/ModelConfig';
 import { Parser } from '../Parser';
 import { extendEnum } from './extendEnum';
 import { getComment } from './getComment';

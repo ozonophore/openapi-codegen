@@ -1,4 +1,4 @@
-import { unique } from './unique';
+import { unique } from '../unique';
 
 describe('unique', () => {
     it('should return correct index', () => {

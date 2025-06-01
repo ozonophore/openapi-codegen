@@ -1,5 +1,5 @@
-import type { Service } from '../../../client/interfaces/Service';
-import type { OpenApi } from '../interfaces/OpenApi';
+import type { Service } from '../../../types/shared/Service';
+import type { OpenApi } from '../types/OpenApi';
 import { Parser } from '../Parser';
 
 /**

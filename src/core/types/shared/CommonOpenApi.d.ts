@@ -1,5 +1,5 @@
-import { OpenApiPath } from '../openApi/v2/interfaces/OpenApiPath';
-import { OpenApiPaths } from '../openApi/v3/interfaces/OpenApiPaths';
+import { OpenApiPath } from '../openApi/v2/types/OpenApiPath';
+import { OpenApiPaths } from '../openApi/v3/types/OpenApiPaths';
 import { Dictionary } from './Dictionary.model';
 
 export interface CommonOpenApi {

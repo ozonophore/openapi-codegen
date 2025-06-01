@@ -1,4 +1,4 @@
-import { replaceString } from './replaceString';
+import { replaceString } from '../replaceString';
 
 describe('replaceString', () => {
     it('should replace', () => {

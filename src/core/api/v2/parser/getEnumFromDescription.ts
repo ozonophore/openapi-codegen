@@ -1,4 +1,4 @@
-import type { Enum } from '../../../client/interfaces/Enum';
+import type { Enum } from '../../../types/shared/Enum';
 
 export function getEnumFromDescription(description: string): Enum[] {
     // Check if we can find this special format string:

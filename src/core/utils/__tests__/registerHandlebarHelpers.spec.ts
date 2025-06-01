@@ -1,7 +1,7 @@
 import * as Handlebars from 'handlebars/runtime';
 
-import { HttpClient } from '../HttpClient';
-import { registerHandlebarHelpers } from './registerHandlebarHelpers';
+import { HttpClient } from '../../types/Enums';
+import { registerHandlebarHelpers } from '../registerHandlebarHelpers';
 
 describe('registerHandlebarHelpers', () => {
     it('should register the helpers', () => {

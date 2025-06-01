@@ -1,4 +1,4 @@
-import { Context } from '../core/Context';
+import { Context } from '../Context';
 import { TypeRef } from '../types/Enums';
 import { getGatheringRefs } from './getGatheringRefs';
 

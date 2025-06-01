@@ -1,4 +1,4 @@
-import { getClassName } from './getClassName';
+import { getClassName } from '../getClassName';
 
 describe('getModelNames', () => {
     it('should retur classname', () => {

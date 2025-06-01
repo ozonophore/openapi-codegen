@@ -1,5 +1,5 @@
-import type { Enum } from '../client/interfaces/Enum';
-import type { Model } from '../client/interfaces/Model';
+import type { Enum } from '../types/shared/Enum';
+import type { Model } from '../types/shared/Model';
 
 /**
  * Set unique enum values for the model

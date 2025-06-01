@@ -1,4 +1,4 @@
-import type { Model } from '../client/interfaces/Model';
+import type { Model } from '../types/shared/Model';
 import { sort } from './sort';
 
 export function getModelNames(models: Model[]): string[] {

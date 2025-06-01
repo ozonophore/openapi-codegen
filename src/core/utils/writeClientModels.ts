@@ -1,8 +1,8 @@
 import { mkdirSync } from 'fs';
 
-import type { Model } from '../client/interfaces/Model';
-import { dirName, resolve } from '../core/path';
-import { HttpClient } from '../HttpClient';
+import { HttpClient } from '../types/Enums';
+import type { Model } from '../types/shared/Model';
+import { dirName, resolve } from '../utils/pathHelpers';
 import { writeFile } from './fileSystem';
 import { format } from './format';
 import { Templates } from './registerHandlebarTemplates';

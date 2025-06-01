@@ -1,5 +1,5 @@
-import type { Model } from '../../../client/interfaces/Model';
-import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
+import type { Model } from '../../../types/shared/Model';
+import type { OpenApiSchema } from '../types/OpenApiSchema';
 
 export function getModelDefault(definition: OpenApiSchema, model?: Model): string | undefined {
     if (definition.default === undefined) {

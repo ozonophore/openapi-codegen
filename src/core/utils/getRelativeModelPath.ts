@@ -1,6 +1,6 @@
-import { resolve } from '../core/path';
-import { replaceString } from '../core/replaceString';
 import { isInsideDirectory } from './isInsideDirectory';
+import { resolve } from './pathHelpers';
+import { replaceString } from './replaceString';
 import { stripNamespace } from './stripNamespace';
 
 /**

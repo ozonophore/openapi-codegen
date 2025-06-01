@@ -1,7 +1,7 @@
-import type { Service } from '../client/interfaces/Service';
+import { Import } from '../types/shared/Import';
+import type { Service } from '../types/shared/Service';
 import { sort } from './sort';
 import { unique } from './unique';
-import { Import } from "../client/interfaces/Import";
 
 /**
  * Set unique imports, sorted by name

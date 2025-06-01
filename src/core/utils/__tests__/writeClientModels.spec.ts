@@ -1,8 +1,8 @@
-import type { Model } from '../client/interfaces/Model';
-import { HttpClient } from '../HttpClient';
-import { writeFile } from './fileSystem';
-import { Templates } from './registerHandlebarTemplates';
-import { writeClientModels } from './writeClientModels';
+import { HttpClient } from '../../types/Enums';
+import type { Model } from '../../types/shared/Model';
+import { writeFile } from '../fileSystem';
+import { Templates } from '../registerHandlebarTemplates';
+import { writeClientModels } from '../writeClientModels';
 
 jest.mock('./fileSystem');
 

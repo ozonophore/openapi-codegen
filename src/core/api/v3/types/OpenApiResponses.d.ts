@@ -1,4 +1,4 @@
-import type { OpenApiReference } from '../../interfaces/OpenApiReference';
+import type { OpenApiReference } from '../../types/OpenApiReference';
 import type { OpenApiResponse } from './OpenApiResponse';
 
 /**

@@ -1,8 +1,8 @@
-import type { Client } from '../client/interfaces/Client';
-import { HttpClient } from '../HttpClient';
-import { writeFile } from './fileSystem';
-import { Templates } from './registerHandlebarTemplates';
-import { writeClientCore } from './writeClientCore';
+import { HttpClient } from '../../types/Enums';
+import type { Client } from '../../types/shared/Client';
+import { writeFile } from '../fileSystem';
+import { Templates } from '../registerHandlebarTemplates';
+import { writeClientCore } from '../writeClientCore';
 
 jest.mock('./fileSystem');
 

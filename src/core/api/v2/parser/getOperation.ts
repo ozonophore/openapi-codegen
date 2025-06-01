@@ -1,8 +1,8 @@
-import type { Operation } from '../../../client/interfaces/Operation';
-import type { OperationParameters } from '../../../client/interfaces/OperationParameters';
+import type { Operation } from '../../../types/shared/Operation';
+import type { OperationParameters } from '../../../types/shared/OperationParameters';
 import { Context } from '../../../core/Context';
-import type { OpenApi } from '../interfaces/OpenApi';
-import type { OpenApiOperation } from '../interfaces/OpenApiOperation';
+import type { OpenApi } from '../types/OpenApi';
+import type { OpenApiOperation } from '../types/OpenApiOperation';
 import { Parser } from '../Parser';
 import { getComment } from './getComment';
 import { getOperationErrors } from './getOperationErrors';

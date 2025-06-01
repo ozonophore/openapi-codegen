@@ -1,16 +1,16 @@
-import type { Operation } from '../../../client/interfaces/Operation';
-import type { OperationParameters } from '../../../client/interfaces/OperationParameters';
-import type { OpenApi } from '../interfaces/OpenApi';
-import type { OpenApiOperation } from '../interfaces/OpenApiOperation';
-import type { OpenApiRequestBody } from '../interfaces/OpenApiRequestBody';
+import type { Operation } from '../../../types/shared/Operation';
+import type { OperationParameters } from '../../../types/shared/OperationParameters';
+import { sortByRequired } from '../../../utils/sortByRequired';
 import { Parser } from '../Parser';
+import type { OpenApi } from '../types/OpenApi';
+import type { OpenApiOperation } from '../types/OpenApiOperation';
+import type { OpenApiRequestBody } from '../types/OpenApiRequestBody';
 import { getComment } from './getComment';
 import { getOperationErrors } from './getOperationErrors';
 import { getOperationName } from './getOperationName';
 import { getOperationPath } from './getOperationPath';
 import { getOperationResponseHeader } from './getOperationResponseHeader';
 import { getOperationResults } from './getOperationResults';
-import { sortByRequired } from '../../../utils/sortByRequired';
 
 export function getOperation(this: Parser, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, serviceClassName: string): Operation {
     const operationNameFallback = `${method}${serviceClassName}`;

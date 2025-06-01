@@ -1,9 +1,9 @@
 import equal from 'fast-deep-equal';
 
-import { Context } from '../core/Context';
-import { dirName, join } from '../core/path';
+import { Context } from '../Context';
 import { TypeRef } from '../types/Enums';
 import { IRefWithtype } from '../types/Models';
+import { dirName, join } from '../utils/pathHelpers';
 
 function includes(references: IRefWithtype[], value: string): boolean {
     return references.findIndex(item => equal(item.value, value)) !== -1;

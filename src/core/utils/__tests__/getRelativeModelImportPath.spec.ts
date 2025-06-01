@@ -1,4 +1,4 @@
-import { getRelativeModelImportPath } from './getRelativeModelImportPath';
+import { getRelativeModelImportPath } from '../getRelativeModelImportPath';
 
 const rootPath = '/openapi-codegen/generated/openapi/models';
 let sourcePath = '';

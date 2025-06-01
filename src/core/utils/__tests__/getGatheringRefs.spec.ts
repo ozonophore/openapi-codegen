@@ -1,5 +1,5 @@
-import { TypeRef } from '../types/Enums';
-import { getGatheringRefs } from './getGatheringRefs';
+import { TypeRef } from '../../types/Enums';
+import { getGatheringRefs } from '../getGatheringRefs';
 
 const Context = jest.fn();
 

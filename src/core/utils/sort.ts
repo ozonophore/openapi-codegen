@@ -1,4 +1,4 @@
-import { Import } from '../client/interfaces/Import';
+import { Import } from '../types/shared/Import';
 
 function sortString(a: string, b: string): number {
     const nameA = a.toLowerCase();

@@ -1,4 +1,4 @@
-import { Context } from '../../core/Context';
+import { Context } from '../../../core/Context';
 import { getModel } from '../v3/parser/getModel';
 import { getModelComposition } from './parser/getModelComposition';
 import { getModelProperties } from './parser/getModelProperties';

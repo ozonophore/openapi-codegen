@@ -1,5 +1,5 @@
-import type { Model } from '../client/interfaces/Model';
-import { sortModelsByName } from './sortModelsByName';
+import type { Model } from '../../types/shared/Model';
+import { sortModelsByName } from '../sortModelsByName';
 
 describe('sortModelsByName', () => {
     it('should return sorted list', () => {

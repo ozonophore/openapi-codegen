@@ -1,4 +1,4 @@
-import { getFileName } from './getFileName';
+import { getFileName } from '../getFileName';
 
 describe('getFileName', () => {
     it('should return file name', () => {

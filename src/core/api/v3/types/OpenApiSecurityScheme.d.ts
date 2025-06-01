@@ -1,5 +1,5 @@
 import type { OpenApiOAuthFlows } from './OpenApiOAuthFlows';
-import type { OpenApiReference } from '../../interfaces/OpenApiReference';
+import type { OpenApiReference } from '../../types/OpenApiReference';
 
 /**
  * https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#securitySchemeObject

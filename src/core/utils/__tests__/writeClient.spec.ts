@@ -1,9 +1,9 @@
-import type { Client } from '../client/interfaces/Client';
-import { getOutputPaths } from '../core/getOutputPaths';
-import { HttpClient } from '../HttpClient';
-import { mkdir, writeFile } from './fileSystem';
-import { Templates } from './registerHandlebarTemplates';
-import { WriteClient } from './writeClient';
+import { HttpClient } from '../../types/Enums';
+import type { Client } from '../../types/shared/Client';
+import { mkdir, writeFile } from '../fileSystem';
+import { getOutputPaths } from '../getOutputPaths';
+import { Templates } from '../registerHandlebarTemplates';
+import { WriteClient } from '../writeClient';
 
 jest.mock('./fileSystem');
 

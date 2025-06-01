@@ -1,4 +1,4 @@
-import { getPattern } from './getPattern';
+import { getPattern } from '../getPattern';
 
 describe('getPattern', () => {
     it('should produce correct result', () => {

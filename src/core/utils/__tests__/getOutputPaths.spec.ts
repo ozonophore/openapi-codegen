@@ -1,5 +1,5 @@
-import { getOutputPaths } from './getOutputPaths';
-import { join } from './path';
+import { getOutputPaths } from '../getOutputPaths';
+import { join } from '../pathHelpers';
 
 // mock - process.cwd()
 const mockCwd = '/projects/my-project';

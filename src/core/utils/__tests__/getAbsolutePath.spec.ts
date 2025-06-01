@@ -1,4 +1,4 @@
-import { getAbsolutePath } from './getAbsolutePath';
+import { getAbsolutePath } from '../getAbsolutePath';
 
 describe('getAbsolutePath', () => {
     it('The absolute reference in the definition Ref replaces the part after the # in the parentRef', () => {

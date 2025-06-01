@@ -1,4 +1,4 @@
-import { getRefFromSchema } from './getRefFromSchema';
+import { getRefFromSchema } from '../getRefFromSchema';
 
 describe('getRefFromSchema', () => {
     it('should obtain refs from all schemas', () => {

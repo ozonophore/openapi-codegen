@@ -1,9 +1,9 @@
 import path from 'path';
 
-import { replaceString } from '../core/replaceString';
 import { getRelativeModelPath } from './getRelativeModelPath';
 import { isInsideDirectory } from './isInsideDirectory';
 import { normalizedAbsolutePath } from './normalizedAbsolutePath';
+import { replaceString } from './replaceString';
 import { stripNamespace } from './stripNamespace';
 
 /**

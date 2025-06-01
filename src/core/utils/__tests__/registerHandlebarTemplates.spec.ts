@@ -1,5 +1,5 @@
-import { HttpClient } from '../HttpClient';
-import { registerHandlebarTemplates } from './registerHandlebarTemplates';
+import { HttpClient } from '../../types/Enums';
+import { registerHandlebarTemplates } from '../registerHandlebarTemplates';
 
 describe('registerHandlebarTemplates', () => {
     it('should return correct templates', () => {

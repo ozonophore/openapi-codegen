@@ -1,4 +1,4 @@
-import { getRefs } from './getRefs';
+import { getRefs } from '../getRefs';
 
 describe('getRefs', () => {
     it('should return array of refs', () => {

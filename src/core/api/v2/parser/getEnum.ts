@@ -1,4 +1,4 @@
-import type { Enum } from '../../../client/interfaces/Enum';
+import type { Enum } from '../../../types/shared/Enum';
 import { isDefined } from '../../../utils/isDefined';
 
 export function getEnum(values?: (string | number)[]): Enum[] {

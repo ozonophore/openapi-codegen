@@ -46,7 +46,7 @@
     ],
     "scripts": {
         "clean": "rimraf ./dist ./generated ./test/generated ./test/e2e/generated ./samples/generated ./coverage ./node_modules/.cache",
-        "build": "rollup --config --environment NODE_ENV:development",
+        "build": "tsc -p .",
         "build:watch": "rollup --config --environment NODE_ENV:development --watch",
         "release": "rollup --config --environment NODE_ENV:production",
         "run": "node ./test/index.js",

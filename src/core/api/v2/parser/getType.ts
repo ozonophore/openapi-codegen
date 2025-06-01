@@ -1,4 +1,4 @@
-import type { Type } from '../../../client/interfaces/Type';
+import type { Type } from '../../../types/shared/Type';
 import { replaceString } from '../../../core/replaceString';
 import { encode } from '../../../utils/encode';
 import { getAbsolutePath } from '../../../utils/getAbsolutePath';

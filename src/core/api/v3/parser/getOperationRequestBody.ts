@@ -1,8 +1,8 @@
-import type { OperationParameter } from '../../../client/interfaces/OperationParameter';
+import type { OperationParameter } from '../../../types/shared/OperationParameter';
 import { getPattern } from '../../../utils/getPattern';
-import type { OpenApi } from '../interfaces/OpenApi';
-import type { OpenApiRequestBody } from '../interfaces/OpenApiRequestBody';
 import { Parser } from '../Parser';
+import type { OpenApi } from '../types/OpenApi';
+import type { OpenApiRequestBody } from '../types/OpenApiRequestBody';
 import { getComment } from './getComment';
 import { getContent } from './getContent';
 
@@ -36,9 +36,7 @@ export function getOperationRequestBody(this: Parser, openApi: OpenApi, paramete
         if (content) {
             requestBody.mediaType = content.mediaType;
             if (requestBody.mediaType === 'multipart/form-data') {
-                requestBody.in = 'formData',
-                requestBody.name = 'formData',
-                requestBody.prop = 'formData'
+                (requestBody.in = 'formData'), (requestBody.name = 'formData'), (requestBody.prop = 'formData');
             }
             if (content?.schema?.$ref) {
                 const model = this.getType(content.schema.$ref, parentRef);

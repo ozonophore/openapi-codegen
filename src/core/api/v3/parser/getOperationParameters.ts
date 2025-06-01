@@ -1,8 +1,8 @@
-import type { OperationParameters } from '../../../client/interfaces/OperationParameters';
+import type { OperationParameters } from '../../../types/shared/OperationParameters';
 import { sortByRequired } from '../../../utils/sortByRequired';
-import type { OpenApi } from '../interfaces/OpenApi';
-import type { OpenApiParameter } from '../interfaces/OpenApiParameter';
 import { Parser } from '../Parser';
+import type { OpenApi } from '../types/OpenApi';
+import type { OpenApiParameter } from '../types/OpenApiParameter';
 
 export function getOperationParameters(this: Parser, openApi: OpenApi, parameters: OpenApiParameter[]): OperationParameters {
     const operationParameters: OperationParameters = {

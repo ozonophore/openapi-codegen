@@ -1,7 +1,7 @@
-import type { Model } from '../../../client/interfaces/Model';
+import type { Model } from '../../../types/shared/Model';
 import { getPattern } from '../../../utils/getPattern';
-import type { OpenApi } from '../interfaces/OpenApi';
-import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
+import type { OpenApi } from '../types/OpenApi';
+import type { OpenApiSchema } from '../types/OpenApiSchema';
 import { Parser } from '../Parser';
 import { escapeName } from './escapeName';
 import { getComment } from './getComment';

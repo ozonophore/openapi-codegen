@@ -1,8 +1,8 @@
-import type { Client } from '../client/interfaces/Client';
-import { relative, resolve } from '../core/path';
-import { HttpClient } from '../HttpClient';
+import { HttpClient } from '../types/Enums';
+import { IOutput } from '../types/Models';
+import type { Client } from '../types/shared/Client';
+import { relative, resolve } from '../utils/pathHelpers';
 import { mkdir } from './fileSystem';
-import { IOutput } from './output';
 import { Templates } from './registerHandlebarTemplates';
 import { unique } from './unique';
 import { writeClientCore } from './writeClientCore';

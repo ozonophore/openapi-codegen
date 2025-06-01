@@ -1,4 +1,4 @@
-import type { OpenApi } from '../interfaces/OpenApi';
+import type { OpenApi } from '../types/OpenApi';
 
 /**
  * Get the base server url.

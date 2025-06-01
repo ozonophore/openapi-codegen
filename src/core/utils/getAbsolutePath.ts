@@ -1,4 +1,4 @@
-import { dirName, join } from '../core/path';
+import { dirName, join } from '../utils/pathHelpers';
 
 export function getAbsolutePath(definitionRef: string | undefined, parentRef: string): string {
     // If the definition Ref is missing

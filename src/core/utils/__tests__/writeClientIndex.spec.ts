@@ -1,6 +1,6 @@
-import { writeFile } from './fileSystem';
-import { Templates } from './registerHandlebarTemplates';
-import { writeClientIndex } from './writeClientIndex';
+import { writeFile } from '../fileSystem';
+import { Templates } from '../registerHandlebarTemplates';
+import { writeClientIndex } from '../writeClientIndex';
 
 jest.mock('./fileSystem');
 

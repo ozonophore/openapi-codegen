@@ -1,6 +1,6 @@
 import type { WithEnumExtension } from '../../../types/shared/extensions/WithEnumExtension';
 import type { Dictionary } from '../../../utils/types';
-import type { OpenApiReference } from '../../interfaces/OpenApiReference';
+import type { OpenApiReference } from '../../types/OpenApiReference';
 import type { WithNullableExtension } from './Extensions/WithNullableExtension';
 import type { OpenApiExternalDocs } from './OpenApiExternalDocs';
 import type { OpenApiXml } from './OpenApiXml';

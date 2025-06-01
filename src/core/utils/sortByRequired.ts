@@ -1,4 +1,4 @@
-import type { OperationParameter } from '../client/interfaces/OperationParameter';
+import type { OperationParameter } from '../types/shared/OperationParameter';
 
 export function sortByRequired(a: OperationParameter, b: OperationParameter): number {
     if (!a.isRequired && b.isRequired) {

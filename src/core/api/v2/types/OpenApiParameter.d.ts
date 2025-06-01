@@ -1,5 +1,5 @@
 import type { WithEnumExtension } from '../../../types/shared/extensions/WithEnumExtension';
-import type { OpenApiReference } from '../../interfaces/OpenApiReference';
+import type { OpenApiReference } from '../../types/OpenApiReference';
 import type { WithNullableExtension } from './Extensions/WithNullableExtension';
 import type { OpenApiItems } from './OpenApiItems';
 import type { OpenApiSchema } from './OpenApiSchema';

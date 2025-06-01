@@ -1,4 +1,4 @@
-import { getRelativeModelPath } from './getRelativeModelPath';
+import { getRelativeModelPath } from '../getRelativeModelPath';
 
 describe('getRelativeModelPath', () => {
     it('hould return model relative path', () => {

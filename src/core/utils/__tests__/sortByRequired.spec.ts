@@ -1,5 +1,5 @@
-import { OperationParameter } from '../client/interfaces/OperationParameter';
-import { sortByRequired } from './sortByRequired';
+import { OperationParameter } from '../../types/shared/OperationParameter';
+import { sortByRequired } from '../sortByRequired';
 
 describe('sortByRequired', () => {
     it('should sort params', () => {

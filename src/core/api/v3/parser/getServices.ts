@@ -1,11 +1,11 @@
-import { Import } from '../../../client/interfaces/Import';
-import { Model } from '../../../client/interfaces/Model';
-import type { Service } from '../../../client/interfaces/Service';
+import { Import } from '../../../types/shared/Import';
+import { Model } from '../../../types/shared/Model';
+import type { Service } from '../../../types/shared/Service';
 import { getClassName } from '../../../utils/getClassName';
 import { unique } from '../../../utils/unique';
-import type { OpenApi } from '../interfaces/OpenApi';
-import { OpenApiOperation } from '../interfaces/OpenApiOperation';
 import { Parser } from '../Parser';
+import type { OpenApi } from '../types/OpenApi';
+import { OpenApiOperation } from '../types/OpenApiOperation';
 import { getServiceClassName } from './getServiceClassName';
 
 function getServiceName(op: OpenApiOperation, fileName: string): string {

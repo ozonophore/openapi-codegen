@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 
-import type { Client } from '../client/interfaces/Client';
-import { HttpClient } from '../HttpClient';
+import { HttpClient } from '../types/Enums';
+import type { Client } from '../types/shared/Client';
 import { copyFile, exists, writeFile } from './fileSystem';
 import { Templates } from './registerHandlebarTemplates';
 

@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 
-import { isSubDirectory } from './isSubdirectory';
+import { isSubDirectory } from '../isSubdirectory';
 
 describe('isSubDirectory', () => {
     it('should return correct result', () => {

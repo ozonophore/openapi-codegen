@@ -1,6 +1,6 @@
 import { basename, extname } from 'path';
 
-import { dirName, join } from '../core/path';
+import { dirName, join } from '../utils/pathHelpers';
 import { getClassName } from './getClassName';
 import { hasMappedType } from './getMappedType';
 

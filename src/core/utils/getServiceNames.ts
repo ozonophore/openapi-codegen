@@ -1,4 +1,4 @@
-import type { Service } from '../client/interfaces/Service';
+import type { Service } from '../types/shared/Service';
 import { sort } from './sort';
 
 export function getServiceNames(services: Service[]): string[] {

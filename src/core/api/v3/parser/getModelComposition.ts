@@ -1,7 +1,7 @@
-import type { ModelComposition } from '../../../client/interfaces/ModelComposition';
+import type { ModelComposition } from '../../../types/shared/ModelComposition';
 import { unique } from '../../../utils/unique';
-import type { OpenApi } from '../interfaces/OpenApi';
-import type { OpenApiSchema } from '../interfaces/OpenApiSchema';
+import type { OpenApi } from '../types/OpenApi';
+import type { OpenApiSchema } from '../types/OpenApiSchema';
 import { Parser } from '../Parser';
 
 export function getModelComposition(
