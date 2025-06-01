@@ -1,11 +1,10 @@
 import type { Model } from '../../../types/shared/Model';
-import { join, relative } from '../../../core/path';
 import { getRefFromSchema } from '../../../utils/getRefFromSchema';
-import { getRelativeModelImportPath } from '../../../utils/getRelativeModelImportPath';
+import { join, relative } from '../../../utils/pathHelpers';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
 import { unique } from '../../../utils/unique';
-import type { OpenApi } from '../types/OpenApi';
 import { Parser } from '../Parser';
+import type { OpenApi } from '../types/OpenApi';
 
 export function getModels(this: Parser, openApi: OpenApi): Model[] {
     let models: Model[] = [];

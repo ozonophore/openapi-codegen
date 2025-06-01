@@ -1,10 +1,10 @@
 import type { Type } from '../../../types/shared/Type';
-import { replaceString } from '../../../core/replaceString';
 import { encode } from '../../../utils/encode';
 import { getAbsolutePath } from '../../../utils/getAbsolutePath';
 import { getMappedType, hasMappedType } from '../../../utils/getMappedType';
 import { getRelativeModelImportPath } from '../../../utils/getRelativeModelImportPath';
 import { getRelativeModelPath } from '../../../utils/getRelativeModelPath';
+import { replaceString } from '../../../utils/replaceString';
 import { stripNamespace } from '../../../utils/stripNamespace';
 import { Parser } from '../Parser';
 

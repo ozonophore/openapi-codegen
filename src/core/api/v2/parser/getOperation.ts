@@ -1,9 +1,8 @@
 import type { Operation } from '../../../types/shared/Operation';
 import type { OperationParameters } from '../../../types/shared/OperationParameters';
-import { Context } from '../../../core/Context';
+import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi';
 import type { OpenApiOperation } from '../types/OpenApiOperation';
-import { Parser } from '../Parser';
 import { getComment } from './getComment';
 import { getOperationErrors } from './getOperationErrors';
 import { getOperationName } from './getOperationName';
