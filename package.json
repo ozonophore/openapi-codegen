@@ -48,6 +48,7 @@
         "clean": "rimraf ./dist ./generated ./test/generated ./test/e2e/generated ./samples/generated ./coverage ./node_modules/.cache",
         "build": "tsc -p .",
         "build:watch": "rollup --config --environment NODE_ENV:development --watch",
+        "build:hbs": "ts-node src/core/utils/precompileTemplates.ts",
         "release": "rollup --config --environment NODE_ENV:production",
         "run": "node ./test/index.js",
         "test": "jest --selectProjects UNIT",
