@@ -1,4 +1,5 @@
 import type { OperationParameters } from '../../../client/interfaces/OperationParameters';
+import { ESortStrategy } from '../../../types/Enums';
 import { sortByRequired } from '../../../utils/sortByRequired';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiParameter } from '../interfaces/OpenApiParameter';
@@ -58,11 +59,13 @@ export function getOperationParameters(this: Parser, openApi: OpenApi, parameter
         }
     });
 
-    operationParameters.parameters = operationParameters.parameters.sort(sortByRequired);
-    operationParameters.parametersPath = operationParameters.parametersPath.sort(sortByRequired);
-    operationParameters.parametersQuery = operationParameters.parametersQuery.sort(sortByRequired);
-    operationParameters.parametersForm = operationParameters.parametersForm.sort(sortByRequired);
-    operationParameters.parametersCookie = operationParameters.parametersCookie.sort(sortByRequired);
-    operationParameters.parametersHeader = operationParameters.parametersHeader.sort(sortByRequired);
+    if (this.context.propSortStrategy === ESortStrategy.REQUIRED_FIRST) {
+        operationParameters.parameters = operationParameters.parameters.sort(sortByRequired);
+        operationParameters.parametersPath = operationParameters.parametersPath.sort(sortByRequired);
+        operationParameters.parametersQuery = operationParameters.parametersQuery.sort(sortByRequired);
+        operationParameters.parametersForm = operationParameters.parametersForm.sort(sortByRequired);
+        operationParameters.parametersCookie = operationParameters.parametersCookie.sort(sortByRequired);
+        operationParameters.parametersHeader = operationParameters.parametersHeader.sort(sortByRequired);
+    }
     return operationParameters;
 }

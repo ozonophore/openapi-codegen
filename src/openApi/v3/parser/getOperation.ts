@@ -1,5 +1,7 @@
 import type { Operation } from '../../../client/interfaces/Operation';
 import type { OperationParameters } from '../../../client/interfaces/OperationParameters';
+import { ESortStrategy } from '../../../types/Enums';
+import { sortByRequired } from '../../../utils/sortByRequired';
 import type { OpenApi } from '../interfaces/OpenApi';
 import type { OpenApiOperation } from '../interfaces/OpenApiOperation';
 import type { OpenApiRequestBody } from '../interfaces/OpenApiRequestBody';
@@ -10,7 +12,6 @@ import { getOperationName } from './getOperationName';
 import { getOperationPath } from './getOperationPath';
 import { getOperationResponseHeader } from './getOperationResponseHeader';
 import { getOperationResults } from './getOperationResults';
-import { sortByRequired } from '../../../utils/sortByRequired';
 
 export function getOperation(this: Parser, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, serviceClassName: string): Operation {
     const operationNameFallback = `${method}${serviceClassName}`;
@@ -57,7 +58,7 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
         const requestBody = this.getOperationRequestBody(openApi, requestBodyDef, '');
         operation.imports.push(...requestBody.imports);
         operation.parameters.push(requestBody);
-        operation.parameters = operation.parameters.sort(sortByRequired);
+        operation.parameters = this.context.propSortStrategy === ESortStrategy.REQUIRED_FIRST ? operation.parameters.sort(sortByRequired) : operation.parameters;
         operation.parametersBody = requestBody;
     }
 

@@ -1,8 +1,8 @@
 import { OperationParameter } from '../client/interfaces/OperationParameter';
-import { sortByRequired } from './sortByRequired';
+import { getPropertyGroup } from './getPropertyGroup';
 
-describe('sortByRequired', () => {
-    it('should sort params', () => {
+describe('getPropertyGroup', () => {
+    it('should return "optional"', () => {
         const paramOptional: OperationParameter = {
             in: 'query',
             prop: 'parameterOptionalStringWithNoDefault',
@@ -25,11 +25,15 @@ describe('sortByRequired', () => {
             properties: [],
             mediaType: null,
         };
+        expect(getPropertyGroup(paramOptional)).toEqual('optional');
+    });
+
+    it('should return "optional-with-default"', () => {
         const paramOptionalWithDefault: OperationParameter = {
             in: 'query',
-            prop: 'parameterOptionalStringWithDefault',
+            prop: 'parameterOptionalStringWithNoDefault',
             export: 'generic',
-            name: 'parameterOptionalStringWithDefault',
+            name: 'parameterOptionalStringWithNoDefault',
             alias: '',
             path: '',
             type: 'string',
@@ -48,6 +52,10 @@ describe('sortByRequired', () => {
             mediaType: null,
             default: 'Hello World!',
         };
+        expect(getPropertyGroup(paramOptionalWithDefault)).toEqual('optional-with-default');
+    });
+
+    it('should return "required-with-default"', () => {
         const paramRequiredWithDefault: OperationParameter = {
             in: 'query',
             prop: 'parameterStringWithDefault',
@@ -71,6 +79,10 @@ describe('sortByRequired', () => {
             mediaType: null,
             default: 'Hello World!',
         };
+        expect(getPropertyGroup(paramRequiredWithDefault)).toEqual('required-with-default');
+    });
+
+    it('should return "required"', () => {
         const paramRequiredWithoutDefault: OperationParameter = {
             in: 'query',
             prop: 'parameterStringWithoutDefault',
@@ -93,11 +105,6 @@ describe('sortByRequired', () => {
             properties: [],
             mediaType: null,
         };
-        expect([paramOptionalWithDefault, paramOptional, paramRequiredWithDefault, paramRequiredWithoutDefault].sort(sortByRequired).map((item: any) => item.name)).toEqual([
-            'parameterStringWithoutDefault',
-            'parameterStringWithDefault',
-            'parameterOptionalStringWithNoDefault',
-            'parameterOptionalStringWithDefault',
-        ]);
+        expect(getPropertyGroup(paramRequiredWithoutDefault)).toEqual('required');
     });
 });
