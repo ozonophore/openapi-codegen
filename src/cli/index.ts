@@ -6,8 +6,9 @@ import program from 'commander';
 import path from 'path';
 
 import * as OpenAPI from '..';
+import { ESortStrategy } from '../types/Enums';
 
-const VALID_STRATEGIES = new Set(['as-is', 'required-first']);
+const VALID_STRATEGIES = new Set([ESortStrategy.AS_IS, ESortStrategy.REQUIRED_FIRST]);
 
 /**
  * Checks if `value` is `null` or `undefined`.
@@ -29,7 +30,7 @@ function isNil(value: any) {
     return value == null;
 }
 
-function checkValidStategies(value: string) {
+function checkValidStategies(value: ESortStrategy) {
     if (value && !VALID_STRATEGIES.has(value)) {
         console.error(`Недопустимая стратегия сортировки: ${value}`);
         process.exit(1);

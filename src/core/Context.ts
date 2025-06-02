@@ -2,6 +2,7 @@
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import RefParser from 'json-schema-ref-parser';
 
+import { ESortStrategy } from '../types/Enums';
 import { getFileName } from '../utils/getFileName';
 import { isString } from '../utils/isString';
 import { IOutput } from '../utils/output';
@@ -18,6 +19,11 @@ export interface Prefix {
     type: string;
 }
 
+interface IOptionals {
+    prefix?: Prefix;
+    propSortStrategy: ESortStrategy;
+}
+
 /**
  * A Context wich can share a data between methods
  */
@@ -31,7 +37,17 @@ export class Context {
         type: 'T',
     };
 
-    constructor(input: string | Record<string, any>, output: IOutput, prefix?: Prefix) {
+    private _propSortStrategy = ESortStrategy.AS_IS;
+
+    public get propSortStrategy() {
+        return this._propSortStrategy;
+    }
+
+    public set propSortStrategy(value: ESortStrategy) {
+        this._propSortStrategy = value;
+    }
+
+    constructor(input: string | Record<string, any>, output: IOutput, optionals?: IOptionals) {
         this._output = output;
         this._refs = {} as RefParser.$Refs;
         if (isString(input)) {
@@ -39,8 +55,11 @@ export class Context {
         } else {
             this._root = { path: '' };
         }
-        if (prefix) {
-            this.prefix = prefix;
+        if (optionals?.prefix) {
+            this.prefix = optionals.prefix;
+        }
+        if (optionals?.propSortStrategy) {
+            this._propSortStrategy = optionals.propSortStrategy;
         }
         return this;
     }

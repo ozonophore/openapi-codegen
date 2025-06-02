@@ -4,6 +4,7 @@ import { getOutputPaths } from './core/getOutputPaths';
 import { HttpClient } from './HttpClient';
 import { Parser as ParserV2 } from './openApi/v2/Parser';
 import { Parser as ParserV3 } from './openApi/v3/Parser';
+import { ESortStrategy } from './types/Enums';
 import { rmdir } from './utils/fileSystem';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
@@ -36,7 +37,7 @@ export type Options = {
     enumPrefix?: string;
     typePrefix?: string;
     useCancelableRequest?: boolean;
-    propSortStrategy: 'as-is' | 'required-first';
+    propSortStrategy: ESortStrategy;
 };
 
 /**
@@ -86,6 +87,7 @@ async function generateFrom(
         enumPrefix = 'E',
         typePrefix = 'T',
         useCancelableRequest = false,
+        propSortStrategy = ESortStrategy.AS_IS,
     }: Options,
     writeClient: WriteClient
 ): Promise<void> {
@@ -96,7 +98,10 @@ async function generateFrom(
         outputModels,
         outputSchemas,
     });
-    const context = new Context(input, outputPaths, { interface: interfacePrefix, enum: enumPrefix, type: typePrefix });
+    const context = new Context(input, outputPaths, {
+        prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix },
+        propSortStrategy,
+    });
     const openApi = isString(input) ? await getOpenApiSpec(context, input) : input;
     const openApiVersion = getOpenApiVersion(openApi);
     const templates = registerHandlebarTemplates({
