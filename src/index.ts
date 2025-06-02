@@ -36,6 +36,7 @@ export type Options = {
     enumPrefix?: string;
     typePrefix?: string;
     useCancelableRequest?: boolean;
+    propSortStrategy: 'as-is' | 'required-first';
 };
 
 /**
