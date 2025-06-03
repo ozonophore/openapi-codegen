@@ -51,4 +51,8 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
                 .join(' | ')
         );
     });
+
+    Handlebars.registerHelper('or', (...args) => args.slice(0, -1).some(Boolean));
+    Handlebars.registerHelper('and', (...args) => args.slice(0, -1).every(Boolean));
+    Handlebars.registerHelper('not', value => !value);
 }

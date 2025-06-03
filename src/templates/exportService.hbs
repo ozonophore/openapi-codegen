@@ -12,6 +12,13 @@ import { request as __request } from '{{{@root.outputCore}}}request';
 import type { ApiRequestOptions } from '{{{@root.outputCore}}}ApiRequestOptions';
 import { OpenAPI } from '{{{@root.outputCore}}}OpenAPI';
 
+class ParameterRequiredError extends Error {
+    constructor(public parameterName: string) {
+        super(`Parameter "${parameterName}" is required`);
+        this.name = 'ParameterRequiredError';
+    }
+}
+
 {{#each operations}}
 const {{{name}}} = ({{>parameters}}): ApiRequestOptions => ({
     {{>serviceOption}}
@@ -57,6 +64,17 @@ export class {{{name}}} {
      * @throws ApiError
      */
     public static {{{name}}}({{>parameters}}): {{#if @root.useCancelableRequest}}CancelablePromise<{{>result default="void"}}>{{else}}Promise<{{>result default="void"}}>{{/if}} {
+        {{#if parameters}}
+        // Validate required parameters
+        {{#each parameters}}
+        {{#if isRequired}}
+        if ({{{name}}} === null || {{{name}}} === undefined) {
+            throw new Error('Parameter "{{{name}}}" is required');
+        }
+        {{/if}}
+        {{/each}}
+        {{/if}}
+        
         return __request<{{>result default="void"}}>({{../originName}}Options.{{{name}}}({{>parameterValues~}}), OpenAPI);
     }
     {{/each}}
