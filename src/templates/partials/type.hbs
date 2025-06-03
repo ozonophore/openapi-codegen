@@ -1,10 +1,19 @@
-{{#switch export}}
-    {{#case 'interface'}} {{>typeInterface}} {{/case}}
-    {{#case 'reference'}} {{>typeReference}} {{/case}}
-    {{#case 'enum'}} {{>typeEnum}} {{/case}}
-    {{#case 'array'}} {{>typeArray}} {{/case}}
-    {{#case 'dictionary'}} {{>typeDictionary}} {{/case}}
-    {{#case 'one-of' 'any-of'}} {{>typeUnion}} {{/case}}
-    {{#case 'all-of'}} {{>typeIntersection}} {{/case}}
-    {{#default}} {{>typeGeneric}} {{/default}}
-{{/switch}}
+{{#equals export 'interface'}}
+{{>typeInterface}}
+{{else equals export 'reference'}}
+{{>typeReference}}
+{{else equals export 'enum'}}
+{{>typeEnum}}
+{{else equals export 'array'}}
+{{>typeArray}}
+{{else equals export 'dictionary'}}
+{{>typeDictionary}}
+{{else equals export 'one-of'}}
+{{>typeUnion}}
+{{else equals export 'any-of'}}
+{{>typeUnion}}
+{{else equals export 'all-of'}}
+{{>typeIntersection}}
+{{else}}
+{{>typeGeneric}}
+{{/equals}}
