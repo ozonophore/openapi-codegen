@@ -5,41 +5,59 @@
 import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{@root.outputModels}}}{{{path}}}';
 {{/each}}
 {{/if}}
-
-// Унифицированный импорт запросов
-import { OpenAPI, createRequest } from '{{{@root.outputCore}}}request';
+{{#if @root.useCancelableRequest}}
+import type { CancelablePromise } from '{{{@root.outputCore}}}CancelablePromise';
+{{/if}}
+import { request as __request } from '{{{@root.outputCore}}}request';
+import type { ApiRequestOptions } from '{{{@root.outputCore}}}ApiRequestOptions';
+import { OpenAPI } from '{{{@root.outputCore}}}OpenAPI';
 
 {{#each operations}}
-/**
-{{#if deprecated}}
- * @deprecated
-{{/if}}
-{{#if summary}}
- * {{summary}}
-{{/if}}
-{{#if description}}
- * {{description}}
-{{/if}}
-{{#each parameters}}
- * @param {{name}} {{description}}
-{{/each}}
-{{#each results}}
- * @returns {{type}} {{description}}
-{{/each}}
- * @throws ApiError
- */
-export const {{{name}}} = ({{>parameters}}): Promise<{{>result}}> => {
-    const options: ApiRequestOptions = {
-        {{>serviceOption}}
-    };
-    
-    return createRequest(options, OpenAPI);
-};
+const {{{name}}} = ({{>parameters}}): ApiRequestOptions => ({
+    {{>serviceOption}}
+});
+
 {{/each}}
 
-{{! Альтернативный вариант с классом (опционально) }}
-export class {{{name}}}Service {
+export type T{{{originName}}}Options = {
+{{#each operations}}
+    {{{name}}}: ({{>parametersDefinition}}) => ApiRequestOptions;
+{{/each}}
+}
+
+export const {{{originName}}}Options: T{{{originName}}}Options = {
+{{#each operations}}
+    {{{name}}}: {{{name}}},
+{{/each}}
+}
+
+export class {{{name}}} {
+
     {{#each operations}}
-    static {{{name}}} = {{{name}}};
+    /**
+    {{#if deprecated}}
+     * @deprecated
+    {{/if}}
+    {{#if summary}}
+     * {{{summary}}}
+    {{/if}}
+    {{#if description}}
+     * {{{description}}}
+    {{/if}}
+    {{#unless @root.useOptions}}
+    {{#if parameters}}
+    {{#each parameters}}
+     * @param {{{name}}} {{{description}}}
+    {{/each}}
+    {{/if}}
+    {{/unless}}
+    {{#each results}}
+     * @returns {{{type}}} {{{description}}}
+    {{/each}}
+     * @throws ApiError
+     */
+    public static {{{name}}}({{>parameters}}): {{#if @root.useCancelableRequest}}CancelablePromise<{{>result default="void"}}>{{else}}Promise<{{>result default="void"}}>{{/if}} {
+        return __request<{{>result default="void"}}>({{../originName}}Options.{{{name}}}({{>parameterValues~}}), OpenAPI);
+    }
     {{/each}}
 }
