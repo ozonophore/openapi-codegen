@@ -2,7 +2,7 @@
 {{#if @root.useOptions~}}
 {
 {{#each parameters}}
-{{{name}}}{{#if default}} = {{{safeDefault default}}}{{/if}},
+{{{name}}}{{#if default}} = {{#isString default}}"{{{escapeString default}}}"{{else}}{{{default}}}{{/isString}}{{/if}},
 {{/each}}
 }: {
 {{#each parameters}}
@@ -15,7 +15,7 @@
 {{~else}}
 
 {{#each parameters}}
-{{{name}}}{{>isRequired}}: {{>type}}{{#if default}} = {{{safeDefault default}}}{{/if}}{{#unless @last}},{{/unless}}
+{{{name}}}{{>isRequired}}: {{>type}}{{#if default}} = {{#isString default}}"{{{escapeString default}}}"{{else}}{{{default}}}{{/isString}}{{/if}}{{#unless @last}},{{/unless}}
 {{/each}}
 {{/if}}
 {{/if}}

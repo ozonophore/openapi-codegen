@@ -49,6 +49,7 @@ export async function writeClientCore(options: IWriteClientCore): Promise<void> 
     }
     await writeFile(resolve(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
     await writeFile(resolve(outputCorePath, 'request.ts'), templates.core.request(context));
+    await writeFile(resolve(outputCorePath, 'errors.ts'), templates.core.requiredError(context));
 
     if (request) {
         const requestFile = resolve(process.cwd(), request);

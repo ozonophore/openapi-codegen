@@ -108,6 +108,19 @@ export const OpenAPI: TOpenAPIConfig = {
 };"
 `;
 
+exports[`v2 should generate: ./test/generated/v2/core/errors.ts 1`] = `
+"export class RequiredError extends Error {
+    constructor(
+        public parameterName: string,
+        message?: string
+    ) {
+        super(message || \`Required parameter "\${parameterName}" was not specified\`);
+        this.name = 'RequiredError';
+        Object.setPrototypeOf(this, RequiredError.prototype);
+    }
+}"
+`;
+
 exports[`v2 should generate: ./test/generated/v2/core/request.ts 1`] = `
 "/* istanbul ignore file */
 /* tslint:disable */
@@ -645,13 +658,7 @@ exports[`v2 should generate: ./test/generated/v2/services/CollectionFormatServic
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const collectionFormat = (
     parameterArrayCsv?: Array<string>,
@@ -673,11 +680,11 @@ const collectionFormat = (
 
 export type TCollectionFormatServiceOptions = {
     collectionFormat: (
-        parameterArrayCsv: Array<string>,
-        parameterArraySsv: Array<string>,
-        parameterArrayTsv: Array<string>,
-        parameterArrayPipes: Array<string>,
-        parameterArrayMulti: Array<string>,
+        parameterArrayCsv?: Array<string>,
+        parameterArraySsv?: Array<string>,
+        parameterArrayTsv?: Array<string>,
+        parameterArrayPipes?: Array<string>,
+        parameterArrayMulti?: Array<string>,
     ) => ApiRequestOptions;
 };
 
@@ -703,19 +710,19 @@ export class CollectionFormatService {
     ): Promise<void> {
         // Validate required parameters
         if (parameterArrayCsv === null || parameterArrayCsv === undefined) {
-            throw new Error('Parameter "parameterArrayCsv" is required');
+            throw new RequiredError('parameterArrayCsv', 'Required parameter parameterArrayCsv was not specified');
         }
         if (parameterArraySsv === null || parameterArraySsv === undefined) {
-            throw new Error('Parameter "parameterArraySsv" is required');
+            throw new RequiredError('parameterArraySsv', 'Required parameter parameterArraySsv was not specified');
         }
         if (parameterArrayTsv === null || parameterArrayTsv === undefined) {
-            throw new Error('Parameter "parameterArrayTsv" is required');
+            throw new RequiredError('parameterArrayTsv', 'Required parameter parameterArrayTsv was not specified');
         }
         if (parameterArrayPipes === null || parameterArrayPipes === undefined) {
-            throw new Error('Parameter "parameterArrayPipes" is required');
+            throw new RequiredError('parameterArrayPipes', 'Required parameter parameterArrayPipes was not specified');
         }
         if (parameterArrayMulti === null || parameterArrayMulti === undefined) {
-            throw new Error('Parameter "parameterArrayMulti" is required');
+            throw new RequiredError('parameterArrayMulti', 'Required parameter parameterArrayMulti was not specified');
         }
 
         return __request<void>(
@@ -741,13 +748,7 @@ import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const complexTypes = (
     parameterObject?: {
@@ -773,14 +774,14 @@ const complexTypes = (
 
 export type TComplexServiceOptions = {
     complexTypes: (
-        parameterObject: {
+        parameterObject?: {
             first?: {
                 second?: {
                     third?: string;
                 };
             };
         },
-        parameterReference: IModelWithString,
+        parameterReference?: IModelWithString,
     ) => ApiRequestOptions;
 };
 
@@ -807,10 +808,10 @@ export class ComplexService {
     ): Promise<Array<IModelWithString>> {
         // Validate required parameters
         if (parameterObject === null || parameterObject === undefined) {
-            throw new Error('Parameter "parameterObject" is required');
+            throw new RequiredError('parameterObject', 'Required parameter parameterObject was not specified');
         }
         if (parameterReference === null || parameterReference === undefined) {
-            throw new Error('Parameter "parameterReference" is required');
+            throw new RequiredError('parameterReference', 'Required parameter parameterReference was not specified');
         }
 
         return __request<Array<IModelWithString>>(
@@ -830,22 +831,14 @@ import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithDefaultParameters = (
-    parameterString?: string = 'Hello World!',
+    parameterString?: string = "'Hello World!'",
     parameterNumber?: number = 123,
-    parameterBoolean?: boolean = true,
-    parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-    parameterModel?: IModelWithString = {
-        prop: 'Hello World!',
-    },
+    parameterBoolean?: boolean = 'true',
+    parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+    parameterModel?: IModelWithString = '{\\n    "prop": "Hello World!"\\n}',
 ): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/defaults\`,
@@ -859,13 +852,11 @@ const callWithDefaultParameters = (
 });
 
 const callWithDefaultOptionalParameters = (
-    parameterString?: string = 'Hello World!',
+    parameterString?: string = "'Hello World!'",
     parameterNumber?: number = 123,
-    parameterBoolean?: boolean = true,
-    parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-    parameterModel?: IModelWithString = {
-        prop: 'Hello World!',
-    },
+    parameterBoolean?: boolean = 'true',
+    parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+    parameterModel?: IModelWithString = '{\\n    "prop": "Hello World!"\\n}',
 ): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/defaults\`,
@@ -879,11 +870,11 @@ const callWithDefaultOptionalParameters = (
 });
 
 const callToTestOrderOfParams = (
-    parameterOptionalStringWithDefault?: string = 'Hello World!',
-    parameterOptionalStringWithEmptyDefault?: string = '',
+    parameterOptionalStringWithDefault?: string = "'Hello World!'",
+    parameterOptionalStringWithEmptyDefault?: string = "''",
     parameterOptionalStringWithNoDefault?: string,
-    parameterStringWithDefault?: string = 'Hello World!',
-    parameterStringWithEmptyDefault?: string = '',
+    parameterStringWithDefault?: string = "'Hello World!'",
+    parameterStringWithEmptyDefault?: string = "''",
     parameterStringWithNoDefault?: string,
 ): ApiRequestOptions => ({
     method: 'PUT',
@@ -900,26 +891,26 @@ const callToTestOrderOfParams = (
 
 export type TDefaultsServiceOptions = {
     callWithDefaultParameters: (
-        parameterString: string,
-        parameterNumber: number,
-        parameterBoolean: boolean,
-        parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterModel: IModelWithString,
+        parameterString?: string,
+        parameterNumber?: number,
+        parameterBoolean?: boolean,
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
+        parameterModel?: IModelWithString,
     ) => ApiRequestOptions;
     callWithDefaultOptionalParameters: (
-        parameterString: string,
-        parameterNumber: number,
-        parameterBoolean: boolean,
-        parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterModel: IModelWithString,
+        parameterString?: string,
+        parameterNumber?: number,
+        parameterBoolean?: boolean,
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
+        parameterModel?: IModelWithString,
     ) => ApiRequestOptions;
     callToTestOrderOfParams: (
-        parameterOptionalStringWithDefault: string,
-        parameterOptionalStringWithEmptyDefault: string,
+        parameterOptionalStringWithDefault?: string,
+        parameterOptionalStringWithEmptyDefault?: string,
         parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault: string,
-        parameterStringWithEmptyDefault: string,
-        parameterStringWithNoDefault: string,
+        parameterStringWithDefault?: string,
+        parameterStringWithEmptyDefault?: string,
+        parameterStringWithNoDefault?: string,
     ) => ApiRequestOptions;
 };
 
@@ -939,29 +930,27 @@ export class DefaultsService {
      * @throws ApiError
      */
     public static callWithDefaultParameters(
-        parameterString?: string = 'Hello World!',
+        parameterString?: string = "'Hello World!'",
         parameterNumber?: number = 123,
-        parameterBoolean?: boolean = true,
-        parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel?: IModelWithString = {
-            prop: 'Hello World!',
-        },
+        parameterBoolean?: boolean = 'true',
+        parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+        parameterModel?: IModelWithString = '{\\n    "prop": "Hello World!"\\n}',
     ): Promise<void> {
         // Validate required parameters
         if (parameterString === null || parameterString === undefined) {
-            throw new Error('Parameter "parameterString" is required');
+            throw new RequiredError('parameterString', 'Required parameter parameterString was not specified');
         }
         if (parameterNumber === null || parameterNumber === undefined) {
-            throw new Error('Parameter "parameterNumber" is required');
+            throw new RequiredError('parameterNumber', 'Required parameter parameterNumber was not specified');
         }
         if (parameterBoolean === null || parameterBoolean === undefined) {
-            throw new Error('Parameter "parameterBoolean" is required');
+            throw new RequiredError('parameterBoolean', 'Required parameter parameterBoolean was not specified');
         }
         if (parameterEnum === null || parameterEnum === undefined) {
-            throw new Error('Parameter "parameterEnum" is required');
+            throw new RequiredError('parameterEnum', 'Required parameter parameterEnum was not specified');
         }
         if (parameterModel === null || parameterModel === undefined) {
-            throw new Error('Parameter "parameterModel" is required');
+            throw new RequiredError('parameterModel', 'Required parameter parameterModel was not specified');
         }
 
         return __request<void>(
@@ -984,13 +973,11 @@ export class DefaultsService {
      * @throws ApiError
      */
     public static callWithDefaultOptionalParameters(
-        parameterString?: string = 'Hello World!',
+        parameterString?: string = "'Hello World!'",
         parameterNumber?: number = 123,
-        parameterBoolean?: boolean = true,
-        parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel?: IModelWithString = {
-            prop: 'Hello World!',
-        },
+        parameterBoolean?: boolean = 'true',
+        parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+        parameterModel?: IModelWithString = '{\\n    "prop": "Hello World!"\\n}',
     ): Promise<void> {
         // Validate required parameters
 
@@ -1015,22 +1002,31 @@ export class DefaultsService {
      * @throws ApiError
      */
     public static callToTestOrderOfParams(
-        parameterOptionalStringWithDefault?: string = 'Hello World!',
-        parameterOptionalStringWithEmptyDefault?: string = '',
+        parameterOptionalStringWithDefault?: string = "'Hello World!'",
+        parameterOptionalStringWithEmptyDefault?: string = "''",
         parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault?: string = 'Hello World!',
-        parameterStringWithEmptyDefault?: string = '',
+        parameterStringWithDefault?: string = "'Hello World!'",
+        parameterStringWithEmptyDefault?: string = "''",
         parameterStringWithNoDefault?: string,
     ): Promise<void> {
         // Validate required parameters
         if (parameterStringWithDefault === null || parameterStringWithDefault === undefined) {
-            throw new Error('Parameter "parameterStringWithDefault" is required');
+            throw new RequiredError(
+                'parameterStringWithDefault',
+                'Required parameter parameterStringWithDefault was not specified',
+            );
         }
         if (parameterStringWithEmptyDefault === null || parameterStringWithEmptyDefault === undefined) {
-            throw new Error('Parameter "parameterStringWithEmptyDefault" is required');
+            throw new RequiredError(
+                'parameterStringWithEmptyDefault',
+                'Required parameter parameterStringWithEmptyDefault was not specified',
+            );
         }
         if (parameterStringWithNoDefault === null || parameterStringWithNoDefault === undefined) {
-            throw new Error('Parameter "parameterStringWithNoDefault" is required');
+            throw new RequiredError(
+                'parameterStringWithNoDefault',
+                'Required parameter parameterStringWithNoDefault was not specified',
+            );
         }
 
         return __request<void>(
@@ -1056,13 +1052,7 @@ exports[`v2 should generate: ./test/generated/v2/services/DuplicateService.ts 1`
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const duplicateName = (): ApiRequestOptions => ({
     method: 'GET',
@@ -1103,24 +1093,32 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static duplicateName(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateServiceOptions.duplicateName(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName1(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateServiceOptions.duplicateName1(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName2(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateServiceOptions.duplicateName2(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName3(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateServiceOptions.duplicateName3(), OpenAPI);
     }
 }
@@ -1134,13 +1132,7 @@ exports[`v2 should generate: ./test/generated/v2/services/HeaderService.ts 1`] =
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithResultFromHeader = (): ApiRequestOptions => ({
     method: 'POST',
@@ -1166,6 +1158,8 @@ export class HeaderService {
      * @throws ApiError
      */
     public static callWithResultFromHeader(): Promise<string> {
+        // Validate required parameters
+
         return __request<string>(HeaderServiceOptions.callWithResultFromHeader(), OpenAPI);
     }
 }
@@ -1179,13 +1173,7 @@ exports[`v2 should generate: ./test/generated/v2/services/NoContentService.ts 1`
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithNoContentResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -1206,6 +1194,8 @@ export class NoContentService {
      * @throws ApiError
      */
     public static callWithNoContentResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(NoContentServiceOptions.callWithNoContentResponse(), OpenAPI);
     }
 }
@@ -1219,13 +1209,7 @@ exports[`v2 should generate: ./test/generated/v2/services/ParametersService.ts 1
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithParameters = (
     parameterHeader?: string,
@@ -1275,21 +1259,21 @@ const callWithWeirdParameterNames = (
 
 export type TParametersServiceOptions = {
     callWithParameters: (
-        parameterHeader: string,
-        parameterQuery: string,
-        parameterForm: string,
-        parameterBody: string,
-        parameterPath: string,
+        parameterHeader?: string,
+        parameterQuery?: string,
+        parameterForm?: string,
+        parameterBody?: string,
+        parameterPath?: string,
     ) => ApiRequestOptions;
     callWithWeirdParameterNames: (
         parameterPath1?: string,
         parameterPath2?: string,
         parameterPath3?: string,
         _default?: string,
-        parameterHeader: string,
-        parameterQuery: string,
-        parameterForm: string,
-        parameterBody: string,
+        parameterHeader?: string,
+        parameterQuery?: string,
+        parameterForm?: string,
+        parameterBody?: string,
     ) => ApiRequestOptions;
 };
 
@@ -1316,19 +1300,19 @@ export class ParametersService {
     ): Promise<void> {
         // Validate required parameters
         if (parameterHeader === null || parameterHeader === undefined) {
-            throw new Error('Parameter "parameterHeader" is required');
+            throw new RequiredError('parameterHeader', 'Required parameter parameterHeader was not specified');
         }
         if (parameterQuery === null || parameterQuery === undefined) {
-            throw new Error('Parameter "parameterQuery" is required');
+            throw new RequiredError('parameterQuery', 'Required parameter parameterQuery was not specified');
         }
         if (parameterForm === null || parameterForm === undefined) {
-            throw new Error('Parameter "parameterForm" is required');
+            throw new RequiredError('parameterForm', 'Required parameter parameterForm was not specified');
         }
         if (parameterBody === null || parameterBody === undefined) {
-            throw new Error('Parameter "parameterBody" is required');
+            throw new RequiredError('parameterBody', 'Required parameter parameterBody was not specified');
         }
         if (parameterPath === null || parameterPath === undefined) {
-            throw new Error('Parameter "parameterPath" is required');
+            throw new RequiredError('parameterPath', 'Required parameter parameterPath was not specified');
         }
 
         return __request<void>(
@@ -1365,16 +1349,16 @@ export class ParametersService {
     ): Promise<void> {
         // Validate required parameters
         if (parameterHeader === null || parameterHeader === undefined) {
-            throw new Error('Parameter "parameterHeader" is required');
+            throw new RequiredError('parameterHeader', 'Required parameter parameterHeader was not specified');
         }
         if (parameterQuery === null || parameterQuery === undefined) {
-            throw new Error('Parameter "parameterQuery" is required');
+            throw new RequiredError('parameterQuery', 'Required parameter parameterQuery was not specified');
         }
         if (parameterForm === null || parameterForm === undefined) {
-            throw new Error('Parameter "parameterForm" is required');
+            throw new RequiredError('parameterForm', 'Required parameter parameterForm was not specified');
         }
         if (parameterBody === null || parameterBody === undefined) {
-            throw new Error('Parameter "parameterBody" is required');
+            throw new RequiredError('parameterBody', 'Required parameter parameterBody was not specified');
         }
 
         return __request<void>(
@@ -1405,13 +1389,7 @@ import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -1456,6 +1434,8 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithResponse(): Promise<IModelWithString> {
+        // Validate required parameters
+
         return __request<IModelWithString>(ResponseServiceOptions.callWithResponse(), OpenAPI);
     }
     /**
@@ -1463,6 +1443,8 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithDuplicateResponses(): Promise<IModelWithString> {
+        // Validate required parameters
+
         return __request<IModelWithString>(ResponseServiceOptions.callWithDuplicateResponses(), OpenAPI);
     }
     /**
@@ -1482,6 +1464,8 @@ export class ResponseService {
         | TModelThatExtends
         | TModelThatExtendsExtends
     > {
+        // Validate required parameters
+
         return __request<
             | {
                   readonly '@namespace.string'?: string;
@@ -1508,13 +1492,7 @@ import type { IModelWithEnumInteger } from './../models/./ModelWithEnumInteger';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const getCallWithModelWithDictionaryReference = (): ApiRequestOptions => ({
     method: 'GET',
@@ -1556,6 +1534,8 @@ export class Service {
      * @throws ApiError
      */
     public static getCallWithModelWithDictionaryReference(): Promise<IDictionaryWithReference> {
+        // Validate required parameters
+
         return __request<IDictionaryWithReference>(ServiceOptions.getCallWithModelWithDictionaryReference(), OpenAPI);
     }
     /**
@@ -1563,6 +1543,8 @@ export class Service {
      * @throws ApiError
      */
     public static getCallWithModelWithDictionary(): Promise<IModelWithDictionary> {
+        // Validate required parameters
+
         return __request<IModelWithDictionary>(ServiceOptions.getCallWithModelWithDictionary(), OpenAPI);
     }
     /**
@@ -1570,6 +1552,8 @@ export class Service {
      * @throws ApiError
      */
     public static getCallWithSimpleInteger(): Promise<IModelWithEnumInteger> {
+        // Validate required parameters
+
         return __request<IModelWithEnumInteger>(ServiceOptions.getCallWithSimpleInteger(), OpenAPI);
     }
     /**
@@ -1577,6 +1561,8 @@ export class Service {
      * @throws ApiError
      */
     public static getCallWithModelArray(): Promise<IModelWithArray> {
+        // Validate required parameters
+
         return __request<IModelWithArray>(ServiceOptions.getCallWithModelArray(), OpenAPI);
     }
 }
@@ -1590,13 +1576,7 @@ exports[`v2 should generate: ./test/generated/v2/services/SimpleService.ts 1`] =
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -1658,42 +1638,56 @@ export class SimpleService {
      * @throws ApiError
      */
     public static getCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleServiceOptions.getCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static putCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleServiceOptions.putCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static postCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleServiceOptions.postCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static deleteCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleServiceOptions.deleteCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static optionsCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleServiceOptions.optionsCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static headCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleServiceOptions.headCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleServiceOptions.patchCallWithoutParametersAndResponse(), OpenAPI);
     }
 }
@@ -1707,19 +1701,13 @@ exports[`v2 should generate: ./test/generated/v2/services/TypesService.ts 1`] = 
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const types = (
     parameterNumber?: number = 123,
-    parameterString?: string = 'default',
-    parameterBoolean?: boolean = true,
-    parameterObject?: any = null,
+    parameterString?: string = "'default'",
+    parameterBoolean?: boolean = 'true',
+    parameterObject?: any = 'null',
     parameterArray?: Array<string>,
     parameterDictionary?: Record<string, string>,
     parameterEnum?: 'Success' | 'Warning' | 'Error',
@@ -1740,13 +1728,13 @@ const types = (
 
 export type TTypesServiceOptions = {
     types: (
-        parameterNumber: number,
-        parameterString: string,
-        parameterBoolean: boolean,
-        parameterObject: any,
-        parameterArray: Array<string>,
-        parameterDictionary: Record<string, string>,
-        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterNumber?: number,
+        parameterString?: string,
+        parameterBoolean?: boolean,
+        parameterObject?: any,
+        parameterArray?: Array<string>,
+        parameterDictionary?: Record<string, string>,
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
         id?: number,
     ) => ApiRequestOptions;
 };
@@ -1773,9 +1761,9 @@ export class TypesService {
      */
     public static types(
         parameterNumber?: number = 123,
-        parameterString?: string = 'default',
-        parameterBoolean?: boolean = true,
-        parameterObject?: any = null,
+        parameterString?: string = "'default'",
+        parameterBoolean?: boolean = 'true',
+        parameterObject?: any = 'null',
         parameterArray?: Array<string>,
         parameterDictionary?: Record<string, string>,
         parameterEnum?: 'Success' | 'Warning' | 'Error',
@@ -1783,25 +1771,25 @@ export class TypesService {
     ): Promise<number | string | boolean | any> {
         // Validate required parameters
         if (parameterNumber === null || parameterNumber === undefined) {
-            throw new Error('Parameter "parameterNumber" is required');
+            throw new RequiredError('parameterNumber', 'Required parameter parameterNumber was not specified');
         }
         if (parameterString === null || parameterString === undefined) {
-            throw new Error('Parameter "parameterString" is required');
+            throw new RequiredError('parameterString', 'Required parameter parameterString was not specified');
         }
         if (parameterBoolean === null || parameterBoolean === undefined) {
-            throw new Error('Parameter "parameterBoolean" is required');
+            throw new RequiredError('parameterBoolean', 'Required parameter parameterBoolean was not specified');
         }
         if (parameterObject === null || parameterObject === undefined) {
-            throw new Error('Parameter "parameterObject" is required');
+            throw new RequiredError('parameterObject', 'Required parameter parameterObject was not specified');
         }
         if (parameterArray === null || parameterArray === undefined) {
-            throw new Error('Parameter "parameterArray" is required');
+            throw new RequiredError('parameterArray', 'Required parameter parameterArray was not specified');
         }
         if (parameterDictionary === null || parameterDictionary === undefined) {
-            throw new Error('Parameter "parameterDictionary" is required');
+            throw new RequiredError('parameterDictionary', 'Required parameter parameterDictionary was not specified');
         }
         if (parameterEnum === null || parameterEnum === undefined) {
-            throw new Error('Parameter "parameterEnum" is required');
+            throw new RequiredError('parameterEnum', 'Required parameter parameterEnum was not specified');
         }
 
         return __request<number | string | boolean | any>(
@@ -1928,6 +1916,19 @@ export const OpenAPI: TOpenAPIConfig = {
     PASSWORD: undefined,
     HEADERS: undefined,
 };"
+`;
+
+exports[`v3 should generate from different files: ./test/generated/v3_1/core/errors.ts 1`] = `
+"export class RequiredError extends Error {
+    constructor(
+        public parameterName: string,
+        message?: string
+    ) {
+        super(message || \`Required parameter "\${parameterName}" was not specified\`);
+        this.name = 'RequiredError';
+        Object.setPrototypeOf(this, RequiredError.prototype);
+    }
+}"
 `;
 
 exports[`v3 should generate from different files: ./test/generated/v3_1/core/request.ts 1`] = `
@@ -2550,13 +2551,7 @@ import type { IModelWithCircularReference } from './../models/./schemas/ModelWit
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithCircularModel = (): ApiRequestOptions => ({
     method: 'GET',
@@ -2577,6 +2572,8 @@ export class CircularService {
      * @throws ApiError
      */
     public static callWithCircularModel(): Promise<IModelWithCircularReference> {
+        // Validate required parameters
+
         return __request<IModelWithCircularReference>(CircularOptions.callWithCircularModel(), OpenAPI);
     }
 }
@@ -2590,13 +2587,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const collectionFormat = (
     parameterArrayCsv?: Array<string> | null,
@@ -2618,11 +2609,11 @@ const collectionFormat = (
 
 export type TCollectionFormatOptions = {
     collectionFormat: (
-        parameterArrayCsv: Array<string> | null,
-        parameterArraySsv: Array<string> | null,
-        parameterArrayTsv: Array<string> | null,
-        parameterArrayPipes: Array<string> | null,
-        parameterArrayMulti: Array<string> | null,
+        parameterArrayCsv?: Array<string> | null,
+        parameterArraySsv?: Array<string> | null,
+        parameterArrayTsv?: Array<string> | null,
+        parameterArrayPipes?: Array<string> | null,
+        parameterArrayMulti?: Array<string> | null,
     ) => ApiRequestOptions;
 };
 
@@ -2648,19 +2639,19 @@ export class CollectionFormatService {
     ): Promise<void> {
         // Validate required parameters
         if (parameterArrayCsv === null || parameterArrayCsv === undefined) {
-            throw new Error('Parameter "parameterArrayCsv" is required');
+            throw new RequiredError('parameterArrayCsv', 'Required parameter parameterArrayCsv was not specified');
         }
         if (parameterArraySsv === null || parameterArraySsv === undefined) {
-            throw new Error('Parameter "parameterArraySsv" is required');
+            throw new RequiredError('parameterArraySsv', 'Required parameter parameterArraySsv was not specified');
         }
         if (parameterArrayTsv === null || parameterArrayTsv === undefined) {
-            throw new Error('Parameter "parameterArrayTsv" is required');
+            throw new RequiredError('parameterArrayTsv', 'Required parameter parameterArrayTsv was not specified');
         }
         if (parameterArrayPipes === null || parameterArrayPipes === undefined) {
-            throw new Error('Parameter "parameterArrayPipes" is required');
+            throw new RequiredError('parameterArrayPipes', 'Required parameter parameterArrayPipes was not specified');
         }
         if (parameterArrayMulti === null || parameterArrayMulti === undefined) {
-            throw new Error('Parameter "parameterArrayMulti" is required');
+            throw new RequiredError('parameterArrayMulti', 'Required parameter parameterArrayMulti was not specified');
         }
 
         return __request<void>(
@@ -2689,13 +2680,7 @@ import type { IModelWithString } from './../models/./schemas/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const complexTypes = (
     parameterObject?: {
@@ -2722,13 +2707,13 @@ const complexTypes = (
 const complexParams = (
     id?: number,
     requestBody?: {
-        readonly key: string | null;
-        name: string | null;
-        enabled: boolean;
-        readonly type: 'Monkey' | 'Horse' | 'Bird';
+        readonly key?: string | null;
+        name?: string | null;
+        enabled?: boolean;
+        readonly type?: 'Monkey' | 'Horse' | 'Bird';
         listOfModels?: Array<IModelWithString> | null;
         listOfStrings?: Array<string> | null;
-        parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+        parameters?: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
         readonly user?: {
             readonly id?: number;
             readonly name?: string | null;
@@ -2743,25 +2728,25 @@ const complexParams = (
 
 export type TComplexOptions = {
     complexTypes: (
-        parameterObject: {
+        parameterObject?: {
             first?: {
                 second?: {
                     third?: string;
                 };
             };
         },
-        parameterReference: IModelWithString,
+        parameterReference?: IModelWithString,
     ) => ApiRequestOptions;
     complexParams: (
-        id: number,
+        id?: number,
         requestBody?: {
-            readonly key: string | null;
-            name: string | null;
-            enabled: boolean;
-            readonly type: 'Monkey' | 'Horse' | 'Bird';
+            readonly key?: string | null;
+            name?: string | null;
+            enabled?: boolean;
+            readonly type?: 'Monkey' | 'Horse' | 'Bird';
             listOfModels?: Array<IModelWithString> | null;
             listOfStrings?: Array<string> | null;
-            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            parameters?: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
                 readonly id?: number;
                 readonly name?: string | null;
@@ -2794,10 +2779,10 @@ export class ComplexService {
     ): Promise<Array<IModelWithString>> {
         // Validate required parameters
         if (parameterObject === null || parameterObject === undefined) {
-            throw new Error('Parameter "parameterObject" is required');
+            throw new RequiredError('parameterObject', 'Required parameter parameterObject was not specified');
         }
         if (parameterReference === null || parameterReference === undefined) {
-            throw new Error('Parameter "parameterReference" is required');
+            throw new RequiredError('parameterReference', 'Required parameter parameterReference was not specified');
         }
 
         return __request<Array<IModelWithString>>(
@@ -2814,13 +2799,13 @@ export class ComplexService {
     public static complexParams(
         id?: number,
         requestBody?: {
-            readonly key: string | null;
-            name: string | null;
-            enabled: boolean;
-            readonly type: 'Monkey' | 'Horse' | 'Bird';
+            readonly key?: string | null;
+            name?: string | null;
+            enabled?: boolean;
+            readonly type?: 'Monkey' | 'Horse' | 'Bird';
             listOfModels?: Array<IModelWithString> | null;
             listOfStrings?: Array<string> | null;
-            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            parameters?: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
                 readonly id?: number;
                 readonly name?: string | null;
@@ -2829,7 +2814,7 @@ export class ComplexService {
     ): Promise<IModelWithString> {
         // Validate required parameters
         if (id === null || id === undefined) {
-            throw new Error('Parameter "id" is required');
+            throw new RequiredError('id', 'Required parameter id was not specified');
         }
 
         return __request<IModelWithString>(ComplexOptions.complexParams(id, requestBody), OpenAPI);
@@ -2846,22 +2831,14 @@ import type { IModelWithString } from './../models/./schemas/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithDefaultParameters = (
-    parameterString?: string | null = 'Hello World!',
+    parameterString?: string | null = "'Hello World!'",
     parameterNumber?: number | null = 123,
-    parameterBoolean?: boolean | null = true,
-    parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-    parameterModel?: IModelWithString | null = {
-        prop: 'Hello World!',
-    },
+    parameterBoolean?: boolean | null = 'true',
+    parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+    parameterModel?: IModelWithString | null = '{\\n    "prop": "Hello World!"\\n}',
 ): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/defaults\`,
@@ -2875,13 +2852,11 @@ const callWithDefaultParameters = (
 });
 
 const callWithDefaultOptionalParameters = (
-    parameterString?: string = 'Hello World!',
+    parameterString?: string = "'Hello World!'",
     parameterNumber?: number = 123,
-    parameterBoolean?: boolean = true,
-    parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-    parameterModel?: IModelWithString = {
-        prop: 'Hello World!',
-    },
+    parameterBoolean?: boolean = 'true',
+    parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+    parameterModel?: IModelWithString = '{\\n    "prop": "Hello World!"\\n}',
 ): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/defaults\`,
@@ -2895,11 +2870,11 @@ const callWithDefaultOptionalParameters = (
 });
 
 const callToTestOrderOfParams = (
-    parameterOptionalStringWithDefault?: string = 'Hello World!',
-    parameterOptionalStringWithEmptyDefault?: string = '',
+    parameterOptionalStringWithDefault?: string = "'Hello World!'",
+    parameterOptionalStringWithEmptyDefault?: string = "''",
     parameterOptionalStringWithNoDefault?: string,
-    parameterStringWithDefault?: string = 'Hello World!',
-    parameterStringWithEmptyDefault?: string = '',
+    parameterStringWithDefault?: string = "'Hello World!'",
+    parameterStringWithEmptyDefault?: string = "''",
     parameterStringWithNoDefault?: string,
 ): ApiRequestOptions => ({
     method: 'PUT',
@@ -2916,26 +2891,26 @@ const callToTestOrderOfParams = (
 
 export type TDefaultsOptions = {
     callWithDefaultParameters: (
-        parameterString: string | null,
-        parameterNumber: number | null,
-        parameterBoolean: boolean | null,
-        parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterModel: IModelWithString | null,
+        parameterString?: string | null,
+        parameterNumber?: number | null,
+        parameterBoolean?: boolean | null,
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
+        parameterModel?: IModelWithString | null,
     ) => ApiRequestOptions;
     callWithDefaultOptionalParameters: (
-        parameterString: string,
-        parameterNumber: number,
-        parameterBoolean: boolean,
-        parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterModel: IModelWithString,
+        parameterString?: string,
+        parameterNumber?: number,
+        parameterBoolean?: boolean,
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
+        parameterModel?: IModelWithString,
     ) => ApiRequestOptions;
     callToTestOrderOfParams: (
-        parameterOptionalStringWithDefault: string,
-        parameterOptionalStringWithEmptyDefault: string,
+        parameterOptionalStringWithDefault?: string,
+        parameterOptionalStringWithEmptyDefault?: string,
         parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault: string,
-        parameterStringWithEmptyDefault: string,
-        parameterStringWithNoDefault: string,
+        parameterStringWithDefault?: string,
+        parameterStringWithEmptyDefault?: string,
+        parameterStringWithNoDefault?: string,
     ) => ApiRequestOptions;
 };
 
@@ -2955,26 +2930,24 @@ export class DefaultsService {
      * @throws ApiError
      */
     public static callWithDefaultParameters(
-        parameterString?: string | null = 'Hello World!',
+        parameterString?: string | null = "'Hello World!'",
         parameterNumber?: number | null = 123,
-        parameterBoolean?: boolean | null = true,
-        parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel?: IModelWithString | null = {
-            prop: 'Hello World!',
-        },
+        parameterBoolean?: boolean | null = 'true',
+        parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+        parameterModel?: IModelWithString | null = '{\\n    "prop": "Hello World!"\\n}',
     ): Promise<void> {
         // Validate required parameters
         if (parameterString === null || parameterString === undefined) {
-            throw new Error('Parameter "parameterString" is required');
+            throw new RequiredError('parameterString', 'Required parameter parameterString was not specified');
         }
         if (parameterNumber === null || parameterNumber === undefined) {
-            throw new Error('Parameter "parameterNumber" is required');
+            throw new RequiredError('parameterNumber', 'Required parameter parameterNumber was not specified');
         }
         if (parameterBoolean === null || parameterBoolean === undefined) {
-            throw new Error('Parameter "parameterBoolean" is required');
+            throw new RequiredError('parameterBoolean', 'Required parameter parameterBoolean was not specified');
         }
         if (parameterEnum === null || parameterEnum === undefined) {
-            throw new Error('Parameter "parameterEnum" is required');
+            throw new RequiredError('parameterEnum', 'Required parameter parameterEnum was not specified');
         }
 
         return __request<void>(
@@ -2997,26 +2970,24 @@ export class DefaultsService {
      * @throws ApiError
      */
     public static callWithDefaultOptionalParameters(
-        parameterString?: string = 'Hello World!',
+        parameterString?: string = "'Hello World!'",
         parameterNumber?: number = 123,
-        parameterBoolean?: boolean = true,
-        parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel?: IModelWithString = {
-            prop: 'Hello World!',
-        },
+        parameterBoolean?: boolean = 'true',
+        parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+        parameterModel?: IModelWithString = '{\\n    "prop": "Hello World!"\\n}',
     ): Promise<void> {
         // Validate required parameters
         if (parameterString === null || parameterString === undefined) {
-            throw new Error('Parameter "parameterString" is required');
+            throw new RequiredError('parameterString', 'Required parameter parameterString was not specified');
         }
         if (parameterNumber === null || parameterNumber === undefined) {
-            throw new Error('Parameter "parameterNumber" is required');
+            throw new RequiredError('parameterNumber', 'Required parameter parameterNumber was not specified');
         }
         if (parameterBoolean === null || parameterBoolean === undefined) {
-            throw new Error('Parameter "parameterBoolean" is required');
+            throw new RequiredError('parameterBoolean', 'Required parameter parameterBoolean was not specified');
         }
         if (parameterEnum === null || parameterEnum === undefined) {
-            throw new Error('Parameter "parameterEnum" is required');
+            throw new RequiredError('parameterEnum', 'Required parameter parameterEnum was not specified');
         }
 
         return __request<void>(
@@ -3040,28 +3011,43 @@ export class DefaultsService {
      * @throws ApiError
      */
     public static callToTestOrderOfParams(
-        parameterOptionalStringWithDefault?: string = 'Hello World!',
-        parameterOptionalStringWithEmptyDefault?: string = '',
+        parameterOptionalStringWithDefault?: string = "'Hello World!'",
+        parameterOptionalStringWithEmptyDefault?: string = "''",
         parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault?: string = 'Hello World!',
-        parameterStringWithEmptyDefault?: string = '',
+        parameterStringWithDefault?: string = "'Hello World!'",
+        parameterStringWithEmptyDefault?: string = "''",
         parameterStringWithNoDefault?: string,
     ): Promise<void> {
         // Validate required parameters
         if (parameterOptionalStringWithDefault === null || parameterOptionalStringWithDefault === undefined) {
-            throw new Error('Parameter "parameterOptionalStringWithDefault" is required');
+            throw new RequiredError(
+                'parameterOptionalStringWithDefault',
+                'Required parameter parameterOptionalStringWithDefault was not specified',
+            );
         }
         if (parameterOptionalStringWithEmptyDefault === null || parameterOptionalStringWithEmptyDefault === undefined) {
-            throw new Error('Parameter "parameterOptionalStringWithEmptyDefault" is required');
+            throw new RequiredError(
+                'parameterOptionalStringWithEmptyDefault',
+                'Required parameter parameterOptionalStringWithEmptyDefault was not specified',
+            );
         }
         if (parameterStringWithDefault === null || parameterStringWithDefault === undefined) {
-            throw new Error('Parameter "parameterStringWithDefault" is required');
+            throw new RequiredError(
+                'parameterStringWithDefault',
+                'Required parameter parameterStringWithDefault was not specified',
+            );
         }
         if (parameterStringWithEmptyDefault === null || parameterStringWithEmptyDefault === undefined) {
-            throw new Error('Parameter "parameterStringWithEmptyDefault" is required');
+            throw new RequiredError(
+                'parameterStringWithEmptyDefault',
+                'Required parameter parameterStringWithEmptyDefault was not specified',
+            );
         }
         if (parameterStringWithNoDefault === null || parameterStringWithNoDefault === undefined) {
-            throw new Error('Parameter "parameterStringWithNoDefault" is required');
+            throw new RequiredError(
+                'parameterStringWithNoDefault',
+                'Required parameter parameterStringWithNoDefault was not specified',
+            );
         }
 
         return __request<void>(
@@ -3087,13 +3073,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const duplicateName = (): ApiRequestOptions => ({
     method: 'GET',
@@ -3134,24 +3114,32 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static duplicateName(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateOptions.duplicateName(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName1(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateOptions.duplicateName1(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName2(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateOptions.duplicateName2(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName3(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateOptions.duplicateName3(), OpenAPI);
     }
 }
@@ -3167,13 +3155,7 @@ import type { EEnumWithStrings } from './../models/./schemas/EnumWithStrings';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithEnums = (requestBody?: {
     enumWithNumbers?: EEnumWithNumbers;
@@ -3220,13 +3202,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithResultFromHeader = (): ApiRequestOptions => ({
     method: 'POST',
@@ -3252,6 +3228,8 @@ export class HeaderService {
      * @throws ApiError
      */
     public static callWithResultFromHeader(): Promise<string> {
+        // Validate required parameters
+
         return __request<string>(HeaderOptions.callWithResultFromHeader(), OpenAPI);
     }
 }
@@ -3265,13 +3243,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const multipartResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -3298,6 +3270,8 @@ export class MultipartService {
             bar?: string;
         };
     }> {
+        // Validate required parameters
+
         return __request<{
             file?: string;
             metadata?: {
@@ -3317,13 +3291,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithNoContentResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -3344,6 +3312,8 @@ export class NoContentService {
      * @throws ApiError
      */
     public static callWithNoContentResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(NoContentOptions.callWithNoContentResponse(), OpenAPI);
     }
 }
@@ -3358,13 +3328,7 @@ import type { IModelWithString } from './../models/./schemas/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithParameters = (
     parameterHeader?: string | null,
@@ -3444,26 +3408,26 @@ const postCallWithOptionalParam = (parameter?: string, requestBody?: IModelWithS
 
 export type TParametersOptions = {
     callWithParameters: (
-        parameterHeader: string | null,
-        parameterQuery: string | null,
-        parameterForm: string | null,
-        parameterCookie: string | null,
-        parameterPath: string | null,
-        requestBody: IModelWithString | null,
+        parameterHeader?: string | null,
+        parameterQuery?: string | null,
+        parameterForm?: string | null,
+        parameterCookie?: string | null,
+        parameterPath?: string | null,
+        requestBody?: IModelWithString | null,
     ) => ApiRequestOptions;
     callWithWeirdParameterNames: (
         parameterPath1?: string,
         parameterPath2?: string,
         parameterPath3?: string,
         _default?: string,
-        parameterHeader: string | null,
-        parameterQuery: string | null,
-        parameterForm: string | null,
-        parameterCookie: string | null,
-        requestBody: IModelWithString | null,
+        parameterHeader?: string | null,
+        parameterQuery?: string | null,
+        parameterForm?: string | null,
+        parameterCookie?: string | null,
+        requestBody?: IModelWithString | null,
     ) => ApiRequestOptions;
-    getCallWithOptionalParam: (parameter?: string, requestBody: IModelWithString) => ApiRequestOptions;
-    postCallWithOptionalParam: (parameter: string, requestBody?: IModelWithString) => ApiRequestOptions;
+    getCallWithOptionalParam: (parameter?: string, requestBody?: IModelWithString) => ApiRequestOptions;
+    postCallWithOptionalParam: (parameter?: string, requestBody?: IModelWithString) => ApiRequestOptions;
 };
 
 export const ParametersOptions: TParametersOptions = {
@@ -3493,22 +3457,22 @@ export class ParametersService {
     ): Promise<void> {
         // Validate required parameters
         if (parameterHeader === null || parameterHeader === undefined) {
-            throw new Error('Parameter "parameterHeader" is required');
+            throw new RequiredError('parameterHeader', 'Required parameter parameterHeader was not specified');
         }
         if (parameterQuery === null || parameterQuery === undefined) {
-            throw new Error('Parameter "parameterQuery" is required');
+            throw new RequiredError('parameterQuery', 'Required parameter parameterQuery was not specified');
         }
         if (parameterForm === null || parameterForm === undefined) {
-            throw new Error('Parameter "parameterForm" is required');
+            throw new RequiredError('parameterForm', 'Required parameter parameterForm was not specified');
         }
         if (parameterCookie === null || parameterCookie === undefined) {
-            throw new Error('Parameter "parameterCookie" is required');
+            throw new RequiredError('parameterCookie', 'Required parameter parameterCookie was not specified');
         }
         if (parameterPath === null || parameterPath === undefined) {
-            throw new Error('Parameter "parameterPath" is required');
+            throw new RequiredError('parameterPath', 'Required parameter parameterPath was not specified');
         }
         if (requestBody === null || requestBody === undefined) {
-            throw new Error('Parameter "requestBody" is required');
+            throw new RequiredError('requestBody', 'Required parameter requestBody was not specified');
         }
 
         return __request<void>(
@@ -3548,19 +3512,19 @@ export class ParametersService {
     ): Promise<void> {
         // Validate required parameters
         if (parameterHeader === null || parameterHeader === undefined) {
-            throw new Error('Parameter "parameterHeader" is required');
+            throw new RequiredError('parameterHeader', 'Required parameter parameterHeader was not specified');
         }
         if (parameterQuery === null || parameterQuery === undefined) {
-            throw new Error('Parameter "parameterQuery" is required');
+            throw new RequiredError('parameterQuery', 'Required parameter parameterQuery was not specified');
         }
         if (parameterForm === null || parameterForm === undefined) {
-            throw new Error('Parameter "parameterForm" is required');
+            throw new RequiredError('parameterForm', 'Required parameter parameterForm was not specified');
         }
         if (parameterCookie === null || parameterCookie === undefined) {
-            throw new Error('Parameter "parameterCookie" is required');
+            throw new RequiredError('parameterCookie', 'Required parameter parameterCookie was not specified');
         }
         if (requestBody === null || requestBody === undefined) {
-            throw new Error('Parameter "requestBody" is required');
+            throw new RequiredError('requestBody', 'Required parameter requestBody was not specified');
         }
 
         return __request<void>(
@@ -3586,7 +3550,7 @@ export class ParametersService {
     public static getCallWithOptionalParam(parameter?: string, requestBody?: IModelWithString): Promise<void> {
         // Validate required parameters
         if (requestBody === null || requestBody === undefined) {
-            throw new Error('Parameter "requestBody" is required');
+            throw new RequiredError('requestBody', 'Required parameter requestBody was not specified');
         }
 
         return __request<void>(ParametersOptions.getCallWithOptionalParam(parameter, requestBody), OpenAPI);
@@ -3599,7 +3563,7 @@ export class ParametersService {
     public static postCallWithOptionalParam(parameter?: string, requestBody?: IModelWithString): Promise<void> {
         // Validate required parameters
         if (parameter === null || parameter === undefined) {
-            throw new Error('Parameter "parameter" is required');
+            throw new RequiredError('parameter', 'Required parameter parameter was not specified');
         }
 
         return __request<void>(ParametersOptions.postCallWithOptionalParam(parameter, requestBody), OpenAPI);
@@ -3616,13 +3580,7 @@ import type { IModelWithString } from './../models/./schemas/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const postRequestBodyService = (requestBody?: IModelWithString): ApiRequestOptions => ({
     method: 'POST',
@@ -3662,13 +3620,7 @@ import type { IModelWithString } from './../models/./schemas/ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -3713,6 +3665,8 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithResponse(): Promise<IModelWithString> {
+        // Validate required parameters
+
         return __request<IModelWithString>(ResponseOptions.callWithResponse(), OpenAPI);
     }
     /**
@@ -3720,6 +3674,8 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithDuplicateResponses(): Promise<IModelWithString> {
+        // Validate required parameters
+
         return __request<IModelWithString>(ResponseOptions.callWithDuplicateResponses(), OpenAPI);
     }
     /**
@@ -3737,6 +3693,8 @@ export class ResponseService {
         | IModelWithString
         | TModelThatExtends
     > {
+        // Validate required parameters
+
         return __request<
             | {
                   readonly '@namespace.string'?: string;
@@ -3758,13 +3716,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -3826,42 +3778,56 @@ export class SimpleService {
      * @throws ApiError
      */
     public static getCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.getCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static putCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.putCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static postCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.postCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static deleteCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.deleteCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static optionsCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.optionsCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static headCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.headCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), OpenAPI);
     }
 }
@@ -3875,19 +3841,13 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const types = (
     parameterNumber?: number = 123,
-    parameterString?: string | null = 'default',
-    parameterBoolean?: boolean | null = true,
-    parameterObject?: any = null,
+    parameterString?: string | null = "'default'",
+    parameterBoolean?: boolean | null = 'true',
+    parameterObject?: any = 'null',
     parameterArray?: Array<string> | null,
     parameterDictionary?: any,
     parameterEnum?: 'Success' | 'Warning' | 'Error' | null,
@@ -3908,13 +3868,13 @@ const types = (
 
 export type TTypesOptions = {
     types: (
-        parameterNumber: number,
-        parameterString: string | null,
-        parameterBoolean: boolean | null,
-        parameterObject: any,
-        parameterArray: Array<string> | null,
-        parameterDictionary: any,
-        parameterEnum: 'Success' | 'Warning' | 'Error' | null,
+        parameterNumber?: number,
+        parameterString?: string | null,
+        parameterBoolean?: boolean | null,
+        parameterObject?: any,
+        parameterArray?: Array<string> | null,
+        parameterDictionary?: any,
+        parameterEnum?: 'Success' | 'Warning' | 'Error' | null,
         id?: number,
     ) => ApiRequestOptions;
 };
@@ -3941,9 +3901,9 @@ export class TypesService {
      */
     public static types(
         parameterNumber?: number = 123,
-        parameterString?: string | null = 'default',
-        parameterBoolean?: boolean | null = true,
-        parameterObject?: any = null,
+        parameterString?: string | null = "'default'",
+        parameterBoolean?: boolean | null = 'true',
+        parameterObject?: any = 'null',
         parameterArray?: Array<string> | null,
         parameterDictionary?: any,
         parameterEnum?: 'Success' | 'Warning' | 'Error' | null,
@@ -3951,25 +3911,25 @@ export class TypesService {
     ): Promise<number | string | boolean | any> {
         // Validate required parameters
         if (parameterNumber === null || parameterNumber === undefined) {
-            throw new Error('Parameter "parameterNumber" is required');
+            throw new RequiredError('parameterNumber', 'Required parameter parameterNumber was not specified');
         }
         if (parameterString === null || parameterString === undefined) {
-            throw new Error('Parameter "parameterString" is required');
+            throw new RequiredError('parameterString', 'Required parameter parameterString was not specified');
         }
         if (parameterBoolean === null || parameterBoolean === undefined) {
-            throw new Error('Parameter "parameterBoolean" is required');
+            throw new RequiredError('parameterBoolean', 'Required parameter parameterBoolean was not specified');
         }
         if (parameterObject === null || parameterObject === undefined) {
-            throw new Error('Parameter "parameterObject" is required');
+            throw new RequiredError('parameterObject', 'Required parameter parameterObject was not specified');
         }
         if (parameterArray === null || parameterArray === undefined) {
-            throw new Error('Parameter "parameterArray" is required');
+            throw new RequiredError('parameterArray', 'Required parameter parameterArray was not specified');
         }
         if (parameterDictionary === null || parameterDictionary === undefined) {
-            throw new Error('Parameter "parameterDictionary" is required');
+            throw new RequiredError('parameterDictionary', 'Required parameter parameterDictionary was not specified');
         }
         if (parameterEnum === null || parameterEnum === undefined) {
-            throw new Error('Parameter "parameterEnum" is required');
+            throw new RequiredError('parameterEnum', 'Required parameter parameterEnum was not specified');
         }
 
         return __request<number | string | boolean | any>(
@@ -3997,13 +3957,7 @@ exports[`v3 should generate from different files: ./test/generated/v3_1/services
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const uploadFile = (file?: Blob): ApiRequestOptions => ({
     method: 'POST',
@@ -4014,7 +3968,7 @@ const uploadFile = (file?: Blob): ApiRequestOptions => ({
 });
 
 export type TUploadOptions = {
-    uploadFile: (file: Blob) => ApiRequestOptions;
+    uploadFile: (file?: Blob) => ApiRequestOptions;
 };
 
 export const UploadOptions: TUploadOptions = {
@@ -4030,7 +3984,7 @@ export class UploadService {
     public static uploadFile(file?: Blob): Promise<boolean> {
         // Validate required parameters
         if (file === null || file === undefined) {
-            throw new Error('Parameter "file" is required');
+            throw new RequiredError('file', 'Required parameter file was not specified');
         }
 
         return __request<boolean>(UploadOptions.uploadFile(file), OpenAPI);
@@ -4145,6 +4099,19 @@ export const OpenAPI: TOpenAPIConfig = {
     PASSWORD: undefined,
     HEADERS: undefined,
 };"
+`;
+
+exports[`v3 should generate: ./test/generated/v3/core/errors.ts 1`] = `
+"export class RequiredError extends Error {
+    constructor(
+        public parameterName: string,
+        message?: string
+    ) {
+        super(message || \`Required parameter "\${parameterName}" was not specified\`);
+        this.name = 'RequiredError';
+        Object.setPrototypeOf(this, RequiredError.prototype);
+    }
+}"
 `;
 
 exports[`v3 should generate: ./test/generated/v3/core/request.ts 1`] = `
@@ -4811,13 +4778,7 @@ exports[`v3 should generate: ./test/generated/v3/services/CollectionFormatServic
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const collectionFormat = (
     parameterArrayCsv?: Array<string> | null,
@@ -4839,11 +4800,11 @@ const collectionFormat = (
 
 export type TCollectionFormatOptions = {
     collectionFormat: (
-        parameterArrayCsv: Array<string> | null,
-        parameterArraySsv: Array<string> | null,
-        parameterArrayTsv: Array<string> | null,
-        parameterArrayPipes: Array<string> | null,
-        parameterArrayMulti: Array<string> | null,
+        parameterArrayCsv?: Array<string> | null,
+        parameterArraySsv?: Array<string> | null,
+        parameterArrayTsv?: Array<string> | null,
+        parameterArrayPipes?: Array<string> | null,
+        parameterArrayMulti?: Array<string> | null,
     ) => ApiRequestOptions;
 };
 
@@ -4869,19 +4830,19 @@ export class CollectionFormatService {
     ): Promise<void> {
         // Validate required parameters
         if (parameterArrayCsv === null || parameterArrayCsv === undefined) {
-            throw new Error('Parameter "parameterArrayCsv" is required');
+            throw new RequiredError('parameterArrayCsv', 'Required parameter parameterArrayCsv was not specified');
         }
         if (parameterArraySsv === null || parameterArraySsv === undefined) {
-            throw new Error('Parameter "parameterArraySsv" is required');
+            throw new RequiredError('parameterArraySsv', 'Required parameter parameterArraySsv was not specified');
         }
         if (parameterArrayTsv === null || parameterArrayTsv === undefined) {
-            throw new Error('Parameter "parameterArrayTsv" is required');
+            throw new RequiredError('parameterArrayTsv', 'Required parameter parameterArrayTsv was not specified');
         }
         if (parameterArrayPipes === null || parameterArrayPipes === undefined) {
-            throw new Error('Parameter "parameterArrayPipes" is required');
+            throw new RequiredError('parameterArrayPipes', 'Required parameter parameterArrayPipes was not specified');
         }
         if (parameterArrayMulti === null || parameterArrayMulti === undefined) {
-            throw new Error('Parameter "parameterArrayMulti" is required');
+            throw new RequiredError('parameterArrayMulti', 'Required parameter parameterArrayMulti was not specified');
         }
 
         return __request<void>(
@@ -4910,13 +4871,7 @@ import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const complexTypes = (
     parameterObject?: {
@@ -4943,13 +4898,13 @@ const complexTypes = (
 const complexParams = (
     id?: number,
     requestBody?: {
-        readonly key: string | null;
-        name: string | null;
-        enabled: boolean;
-        readonly type: 'Monkey' | 'Horse' | 'Bird';
+        readonly key?: string | null;
+        name?: string | null;
+        enabled?: boolean;
+        readonly type?: 'Monkey' | 'Horse' | 'Bird';
         listOfModels?: Array<IModelWithString> | null;
         listOfStrings?: Array<string> | null;
-        parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+        parameters?: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
         readonly user?: {
             readonly id?: number;
             readonly name?: string | null;
@@ -4964,25 +4919,25 @@ const complexParams = (
 
 export type TComplexOptions = {
     complexTypes: (
-        parameterObject: {
+        parameterObject?: {
             first?: {
                 second?: {
                     third?: string;
                 };
             };
         },
-        parameterReference: IModelWithString,
+        parameterReference?: IModelWithString,
     ) => ApiRequestOptions;
     complexParams: (
-        id: number,
+        id?: number,
         requestBody?: {
-            readonly key: string | null;
-            name: string | null;
-            enabled: boolean;
-            readonly type: 'Monkey' | 'Horse' | 'Bird';
+            readonly key?: string | null;
+            name?: string | null;
+            enabled?: boolean;
+            readonly type?: 'Monkey' | 'Horse' | 'Bird';
             listOfModels?: Array<IModelWithString> | null;
             listOfStrings?: Array<string> | null;
-            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            parameters?: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
                 readonly id?: number;
                 readonly name?: string | null;
@@ -5015,10 +4970,10 @@ export class ComplexService {
     ): Promise<Array<IModelWithString>> {
         // Validate required parameters
         if (parameterObject === null || parameterObject === undefined) {
-            throw new Error('Parameter "parameterObject" is required');
+            throw new RequiredError('parameterObject', 'Required parameter parameterObject was not specified');
         }
         if (parameterReference === null || parameterReference === undefined) {
-            throw new Error('Parameter "parameterReference" is required');
+            throw new RequiredError('parameterReference', 'Required parameter parameterReference was not specified');
         }
 
         return __request<Array<IModelWithString>>(
@@ -5035,13 +4990,13 @@ export class ComplexService {
     public static complexParams(
         id?: number,
         requestBody?: {
-            readonly key: string | null;
-            name: string | null;
-            enabled: boolean;
-            readonly type: 'Monkey' | 'Horse' | 'Bird';
+            readonly key?: string | null;
+            name?: string | null;
+            enabled?: boolean;
+            readonly type?: 'Monkey' | 'Horse' | 'Bird';
             listOfModels?: Array<IModelWithString> | null;
             listOfStrings?: Array<string> | null;
-            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            parameters?: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
                 readonly id?: number;
                 readonly name?: string | null;
@@ -5050,7 +5005,7 @@ export class ComplexService {
     ): Promise<IModelWithString> {
         // Validate required parameters
         if (id === null || id === undefined) {
-            throw new Error('Parameter "id" is required');
+            throw new RequiredError('id', 'Required parameter id was not specified');
         }
 
         return __request<IModelWithString>(ComplexOptions.complexParams(id, requestBody), OpenAPI);
@@ -5067,22 +5022,14 @@ import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithDefaultParameters = (
-    parameterString?: string | null = 'Hello World!',
+    parameterString?: string | null = "'Hello World!'",
     parameterNumber?: number | null = 123,
-    parameterBoolean?: boolean | null = true,
-    parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-    parameterModel?: IModelWithString | null = {
-        prop: 'Hello World!',
-    },
+    parameterBoolean?: boolean | null = 'true',
+    parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+    parameterModel?: IModelWithString | null = '{\\n    "prop": "Hello World!"\\n}',
 ): ApiRequestOptions => ({
     method: 'GET',
     path: \`/api/v{api-version}/defaults\`,
@@ -5096,13 +5043,11 @@ const callWithDefaultParameters = (
 });
 
 const callWithDefaultOptionalParameters = (
-    parameterString?: string = 'Hello World!',
+    parameterString?: string = "'Hello World!'",
     parameterNumber?: number = 123,
-    parameterBoolean?: boolean = true,
-    parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-    parameterModel?: IModelWithString = {
-        prop: 'Hello World!',
-    },
+    parameterBoolean?: boolean = 'true',
+    parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+    parameterModel?: IModelWithString = '{\\n    "prop": "Hello World!"\\n}',
 ): ApiRequestOptions => ({
     method: 'POST',
     path: \`/api/v{api-version}/defaults\`,
@@ -5116,11 +5061,11 @@ const callWithDefaultOptionalParameters = (
 });
 
 const callToTestOrderOfParams = (
-    parameterOptionalStringWithDefault?: string = 'Hello World!',
-    parameterOptionalStringWithEmptyDefault?: string = '',
+    parameterOptionalStringWithDefault?: string = "'Hello World!'",
+    parameterOptionalStringWithEmptyDefault?: string = "''",
     parameterOptionalStringWithNoDefault?: string,
-    parameterStringWithDefault?: string = 'Hello World!',
-    parameterStringWithEmptyDefault?: string = '',
+    parameterStringWithDefault?: string = "'Hello World!'",
+    parameterStringWithEmptyDefault?: string = "''",
     parameterStringWithNoDefault?: string,
 ): ApiRequestOptions => ({
     method: 'PUT',
@@ -5137,26 +5082,26 @@ const callToTestOrderOfParams = (
 
 export type TDefaultsOptions = {
     callWithDefaultParameters: (
-        parameterString: string | null,
-        parameterNumber: number | null,
-        parameterBoolean: boolean | null,
-        parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterModel: IModelWithString | null,
+        parameterString?: string | null,
+        parameterNumber?: number | null,
+        parameterBoolean?: boolean | null,
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
+        parameterModel?: IModelWithString | null,
     ) => ApiRequestOptions;
     callWithDefaultOptionalParameters: (
-        parameterString: string,
-        parameterNumber: number,
-        parameterBoolean: boolean,
-        parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterModel: IModelWithString,
+        parameterString?: string,
+        parameterNumber?: number,
+        parameterBoolean?: boolean,
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
+        parameterModel?: IModelWithString,
     ) => ApiRequestOptions;
     callToTestOrderOfParams: (
-        parameterOptionalStringWithDefault: string,
-        parameterOptionalStringWithEmptyDefault: string,
+        parameterOptionalStringWithDefault?: string,
+        parameterOptionalStringWithEmptyDefault?: string,
         parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault: string,
-        parameterStringWithEmptyDefault: string,
-        parameterStringWithNoDefault: string,
+        parameterStringWithDefault?: string,
+        parameterStringWithEmptyDefault?: string,
+        parameterStringWithNoDefault?: string,
     ) => ApiRequestOptions;
 };
 
@@ -5176,26 +5121,24 @@ export class DefaultsService {
      * @throws ApiError
      */
     public static callWithDefaultParameters(
-        parameterString?: string | null = 'Hello World!',
+        parameterString?: string | null = "'Hello World!'",
         parameterNumber?: number | null = 123,
-        parameterBoolean?: boolean | null = true,
-        parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel?: IModelWithString | null = {
-            prop: 'Hello World!',
-        },
+        parameterBoolean?: boolean | null = 'true',
+        parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+        parameterModel?: IModelWithString | null = '{\\n    "prop": "Hello World!"\\n}',
     ): Promise<void> {
         // Validate required parameters
         if (parameterString === null || parameterString === undefined) {
-            throw new Error('Parameter "parameterString" is required');
+            throw new RequiredError('parameterString', 'Required parameter parameterString was not specified');
         }
         if (parameterNumber === null || parameterNumber === undefined) {
-            throw new Error('Parameter "parameterNumber" is required');
+            throw new RequiredError('parameterNumber', 'Required parameter parameterNumber was not specified');
         }
         if (parameterBoolean === null || parameterBoolean === undefined) {
-            throw new Error('Parameter "parameterBoolean" is required');
+            throw new RequiredError('parameterBoolean', 'Required parameter parameterBoolean was not specified');
         }
         if (parameterEnum === null || parameterEnum === undefined) {
-            throw new Error('Parameter "parameterEnum" is required');
+            throw new RequiredError('parameterEnum', 'Required parameter parameterEnum was not specified');
         }
 
         return __request<void>(
@@ -5218,26 +5161,24 @@ export class DefaultsService {
      * @throws ApiError
      */
     public static callWithDefaultOptionalParameters(
-        parameterString?: string = 'Hello World!',
+        parameterString?: string = "'Hello World!'",
         parameterNumber?: number = 123,
-        parameterBoolean?: boolean = true,
-        parameterEnum?: 'Success' | 'Warning' | 'Error' = 'Success',
-        parameterModel?: IModelWithString = {
-            prop: 'Hello World!',
-        },
+        parameterBoolean?: boolean = 'true',
+        parameterEnum?: 'Success' | 'Warning' | 'Error' = "'Success'",
+        parameterModel?: IModelWithString = '{\\n    "prop": "Hello World!"\\n}',
     ): Promise<void> {
         // Validate required parameters
         if (parameterString === null || parameterString === undefined) {
-            throw new Error('Parameter "parameterString" is required');
+            throw new RequiredError('parameterString', 'Required parameter parameterString was not specified');
         }
         if (parameterNumber === null || parameterNumber === undefined) {
-            throw new Error('Parameter "parameterNumber" is required');
+            throw new RequiredError('parameterNumber', 'Required parameter parameterNumber was not specified');
         }
         if (parameterBoolean === null || parameterBoolean === undefined) {
-            throw new Error('Parameter "parameterBoolean" is required');
+            throw new RequiredError('parameterBoolean', 'Required parameter parameterBoolean was not specified');
         }
         if (parameterEnum === null || parameterEnum === undefined) {
-            throw new Error('Parameter "parameterEnum" is required');
+            throw new RequiredError('parameterEnum', 'Required parameter parameterEnum was not specified');
         }
 
         return __request<void>(
@@ -5261,28 +5202,43 @@ export class DefaultsService {
      * @throws ApiError
      */
     public static callToTestOrderOfParams(
-        parameterOptionalStringWithDefault?: string = 'Hello World!',
-        parameterOptionalStringWithEmptyDefault?: string = '',
+        parameterOptionalStringWithDefault?: string = "'Hello World!'",
+        parameterOptionalStringWithEmptyDefault?: string = "''",
         parameterOptionalStringWithNoDefault?: string,
-        parameterStringWithDefault?: string = 'Hello World!',
-        parameterStringWithEmptyDefault?: string = '',
+        parameterStringWithDefault?: string = "'Hello World!'",
+        parameterStringWithEmptyDefault?: string = "''",
         parameterStringWithNoDefault?: string,
     ): Promise<void> {
         // Validate required parameters
         if (parameterOptionalStringWithDefault === null || parameterOptionalStringWithDefault === undefined) {
-            throw new Error('Parameter "parameterOptionalStringWithDefault" is required');
+            throw new RequiredError(
+                'parameterOptionalStringWithDefault',
+                'Required parameter parameterOptionalStringWithDefault was not specified',
+            );
         }
         if (parameterOptionalStringWithEmptyDefault === null || parameterOptionalStringWithEmptyDefault === undefined) {
-            throw new Error('Parameter "parameterOptionalStringWithEmptyDefault" is required');
+            throw new RequiredError(
+                'parameterOptionalStringWithEmptyDefault',
+                'Required parameter parameterOptionalStringWithEmptyDefault was not specified',
+            );
         }
         if (parameterStringWithDefault === null || parameterStringWithDefault === undefined) {
-            throw new Error('Parameter "parameterStringWithDefault" is required');
+            throw new RequiredError(
+                'parameterStringWithDefault',
+                'Required parameter parameterStringWithDefault was not specified',
+            );
         }
         if (parameterStringWithEmptyDefault === null || parameterStringWithEmptyDefault === undefined) {
-            throw new Error('Parameter "parameterStringWithEmptyDefault" is required');
+            throw new RequiredError(
+                'parameterStringWithEmptyDefault',
+                'Required parameter parameterStringWithEmptyDefault was not specified',
+            );
         }
         if (parameterStringWithNoDefault === null || parameterStringWithNoDefault === undefined) {
-            throw new Error('Parameter "parameterStringWithNoDefault" is required');
+            throw new RequiredError(
+                'parameterStringWithNoDefault',
+                'Required parameter parameterStringWithNoDefault was not specified',
+            );
         }
 
         return __request<void>(
@@ -5308,13 +5264,7 @@ exports[`v3 should generate: ./test/generated/v3/services/DuplicateService.ts 1`
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const duplicateName = (): ApiRequestOptions => ({
     method: 'GET',
@@ -5355,24 +5305,32 @@ export class DuplicateService {
      * @throws ApiError
      */
     public static duplicateName(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateOptions.duplicateName(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName1(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateOptions.duplicateName1(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName2(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateOptions.duplicateName2(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static duplicateName3(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(DuplicateOptions.duplicateName3(), OpenAPI);
     }
 }
@@ -5389,13 +5347,7 @@ import type { EEnumWithStringsWithType } from './../models/./EnumWithStringsWith
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithEnums = (requestBody?: {
     enumWithNumbers?: EEnumWithNumbers;
@@ -5445,13 +5397,7 @@ exports[`v3 should generate: ./test/generated/v3/services/HeaderService.ts 1`] =
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithResultFromHeader = (): ApiRequestOptions => ({
     method: 'POST',
@@ -5477,6 +5423,8 @@ export class HeaderService {
      * @throws ApiError
      */
     public static callWithResultFromHeader(): Promise<string> {
+        // Validate required parameters
+
         return __request<string>(HeaderOptions.callWithResultFromHeader(), OpenAPI);
     }
 }
@@ -5491,13 +5439,7 @@ import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const multipartResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -5533,6 +5475,8 @@ export class MultipartService {
             bar?: string;
         };
     }> {
+        // Validate required parameters
+
         return __request<{
             file?: string;
             metadata?: {
@@ -5561,13 +5505,7 @@ exports[`v3 should generate: ./test/generated/v3/services/NoContentService.ts 1`
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithNoContentResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -5588,6 +5526,8 @@ export class NoContentService {
      * @throws ApiError
      */
     public static callWithNoContentResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(NoContentOptions.callWithNoContentResponse(), OpenAPI);
     }
 }
@@ -5602,13 +5542,7 @@ import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithParameters = (
     parameterHeader?: string | null,
@@ -5688,26 +5622,26 @@ const postCallWithOptionalParam = (parameter?: string, requestBody?: IModelWithS
 
 export type TParametersOptions = {
     callWithParameters: (
-        parameterHeader: string | null,
-        parameterQuery: string | null,
-        parameterForm: string | null,
-        parameterCookie: string | null,
-        parameterPath: string | null,
-        requestBody: IModelWithString | null,
+        parameterHeader?: string | null,
+        parameterQuery?: string | null,
+        parameterForm?: string | null,
+        parameterCookie?: string | null,
+        parameterPath?: string | null,
+        requestBody?: IModelWithString | null,
     ) => ApiRequestOptions;
     callWithWeirdParameterNames: (
         parameterPath1?: string,
         parameterPath2?: string,
         parameterPath3?: string,
         _default?: string,
-        parameterHeader: string | null,
-        parameterQuery: string | null,
-        parameterForm: string | null,
-        parameterCookie: string | null,
-        requestBody: IModelWithString | null,
+        parameterHeader?: string | null,
+        parameterQuery?: string | null,
+        parameterForm?: string | null,
+        parameterCookie?: string | null,
+        requestBody?: IModelWithString | null,
     ) => ApiRequestOptions;
-    getCallWithOptionalParam: (parameter?: string, requestBody: IModelWithString) => ApiRequestOptions;
-    postCallWithOptionalParam: (parameter: string, requestBody?: IModelWithString) => ApiRequestOptions;
+    getCallWithOptionalParam: (parameter?: string, requestBody?: IModelWithString) => ApiRequestOptions;
+    postCallWithOptionalParam: (parameter?: string, requestBody?: IModelWithString) => ApiRequestOptions;
 };
 
 export const ParametersOptions: TParametersOptions = {
@@ -5737,22 +5671,22 @@ export class ParametersService {
     ): Promise<void> {
         // Validate required parameters
         if (parameterHeader === null || parameterHeader === undefined) {
-            throw new Error('Parameter "parameterHeader" is required');
+            throw new RequiredError('parameterHeader', 'Required parameter parameterHeader was not specified');
         }
         if (parameterQuery === null || parameterQuery === undefined) {
-            throw new Error('Parameter "parameterQuery" is required');
+            throw new RequiredError('parameterQuery', 'Required parameter parameterQuery was not specified');
         }
         if (parameterForm === null || parameterForm === undefined) {
-            throw new Error('Parameter "parameterForm" is required');
+            throw new RequiredError('parameterForm', 'Required parameter parameterForm was not specified');
         }
         if (parameterCookie === null || parameterCookie === undefined) {
-            throw new Error('Parameter "parameterCookie" is required');
+            throw new RequiredError('parameterCookie', 'Required parameter parameterCookie was not specified');
         }
         if (parameterPath === null || parameterPath === undefined) {
-            throw new Error('Parameter "parameterPath" is required');
+            throw new RequiredError('parameterPath', 'Required parameter parameterPath was not specified');
         }
         if (requestBody === null || requestBody === undefined) {
-            throw new Error('Parameter "requestBody" is required');
+            throw new RequiredError('requestBody', 'Required parameter requestBody was not specified');
         }
 
         return __request<void>(
@@ -5792,19 +5726,19 @@ export class ParametersService {
     ): Promise<void> {
         // Validate required parameters
         if (parameterHeader === null || parameterHeader === undefined) {
-            throw new Error('Parameter "parameterHeader" is required');
+            throw new RequiredError('parameterHeader', 'Required parameter parameterHeader was not specified');
         }
         if (parameterQuery === null || parameterQuery === undefined) {
-            throw new Error('Parameter "parameterQuery" is required');
+            throw new RequiredError('parameterQuery', 'Required parameter parameterQuery was not specified');
         }
         if (parameterForm === null || parameterForm === undefined) {
-            throw new Error('Parameter "parameterForm" is required');
+            throw new RequiredError('parameterForm', 'Required parameter parameterForm was not specified');
         }
         if (parameterCookie === null || parameterCookie === undefined) {
-            throw new Error('Parameter "parameterCookie" is required');
+            throw new RequiredError('parameterCookie', 'Required parameter parameterCookie was not specified');
         }
         if (requestBody === null || requestBody === undefined) {
-            throw new Error('Parameter "requestBody" is required');
+            throw new RequiredError('requestBody', 'Required parameter requestBody was not specified');
         }
 
         return __request<void>(
@@ -5830,7 +5764,7 @@ export class ParametersService {
     public static getCallWithOptionalParam(parameter?: string, requestBody?: IModelWithString): Promise<void> {
         // Validate required parameters
         if (requestBody === null || requestBody === undefined) {
-            throw new Error('Parameter "requestBody" is required');
+            throw new RequiredError('requestBody', 'Required parameter requestBody was not specified');
         }
 
         return __request<void>(ParametersOptions.getCallWithOptionalParam(parameter, requestBody), OpenAPI);
@@ -5843,7 +5777,7 @@ export class ParametersService {
     public static postCallWithOptionalParam(parameter?: string, requestBody?: IModelWithString): Promise<void> {
         // Validate required parameters
         if (parameter === null || parameter === undefined) {
-            throw new Error('Parameter "parameter" is required');
+            throw new RequiredError('parameter', 'Required parameter parameter was not specified');
         }
 
         return __request<void>(ParametersOptions.postCallWithOptionalParam(parameter, requestBody), OpenAPI);
@@ -5860,13 +5794,7 @@ import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const postRequestBodyService = (requestBody?: IModelWithString): ApiRequestOptions => ({
     method: 'POST',
@@ -5907,13 +5835,7 @@ import type { IModelWithString } from './../models/./ModelWithString';
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const callWithResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -5958,6 +5880,8 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithResponse(): Promise<IModelWithString> {
+        // Validate required parameters
+
         return __request<IModelWithString>(ResponseOptions.callWithResponse(), OpenAPI);
     }
     /**
@@ -5965,6 +5889,8 @@ export class ResponseService {
      * @throws ApiError
      */
     public static callWithDuplicateResponses(): Promise<IModelWithString> {
+        // Validate required parameters
+
         return __request<IModelWithString>(ResponseOptions.callWithDuplicateResponses(), OpenAPI);
     }
     /**
@@ -5984,6 +5910,8 @@ export class ResponseService {
         | TModelThatExtends
         | TModelThatExtendsExtends
     > {
+        // Validate required parameters
+
         return __request<
             | {
                   readonly '@namespace.string'?: string;
@@ -6006,13 +5934,7 @@ exports[`v3 should generate: ./test/generated/v3/services/SimpleService.ts 1`] =
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'GET',
@@ -6074,42 +5996,56 @@ export class SimpleService {
      * @throws ApiError
      */
     public static getCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.getCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static putCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.putCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static postCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.postCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static deleteCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.deleteCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static optionsCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.optionsCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static headCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.headCallWithoutParametersAndResponse(), OpenAPI);
     }
     /**
      * @throws ApiError
      */
     public static patchCallWithoutParametersAndResponse(): Promise<void> {
+        // Validate required parameters
+
         return __request<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), OpenAPI);
     }
 }
@@ -6123,19 +6059,13 @@ exports[`v3 should generate: ./test/generated/v3/services/TypesService.ts 1`] = 
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const types = (
     parameterNumber?: number = 123,
-    parameterString?: string | null = 'default',
-    parameterBoolean?: boolean | null = true,
-    parameterObject?: any = null,
+    parameterString?: string | null = "'default'",
+    parameterBoolean?: boolean | null = 'true',
+    parameterObject?: any = 'null',
     parameterArray?: Array<string> | null,
     parameterDictionary?: any,
     parameterEnum?: 'Success' | 'Warning' | 'Error' | null,
@@ -6156,13 +6086,13 @@ const types = (
 
 export type TTypesOptions = {
     types: (
-        parameterNumber: number,
-        parameterString: string | null,
-        parameterBoolean: boolean | null,
-        parameterObject: any,
-        parameterArray: Array<string> | null,
-        parameterDictionary: any,
-        parameterEnum: 'Success' | 'Warning' | 'Error' | null,
+        parameterNumber?: number,
+        parameterString?: string | null,
+        parameterBoolean?: boolean | null,
+        parameterObject?: any,
+        parameterArray?: Array<string> | null,
+        parameterDictionary?: any,
+        parameterEnum?: 'Success' | 'Warning' | 'Error' | null,
         id?: number,
     ) => ApiRequestOptions;
 };
@@ -6189,9 +6119,9 @@ export class TypesService {
      */
     public static types(
         parameterNumber?: number = 123,
-        parameterString?: string | null = 'default',
-        parameterBoolean?: boolean | null = true,
-        parameterObject?: any = null,
+        parameterString?: string | null = "'default'",
+        parameterBoolean?: boolean | null = 'true',
+        parameterObject?: any = 'null',
         parameterArray?: Array<string> | null,
         parameterDictionary?: any,
         parameterEnum?: 'Success' | 'Warning' | 'Error' | null,
@@ -6199,25 +6129,25 @@ export class TypesService {
     ): Promise<number | string | boolean | any> {
         // Validate required parameters
         if (parameterNumber === null || parameterNumber === undefined) {
-            throw new Error('Parameter "parameterNumber" is required');
+            throw new RequiredError('parameterNumber', 'Required parameter parameterNumber was not specified');
         }
         if (parameterString === null || parameterString === undefined) {
-            throw new Error('Parameter "parameterString" is required');
+            throw new RequiredError('parameterString', 'Required parameter parameterString was not specified');
         }
         if (parameterBoolean === null || parameterBoolean === undefined) {
-            throw new Error('Parameter "parameterBoolean" is required');
+            throw new RequiredError('parameterBoolean', 'Required parameter parameterBoolean was not specified');
         }
         if (parameterObject === null || parameterObject === undefined) {
-            throw new Error('Parameter "parameterObject" is required');
+            throw new RequiredError('parameterObject', 'Required parameter parameterObject was not specified');
         }
         if (parameterArray === null || parameterArray === undefined) {
-            throw new Error('Parameter "parameterArray" is required');
+            throw new RequiredError('parameterArray', 'Required parameter parameterArray was not specified');
         }
         if (parameterDictionary === null || parameterDictionary === undefined) {
-            throw new Error('Parameter "parameterDictionary" is required');
+            throw new RequiredError('parameterDictionary', 'Required parameter parameterDictionary was not specified');
         }
         if (parameterEnum === null || parameterEnum === undefined) {
-            throw new Error('Parameter "parameterEnum" is required');
+            throw new RequiredError('parameterEnum', 'Required parameter parameterEnum was not specified');
         }
 
         return __request<number | string | boolean | any>(
@@ -6245,13 +6175,7 @@ exports[`v3 should generate: ./test/generated/v3/services/UploadService.ts 1`] =
 import { request as __request } from './../core/request';
 import type { ApiRequestOptions } from './../core/ApiRequestOptions';
 import { OpenAPI } from './../core/OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(\`Parameter "\${parameterName}" is required\`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+import { RequiredError } from './../core/errors';
 
 const uploadFile = (file?: Blob): ApiRequestOptions => ({
     method: 'POST',
@@ -6262,7 +6186,7 @@ const uploadFile = (file?: Blob): ApiRequestOptions => ({
 });
 
 export type TUploadOptions = {
-    uploadFile: (file: Blob) => ApiRequestOptions;
+    uploadFile: (file?: Blob) => ApiRequestOptions;
 };
 
 export const UploadOptions: TUploadOptions = {
@@ -6278,7 +6202,7 @@ export class UploadService {
     public static uploadFile(file?: Blob): Promise<boolean> {
         // Validate required parameters
         if (file === null || file === undefined) {
-            throw new Error('Parameter "file" is required');
+            throw new RequiredError('file', 'Required parameter file was not specified');
         }
 
         return __request<boolean>(UploadOptions.uploadFile(file), OpenAPI);

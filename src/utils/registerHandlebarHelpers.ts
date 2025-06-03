@@ -52,15 +52,33 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
         );
     });
 
-    Handlebars.registerHelper('or', (...args) => args.slice(0, -1).some(Boolean));
-    Handlebars.registerHelper('and', (...args) => args.slice(0, -1).every(Boolean));
-    Handlebars.registerHelper('not', value => !value);
-
-    Handlebars.registerHelper('isString', function (value) {
-        return typeof value === 'string';
+    // Хелпер для проверки строки
+    Handlebars.registerHelper('isString', function (this: any, value, options) {
+        return typeof value === 'string' ? options.fn(this) : options.inverse(this);
     });
 
-    Handlebars.registerHelper('replace', function (str, find, replacement) {
-        return typeof str === 'string' ? str.replace(new RegExp(find, 'g'), replacement) : str;
+    // Хелпер для экранирования строк
+    Handlebars.registerHelper('escapeString', function (value) {
+        if (typeof value === 'string') {
+            return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+        }
+        return value;
+    });
+
+    // Базовые логические хелперы
+    Handlebars.registerHelper('eq', function (this: any, a, b, options) {
+        return a === b ? options.fn(this) : options.inverse(this);
+    });
+
+    Handlebars.registerHelper('or', function (this: any, a, b, options) {
+        return a || b ? options.fn(this) : options.inverse(this);
+    });
+
+    Handlebars.registerHelper('and', function (this: any, a, b, options) {
+        return a && b ? options.fn(this) : options.inverse(this);
+    });
+
+    Handlebars.registerHelper('not', function (this: any, value, options) {
+        return !value ? options.fn(this) : options.inverse(this);
     });
 }

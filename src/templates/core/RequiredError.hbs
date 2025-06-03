@@ -1,0 +1,10 @@
+export class RequiredError extends Error {
+    constructor(
+        public parameterName: string,
+        message?: string
+    ) {
+        super(message || `Required parameter "${parameterName}" was not specified`);
+        this.name = 'RequiredError';
+        Object.setPrototypeOf(this, RequiredError.prototype);
+    }
+}
