@@ -55,4 +55,12 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
     Handlebars.registerHelper('or', (...args) => args.slice(0, -1).some(Boolean));
     Handlebars.registerHelper('and', (...args) => args.slice(0, -1).every(Boolean));
     Handlebars.registerHelper('not', value => !value);
+
+    Handlebars.registerHelper('isString', function (value) {
+        return typeof value === 'string';
+    });
+
+    Handlebars.registerHelper('replace', function (str, find, replacement) {
+        return typeof str === 'string' ? str.replace(new RegExp(find, 'g'), replacement) : str;
+    });
 }

@@ -70,6 +70,7 @@ import partialSchemaDictionary from '../templates/partials/schemaDictionary.hbs'
 import partialSchemaEnum from '../templates/partials/schemaEnum.hbs';
 import partialSchemaGeneric from '../templates/partials/schemaGeneric.hbs';
 import partialSchemaInterface from '../templates/partials/schemaInterface.hbs';
+import partialSafeDefault from '../templates/partials/safeDefault.hbs';
 import partialServiceOption from '../templates/partials/serviceOption.hbs';
 import partialType from '../templates/partials/type.hbs';
 import partialTypeArray from '../templates/partials/typeArray.hbs';
@@ -139,6 +140,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
     Handlebars.registerPartial('parametersDefinition', Handlebars.template(partialParametersDefinition));
     Handlebars.registerPartial('parameterValues', Handlebars.template(partialParameterValues));
     Handlebars.registerPartial('result', Handlebars.template(partialResult));
+    Handlebars.registerPartial('safeDefault', Handlebars.template(partialSafeDefault));
     Handlebars.registerPartial('serviceOption', Handlebars.template(partialServiceOption));
     Handlebars.registerPartial('schema', Handlebars.template(partialSchema));
     Handlebars.registerPartial('schemaArray', Handlebars.template(partialSchemaArray));

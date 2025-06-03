@@ -2,20 +2,20 @@
 {{#if @root.useOptions~}}
 {
 {{#each parameters}}
-{{{name}}}{{#if default}} = {{{default}}}{{/if}},
+{{{name}}}{{#if default}} = {{{safeDefault default}}}{{/if}},
 {{/each}}
 }: {
 {{#each parameters}}
 {{#if description}}
-/** {{{description}}} **/
+/** {{description}} */
 {{/if}}
-{{{name}}}{{#unless @root.strictRequired}}?{{/unless}}: {{>type}}, // Всегда необязательный в TypeScript
+{{{name}}}{{>isRequired}}: {{>type}},
 {{/each}}
 }
 {{~else}}
 
 {{#each parameters}}
-{{{name}}}{{#unless @root.strictRequired}}?{{/unless}}: {{>type}}{{#if default}} = {{{default}}}{{/if}}{{#unless @last}},{{/unless}}
+{{{name}}}{{>isRequired}}: {{>type}}{{#if default}} = {{{safeDefault default}}}{{/if}}{{#unless @last}},{{/unless}}
 {{/each}}
 {{/if}}
 {{/if}}

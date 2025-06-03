@@ -11,13 +11,9 @@ import type { CancelablePromise } from '{{{@root.outputCore}}}CancelablePromise'
 import { request as __request } from '{{{@root.outputCore}}}request';
 import type { ApiRequestOptions } from '{{{@root.outputCore}}}ApiRequestOptions';
 import { OpenAPI } from '{{{@root.outputCore}}}OpenAPI';
-
-class ParameterRequiredError extends Error {
-    constructor(public parameterName: string) {
-        super(`Parameter "${parameterName}" is required`);
-        this.name = 'ParameterRequiredError';
-    }
-}
+{{#unless @root.strictRequired}}
+import { RequiredError } from '{{{@root.outputCore}}}errors';
+{{/unless}}
 
 {{#each operations}}
 const {{{name}}} = ({{>parameters}}): ApiRequestOptions => ({
@@ -64,16 +60,18 @@ export class {{{name}}} {
      * @throws ApiError
      */
     public static {{{name}}}({{>parameters}}): {{#if @root.useCancelableRequest}}CancelablePromise<{{>result default="void"}}>{{else}}Promise<{{>result default="void"}}>{{/if}} {
-        {{#if parameters}}
+        {{#unless @root.useOptions}}
+        {{#unless @root.strictRequired}}
         // Validate required parameters
         {{#each parameters}}
         {{#if isRequired}}
         if ({{{name}}} === null || {{{name}}} === undefined) {
-            throw new Error('Parameter "{{{name}}}" is required');
+            throw new RequiredError('{{{name}}}', 'Required parameter {{{name}}} was not specified');
         }
         {{/if}}
         {{/each}}
-        {{/if}}
+        {{/unless}}
+        {{/unless}}
         
         return __request<{{>result default="void"}}>({{../originName}}Options.{{{name}}}({{>parameterValues~}}), OpenAPI);
     }

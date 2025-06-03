@@ -1,6 +1,11 @@
 {{~#if @root.useOptions~}}
-    {{~#if (or (not isRequired) default)}}?{{/if~}}
+    {{~#if isRequired~}}
+        {{~#unless default~}}?{{/unless~}}
+    {{~else~}}
+        ?{{~/if~}}
 {{~else~}}
-    {{~#unless isRequired}}?{{/unless~}}
+    {{~#if @root.strictRequired~}}
+        {{~#unless isRequired}}?{{/unless~}}
+    {{~else~}}
+        ?{{~/if~}}
 {{~/if~}}
-
