@@ -1,5 +1,5 @@
+import type { OpenApiReference } from '../../../types/shared/OpenApiReference';
 import type { Dictionary } from '../../../utils/types';
-import type { OpenApiReference } from '../../types/OpenApiReference';
 import type { OpenApiMediaType } from './OpenApiMediaType';
 
 /**

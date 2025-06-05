@@ -1,8 +1,8 @@
 import type { OperationParameter } from '../../../types/shared/OperationParameter';
 import { getPattern } from '../../../utils/getPattern';
+import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi';
 import type { OpenApiParameter } from '../types/OpenApiParameter';
-import { Parser } from '../Parser';
 import { extendEnum } from './extendEnum';
 import { getComment } from './getComment';
 import { getEnum } from './getEnum';

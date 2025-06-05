@@ -1,8 +1,8 @@
 import type { OperationResponse } from '../../../types/shared/OperationResponse';
+import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi';
 import type { OpenApiResponse } from '../types/OpenApiResponse';
 import type { OpenApiResponses } from '../types/OpenApiResponses';
-import { Parser } from '../Parser';
 import { getOperationResponseCode } from './getOperationResponseCode';
 
 export function getOperationResponses(this: Parser, openApi: OpenApi, responses: OpenApiResponses): OperationResponse[] {

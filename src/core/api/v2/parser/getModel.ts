@@ -1,7 +1,7 @@
 import type { Model } from '../../../types/shared/Model';
 import { getPattern } from '../../../utils/getPattern';
-import { ModelConfig } from '../types/ModelConfig';
 import { Parser } from '../Parser';
+import { ModelConfig } from '../types/ModelConfig';
 import { extendEnum } from './extendEnum';
 import { getComment } from './getComment';
 import { getEnum } from './getEnum';
