@@ -1,38 +1,30 @@
 {{>header}}
 {{#if core}}
-
 {{#each core}}
-export { ApiError{{#notEquals ../core.length 1}} as ApiError${{{@index}}}{{/notEquals}} } from './{{{this}}}ApiError';
+export { ApiError{{#if (ne ../core.length 1)}} as ApiError${{@index}}{{/if}} } from './{{{safePath this}}}ApiError';
 {{#if @root.useCancelableRequest}}
-export { CancelablePromise } from './{{{this}}}CancelablePromise';
+export { CancelablePromise } from './{{{safePath this}}}CancelablePromise';
 {{/if}}
-export { OpenAPI{{#notEquals ../core.length 1}}  as OpenAPI${{{@index}}}{{/notEquals}} } from './{{{this}}}OpenAPI';
-export type { TOpenAPIConfig{{#notEquals ../core.length 1}} as TOpenAPIConfig${{{@index}}}{{/notEquals}} } from './{{{this}}}OpenAPI';
+export { OpenAPI{{#if (ne ../core.length 1)}} as OpenAPI${{@index}}{{/if}} } from './{{{safePath this}}}OpenAPI';
+export type { TOpenAPIConfig{{#if (ne ../core.length 1)}} as TOpenAPIConfig${{@index}}{{/if}} } from './{{{safePath this}}}OpenAPI';
 {{/each}}
 {{/if}}
 {{#if models}}
-
 {{#each models}}
-{{#if enum}}
-export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
-{{else if useUnionTypes}}
-export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
-{{else if enums}}
-export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
+{{#if (or enum enums)}}
+export { {{safeName name}}{{#if alias}} as {{safeName alias}}{{/if}} } from './{{{safePath package}}}{{{safePath path}}}';
 {{else}}
-export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
+export type { {{safeName name}}{{#if alias}} as {{safeName alias}}{{/if}} } from './{{{safePath package}}}{{{safePath path}}}';
 {{/if}}
 {{/each}}
 {{/if}}
 {{#if schemas}}
-
 {{#each schemas}}
-export { {{{name}}}Schema{{#if alias }} as {{{alias}}}Schema{{/if}} } from './{{{package}}}{{{path}}}Schema';
+export { {{safeName name}}Schema{{#if alias}} as {{safeName alias}}Schema{{/if}} } from './{{{safePath package}}}{{{safePath path}}}Schema';
 {{/each}}
 {{/if}}
 {{#if services}}
-
 {{#each services}}
-export { {{{name}}} } from './{{{package}}}{{{name}}}';
+export { {{safeName name}} } from './{{{safePath package}}}{{{safeName name}}}';
 {{/each}}
 {{/if}}

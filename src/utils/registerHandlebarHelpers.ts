@@ -81,4 +81,18 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
     Handlebars.registerHelper('not', function (this: any, value, options) {
         return !value ? options.fn(this) : options.inverse(this);
     });
+
+    // Регистрация хелперов безопасности
+    Handlebars.registerHelper('safeName', function (name) {
+        // Удаляем опасные символы, оставляя только допустимые для идентификаторов
+        return typeof name === 'string' ? name.replace(/[^a-zA-Z0-9_$]/g, '') : name;
+    });
+
+    Handlebars.registerHelper('safePath', function (path) {
+        // Заменяем опасные символы в путях
+        return typeof path === 'string' ? path.replace(/\.\./g, '').replace(/[^a-zA-Z0-9_$\/-]/g, '') : path;
+    });
+
+    // Хелперы для сравнения
+    Handlebars.registerHelper('ne', (a, b) => a !== b);
 }

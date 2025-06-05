@@ -41,9 +41,12 @@ const handlebarsPlugin = () => ({
                     isString: true,
                     escapeString: true,
                     eq: true,
+                    ne: true,
                     or: true,
                     and: true,
                     not: true,
+                    safePath: true,
+                    safeName: true,
                 },
             });
             return `export default ${templateSpec};`;
