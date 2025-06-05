@@ -1,11 +1,17 @@
 {{~#if @root.useOptions~}}
-    {{~#if isRequired~}}
-        {{~#unless default~}}?{{/unless~}}
+    {{~#if default~}}
+        ?  {{!-- Если есть default, всегда делаем необязательным --}}
     {{~else~}}
-        ?{{~/if~}}
+        {{~#if isRequired}}{{else}}?{{/if~}}
+    {{~/if~}}
 {{~else~}}
     {{~#if @root.strictRequired~}}
-        {{~#unless isRequired}}?{{/unless~}}
+        {{~#if default~}}
+            ?  {{!-- Если есть default, всегда делаем необязательным --}}
+        {{~else~}}
+            {{~#unless isRequired}}?{{/unless~}}
+        {{~/if~}}
     {{~else~}}
-        ?{{~/if~}}
+        ?  {{!-- В совместимом режиме всегда необязательный --}}
+    {{~/if~}}
 {{~/if~}}
