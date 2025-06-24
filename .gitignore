@@ -16,6 +16,4 @@ samples/generated
 samples/swagger-codegen-cli-v2.jar
 samples/swagger-codegen-cli-v3.jar
 generated
-package-lock.json
 yarn.lock
-package-lock.json

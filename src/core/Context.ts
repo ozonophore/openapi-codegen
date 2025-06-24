@@ -2,21 +2,10 @@
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import RefParser from 'json-schema-ref-parser';
 
-import { getFileName } from '../utils/getFileName';
-import { isString } from '../utils/isString';
-import { IOutput } from '../utils/output';
-import { dirName } from './path';
-
-interface $Root {
-    path: string;
-    fileName?: string;
-}
-
-export interface Prefix {
-    interface: string;
-    enum: string;
-    type: string;
-}
+import { $Root, IOutput, Prefix } from './types/Models';
+import { getFileName } from './utils/getFileName';
+import { isString } from './utils/isString';
+import { dirName } from './utils/pathHelpers';
 
 /**
  * A Context wich can share a data between methods

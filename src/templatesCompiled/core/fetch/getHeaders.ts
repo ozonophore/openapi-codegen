@@ -1,0 +1,9 @@
+// Это автоматически сгенерированный файл для hbs шаблона.
+// Не нужно его изменять, для обновления запусти npm run build:hbs
+/* istanbul ignore file */
+/* tslint: disable */
+/* eslint: disable */
+// @ts-nocheck
+export default {"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "async function getHeaders(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<Headers> {\n    const token = await resolve(options, config.TOKEN);\n    const username = await resolve(options, config.USERNAME);\n    const password = await resolve(options, config.PASSWORD);\n    const defaultHeaders = await resolve(options, config.HEADERS);\n\n    const headers = new Headers({\n        Accept: 'application/json',\n        ...defaultHeaders,\n        ...options.headers,\n    });\n\n    if (isStringWithValue(token)) {\n        headers.append('Authorization', `Bearer ${token}`);\n    }\n\n    if (isStringWithValue(username) && isStringWithValue(password)) {\n        const credentials = btoa(`${username}:${password}`);\n        headers.append('Authorization', `Basic ${credentials}`);\n    }\n\n    if (options.body) {\n        if (options.mediaType) {\n            headers.append('Content-Type', options.mediaType);\n        } else if (isBlob(options.body)) {\n            headers.append('Content-Type', options.body.type || 'application/octet-stream');\n        } else if (isString(options.body)) {\n            headers.append('Content-Type', 'text/plain');\n        } else {\n            headers.append('Content-Type', 'application/json');\n        }\n    }\n    return headers;\n}\n";
+},"useData":true}
