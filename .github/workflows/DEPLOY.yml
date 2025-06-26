@@ -22,7 +22,7 @@ jobs:
 
       - name: Get the npm version
         id: release
-        uses: martinbeentjes/npm-get-version-action@v1.0.1
+        uses: martinbeentjes/npm-get-version-action@v@v1.3.1
 
       - run: |
           echo "Version: ${{ steps.release.outputs.current-version }}"
@@ -86,7 +86,7 @@ jobs:
       - name: Create Release
         id: create_release
         if: github.ref == 'refs/heads/master' && steps.release.outputs.current-version != steps.tag_version.outputs.tag
-        uses: actions/create-release@v2
+        uses: actions/create-release@v1.1.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
