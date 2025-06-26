@@ -22,7 +22,7 @@ jobs:
 
       - name: Get the npm version
         id: release
-        uses: martinbeentjes/npm-get-version-action@v@v1.3.1
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
 
       - run: |
           echo "Version: ${{ steps.release.outputs.current-version }}"
