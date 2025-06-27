@@ -1,0 +1,14 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a model with one string property
+ */
+export interface IModelWithString {
+    /**
+     * This is a simple string property
+     */
+
+    prop?: string;
+}

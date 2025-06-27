@@ -1,0 +1,175 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const callWithParameters = (
+    parameterHeader: string,
+
+    parameterQuery: string,
+
+    parameterForm: string,
+
+    parameterBody: string,
+
+    parameterPath: string,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/parameters/${parameterPath}`,
+    headers: {
+        parameterHeader: parameterHeader,
+    },
+    query: {
+        parameterQuery: parameterQuery,
+    },
+    formData: {
+        parameterForm: parameterForm,
+    },
+    body: parameterBody,
+});
+
+const callWithWeirdParameterNames = (
+    parameterHeader: string,
+
+    parameterQuery: string,
+
+    parameterForm: string,
+
+    parameterBody: string,
+
+    parameterPath1?: string,
+
+    parameterPath2?: string,
+
+    parameterPath3?: string,
+
+    _default?: string,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
+    headers: {
+        'parameter.header': parameterHeader,
+    },
+    query: {
+        'parameter-query': parameterQuery,
+        default: _default,
+    },
+    formData: {
+        parameter_form: parameterForm,
+    },
+    body: parameterBody,
+});
+
+export type TParametersServiceOptions = {
+    callWithParameters: (
+        parameterHeader: string,
+
+        parameterQuery: string,
+
+        parameterForm: string,
+
+        parameterBody: string,
+
+        parameterPath: string,
+    ) => ApiRequestOptions;
+    callWithWeirdParameterNames: (
+        parameterHeader: string,
+
+        parameterQuery: string,
+
+        parameterForm: string,
+
+        parameterBody: string,
+
+        parameterPath1?: string,
+
+        parameterPath2?: string,
+
+        parameterPath3?: string,
+
+        _default?: string,
+    ) => ApiRequestOptions;
+};
+
+export const ParametersServiceOptions: TParametersServiceOptions = {
+    callWithParameters: callWithParameters,
+    callWithWeirdParameterNames: callWithWeirdParameterNames,
+};
+
+export class ParametersService {
+    /**
+     * @param parameterHeader This is the parameter that goes into the header
+     * @param parameterQuery This is the parameter that goes into the query params
+     * @param parameterForm This is the parameter that goes into the form data
+     * @param parameterBody This is the parameter that is send as request body
+     * @param parameterPath This is the parameter that goes into the path
+     * @throws ApiError
+     */
+    public static callWithParameters(
+        parameterHeader: string,
+
+        parameterQuery: string,
+
+        parameterForm: string,
+
+        parameterBody: string,
+
+        parameterPath: string,
+    ): Promise<void> {
+        return __request<void>(
+            ParametersServiceOptions.callWithParameters(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterBody,
+                parameterPath,
+            ),
+            OpenAPI,
+        );
+    }
+    /**
+     * @param parameterHeader This is the parameter that goes into the request header
+     * @param parameterQuery This is the parameter that goes into the request query params
+     * @param parameterForm This is the parameter that goes into the request form data
+     * @param parameterBody This is the parameter that is send as request body
+     * @param parameterPath1 This is the parameter that goes into the path
+     * @param parameterPath2 This is the parameter that goes into the path
+     * @param parameterPath3 This is the parameter that goes into the path
+     * @param _default This is the parameter with a reserved keyword
+     * @throws ApiError
+     */
+    public static callWithWeirdParameterNames(
+        parameterHeader: string,
+
+        parameterQuery: string,
+
+        parameterForm: string,
+
+        parameterBody: string,
+
+        parameterPath1?: string,
+
+        parameterPath2?: string,
+
+        parameterPath3?: string,
+
+        _default?: string,
+    ): Promise<void> {
+        return __request<void>(
+            ParametersServiceOptions.callWithWeirdParameterNames(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterBody,
+                parameterPath1,
+                parameterPath2,
+                parameterPath3,
+                _default,
+            ),
+            OpenAPI,
+        );
+    }
+}

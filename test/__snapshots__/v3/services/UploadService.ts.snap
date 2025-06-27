@@ -1,0 +1,34 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const uploadFile = (file: Blob): ApiRequestOptions => ({
+    method: 'POST',
+    path: `/api/v{api-version}/upload`,
+    formData: {
+        file: file,
+    },
+});
+
+export type TUploadOptions = {
+    uploadFile: (file: Blob) => ApiRequestOptions;
+};
+
+export const UploadOptions: TUploadOptions = {
+    uploadFile: uploadFile,
+};
+
+export class UploadService {
+    /**
+     * @param file Supply a file reference for upload
+     * @returns boolean
+     * @throws ApiError
+     */
+    public static uploadFile(file: Blob): Promise<boolean> {
+        return __request<boolean>(UploadOptions.uploadFile(file), OpenAPI);
+    }
+}

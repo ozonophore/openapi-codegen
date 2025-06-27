@@ -5,7 +5,7 @@ import { Context } from '../Context';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 import { OpenApiReference } from '../types/shared/OpenApiReference.model';
 import { dirName, join, resolve } from '../utils/pathHelpers';
-import { exists } from './fileSystem';
+import { fileSystem } from './fileSystem';
 
 function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: string): T {
     if (object.$ref && !isAbsolute(object.$ref) && !object.$ref.match(/^(http:\/\/|https:\/\/|#\/)/g)) {
@@ -35,7 +35,7 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<a
     if (!input) {
         throw new Error(`Could not find OpenApi spec: "${absoluteInput}"`);
     }
-    const fileExists = await exists(absoluteInput);
+    const fileExists = await fileSystem.exists(absoluteInput);
     if (!fileExists) {
         throw new Error(`Could not read OpenApi spec: "${absoluteInput}"`);
     }

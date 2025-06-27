@@ -1,0 +1,68 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const duplicateName = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/duplicate`,
+});
+
+const duplicateName1 = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: `/api/v{api-version}/duplicate`,
+});
+
+const duplicateName2 = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: `/api/v{api-version}/duplicate`,
+});
+
+const duplicateName3 = (): ApiRequestOptions => ({
+    method: 'DELETE',
+    path: `/api/v{api-version}/duplicate`,
+});
+
+export type TDuplicateServiceOptions = {
+    duplicateName: () => ApiRequestOptions;
+    duplicateName1: () => ApiRequestOptions;
+    duplicateName2: () => ApiRequestOptions;
+    duplicateName3: () => ApiRequestOptions;
+};
+
+export const DuplicateServiceOptions: TDuplicateServiceOptions = {
+    duplicateName: duplicateName,
+    duplicateName1: duplicateName1,
+    duplicateName2: duplicateName2,
+    duplicateName3: duplicateName3,
+};
+
+export class DuplicateService {
+    /**
+     * @throws ApiError
+     */
+    public static duplicateName(): Promise<void> {
+        return __request<void>(DuplicateServiceOptions.duplicateName(), OpenAPI);
+    }
+    /**
+     * @throws ApiError
+     */
+    public static duplicateName1(): Promise<void> {
+        return __request<void>(DuplicateServiceOptions.duplicateName1(), OpenAPI);
+    }
+    /**
+     * @throws ApiError
+     */
+    public static duplicateName2(): Promise<void> {
+        return __request<void>(DuplicateServiceOptions.duplicateName2(), OpenAPI);
+    }
+    /**
+     * @throws ApiError
+     */
+    public static duplicateName3(): Promise<void> {
+        return __request<void>(DuplicateServiceOptions.duplicateName3(), OpenAPI);
+    }
+}

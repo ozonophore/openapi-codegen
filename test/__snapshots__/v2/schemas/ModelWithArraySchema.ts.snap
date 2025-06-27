@@ -1,0 +1,26 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+export const IModelWithArraySchema = {
+    properties: {
+        prop: {
+            type: 'array',
+            contains: {
+                type: 'IModelWithString',
+            },
+        },
+        propWithFile: {
+            type: 'array',
+            contains: {
+                type: 'File',
+            },
+        },
+        propWithNumber: {
+            type: 'array',
+            contains: {
+                type: 'number',
+            },
+        },
+    },
+};

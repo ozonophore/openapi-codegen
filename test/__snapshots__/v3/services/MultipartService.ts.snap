@@ -1,0 +1,75 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithString } from './../models/./ModelWithString';
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const multipartResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/multipart`,
+});
+
+const multipartRequest = (formData?: {
+    content?: string;
+
+    data?: IModelWithString | null;
+}): ApiRequestOptions => ({
+    method: 'POST',
+    path: `/api/v{api-version}/multipart`,
+    body: formData,
+    mediaType: 'multipart/form-data',
+});
+
+export type TMultipartOptions = {
+    multipartResponse: () => ApiRequestOptions;
+    multipartRequest: (formData?: {
+        content?: string;
+
+        data?: IModelWithString | null;
+    }) => ApiRequestOptions;
+};
+
+export const MultipartOptions: TMultipartOptions = {
+    multipartResponse: multipartResponse,
+    multipartRequest: multipartRequest,
+};
+
+export class MultipartService {
+    /**
+     * @returns any OK
+     * @throws ApiError
+     */
+    public static multipartResponse(): Promise<{
+        file?: string;
+
+        metadata?: {
+            foo?: string;
+
+            bar?: string;
+        };
+    }> {
+        return __request<{
+            file?: string;
+
+            metadata?: {
+                foo?: string;
+
+                bar?: string;
+            };
+        }>(MultipartOptions.multipartResponse(), OpenAPI);
+    }
+    /**
+     * @param formData
+     * @throws ApiError
+     */
+    public static multipartRequest(formData?: {
+        content?: string;
+
+        data?: IModelWithString | null;
+    }): Promise<void> {
+        return __request<void>(MultipartOptions.multipartRequest(formData), OpenAPI);
+    }
+}

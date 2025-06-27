@@ -1,0 +1,264 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithString } from './../models/./ModelWithString';
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const callWithParameters = (
+    parameterHeader: string | null,
+
+    parameterQuery: string | null,
+
+    parameterForm: string | null,
+
+    parameterCookie: string | null,
+
+    parameterPath: string | null,
+
+    requestBody: IModelWithString | null,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/parameters/${parameterPath}`,
+    cookies: {
+        parameterCookie: parameterCookie,
+    },
+    headers: {
+        parameterHeader: parameterHeader,
+    },
+    query: {
+        parameterQuery: parameterQuery,
+    },
+    formData: {
+        parameterForm: parameterForm,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+const callWithWeirdParameterNames = (
+    parameterHeader: string | null,
+
+    parameterQuery: string | null,
+
+    parameterForm: string | null,
+
+    parameterCookie: string | null,
+
+    requestBody: IModelWithString | null,
+
+    parameterPath1?: string,
+
+    parameterPath2?: string,
+
+    parameterPath3?: string,
+
+    _default?: string,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
+    cookies: {
+        'PARAMETER-COOKIE': parameterCookie,
+    },
+    headers: {
+        'parameter.header': parameterHeader,
+    },
+    query: {
+        'parameter-query': parameterQuery,
+        default: _default,
+    },
+    formData: {
+        parameter_form: parameterForm,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+const getCallWithOptionalParam = (
+    requestBody: IModelWithString,
+
+    parameter?: string,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/parameters/`,
+    query: {
+        parameter: parameter,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+const postCallWithOptionalParam = (
+    parameter: string,
+
+    requestBody?: IModelWithString,
+): ApiRequestOptions => ({
+    method: 'POST',
+    path: `/api/v{api-version}/parameters/`,
+    query: {
+        parameter: parameter,
+    },
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+export type TParametersOptions = {
+    callWithParameters: (
+        parameterHeader: string | null,
+
+        parameterQuery: string | null,
+
+        parameterForm: string | null,
+
+        parameterCookie: string | null,
+
+        parameterPath: string | null,
+
+        requestBody: IModelWithString | null,
+    ) => ApiRequestOptions;
+    callWithWeirdParameterNames: (
+        parameterHeader: string | null,
+
+        parameterQuery: string | null,
+
+        parameterForm: string | null,
+
+        parameterCookie: string | null,
+
+        requestBody: IModelWithString | null,
+
+        parameterPath1?: string,
+
+        parameterPath2?: string,
+
+        parameterPath3?: string,
+
+        _default?: string,
+    ) => ApiRequestOptions;
+    getCallWithOptionalParam: (
+        requestBody: IModelWithString,
+
+        parameter?: string,
+    ) => ApiRequestOptions;
+    postCallWithOptionalParam: (
+        parameter: string,
+
+        requestBody?: IModelWithString,
+    ) => ApiRequestOptions;
+};
+
+export const ParametersOptions: TParametersOptions = {
+    callWithParameters: callWithParameters,
+    callWithWeirdParameterNames: callWithWeirdParameterNames,
+    getCallWithOptionalParam: getCallWithOptionalParam,
+    postCallWithOptionalParam: postCallWithOptionalParam,
+};
+
+export class ParametersService {
+    /**
+     * @param parameterHeader This is the parameter that goes into the header
+     * @param parameterQuery This is the parameter that goes into the query params
+     * @param parameterForm This is the parameter that goes into the form data
+     * @param parameterCookie This is the parameter that goes into the cookie
+     * @param parameterPath This is the parameter that goes into the path
+     * @param requestBody This is the parameter that goes into the body
+     * @throws ApiError
+     */
+    public static callWithParameters(
+        parameterHeader: string | null,
+
+        parameterQuery: string | null,
+
+        parameterForm: string | null,
+
+        parameterCookie: string | null,
+
+        parameterPath: string | null,
+
+        requestBody: IModelWithString | null,
+    ): Promise<void> {
+        return __request<void>(
+            ParametersOptions.callWithParameters(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterCookie,
+                parameterPath,
+                requestBody,
+            ),
+            OpenAPI,
+        );
+    }
+    /**
+     * @param parameterHeader This is the parameter that goes into the request header
+     * @param parameterQuery This is the parameter that goes into the request query params
+     * @param parameterForm This is the parameter that goes into the request form data
+     * @param parameterCookie This is the parameter that goes into the cookie
+     * @param requestBody This is the parameter that goes into the body
+     * @param parameterPath1 This is the parameter that goes into the path
+     * @param parameterPath2 This is the parameter that goes into the path
+     * @param parameterPath3 This is the parameter that goes into the path
+     * @param _default This is the parameter with a reserved keyword
+     * @throws ApiError
+     */
+    public static callWithWeirdParameterNames(
+        parameterHeader: string | null,
+
+        parameterQuery: string | null,
+
+        parameterForm: string | null,
+
+        parameterCookie: string | null,
+
+        requestBody: IModelWithString | null,
+
+        parameterPath1?: string,
+
+        parameterPath2?: string,
+
+        parameterPath3?: string,
+
+        _default?: string,
+    ): Promise<void> {
+        return __request<void>(
+            ParametersOptions.callWithWeirdParameterNames(
+                parameterHeader,
+                parameterQuery,
+                parameterForm,
+                parameterCookie,
+                requestBody,
+                parameterPath1,
+                parameterPath2,
+                parameterPath3,
+                _default,
+            ),
+            OpenAPI,
+        );
+    }
+    /**
+     * @param requestBody This is a required parameter
+     * @param parameter This is an optional parameter
+     * @throws ApiError
+     */
+    public static getCallWithOptionalParam(
+        requestBody: IModelWithString,
+
+        parameter?: string,
+    ): Promise<void> {
+        return __request<void>(ParametersOptions.getCallWithOptionalParam(requestBody, parameter), OpenAPI);
+    }
+    /**
+     * @param parameter This is a required parameter
+     * @param requestBody This is an optional parameter
+     * @throws ApiError
+     */
+    public static postCallWithOptionalParam(
+        parameter: string,
+
+        requestBody?: IModelWithString,
+    ): Promise<void> {
+        return __request<void>(ParametersOptions.postCallWithOptionalParam(parameter, requestBody), OpenAPI);
+    }
+}

@@ -1,0 +1,10 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a model with one property containing a dictionary
+ */
+export interface IModelWithDictionary {
+    prop?: Record<string, string>;
+}

@@ -2,7 +2,7 @@ import { resolve } from 'path';
 
 import { HttpClient } from '../types/Enums';
 import type { Client } from '../types/shared/Client.model';
-import { copyFile, exists, writeFile } from './fileSystem';
+import { fileSystem } from './fileSystem';
 import { Templates } from './registerHandlebarTemplates';
 
 /**
@@ -40,22 +40,22 @@ export async function writeClientCore(options: IWriteClientCore): Promise<void> 
         useCancelableRequest,
     };
 
-    await writeFile(resolve(outputCorePath, 'OpenAPI.ts'), templates.core.settings(context));
-    await writeFile(resolve(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
-    await writeFile(resolve(outputCorePath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
-    await writeFile(resolve(outputCorePath, 'ApiResult.ts'), templates.core.apiResult({}));
+    await fileSystem.writeFile(resolve(outputCorePath, 'OpenAPI.ts'), templates.core.settings(context));
+    await fileSystem.writeFile(resolve(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
+    await fileSystem.writeFile(resolve(outputCorePath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
+    await fileSystem.writeFile(resolve(outputCorePath, 'ApiResult.ts'), templates.core.apiResult({}));
     if (useCancelableRequest) {
-        await writeFile(resolve(outputCorePath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
+        await fileSystem.writeFile(resolve(outputCorePath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
     }
-    await writeFile(resolve(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
-    await writeFile(resolve(outputCorePath, 'request.ts'), templates.core.request(context));
+    await fileSystem.writeFile(resolve(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
+    await fileSystem.writeFile(resolve(outputCorePath, 'request.ts'), templates.core.request(context));
 
     if (request) {
         const requestFile = resolve(process.cwd(), request);
-        const requestFileExists = await exists(requestFile);
+        const requestFileExists = await fileSystem.exists(requestFile);
         if (!requestFileExists) {
             throw new Error(`Custom request file "${requestFile}" does not exists`);
         }
-        await copyFile(requestFile, resolve(outputCorePath, 'request.ts'));
+        await fileSystem.copyFile(requestFile, resolve(outputCorePath, 'request.ts'));
     }
 }

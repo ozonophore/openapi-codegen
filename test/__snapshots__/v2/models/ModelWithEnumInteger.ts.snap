@@ -1,0 +1,25 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a model with one number property
+ */
+export interface IModelWithEnumInteger {
+    /**
+     * VALUE_1=1,VALUE_2=2,VALUE_3=3
+     */
+
+    prop?: IModelWithEnumInteger.prop;
+}
+
+export namespace IModelWithEnumInteger {
+    /**
+     * VALUE_1=1,VALUE_2=2,VALUE_3=3
+     */
+    export enum prop {
+        VALUE_1 = 1,
+        VALUE_2 = 2,
+        VALUE_3 = 3,
+    }
+}

@@ -2,7 +2,7 @@ import { HttpClient } from '../types/Enums';
 import { IOutput } from '../types/Models';
 import type { Client } from '../types/shared/Client.model';
 import { relative, resolve } from '../utils/pathHelpers';
-import { mkdir } from './fileSystem';
+import { fileSystem } from './fileSystem';
 import { Templates } from './registerHandlebarTemplates';
 import { unique } from './unique';
 import { writeClientCore } from './writeClientCore';
@@ -117,13 +117,13 @@ export class WriteClient {
         const { client, templates, outputPaths, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, request, useCancelableRequest = false } = options;
 
         if (exportCore) {
-            await mkdir(outputPaths.outputCore);
+            await fileSystem.mkdir(outputPaths.outputCore);
             await writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest });
         }
 
         if (exportServices) {
             const { outputCore, outputServices, outputModels } = outputPaths;
-            await mkdir(outputPaths.outputServices);
+            await fileSystem.mkdir(outputPaths.outputServices);
             await writeClientServices({
                 services: client.services,
                 templates,
@@ -140,7 +140,7 @@ export class WriteClient {
         }
 
         if (exportSchemas) {
-            await mkdir(outputPaths.outputSchemas);
+            await fileSystem.mkdir(outputPaths.outputSchemas);
             await writeClientSchemas({
                 models: client.models,
                 templates,
@@ -151,7 +151,7 @@ export class WriteClient {
         }
 
         if (exportModels) {
-            await mkdir(outputPaths.outputModels);
+            await fileSystem.mkdir(outputPaths.outputModels);
             await writeClientModels({
                 models: client.models,
                 templates,
@@ -162,7 +162,7 @@ export class WriteClient {
         }
 
         if (exportCore || exportServices || exportSchemas || exportModels) {
-            await mkdir(outputPaths.output);
+            await fileSystem.mkdir(outputPaths.output);
             await this.writeClientIndex({
                 client,
                 templates,

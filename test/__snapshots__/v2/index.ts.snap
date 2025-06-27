@@ -1,0 +1,35 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+export { ApiError } from '././core/ApiError';
+export { OpenAPI } from '././core/OpenAPI';
+export type { TOpenAPIConfig } from '././core/OpenAPI';
+
+export type { IDictionaryWithReference } from '././models/DictionaryWithReference';
+export type { IModelWithArray } from '././models/ModelWithArray';
+export type { IModelWithDictionary } from '././models/ModelWithDictionary';
+export { IModelWithEnumInteger } from '././models/ModelWithEnumInteger';
+export type { IModelWithString } from '././models/ModelWithString';
+export type { TModelThatExtends } from '././models/ModelThatExtends';
+export type { TModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
+
+export { IDictionaryWithReferenceSchema } from '././schemas/DictionaryWithReferenceSchema';
+export { IModelWithArraySchema } from '././schemas/ModelWithArraySchema';
+export { IModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
+export { IModelWithEnumIntegerSchema } from '././schemas/ModelWithEnumIntegerSchema';
+export { IModelWithStringSchema } from '././schemas/ModelWithStringSchema';
+export { TModelThatExtendsSchema } from '././schemas/ModelThatExtendsSchema';
+export { TModelThatExtendsExtendsSchema } from '././schemas/ModelThatExtendsExtendsSchema';
+
+export { Service } from '././services/Service';
+export { SimpleService } from '././services/SimpleService';
+export { ParametersService } from '././services/ParametersService';
+export { DefaultsService } from '././services/DefaultsService';
+export { DuplicateService } from '././services/DuplicateService';
+export { NoContentService } from '././services/NoContentService';
+export { ResponseService } from '././services/ResponseService';
+export { CollectionFormatService } from '././services/CollectionFormatService';
+export { TypesService } from '././services/TypesService';
+export { ComplexService } from '././services/ComplexService';
+export { HeaderService } from '././services/HeaderService';

@@ -37,7 +37,7 @@ export default defineConfig([
     ),
     {
         plugins: {
-            '@typescript-eslint': fixupPluginRules(pluginTypescriptEslint), // файл с правилами '@typescript-eslint
+            '@typescript-eslint': fixupPluginRules(pluginTypescriptEslint),
             jsdoc: fixupPluginRules(pluginJsdoc),
             "simple-import-sort": fixupPluginRules(pluginSimpleImportSort),
             // lodash: fixupPluginRules(pluginLodash),

@@ -1,0 +1,92 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const types = (
+    parameterArray: Array<string> | null,
+    parameterDictionary: any,
+    parameterEnum: 'Success' | 'Warning' | 'Error' | null,
+    parameterNumber: number = 123,
+    parameterString: string | null = 'default',
+    parameterBoolean: boolean | null = true,
+    parameterObject: any = null,
+    id?: number,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/types`,
+    query: {
+        parameterArray: parameterArray,
+        parameterDictionary: parameterDictionary,
+        parameterEnum: parameterEnum,
+        parameterNumber: parameterNumber,
+        parameterString: parameterString,
+        parameterBoolean: parameterBoolean,
+        parameterObject: parameterObject,
+    },
+});
+
+export type TTypesOptions = {
+    types: (
+        parameterArray: Array<string> | null,
+        parameterDictionary: any,
+        parameterEnum: 'Success' | 'Warning' | 'Error' | null,
+        parameterNumber: number,
+
+        parameterString: string | null,
+
+        parameterBoolean: boolean | null,
+
+        parameterObject: any,
+        id?: number,
+    ) => ApiRequestOptions;
+};
+
+export const TypesOptions: TTypesOptions = {
+    types: types,
+};
+
+export class TypesService {
+    /**
+     * @param parameterArray This is an array parameter
+     * @param parameterDictionary This is a dictionary parameter
+     * @param parameterEnum This is an enum parameter
+     * @param parameterNumber This is a number parameter
+     * @param parameterString This is a string parameter
+     * @param parameterBoolean This is a boolean parameter
+     * @param parameterObject This is an object parameter
+     * @param id This is a number parameter
+     * @returns number Response is a simple number
+     * @returns string Response is a simple string
+     * @returns boolean Response is a simple boolean
+     * @returns any Response is a simple object
+     * @throws ApiError
+     */
+    public static types(
+        parameterArray: Array<string> | null,
+        parameterDictionary: any,
+        parameterEnum: 'Success' | 'Warning' | 'Error' | null,
+        parameterNumber: number = 123,
+        parameterString: string | null = 'default',
+        parameterBoolean: boolean | null = true,
+        parameterObject: any = null,
+        id?: number,
+    ): Promise<number | string | boolean | any> {
+        return __request<number | string | boolean | any>(
+            TypesOptions.types(
+                parameterArray,
+                parameterDictionary,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterBoolean,
+                parameterObject,
+                id,
+            ),
+            OpenAPI,
+        );
+    }
+}
