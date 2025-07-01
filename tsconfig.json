@@ -1,11 +1,14 @@
 {
     "compilerOptions": {
+        "rootDir": "./src",
+        "baseUrl": "./src",
         "outDir": "./dist",
         "target": "ES2022",
         "module": "commonjs",
         "moduleResolution": "node",
         "lib": ["es6", "es2017", "dom"],
         "types": ["node"],
+        "typeRoots": ["node_modules/@types"],
         "declaration": true,
         "declarationMap": true,
         "declarationDir": "./dist",
@@ -17,7 +20,10 @@
         "strictNullChecks": true,
         "strictFunctionTypes": true,
         "allowSyntheticDefaultImports": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "forceConsistentCasingInFileNames": true
     },
 
     "files": [
@@ -28,14 +34,15 @@
     ],
 
     "include": [
-        "./src/**/*.ts"
+        "./src/**/*.ts",
+        "./types",
+        "./src/**/__tests__/*.test.ts"
     ],
 
     "exclude": [
         "node_modules",
         "**/__mocks__",
-        "**/__tests__",
-        "**/*.spec.ts"
+        "./dist"
     ]
 }
 

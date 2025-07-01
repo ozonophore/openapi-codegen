@@ -1,11 +1,11 @@
 import get from 'lodash-es/get';
 
 import type { OperationResponse } from '../../../types/shared/OperationResponse.model';
+import { getOperationResponseCode } from '../../../utils/getOperationResponseCode';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiResponse } from '../types/OpenApiResponse.model';
 import type { OpenApiResponses } from '../types/OpenApiResponses.model';
-import { getOperationResponseCode } from './getOperationResponseCode';
 
 export function getOperationResponses(this: Parser, openApi: OpenApi, responses: OpenApiResponses): OperationResponse[] {
     const operationResponses: OperationResponse[] = [];

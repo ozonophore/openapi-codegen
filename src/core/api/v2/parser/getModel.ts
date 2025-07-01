@@ -1,11 +1,11 @@
 import type { Model } from '../../../types/shared/Model.model';
+import { extendEnum } from '../../../utils/extendEnum';
+import { getComment } from '../../../utils/getComment';
+import { getEnum } from '../../../utils/getEnum';
+import { getEnumFromDescription } from '../../../utils/getEnumFromDescription';
 import { getPattern } from '../../../utils/getPattern';
 import { Parser } from '../Parser';
 import { ModelConfig } from '../types/ModelConfig.model';
-import { extendEnum } from './extendEnum';
-import { getComment } from './getComment';
-import { getEnum } from './getEnum';
-import { getEnumFromDescription } from './getEnumFromDescription';
 
 export function getModel(this: Parser, config: ModelConfig): Model {
     const { openApi, definition, isDefinition = false, name = '', path = '', parentRef } = config;

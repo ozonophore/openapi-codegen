@@ -1,11 +1,11 @@
 import type { OperationParameter } from '../../../types/shared/OperationParameter.model';
+import { getComment } from '../../../utils/getComment';
+import { getOperationParameterName } from '../../../utils/getOperationParameterName';
 import { getPattern } from '../../../utils/getPattern';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiParameter } from '../types/OpenApiParameter.model';
-import { getComment } from './getComment';
 import { getModelDefault } from './getModelDefault';
-import { getOperationParameterName } from './getOperationParameterName';
 
 export function getOperationParameter(this: Parser, openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
     const operationParameter: OperationParameter = {

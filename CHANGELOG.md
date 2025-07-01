@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.2] - 2025-07-22
+
+### Added
+- Added a mechanism for matching different versions of generator parameter sets to maintain backward compatibility;
+- Added a mechanism for detecting typos when using generator options via a CLI tool or configuration file;
+- Added a check of the tool's cli options for default values to determine further action scenarios;
+- Added an assistant utility for processing system words in names (templates);
+
+### Updated
+
+- The models of the generator option sets for the start of generation have been changed;
+- The tool's cli code has been moved to the cli catalog, and edits have been made to the logic of the tool's cli operation before generating it;
+- Duplicate sections of code have been combined;
+
 ## [1.0.0-beta.1] - 2025-06-27
 
 ### Added

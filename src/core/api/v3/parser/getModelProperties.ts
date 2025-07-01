@@ -1,13 +1,13 @@
 import get from 'lodash-es/get';
 
 import type { Model } from '../../../types/shared/Model.model';
+import { escapeName } from '../../../utils/escapeName';
 import { getClassName } from '../../../utils/getClassName';
+import { getComment } from '../../../utils/getComment';
 import { getPattern } from '../../../utils/getPattern';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiSchema } from '../types/OpenApiSchema.model';
-import { escapeName } from './escapeName';
-import { getComment } from './getComment';
 
 export function getModelProperties(this: Parser, openApi: OpenApi, definition: OpenApiSchema, parentRef: string): Model[] {
     const models: Model[] = [];

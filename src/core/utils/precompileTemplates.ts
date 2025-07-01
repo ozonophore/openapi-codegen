@@ -5,8 +5,8 @@ import path from 'path';
 const templatesDir = path.resolve(__dirname, '../../templates');
 const compiledDir = path.resolve(__dirname, '../../templatesCompiled');
 
-const header = `// Это автоматически сгенерированный файл для hbs шаблона.
-// Не нужно его изменять, для обновления запусти npm run build:hbs
+const header = `// This is an automatically generated file for the hbs template.
+// You don't need to change it, run npm run build:hbs to update it.
 /* istanbul ignore file */
 /* tslint: disable */
 /* eslint: disable */
@@ -65,9 +65,9 @@ const precompileTemplates = () => {
         };
         walk(templatesDir);
 
-        console.log('Шаблоны успешно предкомпелированы и сохранены!');
+        console.log('The templates have been successfully precompiled and saved!');
     } catch (error) {
-        console.error('Ошибка при пред-компиляции шаблонов: ', error);
+        console.error('Error during pre-compilation of templates: ', error);
     }
 };
 

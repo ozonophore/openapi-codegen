@@ -1,8 +1,8 @@
 /* istanbul ignore file */
 import type { Client } from '../../types/shared/Client.model';
+import { getServiceVersion } from '../../utils/getServiceVersion';
 import { Parser } from './Parser';
 import { getServer } from './parser/getServer';
-import { getServiceVersion } from './parser/getServiceVersion';
 import type { OpenApi } from './types/OpenApi.model';
 
 /**

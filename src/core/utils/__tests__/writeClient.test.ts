@@ -21,7 +21,7 @@ test('@unit: writeClient should write to filesystem', async () => {
     // Мокаем функции
     fileSystem.mkdir = mock.fn(async (path: string) => {
         mkdirCalls.push(path);
-        return true;
+        return path;
     });
 
 

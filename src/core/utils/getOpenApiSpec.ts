@@ -1,4 +1,4 @@
-import RefParser from 'json-schema-ref-parser';
+import RefParser from '@apidevtools/json-schema-ref-parser';
 import { isAbsolute } from 'path';
 
 import { Context } from '../Context';
@@ -30,8 +30,9 @@ function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: st
  * on parsing the file as JSON.
  * @param input
  */
-export async function getOpenApiSpec(context: Context, input: string): Promise<any> {
+export async function getOpenApiSpec(context: Context, input: string): Promise<CommonOpenApi> {
     const absoluteInput = resolve(process.cwd(), input);
+
     if (!input) {
         throw new Error(`Could not find OpenApi spec: "${absoluteInput}"`);
     }
@@ -39,22 +40,37 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<a
     if (!fileExists) {
         throw new Error(`Could not read OpenApi spec: "${absoluteInput}"`);
     }
-    const parser = new RefParser();
-    context.addRefs(await parser.resolve(input));
-    const openApi = { ...parser.schema } as CommonOpenApi;
-    let newPaths = {};
-    // If paths contain $ref then they must be changed to object
-    for (const pathValue of Object.entries(openApi.paths)) {
-        const key = pathValue[0];
-        const object = pathValue[1] as OpenApiReference;
-        if (object.$ref) {
-            let objectValue = context.get(object.$ref);
-            objectValue = replaceRef(objectValue as OpenApiReference, context, dirName(object.$ref));
-            newPaths = Object.assign(newPaths, { [key]: objectValue });
+
+    // 2. Вызываем статический метод вместо new RefParser()
+    //    resolve() разбирает все $ref, но не разворачивает ссылки
+    const resolvedRefs = await RefParser.resolve(absoluteInput);
+
+    // Если вам нужны сами ссылки (instances of $Refs), можно сделать так:
+    // const $refs = (await RefParser.parse(absoluteInput)).$refs;
+    // context.addRefs($refs);
+
+    // В вашем случае — пробрасываем то, что вернул resolve()
+    context.addRefs(resolvedRefs);
+
+    const raw = resolvedRefs.get(absoluteInput);
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !('paths' in raw)) {
+        throw new Error(`Schema at "${absoluteInput}" is not a valid OpenAPI object`);
+    }
+    const mainSchema = raw as unknown as CommonOpenApi;
+
+    const newPaths: Record<string, any> = {};
+
+    for (const [pathKey, value] of Object.entries(mainSchema.paths)) {
+        const maybeRef = value as OpenApiReference;
+        if (maybeRef.$ref) {
+            // ваша функция replaceRef возвращает раскрученный объект
+            newPaths[pathKey] = replaceRef(context.get(maybeRef.$ref) as OpenApiReference, context, dirName(maybeRef.$ref));
         } else {
-            Object.assign(newPaths, { [key]: object });
+            newPaths[pathKey] = value;
         }
     }
-    parser.schema = Object.assign(parser.schema, { paths: newPaths });
-    return new Promise(resolve => resolve(parser.schema));
+
+    mainSchema.paths = newPaths;
+
+    return mainSchema;
 }

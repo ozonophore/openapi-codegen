@@ -1,6 +1,9 @@
 /* istanbul ignore file */
+import { MultiOptions, Options } from '../common/Options';
 import { Parser as ParserV2 } from './api/v2/Parser';
+import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
+import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
 import { HttpClient } from './types/Enums';
 import { IOutput } from './types/Models';
@@ -8,35 +11,14 @@ import { fileSystem } from './utils/fileSystem';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
+import { isInstanceOfMultioptions } from './utils/isInstanceOfMultiOptions';
 import { isString } from './utils/isString';
 import { postProcessClient } from './utils/postProcessClient';
+import { prepareOptions } from './utils/prepareOptions';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { WriteClient } from './utils/writeClient';
 
 export { HttpClient } from './types/Enums';
-
-export type Options = {
-    input: string | Record<string, any>;
-    output: string;
-    outputCore?: string;
-    outputServices?: string;
-    outputModels?: string;
-    outputSchemas?: string;
-    httpClient?: HttpClient;
-    useOptions?: boolean;
-    useUnionTypes?: boolean;
-    exportCore?: boolean;
-    exportServices?: boolean;
-    exportModels?: boolean;
-    exportSchemas?: boolean;
-    clean?: boolean;
-    request?: string;
-    write?: boolean;
-    interfacePrefix?: string;
-    enumPrefix?: string;
-    typePrefix?: string;
-    useCancelableRequest?: boolean;
-};
 
 /**
  * Generate the OpenAPI client. This method will read the OpenAPI specification and based on the
@@ -106,7 +88,7 @@ async function generateFrom(
 
     switch (openApiVersion) {
         case OpenApiVersion.V2: {
-            const client = new ParserV2(context).parse(openApi);
+            const client = new ParserV2(context).parse(openApi as OpenApiV2);
             const clientFinal = postProcessClient(client);
             if (!write) break;
             await writeClient.writeClient({
@@ -128,7 +110,7 @@ async function generateFrom(
         }
 
         case OpenApiVersion.V3: {
-            const client = new ParserV3(context).parse(openApi);
+            const client = new ParserV3(context).parse(openApi as OpenApiV3);
             const clientFinal = postProcessClient(client);
             if (!write) break;
             await writeClient.writeClient({
@@ -151,8 +133,19 @@ async function generateFrom(
     }
 }
 
-export async function generate(options: Options | Options[]): Promise<void> {
-    const optionsFinal = Array.isArray(options) ? options : Array.of(options);
+export async function generate(options: Options | Options[] | MultiOptions): Promise<void> {
+    let preparedOptions: Options[] = [];
+    if (Array.isArray(options)) {
+        preparedOptions = options;
+    } else if (isInstanceOfMultioptions(options)) {
+        const {items, ...otherProps} = options as MultiOptions;
+        preparedOptions = items.map(item => ({...item, ...otherProps}));
+    } else {
+        preparedOptions = Array.of(options as Options);
+    }
+
+    const optionsFinal = preparedOptions.map((op) => prepareOptions(op));
+
     for (const option of optionsFinal) {
         if (option.output) {
             await fileSystem.rmdir(option.output);

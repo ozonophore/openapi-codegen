@@ -1,11 +1,11 @@
 import get from 'lodash-es/get'
 
 import type { OperationResponse } from '../../../types/shared/OperationResponse.model';
+import { getComment } from '../../../utils/getComment';
 import { getPattern } from '../../../utils/getPattern';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiResponse } from '../types/OpenApiResponse.model';
-import { getComment } from './getComment';
 import { getContent } from './getContent';
 
 export function getOperationResponse(this: Parser, openApi: OpenApi, response: OpenApiResponse, responseCode: number, parentRef: string): OperationResponse {
