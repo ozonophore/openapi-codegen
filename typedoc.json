@@ -1,0 +1,28 @@
+{
+    "entryPoints": ["src/core/**/*.ts"],
+    "compilerOptions": {
+        "skipLibCheck": true,
+    },
+    "exclude": ["**/*+(test|.spec|.e2e).ts"],
+    "outputs": [
+        {
+            "name": "html",
+            "path": "./docs_html"
+        },
+        {
+            "name": "markdown",
+            "path": "./docs_markdown"
+        }
+    ],
+    "highlightLanguages": ["bash", "console", "javascript", "json", "typescript"],
+    "commentStyle": "jsdoc",
+    "groupOrder": ["Variables", "Functions", "*"],
+    "validation": {
+        "notExported": true,
+        "invalidLink": true,
+        "rewrittenLink": true,
+        "notDocumented": false,
+        "unusedMergeModuleWith": true
+    },
+    "plugin": ["typedoc-plugin-markdown"]
+}

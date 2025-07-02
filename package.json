@@ -46,6 +46,7 @@
     ],
     "scripts": {
         "clean": "rimraf ./dist ./generated ./test/generated ./test/e2e/generated ./samples/generated ./coverage ./node_modules/.cache",
+        "clean:docs": "rimraf docs_html docs_markdown",
         "build": "tsc -p .",
         "build:hbs": "tsx ./src/core/utils/precompileTemplates.ts",
         "release": "npm run build:hbs && npm run build",
@@ -106,6 +107,8 @@
         "puppeteer": "10.1.0",
         "qs": "6.10.1",
         "tsx": "^4.20.3",
+        "typedoc": "^0.28.7",
+        "typedoc-plugin-markdown": "^4.7.0",
         "typescript": "5.8.3"
     },
     "peerDependencies": {
