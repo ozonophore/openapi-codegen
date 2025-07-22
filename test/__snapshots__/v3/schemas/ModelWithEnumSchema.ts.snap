@@ -1,0 +1,17 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+export const IModelWithEnumSchema = {
+    properties: {
+        test: {
+            type: 'Enum',
+        },
+        statusCode: {
+            type: 'Enum',
+        },
+        bool: {
+            type: 'boolean',
+        },
+    },
+};

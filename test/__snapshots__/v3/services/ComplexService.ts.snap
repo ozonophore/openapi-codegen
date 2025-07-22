@@ -1,0 +1,170 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithArray } from './../models/./ModelWithArray';
+import type { IModelWithDictionary } from './../models/./ModelWithDictionary';
+import type { IModelWithEnum } from './../models/./ModelWithEnum';
+import type { IModelWithString } from './../models/./ModelWithString';
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const complexTypes = (
+    parameterObject: {
+        first?: {
+            second?: {
+                third?: string;
+            };
+        };
+    },
+    parameterReference: IModelWithString,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/complex`,
+    query: {
+        parameterObject: parameterObject,
+        parameterReference: parameterReference,
+    },
+    errors: {
+        400: `400 server error`,
+        500: `500 server error`,
+    },
+});
+
+const complexParams = (
+    id: number,
+
+    requestBody?: {
+        readonly;
+        key: string | null;
+
+        name: string | null;
+
+        enabled: boolean;
+        readonly;
+        type: 'Monkey' | 'Horse' | 'Bird';
+
+        listOfModels?: Array<IModelWithString> | null;
+
+        listOfStrings?: Array<string> | null;
+
+        parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+        readonly;
+        user?: {
+            readonly;
+            id?: number;
+            readonly;
+            name?: string | null;
+        };
+    },
+): ApiRequestOptions => ({
+    method: 'PUT',
+    path: `/api/v{api-version}/complex/${id}`,
+    body: requestBody,
+    mediaType: 'application/json-patch+json',
+});
+
+export type TComplexOptions = {
+    complexTypes: (
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string;
+                };
+            };
+        },
+        parameterReference: IModelWithString,
+    ) => ApiRequestOptions;
+    complexParams: (
+        id: number,
+
+        requestBody?: {
+            readonly;
+            key: string | null;
+
+            name: string | null;
+
+            enabled: boolean;
+            readonly;
+            type: 'Monkey' | 'Horse' | 'Bird';
+
+            listOfModels?: Array<IModelWithString> | null;
+
+            listOfStrings?: Array<string> | null;
+
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            readonly;
+            user?: {
+                readonly;
+                id?: number;
+                readonly;
+                name?: string | null;
+            };
+        },
+    ) => ApiRequestOptions;
+};
+
+export const ComplexOptions: TComplexOptions = {
+    complexTypes: complexTypes,
+    complexParams: complexParams,
+};
+
+export class ComplexService {
+    /**
+     * @param parameterObject Parameter containing object
+     * @param parameterReference Parameter containing reference
+     * @returns IModelWithString Successful response
+     * @throws ApiError
+     */
+    public static complexTypes(
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string;
+                };
+            };
+        },
+        parameterReference: IModelWithString,
+    ): Promise<Array<IModelWithString>> {
+        return __request<Array<IModelWithString>>(
+            ComplexOptions.complexTypes(parameterObject, parameterReference),
+            OpenAPI,
+        );
+    }
+    /**
+     * @param id
+     * @param requestBody
+     * @returns IModelWithString Success
+     * @throws ApiError
+     */
+    public static complexParams(
+        id: number,
+
+        requestBody?: {
+            readonly;
+            key: string | null;
+
+            name: string | null;
+
+            enabled: boolean;
+            readonly;
+            type: 'Monkey' | 'Horse' | 'Bird';
+
+            listOfModels?: Array<IModelWithString> | null;
+
+            listOfStrings?: Array<string> | null;
+
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            readonly;
+            user?: {
+                readonly;
+                id?: number;
+                readonly;
+                name?: string | null;
+            };
+        },
+    ): Promise<IModelWithString> {
+        return __request<IModelWithString>(ComplexOptions.complexParams(id, requestBody), OpenAPI);
+    }
+}

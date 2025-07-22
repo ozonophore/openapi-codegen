@@ -1,0 +1,14 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithString } from '././ModelWithString';
+
+/**
+ * This is a model that extends another model
+ */
+export type TModelThatExtends = IModelWithString & {
+    propExtendsA?: string;
+
+    propExtendsB?: IModelWithString;
+};

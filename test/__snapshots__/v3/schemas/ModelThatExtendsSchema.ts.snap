@@ -1,0 +1,22 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+export const TModelThatExtendsSchema = {
+    type: 'all-of',
+    contains: [
+        {
+            type: 'IModelWithString',
+        },
+        {
+            properties: {
+                propExtendsA: {
+                    type: 'string',
+                },
+                propExtendsB: {
+                    type: 'IModelWithString',
+                },
+            },
+        },
+    ],
+};

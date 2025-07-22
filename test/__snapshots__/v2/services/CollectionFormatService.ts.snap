@@ -1,0 +1,68 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const collectionFormat = (
+    parameterArrayCsv: Array<string>,
+    parameterArraySsv: Array<string>,
+    parameterArrayTsv: Array<string>,
+    parameterArrayPipes: Array<string>,
+    parameterArrayMulti: Array<string>,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/collectionFormat`,
+    query: {
+        parameterArrayCSV: parameterArrayCsv,
+        parameterArraySSV: parameterArraySsv,
+        parameterArrayTSV: parameterArrayTsv,
+        parameterArrayPipes: parameterArrayPipes,
+        parameterArrayMulti: parameterArrayMulti,
+    },
+});
+
+export type TCollectionFormatServiceOptions = {
+    collectionFormat: (
+        parameterArrayCsv: Array<string>,
+        parameterArraySsv: Array<string>,
+        parameterArrayTsv: Array<string>,
+        parameterArrayPipes: Array<string>,
+        parameterArrayMulti: Array<string>,
+    ) => ApiRequestOptions;
+};
+
+export const CollectionFormatServiceOptions: TCollectionFormatServiceOptions = {
+    collectionFormat: collectionFormat,
+};
+
+export class CollectionFormatService {
+    /**
+     * @param parameterArrayCsv This is an array parameter that is send as csv format (comma-separated values)
+     * @param parameterArraySsv This is an array parameter that is send as ssv format (space-separated values)
+     * @param parameterArrayTsv This is an array parameter that is send as tsv format (tab-separated values)
+     * @param parameterArrayPipes This is an array parameter that is send as pipes format (pipe-separated values)
+     * @param parameterArrayMulti This is an array parameter that is send as multi format (multiple parameter instances)
+     * @throws ApiError
+     */
+    public static collectionFormat(
+        parameterArrayCsv: Array<string>,
+        parameterArraySsv: Array<string>,
+        parameterArrayTsv: Array<string>,
+        parameterArrayPipes: Array<string>,
+        parameterArrayMulti: Array<string>,
+    ): Promise<void> {
+        return __request<void>(
+            CollectionFormatServiceOptions.collectionFormat(
+                parameterArrayCsv,
+                parameterArraySsv,
+                parameterArrayTsv,
+                parameterArrayPipes,
+                parameterArrayMulti,
+            ),
+            OpenAPI,
+        );
+    }
+}

@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 
-import { writeFile } from './fileSystem';
+import { fileSystem } from './fileSystem';
 import { Templates } from './registerHandlebarTemplates';
 
 /**
@@ -64,7 +64,7 @@ export interface IClientIndex {
  */
 export async function writeClientIndex(options: IClientIndex): Promise<void> {
     const { templates, outputPath, core, models, schemas, services } = options;
-    await writeFile(
+    await fileSystem.writeFile(
         resolve(outputPath, 'index.ts'),
         templates.index({
             core,

@@ -1,0 +1,30 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const callWithNoContentResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/no-content`,
+});
+
+export type TNoContentOptions = {
+    callWithNoContentResponse: () => ApiRequestOptions;
+};
+
+export const NoContentOptions: TNoContentOptions = {
+    callWithNoContentResponse: callWithNoContentResponse,
+};
+
+export class NoContentService {
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public static callWithNoContentResponse(): Promise<void> {
+        return __request<void>(NoContentOptions.callWithNoContentResponse(), OpenAPI);
+    }
+}

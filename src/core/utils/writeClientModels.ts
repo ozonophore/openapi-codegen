@@ -3,7 +3,7 @@ import { mkdirSync } from 'fs';
 import { HttpClient } from '../types/Enums';
 import type { Model } from '../types/shared/Model.model';
 import { dirName, resolve } from '../utils/pathHelpers';
-import { writeFile } from './fileSystem';
+import { fileSystem } from './fileSystem';
 import { format } from './format';
 import { Templates } from './registerHandlebarTemplates';
 
@@ -52,6 +52,6 @@ export async function writeClientModels(options: IWriteClientModels): Promise<vo
             useUnionTypes,
         });
         const formattedValue = await format(templateResult);
-        await writeFile(file, formattedValue);
+        await fileSystem.writeFile(file, formattedValue);
     }
 }

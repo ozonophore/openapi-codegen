@@ -4,7 +4,7 @@ import { Parser as ParserV3 } from './api/v3/Parser';
 import { Context } from './Context';
 import { HttpClient } from './types/Enums';
 import { IOutput } from './types/Models';
-import { rmdir } from './utils/fileSystem';
+import { fileSystem } from './utils/fileSystem';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
@@ -155,19 +155,19 @@ export async function generate(options: Options | Options[]): Promise<void> {
     const optionsFinal = Array.isArray(options) ? options : Array.of(options);
     for (const option of optionsFinal) {
         if (option.output) {
-            await rmdir(option.output);
+            await fileSystem.rmdir(option.output);
         }
         if (option.outputCore) {
-            await rmdir(option.outputCore);
+            await fileSystem.rmdir(option.outputCore);
         }
         if (option.outputSchemas) {
-            await rmdir(option.outputSchemas);
+            await fileSystem.rmdir(option.outputSchemas);
         }
         if (option.outputModels) {
-            await rmdir(option.outputModels);
+            await fileSystem.rmdir(option.outputModels);
         }
         if (option.outputServices) {
-            await rmdir(option.outputServices);
+            await fileSystem.rmdir(option.outputServices);
         }
     }
     const writeClient = new WriteClient();

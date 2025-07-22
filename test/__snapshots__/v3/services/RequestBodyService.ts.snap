@@ -1,0 +1,33 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithString } from './../models/./ModelWithString';
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const postRequestBodyService = (requestBody?: IModelWithString): ApiRequestOptions => ({
+    method: 'POST',
+    path: `/api/v{api-version}/requestBody/`,
+    body: requestBody,
+    mediaType: 'application/json',
+});
+
+export type TRequestBodyOptions = {
+    postRequestBodyService: (requestBody?: IModelWithString) => ApiRequestOptions;
+};
+
+export const RequestBodyOptions: TRequestBodyOptions = {
+    postRequestBodyService: postRequestBodyService,
+};
+
+export class RequestBodyService {
+    /**
+     * @param requestBody A reusable request body
+     * @throws ApiError
+     */
+    public static postRequestBodyService(requestBody?: IModelWithString): Promise<void> {
+        return __request<void>(RequestBodyOptions.postRequestBodyService(requestBody), OpenAPI);
+    }
+}

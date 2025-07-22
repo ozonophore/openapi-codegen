@@ -1,0 +1,71 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithString } from './../models/./ModelWithString';
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const complexTypes = (
+    parameterObject: {
+        first?: {
+            second?: {
+                third?: string;
+            };
+        };
+    },
+    parameterReference: IModelWithString,
+): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/complex`,
+    query: {
+        parameterObject: parameterObject,
+        parameterReference: parameterReference,
+    },
+    errors: {
+        400: `400 server error`,
+        500: `500 server error`,
+    },
+});
+
+export type TComplexServiceOptions = {
+    complexTypes: (
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string;
+                };
+            };
+        },
+        parameterReference: IModelWithString,
+    ) => ApiRequestOptions;
+};
+
+export const ComplexServiceOptions: TComplexServiceOptions = {
+    complexTypes: complexTypes,
+};
+
+export class ComplexService {
+    /**
+     * @param parameterObject Parameter containing object
+     * @param parameterReference Parameter containing reference
+     * @returns IModelWithString Successful response
+     * @throws ApiError
+     */
+    public static complexTypes(
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string;
+                };
+            };
+        },
+        parameterReference: IModelWithString,
+    ): Promise<Array<IModelWithString>> {
+        return __request<Array<IModelWithString>>(
+            ComplexServiceOptions.complexTypes(parameterObject, parameterReference),
+            OpenAPI,
+        );
+    }
+}

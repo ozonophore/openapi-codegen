@@ -1,0 +1,35 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const callWithResultFromHeader = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: `/api/v{api-version}/header`,
+    responseHeader: 'operation-location',
+    errors: {
+        400: `400 server error`,
+        500: `500 server error`,
+    },
+});
+
+export type THeaderServiceOptions = {
+    callWithResultFromHeader: () => ApiRequestOptions;
+};
+
+export const HeaderServiceOptions: THeaderServiceOptions = {
+    callWithResultFromHeader: callWithResultFromHeader,
+};
+
+export class HeaderService {
+    /**
+     * @returns string Successful response
+     * @throws ApiError
+     */
+    public static callWithResultFromHeader(): Promise<string> {
+        return __request<string>(HeaderServiceOptions.callWithResultFromHeader(), OpenAPI);
+    }
+}

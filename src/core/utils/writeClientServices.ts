@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { HttpClient } from '../types/Enums';
 import { IOutput } from '../types/Models';
 import type { Service } from '../types/shared/Service.model';
-import { writeFile } from './fileSystem';
+import { fileSystem } from './fileSystem';
 import { format } from './format';
 import { Templates } from './registerHandlebarTemplates';
 
@@ -51,6 +51,6 @@ export async function writeClientServices(options: IWriteClientServices): Promis
             useCancelableRequest,
         });
         const formattedValue = await format(templateResult);
-        await writeFile(file, formattedValue);
+        await fileSystem.writeFile(file, formattedValue);
     }
 }

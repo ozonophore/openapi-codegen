@@ -1,0 +1,98 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { TModelThatExtendsExtends } from './../models/./ModelThatExtendsExtends';
+import type { TModelThatExtends } from './../models/./ModelThatExtends';
+import type { IModelWithString } from './../models/./ModelWithString';
+import { request as __request } from './../core/request';
+import type { ApiRequestOptions } from './../core/ApiRequestOptions';
+import { OpenAPI } from './../core/OpenAPI';
+
+const callWithResponse = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/response`,
+});
+
+const callWithDuplicateResponses = (): ApiRequestOptions => ({
+    method: 'POST',
+    path: `/api/v{api-version}/response`,
+    errors: {
+        500: `Message for 500 error`,
+        501: `Message for 501 error`,
+        502: `Message for 502 error`,
+    },
+});
+
+const callWithResponses = (): ApiRequestOptions => ({
+    method: 'PUT',
+    path: `/api/v{api-version}/response`,
+    errors: {
+        500: `Message for 500 error`,
+        501: `Message for 501 error`,
+        502: `Message for 502 error`,
+    },
+});
+
+export type TResponseServiceOptions = {
+    callWithResponse: () => ApiRequestOptions;
+    callWithDuplicateResponses: () => ApiRequestOptions;
+    callWithResponses: () => ApiRequestOptions;
+};
+
+export const ResponseServiceOptions: TResponseServiceOptions = {
+    callWithResponse: callWithResponse,
+    callWithDuplicateResponses: callWithDuplicateResponses,
+    callWithResponses: callWithResponses,
+};
+
+export class ResponseService {
+    /**
+     * @returns IModelWithString Message for default response
+     * @throws ApiError
+     */
+    public static callWithResponse(): Promise<IModelWithString> {
+        return __request<IModelWithString>(ResponseServiceOptions.callWithResponse(), OpenAPI);
+    }
+    /**
+     * @returns IModelWithString Message for default response
+     * @throws ApiError
+     */
+    public static callWithDuplicateResponses(): Promise<IModelWithString> {
+        return __request<IModelWithString>(ResponseServiceOptions.callWithDuplicateResponses(), OpenAPI);
+    }
+    /**
+     * @returns any Message for 200 response
+     * @returns IModelWithString Message for default response
+     * @returns TModelThatExtends Message for 201 response
+     * @returns TModelThatExtendsExtends Message for 202 response
+     * @throws ApiError
+     */
+    public static callWithResponses(): Promise<
+        | {
+              readonly;
+              '@namespace.string'?: string;
+              readonly;
+              '@namespace.integer'?: number;
+              readonly;
+              value?: Array<IModelWithString>;
+          }
+        | IModelWithString
+        | TModelThatExtends
+        | TModelThatExtendsExtends
+    > {
+        return __request<
+            | {
+                  readonly;
+                  '@namespace.string'?: string;
+                  readonly;
+                  '@namespace.integer'?: number;
+                  readonly;
+                  value?: Array<IModelWithString>;
+              }
+            | IModelWithString
+            | TModelThatExtends
+            | TModelThatExtendsExtends
+        >(ResponseServiceOptions.callWithResponses(), OpenAPI);
+    }
+}
