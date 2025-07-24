@@ -7,11 +7,9 @@ export const multiOptionsMigrationPlan: SchemaMigrationPlan<Record<string, any>,
     {
         fromVersion: '1.0.0',
         toVersion: '1.0.1',
-        migrate: ({ items, client, output, ...otherProps }) => ({
+        migrate: ({ client, ...otherProps }) => ({
             ...otherProps,
-            output,
             httpClient: client,
-            items: items.map((el: any) => ({ ...el, output })),
         }),
     },
     {
