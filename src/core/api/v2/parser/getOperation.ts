@@ -1,15 +1,15 @@
 import type { Operation } from '../../../types/shared/Operation.model';
 import type { OperationParameters } from '../../../types/shared/OperationParameters.model';
+import { getComment } from '../../../utils/getComment';
+import { getOperationErrors } from '../../../utils/getOperationErrors';
+import { getOperationName } from '../../../utils/getOperationName';
+import { getOperationPath } from '../../../utils/getOperationPath';
+import { getOperationResponseHeader } from '../../../utils/getOperationResponseHeader';
+import { getOperationResults } from '../../../utils/getOperationResults';
+import { getServiceClassName } from '../../../utils/getServiceClassName';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiOperation } from '../types/OpenApiOperation.model';
-import { getComment } from './getComment';
-import { getOperationErrors } from './getOperationErrors';
-import { getOperationName } from './getOperationName';
-import { getOperationPath } from './getOperationPath';
-import { getOperationResponseHeader } from './getOperationResponseHeader';
-import { getOperationResults } from './getOperationResults';
-import { getServiceClassName } from './getServiceClassName';
 
 export function getOperation(this: Parser, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters): Operation {
     const serviceName = op.tags?.[0] || 'Service';

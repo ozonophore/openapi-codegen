@@ -1,9 +1,9 @@
 import type { OperationParameter } from '../../../types/shared/OperationParameter.model';
+import { getComment } from '../../../utils/getComment';
 import { getPattern } from '../../../utils/getPattern';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiRequestBody } from '../types/OpenApiRequestBody.model';
-import { getComment } from './getComment';
 import { getContent } from './getContent';
 
 export function getOperationRequestBody(this: Parser, openApi: OpenApi, parameter: OpenApiRequestBody, parentRef: string): OperationParameter {

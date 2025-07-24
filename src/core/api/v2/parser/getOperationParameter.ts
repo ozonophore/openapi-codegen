@@ -1,14 +1,14 @@
 import type { OperationParameter } from '../../../types/shared/OperationParameter.model';
+import { extendEnum } from '../../../utils/extendEnum';
+import { getComment } from '../../../utils/getComment';
+import { getEnum } from '../../../utils/getEnum';
+import { getEnumFromDescription } from '../../../utils/getEnumFromDescription';
+import { getOperationParameterName } from '../../../utils/getOperationParameterName';
 import { getPattern } from '../../../utils/getPattern';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiParameter } from '../types/OpenApiParameter.model';
-import { extendEnum } from './extendEnum';
-import { getComment } from './getComment';
-import { getEnum } from './getEnum';
-import { getEnumFromDescription } from './getEnumFromDescription';
 import { getOperationParameterDefault } from './getOperationParameterDefault';
-import { getOperationParameterName } from './getOperationParameterName';
 
 export function getOperationParameter(this: Parser, openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
     const operationParameter: OperationParameter = {

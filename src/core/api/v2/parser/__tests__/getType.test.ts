@@ -9,6 +9,8 @@ import { Parser } from '../../Parser';
 
 describe('getType', () => {
     test('@unit: should convert int', async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         const parser = new RefParser();
         const context = new Context('test/spec/v3.yml', getOutputPaths({ output: './generated' }));
         context.addRefs(await parser.resolve('test/spec/v3.yml'));
@@ -20,6 +22,8 @@ describe('getType', () => {
     });
 
     test('@unit: should support file with ext', async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         const parser = new RefParser();
         const context = new Context('test/spec/v3.yml', getOutputPaths({ output: './generated' }));
         context.addRefs(await parser.resolve('test/spec/v3.yml'));
@@ -47,6 +51,8 @@ describe('getType', () => {
     };
 
     test('@unit: should support external generation type', async () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         const parser = new RefParser();
         const context = new Context(object, getOutputPaths({ output: './generated' }));
         context.addRefs(await parser.resolve(object));

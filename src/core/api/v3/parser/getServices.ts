@@ -4,11 +4,11 @@ import { Import } from '../../../types/shared/Import.model';
 import { Model } from '../../../types/shared/Model.model';
 import type { Service } from '../../../types/shared/Service.model';
 import { getClassName } from '../../../utils/getClassName';
+import { getServiceClassName } from '../../../utils/getServiceClassName';
 import { unique } from '../../../utils/unique';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import { OpenApiOperation } from '../types/OpenApiOperation.model';
-import { getServiceClassName } from './getServiceClassName';
 
 function getServiceName(op: OpenApiOperation, fileName: string): string {
     return getServiceClassName(op.tags?.[0] || `${getClassName(fileName)}Service`);

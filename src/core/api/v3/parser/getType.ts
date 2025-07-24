@@ -1,20 +1,12 @@
 import type { Type } from '../../../types/shared/Type.model';
-import { encode } from '../../../utils/encode';
 import { getAbsolutePath } from '../../../utils/getAbsolutePath';
 import { getMappedType, hasMappedType } from '../../../utils/getMappedType';
 import { getRelativeModelImportPath } from '../../../utils/getRelativeModelImportPath';
 import { getRelativeModelPath } from '../../../utils/getRelativeModelPath';
+import { getTypeName } from '../../../utils/getTypeName';
 import { replaceString } from '../../../utils/replaceString';
 import { stripNamespace } from '../../../utils/stripNamespace';
 import { Parser } from '../Parser';
-
-function getTypeName(value: string): string {
-    const index = value.lastIndexOf('/');
-    if (index === -1) {
-        return encode(value);
-    }
-    return encode(value.substring(index, value.length));
-}
 
 /**
  * Parse any string value into a type object.
@@ -49,5 +41,6 @@ export function getType(this: Parser, value: string, parentRef: string): Type {
         result.base = type;
         result.imports.push({ name: type, alias: '', path: valueImportPath });
     }
+
     return result;
 }
