@@ -1,5 +1,7 @@
 /* istanbul ignore file */
-import { MultiOptions, Options } from '../common/Options';
+import path from 'path';
+
+import { TMultiOptions, TOptions } from '../common/Options';
 import { Parser as ParserV2 } from './api/v2/Parser';
 import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
@@ -67,7 +69,7 @@ async function generateFrom(
         enumPrefix = 'E',
         typePrefix = 'T',
         useCancelableRequest = false,
-    }: Options,
+    }: TOptions,
     writeClient: WriteClient
 ): Promise<void> {
     const outputPaths: IOutput = getOutputPaths({
@@ -86,11 +88,13 @@ async function generateFrom(
         useOptions,
     });
 
+    writeClient.logger.info('Defining the version of the openapi specification (2 or 3)');
     switch (openApiVersion) {
         case OpenApiVersion.V2: {
             const client = new ParserV2(context).parse(openApi as OpenApiV2);
             const clientFinal = postProcessClient(client);
             if (!write) break;
+            writeClient.logger.info('Write our OpenAPI client version 2 to disk.');
             await writeClient.writeClient({
                 client: clientFinal,
                 templates,
@@ -113,6 +117,7 @@ async function generateFrom(
             const client = new ParserV3(context).parse(openApi as OpenApiV3);
             const clientFinal = postProcessClient(client);
             if (!write) break;
+            writeClient.logger.info('Write our OpenAPI client version 3 to disk.');
             await writeClient.writeClient({
                 client: clientFinal,
                 templates,
@@ -133,39 +138,55 @@ async function generateFrom(
     }
 }
 
-export async function generate(options: Options | Options[] | MultiOptions): Promise<void> {
-    let preparedOptions: Options[] = [];
+export async function generate(options: TOptions | TOptions[] | TMultiOptions): Promise<void> {
+    let preparedOptions: TOptions[] = [];
     if (Array.isArray(options)) {
         preparedOptions = options;
     } else if (isInstanceOfMultioptions(options)) {
-        const {items, ...otherProps} = options as MultiOptions;
-        preparedOptions = items.map(item => ({...item, ...otherProps}));
+        const { items, ...otherProps } = options as TMultiOptions;
+        preparedOptions = items.map(item => ({ ...item, ...otherProps }));
     } else {
-        preparedOptions = Array.of(options as Options);
+        preparedOptions = Array.of(options as TOptions);
     }
 
-    const optionsFinal = preparedOptions.map((op) => prepareOptions(op));
+    const optionsFinal = preparedOptions.map(op => prepareOptions(op));
 
-    for (const option of optionsFinal) {
-        if (option.output) {
-            await fileSystem.rmdir(option.output);
-        }
-        if (option.outputCore) {
-            await fileSystem.rmdir(option.outputCore);
-        }
-        if (option.outputSchemas) {
-            await fileSystem.rmdir(option.outputSchemas);
-        }
-        if (option.outputModels) {
-            await fileSystem.rmdir(option.outputModels);
-        }
-        if (option.outputServices) {
-            await fileSystem.rmdir(option.outputServices);
-        }
-    }
     const writeClient = new WriteClient();
-    for (const option of optionsFinal) {
-        await generateFrom(option, writeClient);
+    writeClient.logger.forceInfo(`Generation has begun. Total number of specification files: ${optionsFinal.length}`);
+
+    try {
+        const start = process.hrtime();
+        for (const option of optionsFinal) {
+            if (option.output) {
+                await fileSystem.rmdir(option.output);
+            }
+            if (option.outputCore) {
+                await fileSystem.rmdir(option.outputCore);
+            }
+            if (option.outputSchemas) {
+                await fileSystem.rmdir(option.outputSchemas);
+            }
+            if (option.outputModels) {
+                await fileSystem.rmdir(option.outputModels);
+            }
+            if (option.outputServices) {
+                await fileSystem.rmdir(option.outputServices);
+            }
+        }
+
+        for (const option of optionsFinal) {
+            await generateFrom(option, writeClient);
+            writeClient.logger.info(`Generation from "${option.input}" was finished`);
+            writeClient.logger.info(`Output folder: ${path.resolve(process.cwd(), option.output)}`, true);
+        }
+        await writeClient.combineAndWrite();
+        writeClient.logger.forceInfo("Generation from has been finished");
+        const [seconds, nanoseconds] = process.hrtime(start);
+        const durationInMs = seconds + nanoseconds / 1e6;
+        writeClient.logger.forceInfo(`Lead time: ${durationInMs.toFixed(2)} sec`);
+    } catch (error: any) {
+        writeClient.logger.error(error.message);
     }
-    await writeClient.combineAndWrite();
+
+    writeClient.logger.shutdownLogger();
 }

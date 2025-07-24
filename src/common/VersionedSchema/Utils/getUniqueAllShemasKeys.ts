@@ -1,4 +1,5 @@
-import { VersionedSchema } from "../Types";
+import Joi from "joi";
+
 import { joiDescHandler, joiSchemaHandler } from "./joiHandlers";
 import { traverseGeneric } from "./traverseGeneric";
 
@@ -7,10 +8,12 @@ import { traverseGeneric } from "./traverseGeneric";
  * @param schemas array of joi schemes
  * @returns All the unique parameter keys of all Joi schemes in the array
  */
-export function getUniqueAllShemasKeys(schemas: VersionedSchema<Record<string, any>>[]) {
+export function getUniqueAllShemasKeys(schemas: Joi.Schema[]) {
     const result = new Set<string>();
 
-    traverseGeneric(schemas, [joiSchemaHandler, joiDescHandler], result);
+    for (const schema of schemas) {
+        traverseGeneric(schema, [joiSchemaHandler, joiDescHandler], result);
+    }
 
     return result;
 }

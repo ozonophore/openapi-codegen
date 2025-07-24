@@ -2,6 +2,9 @@ import fs from 'fs';
 import Handlebars from 'handlebars';
 import path from 'path';
 
+import { ELogLevel, ELogOutput } from '../../common/Enums';
+import { Logger } from '../../common/Logger';
+
 const templatesDir = path.resolve(__dirname, '../../templates');
 const compiledDir = path.resolve(__dirname, '../../templatesCompiled');
 
@@ -17,6 +20,11 @@ export default `;
  * Фунукция для пре-компеляции шаблонов (hbs) перед дальнейшим использованием
  */
 const precompileTemplates = () => {
+    const logger = new Logger({
+        instanceId: 'templates',
+        level: ELogLevel.INFO,
+        logOutput: ELogOutput.CONSOLE,
+    });
     try {
         if (!fs.existsSync(compiledDir)) {
             fs.mkdirSync(compiledDir, { recursive: true });
@@ -65,9 +73,9 @@ const precompileTemplates = () => {
         };
         walk(templatesDir);
 
-        console.log('The templates have been successfully precompiled and saved!');
-    } catch (error) {
-        console.error('Error during pre-compilation of templates: ', error);
+        logger.info('The templates have been successfully precompiled and saved!');
+    } catch (error: any) {
+        logger.error(`Error during pre-compilation of templates: ${error.message}`);
     }
 };
 
