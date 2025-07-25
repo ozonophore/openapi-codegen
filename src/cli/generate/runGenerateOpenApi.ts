@@ -2,7 +2,7 @@ import { OptionValues } from 'commander';
 
 import { defaultOptions } from '../../common/defaultOptions';
 import { MultiOptions, Options } from '../../common/Options';
-import { loadConfigIfExists } from '../../common/Utils';
+import { convertArrayToObject, loadConfigIfExists } from '../../common/Utils';
 import { multiOptionsMigrationPlan } from '../../common/VersionedSchema/MultiOptionsMigrationPlan';
 import { multiOptionsVersionedSchema } from '../../common/VersionedSchema/MultiOptionsVersionedSchemas';
 import { optionsMigrationPlans } from '../../common/VersionedSchema/OptionsMigrationPlans';
@@ -31,16 +31,18 @@ export async function runGenerateOpenApi(options: OptionValues) {
         throw new Error('Error: The configuration file is missing');
     }
 
-    const isMultiOptions = isInstanceOfMultioptions(configData);
+    const preparedOptions = convertArrayToObject(configData);
+
+    const isMultiOptions = isInstanceOfMultioptions(preparedOptions);
 
     const migratedOptions = isMultiOptions
         ? migrateToLatestVersion({
-              rawInput: configData,
+              rawInput: preparedOptions,
               migrationPlans: multiOptionsMigrationPlan,
               versionedSchemas: multiOptionsVersionedSchema,
           })
         : migrateToLatestVersion({
-              rawInput: configData,
+              rawInput: preparedOptions,
               migrationPlans: optionsMigrationPlans,
               versionedSchemas: optionsVersionedSchemas,
           });
