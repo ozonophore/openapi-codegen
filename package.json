@@ -68,7 +68,8 @@
         "json-schema-ref-parser": "9.0.7",
         "leven": "^4.0.0",
         "mkdirp": "1.0.4",
-        "rimraf": "3.0.2"
+        "rimraf": "3.0.2",
+        "winston": "^3.17.0"
     },
     "devDependencies": {
         "@babel/cli": "7.14.8",
