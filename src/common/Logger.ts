@@ -1,97 +1,84 @@
 // logger.ts
+import { existsSync, mkdirSync } from 'fs';
 import { TransformableInfo } from 'logform';
 import { createLogger, format, Logger as WinstonLogger,transports } from 'winston';
 
 export type LogLevel = 'error' | 'warn' | 'info';
+export type LogOutput = 'console' | 'file';
 
 export interface LoggerOptions {
-  /** Идентификатор экземпляра (чтобы логи разных экземпляров не переплетались) */
+  /** Идентификатор экземпляра (только буквы/цифры/дефис/подчёрки) */
   id: string;
   /** Начальный уровень логирования */
   level: LogLevel;
-  /** Куда писать: 'console' или путь к файлу */
-  destination: 'console' | string;
+  /** Куда писать: 'console' или 'file' */
+  logOutput: LogOutput;
+  /** Папка для логов (только при logOutput='file') */
+  logDir?: string;
 }
 
 export class AppLogger {
   private logger: WinstonLogger;
-  private forcedInfoTransport?: transports.ConsoleTransportInstance;
+  private forcedInfoTransport: transports.ConsoleTransportInstance;
 
   constructor(private opts: LoggerOptions) {
-    const { id, level, destination } = opts;
+    const { id, level, logOutput, logDir = './logs' } = opts;
 
-    // базовый формат: [timestamp] [id] level: message
+    // готовим формат: [timestamp] [id] level: message
     const logFormat = format.printf((info: TransformableInfo) => {
       return `${info.timestamp} [${id}] ${info.level}: ${info.message}`;
     });
 
-    // создаём транспорты в зависимости от destination
-    const chosenTransports = [];
-    if (destination === 'console') {
-      chosenTransports.push(new transports.Console());
+    // собираем транспорты в массив
+    const activeTransports = [];
+
+    if (logOutput === 'file') {
+      // создаём папку, если нужно
+      if (!existsSync(logDir)) mkdirSync(logDir, { recursive: true });
+
+      // формируем имя файла: <id>_<YYYYMMDD-HHmmss>.log
+      const now = new Date();
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const ts = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      const filename = `${logDir}/${id}_${ts}.log`;
+
+      activeTransports.push(new transports.File({ filename }));
     } else {
-      chosenTransports.push(
-        new transports.File({ filename: destination })
-      );
+      activeTransports.push(new transports.Console());
     }
 
-    // основной logger
+    // базовый Winston-логгер
     this.logger = createLogger({
       level,
-      levels: {
-        error: 0,
-        warn: 1,
-        info: 2,
-      },
-      format: format.combine(
-        format.timestamp(),
-        logFormat
-      ),
-      transports: chosenTransports,
+      levels: { error: 0, warn: 1, info: 2 },
+      format: format.combine(format.timestamp(), logFormat),
+      transports: activeTransports,
     });
 
-    // отдельный консольный транспорт для «форсированной» info-передачи
+    // отдельный транспорт для принудительного info в консоль
     this.forcedInfoTransport = new transports.Console({
       level: 'info',
-      format: format.combine(
-        format.colorize(),
-        format.timestamp(),
-        logFormat
-      )
+      format: format.combine(format.colorize(), format.timestamp(), logFormat),
     });
   }
 
-  /** Изменить уровень логирования «на ходу» */
+  /** Сменить уровень "на лету" */
   public setLevel(newLevel: LogLevel) {
     this.logger.level = newLevel;
   }
 
-  /** Логирование ошибок */
-  public error(message: string) {
-    this.logger.error(message);
+  public error(msg: string) {
+    this.logger.error(msg);
+  }
+  public warn(msg: string) {
+    this.logger.warn(msg);
+  }
+  public info(msg: string) {
+    this.logger.info(msg);
   }
 
-  /** Логирование предупреждений */
-  public warn(message: string) {
-    this.logger.warn(message);
-  }
-
-  /** Обычная информационная запись */
-  public info(message: string) {
-    this.logger.info(message);
-  }
-
-  /**
-   * Специальный метод: даже если текущий level = 'error',
-   * отправит в консоль info-сообщение через отдельный транспорт.
-   */
-  public forceInfo(message: string) {
-    if (this.forcedInfoTransport) {
-      this.forcedInfoTransport.log({
-        level: 'info',
-        message,
-        timestamp: new Date().toISOString(),
-      } as TransformableInfo);
-    }
+  /** Всегда выводит info в консоль, независимо от основного уровня */
+  public forceInfo(msg: string) {
+    this.forcedInfoTransport.log({ level: 'info', message: msg, timestamp: new Date().toISOString() } as TransformableInfo);
   }
 }
