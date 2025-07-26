@@ -174,18 +174,16 @@ export async function generate(options: Options | Options[] | MultiOptions): Pro
             }
         }
 
-        let count = 0;
         for (const option of optionsFinal) {
             await generateFrom(option, writeClient);
             writeClient.logger.info(`Generation from "${option.input}" was finished`);
-            writeClient.logger.info(`Output folder: ${path.resolve(process.cwd(), option.output)}`, count === optionsFinal.length - 1);
-            count++;
+            writeClient.logger.info(`Output folder: ${path.resolve(process.cwd(), option.output)}`, true);
         }
         await writeClient.combineAndWrite();
         writeClient.logger.forceInfo("Generation from has been finished");
         const [seconds, nanoseconds] = process.hrtime(start);
-        const durationInMs = seconds * 1000 + nanoseconds / 1e6;
-        writeClient.logger.forceInfo(`Время выполнения: ${durationInMs} мс`);
+        const durationInMs = seconds + nanoseconds / 1e6;
+        writeClient.logger.forceInfo(`Lead time: ${durationInMs.toFixed(2)} sec`);
     } catch (error) {
         writeClient.logger.error(`Error: ${error}`);
     }
