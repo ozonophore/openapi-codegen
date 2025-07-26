@@ -1,7 +1,8 @@
 import { OptionValues } from 'commander';
 
 import { defaultOptions } from '../../common/defaultOptions';
-import { AppLogger } from '../../common/Logger';
+import { ELogLevel, ELogOutput } from '../../common/Enums';
+import { Logger } from '../../common/Logger';
 import { MultiOptions, Options } from '../../common/Options';
 import { convertArrayToObject, loadConfigIfExists } from '../../common/Utils';
 import { multiOptionsMigrationPlan } from '../../common/VersionedSchema/MultiOptionsMigrationPlan';
@@ -17,54 +18,57 @@ import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOpti
  * @param options Options for starting generation.
  */
 export async function runGenerateOpenApi(options: OptionValues) {
-    const logger = new AppLogger({
-        level: 'error',
-        instanceId: 'ts-openapi-codegen-cli',
-        // id: 'ts-openapi-codegen-cli',
-        // level: 'error',
-        // logOutput: 'console',
+    const logger = new Logger({
+        level: ELogLevel.INFO,
+        instanceId: 'openapi-cli',
+        logOutput: ELogOutput.CONSOLE,
     });
-    const hasMinimumRequiredOptions = !!options.input && !!options.output;
-    if (hasMinimumRequiredOptions) {
-        const { error: defaultValuesError, value } = defaultOptions.validate(options);
 
-        if (defaultValuesError) {
-            await OpenAPI.generate(value);
-            return;
+    try {
+        const hasMinimumRequiredOptions = !!options.input && !!options.output;
+        if (hasMinimumRequiredOptions) {
+            const { error: defaultValuesError, value } = defaultOptions.validate(options);
+
+            if (defaultValuesError) {
+                await OpenAPI.generate(value);
+                process.exit(0);
+            }
         }
-    }
 
-    const configData = loadConfigIfExists();
-    if (!configData) {
-        logger.error('Error: The configuration file is missing');
-    }
+        const configData = loadConfigIfExists();
+        if (!configData) {
+            logger.error('The configuration file is missing');
+        }
 
-    const preparedOptions = convertArrayToObject(configData);
+        const preparedOptions = convertArrayToObject(configData);
 
-    const isMultiOptions = isInstanceOfMultioptions(preparedOptions);
+        const isMultiOptions = isInstanceOfMultioptions(preparedOptions);
 
-    const migratedOptions = isMultiOptions
-        ? migrateToLatestVersion({
-              rawInput: preparedOptions,
-              migrationPlans: multiOptionsMigrationPlan,
-              versionedSchemas: multiOptionsVersionedSchema,
-          })
-        : migrateToLatestVersion({
-              rawInput: preparedOptions,
-              migrationPlans: optionsMigrationPlans,
-              versionedSchemas: optionsVersionedSchemas,
-          });
+        const migratedOptions = isMultiOptions
+            ? migrateToLatestVersion({
+                  rawInput: preparedOptions,
+                  migrationPlans: multiOptionsMigrationPlan,
+                  versionedSchemas: multiOptionsVersionedSchema,
+              })
+            : migrateToLatestVersion({
+                  rawInput: preparedOptions,
+                  migrationPlans: optionsMigrationPlans,
+                  versionedSchemas: optionsVersionedSchemas,
+              });
 
-    if (!migratedOptions) {
-        logger.error('Error: Couldn\'t convert the set of options to the current version');
-    } else {
-        const { value } = migratedOptions;
-
-        if (isMultiOptions) {
-            await OpenAPI.generate(value as MultiOptions);
+        if (!migratedOptions) {
+            logger.error("Couldn't convert the set of options to the current version");
         } else {
-            await OpenAPI.generate(value as Options);
+            const { value } = migratedOptions;
+
+            if (isMultiOptions) {
+                await OpenAPI.generate(value as MultiOptions);
+            } else {
+                await OpenAPI.generate(value as Options);
+            }
         }
+        process.exit(0);
+    } catch (error: any) {
+        logger.error(error.message);
     }
-    process.exit(0);
 }

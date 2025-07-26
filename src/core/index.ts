@@ -184,7 +184,7 @@ export async function generate(options: Options | Options[] | MultiOptions): Pro
         const [seconds, nanoseconds] = process.hrtime(start);
         const durationInMs = seconds + nanoseconds / 1e6;
         writeClient.logger.forceInfo(`Lead time: ${durationInMs.toFixed(2)} sec`);
-    } catch (error) {
-        writeClient.logger.error(`Error: ${error}`);
+    } catch (error: any) {
+        writeClient.logger.error(error.message);
     }
 }

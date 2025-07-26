@@ -1,4 +1,5 @@
-import { AppLogger } from '../../common/Logger';
+import { ELogLevel, ELogOutput } from '../../common/Enums';
+import { Logger } from '../../common/Logger';
 import { HttpClient } from '../types/Enums';
 import { IOutput } from '../types/Models';
 import type { Client } from '../types/shared/Client.model';
@@ -97,19 +98,14 @@ export interface IWriteClientIndex {
  */
 export class WriteClient {
     private options: Map<string, IWriteClientIndex[]> = new Map();
-    private _logger: AppLogger;
+    private _logger: Logger;
 
     constructor() {
-        this._logger = new AppLogger({
-            level: "error",
-            instanceId: 'ts-openapi-codegen',
+        this._logger = new Logger({
+            level: ELogLevel.ERROR,
+            instanceId: 'client',
+            logOutput: ELogOutput.CONSOLE,
         });
-
-        // this._logger = new AppLogger({
-        //     id: 'ts-openapi-codegen',
-        //     level: currentLogLevel,
-        //     logOutput: currentLogOutput,
-        // });
     }
 
     /**
