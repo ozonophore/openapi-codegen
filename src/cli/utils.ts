@@ -1,7 +1,3 @@
-import path from 'path'
-
-import * as OpenAPI from '../core'
-
 /**
  * Checks if `value` is `null` or `undefined`.
  *
@@ -29,22 +25,4 @@ export function isValidJson(value: any) {
     } catch {
         return false;
     }
-}
-
-export function startGenerate(options: any) {
-    return OpenAPI.generate(options)
-        .then(() => {
-            console.group(`Generation from has been finished`);
-            const group = Array.isArray(options) ? options : Array.of(options);
-            group.forEach(option => {
-                console.log(`Generation from "${option.input}" was finished`);
-                console.log(`Output folder: ${path.resolve(process.cwd(), option.output)}`);
-                console.log('==================================');
-            });
-            console.groupEnd();
-        })
-        .catch((error: any) => {
-            console.log(error);
-            process.exit(1);
-        });
 }

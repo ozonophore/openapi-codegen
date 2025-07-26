@@ -19,19 +19,25 @@ export function loadConfigIfExists() {
     return configData;
 }
 
-export function convertArrayToObject(optionsArr: Record<string, any> | Record<string, any>[]): Record<string, any> {
+export function convertArrayToObject(optionsArr: Record<string, any> | Record<string, any>[] | null): Record<string, any> {
+    const emptyResult = {
+        items: [],
+        exportCore: undefined,
+        exportServices: undefined,
+        exportModels: undefined,
+        exportSchemas: undefined,
+        request: undefined,
+        useOptions: undefined,
+        useCancelableRequest: undefined,
+    };
+
+    if (!optionsArr) {
+        return emptyResult;
+    }
+
     if (Array.isArray(optionsArr)) {
         if (optionsArr.length === 0) {
-            return {
-                items: [],
-                exportCore: undefined,
-                exportServices: undefined,
-                exportModels: undefined,
-                exportSchemas: undefined,
-                request: undefined,
-                useOptions: undefined,
-                useCancelableRequest: undefined,
-            };
+            return emptyResult;
         }
         const items = optionsArr.map(item => ({
             input: item.input,

@@ -1,3 +1,4 @@
+import { AppLogger, LogLevel, LogOutput } from '../../common/Logger';
 import { HttpClient } from '../types/Enums';
 import { IOutput } from '../types/Models';
 import type { Client } from '../types/shared/Client.model';
@@ -96,6 +97,18 @@ export interface IWriteClientIndex {
  */
 export class WriteClient {
     private options: Map<string, IWriteClientIndex[]> = new Map();
+    private _logger: AppLogger;
+
+    constructor(logLevel?: LogLevel, logOutput?: LogOutput) {
+        const currentLogLevel = logLevel || "error";
+        const currentLogOutput = logOutput || 'console';
+
+        this._logger = new AppLogger({
+            id: 'ts-openapi-codegen',
+            level: currentLogLevel,
+            logOutput: currentLogOutput,
+        });
+    }
 
     /**
      * Write our OpenAPI client, using the given templates at the given output
@@ -275,5 +288,9 @@ export class WriteClient {
             prepareAlias(value.schemas);
             await writeClientIndex(value);
         }
+    }
+
+    public get logger() {
+        return this._logger;
     }
 }

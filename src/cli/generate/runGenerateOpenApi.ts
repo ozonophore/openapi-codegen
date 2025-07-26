@@ -1,6 +1,7 @@
 import { OptionValues } from 'commander';
 
 import { defaultOptions } from '../../common/defaultOptions';
+import { AppLogger } from '../../common/Logger';
 import { MultiOptions, Options } from '../../common/Options';
 import { convertArrayToObject, loadConfigIfExists } from '../../common/Utils';
 import { multiOptionsMigrationPlan } from '../../common/VersionedSchema/MultiOptionsMigrationPlan';
@@ -16,6 +17,11 @@ import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOpti
  * @param options Options for starting generation.
  */
 export async function runGenerateOpenApi(options: OptionValues) {
+    const logger = new AppLogger({
+        id: 'ts-openapi-codegen-cli',
+        level: 'error',
+        logOutput: 'console',
+    });
     const hasMinimumRequiredOptions = !!options.input && !!options.output;
     if (hasMinimumRequiredOptions) {
         const { error: defaultValuesError, value } = defaultOptions.validate(options);
@@ -28,7 +34,7 @@ export async function runGenerateOpenApi(options: OptionValues) {
 
     const configData = loadConfigIfExists();
     if (!configData) {
-        throw new Error('Error: The configuration file is missing');
+        logger.error('Error: The configuration file is missing');
     }
 
     const preparedOptions = convertArrayToObject(configData);
@@ -48,13 +54,15 @@ export async function runGenerateOpenApi(options: OptionValues) {
           });
 
     if (!migratedOptions) {
-        throw new Error('Error: Couldn\'t convert the set of options to the current version');
-    }
-    const { value } = migratedOptions;
-
-    if (isMultiOptions) {
-        await OpenAPI.generate(value as MultiOptions);
+        logger.error('Error: Couldn\'t convert the set of options to the current version');
     } else {
-        await OpenAPI.generate(value as Options);
+        const { value } = migratedOptions;
+
+        if (isMultiOptions) {
+            await OpenAPI.generate(value as MultiOptions);
+        } else {
+            await OpenAPI.generate(value as Options);
+        }
     }
+    process.exit(0);
 }
