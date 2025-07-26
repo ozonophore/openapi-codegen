@@ -101,8 +101,8 @@ export class WriteClient {
 
     constructor() {
         this._logger = new AppLogger({
-            level: "error",
-            transport: 'console',
+            level: "info",
+            instanceId: 'ts-openapi-codegen',
         });
 
         // this._logger = new AppLogger({
