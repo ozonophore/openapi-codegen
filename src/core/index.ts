@@ -155,6 +155,7 @@ export async function generate(options: Options | Options[] | MultiOptions): Pro
     writeClient.logger.forceInfo(`Generation has begun. Total number of specification files: ${optionsFinal.length}`);
 
     try {
+        const start = process.hrtime();
         for (const option of optionsFinal) {
             if (option.output) {
                 await fileSystem.rmdir(option.output);
@@ -182,6 +183,9 @@ export async function generate(options: Options | Options[] | MultiOptions): Pro
         }
         await writeClient.combineAndWrite();
         writeClient.logger.forceInfo("Generation from has been finished");
+        const [seconds, nanoseconds] = process.hrtime(start);
+        const durationInMs = seconds * 1000 + nanoseconds / 1e6;
+        writeClient.logger.forceInfo(`Время выполнения: ${durationInMs} мс`);
     } catch (error) {
         writeClient.logger.error(`Error: ${error}`);
     }

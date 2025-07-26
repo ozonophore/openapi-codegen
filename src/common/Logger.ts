@@ -1,102 +1,59 @@
-// logger.ts
-import { existsSync, mkdirSync } from 'fs';
-import { TransformableInfo } from 'logform';
-import { createLogger, format, Logger as WinstonLogger, transports } from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
+import { createLogger, format, Logger as WinstonLogger,transports } from 'winston';
 
-export type LogLevel = 'error' | 'warn' | 'info';
-export type LogOutput = 'console' | 'file';
-
-export interface LoggerOptions {
-    /** Instance ID (letters/numbers/hyphens/handwriting only) */
-    id: string;
-    /** The initial logging level */
-    level: LogLevel;
-    /** Where to write: 'console' or 'file' */
-    logOutput: LogOutput;
-    /** Folder for logs (only with LogOutput='file') */
-    logDir?: string;
-    /** Rotation parameters (only for LogOutput='file') */
-    rotate?: {
-        /** Template for the date in the file name */
-        datePattern?: string; // for example: 'YYYY-MM-DD'
-        /** The maximum file size, for example '20m' */
-        maxSize?: string;
-        /** Do not store files for longer, for example '14d' */
-        maxFiles?: string;
-    };
+interface LoggerOptions {
+    level: 'error' | 'warn' | 'info';
+    transport: 'console' | 'file';
+    filePath?: string;
 }
 
 export class AppLogger {
     private logger: WinstonLogger;
-    private forcedInfoTransport: transports.ConsoleTransportInstance;
+    private currentLevel: 'error' | 'warn' | 'info';
 
-    constructor(private opts: LoggerOptions) {
-        const { id, level, logOutput, logDir = './logs', rotate = { datePattern: 'YYYY-MM-DD', maxSize: '20m', maxFiles: '14d' } } = opts;
-
-        const logFormat = format.printf((info: TransformableInfo) => `${info.timestamp} [${id}] ${info.level}: ${info.message}`);
-
-        const activeTransports = [];
-
-        if (logOutput === 'file') {
-            if (!existsSync(logDir)) mkdirSync(logDir, { recursive: true });
-            activeTransports.push(
-                new DailyRotateFile({
-                    dirname: logDir,
-                    filename: `${id}-%DATE%.log`,
-                    datePattern: rotate.datePattern,
-                    maxSize: rotate.maxSize,
-                    maxFiles: rotate.maxFiles,
-                    level,
-                })
-            );
-        } else {
-            activeTransports.push(new transports.Console({ level }));
-        }
-
+    constructor(options: LoggerOptions) {
+        this.currentLevel = options.level;
+        const transport = this.getTransport(options);
         this.logger = createLogger({
-            level,
-            levels: { error: 0, warn: 1, info: 2 },
-            format: format.combine(format.timestamp(), logFormat),
-            transports: activeTransports,
-        });
-
-        // Initializing the console transport for forceInfo only
-        this.forcedInfoTransport = new transports.Console({
-            level: 'info',
-            format: format.combine(format.colorize(), format.timestamp(), logFormat),
+            level: this.currentLevel,
+            format: format.combine(format.timestamp(), format.json()),
+            transports: [transport],
         });
     }
 
-    public setLevel(newLevel: LogLevel) {
-        this.logger.level = newLevel;
-        this.logger.transports.forEach(t => (t.level = newLevel));
+    private getTransport(options: LoggerOptions) {
+        if (options.transport === 'console') {
+            return new transports.Console();
+        } else if (options.transport === 'file') {
+            if (!options.filePath) {
+                throw new Error('File path is required for file transport');
+            }
+            return new transports.File({ filename: options.filePath });
+        } else {
+            throw new Error('Invalid transport type');
+        }
     }
 
-    public error(msg: string) {
-        this.logger.error(msg);
-        process.exit(1);
+    public setLevel(level: 'error' | 'warn' | 'info') {
+        this.currentLevel = level;
+        this.logger.level = level;
     }
 
-    public warn(msg: string) {
-        this.logger.warn(msg);
+    public error(message: string) {
+        this.logger.error(message);
     }
 
-    public info(msg: string, hasSeparator?: boolean) {
-        this.logger.info(msg);
+    public warn(message: string) {
+        this.logger.warn(message);
+    }
+
+    public info(message: string, hasSeparator?: boolean) {
+        this.logger.info(message);
         if (hasSeparator) {
-            this.logger.info('==================================');
+            this.logger.info('==========================================');
         }
     }
 
-    /** Outputs info to the console regardless of the main level */
-    public forceInfo(msg: string) {
-        if (this.forcedInfoTransport) {
-            this.forcedInfoTransport.log?.({
-                level: 'info',
-                message: msg,
-                timestamp: new Date().toISOString(),
-            } as TransformableInfo, () => {});
-        }
+    public forceInfo(message: string) {
+        this.logger.log('info', message);
     }
 }

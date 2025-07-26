@@ -88,6 +88,7 @@
         "@types/node-fetch": "2.5.12",
         "@types/prettier": "3.0.0",
         "@types/qs": "6.9.7",
+        "@types/winston": "^2.4.4",
         "@typescript-eslint/eslint-plugin": "^8.34.1",
         "@typescript-eslint/parser": "^8.34.1",
         "abort-controller": "^3.0.0",

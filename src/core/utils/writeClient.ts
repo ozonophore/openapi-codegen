@@ -1,4 +1,4 @@
-import { AppLogger, LogLevel, LogOutput } from '../../common/Logger';
+import { AppLogger } from '../../common/Logger';
 import { HttpClient } from '../types/Enums';
 import { IOutput } from '../types/Models';
 import type { Client } from '../types/shared/Client.model';
@@ -99,15 +99,17 @@ export class WriteClient {
     private options: Map<string, IWriteClientIndex[]> = new Map();
     private _logger: AppLogger;
 
-    constructor(logLevel?: LogLevel, logOutput?: LogOutput) {
-        const currentLogLevel = logLevel || "error";
-        const currentLogOutput = logOutput || 'console';
-
+    constructor() {
         this._logger = new AppLogger({
-            id: 'ts-openapi-codegen',
-            level: currentLogLevel,
-            logOutput: currentLogOutput,
+            level: "error",
+            transport: 'console',
         });
+
+        // this._logger = new AppLogger({
+        //     id: 'ts-openapi-codegen',
+        //     level: currentLogLevel,
+        //     logOutput: currentLogOutput,
+        // });
     }
 
     /**

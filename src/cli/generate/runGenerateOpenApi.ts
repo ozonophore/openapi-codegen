@@ -18,9 +18,11 @@ import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOpti
  */
 export async function runGenerateOpenApi(options: OptionValues) {
     const logger = new AppLogger({
-        id: 'ts-openapi-codegen-cli',
         level: 'error',
-        logOutput: 'console',
+        transport: 'console',
+        // id: 'ts-openapi-codegen-cli',
+        // level: 'error',
+        // logOutput: 'console',
     });
     const hasMinimumRequiredOptions = !!options.input && !!options.output;
     if (hasMinimumRequiredOptions) {
