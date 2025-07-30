@@ -1,4 +1,4 @@
-import { traverseGeneric } from "./traverseGeneric";
+import { traverseObjectStructure } from "./traverseObjectStructure";
 
 /**
  * Get unique keys from object properties (set of options)
@@ -7,7 +7,7 @@ import { traverseGeneric } from "./traverseGeneric";
  */
 export function getUniqueObjectKeys(rawInput: Record<string, any>) {
     const result = new Set<string>();
-    traverseGeneric(rawInput, [], result);
+    traverseObjectStructure(rawInput, [], result);
 
     return Array.from(result);
 }
