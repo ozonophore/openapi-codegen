@@ -52,9 +52,10 @@ const callToTestOrderOfParams = (
 
     parameterOptionalStringWithDefault: string = 'Hello World!',
     parameterOptionalStringWithEmptyDefault: string = '',
+    parameterOptionalStringWithNoDefault?: string,
+
     parameterStringWithDefault: string = 'Hello World!',
     parameterStringWithEmptyDefault: string = '',
-    parameterOptionalStringWithNoDefault?: string,
 ): ApiRequestOptions => ({
     method: 'PUT',
     path: `/api/v{api-version}/defaults`,
@@ -62,9 +63,9 @@ const callToTestOrderOfParams = (
         parameterStringWithNoDefault: parameterStringWithNoDefault,
         parameterOptionalStringWithDefault: parameterOptionalStringWithDefault,
         parameterOptionalStringWithEmptyDefault: parameterOptionalStringWithEmptyDefault,
+        parameterOptionalStringWithNoDefault: parameterOptionalStringWithNoDefault,
         parameterStringWithDefault: parameterStringWithDefault,
         parameterStringWithEmptyDefault: parameterStringWithEmptyDefault,
-        parameterOptionalStringWithNoDefault: parameterOptionalStringWithNoDefault,
     },
 });
 
@@ -96,11 +97,11 @@ export type TDefaultsOptions = {
 
         parameterOptionalStringWithEmptyDefault: string,
 
+        parameterOptionalStringWithNoDefault?: string,
+
         parameterStringWithDefault: string,
 
         parameterStringWithEmptyDefault: string,
-
-        parameterOptionalStringWithNoDefault?: string,
     ) => ApiRequestOptions;
 };
 
@@ -171,9 +172,9 @@ export class DefaultsService {
      * @param parameterStringWithNoDefault This is a string with no default
      * @param parameterOptionalStringWithDefault This is a optional string with default
      * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
+     * @param parameterOptionalStringWithNoDefault This is a optional string with no default
      * @param parameterStringWithDefault This is a string with default
      * @param parameterStringWithEmptyDefault This is a string with empty default
-     * @param parameterOptionalStringWithNoDefault This is a optional string with no default
      * @throws ApiError
      */
     public static callToTestOrderOfParams(
@@ -181,18 +182,19 @@ export class DefaultsService {
 
         parameterOptionalStringWithDefault: string = 'Hello World!',
         parameterOptionalStringWithEmptyDefault: string = '',
+        parameterOptionalStringWithNoDefault?: string,
+
         parameterStringWithDefault: string = 'Hello World!',
         parameterStringWithEmptyDefault: string = '',
-        parameterOptionalStringWithNoDefault?: string,
     ): Promise<void> {
         return __request<void>(
             DefaultsOptions.callToTestOrderOfParams(
                 parameterStringWithNoDefault,
                 parameterOptionalStringWithDefault,
                 parameterOptionalStringWithEmptyDefault,
+                parameterOptionalStringWithNoDefault,
                 parameterStringWithDefault,
                 parameterStringWithEmptyDefault,
-                parameterOptionalStringWithNoDefault,
             ),
             OpenAPI,
         );

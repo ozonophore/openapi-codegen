@@ -57,7 +57,7 @@ $ openapi --help
     -os, --outputServices <value> Output directory for services
     -om, --outputModels <value>   Output directory for models
     -osm, --outputSchemas <value> Output directory for schemas
-    -c, --client <value>          HTTP client to generate [fetch, xhr, node] (default: "fetch")
+    -c, --httpClient <value>      HTTP client to generate [fetch, xhr, node] (default: "fetch")
     --useOptions <value>          Use options instead of arguments (default: false)
     --useUnionTypes <value>       Use union types instead of enums (default: false)
     --exportCore <value>          Write core files to disk (default: true)
@@ -69,6 +69,7 @@ $ openapi --help
     --enumPrefix <value>          Prefix for enum model(default: "E")
     --typePrefix <value>          Prefix for type model(default: "T")
     --useCancelableRequest        Use cancelled promise as returned data type in request(default: false)
+    -s, --sortByRequired          Property sorting strategy: simplified or extended
 
   Examples
     $ openapi --input ./spec.json
@@ -389,6 +390,39 @@ const MyForm = () => (
 
 ```
 
+### Cancelable promise `--useCancelableRequest`
+By default, the OpenAPI generator generates services for accessing the API that use non-cancellable requests. Therefore, we have added the ability to switch the generator to generate canceled API requests. To do this, use the flag `--useCancelableRequest`.
+An example of a cancelled request would look like this:
+
+```typescript
+export function request<T>(config: TOpenAPIConfig, options: ApiRequestOptions): CancelablePromise<T> {
+    return new CancelablePromise(async(resolve, reject, onCancel) => {
+        const url = `${config.BASE}${options.path}`.replace('{api-version}', config.VERSION);
+        try {
+            if (!onCancel.isCancelled) {
+                const response = await sendRequest(options, url, config, onCancel);
+                const responseBody = await getResponseBody(response);
+                const responseHeader = getResponseHeader(response, options.responseHeader);
+                const result: ApiResult = {
+                    url,
+                    ok: response.ok,
+                    status: response.status,
+                    statusText: response.statusText,
+                    body: responseHeader || responseBody,
+                };
+
+                catchErrors(options, result);
+                resolve(result.body);
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+}
+```
+
+### Sorting strategy for function arguments `--sortByRequired`
+By default, the OpenAPI generator sorts the parameters of service functions according to a simplified scheme. If you need a more strict sorting option, then you need to use the sortByRequired flag. The simplified sorting option is similar to the one used in version 0.2.3 of the OpenAPI generator. This flag allows you to upgrade to a new version of the generator if you are "stuck" on version 0.2.3.
 
 ### Enum with custom names and descriptions
 You can use `x-enum-varnames` and `x-enum-descriptions` in your spec to generate enum with custom names and descriptions.

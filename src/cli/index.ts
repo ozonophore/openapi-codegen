@@ -9,7 +9,7 @@ const APP_VERSION = '1.0.0';
 
 const program = new Command();
 
-program.version(APP_VERSION).name(APP_NAME).description('Описание').addHelpText('before', 'Дополнительный текст');
+program.version(APP_VERSION).name(APP_NAME).description('Description').addHelpText('before', 'Additional text');
 
 program
     .command('generate')
@@ -36,6 +36,7 @@ program
     .option('--useCancelableRequest <value>', 'Use cancelled promise as returned data type in request(default: false)', false)
     .addOption(new Option('-l, --logLevel <level>', 'Logging level').choices([...Object.values(ELogLevel)]).default(ELogLevel.ERROR))
     .addOption(new Option('-t, --logTarget <target>', 'Target of logging').choices([...Object.values(ELogOutput)]).default(ELogOutput.CONSOLE))
+    .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
     .action(async (options: OptionValues) => {
         await runGenerateOpenApi(options);
     });
