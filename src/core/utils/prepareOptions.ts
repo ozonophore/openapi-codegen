@@ -1,4 +1,4 @@
-import { Options } from "../../common/Options"
+import { TOptions } from "../../common/Options"
 import { HttpClient } from "../types/Enums"
 import { isBoolean } from "./isBoolean"
 
@@ -7,7 +7,7 @@ import { isBoolean } from "./isBoolean"
  * @param options 
  * @returns 
  */
-export function prepareOptions(options: Options): Options {
+export function prepareOptions(options: TOptions): TOptions {
     return {
         input: options.input || '',
         output: options.output || '',

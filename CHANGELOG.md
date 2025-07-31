@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.3] - 2025-07-24
+
+### Added
+
+- Added logging using the npm package winston;
+- Added the function of converting an array of option parameters into a multiple option model;
+- Added Joi schema filling for a set of options for checking default values;
+- Added a count of the time spent on code generation with information output to the terminal;
+
+### Fixed
+
+- Fixed the migration plan for multiple options;
+- Fixed unit tests for migrating option sets;
+
 ## [1.0.0-beta.2] - 2025-07-22
 
 ### Added

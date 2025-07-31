@@ -17,3 +17,4 @@ samples/swagger-codegen-cli-v2.jar
 samples/swagger-codegen-cli-v3.jar
 generated
 yarn.lock
+__logs__

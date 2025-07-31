@@ -1,6 +1,6 @@
 import { HttpClient } from "../core/types/Enums";
 
-export type Options = {
+export type TOptions = {
     input: string | Record<string, any>;
     output: string;
     outputCore?: string;
@@ -23,6 +23,6 @@ export type Options = {
     useCancelableRequest?: boolean;
 };
 
-export type MultiOptions = {
-  items: Options[];
-} & Omit<Options, 'input' | 'output'>;
+export type TMultiOptions = {
+  items: TOptions[];
+} & Omit<TOptions, 'input' | 'output'>;

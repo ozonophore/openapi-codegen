@@ -44,15 +44,20 @@ describe('migrateToLatestVersion', () => {
         assert.deepEqual(result, { value: expectedDataV3, schemaVersion: '2.0.0', schemaType: EVersionedSchemaType.OPTIONS }, 'Should migrate 1.0.1 data to 2.0.0 correctly');
     });
 
-    test.skip('@unit: should return null for invalid data after migration', () => {
+    test('@unit: should throw error if not conform any known version schema', () => {
         const dataV1 = { input: 'source/path', output: 'generated/path', client: 'invalid-client' };
-        const result = migrateToLatestVersion({
-            rawInput: dataV1,
-            versionedSchemas: optionsVersionedSchemas,
-            migrationPlans: optionsMigrationPlans,
-        });
 
-        assert.equal(result, null, 'Should return null for invalid data');
+        assert.throws(
+            () => {
+                migrateToLatestVersion({
+                    rawInput: dataV1,
+                    versionedSchemas: optionsVersionedSchemas,
+                    migrationPlans: optionsMigrationPlans,
+                });
+            },
+            /Data does not conform to any known version schema/,
+            'Should throw error if not conform any known version schema'
+        );
     });
 
     test('@unit: should throw error if no migration plan exists', () => {

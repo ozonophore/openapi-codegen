@@ -20,8 +20,9 @@ type MigrateToLatestResult = {
 export function migrateToLatestVersion({ rawInput, migrationPlans, versionedSchemas }: MigrateToLatestProps): MigrateToLatestResult | null {
     let currentData = rawInput;
 
+    const schemas = versionedSchemas.map(el => el.schema);
     const allRawInputKeys = getUniqueObjectKeys(rawInput);
-    const allSchemasKeys = getUniqueAllShemasKeys(versionedSchemas);
+    const allSchemasKeys = getUniqueAllShemasKeys(schemas);
 
     validateUnknownKeys(allRawInputKeys, allSchemasKeys);
 

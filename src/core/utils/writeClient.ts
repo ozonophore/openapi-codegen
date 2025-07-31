@@ -1,3 +1,5 @@
+import { ELogLevel, ELogOutput } from '../../common/Enums';
+import { Logger } from '../../common/Logger';
 import { HttpClient } from '../types/Enums';
 import { IOutput } from '../types/Models';
 import type { Client } from '../types/shared/Client.model';
@@ -96,6 +98,15 @@ export interface IWriteClientIndex {
  */
 export class WriteClient {
     private options: Map<string, IWriteClientIndex[]> = new Map();
+    private _logger: Logger;
+
+    constructor() {
+        this._logger = new Logger({
+            level: ELogLevel.ERROR,
+            instanceId: 'client',
+            logOutput: ELogOutput.CONSOLE,
+        });
+    }
 
     /**
      * Write our OpenAPI client, using the given templates at the given output
@@ -275,5 +286,9 @@ export class WriteClient {
             prepareAlias(value.schemas);
             await writeClientIndex(value);
         }
+    }
+
+    public get logger() {
+        return this._logger;
     }
 }
