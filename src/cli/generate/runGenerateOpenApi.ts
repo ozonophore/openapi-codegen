@@ -9,7 +9,7 @@ import { multiOptionsMigrationPlan } from '../../common/VersionedSchema/MultiOpt
 import { multiOptionsVersionedSchema } from '../../common/VersionedSchema/MultiOptionsVersionedSchemas';
 import { optionsMigrationPlans } from '../../common/VersionedSchema/OptionsMigrationPlans';
 import { optionsVersionedSchemas } from '../../common/VersionedSchema/OptionsVersionedSchemas';
-import { migrateToLatestVersion } from '../../common/VersionedSchema/Utils/migrateToLatestVersion';
+import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
 import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOptions';
 
@@ -45,12 +45,12 @@ export async function runGenerateOpenApi(options: OptionValues) {
         const isMultiOptions = isInstanceOfMultioptions(preparedOptions);
 
         const migratedOptions = isMultiOptions
-            ? migrateToLatestVersion({
+            ? migrateDataToLatestSchemaVersion({
                   rawInput: preparedOptions,
                   migrationPlans: multiOptionsMigrationPlan,
                   versionedSchemas: multiOptionsVersionedSchema,
               })
-            : migrateToLatestVersion({
+            : migrateDataToLatestSchemaVersion({
                   rawInput: preparedOptions,
                   migrationPlans: optionsMigrationPlans,
                   versionedSchemas: optionsVersionedSchemas,

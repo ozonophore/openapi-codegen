@@ -1,11 +1,11 @@
 import { TraverseHandler } from "../Types";
 
-export function traverseGeneric(
+export function traverseObjectStructure<T>(
   root: any,
-  handlers: TraverseHandler[],
-  result: Set<string>
+  handlers: TraverseHandler<T>[],
+  result: T
 ) {
-  const recurse = (v: any) => traverseGeneric(v, handlers, result);
+  const recurse = (v: any) => traverseObjectStructure(v, handlers, result);
 
   // We try "special" handlers
   let handled = false;
@@ -25,7 +25,9 @@ export function traverseGeneric(
       }
     } else {
       for (const key of Object.keys(root)) {
-        result.add(key);
+        if (result instanceof Set) {
+          result.add(key);
+        }
         recurse(root[key]);
       }
     }

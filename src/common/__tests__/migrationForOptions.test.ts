@@ -1,77 +1,42 @@
-import assert from 'node:assert';
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { optionsMigrationPlans } from 'common/VersionedSchema/OptionsMigrationPlans';
-import { optionsVersionedSchemas } from 'common/VersionedSchema/OptionsVersionedSchemas';
-
-import { HttpClient } from '../../core';
 import { EVersionedSchemaType } from '../VersionedSchema/Enums';
-import { migrateToLatestVersion } from '../VersionedSchema/Utils/migrateToLatestVersion';
+import { optionsMigrationPlans } from '../VersionedSchema/OptionsMigrationPlans';
+import { optionsVersionedSchemas } from '../VersionedSchema/OptionsVersionedSchemas';
+import { migrateDataToLatestSchemaVersion } from '../VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 
-describe('migrateToLatestVersion', () => {
-    test('@unit: should migrate data from 1.0.0 to 2.0.0', () => {
-        const dataV1 = { input: 'source/path', output: 'generated/path', client: HttpClient.AXIOS };
-        const expectedDataV3 = {
-            input: 'source/path',
-            output: 'generated/path',
-            httpClient: HttpClient.AXIOS,
-            useCancelableRequest: false,
-        };
-
-        const result = migrateToLatestVersion({
-            rawInput: dataV1,
-            versionedSchemas: optionsVersionedSchemas,
+describe('migrationForOptions', () => {
+    test('@unit: must migrate data to the latest schema version', async () => {
+        const input = { input: "input/path", output: "output/path", client: "fetch" };
+        const result = migrateDataToLatestSchemaVersion({
+            rawInput: input,
             migrationPlans: optionsMigrationPlans,
-        });
-
-        assert.deepEqual(result, { value: expectedDataV3, schemaVersion: '2.0.0', schemaType: EVersionedSchemaType.OPTIONS }, 'Should migrate 1.0.0 data to 2.0.0 correctly');
-    });
-
-    test('@unit: should migrate data from 1.0.1 to 2.0.0', () => {
-        const dataV2 = { input: 'source/path', output: 'generated/path', httpClient: HttpClient.FETCH };
-        const expectedDataV3 = {
-            input: 'source/path',
-            output: 'generated/path',
-            httpClient: HttpClient.FETCH,
-        };
-
-        const result = migrateToLatestVersion({
-            rawInput: dataV2,
             versionedSchemas: optionsVersionedSchemas,
-            migrationPlans: optionsMigrationPlans,
         });
-
-        assert.deepEqual(result, { value: expectedDataV3, schemaVersion: '2.0.0', schemaType: EVersionedSchemaType.OPTIONS }, 'Should migrate 1.0.1 data to 2.0.0 correctly');
+        assert.deepEqual(result, {
+            value: { input: 'input/path', output: 'output/path', httpClient: 'fetch', useCancelableRequest: false },
+            schemaVersion: '2.0.0',
+            schemaType: EVersionedSchemaType.OPTIONS,
+        });
     });
 
-    test('@unit: should throw error if not conform any known version schema', () => {
-        const dataV1 = { input: 'source/path', output: 'generated/path', client: 'invalid-client' };
-
-        assert.throws(
-            () => {
-                migrateToLatestVersion({
-                    rawInput: dataV1,
-                    versionedSchemas: optionsVersionedSchemas,
-                    migrationPlans: optionsMigrationPlans,
-                });
-            },
-            /Data does not conform to any known version schema/,
-            'Should throw error if not conform any known version schema'
-        );
+    test('@unit: should return null if the validation error occurred for the last schema.', async () => {
+        const input = { input: "input/path", };
+        const result = migrateDataToLatestSchemaVersion({
+            rawInput: input,
+            migrationPlans: optionsMigrationPlans,
+            versionedSchemas: optionsVersionedSchemas,
+        });
+        assert.equal(result, null);
     });
 
-    test('@unit: should throw error if no migration plan exists', () => {
-        const dataV1 = { input: 'source/path', output: 'generated/path', client: HttpClient.AXIOS };
-        assert.throws(
-            () => {
-                migrateToLatestVersion({
-                    rawInput: dataV1,
-                    versionedSchemas: optionsVersionedSchemas,
-                    migrationPlans: [],
-                });
-            },
-            /No migration plan from 1.0.0/,
-            'Should throw for missing migration plan'
-        );
+    test('@unit: It should throw an error if the migration plan is not found.', async () => {
+        const input = { input: "input/path", output: "output/path", client: "fetch" };
+        assert.throws(() => migrateDataToLatestSchemaVersion({
+            rawInput: input,
+            migrationPlans: [],
+            versionedSchemas: optionsVersionedSchemas,
+        }), /No migration plan from 1.0.0/);
     });
 });

@@ -19,8 +19,5 @@ export type GuessVersion = {
     index: number;
 }
 
-export type TraverseHandler = (
-  value: any,
-  recurse: (v: any) => void,
-  result: Set<string>
-) => boolean;
+// A universal function for traversing the structure of an object with result typing
+export type TraverseHandler<T> = (value: any, recurse: (v: any) => void, result: T) => boolean;

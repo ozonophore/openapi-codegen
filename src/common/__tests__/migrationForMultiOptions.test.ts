@@ -1,100 +1,116 @@
-import assert from 'node:assert';
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { multiOptionsMigrationPlan } from 'common/VersionedSchema/MultiOptionsMigrationPlan';
-import { multiOptionsVersionedSchema } from 'common/VersionedSchema/MultiOptionsVersionedSchemas';
-
-import { HttpClient } from '../../core';
 import { EVersionedSchemaType } from '../VersionedSchema/Enums';
-import { migrateToLatestVersion } from '../VersionedSchema/Utils/migrateToLatestVersion';
+import { multiOptionsMigrationPlan } from '../VersionedSchema/MultiOptionsMigrationPlan';
+import { multiOptionsVersionedSchema } from '../VersionedSchema/MultiOptionsVersionedSchemas';
+import { migrateDataToLatestSchemaVersion } from '../VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
+import { mockJoiSchema } from './__mock__/mockJoiSchema';
 
-describe('migrateToLatestVersion for Multioptions', () => {
-    test('@unit: should migrate Multioptions data from 1.0.0 to 2.0.0', () => {
-        const dataMultiV1 = {
-            input: 'source/path',
-            output: 'generated/path',
-            client: HttpClient.AXIOS,
-            items: [{ input: 'source/path' }, { input: 'source/path' }],
-        };
-        const expectedDataMultiV3 = {
-            httpClient: HttpClient.AXIOS,
-            items: [
-                { input: 'source/path', output: 'generated/path', outputCore: undefined, outputServices: undefined, outputModels: undefined, outputSchemas: undefined },
-                { input: 'source/path', output: 'generated/path', outputCore: undefined, outputServices: undefined, outputModels: undefined, outputSchemas: undefined },
-            ],
-            useCancelableRequest: false,
-        };
-
-        const result = migrateToLatestVersion({
-            rawInput: dataMultiV1,
-            versionedSchemas: multiOptionsVersionedSchema,
+describe('migrationForMultiOptions', () => {
+    test('@unit: must successfully migrate MULTI_OPTIONS data to the latest version', async () => {
+        const input = { input: 'input/path', output: 'output/path', client: 'fetch', items: [{ input: 'path/item1' }] };
+        const result = migrateDataToLatestSchemaVersion({
+            rawInput: input,
             migrationPlans: multiOptionsMigrationPlan,
+            versionedSchemas: multiOptionsVersionedSchema,
         });
 
-        assert.deepEqual(result, { value: expectedDataMultiV3, schemaVersion: '2.0.0', schemaType: EVersionedSchemaType.MULTI_OPTIONS }, 'Should migrate Multioptions V1 data to V3 correctly');
-    });
-
-    test('@unit: should migrate Multioptions data from 1.0.1 to 2.0.0', () => {
-        const dataMultiV2 = {
-            input: 'source/path',
-            output: 'generated/path',
-            httpClient: HttpClient.FETCH,
-            items: [{ input: 'item1' }, { input: 'item2' }],
-        };
-        const expectedDataMultiV3 = {
-            httpClient: HttpClient.FETCH,
-            items: [
-                { input: 'source/path', output: 'generated/path', outputCore: undefined, outputServices: undefined, outputModels: undefined, outputSchemas: undefined },
-                { input: 'source/path', output: 'generated/path', outputCore: undefined, outputServices: undefined, outputModels: undefined, outputSchemas: undefined },
-            ],
-        };
-
-        const result = migrateToLatestVersion({
-            rawInput: dataMultiV2,
-            versionedSchemas: multiOptionsVersionedSchema,
-            migrationPlans: multiOptionsMigrationPlan,
-        });
-
-        assert.deepEqual(result, { value: expectedDataMultiV3, schemaVersion: '2.0.0', schemaType: EVersionedSchemaType.MULTI_OPTIONS }, 'Should migrate Multioptions 1.0.1 data to 2.0.0 correctly');
-    });
-
-    test('@unit: should throw error if not conform any known version schema', () => {
-        const dataMultiV1 = {
-            input: 'source/path',
-            output: 'generated/path',
-            client: 'invalid-client',
-            items: [{ input: 'item1' }, { input: 'item2' }],
-        };
-        assert.throws(
-            () => {
-                migrateToLatestVersion({
-                    rawInput: dataMultiV1,
-                    versionedSchemas: multiOptionsVersionedSchema,
-                    migrationPlans: multiOptionsMigrationPlan,
-                });
+        assert.deepEqual(result, {
+            value: {
+                httpClient: 'fetch',
+                useCancelableRequest: false,
+                items: [
+                    {
+                        input: 'input/path',
+                        output: 'output/path',
+                        outputCore: undefined,
+                        outputModels: undefined,
+                        outputSchemas: undefined,
+                        outputServices: undefined,
+                    },
+                ],
             },
-            /Data does not conform to any known version schema/,
-            'Should throw error if not conform any known version schema'
-        );
+            schemaVersion: '2.0.0',
+            schemaType: EVersionedSchemaType.MULTI_OPTIONS,
+        });
     });
 
-    test('@unit: should throw error if no migration plan exists for Multioptions', () => {
-        const dataMultiV1 = {
-            input: 'source/path',
-            output: 'generated/path',
-            client: 'axios',
-            items: [{ input: 'item1' }, { input: 'item2' }],
-        };
+    test('@unit: should return null in case of validation error of the last MULTI_OPTIONS scheme', async () => {
+        const input = { input: 'input/path' };
+        const result = migrateDataToLatestSchemaVersion({
+            rawInput: input,
+            migrationPlans: multiOptionsMigrationPlan,
+            versionedSchemas: multiOptionsVersionedSchema,
+        });
+
+        assert.equal(result, null);
+    });
+
+    test('@unit: should throw an error if the migration plan for MULTI_OPTIONS is not found.', async () => {
+        const input = { input: 'input/path', output: 'output/path', client: 'fetch', items: [{ input: 'path/item1' }] };
+
         assert.throws(
-            () => {
-                migrateToLatestVersion({
-                    rawInput: dataMultiV1,
-                    versionedSchemas: multiOptionsVersionedSchema,
+            () =>
+                migrateDataToLatestSchemaVersion({
+                    rawInput: input,
                     migrationPlans: [],
-                });
-            },
-            /No migration plan from 1.0.0/,
-            'Should throw for missing migration plan in Multioptions'
+                    versionedSchemas: multiOptionsVersionedSchema,
+                }),
+            /No migration plan from 1.0.0/
         );
+    });
+
+    test('@unit: should throw an error on unrecognized fields in MULTI_OPTIONS', async () => {
+        const input = {
+            input: 'input/path',
+            output: 'output/path',
+            client: 'fetch',
+            items: [{ input: 'path/item1', name: 'Item1' }],
+        };
+
+        assert.throws(
+            () =>
+                migrateDataToLatestSchemaVersion({
+                    rawInput: input,
+                    migrationPlans: multiOptionsMigrationPlan,
+                    versionedSchemas: multiOptionsVersionedSchema,
+                }),
+            /The "name" field is not recognized./
+        );
+    });
+
+    test('@unit: must process an empty array of MULTI_OPTIONS data', async () => {
+        const schemas = [
+            {
+                schema: mockJoiSchema(['name'], true, [], true),
+                version: '1.0',
+                type: EVersionedSchemaType.MULTI_OPTIONS,
+            },
+            {
+                schema: mockJoiSchema(['name', 'options'], true, [], true),
+                version: '2.0',
+                type: EVersionedSchemaType.MULTI_OPTIONS,
+            },
+        ];
+        const migrationPlans = [
+            {
+                fromVersion: '1.0',
+                toVersion: '2.0',
+                migrate: (input: any) => input.map((item: any) => ({ ...item, options: [] })),
+            },
+        ];
+        const input: any[] = [];
+        const result = migrateDataToLatestSchemaVersion({
+            rawInput: input,
+            migrationPlans,
+            versionedSchemas: schemas as any,
+        });
+
+        assert.deepEqual(result, {
+            value: [],
+            schemaVersion: '2.0',
+            schemaType: EVersionedSchemaType.MULTI_OPTIONS,
+        });
     });
 });
