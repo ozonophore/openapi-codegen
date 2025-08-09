@@ -14,11 +14,11 @@ test('@unit: writeClient should write to filesystem', async () => {
     const mkdirCalls: string[] = [];
     const writeFileCalls: Array<[PathOrFileDescriptor, string | NodeJS.ArrayBufferView]> = [];
 
-    // Сохраняем оригинальные реализации
+    // We keep the original implementations
     const originalMkdir = fileSystem.mkdir;
     const originalWriteFile = fileSystem.writeFile;
 
-    // Мокаем функции
+    // Mock the functions
     fileSystem.mkdir = mock.fn(async (path: string) => {
         mkdirCalls.push(path);
         return path;
@@ -73,7 +73,7 @@ test('@unit: writeClient should write to filesystem', async () => {
     assert.ok(mkdirCalls.length > 0, 'mkdir should be called at least once');
     assert.ok(writeFileCalls.length > 0, 'writeFile should be called at least once');
 
-    // Восстанавливаем оригинальные реализации
+    // Restoring the original implementations
     fileSystem.mkdir = originalMkdir;
     fileSystem.writeFile = originalWriteFile;
 });

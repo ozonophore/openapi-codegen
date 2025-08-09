@@ -6,7 +6,8 @@ import { getOperationName } from '../../../utils/getOperationName';
 import { getOperationPath } from '../../../utils/getOperationPath';
 import { getOperationResponseHeader } from '../../../utils/getOperationResponseHeader';
 import { getOperationResults } from '../../../utils/getOperationResults';
-import { sortByRequired } from '../../../utils/sortByRequired';
+import { sortByRequiredExtended } from '../../../utils/sortByRequiredExtended';
+import { sortByRequiredSimple } from '../../../utils/sortByRequiredSimple';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiOperation } from '../types/OpenApiOperation.model';
@@ -53,6 +54,7 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
     }
 
     if (op.requestBody) {
+        const sortByRequired = this.context.sortByRequired ? sortByRequiredExtended : sortByRequiredSimple;
         const requestBodyDef = (op.requestBody.$ref ? this.context.get(op.requestBody.$ref) : op.requestBody) as OpenApiRequestBody;
         const requestBody = this.getOperationRequestBody(openApi, requestBodyDef, '');
         operation.imports.push(...requestBody.imports);

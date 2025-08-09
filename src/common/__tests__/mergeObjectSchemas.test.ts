@@ -28,7 +28,7 @@ describe('mergeObjectSchemas', () => {
         };
         const invalidData = {
             input: 'source/path',
-            httpClient: 'invalid-client', // Некорректное значение для httpClient
+            httpClient: 'invalid-client',
         };
 
         assert.equal(optionsSchemaV2.validate(validData).error, null, 'Valid data should pass optionsSchemaV2 validation');

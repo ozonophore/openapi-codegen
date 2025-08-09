@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.5] - 2025-08-09
+
+### Added
+
+- Added a function for a simplified way to sort arguments for service functions. The simplified sorting option is similar to the one used in version 0.2.3 of the OpenAPI generator;
+- Added the function of an extended option for sorting arguments of service functions;
+- Added a flag for selecting a sorting strategy for arguments of service functions in the CLI tool;
+
+### Updated
+
+- Updated the description in the README file;
+
 ## [1.0.0-beta.4] - 2025-08-02
 
 ### Added

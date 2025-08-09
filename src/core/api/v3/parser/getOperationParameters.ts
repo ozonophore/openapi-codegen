@@ -1,5 +1,6 @@
 import type { OperationParameters } from '../../../types/shared/OperationParameters.model';
-import { sortByRequired } from '../../../utils/sortByRequired';
+import { sortByRequiredExtended } from '../../../utils/sortByRequiredExtended';
+import { sortByRequiredSimple } from '../../../utils/sortByRequiredSimple';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiParameter } from '../types/OpenApiParameter.model';
@@ -57,6 +58,9 @@ export function getOperationParameters(this: Parser, openApi: OpenApi, parameter
             }
         }
     });
+
+
+    const sortByRequired = this.context.sortByRequired ? sortByRequiredExtended : sortByRequiredSimple;
 
     operationParameters.parameters = operationParameters.parameters.sort(sortByRequired);
     operationParameters.parametersPath = operationParameters.parametersPath.sort(sortByRequired);

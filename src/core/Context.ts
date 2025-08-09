@@ -7,6 +7,13 @@ import { getFileName } from './utils/getFileName';
 import { isString } from './utils/isString';
 import { dirName } from './utils/pathHelpers';
 
+type TContextProps = {
+    input: string | Record<string, any>;
+    output: IOutput;
+    prefix?: Prefix;
+    sortByRequired?: boolean;
+}
+
 /**
  * A Context wich can share a data between methods
  */
@@ -20,7 +27,9 @@ export class Context {
         type: 'T',
     };
 
-    constructor(input: string | Record<string, any>, output: IOutput, prefix?: Prefix) {
+    private _sortByRequired: boolean = false;
+
+    constructor({ input, output, prefix, sortByRequired }: TContextProps) {
         this._output = output;
         this._refs = {} as RefParser.$Refs;
         if (isString(input)) {
@@ -31,6 +40,11 @@ export class Context {
         if (prefix) {
             this.prefix = prefix;
         }
+
+        if (sortByRequired !== undefined && sortByRequired !== null) {
+            this._sortByRequired = sortByRequired;
+        }
+
         return this;
     }
 
@@ -79,5 +93,9 @@ export class Context {
             throw new Error('Context must be initialized');
         }
         return this._output;
+    }
+
+    public get sortByRequired() {
+        return this._sortByRequired;
     }
 }

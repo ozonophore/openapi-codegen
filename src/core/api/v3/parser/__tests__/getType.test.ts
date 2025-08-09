@@ -12,7 +12,7 @@ describe('getType', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const parser = new RefParser();
-        const context = new Context('test/spec/v3.yml', getOutputPaths({ output: './generated' }));
+        const context = new Context({input: 'test/spec/v3.yml', output: getOutputPaths({ output: './generated' })});
         context.addRefs(await parser.resolve('test/spec/v3.yml'));
         const type = new Parser(context).getType('int', '');
         assert.strictEqual(type.type, 'number');
@@ -25,7 +25,7 @@ describe('getType', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const parser = new RefParser();
-        const context = new Context('test/spec/v3.yml', getOutputPaths({ output: './generated' }));
+        const context = new Context({input: 'test/spec/v3.yml', output: getOutputPaths({ output: './generated' })});
         context.addRefs(await parser.resolve('test/spec/v3.yml'));
         const type = new Parser(context).getType('schemas/ModelWithString.yml', '');
         assert.strictEqual(type.type, 'IModelWithString');
@@ -54,7 +54,7 @@ describe('getType', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const parser = new RefParser();
-        const context = new Context(object, getOutputPaths({ output: './generated' }));
+        const context = new Context({input: object, output: getOutputPaths({ output: './generated' })});
         context.addRefs(await parser.resolve(object));
         const type = new Parser(context).getType('#/components/schemas/someSpecialSchema', '');
         assert.strictEqual(type.type, 'ISomeSpecialSchema');

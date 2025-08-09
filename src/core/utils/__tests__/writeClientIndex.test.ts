@@ -8,7 +8,7 @@ import { writeClientIndex } from '../writeClientIndex';
 test('@unit: writeClientIndex writes to filesystem', async () => {
     const writeFileCalls: Array<[PathOrFileDescriptor, string | NodeJS.ArrayBufferView]> = [];
 
-    // Переприсваиваем функцию вручную с моком
+    // Re-assigning the function manually with a mock
     const originalWriteFile = fileSystem.writeFile;
     fileSystem.writeFile = mock.fn(async (path: PathOrFileDescriptor, content: string | NodeJS.ArrayBufferView) => {
         writeFileCalls.push([path, content]);
@@ -39,6 +39,6 @@ test('@unit: writeClientIndex writes to filesystem', async () => {
         'Expected writeFile to be called with index content for index.ts'
     );
 
-    // Восстанавливаем оригинальную функцию
+    // Restoring the original function
     fileSystem.writeFile = originalWriteFile;
 });

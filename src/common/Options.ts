@@ -21,6 +21,7 @@ export type TOptions = {
     enumPrefix?: string;
     typePrefix?: string;
     useCancelableRequest?: boolean;
+    sortByRequired?: boolean;
 };
 
 export type TMultiOptions = {
