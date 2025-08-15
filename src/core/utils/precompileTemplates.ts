@@ -17,7 +17,7 @@ const header = `// This is an automatically generated file for the hbs template.
 export default `;
 
 /**
- * Фунукция для пре-компеляции шаблонов (hbs) перед дальнейшим использованием
+ * Function for template precompilation (hbs) before further use
  */
 const precompileTemplates = () => {
     const logger = new Logger({

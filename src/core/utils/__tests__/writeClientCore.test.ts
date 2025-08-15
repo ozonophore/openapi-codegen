@@ -10,7 +10,7 @@ import { writeClientCore } from '../writeClientCore';
 test('@unit: writeClientCore writes to filesystem', async () => {
     const writeFileCalls: Array<[PathOrFileDescriptor, string | NodeJS.ArrayBufferView]> = [];
 
-    // Переприсваиваем функцию вручную с моком
+    // Re-assigning the function manually with a mock
     const originalWriteFile = fileSystem.writeFile;
     fileSystem.writeFile = mock.fn(async (path: PathOrFileDescriptor, content: string | NodeJS.ArrayBufferView) => {
         writeFileCalls.push([path, content]);
@@ -74,6 +74,6 @@ test('@unit: writeClientCore writes to filesystem', async () => {
         'Expected writeFile to be called with httpStatusCode content for HttpStatusCode.ts'
     );
 
-    // Восстанавливаем оригинальную функцию
+    // Restoring the original function
     fileSystem.writeFile = originalWriteFile;
 });

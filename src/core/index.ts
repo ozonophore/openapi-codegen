@@ -46,6 +46,7 @@ export { HttpClient } from './types/Enums';
  * @param enumPrefix: Prefix for enum model(E)
  * @param typePrefix: Prefix for type model(T)
  * @param useCancelableRequest Use cancelable request type.
+ * @param sortByRequired Property sorting strategy: simplified or extended
  */
 async function generateFrom(
     {
@@ -69,6 +70,7 @@ async function generateFrom(
         enumPrefix = 'E',
         typePrefix = 'T',
         useCancelableRequest = false,
+        sortByRequired = false,
     }: TOptions,
     writeClient: WriteClient
 ): Promise<void> {
@@ -79,7 +81,8 @@ async function generateFrom(
         outputModels,
         outputSchemas,
     });
-    const context = new Context(input, outputPaths, { interface: interfacePrefix, enum: enumPrefix, type: typePrefix });
+
+    const context = new Context({ input, output: outputPaths, prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix }, sortByRequired });
     const openApi = isString(input) ? await getOpenApiSpec(context, input) : input;
     const openApiVersion = getOpenApiVersion(openApi);
     const templates = registerHandlebarTemplates({

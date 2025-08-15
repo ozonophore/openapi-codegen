@@ -1,3 +1,4 @@
+import { GROUP_PRIORITY_EXTENDED, GROUP_PRIORITY_SIMPLE } from './Consts';
 import { TypeRef } from './Enums';
 
 /**
@@ -35,3 +36,7 @@ export interface Prefix {
     enum: string;
     type: string;
 }
+
+export type TPropertyGroupExtended = keyof typeof GROUP_PRIORITY_EXTENDED;
+
+export type TPropertyGroupSimple = keyof typeof GROUP_PRIORITY_SIMPLE;

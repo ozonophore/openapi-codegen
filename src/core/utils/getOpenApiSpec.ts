@@ -41,15 +41,8 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
         throw new Error(`Could not read OpenApi spec: "${absoluteInput}"`);
     }
 
-    // 2. Вызываем статический метод вместо new RefParser()
-    //    resolve() разбирает все $ref, но не разворачивает ссылки
     const resolvedRefs = await RefParser.resolve(absoluteInput);
 
-    // Если вам нужны сами ссылки (instances of $Refs), можно сделать так:
-    // const $refs = (await RefParser.parse(absoluteInput)).$refs;
-    // context.addRefs($refs);
-
-    // В вашем случае — пробрасываем то, что вернул resolve()
     context.addRefs(resolvedRefs);
 
     const raw = resolvedRefs.get(absoluteInput);
@@ -63,7 +56,6 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
     for (const [pathKey, value] of Object.entries(mainSchema.paths)) {
         const maybeRef = value as OpenApiReference;
         if (maybeRef.$ref) {
-            // ваша функция replaceRef возвращает раскрученный объект
             newPaths[pathKey] = replaceRef(context.get(maybeRef.$ref) as OpenApiReference, context, dirName(maybeRef.$ref));
         } else {
             newPaths[pathKey] = value;

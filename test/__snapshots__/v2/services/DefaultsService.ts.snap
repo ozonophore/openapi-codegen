@@ -50,21 +50,22 @@ const callWithDefaultOptionalParameters = (
 const callToTestOrderOfParams = (
     parameterStringWithNoDefault: string,
 
-    parameterStringWithDefault: string = 'Hello World!',
-    parameterStringWithEmptyDefault: string = '',
     parameterOptionalStringWithDefault: string = 'Hello World!',
     parameterOptionalStringWithEmptyDefault: string = '',
     parameterOptionalStringWithNoDefault?: string,
+
+    parameterStringWithDefault: string = 'Hello World!',
+    parameterStringWithEmptyDefault: string = '',
 ): ApiRequestOptions => ({
     method: 'PUT',
     path: `/api/v{api-version}/defaults`,
     query: {
         parameterStringWithNoDefault: parameterStringWithNoDefault,
-        parameterStringWithDefault: parameterStringWithDefault,
-        parameterStringWithEmptyDefault: parameterStringWithEmptyDefault,
         parameterOptionalStringWithDefault: parameterOptionalStringWithDefault,
         parameterOptionalStringWithEmptyDefault: parameterOptionalStringWithEmptyDefault,
         parameterOptionalStringWithNoDefault: parameterOptionalStringWithNoDefault,
+        parameterStringWithDefault: parameterStringWithDefault,
+        parameterStringWithEmptyDefault: parameterStringWithEmptyDefault,
     },
 });
 
@@ -92,15 +93,15 @@ export type TDefaultsServiceOptions = {
     callToTestOrderOfParams: (
         parameterStringWithNoDefault: string,
 
-        parameterStringWithDefault: string,
-
-        parameterStringWithEmptyDefault: string,
-
         parameterOptionalStringWithDefault: string,
 
         parameterOptionalStringWithEmptyDefault: string,
 
         parameterOptionalStringWithNoDefault?: string,
+
+        parameterStringWithDefault: string,
+
+        parameterStringWithEmptyDefault: string,
     ) => ApiRequestOptions;
 };
 
@@ -169,30 +170,31 @@ export class DefaultsService {
     }
     /**
      * @param parameterStringWithNoDefault This is a string with no default
-     * @param parameterStringWithDefault This is a string with default
-     * @param parameterStringWithEmptyDefault This is a string with empty default
      * @param parameterOptionalStringWithDefault This is a optional string with default
      * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
      * @param parameterOptionalStringWithNoDefault This is a optional string with no default
+     * @param parameterStringWithDefault This is a string with default
+     * @param parameterStringWithEmptyDefault This is a string with empty default
      * @throws ApiError
      */
     public static callToTestOrderOfParams(
         parameterStringWithNoDefault: string,
 
-        parameterStringWithDefault: string = 'Hello World!',
-        parameterStringWithEmptyDefault: string = '',
         parameterOptionalStringWithDefault: string = 'Hello World!',
         parameterOptionalStringWithEmptyDefault: string = '',
         parameterOptionalStringWithNoDefault?: string,
+
+        parameterStringWithDefault: string = 'Hello World!',
+        parameterStringWithEmptyDefault: string = '',
     ): Promise<void> {
         return __request<void>(
             DefaultsServiceOptions.callToTestOrderOfParams(
                 parameterStringWithNoDefault,
-                parameterStringWithDefault,
-                parameterStringWithEmptyDefault,
                 parameterOptionalStringWithDefault,
                 parameterOptionalStringWithEmptyDefault,
                 parameterOptionalStringWithNoDefault,
+                parameterStringWithDefault,
+                parameterStringWithEmptyDefault,
             ),
             OpenAPI,
         );
