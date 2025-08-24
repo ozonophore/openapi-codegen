@@ -1,45 +1,20 @@
-import { ELogLevel, ELogOutput } from '../../common/Enums';
-import { Logger } from '../../common/Logger';
-import { HttpClient } from '../types/Enums';
-import { IOutput } from '../types/Models';
-import type { Client } from '../types/shared/Client.model';
-import { relative, resolve } from '../utils/pathHelpers';
-import { fileSystem } from './fileSystem';
-import { Templates } from './registerHandlebarTemplates';
-import { unique } from './unique';
-import { writeClientCore } from './writeClientCore';
-import { IClientIndex, IModel } from './writeClientIndex';
-import { writeClientIndex } from './writeClientIndex';
-import { writeClientModels } from './writeClientModels';
-import { writeClientSchemas } from './writeClientSchemas';
-import { writeClientServices } from './writeClientServices';
-
-function sortModelByName(a: IModel, b: IModel): number {
-    if (a.name > b.name) {
-        return 1;
-    }
-    if (a.name < b.name) {
-        return -1;
-    }
-    return 0;
-}
-
-function prepareAlias(models: IModel[]) {
-    let modelPrevious: IModel | undefined = undefined;
-    let index = 1;
-    for (const model of models) {
-        if (modelPrevious && model.name === modelPrevious.name) {
-            model.alias = `${model.name}$${index}`;
-            if (!modelPrevious.alias) {
-                modelPrevious.alias = `${modelPrevious.name}$${index - 1}`;
-            }
-            index++;
-        } else if (modelPrevious && model.name !== modelPrevious.name) {
-            index = 1;
-        }
-        modelPrevious = model;
-    }
-}
+import { ELogLevel, ELogOutput } from '../common/Enums';
+import { Logger } from '../common/Logger';
+import { HttpClient } from './types/Enums';
+import { IOutput } from './types/Models';
+import type { Client } from './types/shared/Client.model';
+import { relative, resolve } from './utils/pathHelpers';
+import { fileSystem } from './utils/fileSystem';
+import { Templates } from './utils/registerHandlebarTemplates';
+import { unique } from './utils/unique';
+import { writeClientCore } from './utils/writeClientCore';
+import { IClientIndex, IModel, IService } from './utils/writeClientIndex';
+import { writeClientIndex } from './utils/writeClientIndex';
+import { writeClientModels } from './utils/writeClientModels';
+import { writeClientSchemas } from './utils/writeClientSchemas';
+import { writeClientServices } from './utils/writeClientServices';
+import { prepareAlias } from './utils/prepareAlias';
+import { sortModelByName } from './utils/sortModelByName';
 
 /**
  * @param client Client object with all the models, services, etc.
@@ -202,33 +177,39 @@ export class WriteClient {
     }
 
     async combineAndWrite() {
+        const result = this.buildClientIndexMap();
+        await this.finalizeAndWright(result);
+    }
+
+    // TODO: Сделать!
+    // async combineAndWrightSimple() {
+    //     const result = this.buildSimpleClientIndexMap();
+    //     await this.finalizeAndWright(result);
+    // }
+
+    public get logger() {
+        return this._logger;
+    }
+
+    private buildClientIndexMap(): Map<string, IClientIndex> {
         const result: Map<string, IClientIndex> = new Map<string, IClientIndex>();
         for (const [key, value] of this.options.entries()) {
             for (const item of value) {
-                const { exportCore, outputPaths, exportModels, exportSchemas, exportServices, client, templates } = item;
-                const outputCore = outputPaths.outputCore ? outputPaths.outputCore : resolve(key, 'core');
-                const outputModels = outputPaths.outputModels ? outputPaths.outputModels : resolve(key, 'models');
-                const outputSchemas = outputPaths.outputSchemas ? outputPaths.outputSchemas : resolve(key, 'schemas');
-                const outputServices = outputPaths.outputServices ? outputPaths.outputServices : resolve(key, 'services');
-                let clientIndex = result.get(`${key}`);
-                if (!clientIndex) {
-                    clientIndex = {
-                        templates: templates,
-                        outputPath: key,
-                        core: [],
-                        models: [],
-                        schemas: [],
-                        services: [],
-                    };
-                    result.set(`${key}`, clientIndex);
-                }
+                const { exportCore, outputPaths, exportModels, exportSchemas, exportServices, client, templates, useUnionTypes } = item;
+                const outputCore = this.getOutputPath(outputPaths?.outputCore, key, 'core');
+                const outputModels = this.getOutputPath(outputPaths?.outputModels, key, 'models');
+                const outputSchemas = this.getOutputPath(outputPaths?.outputSchemas, key, 'schemas');
+                const outputServices = this.getOutputPath(outputPaths?.outputServices, key, 'services');
+
+                const clientIndex = this.ensureClientIndex(result, key, templates);
+
                 if (exportCore) {
-                    const relativePath = `${relative(key, outputCore)}`;
-                    const clientCore = clientIndex.core.find(item => item === relativePath);
-                    if (!clientCore) {
-                        clientIndex.core.push(relativePath);
+                    const rel = relative(key, outputCore);
+                    if (!clientIndex.core.includes(rel)) {
+                        clientIndex.core.push(rel);
                     }
                 }
+
                 if (exportModels || exportSchemas) {
                     const relativePathModel = `${relative(key, outputModels)}`;
                     const relativePathSchema = `${relative(key, outputSchemas)}`;
@@ -239,46 +220,42 @@ export class WriteClient {
                             path: model.path,
                             package: relativePathModel,
                             enum: model.enum && model.enum.length > 0,
-                            useUnionTypes: item.useUnionTypes,
+                            useUnionTypes,
                             enums: model.enums && model.enums.length > 0,
                         };
-                        if (exportModels) {
-                            const value = clientIndex.models.find(
-                                item =>
-                                    item.name === modelFinal.name &&
-                                    item.path === modelFinal.path &&
-                                    item.package === modelFinal.package &&
-                                    item.enum === modelFinal.enum &&
-                                    item.enums === modelFinal.enums &&
-                                    item.useUnionTypes === modelFinal.useUnionTypes
-                            );
-                            if (!value) {
-                                clientIndex.models.push(modelFinal);
-                            }
+
+                        if (exportModels && clientIndex.models.some(m => this.isSameModel(m, modelFinal))) {
+                            clientIndex.models.push(modelFinal);
                         }
+
                         if (exportSchemas) {
-                            const schema = { ...modelFinal, package: relativePathSchema };
-                            const indexValue = clientIndex.schemas.find(item => item.name === schema.name && item.path === schema.path && item.package === schema.package);
-                            if (!indexValue) {
+                            const schema = {...modelFinal, package: relativePathSchema};
+
+                            if (!clientIndex.schemas.some(s => this.isSameShema(s, schema))) {
                                 clientIndex.schemas.push(schema);
                             }
                         }
                     }
                 }
-                if (exportServices) {
+
+                if (exportSchemas) {
                     const relativeService = `${relative(key, outputServices)}`;
                     for (const service of client.services) {
-                        const valueIndex = clientIndex.services.find(item => item.name === service.name && item.package === relativeService);
-                        if (!valueIndex) {
+                        if (!clientIndex.services.some(s => this.isSomeService(s, service.name, relativeService))) {
                             clientIndex.services.push({
                                 name: service.name,
                                 package: relativeService,
-                            });
+                            })
                         }
                     }
                 }
             }
         }
+
+        return result;
+    }
+
+    private async finalizeAndWright(result: Map<string, IClientIndex>): Promise<void> {
         for (const value of result.values()) {
             value.models = value.models.filter(unique).sort(sortModelByName);
             prepareAlias(value.models);
@@ -288,7 +265,45 @@ export class WriteClient {
         }
     }
 
-    public get logger() {
-        return this._logger;
+    private getOutputPath(output: string | undefined, key: string, fallback: string) {
+        return output ? output : resolve(key, fallback);
+    }
+
+    private ensureClientIndex(
+        map: Map<string, IClientIndex>,
+        key: string,
+        templates: any
+    ): IClientIndex {
+        if (!map.has(key)) {
+            map.set(key, {
+                templates,
+                outputPath: key,
+                core: [],
+                models: [],
+                schemas: [],
+                services: [],
+            })
+        }
+
+        return map.get(key)!;
+    }
+
+    private isSameModel(a: IModel, b: IModel): boolean {
+        return (
+            a.name === b.name &&
+            a.path === b.path &&
+            a.package === b.package &&
+            a.enum === b.enum &&
+            a.enums === b.enums &&
+            a.useUnionTypes === b.useUnionTypes
+        );
+    }
+
+    private isSameShema(a: IModel, b: IModel): boolean {
+        return a.name === b.name && a.path === b.path && a.package === b.package
+    }
+
+    private isSomeService(a: IService, name: string, pkg: string): boolean {
+        return a.name === name && a.package === pkg;
     }
 }

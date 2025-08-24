@@ -37,6 +37,12 @@ program
     .addOption(new Option('-l, --logLevel <level>', 'Logging level').choices([...Object.values(ELogLevel)]).default(ELogLevel.ERROR))
     .addOption(new Option('-t, --logTarget <target>', 'Target of logging').choices([...Object.values(ELogOutput)]).default(ELogOutput.CONSOLE))
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
+    .hook('preAction', (thisCommand, actionCommand) => {
+        console.group('[GENERATE]');
+        console.log('---___---___---', {thisCommand});
+        console.log('---___---___---', {actionCommand});
+        console.groupEnd();
+    })
     .action(async (options: OptionValues) => {
         await runGenerateOpenApi(options);
     });

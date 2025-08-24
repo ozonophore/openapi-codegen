@@ -18,7 +18,7 @@ import { isString } from './utils/isString';
 import { postProcessClient } from './utils/postProcessClient';
 import { prepareOptions } from './utils/prepareOptions';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
-import { WriteClient } from './utils/writeClient';
+import { WriteClient } from './WriteClient';
 
 export { HttpClient } from './types/Enums';
 
