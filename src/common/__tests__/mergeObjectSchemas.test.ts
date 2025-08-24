@@ -3,7 +3,7 @@ import { describe, test } from 'node:test';
 
 import Joi from 'joi';
 
-import {optionsSchemaV2} from '../VersionedSchema/OptionsSchemaV2';
+import {optionsSchemaV2} from '../VersionedSchema/OptionsVersioned/OptionsSchemaV2';
 import {mergeObjectSchemas} from '../VersionedSchema/Utils/mergeObjectSchemas';
 
 describe('mergeObjectSchemas', () => {

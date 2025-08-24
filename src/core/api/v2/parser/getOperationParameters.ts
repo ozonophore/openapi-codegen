@@ -5,7 +5,7 @@ import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiParameter } from '../types/OpenApiParameter.model';
 
-export function getOperationParameters(this: Parser, openApi: OpenApi, parameters: OpenApiParameter[]): OperationParameters {
+export function getOperationParameters(this: Parser, openApi: OpenApi, parameters: OpenApiParameter[], parentRef: string): OperationParameters {
     const operationParameters: OperationParameters = {
         imports: [],
         parameters: [],
@@ -20,7 +20,7 @@ export function getOperationParameters(this: Parser, openApi: OpenApi, parameter
     // Iterate over the parameters
     parameters.forEach(parameterOrReference => {
         const parameterDef = (parameterOrReference.$ref ? this.context.get(parameterOrReference.$ref) : parameterOrReference) as OpenApiParameter;
-        const parameter = this.getOperationParameter(openApi, parameterDef);
+        const parameter = this.getOperationParameter(openApi, parameterDef, parentRef);
 
         // We ignore the "api-version" param, since we do not want to add this
         // as the first / default parameter for each of the service calls.

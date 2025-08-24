@@ -25,6 +25,17 @@ export const specialParametersSchemas = Joi.object({
 });
 
 /**
+ * The scheme of the "accessibility" parameter set.
+ */
+export const specialParametersSchemasV2 = Joi.object({
+    useOptions: Joi.boolean().optional(),
+    useUnionTypes: Joi.boolean().optional(),
+
+    excludeCoreServiceFiles: Joi.boolean().optional(),
+    includeSchemasFiles: Joi.boolean().optional(),
+});
+
+/**
  * The scheme of additional parameters.
  */
 export const additionalParametersSchema = Joi.object({
@@ -36,8 +47,27 @@ export const additionalParametersSchema = Joi.object({
 });
 
 /**
+ * The scheme of additional parameters.
+ */
+export const additionalParametersSchemaV2 = Joi.object({
+    request: Joi.string().optional(),
+    interfacePrefix: Joi.string().optional(),
+    enumPrefix: Joi.string().optional(),
+    typePrefix: Joi.string().optional(),
+});
+
+/**
  * The schema of experimental parameters.
  */
 export const experimentalParametersSchema = Joi.object({
     useCancelableRequest: Joi.boolean().optional(),
+});
+
+/**
+ * The schema of experimental parameters.
+ */
+export const experimentalParametersSchemaV2 = Joi.object({
+    useCancelableRequest: Joi.boolean().optional(),
+    sortByRequired: Joi.boolean().optional(),
+    useSeparatedIndexes: Joi.boolean().optional(),
 });

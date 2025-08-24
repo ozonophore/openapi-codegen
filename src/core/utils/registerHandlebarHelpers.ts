@@ -1,6 +1,6 @@
 import * as Handlebars from 'handlebars/runtime';
 
-import { HttpClient } from '../types/Enums';
+import { HttpClient } from '../types/enums/HttpClient.enum';
 import { Enum } from '../types/shared/Enum.model';
 import { Model } from '../types/shared/Model.model';
 import { unique } from './unique';

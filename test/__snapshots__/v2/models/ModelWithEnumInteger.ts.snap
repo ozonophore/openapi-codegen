@@ -5,14 +5,14 @@
 /**
  * This is a model with one number property
  */
-export interface IModelWithEnumInteger {
+export interface ModelWithEnumInteger {
     /**
      * VALUE_1=1,VALUE_2=2,VALUE_3=3
      */
-    prop?: IModelWithEnumInteger.prop;
+    prop?: ModelWithEnumInteger.prop;
 }
 
-export namespace IModelWithEnumInteger {
+export namespace ModelWithEnumInteger {
     /**
      * VALUE_1=1,VALUE_2=2,VALUE_3=3
      */

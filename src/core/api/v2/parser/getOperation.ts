@@ -11,7 +11,7 @@ import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiOperation } from '../types/OpenApiOperation.model';
 
-export function getOperation(this: Parser, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters): Operation {
+export function getOperation(this: Parser, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, parentRef: string): Operation {
     const serviceName = op.tags?.[0] || 'Service';
     const serviceClassName = getServiceClassName(serviceName);
     const operationNameFallback = `${method}${serviceClassName}`;
@@ -42,7 +42,7 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
 
     // Parse the operation parameters (path, query, body, etc).
     if (op.parameters) {
-        const parameters = this.getOperationParameters(openApi, op.parameters);
+        const parameters = this.getOperationParameters(openApi, op.parameters, parentRef);
         operation.imports.push(...parameters.imports);
         operation.parameters.push(...parameters.parameters);
         operation.parametersPath.push(...parameters.parametersPath);
@@ -55,7 +55,7 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
 
     // Parse the operation responses.
     if (op.responses) {
-        const operationResponses = this.getOperationResponses(openApi, op.responses);
+        const operationResponses = this.getOperationResponses(openApi, op.responses, parentRef);
         const operationResults = getOperationResults(operationResponses);
         operation.errors = getOperationErrors(operationResponses);
         operation.responseHeader = getOperationResponseHeader(operationResults);

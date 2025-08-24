@@ -5,12 +5,13 @@ import { getEnum } from '../../../utils/getEnum';
 import { getEnumFromDescription } from '../../../utils/getEnumFromDescription';
 import { getOperationParameterName } from '../../../utils/getOperationParameterName';
 import { getPattern } from '../../../utils/getPattern';
+import { normalizeRef } from '../../../utils/normalizeRef';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiParameter } from '../types/OpenApiParameter.model';
 import { getOperationParameterDefault } from './getOperationParameterDefault';
 
-export function getOperationParameter(this: Parser, openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
+export function getOperationParameter(this: Parser, openApi: OpenApi, parameter: OpenApiParameter, parentRef: string): OperationParameter {
     const operationParameter: OperationParameter = {
         path: '',
         in: parameter.in,
@@ -47,7 +48,8 @@ export function getOperationParameter(this: Parser, openApi: OpenApi, parameter:
     };
 
     if (parameter.$ref) {
-        const definitionRef = this.getType(parameter.$ref, '');
+        const normalizedRef = normalizeRef(parameter.$ref, parentRef);
+        const definitionRef = this.getType(parameter.$ref, normalizedRef);
         operationParameter.export = 'reference';
         operationParameter.type = definitionRef.type;
         operationParameter.base = definitionRef.base;

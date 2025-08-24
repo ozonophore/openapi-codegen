@@ -1,8 +1,8 @@
 import { ELogLevel, ELogOutput } from '../../common/Enums';
 import { Logger } from '../../common/Logger';
 import { convertArrayToObject, loadConfigIfExists } from '../../common/Utils';
-import { multiOptionsVersionedSchema } from '../../common/VersionedSchema/MultiOptionsVersionedSchemas';
-import { optionsVersionedSchemas } from '../../common/VersionedSchema/OptionsVersionedSchemas';
+import { multiOptionsVersionedSchema } from '../../common/VersionedSchema/MultiOptionsVersioned/MultiOptionsVersionedSchemas';
+import { optionsVersionedSchemas } from '../../common/VersionedSchema/OptionsVersioned/OptionsVersionedSchemas';
 import { getErrorFieldsFromValidation } from '../../common/VersionedSchema/Utils/getErrorFieldsFromValidation';
 import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOptions';
 

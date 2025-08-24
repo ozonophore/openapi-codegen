@@ -1,6 +1,6 @@
 {
     "name": "ts-openapi-codegen",
-    "version": "1.0.0-beta.6",
+    "version": "1.0.0-beta.7",
     "description": "Library that generates Typescript clients based on the OpenAPI specification. It bases on openapi-typescript-codegen",
     "author": "Alexey Zverev",
     "homepage": "https://github.com/ozonophore/openapi-codegen.git",
@@ -44,7 +44,7 @@
     ],
     "scripts": {
         "clean": "rimraf ./dist ./generated ./test/generated ./test/e2e/generated ./samples/generated ./coverage ./node_modules/.cache",
-        "build": "tsc -p .",
+        "build": "tsc -p . && npm run test:unit",
         "build:hbs": "tsx ./src/core/utils/precompileTemplates.ts",
         "release": "npm run build:hbs && npm run build",
         "run": "node ./test/index.js",
@@ -56,9 +56,11 @@
         "prettier": "prettier \"./src/**/*.ts\" \"./types/index.d.ts\" --check",
         "prettier:fix": "prettier \"./src/**/*.ts\" \"./types/index.d.ts\" --write",
         "prepublish": "npm run clean && npm run release",
-        "codecov": "codecov --token=89a9fe76-2714-4b5b-83e3-9d809615064d"
+        "codecov": "codecov --token=89a9fe76-2714-4b5b-83e3-9d809615064d",
+        "find-deadcode": "ts-prune -e"
     },
     "dependencies": {
+        "@apidevtools/swagger-parser": "12.0.0",
         "boxen": "^5.1.2",
         "camelcase": "6.2.0",
         "chalk": "^4.1.2",
@@ -69,7 +71,6 @@
         "handlebars": "4.7.6",
         "joi": "^17.13.3",
         "json-schema": "0.4.0",
-        "json-schema-ref-parser": "9.0.7",
         "leven": "^4.0.0",
         "mkdirp": "1.0.4",
         "rimraf": "3.0.2",
@@ -89,6 +90,7 @@
         "@types/configstore": "^6.0.2",
         "@types/express": "4.17.13",
         "@types/figlet": "^1.5.8",
+        "@types/glob": "^8.1.0",
         "@types/json-schema": "^7.0.15",
         "@types/lodash-es": "^4.17.12",
         "@types/node": "22.5.1",
@@ -117,6 +119,7 @@
         "prettier": "^3.4.2",
         "puppeteer": "10.1.0",
         "qs": "6.10.1",
+        "ts-prune": "^0.10.3",
         "tsx": "^4.20.3",
         "typescript": "5.8.3"
     },

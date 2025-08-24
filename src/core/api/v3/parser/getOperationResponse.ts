@@ -3,6 +3,7 @@ import get from 'lodash-es/get'
 import type { OperationResponse } from '../../../types/shared/OperationResponse.model';
 import { getComment } from '../../../utils/getComment';
 import { getPattern } from '../../../utils/getPattern';
+import { normalizeRef } from '../../../utils/normalizeRef';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiResponse } from '../types/OpenApiResponse.model';
@@ -35,7 +36,8 @@ export function getOperationResponse(this: Parser, openApi: OpenApi, response: O
         const content = getContent(response.content);
         if (content) {
             if (content?.schema?.$ref) {
-                const model = this.getType(content.schema.$ref, parentRef);
+                const normalizedRef = normalizeRef(content.schema.$ref, parentRef);
+                const model = this.getType(content.schema.$ref, normalizedRef);
                 operationResponse.export = 'reference';
                 operationResponse.type = model.type;
                 operationResponse.base = model.base;

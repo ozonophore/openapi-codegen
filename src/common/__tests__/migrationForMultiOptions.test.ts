@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import { EVersionedSchemaType } from '../VersionedSchema/Enums';
-import { multiOptionsMigrationPlan } from '../VersionedSchema/MultiOptionsMigrationPlan';
-import { multiOptionsVersionedSchema } from '../VersionedSchema/MultiOptionsVersionedSchemas';
+import { multiOptionsMigrationPlan } from '../VersionedSchema/MultiOptionsVersioned/MultiOptionsMigrationPlan';
+import { multiOptionsVersionedSchema } from '../VersionedSchema/MultiOptionsVersioned/MultiOptionsVersionedSchemas';
 import { migrateDataToLatestSchemaVersion } from '../VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import { mockJoiSchema } from './__mock__/mockJoiSchema';
 
@@ -18,8 +18,9 @@ describe('migrationForMultiOptions', () => {
 
         assert.deepEqual(result, {
             value: {
+                excludeCoreServiceFiles: false,
                 httpClient: 'fetch',
-                useCancelableRequest: false,
+                includeSchemasFiles: false,
                 items: [
                     {
                         input: 'input/path',
@@ -30,8 +31,11 @@ describe('migrationForMultiOptions', () => {
                         outputServices: undefined,
                     },
                 ],
+                sortByRequired: false,
+                useCancelableRequest: false,
+                useSeparatedIndexes: false
             },
-            schemaVersion: '2.0.0',
+            schemaVersion: 'v5',
             schemaType: EVersionedSchemaType.MULTI_OPTIONS,
         });
     });
@@ -57,7 +61,7 @@ describe('migrationForMultiOptions', () => {
                     migrationPlans: [],
                     versionedSchemas: multiOptionsVersionedSchema,
                 }),
-            /No migration plan from 1.0.0/
+            /No migration plan from v1/
         );
     });
 

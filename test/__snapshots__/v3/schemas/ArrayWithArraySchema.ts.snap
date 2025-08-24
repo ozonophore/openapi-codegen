@@ -2,12 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export const TArrayWithArraySchema = {
+export const ArrayWithArraySchema = {
     type: 'array',
     contains: {
         type: 'array',
         contains: {
-            type: 'IModelWithString',
+            type: 'ModelWithString',
         },
     },
 };

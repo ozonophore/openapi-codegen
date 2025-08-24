@@ -1,3 +1,4 @@
+import { getTypeName } from './getTypeName';
 import { isInsideDirectory } from './isInsideDirectory';
 import { resolve } from './pathHelpers';
 import { replaceString } from './replaceString';
@@ -17,6 +18,11 @@ export function getRelativeModelPath(folderPath: string | undefined, relativeMod
     const pathSep = '/';
     let mappedPaths = '';
     let modelPath = relativeModelPath;
+
+    // If absolute path (filesystem or URL-like), collapse to type name only
+    if (modelPath.startsWith('/')) {
+        return getTypeName(modelPath);
+    }
     if (modelPath.startsWith('../')) {
         const pathArray = modelPath.split(pathSep).filter(Boolean);
 

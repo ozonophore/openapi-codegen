@@ -13,7 +13,7 @@ import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiOperation } from '../types/OpenApiOperation.model';
 import type { OpenApiRequestBody } from '../types/OpenApiRequestBody.model';
 
-export function getOperation(this: Parser, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, serviceClassName: string): Operation {
+export function getOperation(this: Parser, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, serviceClassName: string, parentFileRef: string): Operation {
     const operationNameFallback = `${method}${serviceClassName}`;
     const operationName = getOperationName(op.operationId || operationNameFallback);
     const operationPath = getOperationPath(url);
@@ -42,7 +42,7 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
 
     // Parse the operation parameters (path, query, body, etc).
     if (op.parameters) {
-        const parameters = this.getOperationParameters(openApi, op.parameters);
+        const parameters = this.getOperationParameters(openApi, op.parameters, parentFileRef);
         operation.imports.push(...parameters.imports);
         operation.parameters.push(...parameters.parameters);
         operation.parametersPath.push(...parameters.parametersPath);
@@ -56,7 +56,7 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
     if (op.requestBody) {
         const sortByRequired = this.context.sortByRequired ? sortByRequiredExtended : sortByRequiredSimple;
         const requestBodyDef = (op.requestBody.$ref ? this.context.get(op.requestBody.$ref) : op.requestBody) as OpenApiRequestBody;
-        const requestBody = this.getOperationRequestBody(openApi, requestBodyDef, '');
+        const requestBody = this.getOperationRequestBody(openApi, requestBodyDef, parentFileRef);
         operation.imports.push(...requestBody.imports);
         operation.parameters.push(requestBody);
         operation.parameters = operation.parameters.sort(sortByRequired);
@@ -65,7 +65,7 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
 
     // Parse the operation responses.
     if (op.responses) {
-        const operationResponses = this.getOperationResponses(openApi, op.responses);
+        const operationResponses = this.getOperationResponses(openApi, op.responses, parentFileRef);
         const operationResults = getOperationResults(operationResponses);
         operation.errors = getOperationErrors(operationResponses);
         operation.responseHeader = getOperationResponseHeader(operationResults);

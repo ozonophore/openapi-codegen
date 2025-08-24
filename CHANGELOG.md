@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.7] - 2025-11-30
+
+### Added
+- Added/updated CLI examples and configuration schema in example/openapi.config.json and README.md to reflect new CLI parameters.
+- Added tests and utilities updates around WriteClient behavior.
+
+### Changed
+- CLI surface — updated set of command line parameters and validation logic:
+  - Renamed and reorganized several flags and options in src/cli/index.ts and src/cli/utils.ts.
+  - Updated options handling and migration code in src/common/VersionedSchema/* and src/common/Options.ts to support the new options shape.
+- WriteClient refactor:
+  - Reworked WriteClient internals (src/core/WriteClient.ts) and related helpers (src/core/utils/writeClient*.ts) for more robust I/O, error handling and clearer responsibilities.
+  - Adjusted tests: src/core/__tests__/WriteClient.test.ts and multiple writeClient unit tests under src/core/utils/__tests__.
+- Versioned options schema updates and migration plans (src/common/VersionedSchema/*) to support new CLI/config formats.
+
+### Fixed
+- Parser.getType path/import generation (v3):
+  - Do not prefix "./" to paths that already start with "." (e.g., "../...") or "/" (absolute).
+  - Avoid adding import entries when resolved path is empty.
+  - Preserve correct relative transitions / safe fallbacks when resolving parent references.
+  - Changes implemented in src/core/api/v3/parser/getType.ts and mirrored in v2 where applicable.
+- Utilities:
+  - Fixed and stabilized path resolution helpers: resolveRefToImportPath, getAbsolutePath and related tests.
+  - Corrected getGatheringRefs behaviour and adjusted test expectations to match actual reference classification.
+- Tests:
+  - Updated many unit tests to reflect corrected path and import behaviour (see src/core/api/**/__tests__ and src/core/utils/__tests__).
+
+### Updated
+- Updated unit tests across the codebase to align with changed path resolution, WriteClient behavior and CLI parameters.
+- Updated documentation and examples (README, example/).
+
+### Notes
+- Changes are mostly internal and test/CLI-related. Public API surface of generated clients remains compatible, but configuration CLI/options have changed — review migration notes and examples.
+
 ## [1.0.0-beta.6] - 2025-08-22
 
 ### Added

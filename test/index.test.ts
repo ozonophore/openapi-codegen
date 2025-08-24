@@ -14,10 +14,8 @@ test('@unit: v2: generated files match snapshots', async () => {
         httpClient: HttpClient.FETCH,
         useOptions: false,
         useUnionTypes: false,
-        exportCore: true,
-        exportSchemas: true,
-        exportModels: true,
-        exportServices: true,
+        excludeCoreServiceFiles: true,
+        includeSchemasFiles: true,
     });
     const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v2');
     const files = sync(path.join(generatedDir, '**', '*.ts'));
@@ -37,10 +35,8 @@ test('@unit: v3: generated files match snapshots', async () => {
         httpClient: HttpClient.FETCH,
         useOptions: false,
         useUnionTypes: false,
-        exportCore: true,
-        exportSchemas: true,
-        exportModels: true,
-        exportServices: true,
+        excludeCoreServiceFiles: true,
+        includeSchemasFiles: true,
     });
     const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v3');
     const files = sync(path.join(generatedDir, '**', '*.ts'));

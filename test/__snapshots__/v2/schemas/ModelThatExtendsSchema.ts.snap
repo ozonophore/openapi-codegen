@@ -2,11 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export const TModelThatExtendsSchema = {
+export const ModelThatExtendsSchema = {
     type: 'all-of',
     contains: [
         {
-            type: 'IModelWithString',
+            type: 'ModelWithString',
         },
         {
             properties: {
@@ -14,7 +14,7 @@ export const TModelThatExtendsSchema = {
                     type: 'string',
                 },
                 propExtendsB: {
-                    type: 'IModelWithString',
+                    type: 'ModelWithString',
                 },
             },
         },

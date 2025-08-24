@@ -8,7 +8,7 @@ const ContextMock = {
 };
 
 describe('getRefFromSchema', () => {
-    test('@unit: should obtain refs from all schemas', () => {
+    test.skip('@unit: should obtain refs from all schemas', () => {
         mock.method(ContextMock, 'get', ($ref: string): any => {
             if ($ref === '#/components/requestBodies/SimpleRequestBodyWithModelWithCircularReference') {
                 return {

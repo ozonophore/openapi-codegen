@@ -1,5 +1,5 @@
 import { TOptions } from "../../common/Options"
-import { HttpClient } from "../types/Enums"
+import { HttpClient } from "../types/enums/HttpClient.enum"
 import { isBoolean } from "./isBoolean"
 
 /**
@@ -18,15 +18,13 @@ export function prepareOptions(options: TOptions): TOptions {
         httpClient: options?.httpClient ? options.httpClient : HttpClient.FETCH,
         useOptions: isBoolean(options?.useOptions),
         useUnionTypes: isBoolean(options?.useUnionTypes),
-        exportCore: isBoolean(options?.exportCore, true),
-        exportServices: isBoolean(options?.exportServices, true),
-        exportModels: isBoolean(options?.exportModels, true),
-        exportSchemas: isBoolean(options?.exportSchemas),
-        clean: isBoolean(options?.clean, true),
+        excludeCoreServiceFiles: isBoolean(options?.excludeCoreServiceFiles, false),
+        includeSchemasFiles: isBoolean(options?.includeSchemasFiles, false),
         request: options?.request ? options.request : '',
         interfacePrefix: options?.interfacePrefix ? options.interfacePrefix : 'I',
         enumPrefix: options?.enumPrefix ? options.enumPrefix : 'E',
         typePrefix: options?.typePrefix ? options.typePrefix : 'T',
         useCancelableRequest: isBoolean(options?.useCancelableRequest),
+        useSeparatedIndexes: isBoolean(options?.useSeparatedIndexes),
     }
 }

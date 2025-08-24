@@ -1,0 +1,16 @@
+{{>header}}
+
+{{#if models}}
+
+{{#each models}}
+{{#if enum}}
+export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{path}}}';
+{{else if useUnionTypes}}
+export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{path}}}';
+{{else if enums}}
+export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{path}}}';
+{{else}}
+export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{path}}}';
+{{/if}}
+{{/each}}
+{{/if}}

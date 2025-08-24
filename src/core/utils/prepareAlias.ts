@@ -1,11 +1,7 @@
-import { IModel } from "./writeClientIndex";
+import { ExportedModel } from "../types/base/ExportedModel.model";
 
-/**
- * Function for creating aliases for names
- * @param models Array of models
- */
-export function prepareAlias(models: IModel[]) {
-    let modelPrevious: IModel | undefined = undefined;
+export function prepareAlias(models: ExportedModel[]) {
+    let modelPrevious: ExportedModel | undefined = undefined;
     let index = 1;
     for (const model of models) {
         if (modelPrevious && model.name === modelPrevious.name) {

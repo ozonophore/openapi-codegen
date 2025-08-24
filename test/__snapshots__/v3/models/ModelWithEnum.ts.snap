@@ -5,22 +5,22 @@
 /**
  * This is a model with one enum
  */
-export interface IModelWithEnum {
+export interface ModelWithEnum {
     /**
      * This is a simple enum with strings
      */
-    test?: IModelWithEnum.ETest;
+    test?: ModelWithEnum.ETest;
     /**
      * These are the HTTP error code enums
      */
-    statusCode?: IModelWithEnum.EStatusCode;
+    statusCode?: ModelWithEnum.EStatusCode;
     /**
      * Simple boolean enum
      */
     bool?: boolean;
 }
 
-export namespace IModelWithEnum {
+export namespace ModelWithEnum {
     /**
      * This is a simple enum with strings
      */

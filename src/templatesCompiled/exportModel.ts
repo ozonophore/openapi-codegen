@@ -25,8 +25,8 @@ export default {"1":function(container,depth0,helpers,partials,data) {
   return "import type { "
     + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":6,"column":17},"end":{"line":6,"column":21}} ), depth0)) != null ? stack1 : "")
     + ((stack1 = lookupProperty(helpers,"if").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"alias"),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":24},"end":{"line":6,"column":59}}})) != null ? stack1 : "")
-    + " } from './"
-    + ((stack1 = alias2(alias1(depth0, "path", {"start":{"line":6,"column":73},"end":{"line":6,"column":77}} ), depth0)) != null ? stack1 : "")
+    + " } from '"
+    + ((stack1 = alias2(alias1(depth0, "path", {"start":{"line":6,"column":71},"end":{"line":6,"column":75}} ), depth0)) != null ? stack1 : "")
     + "';\n";
 },"3":function(container,depth0,helpers,partials,data) {
     var stack1;

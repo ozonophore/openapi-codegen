@@ -14,10 +14,5 @@ export type SchemaMigrationPlan<From, To> = {
     migrate: (input: From) => To;
 }
 
-export type GuessVersion = {
-    version: string;
-    index: number;
-}
-
 // A universal function for traversing the structure of an object with result typing
 export type TraverseHandler<T> = (value: any, recurse: (v: any) => void, result: T) => boolean;

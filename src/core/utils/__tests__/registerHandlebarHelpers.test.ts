@@ -3,7 +3,7 @@ import { describe, test } from 'node:test';
 
 import * as Handlebars from 'handlebars/runtime';
 
-import { HttpClient } from '../../types/Enums';
+import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { registerHandlebarHelpers } from '../registerHandlebarHelpers';
 
 describe('registerHandlebarHelpers', () => {

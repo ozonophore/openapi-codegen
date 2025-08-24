@@ -16,7 +16,7 @@ describe('getAbsolutePath', () => {
 
     test('@unit: The relative path is combined with the directory', () => {
         const result = getAbsolutePath('relative/path', 'models.yaml#/components/schemas/ErrorData');
-        assert.strictEqual(result, 'models.yaml#/components/schemas/relative/path');
+        assert.strictEqual(result, 'relative/path');
     });
 
     test('@unit: If definitionRef is missing and parentRef starts with #/, an empty string is returned.', () => {

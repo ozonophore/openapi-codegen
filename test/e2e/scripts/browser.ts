@@ -26,7 +26,7 @@ const evaluate = async (fn: EvaluateFn, ...args: any[]) => {
     return await _page.evaluate(fn, args);
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 const exposeFunction = async (name: string, fn: Function) => {
     return await _page.exposeFunction(name, fn);
 };

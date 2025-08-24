@@ -60,11 +60,8 @@ $ openapi --help
     -c, --httpClient <value>      HTTP client to generate [fetch, xhr, node] (default: "fetch")
     --useOptions <value>          Use options instead of arguments (default: false)
     --useUnionTypes <value>       Use union types instead of enums (default: false)
-    --exportCore <value>          Write core files to disk (default: true)
-    --exportServices <value>      Write services to disk (default: true)
-    --exportModels <value>        Write models to disk (default: true)
-    --exportSchemas <value>       Write schemas to disk (default: false)
-    --clean <value>               Clean a directory before generation (default: true)
+    --excludeCoreServiceFiles          (default: false)
+    --includeSchemasFiles      (default: false)
     --interfacePrefix <value>     Prefix for interface model(default: "I")
     --enumPrefix <value>          Prefix for enum model(default: "E")
     --typePrefix <value>          Prefix for type model(default: "T")
@@ -87,18 +84,14 @@ You should create a file in the root of a project with the name '[openapi.config
     "input": "./first.yml",
     "output": "./dist",
     "client": "xhr",
-    "exportCore": true,
-    "exportServices": true,
-    "exportModels": true,
-    "exportSchemas": true
+    "excludeCoreServiceFiles": true,
+    "includeSchemasFiles": true,
 },{
     "input": "./second.yml",
     "output": "./dist",
     "client": "xhr",
-    "exportCore": true,
-    "exportServices": true,
-    "exportModels": true,
-    "exportSchemas": true
+    "excludeCoreServiceFiles": true,
+    "includeSchemasFiles": true,
 }]
 ```
 or with common block
@@ -106,10 +99,8 @@ or with common block
 {
     "output": "./dist",
     "client": "xhr",
-    "exportCore": true,
-    "exportServices": true,
-    "exportModels": true,
-    "exportSchemas": true,
+    "excludeCoreServiceFiles": true,
+    "includeSchemasFiles": true,
     "items": [{
         "input": "./first.yml"
         },{
@@ -118,47 +109,41 @@ or with common block
 }
 ```
 
-| Name                 | Item                 | type        | Default  | Description                                               |
-|----------------------|----------------------|-------------|----------|-----------------------------------------------------------|
-| output               |                      | string      |          |The relative location of the output directory              |
-| outputCore           |                      | string      | {output} |The relative location of the output directory for core     |
-| outputServices       |                      | string      | {output} |The relative location of the output directory for services |
-| outputModels         |                      | string      | {output} |The relative location of the output directory for models   |
-| outputSchemas        |                      | string      | {output} |The relative location of the output directory for schemas  |
-| client               |                      | string      |'fetch'   |The selected httpClient (fetch or XHR)                     |
-| useOptions           |                      | boolean     |false     |Use options or arguments functions                         |
-| useUnionTypes        |                      | boolean     |false     |Use union types instead of enums                           |
-| exportCore           |                      | boolean     |true      |Generate core client classes                               |
-| exportServices       |                      | boolean     |true      |Generate services                                          |
-| exportModels         |                      | boolean     |true      |Generate models                                            |
-| exportSchemas        |                      | boolean     |false     |Generate schemas                                           |
-| clean                |                      | boolean     |true      |Clean a directory before generation                        |
-| request              |                      | string      |          |Path to custom request file                                |
-| interfacePrefix      |                      | string      |'I'       |Prefix for interface model                                 |
-| enumPrefix           |                      | string      |'E'       |Prefix for enum model                                      |
-| typePrefix           |                      | string      |'T'       |Prefix for type model                                      |
-| useCancelableRequest |                      | boolean     |false     |Use cancelled promise as returned data type in request     |
-| items                |                      | array       |          |                                                           |
-|                      | input                | string      |          |The relative location of the OpenAPI spec                  |
-|                      | output               | string      |          |                                                           |
-|                      | outputCore           | string      |          |                                                           |
-|                      | outputServices       | string      |          |                                                           |
-|                      | outputModels         | string      |          |                                                           |
-|                      | outputSchemas        | string      |          |                                                           |
-|                      | client               | string      |'fetch'   |The selected httpClient (fetch or XHR)                     |
-|                      | useOptions           | boolean     |false     |Use options or arguments functions                         |
-|                      | useUnionTypes        | boolean     |false     |Use union types instead of enums                           |
-|                      | exportCore           | boolean     |true      |Generate core client classes                               |
-|                      | exportServices       | boolean     |true      |Generate services client classes                           |
-|                      | exportModels         | boolean     |true      |Generate models client classes                             |
-|                      | exportSchemas        | boolean     |true      |Generate schemas client classes                            |
-|                      | clean                | boolean     |true      |Clean a directory before generation                        |
-|                      | request              | string      |          |Path to custom request file                                |
-|                      | write                | boolean     |true      |Write the files to disk (true or false)                    |
-|                      | interfacePrefix      | string      |          |Prefix for interface model(I)                              |
-|                      | enumPrefix           | string      |          |Prefix for enum model(E)                                   |
-|                      | typePrefix           | string      |          |Prefix for type model(T)                                   |
-|                      | useCancelableRequest | boolean     |false     |Use cancelled promise as returned data type in request     |
+| Name                    | Item                    | type        | Default  | Description                                               |
+|-------------------------|-------------------------|-------------|----------|-----------------------------------------------------------|
+| output                  |                         | string      |          |The relative location of the output directory              |
+| outputCore              |                         | string      | {output} |The relative location of the output directory for core     |
+| outputServices          |                         | string      | {output} |The relative location of the output directory for services |
+| outputModels            |                         | string      | {output} |The relative location of the output directory for models   |
+| outputSchemas           |                         | string      | {output} |The relative location of the output directory for schemas  |
+| client                  |                         | string      | 'fetch'  |The selected httpClient (fetch or XHR)                     |
+| useOptions              |                         | boolean     | false    |Use options or arguments functions                         |
+| useUnionTypes           |                         | boolean     | false    |Use union types instead of enums                           |
+| excludeCoreServiceFiles |                         | boolean     | true     |                               |
+| includeSchemasFiles     |                         | boolean     | true     |                                          |
+| request                 |                         | string      |          |Path to custom request file                                |
+| interfacePrefix         |                         | string      | 'I'      |Prefix for interface model                                 |
+| enumPrefix              |                         | string      | 'E'      |Prefix for enum model                                      |
+| typePrefix              |                         | string      | 'T'      |Prefix for type model                                      |
+| useCancelableRequest    |                         | boolean     | false    |Use cancelled promise as returned data type in request     |
+| items                   |                         | array       |          |                                                           |
+|                         | input                   | string      |          |The relative location of the OpenAPI spec                  |
+|                         | output                  | string      |          |                                                           |
+|                         | outputCore              | string      |          |                                                           |
+|                         | outputServices          | string      |          |                                                           |
+|                         | outputModels            | string      |          |                                                           |
+|                         | outputSchemas           | string      |          |                                                           |
+|                         | client                  | string      |'fetch'   |The selected httpClient (fetch or XHR)                     |
+|                         | useOptions              | boolean     |false     |Use options or arguments functions                         |
+|                         | useUnionTypes           | boolean     |false     |Use union types instead of enums                           |
+|                         | excludeCoreServiceFiles | boolean     |true      |                               |
+|                         | includeSchemasFiles     | boolean     |true      |                           |
+|                         | request                 | string      |          |Path to custom request file                                |
+|                         | write                   | boolean     |true      |Write the files to disk (true or false)                    |
+|                         | interfacePrefix         | string      |          |Prefix for interface model(I)                              |
+|                         | enumPrefix              | string      |          |Prefix for enum model(E)                                   |
+|                         | typePrefix              | string      |          |Prefix for type model(T)                                   |
+|                         | useCancelableRequest    | boolean     |false     |Use cancelled promise as returned data type in request     |
 
 ## Example
 

@@ -1,4 +1,4 @@
-import { HttpClient } from "../core/types/Enums";
+import { HttpClient } from '../core';
 
 export type TOptions = {
     input: string | Record<string, any>;
@@ -10,11 +10,8 @@ export type TOptions = {
     httpClient?: HttpClient;
     useOptions?: boolean;
     useUnionTypes?: boolean;
-    exportCore?: boolean;
-    exportServices?: boolean;
-    exportModels?: boolean;
-    exportSchemas?: boolean;
-    clean?: boolean;
+    excludeCoreServiceFiles?: boolean;
+    includeSchemasFiles?: boolean;
     request?: string;
     write?: boolean;
     interfacePrefix?: string;
@@ -22,8 +19,9 @@ export type TOptions = {
     typePrefix?: string;
     useCancelableRequest?: boolean;
     sortByRequired?: boolean;
+    useSeparatedIndexes?: boolean;
 };
 
 export type TMultiOptions = {
-  items: TOptions[];
+    items: TOptions[];
 } & Omit<TOptions, 'input' | 'output'>;

@@ -2,12 +2,13 @@ import type { OperationParameter } from '../../../types/shared/OperationParamete
 import { getComment } from '../../../utils/getComment';
 import { getOperationParameterName } from '../../../utils/getOperationParameterName';
 import { getPattern } from '../../../utils/getPattern';
+import { normalizeRef } from '../../../utils/normalizeRef';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiParameter } from '../types/OpenApiParameter.model';
 import { getModelDefault } from './getModelDefault';
 
-export function getOperationParameter(this: Parser, openApi: OpenApi, parameter: OpenApiParameter): OperationParameter {
+export function getOperationParameter(this: Parser, openApi: OpenApi, parameter: OpenApiParameter, parentRef: string): OperationParameter {
     const operationParameter: OperationParameter = {
         in: parameter.in,
         prop: parameter.name,
@@ -32,7 +33,8 @@ export function getOperationParameter(this: Parser, openApi: OpenApi, parameter:
     };
 
     if (parameter.$ref) {
-        const definitionRef = this.getType(parameter.$ref, '');
+        const normalizedRef = normalizeRef(parameter.$ref, parentRef);
+        const definitionRef = this.getType(parameter.$ref, normalizedRef);
         operationParameter.export = 'reference';
         operationParameter.type = definitionRef.type;
         operationParameter.base = definitionRef.base;
@@ -43,7 +45,8 @@ export function getOperationParameter(this: Parser, openApi: OpenApi, parameter:
 
     if (parameter.schema) {
         if (parameter.schema.$ref) {
-            const model = this.getType(parameter.schema.$ref, '');
+            const normalizedRef = normalizeRef(parameter.schema.$ref, parentRef);
+            const model = this.getType(parameter.schema.$ref, normalizedRef);
             operationParameter.export = 'reference';
             operationParameter.type = model.type;
             operationParameter.base = model.base;

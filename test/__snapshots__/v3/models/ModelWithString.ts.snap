@@ -5,7 +5,7 @@
 /**
  * This is a model with one string property
  */
-export interface IModelWithString {
+export interface ModelWithString {
     /**
      * This is a simple string property
      */

@@ -2,13 +2,12 @@ import assert from 'node:assert/strict';
 import { PathOrFileDescriptor } from 'node:fs';
 import { mock, test } from 'node:test';
 
-import { HttpClient } from '../types/Enums';
+import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Client } from '../types/shared/Client.model';
-import {fileSystem} from '../utils/fileSystem';
+import { fileSystem } from '../utils/fileSystem';
 import { getOutputPaths } from '../utils/getOutputPaths';
+import { Templates } from '../utils/registerHandlebarTemplates';
 import { WriteClient } from '../WriteClient';
-
-
 
 test('@unit: writeClient should write to filesystem', async () => {
     const mkdirCalls: string[] = [];
@@ -24,7 +23,6 @@ test('@unit: writeClient should write to filesystem', async () => {
         return path;
     });
 
-
     fileSystem.writeFile = mock.fn(async (path: PathOrFileDescriptor, content: string | NodeJS.ArrayBufferView) => {
         writeFileCalls.push([path, content]);
     });
@@ -36,8 +34,15 @@ test('@unit: writeClient should write to filesystem', async () => {
         services: [],
     };
 
-    const templates = {
-        index: () => 'index',
+    const templates: Templates = {
+        indexes: {
+            full: () => 'fullIndex',
+            simple: () => 'simpleIndex',
+            core: () => 'coreIndex',
+            models: () => 'modelsIndex',
+            schemas: () => 'schemasIndex',
+            services: () => 'servicesIndex',
+        },
         exports: {
             model: () => 'model',
             schema: () => 'schema',
@@ -63,11 +68,8 @@ test('@unit: writeClient should write to filesystem', async () => {
         httpClient: HttpClient.FETCH,
         useOptions: false,
         useUnionTypes: false,
-        exportCore: true,
-        exportServices: true,
-        exportModels: true,
-        exportSchemas: true,
-        clean: true,
+        excludeCoreServiceFiles: false,
+        includeSchemasFiles: false,
     });
 
     assert.ok(mkdirCalls.length > 0, 'mkdir should be called at least once');
