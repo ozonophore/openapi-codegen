@@ -3,6 +3,7 @@ import { Logger } from '../../common/Logger';
 import { convertArrayToObject, loadConfigIfExists } from '../../common/Utils';
 import { multiOptionsVersionedSchema } from '../../common/VersionedSchema/MultiOptionsVersionedSchemas';
 import { optionsVersionedSchemas } from '../../common/VersionedSchema/OptionsVersionedSchemas';
+import { getErrorFieldsFromValidation } from '../../common/VersionedSchema/Utils/getErrorFieldsFromValidation';
 import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOptions';
 
 export function chekOpenApiConfig () {
@@ -26,7 +27,8 @@ export function chekOpenApiConfig () {
 
         const { error } = currentSchema.schema.validate(preparedOptions);
         if (error) {
-            logger.error("Данные конфигурационного файла указаны неправильно")
+            const details = getErrorFieldsFromValidation(error).map((e) => `${e.path}: ${e.type}`).join(',');
+            logger.error(`Данные конфигурационного файла указаны неправильно: ${details}`)
         }
     } catch (error: any) {
         logger.error(error.message);

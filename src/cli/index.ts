@@ -1,7 +1,9 @@
 import { Command, Option, OptionValues } from 'commander';
 
 import { ELogLevel, ELogOutput } from '../common/Enums';
+import { Logger } from '../common/Logger';
 import { HttpClient } from '../core/types/Enums';
+import { chekOpenApiConfig } from './chekOpenApiConfig/chekOpenApiConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
 
 const APP_NAME = 'ts-openapi-codegen-cli';
@@ -37,14 +39,30 @@ program
     .addOption(new Option('-l, --logLevel <level>', 'Logging level').choices([...Object.values(ELogLevel)]).default(ELogLevel.ERROR))
     .addOption(new Option('-t, --logTarget <target>', 'Target of logging').choices([...Object.values(ELogOutput)]).default(ELogOutput.CONSOLE))
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
-    .hook('preAction', (thisCommand, actionCommand) => {
-        console.group('[GENERATE]');
-        console.log('---___---___---', {thisCommand});
-        console.log('---___---___---', {actionCommand});
-        console.groupEnd();
-    })
+    // .hook('preAction', (_thisCommand, actionCommand) => {
+    //     console.group('[GENERATE]');
+    //     console.log('---___---___---', {options: actionCommand.opts()});
+    //     console.groupEnd();
+    // })
     .action(async (options: OptionValues) => {
         await runGenerateOpenApi(options);
     });
 
-program.parse(process.argv);
+program
+    .command('check-openapi-config')
+    .version(APP_VERSION)
+    .action(() => {
+        chekOpenApiConfig();
+    });
+
+try {
+    program.parse(process.argv);
+} catch (error: any) {
+    const logger = new Logger({
+        level: ELogLevel.INFO,
+        instanceId: 'check-openapi-config',
+        logOutput: ELogOutput.CONSOLE,
+    });
+
+    logger.error(error.message);
+}
