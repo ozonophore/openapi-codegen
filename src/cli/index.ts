@@ -1,7 +1,9 @@
 import { Command, Option, OptionValues } from 'commander';
 
 import { ELogLevel, ELogOutput } from '../common/Enums';
+import { Logger } from '../common/Logger';
 import { HttpClient } from '../core/types/Enums';
+import { chekOpenApiConfig } from './chekOpenApiConfig/chekOpenApiConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
 
 const APP_NAME = 'ts-openapi-codegen-cli';
@@ -13,8 +15,8 @@ program.version(APP_VERSION).name(APP_NAME).description('Description').addHelpTe
 
 program
     .command('generate')
+    .description('Starts code generation based on the provided opeanpi specifications')
     .usage('[options]')
-    .version(APP_VERSION)
     .option('-i, --input <value>', 'OpenAPI specification, can be a path, url or string content (required)', '')
     .option('-o, --output <value>', 'Output directory (required)', '')
     .option('-oc, --outputCore <value>', 'Output directory for core files')
@@ -41,4 +43,21 @@ program
         await runGenerateOpenApi(options);
     });
 
-program.parse(process.argv);
+program
+    .command('check-openapi-config')
+    .description('Starts checking whether the configuration file data is filled in correctly.')
+    .action(() => {
+        chekOpenApiConfig();
+    });
+
+try {
+    program.parse(process.argv);
+} catch (error: any) {
+    const logger = new Logger({
+        level: ELogLevel.INFO,
+        instanceId: 'check-openapi-config',
+        logOutput: ELogOutput.CONSOLE,
+    });
+
+    logger.error(error.message);
+}

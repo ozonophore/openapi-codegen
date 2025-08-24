@@ -6,14 +6,6 @@ export { ApiError } from '././core/ApiError';
 export { OpenAPI } from '././core/OpenAPI';
 export type { TOpenAPIConfig } from '././core/OpenAPI';
 
-export type { IDictionaryWithReference } from '././models/DictionaryWithReference';
-export type { IModelWithArray } from '././models/ModelWithArray';
-export type { IModelWithDictionary } from '././models/ModelWithDictionary';
-export { IModelWithEnumInteger } from '././models/ModelWithEnumInteger';
-export type { IModelWithString } from '././models/ModelWithString';
-export type { TModelThatExtends } from '././models/ModelThatExtends';
-export type { TModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
-
 export { IDictionaryWithReferenceSchema } from '././schemas/DictionaryWithReferenceSchema';
 export { IModelWithArraySchema } from '././schemas/ModelWithArraySchema';
 export { IModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
