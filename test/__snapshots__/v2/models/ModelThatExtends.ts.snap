@@ -9,6 +9,5 @@ import type { IModelWithString } from '././ModelWithString';
  */
 export type TModelThatExtends = IModelWithString & {
     propExtendsA?: string;
-
     propExtendsB?: IModelWithString;
 };

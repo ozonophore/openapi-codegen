@@ -6,13 +6,13 @@
 {{/each}}
 }: {
 {{#each parameters}}
-{{{name}}}{{>isRequired}}: {{>type}},
+{{{name}}}{{>isRequiredDefinition}}: {{>type}},
 {{/each}}
 }
 {{~else}}
 
 {{#each parameters}}
-{{{name}}}{{>isRequired}}: {{>type}},
+{{{name}}}{{>isRequiredDefinition}}: {{>type}},
 {{/each}}
 {{/if}}
 {{/if}}

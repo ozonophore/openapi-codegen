@@ -1,5 +1,9 @@
 import { IModel } from "./writeClientIndex";
 
+/**
+ * Function for creating aliases for names
+ * @param models Array of models
+ */
 export function prepareAlias(models: IModel[]) {
     let modelPrevious: IModel | undefined = undefined;
     let index = 1;

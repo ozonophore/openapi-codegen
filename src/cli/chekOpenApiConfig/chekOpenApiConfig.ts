@@ -6,6 +6,9 @@ import { optionsVersionedSchemas } from '../../common/VersionedSchema/OptionsVer
 import { getErrorFieldsFromValidation } from '../../common/VersionedSchema/Utils/getErrorFieldsFromValidation';
 import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOptions';
 
+/**
+ * The function checks whether the configuration file data is filled in correctly
+ */
 export function chekOpenApiConfig () {
     const logger = new Logger({
         level: ELogLevel.INFO,
@@ -21,6 +24,7 @@ export function chekOpenApiConfig () {
         const preparedOptions = convertArrayToObject(configData);
         const isMultiOptions = isInstanceOfMultioptions(preparedOptions);
         const currentMigrationPlan = isMultiOptions ? multiOptionsVersionedSchema : optionsVersionedSchemas;
+
         const currentSchema = currentMigrationPlan
             .map((sch, idx) => ({...sch, index: idx + 1}))
             .reduce((prev, curr) => (curr.index > prev.index ? curr : prev));

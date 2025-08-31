@@ -40,7 +40,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     };
 
   return ((stack1 = container.lambda(container.strict(depth0, "name", {"start":{"line":9,"column":3},"end":{"line":9,"column":7}} ), depth0)) != null ? stack1 : "")
-    + ((stack1 = container.invokePartial(lookupProperty(partials,"isRequired"),depth0,{"name":"isRequired","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
+    + ((stack1 = container.invokePartial(lookupProperty(partials,"isRequiredDefinition"),depth0,{"name":"isRequiredDefinition","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
     + ": "
     + ((stack1 = container.invokePartial(lookupProperty(partials,"type"),depth0,{"name":"type","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
     + ",\n";

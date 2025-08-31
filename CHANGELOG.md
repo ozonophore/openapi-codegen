@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added a command to check the configuration file;
+- Added a mechanism for checking and notifying of exits;
 
-### Updated
+### Fixed
 
 - Refactoring: Improved logic for processing generated data and writing files to disk;
+- Fixed the "IsReadOnly" template. Previously, a property with the readonly attribute had a problem generating it. Added an extra transition to a new line;
 
 ## [1.0.0-beta.5] - 2025-08-09
 

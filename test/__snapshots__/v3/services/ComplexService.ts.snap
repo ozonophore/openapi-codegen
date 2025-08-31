@@ -36,26 +36,16 @@ const complexParams = (
     id: number,
 
     requestBody?: {
-        readonly;
-        key: string | null;
-
+        readonly key: string | null;
         name: string | null;
-
         enabled: boolean;
-        readonly;
-        type: 'Monkey' | 'Horse' | 'Bird';
-
+        readonly type: 'Monkey' | 'Horse' | 'Bird';
         listOfModels?: Array<IModelWithString> | null;
-
         listOfStrings?: Array<string> | null;
-
         parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
-        readonly;
-        user?: {
-            readonly;
-            id?: number;
-            readonly;
-            name?: string | null;
+        readonly user?: {
+            readonly id?: number;
+            readonly name?: string | null;
         };
     },
 ): ApiRequestOptions => ({
@@ -80,26 +70,16 @@ export type TComplexOptions = {
         id: number,
 
         requestBody?: {
-            readonly;
-            key: string | null;
-
+            readonly key: string | null;
             name: string | null;
-
             enabled: boolean;
-            readonly;
-            type: 'Monkey' | 'Horse' | 'Bird';
-
+            readonly type: 'Monkey' | 'Horse' | 'Bird';
             listOfModels?: Array<IModelWithString> | null;
-
             listOfStrings?: Array<string> | null;
-
             parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
-            readonly;
-            user?: {
-                readonly;
-                id?: number;
-                readonly;
-                name?: string | null;
+            readonly user?: {
+                readonly id?: number;
+                readonly name?: string | null;
             };
         },
     ) => ApiRequestOptions;
@@ -142,26 +122,16 @@ export class ComplexService {
         id: number,
 
         requestBody?: {
-            readonly;
-            key: string | null;
-
+            readonly key: string | null;
             name: string | null;
-
             enabled: boolean;
-            readonly;
-            type: 'Monkey' | 'Horse' | 'Bird';
-
+            readonly type: 'Monkey' | 'Horse' | 'Bird';
             listOfModels?: Array<IModelWithString> | null;
-
             listOfStrings?: Array<string> | null;
-
             parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
-            readonly;
-            user?: {
-                readonly;
-                id?: number;
-                readonly;
-                name?: string | null;
+            readonly user?: {
+                readonly id?: number;
+                readonly name?: string | null;
             };
         },
     ): Promise<IModelWithString> {

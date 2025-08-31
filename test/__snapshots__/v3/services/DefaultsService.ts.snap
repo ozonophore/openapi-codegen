@@ -71,37 +71,37 @@ const callToTestOrderOfParams = (
 
 export type TDefaultsOptions = {
     callWithDefaultParameters: (
-        parameterString: string | null,
+        parameterString?: string | null,
 
-        parameterNumber: number | null,
+        parameterNumber?: number | null,
 
-        parameterBoolean: boolean | null,
+        parameterBoolean?: boolean | null,
 
-        parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterModel: IModelWithString | null,
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
+        parameterModel?: IModelWithString | null,
     ) => ApiRequestOptions;
     callWithDefaultOptionalParameters: (
-        parameterString: string,
+        parameterString?: string,
 
-        parameterNumber: number,
+        parameterNumber?: number,
 
-        parameterBoolean: boolean,
+        parameterBoolean?: boolean,
 
-        parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterModel: IModelWithString,
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
+        parameterModel?: IModelWithString,
     ) => ApiRequestOptions;
     callToTestOrderOfParams: (
         parameterStringWithNoDefault: string,
 
-        parameterOptionalStringWithDefault: string,
+        parameterOptionalStringWithDefault?: string,
 
-        parameterOptionalStringWithEmptyDefault: string,
+        parameterOptionalStringWithEmptyDefault?: string,
 
         parameterOptionalStringWithNoDefault?: string,
 
-        parameterStringWithDefault: string,
+        parameterStringWithDefault?: string,
 
-        parameterStringWithEmptyDefault: string,
+        parameterStringWithEmptyDefault?: string,
     ) => ApiRequestOptions;
 };
 

@@ -9,8 +9,6 @@ import type { IModelWithString } from '././ModelWithString';
  */
 export interface IModelWithArray {
     prop?: Array<IModelWithString>;
-
     propWithFile?: Array<Blob>;
-
     propWithNumber?: Array<number>;
 }
