@@ -39,11 +39,7 @@ program
     .addOption(new Option('-l, --logLevel <level>', 'Logging level').choices([...Object.values(ELogLevel)]).default(ELogLevel.ERROR))
     .addOption(new Option('-t, --logTarget <target>', 'Target of logging').choices([...Object.values(ELogOutput)]).default(ELogOutput.CONSOLE))
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
-    // .hook('preAction', (_thisCommand, actionCommand) => {
-    //     console.group('[GENERATE]');
-    //     console.log('---___---___---', {options: actionCommand.opts()});
-    //     console.groupEnd();
-    // })
+    .option('--useSeparatedIndexes', 'Использовать отдельные index файлы для ядра, моделей, схем и сервисов')
     .action(async (options: OptionValues) => {
         await runGenerateOpenApi(options);
     });

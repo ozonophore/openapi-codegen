@@ -47,6 +47,7 @@ export { HttpClient } from './types/Enums';
  * @param typePrefix: Prefix for type model(T)
  * @param useCancelableRequest Use cancelable request type.
  * @param sortByRequired Property sorting strategy: simplified or extended
+ * @param useSeparatedIndexes Использовать отдельные index файлы для ядра, моделей, схем и сервисов
  */
 async function generateFrom(
     {
@@ -71,6 +72,7 @@ async function generateFrom(
         typePrefix = 'T',
         useCancelableRequest = false,
         sortByRequired = false,
+        useSeparatedIndexes = false,
     }: TOptions,
     writeClient: WriteClient
 ): Promise<void> {
@@ -112,6 +114,7 @@ async function generateFrom(
                 clean,
                 request,
                 useCancelableRequest,
+                useSeparatedIndexes,
             });
             break;
         }
@@ -135,6 +138,7 @@ async function generateFrom(
                 clean,
                 request,
                 useCancelableRequest,
+                useSeparatedIndexes,
             });
             break;
         }
@@ -182,7 +186,11 @@ export async function generate(options: TOptions | TOptions[] | TMultiOptions): 
             writeClient.logger.info(`Generation from "${option.input}" was finished`);
             writeClient.logger.info(`Output folder: ${path.resolve(process.cwd(), option.output)}`, true);
         }
-        await writeClient.combineAndWrite();
+        if (optionsFinal[0]?.useSeparatedIndexes) {
+            await writeClient.combineAndWrightSimple();
+        } else {
+            await writeClient.combineAndWrite();
+        }
         writeClient.logger.forceInfo("Generation from has been finished");
         const [seconds, nanoseconds] = process.hrtime(start);
         const durationInMs = seconds + nanoseconds / 1e6;

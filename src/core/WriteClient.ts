@@ -3,18 +3,18 @@ import { Logger } from '../common/Logger';
 import { HttpClient } from './types/Enums';
 import { IOutput } from './types/Models';
 import type { Client } from './types/shared/Client.model';
-import { relative, resolve } from './utils/pathHelpers';
 import { fileSystem } from './utils/fileSystem';
+import { relative, resolve } from './utils/pathHelpers';
+import { prepareAlias } from './utils/prepareAlias';
 import { Templates } from './utils/registerHandlebarTemplates';
+import { sortModelByName } from './utils/sortModelByName';
 import { unique } from './utils/unique';
 import { writeClientCore } from './utils/writeClientCore';
-import { IClientIndex, IModel, IService } from './utils/writeClientIndex';
+import { IClientIndex, IModel, IService, ISimpleClientIndex } from './utils/writeClientIndex';
 import { writeClientIndex } from './utils/writeClientIndex';
 import { writeClientModels } from './utils/writeClientModels';
 import { writeClientSchemas } from './utils/writeClientSchemas';
 import { writeClientServices } from './utils/writeClientServices';
-import { prepareAlias } from './utils/prepareAlias';
-import { sortModelByName } from './utils/sortModelByName';
 
 /**
  * @param client Client object with all the models, services, etc.
@@ -30,6 +30,7 @@ import { sortModelByName } from './utils/sortModelByName';
  * @param clean: Clean a directory before generation
  * @param request: Path to custom request file
  * @param useCancelableRequest Use cancelable request type.
+ * @param useSeparatedIndexes Использовать отдельные index файлы для ядра, моделей, схем и сервисов.
  */
 interface IWriteClient {
     client: Client;
@@ -45,6 +46,7 @@ interface IWriteClient {
     clean: boolean;
     request?: string;
     useCancelableRequest?: boolean;
+    useSeparatedIndexes?: boolean;
 }
 
 /**
@@ -147,6 +149,7 @@ export class WriteClient {
             });
         }
 
+        // TODO: Возможно лучшее место для записи отдельных index файлов!
         if (exportCore || exportServices || exportSchemas || exportModels) {
             await fileSystem.mkdir(outputPaths.output);
             await this.writeClientIndex({
@@ -178,17 +181,62 @@ export class WriteClient {
 
     async combineAndWrite() {
         const result = this.buildClientIndexMap();
-        await this.finalizeAndWright(result);
+        await this.finalizeAndWrite(result);
     }
 
-    // TODO: Сделать!
-    // async combineAndWrightSimple() {
-    //     const result = this.buildSimpleClientIndexMap();
+    async combineAndWrightSimple() {
+        const result = this.buildSimpleClientIndexMap();
+        console.log({ result });
     //     await this.finalizeAndWright(result);
-    // }
+    }
 
     public get logger() {
         return this._logger;
+    }
+
+    private buildSimpleClientIndexMap(): Map<string, ISimpleClientIndex> {
+        const result: Map<string, ISimpleClientIndex> = new Map<string, ISimpleClientIndex>();
+        for (const [key, value] of this.options.entries()) {
+            for (const item of value) {
+                const { exportCore, outputPaths, exportModels, exportSchemas, exportServices, templates } = item;
+                const outputCore = this.getOutputPath(outputPaths?.outputCore, key, 'core');
+                const outputModels = this.getOutputPath(outputPaths?.outputModels, key, 'models');
+                const outputSchemas = this.getOutputPath(outputPaths?.outputSchemas, key, 'schemas');
+                const outputServices = this.getOutputPath(outputPaths?.outputServices, key, 'services');
+                
+                const clientIndex = this.ensureSimpleClientIndex(result, key, templates);
+
+                if (exportCore) {
+                    const relativePathCore = relative(key, outputCore);
+                    if (!clientIndex.core.includes(relativePathCore)) {
+                        clientIndex.core.push(relativePathCore);
+                    }
+                }
+
+                if (exportModels) {
+                    const relativePathModel = relative(key, outputModels);
+                    if (!clientIndex.models.includes(relativePathModel)) {
+                        clientIndex.models.push(relativePathModel);
+                    }
+                }
+
+                if (exportSchemas) {
+                    const relativePathSchema = relative(key, outputSchemas);
+                    if (!clientIndex.schemas.includes(relativePathSchema)) {
+                        clientIndex.schemas.push(relativePathSchema);
+                    }
+                }
+
+                if (exportServices) {
+                    const relativeService = relative(key, outputServices);
+                    if (!clientIndex.services.includes(relativeService)) {
+                        clientIndex.services.push(relativeService);
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     private buildClientIndexMap(): Map<string, IClientIndex> {
@@ -238,7 +286,7 @@ export class WriteClient {
                     }
                 }
 
-                if (exportSchemas) {
+                if (exportServices) {
                     const relativeService = `${relative(key, outputServices)}`;
                     for (const service of client.services) {
                         if (!clientIndex.services.some(s => this.isSomeService(s, service.name, relativeService))) {
@@ -255,7 +303,7 @@ export class WriteClient {
         return result;
     }
 
-    private async finalizeAndWright(result: Map<string, IClientIndex>): Promise<void> {
+    private async finalizeAndWrite(result: Map<string, IClientIndex>): Promise<void> {
         for (const value of result.values()) {
             value.models = value.models.filter(unique).sort(sortModelByName);
             prepareAlias(value.models);
@@ -274,6 +322,25 @@ export class WriteClient {
         key: string,
         templates: any
     ): IClientIndex {
+        if (!map.has(key)) {
+            map.set(key, {
+                templates,
+                outputPath: key,
+                core: [],
+                models: [],
+                schemas: [],
+                services: [],
+            })
+        }
+
+        return map.get(key)!;
+    }
+
+    private ensureSimpleClientIndex(
+        map: Map<string, ISimpleClientIndex>,
+        key: string,
+        templates: any
+    ): ISimpleClientIndex {
         if (!map.has(key)) {
             map.set(key, {
                 templates,

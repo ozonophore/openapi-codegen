@@ -28,5 +28,6 @@ export function prepareOptions(options: TOptions): TOptions {
         enumPrefix: options?.enumPrefix ? options.enumPrefix : 'E',
         typePrefix: options?.typePrefix ? options.typePrefix : 'T',
         useCancelableRequest: isBoolean(options?.useCancelableRequest),
+        useSeparatedIndexes: isBoolean(options?.useSeparatedIndexes),
     }
 }

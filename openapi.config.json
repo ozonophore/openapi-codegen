@@ -1,5 +1,6 @@
 {
     "input": "./test/spec/v2.json",
     "output": "./test/generated/v2/",
-    "client": "http"
+    "httpClient": "fetch",
+    "useSeparatedIndexes": true
 }

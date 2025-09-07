@@ -5,7 +5,7 @@ import { additionalParametersSchema,outputPathsSchema, specialParametersSchemas 
 import { mergeObjectSchemas } from "./Utils/mergeObjectSchemas";
 
 /**
- * The scheme of a set of generator options (Версия 1.0.1).
+ * The scheme of a set of generator options (Версия 2).
  */
 export const optionsSchemaV2 = mergeObjectSchemas(
     Joi.object({

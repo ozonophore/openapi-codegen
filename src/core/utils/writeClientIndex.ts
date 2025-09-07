@@ -49,6 +49,15 @@ export interface IClientIndex {
     services: IService[];
 }
 
+export interface ISimpleClientIndex {
+    templates: Templates;
+    outputPath: string;
+    core: string[];
+    models: string[];
+    schemas: string[];
+    services: string[];
+}
+
 /**
  * Generate the OpenAPI client index file using the Handlebar template and write it to disk.
  * The index file just contains all the exports you need to use the client as a standalone

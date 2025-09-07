@@ -1,0 +1,8 @@
+{{>header}}
+
+{{#if services}}
+
+{{#each services}}
+export { {{{name}}} } from './{{{package}}}{{{name}}}';
+{{/each}}
+{{/if}}

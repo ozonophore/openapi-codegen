@@ -1,0 +1,8 @@
+{{>header}}
+
+{{#if schemas}}
+
+{{#each schemas}}
+export { {{{name}}}Schema{{#if alias }} as {{{alias}}}Schema{{/if}} } from './{{{package}}}{{{path}}}Schema';
+{{/each}}
+{{/if}}

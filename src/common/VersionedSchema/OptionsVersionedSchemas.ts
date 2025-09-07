@@ -2,18 +2,23 @@ import { EVersionedSchemaType } from "./Enums";
 import { optionsSchemaV1 } from "./OptionsSchemaV1";
 import { optionsSchemaV2 } from "./OptionsSchemaV2";
 import { optionsSchemaV3 } from "./OptionsSchemaV3";
+import { optionsSchemaV4 } from "./OptionsSchemaV4";
 import { VersionedSchema } from "./Types";
 
 export const optionsVersionedSchemas: VersionedSchema<Record<string, any>>[] = [{
-    version: '1.0.0',
+    version: 'v1',
     schema: optionsSchemaV1,
     type: EVersionedSchemaType.OPTIONS,
 }, {
-    version: '1.0.1',
+    version: 'v2',
     schema: optionsSchemaV2,
     type: EVersionedSchemaType.OPTIONS,
 }, {
-    version: '2.0.0',
+    version: 'v3',
     schema: optionsSchemaV3,
+    type: EVersionedSchemaType.OPTIONS,
+}, {
+    version: 'v4',
+    schema: optionsSchemaV4,
     type: EVersionedSchemaType.OPTIONS,
 }];

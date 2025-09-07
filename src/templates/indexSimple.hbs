@@ -1,0 +1,26 @@
+{{>header}}
+
+{{#if core}}
+{{#each core}}
+export *{{#notEquals ../core.length 1}} as Core${{{@index}}}{{/notEquals}}  from './{{{this}}}';
+{{/each}}
+{{/if}}
+
+{{#if models}}
+{{#each models}}
+export *{{#notEquals ../models.length 1}} as Models${{{@index}}}{{/notEquals}}  from './{{{this}}}';
+{{/each}}
+{{/if}}
+
+
+{{#if schemas}}
+{{#each schemas}}
+export *{{#notEquals ../schemas.length 1}} as Schemas${{{@index}}}{{/notEquals}}  from './{{{this}}}';
+{{/each}}
+{{/if}}
+
+{{#if services}}
+{{#each services}}
+export *{{#notEquals ../services.length 1}} as Services${{{@index}}}{{/notEquals}}  from './{{{this}}}';
+{{/each}}
+{{/if}}

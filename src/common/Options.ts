@@ -22,6 +22,7 @@ export type TOptions = {
     typePrefix?: string;
     useCancelableRequest?: boolean;
     sortByRequired?: boolean;
+    useSeparatedIndexes?: boolean;
 };
 
 export type TMultiOptions = {
