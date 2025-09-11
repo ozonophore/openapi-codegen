@@ -5,7 +5,7 @@ import { TypeRef } from "../enums/TypeRef.enum";
  * @prop value Value
  * @prop type The type of object passed via ref
  */
-export interface IRefWithtype {
+export type RefWithType = {
     value: string;
     type: TypeRef;
 }

@@ -1,5 +1,5 @@
 import { TOptions } from "../../common/Options"
-import { HttpClient } from "../types/Enums"
+import { HttpClient } from "../types/enums/HttpClient.enum"
 import { isBoolean } from "./isBoolean"
 
 /**

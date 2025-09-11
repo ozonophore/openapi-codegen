@@ -1,11 +1,11 @@
 import equal from 'fast-deep-equal';
 
 import { Context } from '../Context';
-import { TypeRef } from '../types/Enums';
-import { IRefWithtype } from '../types/Models';
+import { RefWithType } from '../types/base/RefWithtype.model';
+import { TypeRef } from '../types/enums/TypeRef.enum';
 import { dirName, join } from '../utils/pathHelpers';
 
-function includes(references: IRefWithtype[], value: string): boolean {
+function includes(references: RefWithType[], value: string): boolean {
     return references.findIndex(item => equal(item.value, value)) !== -1;
 }
 
@@ -14,7 +14,7 @@ function extractBasePath(path: string): string {
     return path.includes('#') ? path.split('#')[0] : path;
 }
 
-export function getGatheringRefs(context: Context, object: Record<string, any>, references: IRefWithtype[] = [], root: string = '', isSchema: boolean = false): IRefWithtype[] {
+export function getGatheringRefs(context: Context, object: Record<string, any>, references: RefWithType[] = [], root: string = '', isSchema: boolean = false): RefWithType[] {
     // If the object is not valid, we return the links
     if (!object || typeof object !== 'object') {
         return references;

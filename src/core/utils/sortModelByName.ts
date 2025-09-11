@@ -1,6 +1,6 @@
-import { IModel } from "./writeClientFullIndex";
+import { ExportedModel } from "../types/base/ExportedModel.model";
 
-export function sortModelByName(a: IModel, b: IModel): number {
+export function sortModelByName(a: ExportedModel, b: ExportedModel): number {
     if (a.name > b.name) {
         return 1;
     }

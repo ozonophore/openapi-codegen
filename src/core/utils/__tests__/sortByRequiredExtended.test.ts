@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 
-import { TPropertyGroupExtended } from '../../types/Models';
+import { PropertyGroupExtended } from '../../types/base/PropertyGroup.model';
 import { OperationParameter } from '../../types/shared/OperationParameter.model';
 import { createOperationParameter } from '../__mocks__/createOperationParameter';
 import { sortByRequiredExtended } from '../sortByRequiredExtended';
@@ -81,7 +81,7 @@ describe('sortByRequiredExtended', () => {
     });
 
     // Тесты для всех возможных пар групп
-    const groupPairs: [TPropertyGroupExtended, TPropertyGroupExtended][] = [
+    const groupPairs: [PropertyGroupExtended, PropertyGroupExtended][] = [
         ['required', 'required-with-default'],
         ['required', 'optional'],
         ['required', 'optional-with-default'],
@@ -103,7 +103,7 @@ describe('sortByRequiredExtended', () => {
     }
 
     // Вспомогательная функция для создания параметров по группе
-    function createOptionsForGroup(group: TPropertyGroupExtended): Partial<OperationParameter> {
+    function createOptionsForGroup(group: PropertyGroupExtended): Partial<OperationParameter> {
         switch (group) {
             case 'required': 
                 return { isRequired: true };

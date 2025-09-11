@@ -2,12 +2,11 @@ import assert from 'node:assert/strict';
 import { PathOrFileDescriptor } from 'node:fs';
 import { mock, test } from 'node:test';
 
-import { Templates } from 'core/utils/registerHandlebarTemplates';
-
-import { HttpClient } from '../types/Enums';
+import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Client } from '../types/shared/Client.model';
 import {fileSystem} from '../utils/fileSystem';
 import { getOutputPaths } from '../utils/getOutputPaths';
+import { Templates } from '../utils/registerHandlebarTemplates';
 import { WriteClient } from '../WriteClient';
 
 

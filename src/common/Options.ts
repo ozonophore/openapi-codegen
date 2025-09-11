@@ -1,4 +1,4 @@
-import { HttpClient } from '../../core';
+import { HttpClient } from '../core';
 
 export type TOptions = {
     input: string | Record<string, any>;

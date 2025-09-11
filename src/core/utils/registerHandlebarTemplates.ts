@@ -84,7 +84,7 @@ import partialTypeIntersection from '../../templatesCompiled/partials/typeInters
 import partialTypeReference from '../../templatesCompiled/partials/typeReference';
 import partialTypeUnion from '../../templatesCompiled/partials/typeUnion';
 import { registerHandlebarHelpers } from './registerHandlebarHelpers';
-import { HttpClient } from '../types/Enums';
+import { HttpClient } from '../types/enums/HttpClient.enum';
 
 export interface Templates {
     indexes: {

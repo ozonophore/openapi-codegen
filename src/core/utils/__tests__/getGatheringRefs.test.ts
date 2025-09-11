@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { describe, mock, test } from 'node:test';
 
-import { TypeRef } from '../../types/Enums';
+import { TypeRef } from '../../types/enums/TypeRef.enum';
 import { getGatheringRefs } from '../getGatheringRefs';
 
 const ContextMock = {

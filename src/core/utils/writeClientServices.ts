@@ -1,13 +1,13 @@
 import { resolve } from 'path';
 
-import { HttpClient } from '../types/Enums';
-import { IOutput } from '../types/Models';
+import { OutputPaths } from '../types/base/OutputPaths.model';
+import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Service } from '../types/shared/Service.model';
 import { fileSystem } from './fileSystem';
 import { format } from './format';
 import { Templates } from './registerHandlebarTemplates';
 
-type TServeceOutputsPath = Omit<IOutput, 'output' | 'outputSchemas'>;
+type TServeceOutputsPath = Omit<OutputPaths, 'output' | 'outputSchemas'>;
 
 /**
  * @param services Array of Services to write

@@ -1,6 +1,6 @@
 import { mkdirSync } from 'fs';
 
-import { HttpClient } from '../types/Enums';
+import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Model } from '../types/shared/Model.model';
 import { dirName, resolve } from '../utils/pathHelpers';
 import { fileSystem } from './fileSystem';

@@ -2,16 +2,17 @@
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import RefParser from 'json-schema-ref-parser';
 
-import { IOutput } from './types/base/OutputPaths.model';
-import { $Root, Prefix } from './types/Models';
+import { OutputPaths } from './types/base/OutputPaths.model';
+import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
+import { $Root} from './types/base/Root.model';
 import { getFileName } from './utils/getFileName';
 import { isString } from './utils/isString';
 import { dirName } from './utils/pathHelpers';
 
 type TContextProps = {
     input: string | Record<string, any>;
-    output: IOutput;
-    prefix?: Prefix;
+    output: OutputPaths;
+    prefix?: PrefixArtifacts;
     sortByRequired?: boolean;
 }
 
@@ -21,8 +22,8 @@ type TContextProps = {
 export class Context {
     private _refs: RefParser.$Refs | undefined;
     private _root: $Root | undefined;
-    private _output: IOutput;
-    public prefix: Prefix = {
+    private _output: OutputPaths;
+    public prefix: PrefixArtifacts = {
         interface: 'I',
         enum: 'E',
         type: 'T',

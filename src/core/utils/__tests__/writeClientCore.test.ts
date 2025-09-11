@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { PathOrFileDescriptor } from 'node:fs';
 import { mock, test } from 'node:test';
 
-import { HttpClient } from '../../types/Enums';
+import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { Client } from '../../types/shared/Client.model';
 import { fileSystem } from '../fileSystem';
 import { Templates } from '../registerHandlebarTemplates';

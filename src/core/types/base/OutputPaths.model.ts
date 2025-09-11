@@ -5,7 +5,7 @@
  * @param outputModels The relative location of the output directory for models
  * @param outputSchemas The relative location of the output directory for schemas
  */
-export interface IOutput {
+export type OutputPaths = {
     output: string;
     outputCore: string;
     outputServices: string;

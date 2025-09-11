@@ -7,7 +7,7 @@ import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
-import { IOutput } from './types/base/OutputPaths.model';
+import { OutputPaths } from './types/base/OutputPaths.model';
 import { HttpClient } from './types/enums/HttpClient.enum';
 import { fileSystem } from './utils/fileSystem';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
@@ -76,7 +76,7 @@ async function generateFrom(
     }: TOptions,
     writeClient: WriteClient
 ): Promise<void> {
-    const outputPaths: IOutput = getOutputPaths({
+    const outputPaths: OutputPaths = getOutputPaths({
         output,
         outputCore,
         outputServices,

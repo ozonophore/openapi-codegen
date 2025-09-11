@@ -1,7 +1,11 @@
 import { ELogLevel, ELogOutput } from '../common/Enums';
 import { Logger } from '../common/Logger';
-import { IOutput } from './types/base/OutputPaths.model';
-import { HttpClient } from './types/Enums';
+import { ClientArtifacts } from './types/base/ClientArtifacts.model';
+import { ExportedModel } from './types/base/ExportedModel.model';
+import { ExportedService } from './types/base/ExportedService.model';
+import { OutputPaths } from './types/base/OutputPaths.model';
+import { SimpleClientArtifacts } from './types/base/SimpleClientArtifacts.model';
+import { HttpClient } from './types/enums/HttpClient.enum';
 import type { Client } from './types/shared/Client.model';
 import { fileSystem } from './utils/fileSystem';
 import { relative, resolve } from './utils/pathHelpers';
@@ -10,11 +14,11 @@ import { Templates } from './utils/registerHandlebarTemplates';
 import { sortModelByName } from './utils/sortModelByName';
 import { unique } from './utils/unique';
 import { writeClientCore } from './utils/writeClientCore';
-import { IClientIndex, IModel, IService, ISimpleClientIndex } from './utils/writeClientFullIndex';
 import { writeClientFullIndex } from './utils/writeClientFullIndex';
 import { writeClientModels } from './utils/writeClientModels';
 import { writeClientSchemas } from './utils/writeClientSchemas';
 import { writeClientServices } from './utils/writeClientServices';
+import { writeClientSimpleIndex } from './utils/writeClientSimpleIndex';
 
 /**
  * @param client Client object with all the models, services, etc.
@@ -35,7 +39,7 @@ import { writeClientServices } from './utils/writeClientServices';
 interface IWriteClient {
     client: Client;
     templates: Templates;
-    outputPaths: IOutput;
+    outputPaths: OutputPaths;
     httpClient: HttpClient;
     useOptions: boolean;
     useUnionTypes: boolean;
@@ -62,7 +66,7 @@ interface IWriteClient {
 interface IWriteClientIndex {
     client: Client;
     templates: Templates;
-    outputPaths: IOutput;
+    outputPaths: OutputPaths;
     useUnionTypes: boolean;
     exportCore: boolean;
     exportServices: boolean;
@@ -186,16 +190,15 @@ export class WriteClient {
 
     async combineAndWrightSimple() {
         const result = this.buildSimpleClientIndexMap();
-        console.log({ result });
-    //     await this.finalizeAndWright(result);
+        await this.simpledFinalizeAndWrite(result);
     }
 
     public get logger() {
         return this._logger;
     }
 
-    private buildSimpleClientIndexMap(): Map<string, ISimpleClientIndex> {
-        const result: Map<string, ISimpleClientIndex> = new Map<string, ISimpleClientIndex>();
+    private buildSimpleClientIndexMap(): Map<string, SimpleClientArtifacts> {
+        const result: Map<string, SimpleClientArtifacts> = new Map<string, SimpleClientArtifacts>();
         for (const [key, value] of this.options.entries()) {
             for (const item of value) {
                 const { exportCore, outputPaths, exportModels, exportSchemas, exportServices, templates } = item;
@@ -203,7 +206,7 @@ export class WriteClient {
                 const outputModels = this.getOutputPath(outputPaths?.outputModels, key, 'models');
                 const outputSchemas = this.getOutputPath(outputPaths?.outputSchemas, key, 'schemas');
                 const outputServices = this.getOutputPath(outputPaths?.outputServices, key, 'services');
-                
+
                 const clientIndex = this.ensureSimpleClientIndex(result, key, templates);
 
                 if (exportCore) {
@@ -239,8 +242,8 @@ export class WriteClient {
         return result;
     }
 
-    private buildClientIndexMap(): Map<string, IClientIndex> {
-        const result: Map<string, IClientIndex> = new Map<string, IClientIndex>();
+    private buildClientIndexMap(): Map<string, ClientArtifacts> {
+        const result: Map<string, ClientArtifacts> = new Map<string, ClientArtifacts>();
         for (const [key, value] of this.options.entries()) {
             for (const item of value) {
                 const { exportCore, outputPaths, exportModels, exportSchemas, exportServices, client, templates, useUnionTypes } = item;
@@ -277,7 +280,7 @@ export class WriteClient {
                         }
 
                         if (exportSchemas) {
-                            const schema = {...modelFinal, package: relativePathSchema};
+                            const schema = { ...modelFinal, package: relativePathSchema };
 
                             if (!clientIndex.schemas.some(s => this.isSameShema(s, schema))) {
                                 clientIndex.schemas.push(schema);
@@ -293,7 +296,7 @@ export class WriteClient {
                             clientIndex.services.push({
                                 name: service.name,
                                 package: relativeService,
-                            })
+                            });
                         }
                     }
                 }
@@ -303,7 +306,7 @@ export class WriteClient {
         return result;
     }
 
-    private async finalizeAndWrite(result: Map<string, IClientIndex>): Promise<void> {
+    private async finalizeAndWrite(result: Map<string, ClientArtifacts>): Promise<void> {
         for (const value of result.values()) {
             value.models = value.models.filter(unique).sort(sortModelByName);
             prepareAlias(value.models);
@@ -313,15 +316,17 @@ export class WriteClient {
         }
     }
 
+    private async simpledFinalizeAndWrite(result: Map<string, SimpleClientArtifacts>): Promise<void> {
+        for (const value of result.values()) {
+            await writeClientSimpleIndex(value);
+        }
+    }
+
     private getOutputPath(output: string | undefined, key: string, fallback: string) {
         return output ? output : resolve(key, fallback);
     }
 
-    private ensureClientIndex(
-        map: Map<string, IClientIndex>,
-        key: string,
-        templates: any
-    ): IClientIndex {
+    private ensureClientIndex(map: Map<string, ClientArtifacts>, key: string, templates: any): ClientArtifacts {
         if (!map.has(key)) {
             map.set(key, {
                 templates,
@@ -330,17 +335,13 @@ export class WriteClient {
                 models: [],
                 schemas: [],
                 services: [],
-            })
+            });
         }
 
         return map.get(key)!;
     }
 
-    private ensureSimpleClientIndex(
-        map: Map<string, ISimpleClientIndex>,
-        key: string,
-        templates: any
-    ): ISimpleClientIndex {
+    private ensureSimpleClientIndex(map: Map<string, SimpleClientArtifacts>, key: string, templates: any): SimpleClientArtifacts {
         if (!map.has(key)) {
             map.set(key, {
                 templates,
@@ -349,28 +350,21 @@ export class WriteClient {
                 models: [],
                 schemas: [],
                 services: [],
-            })
+            });
         }
 
         return map.get(key)!;
     }
 
-    private isSameModel(a: IModel, b: IModel): boolean {
-        return (
-            a.name === b.name &&
-            a.path === b.path &&
-            a.package === b.package &&
-            a.enum === b.enum &&
-            a.enums === b.enums &&
-            a.useUnionTypes === b.useUnionTypes
-        );
+    private isSameModel(a: ExportedModel, b: ExportedModel): boolean {
+        return a.name === b.name && a.path === b.path && a.package === b.package && a.enum === b.enum && a.enums === b.enums && a.useUnionTypes === b.useUnionTypes;
     }
 
-    private isSameShema(a: IModel, b: IModel): boolean {
-        return a.name === b.name && a.path === b.path && a.package === b.package
+    private isSameShema(a: ExportedModel, b: ExportedModel): boolean {
+        return a.name === b.name && a.path === b.path && a.package === b.package;
     }
 
-    private isSomeService(a: IService, name: string, pkg: string): boolean {
+    private isSomeService(a: ExportedService, name: string, pkg: string): boolean {
         return a.name === name && a.package === pkg;
     }
 }
