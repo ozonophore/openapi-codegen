@@ -1,4 +1,4 @@
-import { IModel } from "./writeClientIndex";
+import { IModel } from "./writeClientFullIndex";
 
 export function sortModelByName(a: IModel, b: IModel): number {
     if (a.name > b.name) {

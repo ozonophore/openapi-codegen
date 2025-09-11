@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { HttpClient } from '../core/types/Enums';
+import { HttpClient } from '../core/types/enums/HttpClient.enum';
 
 export const defaultOptions = Joi.object({
     input: Joi.string().required(),

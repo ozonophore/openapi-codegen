@@ -7,8 +7,8 @@ import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
-import { HttpClient } from './types/Enums';
-import { IOutput } from './types/Models';
+import { IOutput } from './types/base/OutputPaths.model';
+import { HttpClient } from './types/enums/HttpClient.enum';
 import { fileSystem } from './utils/fileSystem';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
@@ -20,7 +20,7 @@ import { prepareOptions } from './utils/prepareOptions';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { WriteClient } from './WriteClient';
 
-export { HttpClient } from './types/Enums';
+export { HttpClient } from './types/enums/HttpClient.enum';
 
 /**
  * Generate the OpenAPI client. This method will read the OpenAPI specification and based on the

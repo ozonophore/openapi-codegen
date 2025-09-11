@@ -3,7 +3,8 @@ import { PathOrFileDescriptor } from 'node:fs';
 import { mock, test } from 'node:test';
 
 import { fileSystem } from '../fileSystem';
-import { writeClientIndex } from '../writeClientIndex';
+import { Templates } from '../registerHandlebarTemplates';
+import { writeClientFullIndex } from '../writeClientFullIndex';
 
 test('@unit: writeClientIndex writes to filesystem', async () => {
     const writeFileCalls: Array<[PathOrFileDescriptor, string | NodeJS.ArrayBufferView]> = [];
@@ -14,8 +15,14 @@ test('@unit: writeClientIndex writes to filesystem', async () => {
         writeFileCalls.push([path, content]);
     });
 
-    const templates = {
-        index: () => 'index',
+    const templates: Templates = {
+        indexes: {
+            full: () => 'fullIndex',
+            simple: () => 'simpleIndex',
+            models: () => 'modelsIndex',
+            schemas: () => 'schemasIndex',
+            services: () => 'servicesIndex',
+        },
         exports: {
             model: () => 'model',
             schema: () => 'schema',
@@ -32,7 +39,7 @@ test('@unit: writeClientIndex writes to filesystem', async () => {
         },
     };
 
-    await writeClientIndex({ templates, outputPath: '/', core: [], models: [], schemas: [], services: [] });
+    await writeClientFullIndex({ templates, outputPath: '/', core: [], models: [], schemas: [], services: [] });
 
     assert.ok(
         writeFileCalls.some(([filePath, content]) => filePath.toString().includes('index.ts') && content.toString().includes('index')),

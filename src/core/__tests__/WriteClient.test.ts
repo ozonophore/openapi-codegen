@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { PathOrFileDescriptor } from 'node:fs';
 import { mock, test } from 'node:test';
 
+import { Templates } from 'core/utils/registerHandlebarTemplates';
+
 import { HttpClient } from '../types/Enums';
 import type { Client } from '../types/shared/Client.model';
 import {fileSystem} from '../utils/fileSystem';
@@ -36,8 +38,14 @@ test('@unit: writeClient should write to filesystem', async () => {
         services: [],
     };
 
-    const templates = {
-        index: () => 'index',
+    const templates: Templates = {
+        indexes: {
+            full: () => 'fullIndex',
+            simple: () => 'simpleIndex',
+            models: () => 'modelsIndex',
+            schemas: () => 'schemasIndex',
+            services: () => 'servicesIndex',
+        },
         exports: {
             model: () => 'model',
             schema: () => 'schema',

@@ -1,7 +1,7 @@
 import { ELogLevel, ELogOutput } from '../common/Enums';
 import { Logger } from '../common/Logger';
+import { IOutput } from './types/base/OutputPaths.model';
 import { HttpClient } from './types/Enums';
-import { IOutput } from './types/Models';
 import type { Client } from './types/shared/Client.model';
 import { fileSystem } from './utils/fileSystem';
 import { relative, resolve } from './utils/pathHelpers';
@@ -10,8 +10,8 @@ import { Templates } from './utils/registerHandlebarTemplates';
 import { sortModelByName } from './utils/sortModelByName';
 import { unique } from './utils/unique';
 import { writeClientCore } from './utils/writeClientCore';
-import { IClientIndex, IModel, IService, ISimpleClientIndex } from './utils/writeClientIndex';
-import { writeClientIndex } from './utils/writeClientIndex';
+import { IClientIndex, IModel, IService, ISimpleClientIndex } from './utils/writeClientFullIndex';
+import { writeClientFullIndex } from './utils/writeClientFullIndex';
 import { writeClientModels } from './utils/writeClientModels';
 import { writeClientSchemas } from './utils/writeClientSchemas';
 import { writeClientServices } from './utils/writeClientServices';
@@ -59,7 +59,7 @@ interface IWriteClient {
  * @param exportModels: Generate models
  * @param exportSchemas: Generate schemas
  */
-export interface IWriteClientIndex {
+interface IWriteClientIndex {
     client: Client;
     templates: Templates;
     outputPaths: IOutput;
@@ -309,7 +309,7 @@ export class WriteClient {
             prepareAlias(value.models);
             value.schemas = value.schemas.filter(unique).sort(sortModelByName);
             prepareAlias(value.schemas);
-            await writeClientIndex(value);
+            await writeClientFullIndex(value);
         }
     }
 

@@ -5,6 +5,7 @@ import { mock, test } from 'node:test';
 import { HttpClient } from '../../types/Enums';
 import { Service } from '../../types/shared/Service.model';
 import { fileSystem } from '../fileSystem';
+import { Templates } from '../registerHandlebarTemplates';
 import { writeClientServices } from '../writeClientServices';
 
 test('@unit: writeClientServices  writes to filesystem', async () => {
@@ -25,8 +26,14 @@ test('@unit: writeClientServices  writes to filesystem', async () => {
         },
     ];
 
-    const templates = {
-        index: () => 'index',
+    const templates: Templates = {
+        indexes: {
+            full: () => 'fullIndex',
+            simple: () => 'simpleIndex',
+            models: () => 'modelsIndex',
+            schemas: () => 'schemasIndex',
+            services: () => 'servicesIndex',
+        },
         exports: {
             model: () => 'model',
             schema: () => 'schema',

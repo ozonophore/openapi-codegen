@@ -2,7 +2,8 @@
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import RefParser from 'json-schema-ref-parser';
 
-import { $Root, IOutput, Prefix } from './types/Models';
+import { IOutput } from './types/base/OutputPaths.model';
+import { $Root, Prefix } from './types/Models';
 import { getFileName } from './utils/getFileName';
 import { isString } from './utils/isString';
 import { dirName } from './utils/pathHelpers';

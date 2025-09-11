@@ -1,4 +1,4 @@
-import { IModel } from "./writeClientIndex";
+import { IModel } from "./writeClientFullIndex";
 
 export function prepareAlias(models: IModel[]) {
     let modelPrevious: IModel | undefined = undefined;

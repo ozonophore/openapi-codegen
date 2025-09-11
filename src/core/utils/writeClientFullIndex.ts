@@ -71,15 +71,29 @@ export interface ISimpleClientIndex {
  * @param exportModels: Generate models
  * @param exportSchemas: Generate schemas
  */
-export async function writeClientIndex(options: IClientIndex): Promise<void> {
-    const { templates, outputPath, core, models, schemas, services } = options;
-    await fileSystem.writeFile(
-        resolve(outputPath, 'index.ts'),
-        templates.index({
-            core,
-            models,
-            schemas,
-            services,
-        })
-    );
+export async function writeClientFullIndex(options: IClientIndex): Promise<void> {
+    // TODO: Два файла для full + simple версий!!!
+    const { templates, outputPath, core, models, schemas, services, useSeparatedIndexes } = options;
+    const resolvePathIndex = resolve(outputPath, 'index.ts');
+    if (useSeparatedIndexes) {
+        await fileSystem.writeFile(
+            resolvePathIndex,
+            templates.indexes.simple({
+                core,
+                models,
+                schemas,
+                services,
+            })
+        );
+    } else {
+        await fileSystem.writeFile(
+            resolvePathIndex,
+            templates.indexes.full({
+                core,
+                models,
+                schemas,
+                services,
+            })
+        );
+    }
 }

@@ -92,7 +92,7 @@ export interface Templates {
         simple: Handlebars.TemplateDelegate;
         models: Handlebars.TemplateDelegate;
         schemas: Handlebars.TemplateDelegate;
-        service: Handlebars.TemplateDelegate;
+        services: Handlebars.TemplateDelegate;
     }
     exports: {
         model: Handlebars.TemplateDelegate;
@@ -124,7 +124,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
             simple: Handlebars.template(templateSimpeIndex),
             models: Handlebars.template(templateModels),
             schemas: Handlebars.template(templateSchemas),
-            service: Handlebars.template(templateServices),
+            services: Handlebars.template(templateServices),
         },
         exports: {
             model: Handlebars.template(templateExportModel),
