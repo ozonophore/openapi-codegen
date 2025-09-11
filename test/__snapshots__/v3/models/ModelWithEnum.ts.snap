@@ -9,17 +9,14 @@ export interface IModelWithEnum {
     /**
      * This is a simple enum with strings
      */
-
     test?: IModelWithEnum.ETest;
     /**
      * These are the HTTP error code enums
      */
-
     statusCode?: IModelWithEnum.EStatusCode;
     /**
      * Simple boolean enum
      */
-
     bool?: boolean;
 }
 

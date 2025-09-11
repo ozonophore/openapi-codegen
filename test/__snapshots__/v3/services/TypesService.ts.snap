@@ -34,13 +34,13 @@ export type TTypesOptions = {
         parameterArray: Array<string> | null,
         parameterDictionary: any,
         parameterEnum: 'Success' | 'Warning' | 'Error' | null,
-        parameterNumber: number,
+        parameterNumber?: number,
 
-        parameterString: string | null,
+        parameterString?: string | null,
 
-        parameterBoolean: boolean | null,
+        parameterBoolean?: boolean | null,
 
-        parameterObject: any,
+        parameterObject?: any,
         id?: number,
     ) => ApiRequestOptions;
 };

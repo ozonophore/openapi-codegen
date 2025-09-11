@@ -11,9 +11,7 @@ import { OpenAPI } from './../core/OpenAPI';
 
 const callWithEnums = (requestBody?: {
     enumWithNumbers?: EEnumWithNumbers;
-
     enumWithStrings?: EEnumWithStrings;
-
     enumWithStringsWithType?: EEnumWithStringsWithType;
 }): ApiRequestOptions => ({
     method: 'POST',
@@ -25,9 +23,7 @@ const callWithEnums = (requestBody?: {
 export type TEnumsOptions = {
     callWithEnums: (requestBody?: {
         enumWithNumbers?: EEnumWithNumbers;
-
         enumWithStrings?: EEnumWithStrings;
-
         enumWithStringsWithType?: EEnumWithStringsWithType;
     }) => ApiRequestOptions;
 };
@@ -43,9 +39,7 @@ export class EnumsService {
      */
     public static callWithEnums(requestBody?: {
         enumWithNumbers?: EEnumWithNumbers;
-
         enumWithStrings?: EEnumWithStrings;
-
         enumWithStringsWithType?: EEnumWithStringsWithType;
     }): Promise<void> {
         return __request<void>(EnumsOptions.callWithEnums(requestBody), OpenAPI);

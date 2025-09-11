@@ -9,6 +9,5 @@ export interface IModelWithString {
     /**
      * This is a simple string property
      */
-
     prop?: string;
 }

@@ -34,13 +34,13 @@ export type TTypesServiceOptions = {
         parameterArray: Array<string>,
         parameterDictionary: Record<string, string>,
         parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterNumber: number,
+        parameterNumber?: number,
 
-        parameterString: string,
+        parameterString?: string,
 
-        parameterBoolean: boolean,
+        parameterBoolean?: boolean,
 
-        parameterObject: any,
+        parameterObject?: any,
 
         id?: number,
     ) => ApiRequestOptions;

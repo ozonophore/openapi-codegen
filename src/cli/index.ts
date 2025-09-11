@@ -1,20 +1,32 @@
 import { Command, Option, OptionValues } from 'commander';
+import fs from 'fs';
+import path from 'path';
 
 import { ELogLevel, ELogOutput } from '../common/Enums';
+import { Logger } from '../common/Logger';
+import { UpdateNotifier } from '../common/UpdateNotifier';
 import { HttpClient } from '../core/types/Enums';
+import { chekOpenApiConfig } from './chekOpenApiConfig/chekOpenApiConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
+import { getCLIName } from './utils';
 
-const APP_NAME = 'ts-openapi-codegen-cli';
-const APP_VERSION = '1.0.0';
+const packageDetails = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf-8'));
+
+const APP_NAME = packageDetails.name || 'ts-openapi-codegen-cli';
+const APP_VERSION = packageDetails.version || '1.0.0';
+const APP_DESCRIPTION = packageDetails.description || 'Description';
+
+const updateNotifier = new UpdateNotifier(APP_NAME, APP_VERSION);
 
 const program = new Command();
 
-program.version(APP_VERSION).name(APP_NAME).description('Description').addHelpText('before', 'Additional text');
+program.version(APP_VERSION).name(APP_NAME).description(APP_DESCRIPTION).addHelpText('before', getCLIName(APP_NAME));
 
 program
     .command('generate')
+    .description('Starts code generation based on the provided opeanpi specifications')
+    .addHelpText('before', getCLIName(APP_NAME))
     .usage('[options]')
-    .version(APP_VERSION)
     .option('-i, --input <value>', 'OpenAPI specification, can be a path, url or string content (required)', '')
     .option('-o, --output <value>', 'Output directory (required)', '')
     .option('-oc, --outputCore <value>', 'Output directory for core files')
@@ -37,8 +49,37 @@ program
     .addOption(new Option('-l, --logLevel <level>', 'Logging level').choices([...Object.values(ELogLevel)]).default(ELogLevel.ERROR))
     .addOption(new Option('-t, --logTarget <target>', 'Target of logging').choices([...Object.values(ELogOutput)]).default(ELogOutput.CONSOLE))
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
+    .hook('preAction', () => {
+        updateNotifier.checkAndNotify();
+    })
     .action(async (options: OptionValues) => {
         await runGenerateOpenApi(options);
     });
 
-program.parse(process.argv);
+program
+    .command('check-openapi-config')
+    .description('Starts checking whether the configuration file data is filled in correctly.')
+    .addHelpText('before', getCLIName(APP_NAME))
+    .hook('preAction', () => {
+        updateNotifier.checkAndNotify();
+    })
+    .action(() => {
+        chekOpenApiConfig();
+    });
+
+try {
+    program.parse(process.argv);
+} catch (error: any) {
+    if (error.code === 'commander.unknownOption') {
+        const errorMessage = error?.message ?? '';
+        if (errorMessage) {
+            const logger = new Logger({
+                level: ELogLevel.INFO,
+                instanceId: 'check-openapi-config',
+                logOutput: ELogOutput.CONSOLE,
+            });
+
+            logger.error(errorMessage);
+        }
+    }
+}

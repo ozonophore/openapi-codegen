@@ -58,6 +58,7 @@ import partialHeader from '../../templatesCompiled/partials/header';
 import partialIsNullable from '../../templatesCompiled/partials/isNullable';
 import partialIsReadOnly from '../../templatesCompiled/partials/isReadOnly';
 import partialIsRequired from '../../templatesCompiled/partials/isRequired';
+import partialIsRequiredDefinition from '../../templatesCompiled/partials/isRequiredDefinition';
 import partialParameters from '../../templatesCompiled/partials/parameters';
 import partialParametersDefinition from '../../templatesCompiled/partials/parametersDefinition';
 import partialParameterValues from '../../templatesCompiled/partials/parameterValues';
@@ -135,6 +136,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
     Handlebars.registerPartial('isNullable', Handlebars.template(partialIsNullable));
     Handlebars.registerPartial('isReadOnly', Handlebars.template(partialIsReadOnly));
     Handlebars.registerPartial('isRequired', Handlebars.template(partialIsRequired));
+    Handlebars.registerPartial('isRequiredDefinition', Handlebars.template(partialIsRequiredDefinition));
     Handlebars.registerPartial('parameters', Handlebars.template(partialParameters));
     Handlebars.registerPartial('parametersDefinition', Handlebars.template(partialParametersDefinition));
     Handlebars.registerPartial('parameterValues', Handlebars.template(partialParameterValues));

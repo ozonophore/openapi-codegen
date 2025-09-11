@@ -70,12 +70,9 @@ export class ResponseService {
      */
     public static callWithResponses(): Promise<
         | {
-              readonly;
-              '@namespace.string'?: string;
-              readonly;
-              '@namespace.integer'?: number;
-              readonly;
-              value?: Array<IModelWithString>;
+              readonly '@namespace.string'?: string;
+              readonly '@namespace.integer'?: number;
+              readonly value?: Array<IModelWithString>;
           }
         | IModelWithString
         | TModelThatExtends
@@ -83,12 +80,9 @@ export class ResponseService {
     > {
         return __request<
             | {
-                  readonly;
-                  '@namespace.string'?: string;
-                  readonly;
-                  '@namespace.integer'?: number;
-                  readonly;
-                  value?: Array<IModelWithString>;
+                  readonly '@namespace.string'?: string;
+                  readonly '@namespace.integer'?: number;
+                  readonly value?: Array<IModelWithString>;
               }
             | IModelWithString
             | TModelThatExtends

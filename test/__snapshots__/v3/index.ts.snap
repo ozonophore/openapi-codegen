@@ -6,17 +6,6 @@ export { ApiError } from '././core/ApiError';
 export { OpenAPI } from '././core/OpenAPI';
 export type { TOpenAPIConfig } from '././core/OpenAPI';
 
-export { EEnumWithNumbers } from '././models/EnumWithNumbers';
-export { EEnumWithStrings } from '././models/EnumWithStrings';
-export { EEnumWithStringsWithType } from '././models/EnumWithStringsWithType';
-export type { IModelWithArray } from '././models/ModelWithArray';
-export type { IModelWithDictionary } from '././models/ModelWithDictionary';
-export { IModelWithEnum } from '././models/ModelWithEnum';
-export type { IModelWithString } from '././models/ModelWithString';
-export type { TArrayWithArray } from '././models/ArrayWithArray';
-export type { TModelThatExtends } from '././models/ModelThatExtends';
-export type { TModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
-
 export { EEnumWithNumbersSchema } from '././schemas/EnumWithNumbersSchema';
 export { EEnumWithStringsSchema } from '././schemas/EnumWithStringsSchema';
 export { EEnumWithStringsWithTypeSchema } from '././schemas/EnumWithStringsWithTypeSchema';

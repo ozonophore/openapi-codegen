@@ -1,3 +1,5 @@
+import figlet from "figlet";
+
 /**
  * Checks if `value` is `null` or `undefined`.
  *
@@ -25,4 +27,23 @@ export function isValidJson(value: any) {
     } catch {
         return false;
     }
+}
+
+/**
+ * Returns the stylized package name to display in the terminal
+ * @param appName Package name
+ */
+export function getCLIName(appName: string) {
+    const name = figlet.textSync(appName, {
+        horizontalLayout: 'default',
+        verticalLayout: 'default',
+        width: 75,
+        whitespaceBreak: true,
+    });
+
+    return `
+    
+    ${name}
+    
+    `;
 }

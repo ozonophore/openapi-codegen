@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import { PathOrFileDescriptor } from 'node:fs';
 import { mock, test } from 'node:test';
 
-import { HttpClient } from '../../types/Enums';
-import type { Client } from '../../types/shared/Client.model';
-import {fileSystem} from '../fileSystem';
-import { getOutputPaths } from '../getOutputPaths';
-import { WriteClient } from '../writeClient';
+import { HttpClient } from '../types/Enums';
+import type { Client } from '../types/shared/Client.model';
+import {fileSystem} from '../utils/fileSystem';
+import { getOutputPaths } from '../utils/getOutputPaths';
+import { WriteClient } from '../WriteClient';
 
 
 
