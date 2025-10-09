@@ -23,16 +23,407 @@
         ],
         paths: {
           "/documents/account": {
-            $ref: "./specs/account.yaml",
+            get: {
+              summary: "Get account details",
+              operationId: "getAccount",
+              responses: {
+                "200": {
+                  description: "Successful response",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/AccountResponse",
+                      },
+                    },
+                  },
+                },
+                "400": {
+                  description: "Bad request",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/ErrorResponse",
+                      },
+                    },
+                  },
+                },
+                "500": {
+                  description: "Server error",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/ErrorResponse",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            components: {
+              schemas: {
+                AccountResponse: {
+                  type: "object",
+                  properties: {
+                    account: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/Account",
+                    },
+                  },
+                  required: [
+                    "account",
+                  ],
+                },
+                Account: {
+                  allOf: [
+                    {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/BaseEntity",
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        accountId: {
+                          type: "string",
+                          example: "acc_12345",
+                        },
+                        balance: {
+                          type: "number",
+                          format: "float",
+                          example: 1000.5,
+                        },
+                      },
+                      required: [
+                        "accountId",
+                        "balance",
+                      ],
+                    },
+                  ],
+                },
+                BaseEntity: {
+                  type: "object",
+                  properties: {
+                    createdAt: {
+                      type: "string",
+                      format: "date-time",
+                    },
+                    updatedAt: {
+                      type: "string",
+                      format: "date-time",
+                    },
+                  },
+                  required: [
+                    "createdAt",
+                  ],
+                },
+              },
+            },
           },
           "/documents/list": {
-            $ref: "./specs/list.yaml",
+            get: {
+              summary: "List all documents",
+              operationId: "listDocuments",
+              responses: {
+                "200": {
+                  description: "Successful response",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/DocumentListResponse",
+                      },
+                    },
+                  },
+                },
+                "401": {
+                  description: "Unauthorized",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/ErrorResponse",
+                      },
+                    },
+                  },
+                },
+                "500": {
+                  description: "Server error",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/ErrorResponse",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            components: {
+              schemas: {
+                DocumentListResponse: {
+                  type: "object",
+                  properties: {
+                    documents: {
+                      type: "array",
+                      items: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/Document",
+                      },
+                    },
+                  },
+                  required: [
+                    "documents",
+                  ],
+                },
+                Document: {
+                  allOf: [
+                    {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/BaseEntity",
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        documentId: {
+                          type: "string",
+                          example: "doc_67890",
+                        },
+                        title: {
+                          type: "string",
+                          example: "Contract",
+                        },
+                      },
+                      required: [
+                        "documentId",
+                        "title",
+                      ],
+                    },
+                  ],
+                },
+                BaseEntity: {
+                  type: "object",
+                  properties: {
+                    createdAt: {
+                      type: "string",
+                      format: "date-time",
+                    },
+                    updatedAt: {
+                      type: "string",
+                      format: "date-time",
+                    },
+                  },
+                  required: [
+                    "createdAt",
+                  ],
+                },
+              },
+            },
           },
           "/documents/{id}": {
-            $ref: "./specs/document.yaml",
+            get: {
+              summary: "Get document by ID",
+              operationId: "getDocument",
+              parameters: [
+                {
+                  name: "id",
+                  in: "path",
+                  required: true,
+                  schema: {
+                    type: "string",
+                  },
+                },
+              ],
+              responses: {
+                "200": {
+                  description: "Successful response",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/DocumentResponse",
+                      },
+                    },
+                  },
+                },
+                "404": {
+                  description: "Document not found",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/ErrorResponse",
+                      },
+                    },
+                  },
+                },
+                "500": {
+                  description: "Server error",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/ErrorResponse",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            components: {
+              schemas: {
+                DocumentResponse: {
+                  type: "object",
+                  properties: {
+                    document: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/Document",
+                    },
+                  },
+                  required: [
+                    "document",
+                  ],
+                },
+                Document: {
+                  allOf: [
+                    {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/BaseEntity",
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        documentId: {
+                          type: "string",
+                          example: "doc_67890",
+                        },
+                        content: {
+                          type: "string",
+                          example: "Document content",
+                        },
+                      },
+                      required: [
+                        "documentId",
+                        "content",
+                      ],
+                    },
+                  ],
+                },
+                BaseEntity: {
+                  type: "object",
+                  properties: {
+                    createdAt: {
+                      type: "string",
+                      format: "date-time",
+                    },
+                    updatedAt: {
+                      type: "string",
+                      format: "date-time",
+                    },
+                  },
+                  required: [
+                    "createdAt",
+                  ],
+                },
+              },
+            },
           },
           "/documents/search": {
-            $ref: "./specs/search.yaml",
+            get: {
+              summary: "Search documents",
+              operationId: "searchDocuments",
+              parameters: [
+                {
+                  name: "query",
+                  in: "query",
+                  required: true,
+                  schema: {
+                    type: "string",
+                  },
+                },
+              ],
+              responses: {
+                "200": {
+                  description: "Successful response",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/SearchResponse",
+                      },
+                    },
+                  },
+                },
+                "400": {
+                  description: "Invalid query",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/ErrorResponse",
+                      },
+                    },
+                  },
+                },
+                "500": {
+                  description: "Server error",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/ErrorResponse",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            components: {
+              schemas: {
+                SearchResponse: {
+                  type: "object",
+                  properties: {
+                    results: {
+                      type: "array",
+                      items: {
+                        $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/DocumentSummary",
+                      },
+                    },
+                  },
+                  required: [
+                    "results",
+                  ],
+                },
+                DocumentSummary: {
+                  allOf: [
+                    {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/BaseEntity",
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        documentId: {
+                          type: "string",
+                          example: "doc_67890",
+                        },
+                        title: {
+                          type: "string",
+                          example: "Contract",
+                        },
+                        snippet: {
+                          type: "string",
+                          example: "Short preview...",
+                        },
+                      },
+                      required: [
+                        "documentId",
+                        "title",
+                      ],
+                    },
+                  ],
+                },
+                BaseEntity: {
+                  type: "object",
+                  properties: {
+                    createdAt: {
+                      type: "string",
+                      format: "date-time",
+                    },
+                    updatedAt: {
+                      type: "string",
+                      format: "date-time",
+                    },
+                  },
+                  required: [
+                    "createdAt",
+                  ],
+                },
+              },
+            },
           },
         },
         components: {
@@ -74,7 +465,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/AccountResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/AccountResponse",
                   },
                 },
               },
@@ -84,7 +475,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/ErrorResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/ErrorResponse",
                   },
                 },
               },
@@ -94,7 +485,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/ErrorResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/ErrorResponse",
                   },
                 },
               },
@@ -107,7 +498,7 @@
               type: "object",
               properties: {
                 account: {
-                  $ref: "#/components/schemas/Account",
+                  $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/Account",
                 },
               },
               required: [
@@ -117,7 +508,7 @@
             Account: {
               allOf: [
                 {
-                  $ref: "#/components/schemas/BaseEntity",
+                  $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/BaseEntity",
                 },
                 {
                   type: "object",
@@ -175,7 +566,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/DocumentListResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/DocumentListResponse",
                   },
                 },
               },
@@ -185,7 +576,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/ErrorResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/ErrorResponse",
                   },
                 },
               },
@@ -195,7 +586,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/ErrorResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/ErrorResponse",
                   },
                 },
               },
@@ -210,7 +601,7 @@
                 documents: {
                   type: "array",
                   items: {
-                    $ref: "#/components/schemas/Document",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/Document",
                   },
                 },
               },
@@ -221,7 +612,7 @@
             Document: {
               allOf: [
                 {
-                  $ref: "#/components/schemas/BaseEntity",
+                  $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/BaseEntity",
                 },
                 {
                   type: "object",
@@ -288,7 +679,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/DocumentResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/DocumentResponse",
                   },
                 },
               },
@@ -298,7 +689,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/ErrorResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/ErrorResponse",
                   },
                 },
               },
@@ -308,7 +699,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/ErrorResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/ErrorResponse",
                   },
                 },
               },
@@ -321,7 +712,7 @@
               type: "object",
               properties: {
                 document: {
-                  $ref: "#/components/schemas/Document",
+                  $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/Document",
                 },
               },
               required: [
@@ -331,7 +722,7 @@
             Document: {
               allOf: [
                 {
-                  $ref: "#/components/schemas/BaseEntity",
+                  $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/BaseEntity",
                 },
                 {
                   type: "object",
@@ -398,7 +789,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/SearchResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/SearchResponse",
                   },
                 },
               },
@@ -408,7 +799,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/ErrorResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/ErrorResponse",
                   },
                 },
               },
@@ -418,7 +809,7 @@
               content: {
                 "application/json": {
                   schema: {
-                    $ref: "#/components/schemas/ErrorResponse",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/ErrorResponse",
                   },
                 },
               },
@@ -433,7 +824,7 @@
                 results: {
                   type: "array",
                   items: {
-                    $ref: "#/components/schemas/DocumentSummary",
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/DocumentSummary",
                   },
                 },
               },
@@ -444,7 +835,7 @@
             DocumentSummary: {
               allOf: [
                 {
-                  $ref: "#/components/schemas/BaseEntity",
+                  $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/BaseEntity",
                 },
                 {
                   type: "object",
@@ -519,16 +910,407 @@
       ],
       paths: {
         "/documents/account": {
-          $ref: "./specs/account.yaml",
+          get: {
+            summary: "Get account details",
+            operationId: "getAccount",
+            responses: {
+              "200": {
+                description: "Successful response",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/AccountResponse",
+                    },
+                  },
+                },
+              },
+              "400": {
+                description: "Bad request",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/ErrorResponse",
+                    },
+                  },
+                },
+              },
+              "500": {
+                description: "Server error",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/ErrorResponse",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              AccountResponse: {
+                type: "object",
+                properties: {
+                  account: {
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/Account",
+                  },
+                },
+                required: [
+                  "account",
+                ],
+              },
+              Account: {
+                allOf: [
+                  {
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/account.yaml#/components/schemas/BaseEntity",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      accountId: {
+                        type: "string",
+                        example: "acc_12345",
+                      },
+                      balance: {
+                        type: "number",
+                        format: "float",
+                        example: 1000.5,
+                      },
+                    },
+                    required: [
+                      "accountId",
+                      "balance",
+                    ],
+                  },
+                ],
+              },
+              BaseEntity: {
+                type: "object",
+                properties: {
+                  createdAt: {
+                    type: "string",
+                    format: "date-time",
+                  },
+                  updatedAt: {
+                    type: "string",
+                    format: "date-time",
+                  },
+                },
+                required: [
+                  "createdAt",
+                ],
+              },
+            },
+          },
         },
         "/documents/list": {
-          $ref: "./specs/list.yaml",
+          get: {
+            summary: "List all documents",
+            operationId: "listDocuments",
+            responses: {
+              "200": {
+                description: "Successful response",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/DocumentListResponse",
+                    },
+                  },
+                },
+              },
+              "401": {
+                description: "Unauthorized",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/ErrorResponse",
+                    },
+                  },
+                },
+              },
+              "500": {
+                description: "Server error",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/ErrorResponse",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              DocumentListResponse: {
+                type: "object",
+                properties: {
+                  documents: {
+                    type: "array",
+                    items: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/Document",
+                    },
+                  },
+                },
+                required: [
+                  "documents",
+                ],
+              },
+              Document: {
+                allOf: [
+                  {
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/list.yaml#/components/schemas/BaseEntity",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      documentId: {
+                        type: "string",
+                        example: "doc_67890",
+                      },
+                      title: {
+                        type: "string",
+                        example: "Contract",
+                      },
+                    },
+                    required: [
+                      "documentId",
+                      "title",
+                    ],
+                  },
+                ],
+              },
+              BaseEntity: {
+                type: "object",
+                properties: {
+                  createdAt: {
+                    type: "string",
+                    format: "date-time",
+                  },
+                  updatedAt: {
+                    type: "string",
+                    format: "date-time",
+                  },
+                },
+                required: [
+                  "createdAt",
+                ],
+              },
+            },
+          },
         },
         "/documents/{id}": {
-          $ref: "./specs/document.yaml",
+          get: {
+            summary: "Get document by ID",
+            operationId: "getDocument",
+            parameters: [
+              {
+                name: "id",
+                in: "path",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+              },
+            ],
+            responses: {
+              "200": {
+                description: "Successful response",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/DocumentResponse",
+                    },
+                  },
+                },
+              },
+              "404": {
+                description: "Document not found",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/ErrorResponse",
+                    },
+                  },
+                },
+              },
+              "500": {
+                description: "Server error",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/ErrorResponse",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              DocumentResponse: {
+                type: "object",
+                properties: {
+                  document: {
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/Document",
+                  },
+                },
+                required: [
+                  "document",
+                ],
+              },
+              Document: {
+                allOf: [
+                  {
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/document.yaml#/components/schemas/BaseEntity",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      documentId: {
+                        type: "string",
+                        example: "doc_67890",
+                      },
+                      content: {
+                        type: "string",
+                        example: "Document content",
+                      },
+                    },
+                    required: [
+                      "documentId",
+                      "content",
+                    ],
+                  },
+                ],
+              },
+              BaseEntity: {
+                type: "object",
+                properties: {
+                  createdAt: {
+                    type: "string",
+                    format: "date-time",
+                  },
+                  updatedAt: {
+                    type: "string",
+                    format: "date-time",
+                  },
+                },
+                required: [
+                  "createdAt",
+                ],
+              },
+            },
+          },
         },
         "/documents/search": {
-          $ref: "./specs/search.yaml",
+          get: {
+            summary: "Search documents",
+            operationId: "searchDocuments",
+            parameters: [
+              {
+                name: "query",
+                in: "query",
+                required: true,
+                schema: {
+                  type: "string",
+                },
+              },
+            ],
+            responses: {
+              "200": {
+                description: "Successful response",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/SearchResponse",
+                    },
+                  },
+                },
+              },
+              "400": {
+                description: "Invalid query",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/ErrorResponse",
+                    },
+                  },
+                },
+              },
+              "500": {
+                description: "Server error",
+                content: {
+                  "application/json": {
+                    schema: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/ErrorResponse",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              SearchResponse: {
+                type: "object",
+                properties: {
+                  results: {
+                    type: "array",
+                    items: {
+                      $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/DocumentSummary",
+                    },
+                  },
+                },
+                required: [
+                  "results",
+                ],
+              },
+              DocumentSummary: {
+                allOf: [
+                  {
+                    $ref: "/Users/pidtchay/Developer/openapi-codegen/example/openapi/specs/search.yaml#/components/schemas/BaseEntity",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      documentId: {
+                        type: "string",
+                        example: "doc_67890",
+                      },
+                      title: {
+                        type: "string",
+                        example: "Contract",
+                      },
+                      snippet: {
+                        type: "string",
+                        example: "Short preview...",
+                      },
+                    },
+                    required: [
+                      "documentId",
+                      "title",
+                    ],
+                  },
+                ],
+              },
+              BaseEntity: {
+                type: "object",
+                properties: {
+                  createdAt: {
+                    type: "string",
+                    format: "date-time",
+                  },
+                  updatedAt: {
+                    type: "string",
+                    format: "date-time",
+                  },
+                },
+                required: [
+                  "createdAt",
+                ],
+              },
+            },
+          },
         },
       },
       components: {

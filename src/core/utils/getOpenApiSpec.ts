@@ -1,10 +1,9 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
-import { isAbsolute } from 'path';
 
 import { Context } from '../Context';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 import { OpenApiReference } from '../types/shared/OpenApiReference.model';
-import { dirName, join, resolve } from '../utils/pathHelpers';
+import { dirName, resolve } from '../utils/pathHelpers';
 import { fileSystem } from './fileSystem';
 
 function encodeJsonPointer(pointer: string): string {
@@ -23,7 +22,8 @@ function replaceRef<T>(object: OpenApiReference, context: Context, parentFilePat
     if (object.$ref) {
         const ref = object.$ref;
         if (ref.startsWith('#/')) {
-            const base = resolve(parentFilePath);
+            let base = resolve(parentFilePath);
+            if (!base.startsWith('/')) base = `/${base}`;
             object.$ref = encodeJsonPointer(`${base}${ref}`);
         }
     } else {
@@ -76,7 +76,8 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
         const maybeRef = value as OpenApiReference;
         if (maybeRef.$ref) {
             const [refPath, fragment] = maybeRef.$ref.split('#');
-            const basePath = refPath ? resolve(dirName(absoluteInput), refPath) : absoluteInput;
+            let basePath = refPath ? resolve(dirName(absoluteInput), refPath) : absoluteInput;
+            if (!basePath.startsWith('/')) basePath = `/${basePath}`;
             const qualifiedRef = fragment ? `${basePath}#${fragment}` : basePath;
             const encodedRef = encodeJsonPointer(qualifiedRef);
             const externalRoot = context.get(encodedRef) as OpenApiReference;
