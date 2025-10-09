@@ -23,7 +23,8 @@ function replaceRef<T>(object: OpenApiReference, context: Context, parentFilePat
     if (object.$ref) {
         const ref = object.$ref;
         if (ref.startsWith('#/')) {
-            object.$ref = encodeJsonPointer(`${parentFilePath}${ref}`);
+            const base = resolve(parentFilePath);
+            object.$ref = encodeJsonPointer(`${base}${ref}`);
         }
     } else {
         for (const key of Object.keys(object)) {
@@ -75,7 +76,7 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
         const maybeRef = value as OpenApiReference;
         if (maybeRef.$ref) {
             const [refPath, fragment] = maybeRef.$ref.split('#');
-            const basePath = refPath ? (isAbsolute(refPath) ? refPath : join(dirName(absoluteInput), refPath)) : absoluteInput;
+            const basePath = refPath ? resolve(dirName(absoluteInput), refPath) : absoluteInput;
             const qualifiedRef = fragment ? `${basePath}#${fragment}` : basePath;
             const encodedRef = encodeJsonPointer(qualifiedRef);
             const externalRoot = context.get(encodedRef) as OpenApiReference;
