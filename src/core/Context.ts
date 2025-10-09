@@ -92,6 +92,14 @@ export class Context {
         if (basePath && !basePath.startsWith('/')) {
             basePath = `/${basePath}`;
         }
+        // If root path occurs multiple times (path duplication), keep the last occurrence slice
+        if (basePath && this._root?.path) {
+            const rootPath = this._root.path;
+            const idx = basePath.lastIndexOf(rootPath);
+            if (idx > 0) {
+                basePath = basePath.slice(idx);
+            }
+        }
         const normalizedRef = fragment ? `${basePath}#${fragment}` : basePath;
         return this._refs.get(normalizedRef);
     }
