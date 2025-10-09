@@ -6,6 +6,7 @@ import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
 import { $Root} from './types/base/Root.model';
 import { getFileName } from './utils/getFileName';
 import { isString } from './utils/isString';
+import { resolve } from './utils/pathHelpers';
 import { dirName } from './utils/pathHelpers';
 
 type TContextProps = {
@@ -72,7 +73,19 @@ export class Context {
         if (!this._refs) {
             throw new Error('Context must be initialized');
         }
-        return this._refs.get($ref);
+        const [base, fragment] = String($ref).split('#');
+        let basePath = base;
+        // Resolve base path relative to root if needed
+        if (!basePath || basePath.length === 0) {
+            basePath = this._root?.fileName ? `${this._root.path}/${this._root.fileName}` : this._root?.path || '';
+        } else if (!/^\//.test(basePath) && !/^https?:\/\//i.test(basePath)) {
+            basePath = resolve(this._root?.path || '', basePath);
+        }
+        if (basePath && !basePath.startsWith('/')) {
+            basePath = `/${basePath}`;
+        }
+        const normalizedRef = fragment ? `${basePath}#${fragment}` : basePath;
+        return this._refs.get(normalizedRef);
     }
 
     public paths(...types: string[]): string[] {
