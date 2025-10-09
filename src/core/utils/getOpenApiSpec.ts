@@ -7,12 +7,6 @@ import { OpenApiReference } from '../types/shared/OpenApiReference.model';
 import { dirName, join, resolve } from '../utils/pathHelpers';
 import { fileSystem } from './fileSystem';
 
-function toFileUrl(absPath: string): string {
-    if (absPath.startsWith('file://')) return absPath;
-    const prefix = absPath.startsWith('/') ? 'file://' : 'file:///';
-    return `${prefix}${absPath}`;
-}
-
 function encodeJsonPointer(pointer: string): string {
     const [base, fragment] = pointer.split('#');
     if (!fragment) {
@@ -29,10 +23,10 @@ function replaceRef<T>(object: OpenApiReference, context: Context, parentFilePat
     if (object.$ref) {
         const ref = object.$ref;
         if (ref.startsWith('#/')) {
-            object.$ref = encodeJsonPointer(`${toFileUrl(parentFilePath)}${ref}`);
+            object.$ref = encodeJsonPointer(`${parentFilePath}${ref}`);
         } else if (!isAbsolute(ref) && !ref.match(/^(http:\/\/|https:\/\/)/g)) {
             const abs = join(dirName(parentFilePath), ref);
-            object.$ref = toFileUrl(abs);
+            object.$ref = abs;
         }
     } else {
         for (const key of Object.keys(object)) {
@@ -84,8 +78,7 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
         const maybeRef = value as OpenApiReference;
         if (maybeRef.$ref) {
             const [refPath, fragment] = maybeRef.$ref.split('#');
-            const rawBasePath = isAbsolute(refPath) ? refPath : join(dirName(absoluteInput), refPath);
-            const basePath = toFileUrl(rawBasePath);
+            const basePath = isAbsolute(refPath) ? refPath : join(dirName(absoluteInput), refPath);
             const qualifiedRef = fragment ? `${basePath}#${fragment}` : basePath;
             const encodedRef = encodeJsonPointer(qualifiedRef);
             const externalRoot = context.get(encodedRef) as OpenApiReference;
