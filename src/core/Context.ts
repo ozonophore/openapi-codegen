@@ -75,11 +75,19 @@ export class Context {
         }
         const [base, fragment] = String($ref).split('#');
         let basePath = base;
+        const rootPath = this._root?.path || '';
+        const rootPathNoLead = rootPath.startsWith('/') ? rootPath.slice(1) : rootPath;
         // Resolve base path relative to root if needed
         if (!basePath || basePath.length === 0) {
-            basePath = this._root?.fileName ? `${this._root.path}/${this._root.fileName}` : this._root?.path || '';
+            basePath = this._root?.fileName ? `${rootPath}/${this._root.fileName}` : rootPath;
         } else if (!/^\//.test(basePath) && !/^https?:\/\//i.test(basePath)) {
-            basePath = resolve(this._root?.path || '', basePath);
+            // If basePath already looks like an absolute path missing the leading slash (starts with root path),
+            // just prefix with '/'. Otherwise, resolve relative to root.
+            if (rootPathNoLead && basePath.startsWith(rootPathNoLead)) {
+                basePath = `/${basePath}`;
+            } else {
+                basePath = resolve(rootPath, basePath);
+            }
         }
         if (basePath && !basePath.startsWith('/')) {
             basePath = `/${basePath}`;
