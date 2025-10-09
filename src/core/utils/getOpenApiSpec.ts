@@ -19,9 +19,15 @@ function encodeJsonPointer(pointer: string): string {
     return `${base}#${encoded}`;
 }
 
-function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: string): T {
-    if (object.$ref && !isAbsolute(object.$ref) && !object.$ref.match(/^(http:\/\/|https:\/\/|#\/)/g)) {
-        object.$ref = join(parentRef, object.$ref);
+function replaceRef<T>(object: OpenApiReference, context: Context, parentFilePath: string): T {
+    if (object.$ref) {
+        const ref = object.$ref;
+        if (ref.startsWith('#/')) {
+            object.$ref = encodeJsonPointer(`${parentFilePath}${ref}`);
+        } else if (!isAbsolute(ref) && !ref.match(/^(http:\/\/|https:\/\/)/g)) {
+            const abs = join(dirName(parentFilePath), ref);
+            object.$ref = abs;
+        }
     } else {
         for (const key of Object.keys(object)) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -29,7 +35,7 @@ function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: st
             if (object[key] instanceof Object) {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                replaceRef(object[key], context, parentRef);
+                replaceRef(object[key], context, parentFilePath);
             }
         }
     }
@@ -71,8 +77,12 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
     for (const [pathKey, value] of Object.entries(mainSchema.paths)) {
         const maybeRef = value as OpenApiReference;
         if (maybeRef.$ref) {
-            const encodedRef = encodeJsonPointer(maybeRef.$ref);
-            newPaths[pathKey] = replaceRef(context.get(encodedRef) as OpenApiReference, context, dirName(maybeRef.$ref));
+            const [refPath, fragment] = maybeRef.$ref.split('#');
+            const basePath = isAbsolute(refPath) ? refPath : join(dirName(absoluteInput), refPath);
+            const qualifiedRef = fragment ? `${basePath}#${fragment}` : basePath;
+            const encodedRef = encodeJsonPointer(qualifiedRef);
+            const externalRoot = context.get(encodedRef) as OpenApiReference;
+            newPaths[pathKey] = replaceRef(externalRoot, context, basePath);
         } else {
             newPaths[pathKey] = value;
         }
