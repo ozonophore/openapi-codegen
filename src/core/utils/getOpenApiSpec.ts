@@ -1,4 +1,4 @@
-import RefParser from '@apidevtools/json-schema-ref-parser';
+import SwaggerParser from '@apidevtools/swagger-parser';
 import { isAbsolute } from 'path';
 
 import { Context } from '../Context';
@@ -6,6 +6,18 @@ import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 import { OpenApiReference } from '../types/shared/OpenApiReference.model';
 import { dirName, join, resolve } from '../utils/pathHelpers';
 import { fileSystem } from './fileSystem';
+
+function encodeJsonPointer(pointer: string): string {
+    const [base, fragment] = pointer.split('#');
+    if (!fragment) {
+        return pointer;
+    }
+    const encoded = fragment
+        .split('/')
+        .map(part => part.replace(/~/g, '~0').replace(/\//g, '~1'))
+        .join('/');
+    return `${base}#${encoded}`;
+}
 
 function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: string): T {
     if (object.$ref && !isAbsolute(object.$ref) && !object.$ref.match(/^(http:\/\/|https:\/\/|#\/)/g)) {
@@ -41,8 +53,11 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
         throw new Error(`Could not read OpenApi spec: "${absoluteInput}"`);
     }
 
-    const resolvedRefs = await RefParser.resolve(absoluteInput);
+    const resolvedRefs = await (SwaggerParser as any).resolve(absoluteInput, { validate: false });
 
+    // Coerce to the loose interface expected by Context
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     context.addRefs(resolvedRefs);
 
     const raw = resolvedRefs.get(absoluteInput);
@@ -56,7 +71,8 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
     for (const [pathKey, value] of Object.entries(mainSchema.paths)) {
         const maybeRef = value as OpenApiReference;
         if (maybeRef.$ref) {
-            newPaths[pathKey] = replaceRef(context.get(maybeRef.$ref) as OpenApiReference, context, dirName(maybeRef.$ref));
+            const encodedRef = encodeJsonPointer(maybeRef.$ref);
+            newPaths[pathKey] = replaceRef(context.get(encodedRef) as OpenApiReference, context, dirName(maybeRef.$ref));
         } else {
             newPaths[pathKey] = value;
         }

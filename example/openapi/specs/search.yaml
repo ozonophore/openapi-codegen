@@ -1,0 +1,67 @@
+get:
+  summary: Search documents
+  operationId: searchDocuments
+  parameters:
+    - name: query
+      in: query
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SearchResponse'
+    '400':
+      description: Invalid query
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentSummary'
+      required:
+        - results
+    DocumentSummary:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            documentId:
+              type: string
+              example: doc_67890
+            title:
+              type: string
+              example: Contract
+            snippet:
+              type: string
+              example: Short preview...
+          required:
+            - documentId
+            - title
+    BaseEntity:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - createdAt

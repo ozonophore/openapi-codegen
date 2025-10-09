@@ -1,6 +1,6 @@
 {
-    "input": "./test/spec/v2.json",
-    "output": "./test/generated/v2/",
+    "input": "/Users/pidtchay/Developer/openapi-codegen/example/openapi/spec.yml",
+    "output": "./test/generated/openapi/",
     "httpClient": "fetch",
     "useSeparatedIndexes": true
 }

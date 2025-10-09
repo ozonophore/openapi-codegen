@@ -1,0 +1,58 @@
+get:
+  summary: List all documents
+  operationId: listDocuments
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentListResponse'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    DocumentListResponse:
+      type: object
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+      required:
+        - documents
+    Document:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            documentId:
+              type: string
+              example: doc_67890
+            title:
+              type: string
+              example: Contract
+          required:
+            - documentId
+            - title
+    BaseEntity:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - createdAt

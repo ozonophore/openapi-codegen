@@ -1,6 +1,5 @@
 /* istanbul ignore file */
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
-import RefParser from 'json-schema-ref-parser';
 
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
@@ -16,11 +15,18 @@ type TContextProps = {
     sortByRequired?: boolean;
 }
 
+type RefsLike = {
+    values: (...args: any[]) => Record<string, any>;
+    get: (...args: any[]) => JSONSchema4Type | JSONSchema6Type | JSONSchema7Type;
+    paths: (...args: any[]) => string[];
+    exists: (...args: any[]) => boolean;
+};
+
 /**
  * A Context wich can share a data between methods
  */
 export class Context {
-    private _refs: RefParser.$Refs | undefined;
+    private _refs: RefsLike | undefined;
     private _root: $Root | undefined;
     private _output: OutputPaths;
     public prefix: PrefixArtifacts = {
@@ -33,7 +39,7 @@ export class Context {
 
     constructor({ input, output, prefix, sortByRequired }: TContextProps) {
         this._output = output;
-        this._refs = {} as RefParser.$Refs;
+        this._refs = {} as RefsLike;
         if (isString(input)) {
             this._root = { path: dirName(input), fileName: getFileName(input) };
         } else {
@@ -50,7 +56,7 @@ export class Context {
         return this;
     }
 
-    public addRefs(refs: RefParser.$Refs): Context {
+    public addRefs(refs: RefsLike): Context {
         this._refs = refs;
         return this;
     }

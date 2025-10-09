@@ -1,0 +1,57 @@
+get:
+  summary: Get account details
+  operationId: getAccount
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountResponse'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    AccountResponse:
+      type: object
+      properties:
+        account:
+          $ref: '#/components/schemas/Account'
+      required:
+        - account
+    Account:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            accountId:
+              type: string
+              example: acc_12345
+            balance:
+              type: number
+              format: float
+              example: 1000.50
+          required:
+            - accountId
+            - balance
+    BaseEntity:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - createdAt

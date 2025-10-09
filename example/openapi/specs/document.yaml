@@ -1,0 +1,62 @@
+get:
+  summary: Get document by ID
+  operationId: getDocument
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentResponse'
+    '404':
+      description: Document not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    DocumentResponse:
+      type: object
+      properties:
+        document:
+          $ref: '#/components/schemas/Document'
+      required:
+        - document
+    Document:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            documentId:
+              type: string
+              example: doc_67890
+            content:
+              type: string
+              example: Document content
+          required:
+            - documentId
+            - content
+    BaseEntity:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - createdAt
