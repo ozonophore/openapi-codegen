@@ -1,4 +1,5 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
+import path from 'path';
 
 import { Context } from '../Context';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
@@ -25,6 +26,11 @@ function replaceRef<T>(object: OpenApiReference, context: Context, parentFilePat
             let base = resolve(parentFilePath);
             if (!base.startsWith('/')) base = `/${base}`;
             object.$ref = encodeJsonPointer(`${base}${ref}`);
+        } else if (!ref.match(/^(http:\/\/|https:\/\/)/g) && !path.isAbsolute(ref)) {
+            // Relative external file -> resolve against current file directory
+            let abs = resolve(dirName(parentFilePath), ref);
+            if (!abs.startsWith('/')) abs = `/${abs}`;
+            object.$ref = abs;
         }
     } else {
         for (const key of Object.keys(object)) {
@@ -69,6 +75,9 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
         throw new Error(`Schema at "${absoluteInput}" is not a valid OpenAPI object`);
     }
     const mainSchema = raw as unknown as CommonOpenApi;
+
+    // Normalize all $ref in the entire schema to absolute-file + encoded fragment
+    replaceRef(mainSchema as unknown as OpenApiReference, context, absoluteInput);
 
     const newPaths: Record<string, any> = {};
 
