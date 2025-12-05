@@ -9,10 +9,8 @@ describe('convertArrayToObject', () => {
         const result = convertArrayToObject(input);
         const expected = {
             items: [],
-            exportCore: undefined,
-            exportServices: undefined,
-            exportModels: undefined,
-            exportSchemas: undefined,
+            excludeCoreServiceFiles: undefined,
+            includeSchemasFiles: undefined,
             request: undefined,
             useOptions: undefined,
             useCancelableRequest: undefined,
@@ -31,19 +29,11 @@ describe('convertArrayToObject', () => {
             },
         ];
         const expected = {
-            httpClient: undefined,
-            useOptions: true,
-            useUnionTypes: undefined,
-            exportCore: true,
-            exportServices: undefined,
-            exportModels: undefined,
-            exportSchemas: undefined,
-            clean: undefined,
-            request: 'req1',
-            interfacePrefix: undefined,
             enumPrefix: undefined,
-            typePrefix: undefined,
-            useCancelableRequest: undefined,
+            excludeCoreServiceFiles: undefined,
+            httpClient: undefined,
+            includeSchemasFiles: undefined,
+            interfacePrefix: undefined,
             items: [
                 {
                     input: 'url1',
@@ -54,6 +44,15 @@ describe('convertArrayToObject', () => {
                     outputSchemas: undefined,
                 },
             ],
+            logLevel: undefined,
+            logTarget: undefined,
+            request: 'req1',
+            sortByRequired: undefined,
+            typePrefix: undefined,
+            useCancelableRequest: undefined,
+            useOptions: true,
+            useSeparatedIndexes: undefined,
+            useUnionTypes: undefined,
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -64,19 +63,11 @@ describe('convertArrayToObject', () => {
             { input: 'url2', output: 'res2', exportCore: true, request: 'req1', useOptions: true },
         ];
         const expected = {
-            httpClient: undefined,
-            useOptions: true,
-            useUnionTypes: undefined,
-            exportCore: true,
-            exportServices: undefined,
-            exportModels: undefined,
-            exportSchemas: undefined,
-            clean: undefined,
-            request: 'req1',
-            interfacePrefix: undefined,
             enumPrefix: undefined,
-            typePrefix: undefined,
-            useCancelableRequest: undefined,
+            excludeCoreServiceFiles: undefined,
+            httpClient: undefined,
+            includeSchemasFiles: undefined,
+            interfacePrefix: undefined,
             items: [
                 {
                     input: 'url1',
@@ -95,6 +86,15 @@ describe('convertArrayToObject', () => {
                     outputSchemas: undefined,
                 },
             ],
+            logLevel: undefined,
+            logTarget: undefined,
+            request: 'req1',
+            sortByRequired: undefined,
+            typePrefix: undefined,
+            useCancelableRequest: undefined,
+            useOptions: true,
+            useSeparatedIndexes: undefined,
+            useUnionTypes: undefined,
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -106,19 +106,11 @@ describe('convertArrayToObject', () => {
             { input: 'url2', output: 'res2', exportCore: false, request: 'req2', useOptions: false },
         ];
         const expected = {
-            httpClient: undefined,
-            useOptions: true,
-            useUnionTypes: undefined,
-            exportCore: true,
-            exportServices: undefined,
-            exportModels: undefined,
-            exportSchemas: undefined,
-            clean: undefined,
-            request: 'req1',
-            interfacePrefix: undefined,
             enumPrefix: undefined,
-            typePrefix: undefined,
-            useCancelableRequest: undefined,
+            excludeCoreServiceFiles: undefined,
+            httpClient: undefined,
+            includeSchemasFiles: undefined,
+            interfacePrefix: undefined,
             items: [
                 {
                     input: 'url1',
@@ -137,6 +129,15 @@ describe('convertArrayToObject', () => {
                     outputSchemas: undefined,
                 },
             ],
+            logLevel: undefined,
+            logTarget: undefined,
+            request: 'req1',
+            sortByRequired: undefined,
+            typePrefix: undefined,
+            useCancelableRequest: undefined,
+            useOptions: true,
+            useSeparatedIndexes: undefined,
+            useUnionTypes: undefined,
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -148,19 +149,11 @@ describe('convertArrayToObject', () => {
             { input: 'url2', output: 'res2' },
         ];
         const expected = {
-            httpClient: undefined,
-            useOptions: undefined,
-            useUnionTypes: undefined,
-            exportCore: undefined,
-            exportServices: undefined,
-            exportModels: undefined,
-            exportSchemas: undefined,
-            clean: undefined,
-            request: undefined,
-            interfacePrefix: undefined,
             enumPrefix: undefined,
-            typePrefix: undefined,
-            useCancelableRequest: undefined,
+            excludeCoreServiceFiles: undefined,
+            httpClient: undefined,
+            includeSchemasFiles: undefined,
+            interfacePrefix: undefined,
             items: [
                 {
                     input: 'url1',
@@ -179,6 +172,15 @@ describe('convertArrayToObject', () => {
                     outputSchemas: undefined,
                 },
             ],
+            logLevel: undefined,
+            logTarget: undefined,
+            request: undefined,
+            sortByRequired: undefined,
+            typePrefix: undefined,
+            useCancelableRequest: undefined,
+            useOptions: undefined,
+            useSeparatedIndexes: undefined,
+            useUnionTypes: undefined,
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -190,19 +192,11 @@ describe('convertArrayToObject', () => {
             { input: 'url2', output: 'res2', request: 'req2' },
         ];
         const expected = {
-            httpClient: undefined,
-            useOptions: undefined,
-            useUnionTypes: undefined,
-            exportCore: true,
-            exportServices: undefined,
-            exportModels: undefined,
-            exportSchemas: undefined,
-            clean: undefined,
-            request: undefined,
-            interfacePrefix: undefined,
             enumPrefix: undefined,
-            typePrefix: undefined,
-            useCancelableRequest: undefined,
+            excludeCoreServiceFiles: undefined,
+            httpClient: undefined,
+            includeSchemasFiles: undefined,
+            interfacePrefix: undefined,
             items: [
                 {
                     input: 'url1',
@@ -221,6 +215,15 @@ describe('convertArrayToObject', () => {
                     outputSchemas: undefined,
                 },
             ],
+            logLevel: undefined,
+            logTarget: undefined,
+            request: undefined,
+            sortByRequired: undefined,
+            typePrefix: undefined,
+            useCancelableRequest: undefined,
+            useOptions: undefined,
+            useSeparatedIndexes: undefined,
+            useUnionTypes: undefined,
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);

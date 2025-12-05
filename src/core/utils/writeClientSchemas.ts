@@ -1,8 +1,9 @@
 import { mkdirSync } from 'fs';
 
-import { HttpClient } from '../types/Enums';
+import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Model } from '../types/shared/Model.model';
 import { dirName, resolve } from '../utils/pathHelpers';
+import { WriteClient } from '../WriteClient';
 import { fileSystem } from './fileSystem';
 import { format } from './format';
 import { Templates } from './registerHandlebarTemplates';
@@ -30,16 +31,25 @@ interface IWriteClientSchemas {
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useUnionTypes Use union types instead of enums
  */
-export async function writeClientSchemas(options: IWriteClientSchemas): Promise<void> {
+export async function writeClientSchemas(this: WriteClient, options: IWriteClientSchemas): Promise<void> {
     const { models, templates, outputSchemasPath, httpClient, useUnionTypes } = options;
+
+    this.logger.info('The recording of model validation schema files begins.');
+
     for (const model of models) {
         const modelFolderPath = model?.path;
         const dir = dirName(modelFolderPath);
         if (dir) {
             const directory = resolve(outputSchemasPath, dir);
+
+            this.logger.info(`A directory is being created: ${directory}`);
+
             mkdirSync(directory, { recursive: true });
         }
         const file = resolve(outputSchemasPath, `${modelFolderPath}Schema.ts`);
+
+        this.logger.info(`The recording of the file data begins: ${file}`);
+
         const templateResult = templates.exports.schema({
             ...model,
             httpClient,
@@ -47,5 +57,9 @@ export async function writeClientSchemas(options: IWriteClientSchemas): Promise<
         });
         const formattedValue = await format(templateResult);
         await fileSystem.writeFile(file, formattedValue);
+
+        this.logger.info(`File recording completed: ${file}`);
     }
+
+    this.logger.info('The recording of model validation schema files has been completed successfully');
 }

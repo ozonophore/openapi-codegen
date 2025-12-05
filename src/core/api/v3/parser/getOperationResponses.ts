@@ -7,7 +7,7 @@ import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiResponse } from '../types/OpenApiResponse.model';
 import type { OpenApiResponses } from '../types/OpenApiResponses.model';
 
-export function getOperationResponses(this: Parser, openApi: OpenApi, responses: OpenApiResponses): OperationResponse[] {
+export function getOperationResponses(this: Parser, openApi: OpenApi, responses: OpenApiResponses, parentRef: string): OperationResponse[] {
     const operationResponses: OperationResponse[] = [];
 
     // Iterate over each response code and get the
@@ -19,7 +19,7 @@ export function getOperationResponses(this: Parser, openApi: OpenApi, responses:
             const responseCode = getOperationResponseCode(code);
 
             if (responseCode) {
-                const operationResponse = this.getOperationResponse(openApi, response, responseCode, '');
+                const operationResponse = this.getOperationResponse(openApi, response, responseCode, parentRef);
                 operationResponses.push(operationResponse);
             }
         }

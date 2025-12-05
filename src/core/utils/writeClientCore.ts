@@ -1,7 +1,8 @@
 import { resolve } from 'path';
 
-import { HttpClient } from '../types/Enums';
+import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Client } from '../types/shared/Client.model';
+import { WriteClient } from '../WriteClient';
 import { fileSystem } from './fileSystem';
 import { Templates } from './registerHandlebarTemplates';
 
@@ -20,6 +21,7 @@ interface IWriteClientCore {
     httpClient: HttpClient;
     request?: string;
     useCancelableRequest?: boolean;
+    useSeparatedIndexes?: boolean;
 }
 
 /**
@@ -31,14 +33,17 @@ interface IWriteClientCore {
  * @param request: Path to custom request file
  * @param useCancelableRequest Use cancelable request type
  */
-export async function writeClientCore(options: IWriteClientCore): Promise<void> {
-    const { client, templates, outputCorePath, httpClient, request, useCancelableRequest } = options;
+export async function writeClientCore(this: WriteClient, options: IWriteClientCore): Promise<void> {
+    const { client, templates, outputCorePath, httpClient, request, useCancelableRequest, useSeparatedIndexes } = options;
     const context = {
         httpClient,
         server: client.server,
         version: client.version,
         useCancelableRequest,
+        useSeparatedIndexes,
     };
+
+    this.logger.info("The recording of the kernel files begins");
 
     await fileSystem.writeFile(resolve(outputCorePath, 'OpenAPI.ts'), templates.core.settings(context));
     await fileSystem.writeFile(resolve(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
@@ -58,4 +63,6 @@ export async function writeClientCore(options: IWriteClientCore): Promise<void> 
         }
         await fileSystem.copyFile(requestFile, resolve(outputCorePath, 'request.ts'));
     }
+
+    this.logger.info("The writing of the kernel files has been completed successfully");
 }

@@ -1,28 +1,11 @@
-import RefParser from '@apidevtools/json-schema-ref-parser';
-import { isAbsolute } from 'path';
+import SwaggerParser from '@apidevtools/swagger-parser';
 
 import { Context } from '../Context';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 import { OpenApiReference } from '../types/shared/OpenApiReference.model';
-import { dirName, join, resolve } from '../utils/pathHelpers';
+import { resolve } from '../utils/pathHelpers';
 import { fileSystem } from './fileSystem';
-
-function replaceRef<T>(object: OpenApiReference, context: Context, parentRef: string): T {
-    if (object.$ref && !isAbsolute(object.$ref) && !object.$ref.match(/^(http:\/\/|https:\/\/|#\/)/g)) {
-        object.$ref = join(parentRef, object.$ref);
-    } else {
-        for (const key of Object.keys(object)) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            if (object[key] instanceof Object) {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                replaceRef(object[key], context, parentRef);
-            }
-        }
-    }
-    return <T>object;
-}
+import { normalizeAllRefs } from './normalizeAllRefs';
 
 /**
  * Load and parse te open api spec. If the file extension is ".yml" or ".yaml"
@@ -41,8 +24,11 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
         throw new Error(`Could not read OpenApi spec: "${absoluteInput}"`);
     }
 
-    const resolvedRefs = await RefParser.resolve(absoluteInput);
+    // const isValidated = await SwaggerParser.validate(absoluteInput)
 
+    const resolvedRefs = await (SwaggerParser as any).resolve(absoluteInput, { validate: false });
+
+    // Coerce to the loose interface expected by Context
     context.addRefs(resolvedRefs);
 
     const raw = resolvedRefs.get(absoluteInput);
@@ -51,18 +37,9 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
     }
     const mainSchema = raw as unknown as CommonOpenApi;
 
-    const newPaths: Record<string, any> = {};
+    // Normalize all $ref in the entire schema using the new comprehensive resolver
+    const normalizedSchema = normalizeAllRefs(mainSchema as unknown as OpenApiReference, context, absoluteInput) as CommonOpenApi;
 
-    for (const [pathKey, value] of Object.entries(mainSchema.paths)) {
-        const maybeRef = value as OpenApiReference;
-        if (maybeRef.$ref) {
-            newPaths[pathKey] = replaceRef(context.get(maybeRef.$ref) as OpenApiReference, context, dirName(maybeRef.$ref));
-        } else {
-            newPaths[pathKey] = value;
-        }
-    }
-
-    mainSchema.paths = newPaths;
-
-    return mainSchema;
+    // The schema is already fully normalized, so we can return it directly
+    return normalizedSchema;
 }

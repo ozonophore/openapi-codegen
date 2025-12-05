@@ -1,8 +1,13 @@
 import get from 'lodash-es/get';
 
 import type { Service } from '../../../types/shared/Service.model';
+import { getClassName } from '../../../utils/getClassName';
+import { ensureService, finalizeServiceImports, forEachOperationInPath, mergeOperationImportsIntoService } from '../../../utils/serviceHelpers';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
+import { OpenApiOperation } from '../types/OpenApiOperation.model';
+import { OpenApiPath } from '../types/OpenApiPath.model';
+import { getServiceName } from './getServiceName';
 
 /**
  * Get the OpenAPI services
@@ -12,43 +17,31 @@ export function getServices(this: Parser, openApi: OpenApi): Service[] {
     for (const url in openApi.paths) {
         if (get(openApi.paths, url, null)) {
             // Grab path and parse any global path parameters
-            const path = openApi.paths[url];
-            const pathParams = this.getOperationParameters(openApi, path.parameters || []);
+            const pathByUrl = openApi.paths[url];
+            const path = (pathByUrl.$ref ? (this.context.get(pathByUrl.$ref) as Record<string, any>) : pathByUrl) as OpenApiPath;
+            const pathParams = this.getOperationParameters(openApi, path.parameters || [], '');
+            const parentFileRef = pathByUrl.$ref || this.context.root?.path || '';
 
             // Parse all the methods for this path
-            for (const method in path) {
-                if (get(path, method, null)) {
-                    switch (method) {
-                        case 'get':
-                        case 'put':
-                        case 'post':
-                        case 'delete':
-                        case 'options':
-                        case 'head':
-                        case 'patch': {
-                            // Each method contains an OpenAPI operation, we parse the operation
-                            const op = path[method]!;
-                            const operation = this.getOperation(openApi, url, method, op, pathParams);
+            forEachOperationInPath(path, (method, op) => {
+                // Each method contains an OpenAPI operation, we parse the operation
+                const fileName = this.context.fileName();
+                const serviceName = getServiceName(op as OpenApiOperation, fileName);
+                const service = ensureService(services, serviceName, getClassName(op.tags?.[0] || fileName));
+                const operation = this.getOperation(openApi, url, method, op, pathParams, parentFileRef);
 
-                            // If we have already declared a service, then we should fetch that and
-                            // append the new method to it. Otherwise we should create a new service object.
-                            const service: Service = services.get(operation.service) || {
-                                name: operation.service,
-                                originName: operation.service,
-                                operations: [],
-                                imports: [],
-                            };
+                // Merge operation imports into service (reuse import objects when possible)
+                mergeOperationImportsIntoService(service, operation);
 
-                            // Push the operation in the service
-                            service.operations.push(operation);
-                            service.imports.push(...operation.imports);
-                            services.set(operation.service, service);
-                            break;
-                        }
-                    }
-                }
-            }
+                service.operations.push(operation);
+                services.set(operation.service, service);
+            });
         }
     }
+
+    services.forEach(service => {
+        finalizeServiceImports(service);
+    });
+
     return Array.from(services.values());
 }

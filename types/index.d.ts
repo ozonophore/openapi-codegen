@@ -15,11 +15,8 @@ export type Options = {
     httpClient?: HttpClient;
     useOptions?: boolean;
     useUnionTypes?: boolean;
-    exportCore?: boolean;
-    exportServices?: boolean;
-    exportModels?: boolean;
-    exportSchemas?: boolean;
-    clean?: boolean;
+    excludeCoreServiceFiles?: boolean;
+    includeSchemasFiles?: boolean;
     request?: string;
     write?: boolean;
     interfacePrefix?: string;

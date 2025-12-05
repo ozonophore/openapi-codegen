@@ -5,6 +5,6 @@
 /**
  * This is a model with one property containing a dictionary
  */
-export interface IModelWithDictionary {
+export interface ModelWithDictionary {
     prop?: Record<string, string>;
 }

@@ -1,4 +1,4 @@
-export const TYPE_MAPPINGS = new Map<string, string>([
+const TYPE_MAPPINGS = new Map<string, string>([
     ['File', 'File'],
     ['file', 'File'],
     ['any', 'any'],

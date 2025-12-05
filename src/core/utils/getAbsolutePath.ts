@@ -6,16 +6,30 @@ export function getAbsolutePath(definitionRef: string | undefined, parentRef: st
         return parentRef.startsWith('#/') ? '' : parentRef;
     }
 
+    const parentBase = parentRef.split('#')[0] || '';
+
+    // If definitionRef is an absolute fragment, attach to parent base
     if (definitionRef.startsWith('#/')) {
-        // If definitionRef is an absolute reference (#/), replace the part after # in parentRef.
-        const basePath = parentRef.split('#')[0]; // We take everything up to #
-        return `${basePath}${definitionRef}`;
+        return `${parentBase}${definitionRef}`;
     }
 
+    // If parentRef is only a fragment, keep definitionRef as is
     if (parentRef.startsWith('#/')) {
-        // If parentRef is an absolute reference, we return definitionRef as it is.
         return definitionRef;
     }
 
-    return join(dirName(parentRef), definitionRef);
+    // Full URL or absolute filesystem path → return as is
+    if (/^https?:\/\//i.test(definitionRef) || definitionRef.startsWith('/')) {
+        return definitionRef;
+    }
+
+    // If definitionRef already has its own fragment and/or relative path
+    if (definitionRef.includes('#')) {
+        const [defPath, defFrag] = definitionRef.split('#');
+        const absPath = defPath ? join(dirName(parentBase), defPath) : parentBase;
+        return defFrag ? `${absPath}#${defFrag}` : absPath;
+    }
+
+    // Plain relative path → resolve against parent base directory
+    return join(dirName(parentBase), definitionRef);
 }

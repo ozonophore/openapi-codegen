@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export const IModelWithStringSchema = {
+export const ModelWithStringSchema = {
     properties: {
         prop: {
             type: 'string',

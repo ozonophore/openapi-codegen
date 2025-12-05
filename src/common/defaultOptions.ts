@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { HttpClient } from '../core/types/Enums';
+import { HttpClient } from '../core/types/enums/HttpClient.enum';
 
 export const defaultOptions = Joi.object({
     input: Joi.string().required(),
@@ -15,17 +15,14 @@ export const defaultOptions = Joi.object({
     useOptions: Joi.boolean().optional(),
     useUnionTypes: Joi.boolean().optional(),
 
-    exportCore: Joi.boolean().optional(),
-    exportServices: Joi.boolean().optional(),
-    exportModels: Joi.boolean().optional(),
-    exportSchemas: Joi.boolean().optional(),
+    excludeCoreServiceFiles: Joi.boolean().optional(),
+    includeSchemasFiles: Joi.boolean().optional(),
 
-
-    clean: Joi.boolean().optional(),
     request: Joi.string().optional(),
     interfacePrefix: Joi.string().optional(),
     enumPrefix: Joi.string().optional(),
     typePrefix: Joi.string().optional(),
 
     useCancelableRequest: Joi.boolean().optional(),
+    useSeparatedIndexes: Joi.boolean().optional(),
 }).unknown(false);

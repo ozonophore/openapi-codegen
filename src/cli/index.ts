@@ -5,7 +5,7 @@ import path from 'path';
 import { ELogLevel, ELogOutput } from '../common/Enums';
 import { Logger } from '../common/Logger';
 import { UpdateNotifier } from '../common/UpdateNotifier';
-import { HttpClient } from '../core/types/Enums';
+import { HttpClient } from '../core/types/enums/HttpClient.enum';
 import { chekOpenApiConfig } from './chekOpenApiConfig/chekOpenApiConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
 import { getCLIName } from './utils';
@@ -34,21 +34,19 @@ program
     .option('-om, --outputModels <value>', 'Output directory for models')
     .option('-osm, --outputSchemas <value>', 'Output directory for schemas')
     .addOption(new Option('-c, --httpClient <value>', 'HTTP client to generate').choices([...Object.values(HttpClient)]).default(HttpClient.FETCH))
-    .option('--useOptions <value>', 'Use options instead of arguments', false)
-    .option('--useUnionTypes <value>', 'Use union types instead of enums', false)
-    .option('--exportCore <value>', 'Write core files to disk', true)
-    .option('--exportServices <value>', 'Write services to disk', true)
-    .option('--exportModels <value>', 'Write models to disk', true)
-    .option('--exportSchemas <value>', 'Write schemas to disk', false)
-    .option('--clean <value>', 'Clean a directory before generation', true)
+    .option('--useOptions', 'Use options instead of arguments (default: false)')
+    .option('--useUnionTypes', 'Use union types instead of enums (default: false)')
+    .option('--excludeCoreServiceFiles','The generation of the core and services is excluded (default: false)')
+    .option('--includeSchemasFiles','The generation of model validation schemes is enabled (default: false)')
     .option('--request <value>', 'Path to custom request file')
-    .option('--interfacePrefix <value>', 'Prefix for interface model(default: "I")')
-    .option('--enumPrefix <value>', 'Prefix for enum model(default: "E")')
-    .option('--typePrefix <value>', 'Prefix for type model(default: "T")')
-    .option('--useCancelableRequest <value>', 'Use cancelled promise as returned data type in request(default: false)', false)
+    .option('--interfacePrefix <value>', 'Prefix for interface model(default: "I")', "I")
+    .option('--enumPrefix <value>', 'Prefix for enum model(default: "E")', "E")
+    .option('--typePrefix <value>', 'Prefix for type model(default: "T")', "T")
+    .option('--useCancelableRequest', 'Use cancelled promise as returned data type in request (default: false)')
     .addOption(new Option('-l, --logLevel <level>', 'Logging level').choices([...Object.values(ELogLevel)]).default(ELogLevel.ERROR))
     .addOption(new Option('-t, --logTarget <target>', 'Target of logging').choices([...Object.values(ELogOutput)]).default(ELogOutput.CONSOLE))
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
+    .option('--useSeparatedIndexes', 'Use separate index files for the core, models, schemas, and services.')
     .hook('preAction', () => {
         updateNotifier.checkAndNotify();
     })

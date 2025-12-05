@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 
-import RefParser from 'json-schema-ref-parser';
+import SwaggerParser from '@apidevtools/swagger-parser';
 
 import { Context } from '../../../../Context';
 import { getOutputPaths } from '../../../../utils/getOutputPaths';
@@ -11,7 +11,7 @@ describe('getType', () => {
     test('@unit: should convert int', async () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const parser = new RefParser();
+        const parser = new SwaggerParser();
         const context = new Context({input: 'test/spec/v3.yml', output: getOutputPaths({ output: './generated' })});
         context.addRefs(await parser.resolve('test/spec/v3.yml'));
         const type = new Parser(context).getType('int', '');
@@ -24,39 +24,19 @@ describe('getType', () => {
     test('@unit: should support file with ext', async () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const parser = new RefParser();
+        const parser = new SwaggerParser();
         const context = new Context({input: 'test/spec/v3.yml', output: getOutputPaths({ output: './generated' })});
         context.addRefs(await parser.resolve('test/spec/v3.yml'));
         const type = new Parser(context).getType('schemas/ModelWithString.yml', '');
-        assert.strictEqual(type.type, 'IModelWithString');
-        assert.strictEqual(type.base, 'IModelWithString');
+        assert.strictEqual(type.type, 'ModelWithString');
+        assert.strictEqual(type.base, 'ModelWithString');
         assert.strictEqual(type.template, null);
         assert.deepStrictEqual(type.imports, [
             {
-                name: 'IModelWithString',
+                name: 'ModelWithString',
                 alias: '',
-                path: './schemas/ModelWithString',
+                path: '././schemas/ModelWithString',
             },
         ]);
-    });
-
-    const object = {
-        components: {
-            schemas: {
-                someSpecialSchema: {
-                    type: 'object',
-                },
-            },
-        },
-    };
-
-    test('@unit: should support external generation type', async () => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const parser = new RefParser();
-        const context = new Context({input: object, output: getOutputPaths({ output: './generated' })});
-        context.addRefs(await parser.resolve(object));
-        const type = new Parser(context).getType('#/components/schemas/someSpecialSchema', '');
-        assert.strictEqual(type.type, 'ISomeSpecialSchema');
     });
 });

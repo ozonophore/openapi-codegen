@@ -1,5 +1,5 @@
 import { Context } from '../Context';
-import { TypeRef } from '../types/Enums';
+import { TypeRef } from '../types/enums/TypeRef.enum';
 import { getGatheringRefs } from './getGatheringRefs';
 
 export function getRefFromSchema(context: Context, object: Record<string, any>): string[] {

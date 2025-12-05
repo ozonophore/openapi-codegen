@@ -1,0 +1,8 @@
+{{>header}}
+
+{{#if services}}
+
+{{#each services}}
+export { {{{name}}} } from './{{{name}}}';
+{{/each}}
+{{/if}}

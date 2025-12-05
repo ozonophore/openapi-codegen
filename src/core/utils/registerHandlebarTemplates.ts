@@ -48,7 +48,12 @@ import xhrSendRequest from '../../templatesCompiled/core/xhr/sendRequest';
 import templateExportModel from '../../templatesCompiled/exportModel';
 import templateExportSchema from '../../templatesCompiled/exportSchema';
 import templateExportService from '../../templatesCompiled/exportService';
-import templateIndex from '../../templatesCompiled';
+import templateFullIndex from '../../templatesCompiled/indexFull';
+import templateSimpeIndex from '../../templatesCompiled/indexSimple';
+import templateCore from '../../templatesCompiled/indexCore';
+import templateModels from '../../templatesCompiled/indexModels';
+import templateSchemas from '../../templatesCompiled/indexShemas';
+import templateServices from '../../templatesCompiled/indexServices'
 import partialBase from '../../templatesCompiled/partials/base';
 import partialExportComposition from '../../templatesCompiled/partials/exportComposition';
 import partialExportEnum from '../../templatesCompiled/partials/exportEnum';
@@ -81,10 +86,17 @@ import partialTypeIntersection from '../../templatesCompiled/partials/typeInters
 import partialTypeReference from '../../templatesCompiled/partials/typeReference';
 import partialTypeUnion from '../../templatesCompiled/partials/typeUnion';
 import { registerHandlebarHelpers } from './registerHandlebarHelpers';
-import { HttpClient } from '../types/Enums';
+import { HttpClient } from '../types/enums/HttpClient.enum';
 
 export interface Templates {
-    index: Handlebars.TemplateDelegate;
+    indexes: {
+        full: Handlebars.TemplateDelegate;
+        simple: Handlebars.TemplateDelegate;
+        core: Handlebars.TemplateDelegate;
+        models: Handlebars.TemplateDelegate;
+        schemas: Handlebars.TemplateDelegate;
+        services: Handlebars.TemplateDelegate;
+    }
     exports: {
         model: Handlebars.TemplateDelegate;
         schema: Handlebars.TemplateDelegate;
@@ -110,7 +122,14 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
 
     // Main templates (entry points for the files we write to disk)
     const templates: Templates = {
-        index: Handlebars.template(templateIndex),
+        indexes: {
+            full: Handlebars.template(templateFullIndex),
+            simple: Handlebars.template(templateSimpeIndex),
+            core: Handlebars.template(templateCore),
+            models: Handlebars.template(templateModels),
+            schemas: Handlebars.template(templateSchemas),
+            services: Handlebars.template(templateServices),
+        },
         exports: {
             model: Handlebars.template(templateExportModel),
             schema: Handlebars.template(templateExportSchema),

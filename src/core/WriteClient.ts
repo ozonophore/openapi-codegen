@@ -1,7 +1,11 @@
 import { ELogLevel, ELogOutput } from '../common/Enums';
 import { Logger } from '../common/Logger';
-import { HttpClient } from './types/Enums';
-import { IOutput } from './types/Models';
+import { ClientArtifacts } from './types/base/ClientArtifacts.model';
+import { ExportedModel } from './types/base/ExportedModel.model';
+import { ExportedService } from './types/base/ExportedService.model';
+import { OutputPaths } from './types/base/OutputPaths.model';
+import { SimpleClientArtifacts } from './types/base/SimpleClientArtifacts.model';
+import { HttpClient } from './types/enums/HttpClient.enum';
 import type { Client } from './types/shared/Client.model';
 import { fileSystem } from './utils/fileSystem';
 import { relative, resolve } from './utils/pathHelpers';
@@ -10,11 +14,15 @@ import { Templates } from './utils/registerHandlebarTemplates';
 import { sortModelByName } from './utils/sortModelByName';
 import { unique } from './utils/unique';
 import { writeClientCore } from './utils/writeClientCore';
-import { IClientIndex, IModel, IService } from './utils/writeClientIndex';
-import { writeClientIndex } from './utils/writeClientIndex';
+import { writeClientCoreIndex } from './utils/writeClientCoreIndex';
+import { writeClientFullIndex } from './utils/writeClientFullIndex';
 import { writeClientModels } from './utils/writeClientModels';
+import { writeClientModelsIndex } from './utils/writeClientModelsIndex';
 import { writeClientSchemas } from './utils/writeClientSchemas';
+import { writeClientSchemasIndex } from './utils/writeClientSchemasIndex';
 import { writeClientServices } from './utils/writeClientServices';
+import { writeClientServicesIndex } from './utils/writeClientServicesIndex';
+import { writeClientSimpleIndex } from './utils/writeClientSimpleIndex';
 
 /**
  * @param client Client object with all the models, services, etc.
@@ -23,56 +31,33 @@ import { writeClientServices } from './utils/writeClientServices';
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useOptions Use options or arguments functions
  * @param useUnionTypes Use union types instead of enums
- * @param exportCore: Generate core client classes
- * @param exportServices: Generate services
- * @param exportModels: Generate models
- * @param exportSchemas: Generate schemas
- * @param clean: Clean a directory before generation
+ * @param excludeCoreServiceFiles The generation of the core and services is excluded
+ * @param includeSchemasFiles The generation of model validation schemes is enabled
  * @param request: Path to custom request file
  * @param useCancelableRequest Use cancelable request type.
+ * @param useSeparatedIndexes Use separate index files for the core, models, schemas, and services
  */
-interface IWriteClient {
+type TWriteClientProps = {
     client: Client;
     templates: Templates;
-    outputPaths: IOutput;
+    outputPaths: OutputPaths;
     httpClient: HttpClient;
     useOptions: boolean;
     useUnionTypes: boolean;
-    exportCore: boolean;
-    exportServices: boolean;
-    exportModels: boolean;
-    exportSchemas: boolean;
-    clean: boolean;
+    excludeCoreServiceFiles: boolean;
+    includeSchemasFiles: boolean;
     request?: string;
     useCancelableRequest?: boolean;
-}
+    useSeparatedIndexes?: boolean;
+};
 
-/**
- * @param client Client object with all the models, services, etc.
- * @param templates The loaded handlebar templates
- * @param outputPaths Directory to write the generated files to
- * @param useUnionTypes Use union types instead of enums
- * @param exportCore: Generate core
- * @param exportServices: Generate services
- * @param exportModels: Generate models
- * @param exportSchemas: Generate schemas
- */
-export interface IWriteClientIndex {
-    client: Client;
-    templates: Templates;
-    outputPaths: IOutput;
-    useUnionTypes: boolean;
-    exportCore: boolean;
-    exportServices: boolean;
-    exportModels: boolean;
-    exportSchemas: boolean;
-}
+type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOptions' | 'request' | 'useCancelableRequest' | 'useSeparatedIndexes'>;
 
 /**
  * The client which is writing all items and keep the parameters to write index file
  */
 export class WriteClient {
-    private options: Map<string, IWriteClientIndex[]> = new Map();
+    private config: Map<string, TAPIClientGeneratorConfig[]> = new Map();
     private _logger: Logger;
 
     constructor() {
@@ -91,105 +76,176 @@ export class WriteClient {
      * @param httpClient The selected httpClient (fetch, xhr or node)
      * @param useOptions Use options or arguments functions
      * @param useUnionTypes Use union types instead of enums
-     * @param exportCore: Generate core client classes
-     * @param exportServices: Generate services
-     * @param exportModels: Generate models
-     * @param exportSchemas: Generate schemas
-     * @param clean: Clean a directory before generation
+     * @param excludeCoreServiceFiles:
+     * @param includeSchemasFiles:
      * @param request: Path to custom request file
      * @param useCancelableRequest Use cancelable request type.
      */
-    async writeClient(options: IWriteClient): Promise<void> {
-        const { client, templates, outputPaths, httpClient, useOptions, useUnionTypes, exportCore, exportServices, exportModels, exportSchemas, request, useCancelableRequest = false } = options;
+    async writeClient(options: TWriteClientProps): Promise<void> {
+        const {
+            client,
+            templates,
+            outputPaths,
+            httpClient,
+            useOptions,
+            useUnionTypes,
+            excludeCoreServiceFiles = false,
+            includeSchemasFiles = false,
+            request,
+            useCancelableRequest = false,
+            useSeparatedIndexes = false,
+        } = options;
 
-        if (exportCore) {
+        if (!excludeCoreServiceFiles) {
             await fileSystem.mkdir(outputPaths.outputCore);
-            await writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest });
-        }
+            await this.writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest });
+            await this.writeClientCoreIndex({
+                templates,
+                outputCorePath: outputPaths.outputCore,
+                useCancelableRequest,
+                useSeparatedIndexes,
+            });
 
-        if (exportServices) {
             const { outputCore, outputServices, outputModels } = outputPaths;
             await fileSystem.mkdir(outputPaths.outputServices);
-            await writeClientServices({
+            await this.writeClientServices({
                 services: client.services,
                 templates,
                 outputPaths: {
                     outputServices,
-                    outputCore: exportCore ? `${relative(outputServices, outputCore)}` : '../core/',
-                    outputModels: exportModels ? `${relative(outputServices, outputModels)}` : '../models/',
+                    outputCore: `${relative(outputServices, outputCore)}`,
+                    outputModels: `${relative(outputServices, outputModels)}`,
                 },
                 httpClient,
                 useUnionTypes,
                 useOptions,
                 useCancelableRequest,
             });
+            await this.writeClientServicesIndex({
+                services: client.services,
+                templates,
+                outputServices,
+                useSeparatedIndexes,
+            });
         }
 
-        if (exportSchemas) {
+        if (includeSchemasFiles) {
             await fileSystem.mkdir(outputPaths.outputSchemas);
-            await writeClientSchemas({
+            await this.writeClientSchemas({
                 models: client.models,
                 templates,
                 outputSchemasPath: outputPaths.outputSchemas,
                 httpClient,
                 useUnionTypes,
             });
-        }
-
-        if (exportModels) {
-            await fileSystem.mkdir(outputPaths.outputModels);
-            await writeClientModels({
+            await this.writeClientSchemasIndex({
                 models: client.models,
                 templates,
-                outputModelsPath: outputPaths.outputModels,
-                httpClient,
-                useUnionTypes,
+                outputSchemasPath: outputPaths.outputSchemas,
+                useSeparatedIndexes,
             });
         }
 
-        if (exportCore || exportServices || exportSchemas || exportModels) {
-            await fileSystem.mkdir(outputPaths.output);
-            await this.writeClientIndex({
-                client,
-                templates,
-                outputPaths,
-                useUnionTypes,
-                exportCore,
-                exportServices,
-                exportModels,
-                exportSchemas,
-            });
-        }
+        await fileSystem.mkdir(outputPaths.outputModels);
+        await this.writeClientModels({
+            models: client.models,
+            templates,
+            outputModelsPath: outputPaths.outputModels,
+            httpClient,
+            useUnionTypes,
+        });
+        await this.writeClientModelsIndex({
+            models: client.models,
+            templates,
+            outputModelsPath: outputPaths.outputModels,
+            useSeparatedIndexes,
+        });
+
+        await fileSystem.mkdir(outputPaths.output);
+        this.buildClientGeneratorConfigMap({
+            client,
+            templates,
+            outputPaths,
+            useUnionTypes,
+            excludeCoreServiceFiles,
+            includeSchemasFiles,
+        });
     }
 
     /**
      * Method keeps all options that is need to create index file
-     * @param options
+     * @param config
      */
-    async writeClientIndex(options: IWriteClientIndex): Promise<void> {
-        const { outputPaths } = options;
-        const values = this.options.get(outputPaths.output);
+    buildClientGeneratorConfigMap(config: TAPIClientGeneratorConfig) {
+        const { outputPaths } = config;
+        const values = this.config.get(outputPaths.output);
         if (values) {
-            values.push(options);
+            values.push(config);
         } else {
-            this.options.set(outputPaths.output, Array.of(options));
+            this.config.set(outputPaths.output, Array.of(config));
         }
     }
 
     async combineAndWrite() {
         const result = this.buildClientIndexMap();
-        await this.finalizeAndWright(result);
+        await this.finalizeAndWrite(result);
+    }
+
+    async combineAndWrightSimple() {
+        const result = this.buildSimpleClientIndexMap();
+        await this.simpledFinalizeAndWrite(result);
     }
 
     public get logger() {
         return this._logger;
     }
 
-    private buildClientIndexMap(): Map<string, IClientIndex> {
-        const result: Map<string, IClientIndex> = new Map<string, IClientIndex>();
-        for (const [key, value] of this.options.entries()) {
+    private buildSimpleClientIndexMap(): Map<string, SimpleClientArtifacts> {
+        const result: Map<string, SimpleClientArtifacts> = new Map<string, SimpleClientArtifacts>();
+        for (const [key, value] of this.config.entries()) {
             for (const item of value) {
-                const { exportCore, outputPaths, exportModels, exportSchemas, exportServices, client, templates, useUnionTypes } = item;
+                const { outputPaths, templates, excludeCoreServiceFiles, includeSchemasFiles } = item;
+                const outputCore = this.getOutputPath(outputPaths?.outputCore, key, 'core');
+                const outputModels = this.getOutputPath(outputPaths?.outputModels, key, 'models');
+                const outputSchemas = this.getOutputPath(outputPaths?.outputSchemas, key, 'schemas');
+                const outputServices = this.getOutputPath(outputPaths?.outputServices, key, 'services');
+
+                const clientIndex = this.ensureSimpleClientIndex(result, key, templates);
+
+                if (!excludeCoreServiceFiles) {
+                    const relativePathCore = relative(key, outputCore);
+                    if (!clientIndex.core.includes(relativePathCore)) {
+                        clientIndex.core.push(relativePathCore);
+                    }
+
+                    const relativeService = relative(key, outputServices);
+                    if (!clientIndex.services.includes(relativeService)) {
+                        clientIndex.services.push(relativeService);
+                    }
+                }
+
+                const relativePathModel = relative(key, outputModels);
+                if (!clientIndex.models.includes(relativePathModel)) {
+                    clientIndex.models.push(relativePathModel);
+                }
+
+                if (includeSchemasFiles) {
+                    const relativePathSchema = relative(key, outputSchemas);
+                    if (!clientIndex.schemas.includes(relativePathSchema)) {
+                        clientIndex.schemas.push(relativePathSchema);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private buildClientIndexMap(): Map<string, ClientArtifacts> {
+        const result: Map<string, ClientArtifacts> = new Map<string, ClientArtifacts>();
+        for (const [key, value] of this.config.entries()) {
+            for (const item of value) {
+                const { outputPaths, client, templates, useUnionTypes, excludeCoreServiceFiles, includeSchemasFiles } = item;
                 const outputCore = this.getOutputPath(outputPaths?.outputCore, key, 'core');
                 const outputModels = this.getOutputPath(outputPaths?.outputModels, key, 'models');
                 const outputSchemas = this.getOutputPath(outputPaths?.outputSchemas, key, 'schemas');
@@ -197,49 +253,45 @@ export class WriteClient {
 
                 const clientIndex = this.ensureClientIndex(result, key, templates);
 
-                if (exportCore) {
+                if (!excludeCoreServiceFiles) {
                     const rel = relative(key, outputCore);
                     if (!clientIndex.core.includes(rel)) {
                         clientIndex.core.push(rel);
                     }
-                }
 
-                if (exportModels || exportSchemas) {
-                    const relativePathModel = `${relative(key, outputModels)}`;
-                    const relativePathSchema = `${relative(key, outputSchemas)}`;
-                    for (const model of client.models) {
-                        const modelFinal = {
-                            name: model.name,
-                            alias: '',
-                            path: model.path,
-                            package: relativePathModel,
-                            enum: model.enum && model.enum.length > 0,
-                            useUnionTypes,
-                            enums: model.enums && model.enums.length > 0,
-                        };
-
-                        if (exportModels && clientIndex.models.some(m => this.isSameModel(m, modelFinal))) {
-                            clientIndex.models.push(modelFinal);
-                        }
-
-                        if (exportSchemas) {
-                            const schema = {...modelFinal, package: relativePathSchema};
-
-                            if (!clientIndex.schemas.some(s => this.isSameShema(s, schema))) {
-                                clientIndex.schemas.push(schema);
-                            }
-                        }
-                    }
-                }
-
-                if (exportServices) {
                     const relativeService = `${relative(key, outputServices)}`;
                     for (const service of client.services) {
                         if (!clientIndex.services.some(s => this.isSomeService(s, service.name, relativeService))) {
                             clientIndex.services.push({
                                 name: service.name,
                                 package: relativeService,
-                            })
+                            });
+                        }
+                    }
+                }
+
+                const relativePathModel = `${relative(key, outputModels)}`;
+                const relativePathSchema = `${relative(key, outputSchemas)}`;
+                for (const model of client.models) {
+                    const modelFinal = {
+                        name: model.name,
+                        alias: '',
+                        path: model.path,
+                        package: relativePathModel,
+                        enum: model.enum && model.enum.length > 0,
+                        useUnionTypes,
+                        enums: model.enums && model.enums.length > 0,
+                    };
+
+                    if (!clientIndex.models.some(m => this.isSameModel(m, modelFinal))) {
+                        clientIndex.models.push(modelFinal);
+                    }
+
+                    if (includeSchemasFiles) {
+                        const schema = { ...modelFinal, package: relativePathSchema };
+
+                        if (!clientIndex.schemas.some(s => this.isSameShema(s, schema))) {
+                            clientIndex.schemas.push(schema);
                         }
                     }
                 }
@@ -249,13 +301,19 @@ export class WriteClient {
         return result;
     }
 
-    private async finalizeAndWright(result: Map<string, IClientIndex>): Promise<void> {
+    private async finalizeAndWrite(result: Map<string, ClientArtifacts>): Promise<void> {
         for (const value of result.values()) {
             value.models = value.models.filter(unique).sort(sortModelByName);
             prepareAlias(value.models);
             value.schemas = value.schemas.filter(unique).sort(sortModelByName);
             prepareAlias(value.schemas);
-            await writeClientIndex(value);
+            await this.writeClientFullIndex(value);
+        }
+    }
+
+    private async simpledFinalizeAndWrite(result: Map<string, SimpleClientArtifacts>): Promise<void> {
+        for (const value of result.values()) {
+            await this.writeClientSimpleIndex(value);
         }
     }
 
@@ -263,11 +321,7 @@ export class WriteClient {
         return output ? output : resolve(key, fallback);
     }
 
-    private ensureClientIndex(
-        map: Map<string, IClientIndex>,
-        key: string,
-        templates: any
-    ): IClientIndex {
+    private ensureClientIndex(map: Map<string, ClientArtifacts>, key: string, templates: any): ClientArtifacts {
         if (!map.has(key)) {
             map.set(key, {
                 templates,
@@ -276,28 +330,47 @@ export class WriteClient {
                 models: [],
                 schemas: [],
                 services: [],
-            })
+            });
         }
 
         return map.get(key)!;
     }
 
-    private isSameModel(a: IModel, b: IModel): boolean {
-        return (
-            a.name === b.name &&
-            a.path === b.path &&
-            a.package === b.package &&
-            a.enum === b.enum &&
-            a.enums === b.enums &&
-            a.useUnionTypes === b.useUnionTypes
-        );
+    private ensureSimpleClientIndex(map: Map<string, SimpleClientArtifacts>, key: string, templates: any): SimpleClientArtifacts {
+        if (!map.has(key)) {
+            map.set(key, {
+                templates,
+                outputPath: key,
+                core: [],
+                models: [],
+                schemas: [],
+                services: [],
+            });
+        }
+
+        return map.get(key)!;
     }
 
-    private isSameShema(a: IModel, b: IModel): boolean {
-        return a.name === b.name && a.path === b.path && a.package === b.package
+    private isSameModel(a: ExportedModel, b: ExportedModel): boolean {
+        return a.name === b.name && a.path === b.path && a.package === b.package && a.enum === b.enum && a.enums === b.enums && a.useUnionTypes === b.useUnionTypes;
     }
 
-    private isSomeService(a: IService, name: string, pkg: string): boolean {
+    private isSameShema(a: ExportedModel, b: ExportedModel): boolean {
+        return a.name === b.name && a.path === b.path && a.package === b.package;
+    }
+
+    private isSomeService(a: ExportedService, name: string, pkg: string): boolean {
         return a.name === name && a.package === pkg;
     }
+
+    public writeClientCore = writeClientCore;
+    public writeClientCoreIndex = writeClientCoreIndex;
+    public writeClientFullIndex = writeClientFullIndex;
+    public writeClientModels = writeClientModels;
+    public writeClientModelsIndex = writeClientModelsIndex;
+    public writeClientSchemas = writeClientSchemas;
+    public writeClientSchemasIndex = writeClientSchemasIndex;
+    public writeClientServices = writeClientServices;
+    public writeClientServicesIndex = writeClientServicesIndex;
+    public writeClientSimpleIndex = writeClientSimpleIndex;
 }

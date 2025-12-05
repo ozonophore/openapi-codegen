@@ -1,20 +1,21 @@
 import assert from 'node:assert';
 import { PathOrFileDescriptor } from 'node:fs';
-import { mock, test } from 'node:test';
+import { test } from 'node:test';
 
-import { HttpClient } from '../../types/Enums';
+import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { Model } from '../../types/shared/Model.model';
+import { WriteClient } from '../../WriteClient';
 import { fileSystem } from '../fileSystem';
-import { writeClientSchemas } from '../writeClientSchemas';
+import { Templates } from '../registerHandlebarTemplates';
 
 test('@unit: writeClientSchemas writes to filesystem', async () => {
     const writeFileCalls: Array<[PathOrFileDescriptor, string | NodeJS.ArrayBufferView]> = [];
 
     // Re-assigning the function manually with a mock
     const originalWriteFile = fileSystem.writeFile;
-    fileSystem.writeFile = mock.fn(async (path: PathOrFileDescriptor, content: string | NodeJS.ArrayBufferView) => {
+    fileSystem.writeFile = async (path: PathOrFileDescriptor, content: string | NodeJS.ArrayBufferView) => {
         writeFileCalls.push([path, content]);
-    });
+    };
 
     const models: Model[] = [
         {
@@ -38,8 +39,15 @@ test('@unit: writeClientSchemas writes to filesystem', async () => {
         },
     ];
 
-    const templates = {
-        index: () => 'index',
+    const templates: Templates = {
+        indexes: {
+            full: () => 'fullIndex',
+            simple: () => 'simpleIndex',
+            core: () => 'coreIndex',
+            models: () => 'modelsIndex',
+            schemas: () => 'schemasIndex',
+            services: () => 'servicesIndex',
+        },
         exports: {
             model: () => 'model',
             schema: () => 'schema',
@@ -55,8 +63,9 @@ test('@unit: writeClientSchemas writes to filesystem', async () => {
             httpStatusCode: () => 'httpStatusCode',
         },
     };
+    const writeClient = new WriteClient();
 
-    await writeClientSchemas({
+    await writeClient.writeClientSchemas({
         models,
         templates,
         outputSchemasPath: '/',

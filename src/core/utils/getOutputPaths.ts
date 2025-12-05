@@ -1,4 +1,4 @@
-import { IOutput } from '../types/Models';
+import { OutputPaths } from '../types/base/OutputPaths.model';
 import { isSubDirectory } from '../utils/isSubdirectory';
 import { resolve } from './pathHelpers';
 
@@ -14,7 +14,7 @@ export const getOutputPaths = ({
     outputServices?: string | undefined;
     outputModels?: string | undefined;
     outputSchemas?: string | undefined;
-}): IOutput => {
+}): OutputPaths => {
     const rootPath = process.cwd();
     if (!isSubDirectory(rootPath, output)) {
         throw new Error(`Output folder is not a subdirectory of the current working directory`);

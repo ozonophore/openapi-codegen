@@ -28,7 +28,7 @@ export function getRelativeModelImportPath(rootPath: string | undefined, sourceP
     }
     const absSourceDir = normalizedSourcePath ? path.dirname(absSourcePath) : absoluteRoot;
 
-    let absTargetPath = path.resolve(absSourceDir, targetPath);
+    let absTargetPath = path.isAbsolute(targetPath) ? targetPath : path.resolve(absSourceDir, targetPath);
 
     if (!isInsideDirectory(absTargetPath, rootPath)) {
         const targetRelativePath = getRelativeModelPath(absoluteRoot, targetPath);

@@ -1,11 +1,8 @@
 {
     "output": "./generated",
     "client": "axios",
-    "exportCore": true,
-    "exportServices": true,
-    "exportModels": true,
-    "exportSchemas": true,
-    "clean": true,
+    "excludeCoreServiceFiles": true,
+    "includeSchemasFiles": true,
     "items": [{
         "input": "./openapi/spec.yml"
     }]

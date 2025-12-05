@@ -22,10 +22,8 @@ export function loadConfigIfExists() {
 export function convertArrayToObject(optionsArr: Record<string, any> | Record<string, any>[] | null): Record<string, any> {
     const emptyResult = {
         items: [],
-        exportCore: undefined,
-        exportServices: undefined,
-        exportModels: undefined,
-        exportSchemas: undefined,
+        excludeCoreServiceFiles: undefined,
+        includeSchemasFiles: undefined,
         request: undefined,
         useOptions: undefined,
         useCancelableRequest: undefined,
@@ -53,16 +51,17 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
             'httpClient',
             'useOptions',
             'useUnionTypes',
-            'exportCore',
-            'exportServices',
-            'exportModels',
-            'exportSchemas',
-            'clean',
+            'excludeCoreServiceFiles',
+            'includeSchemasFiles',
             'request',
             'interfacePrefix',
             'enumPrefix',
             'typePrefix',
             'useCancelableRequest',
+            'logLevel',
+            'logTarget',
+            'sortByRequired',
+            'useSeparatedIndexes',
         ];
 
         const extractedFields = fieldsToExtract.reduce(

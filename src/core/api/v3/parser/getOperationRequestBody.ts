@@ -1,6 +1,7 @@
 import type { OperationParameter } from '../../../types/shared/OperationParameter.model';
 import { getComment } from '../../../utils/getComment';
 import { getPattern } from '../../../utils/getPattern';
+import { normalizeRef } from '../../../utils/normalizeRef';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiRequestBody } from '../types/OpenApiRequestBody.model';
@@ -40,7 +41,8 @@ export function getOperationRequestBody(this: Parser, openApi: OpenApi, paramete
                 (requestBody.in = 'formData'), (requestBody.name = 'formData'), (requestBody.prop = 'formData');
             }
             if (content?.schema?.$ref) {
-                const model = this.getType(content.schema.$ref, parentRef);
+                const normalizedRef = normalizeRef(content.schema.$ref, parentRef);
+                const model = this.getType(content.schema.$ref, normalizedRef);
                 requestBody.export = 'reference';
                 requestBody.type = model.type;
                 requestBody.base = model.base;

@@ -9,17 +9,17 @@ import { CancelablePromise } from './CancelablePromise';
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 function getHeaders(options: ApiRequestOptions, config: TOpenAPIConfig): Record<string, unknown> {
-    // Добавь свою логику сбора данных для заголовков
+    // Add your own data collection logic for headers
     return {}
 }
 
 function getRequestBody(options: ApiRequestOptions) {
-    // Добавь свою логику сбора данных для тела запроса
+    // Add your own data collection logic for the request body
     return undefined
 }
 
 function getResponseHeader(response: Response, responseHeader?: string): string | null {
-    // Добавь свою логику сбора данных для формирования заголовков ответа
+    // Add your own data collection logic to generate response headers.
     return null
 }
 
