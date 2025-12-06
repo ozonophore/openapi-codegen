@@ -3,6 +3,7 @@ export enum ELogLevel {
     WARN = 'warn',
     ERROR = 'error',
 }
+
 export enum ELogOutput {
     CONSOLE = 'console',
     FILE = 'file',

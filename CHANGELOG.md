@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.8] - 2025-12-06
+
+### Added
+- Added the CLI command of the `init-openapi-config` tool. Generates a configuration file template for starting code generation based on openapi specification files.
+- Added a parameter to specify the configuration file (default: `openapi.config.json`) in the CLI command of the `check-openapi-config` tool.
+- Added a parameter to specify the configuration file (default: `openapi.config.json`) in the CLI command of the `generate` tool.
+- Added a template file (hbs) to generate a configuration file (default: `openapi.config.json`).
+
+### Changed
+- Changed the layout of templates (hbs files) for generating code according to openapi specifications.
+
 ## [1.0.0-beta.7] - 2025-11-30
 
 ### Added

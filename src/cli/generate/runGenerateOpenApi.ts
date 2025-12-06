@@ -18,6 +18,7 @@ import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOpti
  * @param options Options for starting generation.
  */
 export async function runGenerateOpenApi(options: OptionValues) {
+    const {openapiConfig, ...clientOptions} = options;
     const logger = new Logger({
         level: ELogLevel.INFO,
         instanceId: 'openapi-cli',
@@ -25,9 +26,9 @@ export async function runGenerateOpenApi(options: OptionValues) {
     });
 
     try {
-        const hasMinimumRequiredOptions = !!options.input && !!options.output;
+        const hasMinimumRequiredOptions = !!clientOptions.input && !!clientOptions.output;
         if (hasMinimumRequiredOptions) {
-            const { error: defaultValuesError, value } = defaultOptions.validate(options);
+            const { error: defaultValuesError, value } = defaultOptions.validate(clientOptions);
 
             if (defaultValuesError) {
                 await OpenAPI.generate(value);
@@ -35,7 +36,7 @@ export async function runGenerateOpenApi(options: OptionValues) {
             }
         }
 
-        const configData = loadConfigIfExists();
+        const configData = loadConfigIfExists(openapiConfig);
         if (!configData) {
             logger.error('The configuration file is missing');
         }

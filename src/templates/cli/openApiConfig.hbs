@@ -1,0 +1,19 @@
+{{#if useMultyOptions}}
+{
+    "items": [
+        {
+            "input": "/folder/pogect/openapi/spec_file.yaml",
+            "output": "./generated/rest-api"
+        }
+    ],
+    "httpClient": "fetch",
+    "sortByRequired": true
+}
+{{else}}
+{
+    "input": "/folder/pogect/openapi/spec_file.yaml",
+    "output": "./generated/rest-api",
+    "httpClient": "fetch",
+    "sortByRequired": true
+}
+{{/if}}

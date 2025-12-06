@@ -1,3 +1,5 @@
+import { getFileName } from 'core/utils/getFileName';
+
 import { ELogLevel, ELogOutput } from '../../common/Enums';
 import { Logger } from '../../common/Logger';
 import { convertArrayToObject, loadConfigIfExists } from '../../common/Utils';
@@ -9,7 +11,7 @@ import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOpti
 /**
  * The function checks whether the configuration file data is filled in correctly
  */
-export function chekOpenApiConfig () {
+export function chekOpenApiConfig (configPath?: string) {
     const logger = new Logger({
         level: ELogLevel.INFO,
         instanceId: 'check-openapi-config',
@@ -17,7 +19,7 @@ export function chekOpenApiConfig () {
     });
 
     try {
-        const configData = loadConfigIfExists();
+        const configData = loadConfigIfExists(configPath);
         if (!configData) {
             logger.error('The configuration file is missing');
         }
@@ -33,6 +35,9 @@ export function chekOpenApiConfig () {
         if (error) {
             const details = getErrorFieldsFromValidation(error).map((e) => `${e.path}: ${e.type}`).join(',');
             logger.error(`The configuration file data is specified incorrectly: ${details}`)
+        } else {
+            const fileName = getFileName(configPath);
+            logger.forceInfo( `The parameters in the file are valid: ${fileName}`);
         }
     } catch (error: any) {
         logger.error(error.message);

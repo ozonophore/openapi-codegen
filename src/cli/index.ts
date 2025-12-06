@@ -1,4 +1,5 @@
 import { Command, Option, OptionValues } from 'commander';
+import { DEFAULT_OPENAPI_CONFIG_FILENAME } from 'common/Consts';
 import fs from 'fs';
 import path from 'path';
 
@@ -8,6 +9,8 @@ import { UpdateNotifier } from '../common/UpdateNotifier';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
 import { chekOpenApiConfig } from './chekOpenApiConfig/chekOpenApiConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
+import { EOptionType } from './initOpenApiConfig/Enums';
+import { runInitOpenapiConfig } from './initOpenApiConfig/runInitOpenapiConfig';
 import { getCLIName } from './utils';
 
 const packageDetails = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf-8'));
@@ -27,6 +30,7 @@ program
     .description('Starts code generation based on the provided opeanpi specifications')
     .addHelpText('before', getCLIName(APP_NAME))
     .usage('[options]')
+    .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
     .option('-i, --input <value>', 'OpenAPI specification, can be a path, url or string content (required)', '')
     .option('-o, --output <value>', 'Output directory (required)', '')
     .option('-oc, --outputCore <value>', 'Output directory for core files')
@@ -58,11 +62,25 @@ program
     .command('check-openapi-config')
     .description('Starts checking whether the configuration file data is filled in correctly.')
     .addHelpText('before', getCLIName(APP_NAME))
+    .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
     .hook('preAction', () => {
         updateNotifier.checkAndNotify();
     })
-    .action(() => {
-        chekOpenApiConfig();
+    .action((options: OptionValues) => {
+        chekOpenApiConfig(options?.openapiConfig);
+    });
+
+program
+    .command('init-openapi-config')
+    .description('Generates a configuration file template for a set of single options or multiple options')
+    .addHelpText('before', getCLIName(APP_NAME))
+    .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
+    .addOption(new Option('-t, --type <type>', 'A variant of the set of options for running the client generator (default: "OPTION")').choices([...Object.values(EOptionType)]).default(EOptionType.OPTION))
+    .hook('preAction', () => {
+        updateNotifier.checkAndNotify();
+    })
+    .action((options: OptionValues) => {
+        runInitOpenapiConfig(options);
     });
 
 try {

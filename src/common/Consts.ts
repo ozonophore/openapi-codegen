@@ -1,0 +1,1 @@
+export const DEFAULT_OPENAPI_CONFIG_FILENAME = 'openapi.config.json';
