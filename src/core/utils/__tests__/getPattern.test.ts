@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getPattern } from '../getPattern';
 
-describe('getPattern', () => {
-    test('@unit: should produce correct result', () => {
+describe('@unit: getPattern', () => {
+    test('should produce correct result', () => {
         assert.strictEqual(getPattern(), undefined);
         assert.strictEqual(getPattern(''), '');
         assert.strictEqual(getPattern('^[a-zA-Z]'), '^[a-zA-Z]');

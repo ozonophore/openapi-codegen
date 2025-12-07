@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.12] - 2025-12-16
+
+### Added
+- Added new CLI module `checkAndUpdateConfig` with comprehensive config validation and migration:
+  - `checkConfig.ts` - main configuration checking logic
+  - `updateConfig.ts` - config file update mechanism
+  - `types.ts` - TypeScript types for config operations
+  - `constants.ts` - configuration-related constants
+  - Utility functions: `generateConfigExample`, `prepareConfigData`, `removeDefaultConfigValues`, `rewriteConfigFile`, `selectConfigAction`, `updateExistingConfigFile`, `validateAndMigrateConfigData`, `writeConfigFile`, `writeExampleConfigFile`
+- Added interactive CLI dialogs:
+  - `confirmDialog.ts` - yes/no confirmation prompts
+  - `selectDialog.ts` - selection dialogs for user choices
+  - `types.ts` and `constants.ts` for interactive module
+- Added utility functions `getCurrentErrorMessage` and `getKeyByMapValue` to VersionedSchema Utils
+
+### Changed
+- Refactored CLI structure: moved `chekOpenApiConfig` logic into the new `checkAndUpdateConfig` module
+- Reorganized common utilities: moved test files and utility functions from `src/common/__tests__/` and `src/core/utils/` to `src/common/utils/__tests__/` and `src/common/utils/`
+- Updated all import paths in test files to reflect new utility locations
+- Enhanced `runGenerateOpenApi.ts` with improved error handling and logging
+
+### Fixed
+- Updated test imports across all core utilities to reference relocated files
+- Improved path resolution in core parser tests (v2 and v3)
+- Fixed test expectations for schema version matching and type resolution
+
+### Removed
+- Deleted deprecated `src/cli/chekOpenApiConfig/chekOpenApiConfig.ts` file
+
+### Updated
+- Updated package.json dependencies
+- Updated test files for relocated utilities (see src/core/utils/__tests__ and src/common/utils/__tests__)
+- Enhanced WriteClient tests with additional assertions
+
 ## [1.0.0-beta.11] - 2025-12-12
 
 ### Added

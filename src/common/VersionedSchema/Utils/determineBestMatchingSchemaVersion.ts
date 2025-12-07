@@ -1,13 +1,7 @@
-import { VersionedSchema } from '../Types';
+import { VersionedSchema, VersionMatchResult } from '../Types';
 import { getErrorFieldsFromValidation } from './getErrorFieldsFromValidation';
 import { getUniqueKeysFromSchemas } from './getUniqueKeysFromSchemas';
 import { getUniqueObjectKeys } from './getUniqueObjectKeys';
-
-type VersionMatchResult = {
-    lastVersionIndex: number;
-    latestVersion: string;
-    firstVersion: string;
-};
 
 // Determining the most appropriate schema version
 export function determineBestMatchingSchemaVersion(inputData: Record<string, any>, versionedSchemas: VersionedSchema<Record<string, any>>[]): VersionMatchResult {

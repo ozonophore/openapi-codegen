@@ -4,8 +4,8 @@ import test, { describe } from 'node:test';
 import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { registerHandlebarTemplates } from '../registerHandlebarTemplates';
 
-describe('registerHandlebarTemplates', () => {
-    test('@unit: should return correct templates', () => {
+describe('@unit: registerHandlebarTemplates', () => {
+    test('should return correct templates', () => {
         const templates = registerHandlebarTemplates({
             httpClient: HttpClient.FETCH,
             useOptions: false,

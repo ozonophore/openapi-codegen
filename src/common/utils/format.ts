@@ -1,9 +1,9 @@
-import { format as prettierFormat } from 'prettier';
+import { BuiltInParserName, format as prettierFormat,LiteralUnion } from 'prettier';
 
-export async function format(input: string): Promise<string> {
+export async function format(input: string, parser?: LiteralUnion<BuiltInParserName>): Promise<string> {
     try {
         const formatedCode = await prettierFormat(input, {
-            parser: 'typescript',
+            parser: parser ?? 'typescript',
             tabWidth: 4,
             printWidth: 120,
             useTabs: false,

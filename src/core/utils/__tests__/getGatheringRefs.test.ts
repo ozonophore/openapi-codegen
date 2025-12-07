@@ -8,8 +8,8 @@ const ContextMock = {
     get: (): any => undefined,
 };
 
-describe('gatheringRefs', () => {
-    test.skip('@unit: should handle nested $ref structures', () => {
+describe('@unit: gatheringRefs', () => {
+    test.skip('should handle nested $ref structures', () => {
         mock.method(ContextMock, 'get', (ref: string): any => {
             const mocks: Record<string, any> = {
                 'models.yaml#/components/requestBodies/SimpleRequestBody': { $ref: '#/components/schemas/SimpleInteger' },

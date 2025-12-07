@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getRefs } from '../getRefs';
 
-describe('getRefs', () => {
-    test('@unit: should return array of refs', () => {
+describe('@unit: getRefs', () => {
+    test('should return array of refs', () => {
         const object = {
             name: 'NAME',
             $ref: '#/first/ref',

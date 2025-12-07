@@ -5,8 +5,8 @@ import { EOL } from 'os';
 
 import { getComment } from '../getComment';
 
-describe('getComment', () => {
-    test('@unit: should parse comments', () => {
+describe('@unit: getComment', () => {
+    test('should parse comments', () => {
         const multiline = 'Testing multiline comments.' + EOL + ' * This must go to the next line.' + EOL + ' * ' + EOL + ' * This will contain a break.';
         assert.strictEqual(getComment(''), null);
         assert.strictEqual(getComment('Hello'), 'Hello');

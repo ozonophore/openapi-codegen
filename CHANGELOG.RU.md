@@ -4,6 +4,40 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [1.0.0-beta.12] - 2025-12-16
+
+### Добавлено
+- Добавлен новый CLI модуль `checkAndUpdateConfig` с комплексной валидацией и миграцией конфигурации:
+  - `checkConfig.ts` - основная логика проверки конфигурации
+  - `updateConfig.ts` - механизм обновления файла конфигурации
+  - `types.ts` - TypeScript типы для операций с конфигурацией
+  - `constants.ts` - константы, связанные с конфигурацией
+  - Утилиты: `generateConfigExample`, `prepareConfigData`, `removeDefaultConfigValues`, `rewriteConfigFile`, `selectConfigAction`, `updateExistingConfigFile`, `validateAndMigrateConfigData`, `writeConfigFile`, `writeExampleConfigFile`
+- Добавлены интерактивные диалоги CLI:
+  - `confirmDialog.ts` - диалоги подтверждения да/нет
+  - `selectDialog.ts` - диалоги выбора для пользователя
+  - `types.ts` и `constants.ts` для интерактивного модуля
+- Добавлены утилиты `getCurrentErrorMessage` и `getKeyByMapValue` в VersionedSchema Utils
+
+### Изменено
+- Рефакторинг структуры CLI: логика `chekOpenApiConfig` интегрирована в новый модуль `checkAndUpdateConfig`
+- Реорганизованы утилиты common: файлы тестов и функции утилит перемещены из `src/common/__tests__/` и `src/core/utils/` в `src/common/utils/__tests__/` и `src/common/utils/`
+- Обновлены пути импортов во всех файлах тестов в соответствии с новым расположением утилит
+- Улучшены `runGenerateOpenApi.ts` с лучшей обработкой ошибок и логированием
+
+### Исправлено
+- Обновлены импорты тестов во всех утилитах core для ссылки на перемещённые файлы
+- Улучшена разрешение путей в тестах parser core (v2 и v3)
+- Исправлены ожидания тестов для сопоставления версий схемы и разрешения типов
+
+### Удалено
+- Удалён устаревший файл `src/cli/chekOpenApiConfig/chekOpenApiConfig.ts`
+
+### Обновлено
+- Обновлены зависимости в package.json
+- Обновлены файлы тестов для перемещённых утилит (см. src/core/utils/__tests__ и src/common/utils/__tests__)
+- Улучшены тесты WriteClient с дополнительными проверками
+
 ## [1.0.0-beta.11] - 2025-12-12
 
 ### Добавлено

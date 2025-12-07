@@ -1,13 +1,13 @@
 import { Command, Option, OptionValues } from 'commander';
 import fs from 'fs';
 
-import { DEFAULT_OPENAPI_CONFIG_FILENAME } from '../common/Consts';
+import { APP_LOGGER, DEFAULT_OPENAPI_CONFIG_FILENAME } from '../common/Consts';
 import { ELogLevel, ELogOutput } from '../common/Enums';
-import { Logger } from '../common/Logger';
 import { UpdateNotifier } from '../common/UpdateNotifier';
 import { joinHelper } from '../common/utils/pathHelpers';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
-import { chekOpenApiConfig } from './chekOpenApiConfig/chekOpenApiConfig';
+import { checkConfig } from './checkAndUpdateConfig/checkConfig';
+import { updateConfig } from './checkAndUpdateConfig/updateConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
 import { EOptionType } from './initOpenApiConfig/Enums';
 import { runInitOpenapiConfig } from './initOpenApiConfig/runInitOpenapiConfig';
@@ -25,9 +25,12 @@ const program = new Command();
 
 program.version(APP_VERSION).name(APP_NAME).description(APP_DESCRIPTION).addHelpText('before', getCLIName(APP_NAME));
 
+/**
+ * generate - Команда для генерации кода на основе OpenAPI спецификации
+ */
 program
     .command('generate')
-    .description('Starts code generation based on the provided opeanpi specifications')
+    .description('Starts code generation based on the provided openapi specifications')
     .addHelpText('before', getCLIName(APP_NAME))
     .usage('[options]')
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
@@ -40,12 +43,12 @@ program
     .addOption(new Option('-c, --httpClient <value>', 'HTTP client to generate').choices([...Object.values(HttpClient)]).default(HttpClient.FETCH))
     .option('--useOptions', 'Use options instead of arguments (default: false)')
     .option('--useUnionTypes', 'Use union types instead of enums (default: false)')
-    .option('--excludeCoreServiceFiles','The generation of the core and services is excluded (default: false)')
-    .option('--includeSchemasFiles','The generation of model validation schemes is enabled (default: false)')
+    .option('--excludeCoreServiceFiles', 'The generation of the core and services is excluded (default: false)')
+    .option('--includeSchemasFiles', 'The generation of model validation schemes is enabled (default: false)')
     .option('--request <value>', 'Path to custom request file')
-    .option('--interfacePrefix <value>', 'Prefix for interface model(default: "I")', "I")
-    .option('--enumPrefix <value>', 'Prefix for enum model(default: "E")', "E")
-    .option('--typePrefix <value>', 'Prefix for type model(default: "T")', "T")
+    .option('--interfacePrefix <value>', 'Prefix for interface model(default: "I")', 'I')
+    .option('--enumPrefix <value>', 'Prefix for enum model(default: "E")', 'E')
+    .option('--typePrefix <value>', 'Prefix for type model(default: "T")', 'T')
     .option('--useCancelableRequest', 'Use cancelled promise as returned data type in request (default: false)')
     .addOption(new Option('-l, --logLevel <level>', 'Logging level').choices([...Object.values(ELogLevel)]).default(ELogLevel.ERROR))
     .addOption(new Option('-t, --logTarget <target>', 'Target of logging').choices([...Object.values(ELogOutput)]).default(ELogOutput.CONSOLE))
@@ -58,44 +61,64 @@ program
         await runGenerateOpenApi(options);
     });
 
+/**
+ * check - Команда для проверки конфигурационного файла
+ */
 program
-    .command('check-openapi-config')
-    .description('Starts checking whether the configuration file data is filled in correctly.')
+    .command('check-config')
+    .description('Checks if the configuration file data is filled in correctly')
     .addHelpText('before', getCLIName(APP_NAME))
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
     .hook('preAction', () => {
         updateNotifier.checkAndNotify();
     })
-    .action((options: OptionValues) => {
-        chekOpenApiConfig(options?.openapiConfig);
+    .action(async (options: OptionValues) => {
+        await checkConfig(options.openapiConfig);
     });
 
+/**
+ * update - Команда для обновления конфигурационного файла
+ */
 program
-    .command('init-openapi-config')
-    .description('Generates a configuration file template for a set of single options or multiple options')
+    .command('update-config')
+    .description('Updates the configuration file to the latest version')
     .addHelpText('before', getCLIName(APP_NAME))
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
-    .addOption(new Option('-t, --type <type>', 'A variant of the set of options for running the client generator (default: "OPTION")').choices([...Object.values(EOptionType)]).default(EOptionType.OPTION))
     .hook('preAction', () => {
         updateNotifier.checkAndNotify();
     })
-    .action((options: OptionValues) => {
-        runInitOpenapiConfig(options);
+    .action(async (options: OptionValues) => {
+        await updateConfig(options.openapiConfig);
     });
 
+/**
+ * init - Команда для инициализации конфигурационного файла
+ */
+program
+    .command('init')
+    .description('Generates a configuration file template for a set of single or multiple options')
+    .addHelpText('before', getCLIName(APP_NAME))
+    .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
+    .addOption(
+        new Option('-t, --type <type>', 'A variant of the set of options for running the client generator (default: "OPTION")')
+            .choices([...Object.values(EOptionType)])
+            .default(EOptionType.OPTION)
+    )
+    .hook('preAction', () => {
+        updateNotifier.checkAndNotify();
+    })
+    .action(async (options: OptionValues) => {
+        await runInitOpenapiConfig(options);
+    });
+
+// Парсирование аргументов с обработкой ошибок
 try {
     program.parse(process.argv);
 } catch (error: any) {
     if (error.code === 'commander.unknownOption') {
         const errorMessage = error?.message ?? '';
         if (errorMessage) {
-            const logger = new Logger({
-                level: ELogLevel.INFO,
-                instanceId: 'check-openapi-config',
-                logOutput: ELogOutput.CONSOLE,
-            });
-
-            logger.error(errorMessage);
+            APP_LOGGER.error(errorMessage);
         }
     }
 }

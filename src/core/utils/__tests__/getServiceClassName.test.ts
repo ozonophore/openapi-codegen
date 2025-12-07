@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getServiceClassName } from '../getServiceClassName';
 
-describe('getServiceClassName', () => {
-    test('@unit: should produce correct result', () => {
+describe('@unit: getServiceClassName', () => {
+    test('should produce correct result', () => {
         assert.strictEqual(getServiceClassName(''), '');
         assert.strictEqual(getServiceClassName('FooBar'), 'FooBarService');
         assert.strictEqual(getServiceClassName('Foo Bar'), 'FooBarService');

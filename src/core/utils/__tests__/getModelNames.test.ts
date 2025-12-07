@@ -4,8 +4,8 @@ import { describe, test } from 'node:test';
 import type { Model } from '../../types/shared/Model.model';
 import { getModelNames } from '../getModelNames';
 
-describe('getModelNames', () => {
-    test('@unit: should return sorted list', () => {
+describe('@unit: getModelNames', () => {
+    test('should return sorted list', () => {
         const john: Model = {
             path: '',
             export: 'interface',

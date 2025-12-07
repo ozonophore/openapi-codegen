@@ -7,8 +7,8 @@ import { Context } from '../../../../Context';
 import { getOutputPaths } from '../../../../utils/getOutputPaths';
 import { Parser } from '../../Parser';
 
-describe('getType', () => {
-    test('@unit: should convert int', async () => {
+describe('@unit: getType', () => {
+    test('should convert int', async () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const parser = new SwaggerParser();
@@ -21,7 +21,7 @@ describe('getType', () => {
         assert.deepStrictEqual(type.imports, []);
     });
 
-    test.skip('@unit: should support file with ext', async () => {
+    test.skip('should support file with ext', async () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const parser = new SwaggerParser();

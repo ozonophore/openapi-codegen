@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getOpenApiVersion } from '../getOpenApiVersion';
 
-describe('getOpenApiVersion', () => {
-    test('@unit: should read the correct version', () => {
+describe('@unit: getOpenApiVersion', () => {
+    test('should read the correct version', () => {
         assert.strictEqual(getOpenApiVersion({ openapi: '2' }), 2);
         assert.strictEqual(getOpenApiVersion({ openapi: '3' }), 3);
         assert.strictEqual(getOpenApiVersion({ openapi: '2.0' }), 2);

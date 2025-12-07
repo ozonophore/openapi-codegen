@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getOperationResponseCode } from '../getOperationResponseCode';
 
-describe('getOperationResponseCode', () => {
-    test('@unit: should produce correct result', () => {
+describe('@unit: getOperationResponseCode', () => {
+    test('should produce correct result', () => {
         assert.strictEqual(getOperationResponseCode(''), null);
         assert.strictEqual(getOperationResponseCode('default'), 200);
         assert.strictEqual(getOperationResponseCode('200'), 200);

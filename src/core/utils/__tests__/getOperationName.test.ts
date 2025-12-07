@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getOperationName } from '../getOperationName';
 
-describe('getOperationName', () => {
-    test('@unit: should produce correct result', () => {
+describe('@unit: getOperationName', () => {
+    test('should produce correct result', () => {
         assert.strictEqual(getOperationName(''), '');
         assert.strictEqual(getOperationName('FooBar'), 'fooBar');
         assert.strictEqual(getOperationName('Foo Bar'), 'fooBar');
