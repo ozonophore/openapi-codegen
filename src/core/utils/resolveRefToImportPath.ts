@@ -1,10 +1,10 @@
 import { basename } from 'path';
 
+import { dirNameHelper, joinToDirHelper, relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { isDirectory } from './isDirectory';
 import { isFileName } from './isFileName';
 import { mapPathToTargetDirSafe } from './mapPathToTargetDirSafe';
 import { parseRef, RefType } from './parseRef';
-import { dirName, joinToDir, relative, resolve } from './pathHelpers';
 import { stripNamespace } from './stripNamespace';
 
 export function resolveRefToImportPath({
@@ -18,8 +18,8 @@ export function resolveRefToImportPath({
     refValuePath: string;
     outputModelsPath: string;
 }) {
-    const absOutputModelsPath = resolve(outputModelsPath);
-    const sourceRoot = isDirectory(mainSpecPath) ? mainSpecPath : dirName(mainSpecPath);
+    const absOutputModelsPath = resolveHelper(outputModelsPath);
+    const sourceRoot = isDirectory(mainSpecPath) ? mainSpecPath : dirNameHelper(mainSpecPath);
     const parsed = parseRef(refValuePath);
 
     // KEY CASE: internal link (#/components/schemas/Xxx)
@@ -29,30 +29,31 @@ export function resolveRefToImportPath({
 
         // Determinarea de unde provine legătura (pentru o cale relativă)
         const cleanParent = stripNamespace(parentFilePath || mainSpecPath);
-        const parentDirInSource = dirName(cleanParent);
+        const parentDirInSource = dirNameHelper(cleanParent);
         const parentDirInOutput = mapPathToTargetDirSafe(parentDirInSource, sourceRoot, outputModelsPath);
 
-        const modelFilePathInOutput = resolve(parentDirInOutput, modelName);
-        const absModelPath = resolve(modelFilePathInOutput);
+        // Crearea căii către fișierul model
+        const modelFilePathInOutput = resolveHelper(parentDirInOutput, modelName);
+        const absModelPath = resolveHelper(modelFilePathInOutput);
 
         if (!absModelPath.startsWith(absOutputModelsPath + '/') && absModelPath !== absOutputModelsPath) {
             return `./${modelName}`;
         }
 
-        const relativePath = relative(absOutputModelsPath, absModelPath);
+        const relativePath = relativeHelper(absOutputModelsPath, absModelPath);
 
         return relativePath;
     }
 
     const parentClean = stripNamespace(parentFilePath || '') || '';
-    const parentDirForResolve = parentClean ? dirName(parentClean) : sourceRoot;
+    const parentDirForResolve = parentClean ? dirNameHelper(parentClean) : sourceRoot;
     const refValueClean = stripNamespace(refValuePath || '') || refValuePath;
 
     // KEY CASE: external file (./other-file.yaml)
     if (parsed.type === RefType.EXTERNAL_FILE) {
-        const targetFileAbs = joinToDir(parentDirForResolve, refValueClean);
+        const targetFileAbs = joinToDirHelper(parentDirForResolve, refValueClean);
         const targetPathInOutput = mapPathToTargetDirSafe(targetFileAbs, sourceRoot, outputModelsPath);
-        const absTargetPath = resolve(targetPathInOutput);
+        const absTargetPath = resolveHelper(targetPathInOutput);
 
         if (!absTargetPath.startsWith(absOutputModelsPath + '/') && absTargetPath !== absOutputModelsPath) {
             const fallbackName = stripNamespace(basename(targetFileAbs));
@@ -60,14 +61,14 @@ export function resolveRefToImportPath({
             return `./${fallbackName}`;
         }
 
-        const relativePath = relative(absOutputModelsPath, absTargetPath);
+        const relativePath = relativeHelper(absOutputModelsPath, absTargetPath);
 
         return relativePath;
     }
 
-    const targetFileAbs = isFileName(refValueClean) ? joinToDir(parentDirForResolve, refValueClean) : resolve(parentDirForResolve, refValueClean);
+    const targetFileAbs = isFileName(refValueClean) ? joinToDirHelper(parentDirForResolve, refValueClean) : resolveHelper(parentDirForResolve, refValueClean);
     const targetPathInOutput = mapPathToTargetDirSafe(targetFileAbs, sourceRoot, outputModelsPath);
-    const absTargetPath = resolve(targetPathInOutput);
+    const absTargetPath = resolveHelper(targetPathInOutput);
 
     if (!absTargetPath.startsWith(absOutputModelsPath + '/') && absTargetPath !== absOutputModelsPath) {
         const fallbackName = stripNamespace(basename(targetFileAbs));
@@ -75,7 +76,7 @@ export function resolveRefToImportPath({
         return `./${fallbackName}`;
     }
 
-    const relativePath = relative(absOutputModelsPath, absTargetPath);
+    const relativePath = relativeHelper(absOutputModelsPath, absTargetPath);
 
     return relativePath;
 }

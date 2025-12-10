@@ -1,8 +1,8 @@
-import * as path from 'path';
 import { createLogger, format, Logger as WinstonLogger, transports } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
 import { ELogLevel, ELogOutput } from './Enums';
+import { joinHelper } from './utils/pathHelpers';
 
 interface LoggerOptions {
     /** Instance ID (letters/numbers/hyphens/handwriting only) */
@@ -47,10 +47,10 @@ export class Logger {
                 })
             );
         } else {
-            const logDir = path.join(process.cwd(), '__logs__');
+            const logDir = joinHelper(process.cwd(), '__logs__');
             chosenTransports.push(
                 new DailyRotateFile({
-                    filename: path.join(logDir, 'app-%DATE%.log'),
+                    filename: joinHelper(logDir, 'app-%DATE%.log'),
                     datePattern: rotate.datePattern,
                     zippedArchive: true,
                     maxSize: rotate.maxSize,

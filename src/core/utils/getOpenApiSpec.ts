@@ -1,9 +1,9 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { Context } from '../Context';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 import { OpenApiReference } from '../types/shared/OpenApiReference.model';
-import { resolve } from '../utils/pathHelpers';
 import { fileSystem } from './fileSystem';
 import { normalizeAllRefs } from './normalizeAllRefs';
 
@@ -14,7 +14,7 @@ import { normalizeAllRefs } from './normalizeAllRefs';
  * @param input
  */
 export async function getOpenApiSpec(context: Context, input: string): Promise<CommonOpenApi> {
-    const absoluteInput = resolve(process.cwd(), input);
+    const absoluteInput = resolveHelper(process.cwd(), input);
 
     if (!input) {
         throw new Error(`Could not find OpenApi spec: "${absoluteInput}"`);

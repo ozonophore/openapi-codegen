@@ -1,5 +1,4 @@
-import { resolve } from 'path';
-
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Client } from '../types/shared/Client.model';
 import { WriteClient } from '../WriteClient';
@@ -45,23 +44,23 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
 
     this.logger.info("The recording of the kernel files begins");
 
-    await fileSystem.writeFile(resolve(outputCorePath, 'OpenAPI.ts'), templates.core.settings(context));
-    await fileSystem.writeFile(resolve(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
-    await fileSystem.writeFile(resolve(outputCorePath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
-    await fileSystem.writeFile(resolve(outputCorePath, 'ApiResult.ts'), templates.core.apiResult({}));
+    await fileSystem.writeFile(resolveHelper(outputCorePath, 'OpenAPI.ts'), templates.core.settings(context));
+    await fileSystem.writeFile(resolveHelper(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
+    await fileSystem.writeFile(resolveHelper(outputCorePath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
+    await fileSystem.writeFile(resolveHelper(outputCorePath, 'ApiResult.ts'), templates.core.apiResult({}));
     if (useCancelableRequest) {
-        await fileSystem.writeFile(resolve(outputCorePath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
+        await fileSystem.writeFile(resolveHelper(outputCorePath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
     }
-    await fileSystem.writeFile(resolve(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
-    await fileSystem.writeFile(resolve(outputCorePath, 'request.ts'), templates.core.request(context));
+    await fileSystem.writeFile(resolveHelper(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
+    await fileSystem.writeFile(resolveHelper(outputCorePath, 'request.ts'), templates.core.request(context));
 
     if (request) {
-        const requestFile = resolve(process.cwd(), request);
+        const requestFile = resolveHelper(process.cwd(), request);
         const requestFileExists = await fileSystem.exists(requestFile);
         if (!requestFileExists) {
             throw new Error(`Custom request file "${requestFile}" does not exists`);
         }
-        await fileSystem.copyFile(requestFile, resolve(outputCorePath, 'request.ts'));
+        await fileSystem.copyFile(requestFile, resolveHelper(outputCorePath, 'request.ts'));
     }
 
     this.logger.info("The writing of the kernel files has been completed successfully");

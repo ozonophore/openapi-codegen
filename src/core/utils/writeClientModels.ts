@@ -1,8 +1,8 @@
 import { mkdirSync } from 'fs';
 
+import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Model } from '../types/shared/Model.model';
-import { dirName, resolve } from '../utils/pathHelpers';
 import { WriteClient } from '../WriteClient';
 import { fileSystem } from './fileSystem';
 import { format } from './format';
@@ -43,15 +43,15 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             return;
         }
 
-        const dir = dirName(modelFolderPath);
+        const dir = dirNameHelper(modelFolderPath);
         if (dir) {
-            const directory = resolve(outputModelsPath, dir);
+            const directory = resolveHelper(outputModelsPath, dir);
 
             this.logger.info(`A directory is being created: ${directory}`);
 
             mkdirSync(directory, { recursive: true });
         }
-        const file = resolve(outputModelsPath, `${modelFolderPath}.ts`);
+        const file = resolveHelper(outputModelsPath, `${modelFolderPath}.ts`);
 
         this.logger.info(`The recording of the file data begins: ${file}`);
 

@@ -2,15 +2,15 @@
 
 {{#if imports}}
 {{#each imports}}
-import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{@root.outputModels}}}{{{path}}}';
+import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{joinPath @root.outputModels path}}}';
 {{/each}}
 {{/if}}
 {{#if @root.useCancelableRequest}}
-import type { CancelablePromise } from '{{{@root.outputCore}}}CancelablePromise';
+import type { CancelablePromise } from '{{{joinPath @root.outputCore 'CancelablePromise'}}}';
 {{/if}}
-import { request as __request } from '{{{@root.outputCore}}}request';
-import type { ApiRequestOptions } from '{{{@root.outputCore}}}ApiRequestOptions';
-import { OpenAPI } from '{{{@root.outputCore}}}OpenAPI';
+import { request as __request } from '{{{joinPath @root.outputCore 'request'}}}';
+import type { ApiRequestOptions } from '{{{joinPath @root.outputCore 'ApiRequestOptions'}}}';
+import { OpenAPI } from '{{{joinPath @root.outputCore 'OpenAPI'}}}';
 
 {{#each operations}}
 const {{{name}}} = ({{>parameters}}): ApiRequestOptions => ({

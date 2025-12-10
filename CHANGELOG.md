@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.11] - 2025-12-12
+
+### Added
+- Added regular expressions to handle different situations in file paths (to handle template paths).
+- Added an auxiliary function for processing paths in templates - `normalizePath`.
+- Added an auxiliary function for combining path parts in templates - `joinPath`.
+- Added an auxiliary function to detect the use of names reserved by the system - `containsSystemName`.
+
+### Changed
+- The use of auxiliary functions from the `path` package has been replaced with improved options from `pathHelpers`.
+- Auxiliary functions of `resolveHelper` have been moved to the `common/utils/` directory
+
 ## [1.0.0-beta.10] - 2025-12-11
 
 ### Added

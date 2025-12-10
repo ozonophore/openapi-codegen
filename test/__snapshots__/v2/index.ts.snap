@@ -2,18 +2,18 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type { DictionaryWithReference } from '././models./DictionaryWithReference';
-export type { ModelThatExtends } from '././models./ModelThatExtends';
-export type { ModelThatExtendsExtends } from '././models./ModelThatExtendsExtends';
-export type { ModelWithArray } from '././models./ModelWithArray';
-export type { ModelWithDictionary } from '././models./ModelWithDictionary';
-export { ModelWithEnumInteger } from '././models./ModelWithEnumInteger';
-export type { ModelWithString } from '././models./ModelWithString';
+export type { DictionaryWithReference } from '././models/DictionaryWithReference';
+export type { ModelThatExtends } from '././models/ModelThatExtends';
+export type { ModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
+export type { ModelWithArray } from '././models/ModelWithArray';
+export type { ModelWithDictionary } from '././models/ModelWithDictionary';
+export { ModelWithEnumInteger } from '././models/ModelWithEnumInteger';
+export type { ModelWithString } from '././models/ModelWithString';
 
-export { DictionaryWithReferenceSchema } from '././schemas./DictionaryWithReferenceSchema';
-export { ModelThatExtendsSchema } from '././schemas./ModelThatExtendsSchema';
-export { ModelThatExtendsExtendsSchema } from '././schemas./ModelThatExtendsExtendsSchema';
-export { ModelWithArraySchema } from '././schemas./ModelWithArraySchema';
-export { ModelWithDictionarySchema } from '././schemas./ModelWithDictionarySchema';
-export { ModelWithEnumIntegerSchema } from '././schemas./ModelWithEnumIntegerSchema';
-export { ModelWithStringSchema } from '././schemas./ModelWithStringSchema';
+export { DictionaryWithReferenceSchema } from '././schemas/DictionaryWithReferenceSchema';
+export { ModelThatExtendsSchema } from '././schemas/ModelThatExtendsSchema';
+export { ModelThatExtendsExtendsSchema } from '././schemas/ModelThatExtendsExtendsSchema';
+export { ModelWithArraySchema } from '././schemas/ModelWithArraySchema';
+export { ModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
+export { ModelWithEnumIntegerSchema } from '././schemas/ModelWithEnumIntegerSchema';
+export { ModelWithStringSchema } from '././schemas/ModelWithStringSchema';

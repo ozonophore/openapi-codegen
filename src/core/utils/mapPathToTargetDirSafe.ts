@@ -1,8 +1,6 @@
-import { relative } from 'path';
-
+import { relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { findCommonParent } from './findCommonParent';
 import { getRelativeModelPath } from './getRelativeModelPath';
-import { resolve } from './pathHelpers';
 
 /**
  * Safely muppit the path from SourceDir → targetDir
@@ -15,30 +13,30 @@ import { resolve } from './pathHelpers';
 export function mapPathToTargetDirSafe(filePath: string, sourceDir: string, targetDir: string): string {
     const pathSep = '/';
 
-    const absFile = resolve(filePath);
-    const absSource = resolve(sourceDir);
-    const absTarget = resolve(targetDir);
+    const absFile = resolveHelper(filePath);
+    const absSource = resolveHelper(sourceDir);
+    const absTarget = resolveHelper(targetDir);
 
     const sourceWithSep = absSource.endsWith(pathSep) ? absSource : absSource + pathSep;
 
     // 1. The file inside SourceDir → mapim as usual
     if (absFile.startsWith(sourceWithSep)) {
-        const rel = relative(absSource, absFile);
-        return resolve(absTarget, rel);
+        const rel = relativeHelper(absSource, absFile);
+        return resolveHelper(absTarget, rel);
     }
 
     // 2. The file is outside SourceDir, but in a common parent
     const commonParent = findCommonParent(absSource, absFile);
     if (commonParent) {
         // Path from commonParent → file
-        const fileRelToCommon = relative(commonParent, absFile);
+        const fileRelToCommon = relativeHelper(commonParent, absFile);
 
         // Path from targetDir → commonParent
-        const targetToCommon = relative(absTarget, commonParent);
+        const targetToCommon = relativeHelper(absTarget, commonParent);
         if (targetToCommon.includes('..')) {
             // targetDir is higher than commonParent → we can't map
             if (filePath) {
-                const relativePath = relative(absSource, absFile);
+                const relativePath = relativeHelper(absSource, absFile);
                 return getRelativeModelPath(targetDir, relativePath);
             }
 
@@ -46,10 +44,10 @@ export function mapPathToTargetDirSafe(filePath: string, sourceDir: string, targ
         }
 
         // Collecting: targetDir → commonParent → file
-        const pathFromTargetToCommon = relative(absTarget, commonParent);
+        const pathFromTargetToCommon = relativeHelper(absTarget, commonParent);
         const pathFromCommonToFile = fileRelToCommon;
 
-        return resolve(absTarget, pathFromTargetToCommon, pathFromCommonToFile);
+        return resolveHelper(absTarget, pathFromTargetToCommon, pathFromCommonToFile);
     }
 
     // 3. There is no common parent → return as is

@@ -1,7 +1,6 @@
 /* istanbul ignore file */
-import path from 'path';
-
 import { TMultiOptions, TOptions } from '../common/Options';
+import { resolveHelper } from '../common/utils/pathHelpers';
 import { Parser as ParserV2 } from './api/v2/Parser';
 import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
@@ -172,7 +171,7 @@ export async function generate(options: TOptions | TOptions[] | TMultiOptions): 
         for (const option of optionsFinal) {
             await generateFrom(option, writeClient);
             writeClient.logger.info(`Generation from "${option.input}" was finished`);
-            writeClient.logger.info(`Output folder: ${path.resolve(process.cwd(), option.output)}`, true);
+            writeClient.logger.info(`Output folder: ${resolveHelper(process.cwd(), option.output)}`, true);
         }
         if (optionsFinal[0]?.useSeparatedIndexes) {
             await writeClient.combineAndWrightSimple();

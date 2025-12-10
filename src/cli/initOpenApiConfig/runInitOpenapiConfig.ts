@@ -6,9 +6,9 @@ import { DEFAULT_OPENAPI_CONFIG_FILENAME } from '../../common/Consts';
 import { ELogLevel, ELogOutput } from '../../common/Enums';
 import { Logger } from '../../common/Logger';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { fileSystem } from '../../core/utils/fileSystem';
 import { getFileName } from '../../core/utils/getFileName';
-import { resolve } from '../../core/utils/pathHelpers';
 import openApiCongigTemplate from '../../templatesCompiled/cli/openApiConfig';
 import { EOptionType } from './Enums';
 import { TInitOpenApiConfigParams } from './Types';
@@ -26,7 +26,7 @@ export async function runInitOpenapiConfig(params: OptionValues) {
         const configData = loadConfigIfExists(openapiConfig);
         if (!configData) {
             const configFilePath = openapiConfig ?? DEFAULT_OPENAPI_CONFIG_FILENAME;
-            const file = resolve(process.cwd(), configFilePath);
+            const file = resolveHelper(process.cwd(), configFilePath);
             const configTemplate = Handlebars.template(openApiCongigTemplate);
             const templateResult = configTemplate({ useMultyOptions: optionType === EOptionType.MULTIOPTION });
             const formattedValue = await format(templateResult, { parser: 'json' });

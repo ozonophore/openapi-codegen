@@ -2,6 +2,11 @@
 {{#if @root.useOptions~}}
 {
 {{#each parameters}}
+{{#containsSystemName name}}
+/**
+* [WARN] Be careful! A reserved system word is used!
+*/
+{{/containsSystemName}}
 {{{name}}}{{#if default}} = {{{default}}}{{/if}},
 {{/each}}
 }: {
@@ -9,12 +14,22 @@
 {{#if description}}
 /** {{{description}}} **/
 {{/if}}
+{{#containsSystemName name}}
+/**
+* [WARN] Be careful! A reserved system word is used!
+*/
+{{/containsSystemName}}
 {{{name}}}{{>isRequired}}: {{>type}},
 {{/each}}
 }
 {{~else}}
 
 {{#each parameters}}
+{{#containsSystemName name}}
+/**
+* [WARN] Be careful! A reserved system word is used!
+*/
+{{/containsSystemName}}
 {{{name}}}{{>isRequired}}: {{>type}}{{#if default}} = {{{default}}}{{/if}},
 {{/each}}
 {{/if}}

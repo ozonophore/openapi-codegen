@@ -1,10 +1,10 @@
 import { statSync } from "fs";
 
-import { normalize } from "./pathHelpers";
+import { normalizeHelper } from "../../common/utils/pathHelpers";
 
 export function isDirectory(path: string): boolean {
     try {
-        return statSync(normalize(path)).isDirectory();
+        return statSync(normalizeHelper(path)).isDirectory();
     } catch {
         return false;
     }

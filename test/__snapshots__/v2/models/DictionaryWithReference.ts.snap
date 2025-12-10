@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ModelWithString } from '././ModelWithString';
+import type { ModelWithString } from './ModelWithString';
 
 /**
  * This is a string reference

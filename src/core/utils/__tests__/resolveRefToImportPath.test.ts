@@ -1,11 +1,11 @@
 import { strict as assert } from 'node:assert';
 import { describe, test } from 'node:test';
 
-import { SEARCH_REGEXP } from '../../types/Consts';
+import { REGEX_BACKSLASH } from '../../types/Consts';
 import { resolveRefToImportPath } from '../resolveRefToImportPath';
 
 // Normalization of paths for cross-platform
-const normalizePath = (p: string) => p.replace(SEARCH_REGEXP, '/');
+const normalizePath = (p: string) => p.replace(REGEX_BACKSLASH, '/');
 
 describe('@unit resolveRefToImportPath — correctly resolves links to components', () => {
     const mainSpecPath = '/Users/user/Developer/my_app/openapi/app/openapi_spec.yaml';

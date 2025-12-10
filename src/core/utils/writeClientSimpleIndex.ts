@@ -1,5 +1,4 @@
-import { resolve } from 'path';
-
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { SimpleClientArtifacts } from '../types/base/SimpleClientArtifacts.model';
 import { WriteClient } from '../WriteClient';
 import { fileSystem } from './fileSystem';
@@ -11,7 +10,7 @@ import { fileSystem } from './fileSystem';
  */
 export async function writeClientSimpleIndex(this: WriteClient, options: SimpleClientArtifacts): Promise<void> {
     const { templates, outputPath, core, models, schemas, services } = options;
-    const resolvePathIndex = resolve(outputPath, 'index.ts');
+    const resolvePathIndex = resolveHelper(outputPath, 'index.ts');
 
     this.logger.info(`The recording of the file data begins: ${resolvePathIndex}`);
 

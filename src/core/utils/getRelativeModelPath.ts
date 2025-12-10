@@ -1,6 +1,6 @@
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { getTypeName } from './getTypeName';
 import { isInsideDirectory } from './isInsideDirectory';
-import { resolve } from './pathHelpers';
 import { replaceString } from './replaceString';
 import { stripNamespace } from './stripNamespace';
 
@@ -32,7 +32,7 @@ export function getRelativeModelPath(folderPath: string | undefined, relativeMod
 
         modelPath = pathArray.join(pathSep);
     }
-    const resolvedPath = resolve(folderPath, modelPath);
+    const resolvedPath = resolveHelper(folderPath, modelPath);
     if (isInsideDirectory(resolvedPath, folderPath)) {
         mappedPaths = modelPath;
     }

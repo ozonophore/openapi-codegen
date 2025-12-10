@@ -1,4 +1,12 @@
-export const SEARCH_REGEXP = /\\/g;
+export const REGEX_BACKSLASH = /\\/g;
+
+export const REGEX_MULTIPLE_SLASHES = /\/+/g;
+
+export const REGEX_DOT_SLASH = /\/(\.\/)+/g;
+
+export const REGEX_LEADING_DOT_SLASH = /^(\.\/)+/g;
+
+export const REGEX_TRAILING_SLASH = /\/$/g;
 
 export const GROUP_PRIORITY_EXTENDED = {
     required: 0,

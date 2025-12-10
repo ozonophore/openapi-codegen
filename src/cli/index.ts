@@ -1,11 +1,11 @@
 import { Command, Option, OptionValues } from 'commander';
-import { DEFAULT_OPENAPI_CONFIG_FILENAME } from 'common/Consts';
 import fs from 'fs';
-import path from 'path';
 
+import { DEFAULT_OPENAPI_CONFIG_FILENAME } from '../common/Consts';
 import { ELogLevel, ELogOutput } from '../common/Enums';
 import { Logger } from '../common/Logger';
 import { UpdateNotifier } from '../common/UpdateNotifier';
+import { joinHelper } from '../common/utils/pathHelpers';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
 import { chekOpenApiConfig } from './chekOpenApiConfig/chekOpenApiConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
@@ -13,7 +13,7 @@ import { EOptionType } from './initOpenApiConfig/Enums';
 import { runInitOpenapiConfig } from './initOpenApiConfig/runInitOpenapiConfig';
 import { getCLIName } from './utils';
 
-const packageDetails = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf-8'));
+const packageDetails = JSON.parse(fs.readFileSync(joinHelper(__dirname, '../../package.json'), 'utf-8'));
 
 const APP_NAME = packageDetails.name || 'ts-openapi-codegen-cli';
 const APP_VERSION = packageDetails.version || '1.0.0';

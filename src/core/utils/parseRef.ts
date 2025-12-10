@@ -1,4 +1,4 @@
-import path from 'path';
+import { isAbsolute } from 'path';
 
 export enum RefType {
     LOCAL_FRAGMENT = 'local_fragment',
@@ -31,7 +31,7 @@ export function parseRef(ref: string): ParsedRef {
     }
 
     // Absolute paths (POSIX/Windows handled by path.isAbsolute)
-    if (path.isAbsolute(ref)) {
+    if (isAbsolute(ref)) {
         const [filePath, fragment] = ref.split('#');
         return {
             type: RefType.ABSOLUTE_PATH,

@@ -1,6 +1,6 @@
 import { basename, extname } from 'path';
 
-import { dirName, join } from '../utils/pathHelpers';
+import { dirNameHelper, joinHelper } from '../../common/utils/pathHelpers';
 import { getClassName } from './getClassName';
 import { hasMappedType } from './getMappedType';
 
@@ -14,11 +14,11 @@ export function stripNamespace(value: string): string {
     }
     if (!value.match(/^(http:\/\/|https:\/\/|#\/)/g) && !hasMappedType(value) && !value.match(/^array\[[a-z]+\]$/g)) {
         const foundFile = value.match(/^(.*)#/);
-        const directoryName = foundFile ? dirName(foundFile[1]) : dirName(value);
+        const directoryName = foundFile ? dirNameHelper(foundFile[1]) : dirNameHelper(value);
 
         const extName = extname(value);
         const baseName = extName.toLowerCase().match(/(\.json|\.yaml|\.yml)$/g) ? getClassName(basename(value, extName)) : getClassName(basename(value));
-        return directoryName ? join(directoryName, baseName) : baseName;
+        return directoryName ? joinHelper(directoryName, baseName) : baseName;
     }
     const clearValue = value
         .trim()
@@ -36,7 +36,7 @@ export function stripNamespace(value: string): string {
         .replace(/^#\/responses\//, '')
         .replace(/^#\/securityDefinitions\//, '');
 
-    const directoryName = dirName(clearValue);
+    const directoryName = dirNameHelper(clearValue);
     const baseName = getClassName(basename(clearValue));
-    return directoryName ? join(directoryName, baseName) : baseName;
+    return directoryName ? joinHelper(directoryName, baseName) : baseName;
 }

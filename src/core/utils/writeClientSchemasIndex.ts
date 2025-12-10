@@ -1,5 +1,4 @@
-import { resolve } from 'path';
-
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { Model } from '../types/shared/Model.model';
 import { WriteClient } from '../WriteClient';
 import { appendUniqueLinesToFile } from './appendUniqueLinesToFile';
@@ -18,7 +17,7 @@ export async function writeClientSchemasIndex(this: WriteClient, options: IOptio
     if (!useSeparatedIndexes) {
         return;
     }
-    const filePath = resolve(outputSchemasPath, 'index.ts');
+    const filePath = resolveHelper(outputSchemasPath, 'index.ts');
 
     this.logger.info(`Data has been written to a file: ${filePath}`);
 
