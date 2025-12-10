@@ -1,5 +1,4 @@
-import get from 'lodash-es/get';
-
+import { safeHasOwn } from '../../../../common/utils/safeHasOwn';
 import type { Service } from '../../../types/shared/Service.model';
 import { getClassName } from '../../../utils/getClassName';
 import { ensureService, finalizeServiceImports, forEachOperationInPath, mergeOperationImportsIntoService } from '../../../utils/serviceHelpers';
@@ -15,7 +14,7 @@ import { getServiceName } from './getServiceName';
 export function getServices(this: Parser, openApi: OpenApi): Service[] {
     const services = new Map<string, Service>();
     for (const url in openApi.paths) {
-        if (get(openApi.paths, url, null)) {
+        if (safeHasOwn(openApi.paths, url)) {
             // Grab path and parse any global path parameters
             const pathByUrl = openApi.paths[url];
             const path = (pathByUrl.$ref ? (this.context.get(pathByUrl.$ref) as Record<string, any>) : pathByUrl) as OpenApiPath;

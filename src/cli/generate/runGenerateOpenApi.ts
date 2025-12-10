@@ -4,7 +4,8 @@ import { defaultOptions } from '../../common/defaultOptions';
 import { ELogLevel, ELogOutput } from '../../common/Enums';
 import { Logger } from '../../common/Logger';
 import { TMultiOptions, TOptions } from '../../common/Options';
-import { convertArrayToObject, loadConfigIfExists } from '../../common/Utils';
+import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
+import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { multiOptionsMigrationPlan } from '../../common/VersionedSchema/MultiOptionsVersioned/MultiOptionsMigrationPlan';
 import { multiOptionsVersionedSchema } from '../../common/VersionedSchema/MultiOptionsVersioned/MultiOptionsVersionedSchemas';
 import { optionsMigrationPlans } from '../../common/VersionedSchema/OptionsVersioned/OptionsMigrationPlans';
@@ -18,7 +19,7 @@ import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOpti
  * @param options Options for starting generation.
  */
 export async function runGenerateOpenApi(options: OptionValues) {
-    const {openapiConfig, ...clientOptions} = options;
+    const { openapiConfig, ...clientOptions } = options;
     const logger = new Logger({
         level: ELogLevel.INFO,
         instanceId: 'openapi-cli',

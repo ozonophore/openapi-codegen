@@ -1,5 +1,4 @@
-import get from 'lodash-es/get';
-
+import { safeHasOwn } from '../../../../common/utils/safeHasOwn';
 import type { Model } from '../../../types/shared/Model.model';
 import { escapeName } from '../../../utils/escapeName';
 import { getClassName } from '../../../utils/getClassName';
@@ -13,7 +12,7 @@ import type { OpenApiSchema } from '../types/OpenApiSchema.model';
 export function getModelProperties(this: Parser, openApi: OpenApi, definition: OpenApiSchema, parentRef: string): Model[] {
     const models: Model[] = [];
     for (const propertyName in definition.properties) {
-        if (get(definition.properties, propertyName, null)) {
+        if (safeHasOwn(definition.properties, propertyName)) {
             const property = definition.properties[propertyName];
             const propertyRequired = definition.required?.includes(propertyName) || property.default !== undefined;
             if (property.$ref) {

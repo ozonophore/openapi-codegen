@@ -1,5 +1,4 @@
-import get from 'lodash-es/get'
-
+import { safeHasOwn } from '../../../../common/utils/safeHasOwn';
 import type { OperationResponse } from '../../../types/shared/OperationResponse.model';
 import { getComment } from '../../../utils/getComment';
 import { getPattern } from '../../../utils/getPattern';
@@ -83,7 +82,7 @@ export function getOperationResponse(this: Parser, openApi: OpenApi, response: O
     // fetch and XHR client just support string types.
     if (response.headers) {
         for (const name in response.headers) {
-            if (get(response.headers, name, null)) {
+            if (safeHasOwn(response.headers, name)) {
                 operationResponse.in = 'header';
                 operationResponse.name = name;
                 operationResponse.type = 'string';
