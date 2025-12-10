@@ -1,3 +1,5 @@
+import { SEARCH_REGEXP } from "../types/Consts";
+
 /**
  * The spec generates a pattern like this '^\d{3}-\d{2}-\d{4}$'
  * However, to use it in HTML or inside new RegExp() we need to
@@ -6,5 +8,5 @@
  * @param pattern
  */
 export function getPattern(pattern?: string): string | undefined {
-    return pattern?.replace(/\\/g, '\\\\');
+    return pattern?.replace(SEARCH_REGEXP, '\\\\');
 }

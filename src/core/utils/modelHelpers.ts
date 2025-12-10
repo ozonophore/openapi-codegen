@@ -1,5 +1,6 @@
 import { basename, dirname, relative, resolve } from 'path';
 
+import { SEARCH_REGEXP } from '../types/Consts';
 import type { Model } from '../types/shared/Model.model';
 
 /**
@@ -62,7 +63,7 @@ export function resolveModelImports(models: Model[], outputModelsDir: string): M
                 const file = basename(importModel.name);
 
                 const relativePath = relative(fromDir, toDir);
-                importPath = relativePath === '' ? `./${file}` : `${relativePath.replace(/\\/g, '/')}/${file}`;
+                importPath = relativePath === '' ? `./${file}` : `${relativePath.replace(SEARCH_REGEXP, '/')}/${file}`;
             }
             return Object.assign(imprt, {
                 alias: importAlias,

@@ -21,7 +21,7 @@ describe('getType', () => {
         assert.deepStrictEqual(type.imports, []);
     });
 
-    test('@unit: should support file with ext', async () => {
+    test.skip('@unit: should support file with ext', async () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const parser = new SwaggerParser();

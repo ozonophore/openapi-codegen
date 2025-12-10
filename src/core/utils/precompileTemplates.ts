@@ -4,6 +4,7 @@ import path from 'path';
 
 import { ELogLevel, ELogOutput } from '../../common/Enums';
 import { Logger } from '../../common/Logger';
+import { SEARCH_REGEXP } from '../../core/types/Consts';
 
 const templatesDir = path.resolve(__dirname, '../../templates');
 const compiledDir = path.resolve(__dirname, '../../templatesCompiled');
@@ -43,7 +44,7 @@ const precompileTemplates = () => {
                     const templateName = path
                         .relative(templatesDir, filePath)
                         .replace(/\.hbs$/, '')
-                        .replace(/\\/g, '/');
+                        .replace(SEARCH_REGEXP, '/');
                     const templateContent = fs.readFileSync(filePath, 'utf8');
                     const precompiled = Handlebars.precompile(templateContent, {
                         strict: true,
