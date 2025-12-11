@@ -1,5 +1,4 @@
-import get from 'lodash-es/get'
-
+import { safeHasOwn } from '../../../../common/utils/safeHasOwn';
 import type { OpenApi } from '../types/OpenApi.model';
 
 export function getServer(openApi: OpenApi): string {
@@ -7,7 +6,7 @@ export function getServer(openApi: OpenApi): string {
     const variables = server?.variables || {};
     let url = server?.url || '';
     for (const variable in variables) {
-        if (get(variables, variable, null)) {
+        if (safeHasOwn(variables, variable)) {
             url = url.replace(`{${variable}}`, variables[variable].default);
         }
     }

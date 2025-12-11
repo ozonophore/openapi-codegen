@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.9] - 2025-12-10
+
+### Changed
+- Instead of the `get` function from the npm package `Lodash-es`, the `safeHasOwn` function is used
+- Functions from the file `common/Utils.ts` are placed in separate files with the appropriate name in the directory `common/utils/`
+
+### Deleted
+- Removed the use of the npm package `Lodash-es`
+
 ## [1.0.0-beta.8] - 2025-12-06
 
 ### Added

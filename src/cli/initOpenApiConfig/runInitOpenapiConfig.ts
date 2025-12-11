@@ -5,7 +5,7 @@ import { format } from 'prettier';
 import { DEFAULT_OPENAPI_CONFIG_FILENAME } from '../../common/Consts';
 import { ELogLevel, ELogOutput } from '../../common/Enums';
 import { Logger } from '../../common/Logger';
-import { loadConfigIfExists } from '../../common/Utils';
+import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { fileSystem } from '../../core/utils/fileSystem';
 import { getFileName } from '../../core/utils/getFileName';
 import { resolve } from '../../core/utils/pathHelpers';

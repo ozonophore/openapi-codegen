@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 
-import { convertArrayToObject } from 'common/Utils';
+import { convertArrayToObject } from 'common/utils/convertArrayToObject';
 
 describe('convertArrayToObject', () => {
     test('@unit: Empty array', () => {

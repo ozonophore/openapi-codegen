@@ -1,5 +1,4 @@
-import get from 'lodash-es/get';
-
+import { safeHasOwn } from '../../../../common/utils/safeHasOwn';
 import type { OperationResponse } from '../../../types/shared/OperationResponse.model';
 import { getOperationResponseCode } from '../../../utils/getOperationResponseCode';
 import { Parser } from '../Parser';
@@ -13,7 +12,7 @@ export function getOperationResponses(this: Parser, openApi: OpenApi, responses:
     // Iterate over each response code and get the
     // status code and response message (if any).
     for (const code in responses) {
-        if (get(responses, code, null)) {
+        if (safeHasOwn(responses, code)) {
             const responseOrReference = responses[code];
             const response = (responseOrReference.$ref ? this.context.get(responseOrReference.$ref) : responseOrReference) as OpenApiResponse;
             const responseCode = getOperationResponseCode(code);
