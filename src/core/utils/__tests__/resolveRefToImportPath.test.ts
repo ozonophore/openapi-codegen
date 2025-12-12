@@ -1,10 +1,11 @@
 import { strict as assert } from 'node:assert';
 import { describe, test } from 'node:test';
 
+import { SEARCH_REGEXP } from '../../types/Consts';
 import { resolveRefToImportPath } from '../resolveRefToImportPath';
 
 // Normalization of paths for cross-platform
-const normalizePath = (p: string) => p.replace(/\\/g, '/');
+const normalizePath = (p: string) => p.replace(SEARCH_REGEXP, '/');
 
 describe('@unit resolveRefToImportPath — correctly resolves links to components', () => {
     const mainSpecPath = '/Users/user/Developer/my_app/openapi/app/openapi_spec.yaml';
@@ -40,8 +41,7 @@ describe('@unit resolveRefToImportPath — correctly resolves links to component
             outputModelsPath,
         });
 
-        // users-list.yaml → UsersList (по твоей логике stripNamespace + getClassName)
-        assert.equal(normalizePath(result), './spec/UsersList');
+        assert.equal(normalizePath(result), './UsersList');
     });
 
     test('embedded internal link → folder structure is saved', () => {
@@ -74,7 +74,6 @@ describe('@unit resolveRefToImportPath — correctly resolves links to component
             outputModelsPath,
         });
 
-        // error → Error (getClassName)
-        assert.equal(normalizePath(result), './spec/common/Error');
+        assert.equal(normalizePath(result), './common/Error');
     });
 });
