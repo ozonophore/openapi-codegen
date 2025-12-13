@@ -1,12 +1,12 @@
 /* istanbul ignore file */
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 
+import { dirNameHelper } from '../common/utils/pathHelpers';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
 import { $Root} from './types/base/Root.model';
 import { getFileName } from './utils/getFileName';
 import { isString } from './utils/isString';
-import { dirName } from './utils/pathHelpers';
 
 type TContextProps = {
     input: string | Record<string, any>;
@@ -41,7 +41,7 @@ export class Context {
         this._output = output;
         this._refs = {} as RefsLike;
         if (isString(input)) {
-            this._root = { path: dirName(input), fileName: getFileName(input) };
+            this._root = { path: dirNameHelper(input), fileName: getFileName(input) };
         } else {
             this._root = { path: '' };
         }

@@ -1,6 +1,6 @@
+import { dirNameHelper,  resolveHelper } from '../../common/utils/pathHelpers';
 import { advancedDeduplicatePath } from './advancedDeduplicatePath';
 import { ParsedRef, RefType } from './parseRef';
-import { dirName,  resolve } from './pathHelpers';
 
 /**
  * Resolve a parsed reference to an absolute path (when applicable).
@@ -8,7 +8,7 @@ import { dirName,  resolve } from './pathHelpers';
  */
 export function resolveRefPath(parsedRef: ParsedRef, parentFilePath: string): string {
     // For correct operation, parentDir must be the path to the directory, not the file.
-    const parentDir = dirName(parentFilePath.split('#')[0]);
+    const parentDir = dirNameHelper(parentFilePath.split('#')[0]);
 
     switch (parsedRef.type) {
         case RefType.LOCAL_FRAGMENT:
@@ -19,7 +19,7 @@ export function resolveRefPath(parsedRef: ParsedRef, parentFilePath: string): st
         case RefType.EXTERNAL_FILE_FRAGMENT:
             // Resolve relative to parent file directory
             if (parsedRef.filePath) {
-                const resolvedPath = resolve(parentDir, parsedRef.filePath);
+                const resolvedPath = resolveHelper(parentDir, parsedRef.filePath);
                 // Clean any duplicate path segments
                 return advancedDeduplicatePath(resolvedPath);
             }

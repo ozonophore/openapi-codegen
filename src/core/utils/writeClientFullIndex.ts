@@ -1,5 +1,4 @@
-import { resolve } from 'path';
-
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { ClientArtifacts } from '../types/base/ClientArtifacts.model';
 import { WriteClient } from '../WriteClient';
 import { fileSystem } from './fileSystem';
@@ -11,7 +10,7 @@ import { fileSystem } from './fileSystem';
  */
 export async function writeClientFullIndex(this: WriteClient, options: ClientArtifacts): Promise<void> {
     const { templates, outputPath, core, models, schemas, services } = options;
-    const resolvePathIndex = resolve(outputPath, 'index.ts');
+    const resolvePathIndex = resolveHelper(outputPath, 'index.ts');
 
     this.logger.info(`Data has been written to a file: ${resolvePathIndex}`);
 

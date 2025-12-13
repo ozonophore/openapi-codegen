@@ -1,4 +1,4 @@
-import { dirName, join } from '../utils/pathHelpers';
+import { dirNameHelper, joinHelper } from '../../common/utils/pathHelpers';
 
 export function getAbsolutePath(definitionRef: string | undefined, parentRef: string): string {
     // If the definition Ref is missing
@@ -26,10 +26,10 @@ export function getAbsolutePath(definitionRef: string | undefined, parentRef: st
     // If definitionRef already has its own fragment and/or relative path
     if (definitionRef.includes('#')) {
         const [defPath, defFrag] = definitionRef.split('#');
-        const absPath = defPath ? join(dirName(parentBase), defPath) : parentBase;
+        const absPath = defPath ? joinHelper(dirNameHelper(parentBase), defPath) : parentBase;
         return defFrag ? `${absPath}#${defFrag}` : absPath;
     }
 
     // Plain relative path → resolve against parent base directory
-    return join(dirName(parentBase), definitionRef);
+    return joinHelper(dirNameHelper(parentBase), definitionRef);
 }

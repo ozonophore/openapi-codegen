@@ -1,3 +1,4 @@
+import { REGEX_BACKSLASH, REGEX_DOT_SLASH, REGEX_LEADING_DOT_SLASH, REGEX_MULTIPLE_SLASHES, REGEX_TRAILING_SLASH } from 'core/types/Consts';
 import * as Handlebars from 'handlebars/runtime';
 
 import { HttpClient } from '../types/enums/HttpClient.enum';
@@ -47,10 +48,41 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
         );
     });
 
-    Handlebars.registerHelper('containsSystemName', function(this: any, value: string, options: Handlebars.HelperOptions) {
-        const RESERVED_WORDS = /^_(arguments|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|eval|export|extends|false|finally|for|function|if|implements|import|in|instanceof|interface|let|new|null|package|private|protected|public|return|static|super|switch|this|throw|true|try|typeof|var|void|while|with|yield)$/g;
+    Handlebars.registerHelper('containsSystemName', function (this: any, value: string, options: Handlebars.HelperOptions) {
+        const RESERVED_WORDS =
+            /^_(arguments|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|eval|export|extends|false|finally|for|function|if|implements|import|in|instanceof|interface|let|new|null|package|private|protected|public|return|static|super|switch|this|throw|true|try|typeof|var|void|while|with|yield)$/g;
         const hasReservedWords = RESERVED_WORDS.test(value);
 
         return hasReservedWords ? options.fn(this) : options.inverse(this);
+    });
+
+    Handlebars.registerHelper('normalizePath', function (this: any, path: string) {
+        if (!path || typeof path !== 'string') {
+            return './';
+        }
+
+        let normalizedPath = path
+            .replace(REGEX_BACKSLASH, '/')
+            .replace(REGEX_MULTIPLE_SLASHES, '/')
+            .replace(REGEX_DOT_SLASH, '/')
+            .replace(REGEX_LEADING_DOT_SLASH, './')
+            .replace(REGEX_TRAILING_SLASH, '');
+
+        if (!normalizedPath.startsWith('./')) {
+            normalizedPath = `./${normalizedPath}`;
+        }
+
+        if (normalizedPath === '.') {
+            return './';
+        }
+
+        return normalizedPath;
+    });
+
+    Handlebars.registerHelper('joinPath', function (this: any, firstPath: string, secondPath: string) {
+        const cleanedFirstPath = firstPath.endsWith('./') ? firstPath.slice(0, -2) : firstPath;
+        const cleanedSecondPath = secondPath.startsWith('./') ? secondPath.slice(2) : secondPath;
+
+        return `${cleanedFirstPath}/${cleanedSecondPath}`.replace(REGEX_BACKSLASH, '/').replace(REGEX_MULTIPLE_SLASHES, '/');
     });
 }

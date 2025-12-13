@@ -2,37 +2,37 @@
 {{#if core}}
 
 {{#each core}}
-export { ApiError{{#notEquals ../core.length 1}} as ApiError${{{@index}}}{{/notEquals}} } from './{{{this}}}ApiError';
+export { ApiError{{#notEquals ../core.length 1}} as ApiError${{{@index}}}{{/notEquals}} } from './{{{joinPath this 'ApiError'}}}';
 {{#if @root.useCancelableRequest}}
-export { CancelablePromise } from './{{{this}}}CancelablePromise';
+export { CancelablePromise } from './{{{joinPath this 'CancelablePromise'}}}';
 {{/if}}
-export { OpenAPI{{#notEquals ../core.length 1}}  as OpenAPI${{{@index}}}{{/notEquals}} } from './{{{this}}}OpenAPI';
-export type { TOpenAPIConfig{{#notEquals ../core.length 1}} as TOpenAPIConfig${{{@index}}}{{/notEquals}} } from './{{{this}}}OpenAPI';
+export { OpenAPI{{#notEquals ../core.length 1}}  as OpenAPI${{{@index}}}{{/notEquals}} } from './{{{joinPath this 'OpenAPI'}}}';
+export type { TOpenAPIConfig{{#notEquals ../core.length 1}} as TOpenAPIConfig${{{@index}}}{{/notEquals}} } from './{{{joinPath this 'OpenAPI'}}}';
 {{/each}}
 {{/if}}
 {{#if models}}
 
 {{#each models}}
 {{#if enum}}
-export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
+export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{joinPath package path}}}';
 {{else if useUnionTypes}}
-export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
+export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{joinPath package path}}}';
 {{else if enums}}
-export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
+export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{joinPath package path}}}';
 {{else}}
-export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{package}}}{{{path}}}';
+export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{joinPath package path}}}';
 {{/if}}
 {{/each}}
 {{/if}}
 {{#if schemas}}
 
 {{#each schemas}}
-export { {{{name}}}Schema{{#if alias }} as {{{alias}}}Schema{{/if}} } from './{{{package}}}{{{path}}}Schema';
+export { {{{name}}}Schema{{#if alias }} as {{{alias}}}Schema{{/if}} } from './{{{joinPath package path}}}Schema';
 {{/each}}
 {{/if}}
 {{#if services}}
 
 {{#each services}}
-export { {{{name}}} } from './{{{package}}}{{{name}}}';
+export { {{{name}}} } from './{{{joinPath package name}}}';
 {{/each}}
 {{/if}}

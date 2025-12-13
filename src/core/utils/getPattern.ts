@@ -1,4 +1,4 @@
-import { SEARCH_REGEXP } from "../types/Consts";
+import { REGEX_BACKSLASH } from "../types/Consts";
 
 /**
  * The spec generates a pattern like this '^\d{3}-\d{2}-\d{4}$'
@@ -8,5 +8,5 @@ import { SEARCH_REGEXP } from "../types/Consts";
  * @param pattern
  */
 export function getPattern(pattern?: string): string | undefined {
-    return pattern?.replace(SEARCH_REGEXP, '\\\\');
+    return pattern?.replace(REGEX_BACKSLASH, '\\\\');
 }

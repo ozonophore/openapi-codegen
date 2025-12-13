@@ -1,5 +1,6 @@
 import { ELogLevel, ELogOutput } from '../common/Enums';
 import { Logger } from '../common/Logger';
+import { relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
 import { ClientArtifacts } from './types/base/ClientArtifacts.model';
 import { ExportedModel } from './types/base/ExportedModel.model';
 import { ExportedService } from './types/base/ExportedService.model';
@@ -8,7 +9,6 @@ import { SimpleClientArtifacts } from './types/base/SimpleClientArtifacts.model'
 import { HttpClient } from './types/enums/HttpClient.enum';
 import type { Client } from './types/shared/Client.model';
 import { fileSystem } from './utils/fileSystem';
-import { relative, resolve } from './utils/pathHelpers';
 import { prepareAlias } from './utils/prepareAlias';
 import { Templates } from './utils/registerHandlebarTemplates';
 import { sortModelByName } from './utils/sortModelByName';
@@ -113,8 +113,8 @@ export class WriteClient {
                 templates,
                 outputPaths: {
                     outputServices,
-                    outputCore: `${relative(outputServices, outputCore)}`,
-                    outputModels: `${relative(outputServices, outputModels)}`,
+                    outputCore: `${relativeHelper(outputServices, outputCore)}`,
+                    outputModels: `${relativeHelper(outputServices, outputModels)}`,
                 },
                 httpClient,
                 useUnionTypes,
@@ -213,24 +213,24 @@ export class WriteClient {
                 const clientIndex = this.ensureSimpleClientIndex(result, key, templates);
 
                 if (!excludeCoreServiceFiles) {
-                    const relativePathCore = relative(key, outputCore);
+                    const relativePathCore = relativeHelper(key, outputCore);
                     if (!clientIndex.core.includes(relativePathCore)) {
                         clientIndex.core.push(relativePathCore);
                     }
 
-                    const relativeService = relative(key, outputServices);
+                    const relativeService = relativeHelper(key, outputServices);
                     if (!clientIndex.services.includes(relativeService)) {
                         clientIndex.services.push(relativeService);
                     }
                 }
 
-                const relativePathModel = relative(key, outputModels);
+                const relativePathModel = relativeHelper(key, outputModels);
                 if (!clientIndex.models.includes(relativePathModel)) {
                     clientIndex.models.push(relativePathModel);
                 }
 
                 if (includeSchemasFiles) {
-                    const relativePathSchema = relative(key, outputSchemas);
+                    const relativePathSchema = relativeHelper(key, outputSchemas);
                     if (!clientIndex.schemas.includes(relativePathSchema)) {
                         clientIndex.schemas.push(relativePathSchema);
                     }
@@ -254,12 +254,12 @@ export class WriteClient {
                 const clientIndex = this.ensureClientIndex(result, key, templates);
 
                 if (!excludeCoreServiceFiles) {
-                    const rel = relative(key, outputCore);
+                    const rel = relativeHelper(key, outputCore);
                     if (!clientIndex.core.includes(rel)) {
                         clientIndex.core.push(rel);
                     }
 
-                    const relativeService = `${relative(key, outputServices)}`;
+                    const relativeService = `${relativeHelper(key, outputServices)}`;
                     for (const service of client.services) {
                         if (!clientIndex.services.some(s => this.isSomeService(s, service.name, relativeService))) {
                             clientIndex.services.push({
@@ -270,8 +270,8 @@ export class WriteClient {
                     }
                 }
 
-                const relativePathModel = `${relative(key, outputModels)}`;
-                const relativePathSchema = `${relative(key, outputSchemas)}`;
+                const relativePathModel = `${relativeHelper(key, outputModels)}`;
+                const relativePathSchema = `${relativeHelper(key, outputSchemas)}`;
                 for (const model of client.models) {
                     const modelFinal = {
                         name: model.name,
@@ -318,7 +318,7 @@ export class WriteClient {
     }
 
     private getOutputPath(output: string | undefined, key: string, fallback: string) {
-        return output ? output : resolve(key, fallback);
+        return output ? output : resolveHelper(key, fallback);
     }
 
     private ensureClientIndex(map: Map<string, ClientArtifacts>, key: string, templates: any): ClientArtifacts {

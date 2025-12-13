@@ -1,5 +1,4 @@
-import { resolve } from 'path';
-
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { OutputPaths } from '../types/base/OutputPaths.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Service } from '../types/shared/Service.model';
@@ -44,7 +43,7 @@ export async function writeClientServices(this: WriteClient, options: IWriteClie
     this.logger.info('Recording of service files begins');
 
     for (const service of services) {
-        const file = resolve(outputPaths.outputServices, `${service.name}.ts`);
+        const file = resolveHelper(outputPaths.outputServices, `${service.name}.ts`);
 
         this.logger.info(`The recording of the file data begins: ${file}`);
 

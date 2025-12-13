@@ -2,6 +2,11 @@
 {{#if @root.useOptions~}}
 {
 {{#each parameters}}
+{{#containsSystemName name}}
+/**
+* [WARN] Be careful! A reserved system word is used!
+*/
+{{/containsSystemName}}
 {{{name}}},
 {{/each}}
 }: {
@@ -12,6 +17,11 @@
 {{~else}}
 
 {{#each parameters}}
+{{#containsSystemName name}}
+/**
+* [WARN] Be careful! A reserved system word is used!
+*/
+{{/containsSystemName}}
 {{{name}}}{{>isRequiredDefinition}}: {{>type}},
 {{/each}}
 {{/if}}

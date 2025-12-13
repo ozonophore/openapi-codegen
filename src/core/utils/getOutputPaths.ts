@@ -1,6 +1,6 @@
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { OutputPaths } from '../types/base/OutputPaths.model';
 import { isSubDirectory } from '../utils/isSubdirectory';
-import { resolve } from './pathHelpers';
 
 export const getOutputPaths = ({
     output,
@@ -32,11 +32,11 @@ export const getOutputPaths = ({
         throw new Error(`Output folder(services) is not a subdirectory of the current working directory`);
     }
 
-    const outputPath = resolve(rootPath, output);
-    const outputPathCore = outputCore ? resolve(rootPath, outputCore) : resolve(outputPath, 'core');
-    const outputPathModels = outputModels ? resolve(rootPath, outputModels) : resolve(outputPath, 'models');
-    const outputPathSchemas = outputSchemas ? resolve(rootPath, outputSchemas) : resolve(outputPath, 'schemas');
-    const outputPathServices = outputServices ? resolve(rootPath, outputServices) : resolve(outputPath, 'services');
+    const outputPath = resolveHelper(rootPath, output);
+    const outputPathCore = outputCore ? resolveHelper(rootPath, outputCore) : resolveHelper(outputPath, 'core');
+    const outputPathModels = outputModels ? resolveHelper(rootPath, outputModels) : resolveHelper(outputPath, 'models');
+    const outputPathSchemas = outputSchemas ? resolveHelper(rootPath, outputSchemas) : resolveHelper(outputPath, 'schemas');
+    const outputPathServices = outputServices ? resolveHelper(rootPath, outputServices) : resolveHelper(outputPath, 'services');
 
     return {
         output: outputPath,

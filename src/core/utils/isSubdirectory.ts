@@ -1,4 +1,7 @@
-import path from 'path';
+import path from "path";
+
+import { relativeHelper, resolveHelper } from "../../common/utils/pathHelpers";
+
 
 /**
  * Checks whether `child` is a subdirectory of `parent`
@@ -6,8 +9,8 @@ import path from 'path';
  * @param child Child directory (absolute or relative path)
  */
 export function isSubDirectory(parent: string, child: string) {
-    const parentNormalized = path.resolve(parent);
-    const childNormalized = path.resolve(parentNormalized, child);
-    const relative = path.relative(parentNormalized, childNormalized);
+    const parentNormalized = resolveHelper(parent);
+    const childNormalized = resolveHelper(parentNormalized, child);
+    const relative = relativeHelper(parentNormalized, childNormalized);
     return relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative);
 }

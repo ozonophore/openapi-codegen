@@ -1,9 +1,9 @@
-import { SEARCH_REGEXP } from "../types/Consts";
+import { REGEX_BACKSLASH } from "../types/Consts";
 
 export function replaceString(value?: string): string | null | undefined {
     if (!value) {
         return value;
     }
-    const searchRegExp = SEARCH_REGEXP;
+    const searchRegExp = REGEX_BACKSLASH;
     return value.replace(searchRegExp, '/');
 }

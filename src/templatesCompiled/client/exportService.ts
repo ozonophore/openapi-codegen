@@ -14,7 +14,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
 
   return ((stack1 = lookupProperty(helpers,"each").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"imports"),{"name":"each","hash":{},"fn":container.program(2, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":0},"end":{"line":6,"column":9}}})) != null ? stack1 : "");
 },"2":function(container,depth0,helpers,partials,data) {
-    var stack1, alias1=container.strict, alias2=container.lambda, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+    var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {}), lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
         }
@@ -22,11 +22,10 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     };
 
   return "import type { "
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":5,"column":17},"end":{"line":5,"column":21}} ), depth0)) != null ? stack1 : "")
-    + ((stack1 = lookupProperty(helpers,"if").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"alias"),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":24},"end":{"line":5,"column":59}}})) != null ? stack1 : "")
+    + ((stack1 = container.lambda(container.strict(depth0, "name", {"start":{"line":5,"column":17},"end":{"line":5,"column":21}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"alias"),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":24},"end":{"line":5,"column":59}}})) != null ? stack1 : "")
     + " } from '"
-    + ((stack1 = alias2(alias1(lookupProperty(data,"root"), "outputModels", {"start":{"line":5,"column":71},"end":{"line":5,"column":89}} ), depth0)) != null ? stack1 : "")
-    + ((stack1 = alias2(alias1(depth0, "path", {"start":{"line":5,"column":95},"end":{"line":5,"column":99}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"joinPath").call(alias1,lookupProperty(lookupProperty(data,"root"),"outputModels"),lookupProperty(depth0,"path"),{"name":"joinPath","hash":{},"data":data,"loc":{"start":{"line":5,"column":68},"end":{"line":5,"column":106}}})) != null ? stack1 : "")
     + "';\n";
 },"3":function(container,depth0,helpers,partials,data) {
     var stack1;
@@ -42,8 +41,8 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     };
 
   return "import type { CancelablePromise } from '"
-    + ((stack1 = container.lambda(container.strict(lookupProperty(data,"root"), "outputCore", {"start":{"line":9,"column":43},"end":{"line":9,"column":59}} ), depth0)) != null ? stack1 : "")
-    + "CancelablePromise';\n";
+    + ((stack1 = lookupProperty(helpers,"joinPath").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(lookupProperty(data,"root"),"outputCore"),"CancelablePromise",{"name":"joinPath","hash":{},"data":data,"loc":{"start":{"line":9,"column":40},"end":{"line":9,"column":91}}})) != null ? stack1 : "")
+    + "';\n";
 },"7":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
@@ -196,12 +195,12 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"imports"),{"name":"if","hash":{},"fn":container.program(1, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":3,"column":0},"end":{"line":7,"column":7}}})) != null ? stack1 : "")
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(lookupProperty(data,"root"),"useCancelableRequest"),{"name":"if","hash":{},"fn":container.program(5, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":8,"column":0},"end":{"line":10,"column":7}}})) != null ? stack1 : "")
     + "import { request as __request } from '"
-    + ((stack1 = alias3(alias2(lookupProperty(data,"root"), "outputCore", {"start":{"line":11,"column":41},"end":{"line":11,"column":57}} ), depth0)) != null ? stack1 : "")
-    + "request';\nimport type { ApiRequestOptions } from '"
-    + ((stack1 = alias3(alias2(lookupProperty(data,"root"), "outputCore", {"start":{"line":12,"column":43},"end":{"line":12,"column":59}} ), depth0)) != null ? stack1 : "")
-    + "ApiRequestOptions';\nimport { OpenAPI } from '"
-    + ((stack1 = alias3(alias2(lookupProperty(data,"root"), "outputCore", {"start":{"line":13,"column":28},"end":{"line":13,"column":44}} ), depth0)) != null ? stack1 : "")
-    + "OpenAPI';\n\n"
+    + ((stack1 = lookupProperty(helpers,"joinPath").call(alias1,lookupProperty(lookupProperty(data,"root"),"outputCore"),"request",{"name":"joinPath","hash":{},"data":data,"loc":{"start":{"line":11,"column":38},"end":{"line":11,"column":79}}})) != null ? stack1 : "")
+    + "';\nimport type { ApiRequestOptions } from '"
+    + ((stack1 = lookupProperty(helpers,"joinPath").call(alias1,lookupProperty(lookupProperty(data,"root"),"outputCore"),"ApiRequestOptions",{"name":"joinPath","hash":{},"data":data,"loc":{"start":{"line":12,"column":40},"end":{"line":12,"column":91}}})) != null ? stack1 : "")
+    + "';\nimport { OpenAPI } from '"
+    + ((stack1 = lookupProperty(helpers,"joinPath").call(alias1,lookupProperty(lookupProperty(data,"root"),"outputCore"),"OpenAPI",{"name":"joinPath","hash":{},"data":data,"loc":{"start":{"line":13,"column":25},"end":{"line":13,"column":66}}})) != null ? stack1 : "")
+    + "';\n\n"
     + ((stack1 = lookupProperty(helpers,"each").call(alias1,lookupProperty(depth0,"operations"),{"name":"each","hash":{},"fn":container.program(7, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":15,"column":0},"end":{"line":20,"column":9}}})) != null ? stack1 : "")
     + "\nexport type T"
     + ((stack1 = alias3(alias2(depth0, "originName", {"start":{"line":22,"column":16},"end":{"line":22,"column":26}} ), depth0)) != null ? stack1 : "")

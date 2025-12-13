@@ -1,6 +1,7 @@
-import { basename, dirname, relative, resolve } from 'path';
+import { basename } from 'path';
 
-import { SEARCH_REGEXP } from '../types/Consts';
+import { dirNameHelper, relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { REGEX_BACKSLASH } from '../types/Consts';
 import type { Model } from '../types/shared/Model.model';
 
 /**
@@ -58,12 +59,12 @@ export function resolveModelImports(models: Model[], outputModelsDir: string): M
             let importPath = imprt.path;
 
             if (importModel) {
-                const fromDir = dirname(resolve(outputModelsDir, model.path));
-                const toDir = dirname(resolve(outputModelsDir, importModel.path));
+                const fromDir = dirNameHelper(resolveHelper(outputModelsDir, model.path));
+                const toDir = dirNameHelper(resolveHelper(outputModelsDir, importModel.path));
                 const file = basename(importModel.name);
 
-                const relativePath = relative(fromDir, toDir);
-                importPath = relativePath === '' ? `./${file}` : `${relativePath.replace(SEARCH_REGEXP, '/')}/${file}`;
+                const relativePath = relativeHelper(fromDir, toDir);
+                importPath = relativePath === '' ? `./${file}` : `${relativePath.replace(REGEX_BACKSLASH, '/')}/${file}`;
             }
             return Object.assign(imprt, {
                 alias: importAlias,

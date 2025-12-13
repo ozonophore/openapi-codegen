@@ -1,5 +1,4 @@
-import { resolve } from 'path';
-
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { WriteClient } from '../WriteClient';
 import { appendUniqueLinesToFile } from './appendUniqueLinesToFile';
 import { Templates } from './registerHandlebarTemplates';
@@ -17,7 +16,7 @@ export async function writeClientCoreIndex(this: WriteClient, options: IOptionsP
     if (!useSeparatedIndexes) {
         return;
     }
-    const filePath = resolve(outputCorePath, 'index.ts');
+    const filePath = resolveHelper(outputCorePath, 'index.ts');
 
     this.logger.info(`Data has been written to a file: ${filePath}`);
 
