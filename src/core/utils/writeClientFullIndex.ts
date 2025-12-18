@@ -1,7 +1,7 @@
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { ClientArtifacts } from '../types/base/ClientArtifacts.model';
 import { WriteClient } from '../WriteClient';
-import { fileSystem } from './fileSystem';
+import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 
 /**
  * Generate the OpenAPI client index file using the Handlebar template and write it to disk.
@@ -14,7 +14,7 @@ export async function writeClientFullIndex(this: WriteClient, options: ClientArt
 
     this.logger.info(`Data has been written to a file: ${resolvePathIndex}`);
 
-    await fileSystem.writeFile(
+    await fileSystemHelpers.writeFile(
         resolvePathIndex,
         templates.indexes.full({
             core,

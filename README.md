@@ -21,14 +21,13 @@
 - Frontend ❤️ OpenAPI, but we do not want to use JAVA codegen in our builds
 - Quick, lightweight, robust and framework agnostic 🚀
 - Supports generation of TypeScript clients
-- Supports generations of fetch and XHR http clients
+- Supports generations of fetch, XHR, Node.js and axios http clients
 - Supports OpenAPI specification v2.0 and v3.0
 - Supports JSON and YAML files for input
 - Supports generation through CLI, Node.js and NPX
 - Supports tsc and @babel/plugin-transform-typescript
-- Supports axios
 - Supports customization names of models
-- Supports external references using [`json-schema-ref-parser`](https://github.com/APIDevTools/json-schema-ref-parser/)
+- Supports external references using [`swagger-parser`](https://github.com/APIDevTools/swagger-parser/)
 
 ## Install
 
@@ -39,133 +38,228 @@ npm install ts-openapi-codegen --save-dev
 
 ## Usage
 
-Two ways of configuration exist.
-First, through the command line. Second, through a configuration file.
+The CLI tool supports three main commands: `generate`, `check-openapi-config`, and `init-openapi-config`.
 
-### First
+### Command: `generate`
 
+Generates TypeScript client code based on OpenAPI specifications.
+
+**Basic usage:**
+```bash
+openapi generate --input ./spec.json --output ./dist
 ```
-$ openapi --help
 
-  Usage: openapi [options]
+**All available options:**
 
-  Options:
-    -V, --version                 Output the version number
-    -i, --input <value>           OpenAPI specification, can be a path, url or string content (required)
-    -o, --output <value>          Output directory (required)
-    -oc, --outputCore <value>     Output directory for core files
-    -os, --outputServices <value> Output directory for services
-    -om, --outputModels <value>   Output directory for models
-    -osm, --outputSchemas <value> Output directory for schemas
-    -c, --httpClient <value>      HTTP client to generate [fetch, xhr, node] (default: "fetch")
-    --useOptions <value>          Use options instead of arguments (default: false)
-    --useUnionTypes <value>       Use union types instead of enums (default: false)
-    --excludeCoreServiceFiles          (default: false)
-    --includeSchemasFiles      (default: false)
-    --interfacePrefix <value>     Prefix for interface model(default: "I")
-    --enumPrefix <value>          Prefix for enum model(default: "E")
-    --typePrefix <value>          Prefix for type model(default: "T")
-    --useCancelableRequest        Use cancelled promise as returned data type in request(default: false)
-    -s, --sortByRequired          Property sorting strategy: simplified or extended
+| Option | Short | Type | Default | Description |
+|--------|-------|------|---------|-------------|
+| `--input` | `-i` | string | - | OpenAPI specification (path, URL, or string content) - **required** |
+| `--output` | `-o` | string | - | Output directory - **required** |
+| `--openapi-config` | `-ocn` | string | `openapi.config.json` | Path to configuration file |
+| `--outputCore` | `-oc` | string | `{output}` | Output directory for core files |
+| `--outputServices` | `-os` | string | `{output}` | Output directory for services |
+| `--outputModels` | `-om` | string | `{output}` | Output directory for models |
+| `--outputSchemas` | `-osm` | string | `{output}` | Output directory for schemas |
+| `--httpClient` | `-c` | string | `fetch` | HTTP client to generate: `fetch`, `xhr`, `node`, or `axios` |
+| `--useOptions` | - | boolean | `false` | Use options instead of arguments |
+| `--useUnionTypes` | - | boolean | `false` | Use union types instead of enums |
+| `--excludeCoreServiceFiles` | - | boolean | `false` | Exclude generation of core and service files |
+| `--includeSchemasFiles` | - | boolean | `false` | Enable generation of model validation schemas |
+| `--request` | - | string | - | Path to custom request file |
+| `--interfacePrefix` | - | string | `I` | Prefix for interface models |
+| `--enumPrefix` | - | string | `E` | Prefix for enum models |
+| `--typePrefix` | - | string | `T` | Prefix for type models |
+| `--useCancelableRequest` | - | boolean | `false` | Use cancelable promise as return type |
+| `--sortByRequired` | `-s` | boolean | `false` | Use extended sorting strategy for function arguments |
+| `--useSeparatedIndexes` | - | boolean | `false` | Use separate index files for core, models, schemas, and services |
+| `--logLevel` | `-l` | string | `error` | Logging level: `info`, `warn`, or `error` |
+| `--logTarget` | `-t` | string | `console` | Logging target: `console` or `file` |
 
-  Examples
-    $ openapi --input ./spec.json
-    $ openapi --input ./spec.json --output ./dist
-    $ openapi --input ./spec.json --output ./dist --client xhr
+**Examples:**
+```bash
+# Basic generation
+openapi generate --input ./spec.json --output ./dist
+
+# With custom HTTP client
+openapi generate --input ./spec.json --output ./dist --httpClient axios
+
+# With configuration file
+openapi generate --openapi-config ./my-config.json
+
+# With all options via CLI
+openapi generate \
+  --input ./spec.json \
+  --output ./dist \
+  --httpClient fetch \
+  --useOptions \
+  --useUnionTypes \
+  --includeSchemasFiles \
+  --logLevel info
 ```
-### Second
-[In package.json add new script](./example/package.json).
-You should create a file in the root of a project with the name '[openapi.config.json](./example/openapi.config.json)', where you can describe configurations for several files with openapi specification.
-## Example:
 
-**openapi.config.json**
-```json
-[{
-    "input": "./first.yml",
-    "output": "./dist",
-    "client": "xhr",
-    "excludeCoreServiceFiles": true,
-    "includeSchemasFiles": true,
-},{
-    "input": "./second.yml",
-    "output": "./dist",
-    "client": "xhr",
-    "excludeCoreServiceFiles": true,
-    "includeSchemasFiles": true,
-}]
+### Command: `check-openapi-config`
+
+Validates the configuration file structure and values.
+
+**Usage:**
+```bash
+openapi check-openapi-config
+openapi check-openapi-config --openapi-config ./custom-config.json
 ```
-or with common block
+
+**Options:**
+- `--openapi-config` / `-ocn` - Path to configuration file (default: `openapi.config.json`)
+
+### Command: `init-openapi-config`
+
+Generates a configuration file template.
+
+**Usage:**
+```bash
+# Generate single options template
+openapi init-openapi-config
+
+# Generate multi-options template
+openapi init-openapi-config --type MULTIOPTION
+
+# Custom config file name
+openapi init-openapi-config --openapi-config ./my-config.json
+```
+
+**Options:**
+- `--openapi-config` / `-ocn` - Path to output configuration file (default: `openapi.config.json`)
+- `--type` / `-t` - Template type: `OPTION` (single) or `MULTIOPTION` (multiple) (default: `OPTION`)
+
+### Configuration File
+
+Instead of passing all options via CLI, you can use a configuration file. Create `openapi.config.json` in your project root:
+
+**Single options format:**
 ```json
 {
+    "input": "./spec.json",
     "output": "./dist",
-    "client": "xhr",
-    "excludeCoreServiceFiles": true,
-    "includeSchemasFiles": true,
-    "items": [{
-        "input": "./first.yml"
-        },{
-        "input": "./second.yml"
-        }]
+    "client": "fetch",
+    "useOptions": false,
+    "useUnionTypes": false,
+    "excludeCoreServiceFiles": false,
+    "includeSchemasFiles": false,
+    "interfacePrefix": "I",
+    "enumPrefix": "E",
+    "typePrefix": "T",
+    "useCancelableRequest": false,
+    "sortByRequired": false,
+    "useSeparatedIndexes": false,
+    "request": "./custom-request.ts"
 }
 ```
 
-| Name                    | Item                    | type        | Default  | Description                                               |
-|-------------------------|-------------------------|-------------|----------|-----------------------------------------------------------|
-| output                  |                         | string      |          |The relative location of the output directory              |
-| outputCore              |                         | string      | {output} |The relative location of the output directory for core     |
-| outputServices          |                         | string      | {output} |The relative location of the output directory for services |
-| outputModels            |                         | string      | {output} |The relative location of the output directory for models   |
-| outputSchemas           |                         | string      | {output} |The relative location of the output directory for schemas  |
-| client                  |                         | string      | 'fetch'  |The selected httpClient (fetch or XHR)                     |
-| useOptions              |                         | boolean     | false    |Use options or arguments functions                         |
-| useUnionTypes           |                         | boolean     | false    |Use union types instead of enums                           |
-| excludeCoreServiceFiles |                         | boolean     | true     |                               |
-| includeSchemasFiles     |                         | boolean     | true     |                                          |
-| request                 |                         | string      |          |Path to custom request file                                |
-| interfacePrefix         |                         | string      | 'I'      |Prefix for interface model                                 |
-| enumPrefix              |                         | string      | 'E'      |Prefix for enum model                                      |
-| typePrefix              |                         | string      | 'T'      |Prefix for type model                                      |
-| useCancelableRequest    |                         | boolean     | false    |Use cancelled promise as returned data type in request     |
-| items                   |                         | array       |          |                                                           |
-|                         | input                   | string      |          |The relative location of the OpenAPI spec                  |
-|                         | output                  | string      |          |                                                           |
-|                         | outputCore              | string      |          |                                                           |
-|                         | outputServices          | string      |          |                                                           |
-|                         | outputModels            | string      |          |                                                           |
-|                         | outputSchemas           | string      |          |                                                           |
-|                         | client                  | string      |'fetch'   |The selected httpClient (fetch or XHR)                     |
-|                         | useOptions              | boolean     |false     |Use options or arguments functions                         |
-|                         | useUnionTypes           | boolean     |false     |Use union types instead of enums                           |
-|                         | excludeCoreServiceFiles | boolean     |true      |                               |
-|                         | includeSchemasFiles     | boolean     |true      |                           |
-|                         | request                 | string      |          |Path to custom request file                                |
-|                         | write                   | boolean     |true      |Write the files to disk (true or false)                    |
-|                         | interfacePrefix         | string      |          |Prefix for interface model(I)                              |
-|                         | enumPrefix              | string      |          |Prefix for enum model(E)                                   |
-|                         | typePrefix              | string      |          |Prefix for type model(T)                                   |
-|                         | useCancelableRequest    | boolean     |false     |Use cancelled promise as returned data type in request     |
+**Multi-options format (with common block):**
+```json
+{
+    "output": "./dist",
+    "client": "fetch",
+    "excludeCoreServiceFiles": true,
+    "includeSchemasFiles": true,
+    "items": [
+        {
+            "input": "./first.yml"
+        },
+        {
+            "input": "./second.yml",
+            "output": "./dist-v2"
+        }
+    ]
+}
+```
 
-## Example
+**Array format (multiple configs):**
+```json
+[
+    {
+        "input": "./first.yml",
+        "output": "./dist",
+        "client": "xhr"
+    },
+    {
+        "input": "./second.yml",
+        "output": "./dist",
+        "client": "fetch"
+    }
+]
+```
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `input` | string | - | OpenAPI specification path/URL (required for items) |
+| `output` | string | - | Output directory (required) |
+| `outputCore` | string | `{output}` | Output directory for core files |
+| `outputServices` | string | `{output}` | Output directory for services |
+| `outputModels` | string | `{output}` | Output directory for models |
+| `outputSchemas` | string | `{output}` | Output directory for schemas |
+| `client` | string | `fetch` | HTTP client: `fetch`, `xhr`, `node`, or `axios` |
+| `useOptions` | boolean | `false` | Use options instead of arguments |
+| `useUnionTypes` | boolean | `false` | Use union types instead of enums |
+| `excludeCoreServiceFiles` | boolean | `false` | Exclude core and service files generation |
+| `includeSchemasFiles` | boolean | `false` | Enable model validation schemas generation |
+| `request` | string | - | Path to custom request file |
+| `interfacePrefix` | string | `I` | Prefix for interface models |
+| `enumPrefix` | string | `E` | Prefix for enum models |
+| `typePrefix` | string | `T` | Prefix for type models |
+| `useCancelableRequest` | boolean | `false` | Use cancelable promise as return type |
+| `sortByRequired` | boolean | `false` | Extended sorting strategy for arguments |
+| `useSeparatedIndexes` | boolean | `false` | Use separate index files |
+| `items` | array | - | Array of configurations (for multi-options format) |
+
+**Note:** You can use the `init-openapi-config` command to generate a template configuration file.
+
+## Examples
+
+### Using CLI commands
+
+**Basic generation:**
+```bash
+openapi generate --input ./spec.json --output ./dist
+```
+
+**With configuration file:**
+```bash
+# First, create config file
+openapi init-openapi-config
+
+# Then generate
+openapi generate
+```
+
+**Check configuration:**
+```bash
+openapi check-openapi-config
+```
+
+### Using NPX
+
+```bash
+npx ts-openapi-codegen generate --input ./spec.json --output ./dist
+```
+
+### Using package.json scripts
 
 **package.json**
 ```json
 {
     "scripts": {
-        "generate": "openapi --input ./spec.json --output ./dist"
+        "generate": "openapi generate --input ./spec.json --output ./dist",
+        "generate:config": "openapi generate",
+        "check-config": "openapi check-openapi-config",
+        "init-config": "openapi init-openapi-config"
     }
 }
 ```
 
-**NPX**
-
-```
-npx openapi-codegen --input ./spec.json --output ./dist
-```
-
-**Node.js API**
+### Node.js API
 
 ```javascript
-const OpenAPI = require('openapi-codegen');
+const OpenAPI = require('ts-openapi-codegen');
 
 OpenAPI.generate({
     input: './spec.json',
@@ -181,6 +275,16 @@ OpenAPI.generate({
 
 
 ## Features
+
+### HTTP Clients
+
+The generator supports multiple HTTP clients:
+- **fetch** (default) - Browser Fetch API
+- **xhr** - XMLHttpRequest
+- **node** - Node.js compatible client using `node-fetch`
+- **axios** - Axios HTTP client
+
+Select the client using the `--httpClient` option or `client` property in config file.
 
 ### Argument style vs. Object style `--useOptions`
 There's no [named parameter](https://en.wikipedia.org/wiki/Named_parameter) in JavaScript or TypeScript, because of
@@ -265,7 +369,7 @@ const order: Order = {
 }
 ```
 
-### Runtime schemas `--exportSchemas`
+### Runtime schemas `--includeSchemasFiles`
 By default, the OpenAPI generator only exports interfaces for your models. These interfaces will help you during
 development, but will not be available in JavaScript during runtime. However, Swagger allows you to define properties
 that can be useful during runtime, for instance: `maxLength` of a string or a `pattern` to match, etc. Let's say
@@ -318,7 +422,7 @@ The interface does not contain any properties like `maxLength` or `pattern`. How
 if we wanted to create some form where a user could create such a model. In that form you would iterate
 over the properties to render form fields based on their type and validate the input based on the `maxLength`
 or `pattern` property. This requires us to have this information somewhere... For this we can use the
-flag `--exportSchemas` to generate a runtime model next to the normal interface:
+flag `--includeSchemasFiles` to generate a runtime model next to the normal interface:
 
 ```typescript
 export const $MyModel = {
@@ -407,7 +511,10 @@ export function request<T>(config: TOpenAPIConfig, options: ApiRequestOptions): 
 ```
 
 ### Sorting strategy for function arguments `--sortByRequired`
-By default, the OpenAPI generator sorts the parameters of service functions according to a simplified scheme. If you need a more strict sorting option, then you need to use the sortByRequired flag. The simplified sorting option is similar to the one used in version 0.2.3 of the OpenAPI generator. This flag allows you to upgrade to a new version of the generator if you are "stuck" on version 0.2.3.
+By default, the OpenAPI generator sorts the parameters of service functions according to a simplified scheme. If you need a more strict sorting option, then you need to use the `--sortByRequired` flag. The simplified sorting option is similar to the one used in version 0.2.3 of the OpenAPI generator. This flag allows you to upgrade to a new version of the generator if you are "stuck" on version 0.2.3.
+
+### Separate index files `--useSeparatedIndexes`
+By default, the generator creates a single index file that exports all generated code. With the `--useSeparatedIndexes` flag, you can generate separate index files for core, models, schemas, and services, which can help with better code organization and tree-shaking.
 
 ### Enum with custom names and descriptions
 You can use `x-enum-varnames` and `x-enum-descriptions` in your spec to generate enum with custom names and descriptions.
@@ -542,15 +649,6 @@ At start-up, an OpenAPI or Swagger file with external references will be "bundle
 so that all external references and back-references will be resolved (but local
 references preserved).
 
-### Compare to other generators
-Depending on which swagger generator you use, you will see different output.
-For instance: Different ways of generating models, services, level of quality,
-HTTP client, etc. I've compiled a list with the results per area and how they
-compare against the openapi-typescript-codegen.
-
-[Click here to see the comparison](https://htmlpreview.github.io/?https://github.com/ferdikoomen/openapi-typescript-codegen/blob/master/samples/index.html)
-
-
 FAQ
 ===
 
@@ -577,9 +675,9 @@ module.exports = {
 ### Node.js support
 By default, this library will generate a client that is compatible with the (browser based) [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API),
 however this client will not work inside the Node.js environment. If you want to generate a Node.js compatible client then
-you can specify `--client node` in the openapi call:
+you can specify `--httpClient node` in the openapi call:
 
-`openapi --input ./spec.json --output ./dist --client node`
+`openapi generate --input ./spec.json --output ./dist --httpClient node`
 
 This will generate a client that uses [`node-fetch`](https://www.npmjs.com/package/node-fetch) internally. However,
 in order to compile and run this client, you will need to install the `node-fetch` dependencies:
@@ -606,7 +704,7 @@ in your `tsconfig.json` file.
 [downloads-url]: http://npm-stat.com/charts.html?package=ts-openapi-codegen
 [downloads-image]: http://img.shields.io/npm/dm/ts-openapi-codegen.svg
 [travis-url]: https://app.travis-ci.com/github/ozonophore/openapi-codegen
-[travis-image]: https://app.travis-ci.com/ozonophore/openapi-codegen.svg?branch=master
+[travis-image]: https://app.travis-ci.com/github/ozonophore/openapi-codegen.svg?branch=master
 [coverage-url]: https://codecov.io/gh/ozonophore/openapi-codegen
 [coverage-image]: https://codecov.io/gh/ozonophore/openapi-codegen/branch/master/graph/badge.svg?token=RBPZ01BW0Y
 [typescript-url]: https://www.typescriptlang.org

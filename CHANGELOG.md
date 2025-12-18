@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.13] - 2025-12-18
+
+### Added
+- Added collection of coverage metrics during the launch of unit tests
+- Added centralized file system helpers module (`src/common/utils/fileSystemHelpers.ts`) with unified API for file operations:
+  - Promisified versions of Node.js fs functions (readFile, writeFile, copyFile, exists)
+  - Recursive directory creation (`mkdir`) and removal (`rmdir`) functions
+  - Path checking utilities (`isDirectory`, `isPathToFile`)
+- Enhanced `resolveRefToImportPath` function to handle all types of ref references to specification files:
+  - Improved handling of HTTP URLs, local fragments, external file fragments, external files, and absolute paths
+  - Better path resolution for external files and directories
+  - Enhanced support for complex reference scenarios
+
+### Changed
+- Refactored file system utilities: consolidated scattered file system operations into centralized `fileSystemHelpers` module
+- Updated all write client utilities (`writeClientCore`, `writeClientModels`, `writeClientServices`, `writeClientSchemas`, `writeClientFullIndex`, `writeClientSimpleIndex`) to use new `fileSystemHelpers` API
+- Updated `resolveRefToImportPath` to use `fileSystemHelpers.isDirectory` and `fileSystemHelpers.isPathToFile` for better path detection
+- Updated `getOpenApiSpec` and `appendUniqueLinesToFile` to use new file system helpers
+- Updated CLI utilities (`updateExistingConfigFile`, `writeExampleConfigFile`, `runInitOpenapiConfig`) to use centralized file system helpers
+- Updated all test files to use new `fileSystemHelpers` module instead of deprecated utilities
+
+### Removed
+- Removed deprecated `src/core/utils/fileSystem.ts` file (functionality moved to `fileSystemHelpers`)
+- Removed deprecated `src/core/utils/isDirectory.ts` file (functionality moved to `fileSystemHelpers`)
+
+### Fixed
+- Fixed path resolution issues in `resolveRefToImportPath` when dealing with external files and directories
+- Improved error handling in file system operations with better path normalization
+
 ## [1.0.0-beta.12] - 2025-12-16
 
 ### Added

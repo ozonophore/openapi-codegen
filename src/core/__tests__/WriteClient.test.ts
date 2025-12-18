@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import { PathOrFileDescriptor } from 'node:fs';
 import { describe, mock, test } from 'node:test';
 
+import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Client } from '../types/shared/Client.model';
-import { fileSystem } from '../utils/fileSystem';
 import { getOutputPaths } from '../utils/getOutputPaths';
 import { Templates } from '../utils/registerHandlebarTemplates';
 import { WriteClient } from '../WriteClient';
@@ -15,16 +15,15 @@ describe('@unit: writeClient', () => {
         const writeFileCalls: Array<[PathOrFileDescriptor, string | NodeJS.ArrayBufferView]> = [];
 
         // We keep the original implementations
-        const originalMkdir = fileSystem.mkdir;
-        const originalWriteFile = fileSystem.writeFile;
+        const originalMkdir = fileSystemHelpers.mkdir;
+        const originalWriteFile = fileSystemHelpers.writeFile;
 
         // Mock the functions
-        fileSystem.mkdir = mock.fn(async (path: string) => {
+        fileSystemHelpers.mkdir = mock.fn(async (path: string) => {
             mkdirCalls.push(path);
-            return path;
         });
 
-        fileSystem.writeFile = mock.fn(async (path: PathOrFileDescriptor, content: string | NodeJS.ArrayBufferView) => {
+        fileSystemHelpers.writeFile = mock.fn(async (path: PathOrFileDescriptor, content: string | NodeJS.ArrayBufferView) => {
             writeFileCalls.push([path, content]);
         });
 
@@ -77,7 +76,7 @@ describe('@unit: writeClient', () => {
         assert.ok(writeFileCalls.length > 0, 'writeFile should be called at least once');
 
         // Restoring the original implementations
-        fileSystem.mkdir = originalMkdir;
-        fileSystem.writeFile = originalWriteFile;
+        fileSystemHelpers.mkdir = originalMkdir;
+        fileSystemHelpers.writeFile = originalWriteFile;
     });
 });

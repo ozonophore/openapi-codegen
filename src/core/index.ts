@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 import { TMultiOptions, TOptions } from '../common/Options';
-import { resolveHelper } from '../common/utils/pathHelpers';
+import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { Parser as ParserV2 } from './api/v2/Parser';
 import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
@@ -8,7 +8,6 @@ import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { HttpClient } from './types/enums/HttpClient.enum';
-import { fileSystem } from './utils/fileSystem';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
@@ -150,7 +149,7 @@ export async function generate(options: TOptions | TOptions[] | TMultiOptions): 
     const optionsFinal = preparedOptions.map(op => prepareOptions(op));
 
     const writeClient = new WriteClient();
-    writeClient.logger.forceInfo(`Generation has begun. Total number of specification files: ${optionsFinal.length}`);
+    writeClient.logger.forceInfo(`${GENERATION_MESSAGES.STARTED}. Total number of specification files: ${optionsFinal.length}`);
 
     if (optionsFinal.length === 0) {
         throw new Error('No options provided for generation');
@@ -174,10 +173,11 @@ export async function generate(options: TOptions | TOptions[] | TMultiOptions): 
         } else {
             await writeClient.combineAndWrite();
         }
-        writeClient.logger.forceInfo('Generation from has been finished');
+        writeClient.logger.forceInfo(GENERATION_MESSAGES.FINISHED);
         const [seconds, nanoseconds] = process.hrtime(start);
         const durationInMs = seconds + nanoseconds / 1e6;
-        writeClient.logger.forceInfo(`Lead time: ${durationInMs.toFixed(2)} sec`);
+        writeClient.logger.forceInfo(GENERATION_MESSAGES.DURATION(durationInMs));
+        writeClient.logger.forceInfo(GENERATION_MESSAGES.FINISHED);
     } catch (error: any) {
         writeClient.logger.error(error.message);
     }
@@ -190,7 +190,7 @@ const cleanOutputDirectories = async (option: TOptions): Promise<void> => {
 
     for (const dir of outputDirs) {
         if (dir) {
-            await fileSystem.rmdir(dir);
+            await fileSystemHelpers.rmdir(dir);
         }
     }
 };

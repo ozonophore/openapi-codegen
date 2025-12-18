@@ -8,8 +8,8 @@ import { multiOptionsVersionedSchema } from '../../VersionedSchema/MultiOptionsV
 import { migrateDataToLatestSchemaVersion } from '../../VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import { mockJoiSchema } from './__mock__/mockJoiSchema';
 
-describe('@unit: migrationForMultiOptions', () => {
-    test.skip('must successfully migrate MULTI_OPTIONS data to the latest version', async () => {
+describe.skip('@unit: migrationForMultiOptions', () => {
+    test('must successfully migrate MULTI_OPTIONS data to the latest version', async () => {
         const input = { input: 'input/path', output: 'output/path', client: 'fetch', items: [{ input: 'path/item1' }] };
         const result = migrateDataToLatestSchemaVersion({
             rawInput: input,
@@ -42,7 +42,7 @@ describe('@unit: migrationForMultiOptions', () => {
         });
     });
 
-    test.skip('should return null in case of validation error of the last MULTI_OPTIONS scheme', async () => {
+    test('should return null in case of validation error of the last MULTI_OPTIONS scheme', async () => {
         const input = { input: 'input/path' };
         const result = migrateDataToLatestSchemaVersion({
             rawInput: input,
@@ -54,7 +54,7 @@ describe('@unit: migrationForMultiOptions', () => {
         assert.equal(result, null);
     });
 
-    test.skip('should throw an error if the migration plan for MULTI_OPTIONS is not found.', async () => {
+    test('should throw an error if the migration plan for MULTI_OPTIONS is not found.', async () => {
         const input = { input: 'input/path', output: 'output/path', client: 'fetch', items: [{ input: 'path/item1' }] };
 
         assert.throws(
@@ -69,7 +69,7 @@ describe('@unit: migrationForMultiOptions', () => {
         );
     });
 
-    test.skip('should throw an error on unrecognized fields in MULTI_OPTIONS', async () => {
+    test('should throw an error on unrecognized fields in MULTI_OPTIONS', async () => {
         const input = {
             input: 'input/path',
             output: 'output/path',
@@ -89,7 +89,7 @@ describe('@unit: migrationForMultiOptions', () => {
         );
     });
 
-    test.skip('must process an empty array of MULTI_OPTIONS data', async () => {
+    test('must process an empty array of MULTI_OPTIONS data', async () => {
         const schemas = [
             {
                 schema: mockJoiSchema(['name'], true, [], true),

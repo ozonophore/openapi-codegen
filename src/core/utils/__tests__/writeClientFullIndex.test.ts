@@ -2,8 +2,8 @@ import assert from 'node:assert';
 import { PathOrFileDescriptor } from 'node:fs';
 import { describe, test } from 'node:test';
 
+import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 import { WriteClient } from '../../WriteClient';
-import { fileSystem } from '../fileSystem';
 import { Templates } from '../registerHandlebarTemplates';
 
 describe('@unit: writeClientFullIndex', () => {
@@ -11,8 +11,8 @@ describe('@unit: writeClientFullIndex', () => {
         const writeFileCalls: Array<[PathOrFileDescriptor, string | NodeJS.ArrayBufferView]> = [];
 
         // Re-assigning the function manually with a mock
-        const originalWriteFile = fileSystem.writeFile;
-        fileSystem.writeFile = async (path: PathOrFileDescriptor, content: string | NodeJS.ArrayBufferView) => {
+        const originalWriteFile = fileSystemHelpers.writeFile;
+        fileSystemHelpers.writeFile = async (path: PathOrFileDescriptor, content: string | NodeJS.ArrayBufferView) => {
             writeFileCalls.push([path, content]);
         };
 
@@ -50,6 +50,6 @@ describe('@unit: writeClientFullIndex', () => {
         );
 
         // Restoring the original function
-        fileSystem.writeFile = originalWriteFile;
+        fileSystemHelpers.writeFile = originalWriteFile;
     });
 });

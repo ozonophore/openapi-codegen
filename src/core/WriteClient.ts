@@ -1,5 +1,6 @@
 import { ELogLevel, ELogOutput } from '../common/Enums';
 import { Logger } from '../common/Logger';
+import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
 import { ClientArtifacts } from './types/base/ClientArtifacts.model';
 import { ExportedModel } from './types/base/ExportedModel.model';
@@ -8,7 +9,6 @@ import { OutputPaths } from './types/base/OutputPaths.model';
 import { SimpleClientArtifacts } from './types/base/SimpleClientArtifacts.model';
 import { HttpClient } from './types/enums/HttpClient.enum';
 import type { Client } from './types/shared/Client.model';
-import { fileSystem } from './utils/fileSystem';
 import { prepareAlias } from './utils/prepareAlias';
 import { Templates } from './utils/registerHandlebarTemplates';
 import { sortModelByName } from './utils/sortModelByName';
@@ -97,7 +97,7 @@ export class WriteClient {
         } = options;
 
         if (!excludeCoreServiceFiles) {
-            await fileSystem.mkdir(outputPaths.outputCore);
+            await fileSystemHelpers.mkdir(outputPaths.outputCore);
             await this.writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest });
             await this.writeClientCoreIndex({
                 templates,
@@ -107,7 +107,7 @@ export class WriteClient {
             });
 
             const { outputCore, outputServices, outputModels } = outputPaths;
-            await fileSystem.mkdir(outputPaths.outputServices);
+            await fileSystemHelpers.mkdir(outputPaths.outputServices);
             await this.writeClientServices({
                 services: client.services,
                 templates,
@@ -130,7 +130,7 @@ export class WriteClient {
         }
 
         if (includeSchemasFiles) {
-            await fileSystem.mkdir(outputPaths.outputSchemas);
+            await fileSystemHelpers.mkdir(outputPaths.outputSchemas);
             await this.writeClientSchemas({
                 models: client.models,
                 templates,
@@ -146,7 +146,7 @@ export class WriteClient {
             });
         }
 
-        await fileSystem.mkdir(outputPaths.outputModels);
+        await fileSystemHelpers.mkdir(outputPaths.outputModels);
         await this.writeClientModels({
             models: client.models,
             templates,
@@ -161,7 +161,7 @@ export class WriteClient {
             useSeparatedIndexes,
         });
 
-        await fileSystem.mkdir(outputPaths.output);
+        await fileSystemHelpers.mkdir(outputPaths.output);
         this.buildClientGeneratorConfigMap({
             client,
             templates,
