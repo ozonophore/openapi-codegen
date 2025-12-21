@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getServer } from '../getServer';
 
-describe('getServer', () => {
-    test('@unit: should produce correct result', () => {
+describe('@unit: getServer', () => {
+    test('should produce correct result', () => {
         assert.strictEqual(
             getServer({
                 openapi: '3.0',
@@ -23,7 +23,7 @@ describe('getServer', () => {
         );
     });
 
-    test('@unit: should produce correct result with variables', () => {
+    test('should produce correct result with variables', () => {
         assert.strictEqual(
             getServer({
                 openapi: '3.0',

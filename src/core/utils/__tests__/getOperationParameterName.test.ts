@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getOperationParameterName } from '../getOperationParameterName';
 
-describe('getOperationParameterName', () => {
-    test('@unit: should produce correct result', () => {
+describe('@unit: getOperationParameterName', () => {
+    test('should produce correct result', () => {
         assert.strictEqual(getOperationParameterName(''), '');
         assert.strictEqual(getOperationParameterName('foobar'), 'foobar');
         assert.strictEqual(getOperationParameterName('fooBar'), 'fooBar');

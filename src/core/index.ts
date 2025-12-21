@@ -132,6 +132,10 @@ async function generateFrom(
     }
 }
 
+/**
+ * @throws {Error} If options validation fails or generation encounters an error
+ * @returns {Promise<void>}
+ */
 export async function generate(options: TOptions | TOptions[] | TMultiOptions): Promise<void> {
     let preparedOptions: TOptions[] = [];
     if (Array.isArray(options)) {
@@ -148,37 +152,29 @@ export async function generate(options: TOptions | TOptions[] | TMultiOptions): 
     const writeClient = new WriteClient();
     writeClient.logger.forceInfo(`Generation has begun. Total number of specification files: ${optionsFinal.length}`);
 
+    if (optionsFinal.length === 0) {
+        throw new Error('No options provided for generation');
+    }
+
     try {
         const start = process.hrtime();
         for (const option of optionsFinal) {
-            if (option.output) {
-                await fileSystem.rmdir(option.output);
-            }
-            if (option.outputCore) {
-                await fileSystem.rmdir(option.outputCore);
-            }
-            if (option.outputSchemas) {
-                await fileSystem.rmdir(option.outputSchemas);
-            }
-            if (option.outputModels) {
-                await fileSystem.rmdir(option.outputModels);
-            }
-            if (option.outputServices) {
-                await fileSystem.rmdir(option.outputServices);
-            }
+            await cleanOutputDirectories(option);
         }
 
         for (const option of optionsFinal) {
+            const fileStart = process.hrtime();
             await generateFrom(option, writeClient);
-            writeClient.logger.info(`Generation from "${option.input}" was finished`);
-            writeClient.logger.info(`Output folder: ${resolveHelper(process.cwd(), option.output)}`, true);
+            const [fileSeconds, fileNanoseconds] = process.hrtime(fileStart);
+            const fileDuration = fileSeconds + fileNanoseconds / 1e6;
+            writeClient.logger.info(`Duration for "${option.input}": ${fileDuration.toFixed(2)} sec`);
         }
         if (optionsFinal[0]?.useSeparatedIndexes) {
             await writeClient.combineAndWrightSimple();
         } else {
             await writeClient.combineAndWrite();
         }
-        writeClient.logger.forceInfo("Generation from has been finished");
+        writeClient.logger.forceInfo('Generation from has been finished');
         const [seconds, nanoseconds] = process.hrtime(start);
         const durationInMs = seconds + nanoseconds / 1e6;
         writeClient.logger.forceInfo(`Lead time: ${durationInMs.toFixed(2)} sec`);
@@ -188,3 +184,20 @@ export async function generate(options: TOptions | TOptions[] | TMultiOptions): 
 
     writeClient.logger.shutdownLogger();
 }
+
+const cleanOutputDirectories = async (option: TOptions): Promise<void> => {
+    const outputDirs = [option.output, option.outputCore, option.outputSchemas, option.outputModels, option.outputServices];
+
+    for (const dir of outputDirs) {
+        if (dir) {
+            await fileSystem.rmdir(dir);
+        }
+    }
+};
+
+const GENERATION_MESSAGES = {
+    STARTED: 'Generation has begun',
+    FINISHED: 'Generation from has been finished',
+    FILE_FINISHED: (input: string) => `Generation from "${input}" was finished`,
+    DURATION: (ms: number) => `Lead time: ${ms.toFixed(2)} sec`,
+} as const;

@@ -6,8 +6,8 @@ import * as Handlebars from 'handlebars/runtime';
 import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { registerHandlebarHelpers } from '../registerHandlebarHelpers';
 
-describe('registerHandlebarHelpers', () => {
-    test('@unit: should register the helpers', () => {
+describe('@unit: registerHandlebarHelpers', () => {
+    test('should register the helpers', () => {
         registerHandlebarHelpers({
             httpClient: HttpClient.FETCH,
             useOptions: false,

@@ -4,8 +4,8 @@ import { describe, test } from 'node:test';
 import { createOperationParameter } from '../__mocks__/createOperationParameter';
 import { sortByRequiredSimple } from '../sortByRequiredSimple';
 
-describe('sortByRequiredSimple', () => {
-    test('@unit: must put required parameters without default before optional ones.', () => {
+describe('@unit: sortByRequiredSimple', () => {
+    test('must put required parameters without default before optional ones.', () => {
         const a = createOperationParameter('required', { isRequired: true });
         const b = createOperationParameter('optional', { isRequired: false });
 
@@ -13,21 +13,21 @@ describe('sortByRequiredSimple', () => {
         assert.strictEqual(sortByRequiredSimple(b, a), 1);
     });
 
-    test('@unit: it must consider two required parameters equal without default', () => {
+    test('it must consider two required parameters equal without default', () => {
         const a = createOperationParameter('A', { isRequired: true });
         const b = createOperationParameter('B', { isRequired: true });
 
         assert.strictEqual(sortByRequiredSimple(a, b), 0);
     });
 
-    test('@unit: It must consider two optional parameters equal.', () => {
+    test('It must consider two optional parameters equal.', () => {
         const a = createOperationParameter('A', { isRequired: false });
         const b = createOperationParameter('B', { isRequired: false });
 
         assert.strictEqual(sortByRequiredSimple(a, b), 0);
     });
 
-    test('@unit: must place the required ones without default before the required ones with default', () => {
+    test('must place the required ones without default before the required ones with default', () => {
         const a = createOperationParameter('required', { isRequired: true });
         const b = createOperationParameter('required-with-default', { isRequired: true, default: 'test' });
 
@@ -35,14 +35,14 @@ describe('sortByRequiredSimple', () => {
         assert.strictEqual(sortByRequiredSimple(b, a), 1);
     });
 
-    test('@unit: it must consider two required parameters with default equal.', () => {
+    test('it must consider two required parameters with default equal.', () => {
         const a = createOperationParameter('A', { isRequired: true, default: 'a' });
         const b = createOperationParameter('B', { isRequired: true, default: 'b' });
 
         assert.strictEqual(sortByRequiredSimple(a, b), 0);
     });
 
-    test('@unit: must place the required ones without default before the optional ones with default', () => {
+    test('must place the required ones without default before the optional ones with default', () => {
         const a = createOperationParameter('required', { isRequired: true });
         const b = createOperationParameter('optional-with-default', { isRequired: false, default: 'test' });
 
@@ -50,14 +50,14 @@ describe('sortByRequiredSimple', () => {
         assert.strictEqual(sortByRequiredSimple(b, a), 1);
     });
 
-    test('@unit: it must consider two optional parameters with default equal.', () => {
+    test('it must consider two optional parameters with default equal.', () => {
         const a = createOperationParameter('A', { isRequired: false, default: 'a' });
         const b = createOperationParameter('B', { isRequired: false, default: 'b' });
 
         assert.strictEqual(sortByRequiredSimple(a, b), 0);
     });
 
-    test('@unit: it should consider mandatory with default and optional without default to be equal', () => {
+    test('it should consider mandatory with default and optional without default to be equal', () => {
         const a = createOperationParameter('required-with-default', { isRequired: true, default: 'test' });
         const b = createOperationParameter('optional', { isRequired: false });
 
@@ -65,14 +65,14 @@ describe('sortByRequiredSimple', () => {
         assert.strictEqual(sortByRequiredSimple(b, a), 0);
     });
 
-    test('@unit: it must work correctly with undefined values.', () => {
+    test('it must work correctly with undefined values.', () => {
         const a = createOperationParameter('required', { isRequired: true });
         const b = createOperationParameter('required-with-default', { isRequired: true, default: undefined });
 
         assert.strictEqual(sortByRequiredSimple(a, b), 0);
     });
 
-    test('@unit: should sort params', () => {
+    test('should sort params', () => {
         const optionalParameter = createOperationParameter('optional', { description: '3. Optional parameter with no default value', isRequired: false });
         const optionalParameterWithDefault = createOperationParameter('optional-with-default', {
             description: '4. An optional parameter with a default value',

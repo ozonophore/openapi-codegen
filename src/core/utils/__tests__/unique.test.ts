@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { unique } from '../unique';
 
-describe('unique', () => {
-    test('@unit: should return correct index', () => {
+describe('@unit: unique', () => {
+    test('should return correct index', () => {
         assert.equal(unique('a', 0, ['a', 'b', 'c']), true);
         assert.equal(unique('a', 1, ['a', 'b', 'c']), false);
         assert.equal(unique('a', 2, ['a', 'b', 'c']), false);

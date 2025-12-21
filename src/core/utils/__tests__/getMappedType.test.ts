@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getMappedType } from '../getMappedType';
 
-describe('getMappedType', () => {
-    test('@unit: should map types to the basics', () => {
+describe('@unit: getMappedType', () => {
+    test('should map types to the basics', () => {
         assert.strictEqual(getMappedType('File'), 'File');
         assert.strictEqual(getMappedType('file'), 'File');
         assert.strictEqual(getMappedType('string'), 'string');

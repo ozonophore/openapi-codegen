@@ -78,8 +78,8 @@ export class Logger {
         this._logger.level = level;
     }
 
-    public error(message: string) {
-        this._logger.error(`Error: ${message}`);
+    public error(message: string, error?: any) {
+        this._logger.error(`Error: ${message}`, error);
         process.exit(1);
     }
 

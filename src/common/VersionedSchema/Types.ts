@@ -16,3 +16,10 @@ export type SchemaMigrationPlan<From, To> = {
 
 // A universal function for traversing the structure of an object with result typing
 export type TraverseHandler<T> = (value: any, recurse: (v: any) => void, result: T) => boolean;
+
+
+export type VersionMatchResult = {
+    lastVersionIndex: number;
+    latestVersion: string;
+    firstVersion: string;
+};

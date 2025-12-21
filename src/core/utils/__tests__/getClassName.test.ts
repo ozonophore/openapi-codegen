@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getClassName } from '../getClassName';
 
-describe('getModelNames', () => {
-    test('@unit: should retur classname', () => {
+describe('@unit: getModelNames', () => {
+    test('should retur classname', () => {
         const path = 'path1/path2/file';
         assert.strictEqual(getClassName(path), 'Path1Path2File');
     });

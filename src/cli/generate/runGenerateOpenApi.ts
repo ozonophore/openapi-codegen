@@ -1,8 +1,8 @@
 import { OptionValues } from 'commander';
 
+import { APP_LOGGER } from '../../common/Consts';
 import { defaultOptions } from '../../common/defaultOptions';
-import { ELogLevel, ELogOutput } from '../../common/Enums';
-import { Logger } from '../../common/Logger';
+import { EMigrationMode } from '../../common/Enums';
 import { TMultiOptions, TOptions } from '../../common/Options';
 import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
@@ -15,16 +15,11 @@ import * as OpenAPI from '../../core';
 import { isInstanceOfMultioptions } from '../../core/utils/isInstanceOfMultiOptions';
 
 /**
- * The function starts code generation.
- * @param options Options for starting generation.
+ * Запускает генерацию OpenAPI клиента
+ * Поддерживает как конфиг-файл, так и параметры из CLI
  */
-export async function runGenerateOpenApi(options: OptionValues) {
+export async function runGenerateOpenApi(options: OptionValues): Promise<void> {
     const { openapiConfig, ...clientOptions } = options;
-    const logger = new Logger({
-        level: ELogLevel.INFO,
-        instanceId: 'openapi-cli',
-        logOutput: ELogOutput.CONSOLE,
-    });
 
     try {
         const hasMinimumRequiredOptions = !!clientOptions.input && !!clientOptions.output;
@@ -39,7 +34,7 @@ export async function runGenerateOpenApi(options: OptionValues) {
 
         const configData = loadConfigIfExists(openapiConfig);
         if (!configData) {
-            logger.error('The configuration file is missing');
+            APP_LOGGER.error('The configuration file is missing');
         }
 
         const preparedOptions = convertArrayToObject(configData);
@@ -51,15 +46,17 @@ export async function runGenerateOpenApi(options: OptionValues) {
                   rawInput: preparedOptions,
                   migrationPlans: multiOptionsMigrationPlan,
                   versionedSchemas: multiOptionsVersionedSchema,
+                  migrationMode: EMigrationMode.GENERATE_OPENAPI,
               })
             : migrateDataToLatestSchemaVersion({
                   rawInput: preparedOptions,
                   migrationPlans: optionsMigrationPlans,
                   versionedSchemas: optionsVersionedSchemas,
+                  migrationMode:EMigrationMode.GENERATE_OPENAPI,
               });
 
         if (!migratedOptions) {
-            logger.error("Couldn't convert the set of options to the current version");
+            APP_LOGGER.error("Couldn't convert the set of options to the current version");
         } else {
             const { value } = migratedOptions;
 
@@ -71,6 +68,6 @@ export async function runGenerateOpenApi(options: OptionValues) {
         }
         process.exit(0);
     } catch (error: any) {
-        logger.error(error.message);
+        APP_LOGGER.error(error.message);
     }
 }

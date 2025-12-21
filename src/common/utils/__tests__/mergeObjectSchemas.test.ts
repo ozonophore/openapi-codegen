@@ -3,11 +3,11 @@ import { describe, test } from 'node:test';
 
 import Joi from 'joi';
 
-import {optionsSchemaV2} from '../VersionedSchema/OptionsVersioned/OptionsSchemaV2';
-import {mergeObjectSchemas} from '../VersionedSchema/Utils/mergeObjectSchemas';
+import {optionsSchemaV2} from '../../VersionedSchema/OptionsVersioned/OptionsSchemaV2';
+import {mergeObjectSchemas} from '../../VersionedSchema/Utils/mergeObjectSchemas';
 
-describe('mergeObjectSchemas', () => {
-    test('@unit: should combine multiple schemas correctly', () => {
+describe('@unit: mergeObjectSchemas', () => {
+    test('should combine multiple schemas correctly', () => {
         const schema1 = Joi.object({ a: Joi.string().required() });
         const schema2 = Joi.object({ b: Joi.number().optional() });
         const mergedSchema = mergeObjectSchemas(schema1, schema2);
@@ -19,7 +19,7 @@ describe('mergeObjectSchemas', () => {
         assert.notEqual(mergedSchema.validate(invalidData).error, null, 'Invalid data should fail validation');
     });
 
-    test('@unit: should work with real schemas from OptionSchemas', () => {
+    test('should work with real schemas from OptionSchemas', () => {
         const validData = {
             input: 'source/path',
             httpClient: 'axios',

@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { stripNamespace } from '../stripNamespace';
 
-describe('stripNamespace', () => {
-    test('@unit: should strip namespace', () => {
+describe('@unit: stripNamespace', () => {
+    test('should strip namespace', () => {
         assert.strictEqual(stripNamespace('package/componentClass.yml#/components/TestComponent'), 'package/TestComponent');
         assert.strictEqual(stripNamespace('package/componentClass.yml'), 'package/ComponentClass');
         assert.strictEqual(stripNamespace('#/components/schemas/Item'), 'Item');

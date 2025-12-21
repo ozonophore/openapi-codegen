@@ -4,8 +4,8 @@ import { describe, test } from 'node:test';
 import type { Model } from '../../types/shared/Model.model';
 import { sortModelsByName } from '../sortModelsByName';
 
-describe('sortModelsByName', () => {
-    test('@unit: should return sorted list', () => {
+describe('@unit: sortModelsByName', () => {
+    test('should return sorted list', () => {
         const john: Model = {
             alias: '',
             path: '',

@@ -1,10 +1,10 @@
+import { format } from '../../common/utils/format';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { OutputPaths } from '../types/base/OutputPaths.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Service } from '../types/shared/Service.model';
 import { WriteClient } from '../WriteClient';
 import { fileSystem } from './fileSystem';
-import { format } from './format';
 import { Templates } from './registerHandlebarTemplates';
 
 type TServeceOutputsPath = Omit<OutputPaths, 'output' | 'outputSchemas'>;

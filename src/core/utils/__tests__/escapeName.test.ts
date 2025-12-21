@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { escapeName } from '../escapeName';
 
-describe('escapeName', () => {
-    test('@unit: should escape', () => {
+describe('@unit: escapeName', () => {
+    test('should escape', () => {
         assert.strictEqual(escapeName(''), '');
         assert.strictEqual(escapeName('fooBar'), 'fooBar');
         assert.strictEqual(escapeName('Foo Bar'), `'Foo Bar'`);

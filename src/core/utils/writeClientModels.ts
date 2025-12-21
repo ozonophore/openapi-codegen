@@ -1,11 +1,11 @@
 import { mkdirSync } from 'fs';
 
+import { format } from '../../common/utils/format';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Model } from '../types/shared/Model.model';
 import { WriteClient } from '../WriteClient';
 import { fileSystem } from './fileSystem';
-import { format } from './format';
 import { Templates } from './registerHandlebarTemplates';
 
 /**

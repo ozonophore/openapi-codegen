@@ -2,9 +2,7 @@ import { OptionValues } from 'commander';
 import * as Handlebars from 'handlebars/runtime';
 import { format } from 'prettier';
 
-import { DEFAULT_OPENAPI_CONFIG_FILENAME } from '../../common/Consts';
-import { ELogLevel, ELogOutput } from '../../common/Enums';
-import { Logger } from '../../common/Logger';
+import { APP_LOGGER, DEFAULT_OPENAPI_CONFIG_FILENAME } from '../../common/Consts';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { fileSystem } from '../../core/utils/fileSystem';
@@ -15,12 +13,6 @@ import { TInitOpenApiConfigParams } from './Types';
 
 export async function runInitOpenapiConfig(params: OptionValues) {
     const {openapiConfig, type: optionType} = params as TInitOpenApiConfigParams
-    
-    const logger = new Logger({
-        level: ELogLevel.INFO,
-        instanceId: 'init-openapi-config',
-        logOutput: ELogOutput.CONSOLE,
-    });
 
     try {
         const configData = loadConfigIfExists(openapiConfig);
@@ -31,12 +23,12 @@ export async function runInitOpenapiConfig(params: OptionValues) {
             const templateResult = configTemplate({ useMultyOptions: optionType === EOptionType.MULTIOPTION });
             const formattedValue = await format(templateResult, { parser: 'json' });
             await fileSystem.writeFile(file, formattedValue);
-            logger.info(`File recording completed: ${file}`);
+            APP_LOGGER.info(`File recording completed: ${file}`);
         } else {
             const fileName = getFileName(openapiConfig);
-            logger.info(`The configuration file already exists: ${fileName}`);
+            APP_LOGGER.info(`The configuration file already exists: ${fileName}`);
         }
     } catch (error: any) {
-        logger.error(error.message);
+        APP_LOGGER.error(error.message);
     }
 }

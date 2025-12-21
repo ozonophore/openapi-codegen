@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 
 import { getOperationPath } from '../getOperationPath';
 
-describe('getOperationPath', () => {
-    test('@unit: should produce correct result', () => {
+describe('@unit: getOperationPath', () => {
+    test('should produce correct result', () => {
         assert.strictEqual(getOperationPath('/api/v{api-version}/list/{id}/{type}'), '/api/v{api-version}/list/${id}/${type}');
         assert.strictEqual(getOperationPath('/api/v{api-version}/list/{id}'), '/api/v{api-version}/list/${id}');
         assert.strictEqual(getOperationPath('/api/v1/list/{id}'), '/api/v1/list/${id}');

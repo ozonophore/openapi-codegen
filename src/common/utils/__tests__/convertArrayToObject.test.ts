@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 
-import { convertArrayToObject } from 'common/utils/convertArrayToObject';
+import { convertArrayToObject } from '../convertArrayToObject';
 
-describe('convertArrayToObject', () => {
-    test('@unit: Empty array', () => {
+describe('@unit: convertArrayToObject', () => {
+    test('Empty array', () => {
         const input: any[] = [];
         const result = convertArrayToObject(input);
         const expected = {
@@ -18,7 +18,7 @@ describe('convertArrayToObject', () => {
         assert.deepStrictEqual(result, expected);
     });
 
-    test('@unit: An array with one element', () => {
+    test('An array with one element', () => {
         const input = [
             {
                 input: 'url1',
@@ -57,7 +57,7 @@ describe('convertArrayToObject', () => {
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
     });
-    test('@unit: Multiple elements with the same outer margins', () => {
+    test('Multiple elements with the same outer margins', () => {
         const input = [
             { input: 'url1', output: 'res1', exportCore: true, request: 'req1', useOptions: true },
             { input: 'url2', output: 'res2', exportCore: true, request: 'req1', useOptions: true },
@@ -100,7 +100,7 @@ describe('convertArrayToObject', () => {
         assert.deepStrictEqual(result, expected);
     });
 
-    test('@unit: Multiple elements with different external margins', () => {
+    test('Multiple elements with different external margins', () => {
         const input = [
             { input: 'url1', output: 'res1', exportCore: true, request: 'req1', useOptions: true },
             { input: 'url2', output: 'res2', exportCore: false, request: 'req2', useOptions: false },
@@ -143,7 +143,7 @@ describe('convertArrayToObject', () => {
         assert.deepStrictEqual(result, expected);
     });
 
-    test('@unit: No optional fields', () => {
+    test('No optional fields', () => {
         const input = [
             { input: 'url1', output: 'res1' },
             { input: 'url2', output: 'res2' },
@@ -186,7 +186,7 @@ describe('convertArrayToObject', () => {
         assert.deepStrictEqual(result, expected);
     });
 
-    test('@unit: Mixed presence of optional fields', () => {
+    test('Mixed presence of optional fields', () => {
         const input = [
             { input: 'url1', output: 'res1', exportCore: true },
             { input: 'url2', output: 'res2', request: 'req2' },

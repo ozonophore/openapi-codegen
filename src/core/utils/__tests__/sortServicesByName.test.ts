@@ -4,8 +4,8 @@ import { describe, test } from 'node:test';
 import { Service } from '../../types/shared/Service.model';
 import { sortServicesByName } from '../sortServicesByName';
 
-describe('sortServicesByName', () => {
-    test('@unit: should return sorted list', () => {
+describe('@unit: sortServicesByName', () => {
+    test('should return sorted list', () => {
         const john: Service = {
             name: 'John',
             originName: 'JohnService',
