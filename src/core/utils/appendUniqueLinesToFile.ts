@@ -1,11 +1,11 @@
-import { fileSystem } from "./fileSystem";
+import { fileSystemHelpers } from "../../common/utils/fileSystemHelpers";
 
 export async function appendUniqueLinesToFile(filePath: string, data: string) {
     try {
         let existingContent = '';
-        const fileExists = await fileSystem.exists(filePath);
+        const fileExists = await fileSystemHelpers.exists(filePath);
         if (fileExists) {
-            existingContent = await fileSystem.readFile(filePath, "utf8");
+            existingContent = await fileSystemHelpers.readFile(filePath, "utf8");
         }
 
         const existingLines = existingContent.split(/\r?\n/).filter(Boolean);
@@ -16,7 +16,7 @@ export async function appendUniqueLinesToFile(filePath: string, data: string) {
         }
 
         const updatedContent = existingContent + linesToAdd.join('\n') + '\n';
-        await fileSystem.writeFile(filePath, updatedContent);
+        await fileSystemHelpers.writeFile(filePath, updatedContent);
     } catch (error: any) {
         throw new Error(`Error when writing to a file: ${error?.message}`);
     }

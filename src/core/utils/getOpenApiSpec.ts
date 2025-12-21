@@ -1,10 +1,10 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 
+import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { Context } from '../Context';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 import { OpenApiReference } from '../types/shared/OpenApiReference.model';
-import { fileSystem } from './fileSystem';
 import { normalizeAllRefs } from './normalizeAllRefs';
 
 /**
@@ -19,7 +19,7 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
     if (!input) {
         throw new Error(`Could not find OpenApi spec: "${absoluteInput}"`);
     }
-    const fileExists = await fileSystem.exists(absoluteInput);
+    const fileExists = await fileSystemHelpers.exists(absoluteInput);
     if (!fileExists) {
         throw new Error(`Could not read OpenApi spec: "${absoluteInput}"`);
     }

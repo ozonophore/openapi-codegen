@@ -1,8 +1,8 @@
 import fs from 'fs';
 
 import { APP_LOGGER } from '../../../common/Consts';
+import { fileSystemHelpers } from "../../../common/utils/fileSystemHelpers";
 import { resolveHelper } from "../../../common/utils/pathHelpers";
-import { fileSystem } from "../../../core/utils/fileSystem";
 
 /**
  * Обновляет существующий файл конфигурации
@@ -15,6 +15,6 @@ export async function updateExistingConfigFile(configPath: string, data: string)
         throw new Error(`Configuration file not found at "${configPath}"`);
     }
 
-    await fileSystem.writeFile(configFilePath, data);
+    await fileSystemHelpers.writeFile(configFilePath, data);
     APP_LOGGER.forceInfo(`Configuration file "${configPath}" has been updated`);
 }

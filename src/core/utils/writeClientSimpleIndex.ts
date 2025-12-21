@@ -1,7 +1,7 @@
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { SimpleClientArtifacts } from '../types/base/SimpleClientArtifacts.model';
 import { WriteClient } from '../WriteClient';
-import { fileSystem } from './fileSystem';
+import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 
 /**
  * Generate the OpenAPI client index file using the Handlebar template and write it to disk.
@@ -14,7 +14,7 @@ export async function writeClientSimpleIndex(this: WriteClient, options: SimpleC
 
     this.logger.info(`The recording of the file data begins: ${resolvePathIndex}`);
 
-    await fileSystem.writeFile(
+    await fileSystemHelpers.writeFile(
         resolvePathIndex,
         templates.indexes.simple({
             core,

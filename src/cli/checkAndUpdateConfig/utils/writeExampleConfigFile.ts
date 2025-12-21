@@ -1,5 +1,5 @@
 import { APP_LOGGER } from "../../../common/Consts";
-import { fileSystem } from "../../../core/utils/fileSystem";
+import { fileSystemHelpers } from "../../../common/utils/fileSystemHelpers";
 
 /**
  * Создает файл с примером конфигурации
@@ -11,7 +11,7 @@ export async function writeExampleConfigFile(configPath: string, data: string): 
     const exampleFileName = `example-config-${fileName}`;
     const examplePath = [...pathParts, exampleFileName].join('/');
 
-    await fileSystem.writeFile(examplePath, data);
+    await fileSystemHelpers.writeFile(examplePath, data);
     APP_LOGGER.forceInfo(
         `Example configuration generated and written to: ${examplePath}\n` +
         `You can use it as a template for your actual configuration.`

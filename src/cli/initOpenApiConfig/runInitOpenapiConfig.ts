@@ -3,9 +3,9 @@ import * as Handlebars from 'handlebars/runtime';
 import { format } from 'prettier';
 
 import { APP_LOGGER, DEFAULT_OPENAPI_CONFIG_FILENAME } from '../../common/Consts';
+import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { resolveHelper } from '../../common/utils/pathHelpers';
-import { fileSystem } from '../../core/utils/fileSystem';
 import { getFileName } from '../../core/utils/getFileName';
 import openApiCongigTemplate from '../../templatesCompiled/cli/openApiConfig';
 import { EOptionType } from './Enums';
@@ -22,7 +22,7 @@ export async function runInitOpenapiConfig(params: OptionValues) {
             const configTemplate = Handlebars.template(openApiCongigTemplate);
             const templateResult = configTemplate({ useMultyOptions: optionType === EOptionType.MULTIOPTION });
             const formattedValue = await format(templateResult, { parser: 'json' });
-            await fileSystem.writeFile(file, formattedValue);
+            await fileSystemHelpers.writeFile(file, formattedValue);
             APP_LOGGER.info(`File recording completed: ${file}`);
         } else {
             const fileName = getFileName(openapiConfig);

@@ -1,11 +1,11 @@
 import { mkdirSync } from 'fs';
 
+import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Model } from '../types/shared/Model.model';
 import { WriteClient } from '../WriteClient';
-import { fileSystem } from './fileSystem';
 import { Templates } from './registerHandlebarTemplates';
 
 /**
@@ -56,7 +56,7 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
             useUnionTypes,
         });
         const formattedValue = await format(templateResult);
-        await fileSystem.writeFile(file, formattedValue);
+        await fileSystemHelpers.writeFile(file, formattedValue);
 
         this.logger.info(`File recording completed: ${file}`);
     }

@@ -7,8 +7,8 @@ import { optionsMigrationPlans } from '../../VersionedSchema/OptionsVersioned/Op
 import { optionsVersionedSchemas } from '../../VersionedSchema/OptionsVersioned/OptionsVersionedSchemas';
 import { migrateDataToLatestSchemaVersion } from '../../VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 
-describe('@unit: migrationForOptions', () => {
-    test.skip('must migrate data to the latest schema version', async () => {
+describe.skip('@unit: migrationForOptions', () => {
+    test('must migrate data to the latest schema version', async () => {
         const input = { input: 'input/path', output: 'output/path', client: 'fetch' };
         const result = migrateDataToLatestSchemaVersion({
             rawInput: input,
@@ -32,7 +32,7 @@ describe('@unit: migrationForOptions', () => {
         });
     });
 
-    test.skip('should return null if the validation error occurred for the last schema.', async () => {
+    test('should return null if the validation error occurred for the last schema.', async () => {
         const input = { input: 'input/path' };
         const result = migrateDataToLatestSchemaVersion({
             rawInput: input,
@@ -43,7 +43,7 @@ describe('@unit: migrationForOptions', () => {
         assert.equal(result, null);
     });
 
-    test.skip('It should throw an error if the migration plan is not found.', async () => {
+    test('It should throw an error if the migration plan is not found.', async () => {
         const input = { input: 'input/path', output: 'output/path', client: 'fetch' };
         assert.throws(
             () =>

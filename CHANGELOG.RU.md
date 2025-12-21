@@ -4,6 +4,35 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [1.0.0-beta.13] - 2025-12-18
+
+### Добавлено
+- Добавлен сбор метрик покрытия кода (coverage) во время запуска unit тестов
+- Добавлен централизованный модуль утилит файловой системы (`src/common/utils/fileSystemHelpers.ts`) с унифицированным API для файловых операций:
+  - Промисфицированные версии функций Node.js fs (readFile, writeFile, copyFile, exists)
+  - Функции рекурсивного создания (`mkdir`) и удаления (`rmdir`) директорий
+  - Утилиты проверки путей (`isDirectory`, `isPathToFile`)
+- Улучшена функция `resolveRefToImportPath` для обработки всех типов ref ссылок на файлы спецификации:
+  - Улучшена обработка HTTP URL, локальных фрагментов, фрагментов внешних файлов, внешних файлов и абсолютных путей
+  - Улучшено разрешение путей для внешних файлов и директорий
+  - Расширена поддержка сложных сценариев ссылок
+
+### Изменено
+- Рефакторинг утилит файловой системы: объединены разрозненные операции файловой системы в централизованный модуль `fileSystemHelpers`
+- Обновлены все утилиты записи клиента (`writeClientCore`, `writeClientModels`, `writeClientServices`, `writeClientSchemas`, `writeClientFullIndex`, `writeClientSimpleIndex`) для использования нового API `fileSystemHelpers`
+- Обновлена функция `resolveRefToImportPath` для использования `fileSystemHelpers.isDirectory` и `fileSystemHelpers.isPathToFile` для лучшего определения путей
+- Обновлены `getOpenApiSpec` и `appendUniqueLinesToFile` для использования новых утилит файловой системы
+- Обновлены CLI утилиты (`updateExistingConfigFile`, `writeExampleConfigFile`, `runInitOpenapiConfig`) для использования централизованных утилит файловой системы
+- Обновлены все тестовые файлы для использования нового модуля `fileSystemHelpers` вместо устаревших утилит
+
+### Удалено
+- Удалён устаревший файл `src/core/utils/fileSystem.ts` (функциональность перенесена в `fileSystemHelpers`)
+- Удалён устаревший файл `src/core/utils/isDirectory.ts` (функциональность перенесена в `fileSystemHelpers`)
+
+### Исправлено
+- Исправлены проблемы с разрешением путей в `resolveRefToImportPath` при работе с внешними файлами и директориями
+- Улучшена обработка ошибок в файловых операциях с лучшей нормализацией путей
+
 ## [1.0.0-beta.12] - 2025-12-16
 
 ### Добавлено
