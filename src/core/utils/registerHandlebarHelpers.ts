@@ -1,6 +1,6 @@
-import { REGEX_BACKSLASH, REGEX_DOT_SLASH, REGEX_LEADING_DOT_SLASH, REGEX_MULTIPLE_SLASHES, REGEX_TRAILING_SLASH } from 'core/types/Consts';
 import * as Handlebars from 'handlebars/runtime';
 
+import { REGEX_BACKSLASH, REGEX_DOT_SLASH, REGEX_LEADING_DOT_SLASH, REGEX_MULTIPLE_SLASHES, REGEX_TRAILING_SLASH } from '../types/Consts';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { Enum } from '../types/shared/Enum.model';
 import { Model } from '../types/shared/Model.model';

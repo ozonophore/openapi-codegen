@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.14] - 2025-12-23
+
+### Added
+- Added helper `getModelNameWithPrefix` to centralize generation of model names with interface/enum/type prefixes.
+- Added `normalizeString` utility and integrated it into Handlebars helpers registration to normalize model and schema names in templates.
+- Added CLI executable header (`#!/usr/bin/env node`) to the main entrypoint so the generator can be invoked directly as a shell command.
+
+### Changed
+- Updated OpenAPI v2/v3 parsers (`Parser`, `getModels`, `getType`) and core exports (`Context`, `index`) to use the new model naming and path calculation utilities.
+- Adjusted `getRelativeModelPath` to work with the updated naming rules and to better align model, schema and import paths across different platforms.
+- Updated CLI bootstrap in `src/core/index.ts` to call `program.exitOverride()` so CLI exits are correctly propagated to external tooling.
+- Updated `package.json` to expose the `openapi-codegen-cli` binary, publish type declarations from `dist/index.d.ts`, and ship the `example/` directory as part of the package.
+
+### Fixed
+- Fixed generation of relative import paths for models and their schemas in complex nesting and cross-file reference scenarios for both OpenAPI v2 and v3.
+- Synchronized v2/v3 snapshot tests for models and schemas with the corrected model names and import paths.
+
+### Removed
+- Removed deprecated `getRelativeModelImportPath` utility and its unit tests.
+- Removed legacy ambient typings for `mkdirp` and `rimraf`; remaining custom typings were consolidated under the `types/` directory.
+
 ## [1.0.0-beta.13] - 2025-12-18
 
 ### Added

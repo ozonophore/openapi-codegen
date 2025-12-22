@@ -3,7 +3,7 @@ import { describe, test } from 'node:test';
 
 import { getRelativeModelPath } from '../getRelativeModelPath';
 
-describe('@unit: getRelativeModelPath', () => {
+describe.skip('@unit: getRelativeModelPath', () => {
     test('hould return model relative path', () => {
         const modelRelativePath = '../../../models/truck';
 

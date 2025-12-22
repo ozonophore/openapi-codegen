@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export const ModelWithDictionarySchema = {
+export const IModelWithDictionarySchema = {
     properties: {
         prop: {
             type: 'dictionary',

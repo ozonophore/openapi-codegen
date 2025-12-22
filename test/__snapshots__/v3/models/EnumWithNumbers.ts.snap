@@ -5,7 +5,7 @@
 /**
  * This is a simple enum with numbers
  */
-export enum EnumWithNumbers {
+export enum EEnumWithNumbers {
     '_1' = 1,
     '_2' = 2,
     '_3' = 3,

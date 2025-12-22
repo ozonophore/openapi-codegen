@@ -2,10 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './../models/./ModelWithString';
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import type { IModelWithString } from '../models/ModelWithString';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const callWithDefaultParameters = (
     parameterString: string | null = 'Hello World!',

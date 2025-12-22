@@ -2,9 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const types = (
     parameterArray: Array<string>,
@@ -29,7 +29,7 @@ const types = (
     },
 });
 
-export type TTypesServiceOptions = {
+export type TTypesOptions = {
     types: (
         parameterArray: Array<string>,
         parameterDictionary: Record<string, string>,
@@ -46,7 +46,7 @@ export type TTypesServiceOptions = {
     ) => ApiRequestOptions;
 };
 
-export const TypesServiceOptions: TTypesServiceOptions = {
+export const TypesOptions: TTypesOptions = {
     types: types,
 };
 
@@ -77,7 +77,7 @@ export class TypesService {
         id?: number,
     ): Promise<number | string | boolean | any> {
         return __request<number | string | boolean | any>(
-            TypesServiceOptions.types(
+            TypesOptions.types(
                 parameterArray,
                 parameterDictionary,
                 parameterEnum,

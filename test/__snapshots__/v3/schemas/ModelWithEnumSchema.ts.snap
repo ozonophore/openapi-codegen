@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export const ModelWithEnumSchema = {
+export const IModelWithEnumSchema = {
     properties: {
         test: {
             type: 'Enum',

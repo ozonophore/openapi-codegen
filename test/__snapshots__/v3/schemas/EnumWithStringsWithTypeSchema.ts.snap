@@ -2,6 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export const EnumWithStringsWithTypeSchema = {
+export const EEnumWithStringsWithTypeSchema = {
     type: 'Enum',
 };

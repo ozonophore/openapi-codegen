@@ -2,12 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { EEnumWithNumbers } from './../models/./EnumWithNumbers';
-import type { EEnumWithStrings } from './../models/./EnumWithStrings';
-import type { EEnumWithStringsWithType } from './../models/./EnumWithStringsWithType';
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import type { EEnumWithNumbers } from '../models/EnumWithNumbers';
+import type { EEnumWithStrings } from '../models/EnumWithStrings';
+import type { EEnumWithStringsWithType } from '../models/EnumWithStringsWithType';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const callWithEnums = (requestBody?: {
     enumWithNumbers?: EEnumWithNumbers;

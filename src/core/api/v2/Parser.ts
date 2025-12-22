@@ -1,4 +1,5 @@
 import { Context } from '../../Context';
+import { getModelNameWithPrefix } from '../../utils/getModelNameWithPrefix';
 import { getModel } from '../v2/parser/getModel';
 import { getModelComposition } from './parser/getModelComposition';
 import { getModelProperties } from './parser/getModelProperties';
@@ -26,13 +27,8 @@ export class Parser {
     public getTypeNameByRef(value: string, ref?: string): string {
         if (ref) {
             const definition: any = this.context.get(ref);
-            if (definition.oneOf || definition.anyOf || definition.allOf || ['string', 'number', 'integer', 'boolean', 'array'].includes(definition.type)) {
-                return `${this.context.prefix.type}${value}`;
-            } else if (definition.enum && definition !== 'boolean') {
-                return `${this.context.prefix.enum}${value}`;
-            } else if (definition.type === 'object') {
-                return `${this.context.prefix.interface}${value}`;
-            }
+            
+            return getModelNameWithPrefix(value, definition, this._context.prefix);
         }
         return value;
     }

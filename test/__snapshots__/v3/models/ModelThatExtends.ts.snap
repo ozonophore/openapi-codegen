@@ -2,12 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ModelWithString } from './ModelWithString';
+import type { IModelWithString } from './ModelWithString';
 
 /**
  * This is a model that extends another model
  */
-export type ModelThatExtends = ModelWithString & {
+export type TModelThatExtends = IModelWithString & {
     propExtendsA?: string;
-    propExtendsB?: ModelWithString;
+    propExtendsB?: IModelWithString;
 };

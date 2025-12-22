@@ -2,10 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './../models/./ModelWithString';
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import type { IModelWithString } from '../models/ModelWithString';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const complexTypes = (
     parameterObject: {
@@ -29,7 +29,7 @@ const complexTypes = (
     },
 });
 
-export type TComplexServiceOptions = {
+export type TComplexOptions = {
     complexTypes: (
         parameterObject: {
             first?: {
@@ -42,7 +42,7 @@ export type TComplexServiceOptions = {
     ) => ApiRequestOptions;
 };
 
-export const ComplexServiceOptions: TComplexServiceOptions = {
+export const ComplexOptions: TComplexOptions = {
     complexTypes: complexTypes,
 };
 
@@ -64,7 +64,7 @@ export class ComplexService {
         parameterReference: IModelWithString,
     ): Promise<Array<IModelWithString>> {
         return __request<Array<IModelWithString>>(
-            ComplexServiceOptions.complexTypes(parameterObject, parameterReference),
+            ComplexOptions.complexTypes(parameterObject, parameterReference),
             OpenAPI,
         );
     }

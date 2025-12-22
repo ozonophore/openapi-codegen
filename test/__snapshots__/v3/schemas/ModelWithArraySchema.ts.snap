@@ -2,12 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export const ModelWithArraySchema = {
+export const IModelWithArraySchema = {
     properties: {
         prop: {
             type: 'array',
             contains: {
-                type: 'ModelWithString',
+                type: 'IModelWithString',
             },
         },
         propWithFile: {

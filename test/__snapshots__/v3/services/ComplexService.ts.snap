@@ -2,13 +2,13 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithArray } from './../models/./ModelWithArray';
-import type { IModelWithDictionary } from './../models/./ModelWithDictionary';
-import type { IModelWithEnum } from './../models/./ModelWithEnum';
-import type { IModelWithString } from './../models/./ModelWithString';
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import type { IModelWithArray } from '../models/ModelWithArray';
+import type { IModelWithDictionary } from '../models/ModelWithDictionary';
+import type { IModelWithEnum } from '../models/ModelWithEnum';
+import type { IModelWithString } from '../models/ModelWithString';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const complexTypes = (
     parameterObject: {

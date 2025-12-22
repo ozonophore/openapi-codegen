@@ -5,7 +5,7 @@
 /**
  * This is a simple enum with strings and type
  */
-export enum EnumWithStringsWithType {
+export enum EEnumWithStringsWithType {
     VALUE1 = 'VALUE1',
     VALUE2 = 'VALUE2',
 }

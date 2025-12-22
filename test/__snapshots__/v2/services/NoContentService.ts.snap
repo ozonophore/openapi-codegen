@@ -2,20 +2,20 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const callWithNoContentResponse = (): ApiRequestOptions => ({
     method: 'GET',
     path: `/api/v{api-version}/no-content`,
 });
 
-export type TNoContentServiceOptions = {
+export type TNoContentOptions = {
     callWithNoContentResponse: () => ApiRequestOptions;
 };
 
-export const NoContentServiceOptions: TNoContentServiceOptions = {
+export const NoContentOptions: TNoContentOptions = {
     callWithNoContentResponse: callWithNoContentResponse,
 };
 
@@ -25,6 +25,6 @@ export class NoContentService {
      * @throws ApiError
      */
     public static callWithNoContentResponse(): Promise<void> {
-        return __request<void>(NoContentServiceOptions.callWithNoContentResponse(), OpenAPI);
+        return __request<void>(NoContentOptions.callWithNoContentResponse(), OpenAPI);
     }
 }

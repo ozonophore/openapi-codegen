@@ -2,9 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
     method: 'GET',

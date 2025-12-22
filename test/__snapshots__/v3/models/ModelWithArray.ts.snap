@@ -2,13 +2,13 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ModelWithString } from './ModelWithString';
+import type { IModelWithString } from './ModelWithString';
 
 /**
  * This is a model with one property containing an array
  */
-export interface ModelWithArray {
-    prop?: Array<ModelWithString>;
+export interface IModelWithArray {
+    prop?: Array<IModelWithString>;
     propWithFile?: Array<Blob>;
     propWithNumber?: Array<number>;
 }

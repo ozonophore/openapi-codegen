@@ -2,9 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export const DictionaryWithReferenceSchema = {
+export const IDictionaryWithReferenceSchema = {
     type: 'dictionary',
     contains: {
-        type: 'ModelWithString',
+        type: 'IModelWithString',
     },
 };

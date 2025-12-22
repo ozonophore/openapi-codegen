@@ -1,8 +1,6 @@
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { getTypeName } from './getTypeName';
 import { isInsideDirectory } from './isInsideDirectory';
-import { replaceString } from './replaceString';
-import { stripNamespace } from './stripNamespace';
 
 /**
  * The function calculates the relative path to the model.
@@ -37,7 +35,5 @@ export function getRelativeModelPath(folderPath: string | undefined, relativeMod
         mappedPaths = modelPath;
     }
 
-    const normalizedValue = replaceString(mappedPaths);
-    mappedPaths = stripNamespace(normalizedValue || '');
     return mappedPaths;
 }

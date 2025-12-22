@@ -2,18 +2,34 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type { DictionaryWithReference } from '././models/DictionaryWithReference';
-export type { ModelThatExtends } from '././models/ModelThatExtends';
-export type { ModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
-export type { ModelWithArray } from '././models/ModelWithArray';
-export type { ModelWithDictionary } from '././models/ModelWithDictionary';
-export { ModelWithEnumInteger } from '././models/ModelWithEnumInteger';
-export type { ModelWithString } from '././models/ModelWithString';
+export { ApiError } from '././core/ApiError';
+export { OpenAPI } from '././core/OpenAPI';
+export type { TOpenAPIConfig } from '././core/OpenAPI';
 
-export { DictionaryWithReferenceSchema } from '././schemas/DictionaryWithReferenceSchema';
-export { ModelThatExtendsSchema } from '././schemas/ModelThatExtendsSchema';
-export { ModelThatExtendsExtendsSchema } from '././schemas/ModelThatExtendsExtendsSchema';
-export { ModelWithArraySchema } from '././schemas/ModelWithArraySchema';
-export { ModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
-export { ModelWithEnumIntegerSchema } from '././schemas/ModelWithEnumIntegerSchema';
-export { ModelWithStringSchema } from '././schemas/ModelWithStringSchema';
+export type { IDictionaryWithReference } from '././models/DictionaryWithReference';
+export type { IModelWithArray } from '././models/ModelWithArray';
+export type { IModelWithDictionary } from '././models/ModelWithDictionary';
+export { IModelWithEnumInteger } from '././models/ModelWithEnumInteger';
+export type { IModelWithString } from '././models/ModelWithString';
+export type { TModelThatExtends } from '././models/ModelThatExtends';
+export type { TModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
+
+export { IDictionaryWithReferenceSchema } from '././schemas/DictionaryWithReferenceSchema';
+export { IModelWithArraySchema } from '././schemas/ModelWithArraySchema';
+export { IModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
+export { IModelWithEnumIntegerSchema } from '././schemas/ModelWithEnumIntegerSchema';
+export { IModelWithStringSchema } from '././schemas/ModelWithStringSchema';
+export { TModelThatExtendsSchema } from '././schemas/ModelThatExtendsSchema';
+export { TModelThatExtendsExtendsSchema } from '././schemas/ModelThatExtendsExtendsSchema';
+
+export { V2Service } from '././services/V2Service';
+export { SimpleService } from '././services/SimpleService';
+export { ParametersService } from '././services/ParametersService';
+export { DefaultsService } from '././services/DefaultsService';
+export { DuplicateService } from '././services/DuplicateService';
+export { NoContentService } from '././services/NoContentService';
+export { ResponseService } from '././services/ResponseService';
+export { CollectionFormatService } from '././services/CollectionFormatService';
+export { TypesService } from '././services/TypesService';
+export { ComplexService } from '././services/ComplexService';
+export { HeaderService } from '././services/HeaderService';

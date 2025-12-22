@@ -4,7 +4,7 @@ import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import { dirNameHelper } from '../common/utils/pathHelpers';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
-import { $Root} from './types/base/Root.model';
+import { $Root } from './types/base/Root.model';
 import { getFileName } from './utils/getFileName';
 import { isString } from './utils/isString';
 
@@ -13,7 +13,7 @@ type TContextProps = {
     output: OutputPaths;
     prefix?: PrefixArtifacts;
     sortByRequired?: boolean;
-}
+};
 
 type RefsLike = {
     values: (...args: any[]) => Record<string, any>;
@@ -41,9 +41,9 @@ export class Context {
         this._output = output;
         this._refs = {} as RefsLike;
         if (isString(input)) {
-            this._root = { path: dirNameHelper(input), fileName: getFileName(input) };
+            this._root = { dirName: dirNameHelper(input), path: input, fileName: getFileName(input) };
         } else {
-            this._root = { path: '' };
+            this._root = { dirName: '', path: '' };
         }
         if (prefix) {
             this.prefix = prefix;

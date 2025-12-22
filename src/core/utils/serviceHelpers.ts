@@ -1,3 +1,4 @@
+import { safeHasOwn } from '../../common/utils/safeHasOwn';
 import type { Import } from '../types/shared/Import.model';
 import type { Model } from '../types/shared/Model.model';
 import type { Service } from '../types/shared/Service.model';
@@ -13,7 +14,7 @@ const SUPPORTED_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'p
  */
 export function forEachOperationInPath(pathObj: Record<string, any>, cb: (method: string, op: any) => void): void {
     for (const method in pathObj) {
-        if (!Object.prototype.hasOwnProperty.call(pathObj, method)) continue;
+        if (!safeHasOwn(pathObj, method)) continue;
         if (SUPPORTED_METHODS.includes(method as any) && pathObj[method]) {
             cb(method, pathObj[method]);
         }
