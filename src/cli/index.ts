@@ -20,7 +20,10 @@ const APP_NAME = packageDetails.name || 'ts-openapi-codegen-cli';
 const APP_VERSION = packageDetails.version || '1.0.0';
 const APP_DESCRIPTION = packageDetails.description || 'Description';
 
-const updateNotifier = new UpdateNotifier(APP_NAME, APP_VERSION);
+const updateNotifier = new UpdateNotifier({
+    packageName: APP_NAME,
+    packageVersion: APP_VERSION,
+});
 
 const program = new Command();
 
@@ -55,8 +58,8 @@ program
     .addOption(new Option('-t, --logTarget <target>', 'Target of logging').choices([...Object.values(ELogOutput)]).default(ELogOutput.CONSOLE))
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
     .option('--useSeparatedIndexes', 'Use separate index files for the core, models, schemas, and services.')
-    .hook('preAction', () => {
-        updateNotifier.checkAndNotify();
+    .hook('preAction', async () => {
+        await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
         await runGenerateOpenApi(options);
@@ -70,8 +73,8 @@ program
     .description('Checks if the configuration file data is filled in correctly')
     .addHelpText('before', getCLIName(APP_NAME))
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
-    .hook('preAction', () => {
-        updateNotifier.checkAndNotify();
+    .hook('preAction', async () => {
+        await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
         await checkConfig(options.openapiConfig);
@@ -85,8 +88,8 @@ program
     .description('Updates the configuration file to the latest version')
     .addHelpText('before', getCLIName(APP_NAME))
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
-    .hook('preAction', () => {
-        updateNotifier.checkAndNotify();
+    .hook('preAction', async () => {
+        await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
         await updateConfig(options.openapiConfig);
@@ -101,12 +104,10 @@ program
     .addHelpText('before', getCLIName(APP_NAME))
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
     .addOption(
-        new Option('-t, --type <type>', 'A variant of the set of options for running the client generator (default: "OPTION")')
-            .choices([...Object.values(EOptionType)])
-            .default(EOptionType.OPTION)
+        new Option('-t, --type <type>', 'A variant of the set of options for running the client generator (default: "OPTION")').choices([...Object.values(EOptionType)]).default(EOptionType.OPTION)
     )
-    .hook('preAction', () => {
-        updateNotifier.checkAndNotify();
+    .hook('preAction', async () => {
+        await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
         await runInitOpenapiConfig(options);

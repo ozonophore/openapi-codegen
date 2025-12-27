@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2025-12-27
+
+### Changed
+- Improved `UpdateNotifier.checkAndNotify()` method with better caching logic: now checks cached update info first before performing network requests, providing faster response times for subsequent runs.
+- Enhanced error handling in CLI: improved parsing error handling for unknown command options with proper error logging.
+- Updated all CLI commands to use async `checkAndNotify()` method instead of synchronous version for better reliability and non-blocking behavior.
+- Refactored logger lifecycle management: removed `shutdownLogger()` call from `UpdateNotifier` - logger lifecycle is now managed at application level for better control.
+
+### Deprecated
+- `UpdateNotifier.checkAndNotifySync()` method is now deprecated. Use `checkAndNotify()` instead.
+
+### Fixed
+- Fixed update notification caching to prevent duplicate notifications and properly clear cache after showing updates.
+- Improved error handling in update check process to prevent failures from breaking the main CLI workflow.
+
 ## [1.0.0-beta.14] - 2025-12-23
 
 ### Added
