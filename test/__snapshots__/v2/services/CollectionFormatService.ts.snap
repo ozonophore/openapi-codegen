@@ -2,9 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const collectionFormat = (
     parameterArrayCsv: Array<string>,
@@ -24,7 +24,7 @@ const collectionFormat = (
     },
 });
 
-export type TCollectionFormatServiceOptions = {
+export type TCollectionFormatOptions = {
     collectionFormat: (
         parameterArrayCsv: Array<string>,
         parameterArraySsv: Array<string>,
@@ -34,7 +34,7 @@ export type TCollectionFormatServiceOptions = {
     ) => ApiRequestOptions;
 };
 
-export const CollectionFormatServiceOptions: TCollectionFormatServiceOptions = {
+export const CollectionFormatOptions: TCollectionFormatOptions = {
     collectionFormat: collectionFormat,
 };
 
@@ -55,7 +55,7 @@ export class CollectionFormatService {
         parameterArrayMulti: Array<string>,
     ): Promise<void> {
         return __request<void>(
-            CollectionFormatServiceOptions.collectionFormat(
+            CollectionFormatOptions.collectionFormat(
                 parameterArrayCsv,
                 parameterArraySsv,
                 parameterArrayTsv,

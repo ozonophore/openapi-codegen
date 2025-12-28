@@ -1,0 +1,76 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IDictionaryWithReference } from '../models/DictionaryWithReference';
+import type { IModelWithArray } from '../models/ModelWithArray';
+import type { IModelWithDictionary } from '../models/ModelWithDictionary';
+import type { IModelWithEnumInteger } from '../models/ModelWithEnumInteger';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
+
+const getCallWithModelWithDictionaryReference = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/getModelWithDictionaryReference`,
+});
+
+const getCallWithModelWithDictionary = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/getModelWithDictionary`,
+});
+
+const getCallWithSimpleInteger = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/simpleEnum`,
+});
+
+const getCallWithModelArray = (): ApiRequestOptions => ({
+    method: 'GET',
+    path: `/api/v{api-version}/getModelWithArray`,
+});
+
+export type TV2Options = {
+    getCallWithModelWithDictionaryReference: () => ApiRequestOptions;
+    getCallWithModelWithDictionary: () => ApiRequestOptions;
+    getCallWithSimpleInteger: () => ApiRequestOptions;
+    getCallWithModelArray: () => ApiRequestOptions;
+};
+
+export const V2Options: TV2Options = {
+    getCallWithModelWithDictionaryReference: getCallWithModelWithDictionaryReference,
+    getCallWithModelWithDictionary: getCallWithModelWithDictionary,
+    getCallWithSimpleInteger: getCallWithSimpleInteger,
+    getCallWithModelArray: getCallWithModelArray,
+};
+
+export class V2Service {
+    /**
+     * @returns IDictionaryWithReference Message for default response
+     * @throws ApiError
+     */
+    public static getCallWithModelWithDictionaryReference(): Promise<IDictionaryWithReference> {
+        return __request<IDictionaryWithReference>(V2Options.getCallWithModelWithDictionaryReference(), OpenAPI);
+    }
+    /**
+     * @returns IModelWithDictionary Message for default response
+     * @throws ApiError
+     */
+    public static getCallWithModelWithDictionary(): Promise<IModelWithDictionary> {
+        return __request<IModelWithDictionary>(V2Options.getCallWithModelWithDictionary(), OpenAPI);
+    }
+    /**
+     * @returns IModelWithEnumInteger Message for default response
+     * @throws ApiError
+     */
+    public static getCallWithSimpleInteger(): Promise<IModelWithEnumInteger> {
+        return __request<IModelWithEnumInteger>(V2Options.getCallWithSimpleInteger(), OpenAPI);
+    }
+    /**
+     * @returns IModelWithArray Message for default response
+     * @throws ApiError
+     */
+    public static getCallWithModelArray(): Promise<IModelWithArray> {
+        return __request<IModelWithArray>(V2Options.getCallWithModelArray(), OpenAPI);
+    }
+}

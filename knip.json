@@ -1,0 +1,26 @@
+{
+    "$schema": "https://unpkg.com/knip@5/schema.json",
+    "entry": ["src/core/*.ts", "src/common/*.ts", "src/cli/*.ts"],
+    "ignoreExportsUsedInFile": {
+        "interface": true,
+        "type": true
+    },
+    "ignore": ["src/cli/interactive/**", "src/core/utils/isFileName.ts", "src/templates/**", "test/custom/**", "test/e2e/assets/**", "tools/jestSetup.ts"],
+    "ignoreDependencies": [
+        "@babel/cli",
+        "@types/axios",
+        "@types/node-fetch",
+        "@types/qs",
+        "@types/winston",
+        "abort-controller",
+        "axios",
+        "eslint-config-prettier",
+        "eslint-plugin-lodash",
+        "eslint-plugin-prettier",
+        "form-data",
+        "node-fetch",
+        "qs",
+        "ts-prune"
+    ],
+    "tags": ["-lintignore"]
+}

@@ -109,7 +109,8 @@ export function getOperationParameter(this: Parser, openApi: OpenApi, parameter:
 
     if (parameter.schema) {
         if (parameter.schema.$ref) {
-            const model = this.getType(parameter.schema.$ref, '');
+            const normalizedRef = normalizeRef(parameter.schema.$ref, parentRef);
+            const model = this.getType(parameter.schema.$ref, normalizedRef);
             operationParameter.export = 'reference';
             operationParameter.type = model.type;
             operationParameter.base = model.base;

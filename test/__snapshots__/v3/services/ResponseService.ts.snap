@@ -2,12 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { TModelThatExtendsExtends } from './../models/./ModelThatExtendsExtends';
-import type { TModelThatExtends } from './../models/./ModelThatExtends';
-import type { IModelWithString } from './../models/./ModelWithString';
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import type { TModelThatExtendsExtends } from '../models/ModelThatExtendsExtends';
+import type { TModelThatExtends } from '../models/ModelThatExtends';
+import type { IModelWithString } from '../models/ModelWithString';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const callWithResponse = (): ApiRequestOptions => ({
     method: 'GET',

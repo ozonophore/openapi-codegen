@@ -5,7 +5,7 @@
 /**
  * This is a simple enum with strings
  */
-export enum EnumWithStrings {
+export enum EEnumWithStrings {
     SUCCESS = 'Success',
     WARNING = 'Warning',
     ERROR = 'Error',

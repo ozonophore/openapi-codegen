@@ -1,4 +1,5 @@
 import type { Model } from '../../../types/shared/Model.model';
+import { getModelNameWithPrefix } from '../../../utils/getModelNameWithPrefix';
 import { getRefFromSchema } from '../../../utils/getRefFromSchema';
 import { resolveModelImports, setDuplicateModelAliases } from '../../../utils/modelHelpers';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
@@ -17,7 +18,7 @@ export function getModels(this: Parser, openApi: OpenApi): Model[] {
                 openApi: openApi,
                 definition: definition,
                 isDefinition: true,
-                name: definitionType.base,
+                name: getModelNameWithPrefix(definitionType.base, definition, this.context.prefix),
                 path: definitionType.path,
                 parentRef: modelRef,
             });

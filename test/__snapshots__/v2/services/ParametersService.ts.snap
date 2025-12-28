@@ -2,9 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const callWithParameters = (
     parameterHeader: string,
@@ -46,6 +46,9 @@ const callWithWeirdParameterNames = (
 
     parameterPath3?: string,
 
+    /**
+     * [WARN] Be careful! A reserved system word is used!
+     */
     _default?: string,
 ): ApiRequestOptions => ({
     method: 'GET',
@@ -63,7 +66,7 @@ const callWithWeirdParameterNames = (
     body: parameterBody,
 });
 
-export type TParametersServiceOptions = {
+export type TParametersOptions = {
     callWithParameters: (
         parameterHeader: string,
 
@@ -90,11 +93,14 @@ export type TParametersServiceOptions = {
 
         parameterPath3?: string,
 
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
         _default?: string,
     ) => ApiRequestOptions;
 };
 
-export const ParametersServiceOptions: TParametersServiceOptions = {
+export const ParametersOptions: TParametersOptions = {
     callWithParameters: callWithParameters,
     callWithWeirdParameterNames: callWithWeirdParameterNames,
 };
@@ -120,7 +126,7 @@ export class ParametersService {
         parameterPath: string,
     ): Promise<void> {
         return __request<void>(
-            ParametersServiceOptions.callWithParameters(
+            ParametersOptions.callWithParameters(
                 parameterHeader,
                 parameterQuery,
                 parameterForm,
@@ -156,10 +162,13 @@ export class ParametersService {
 
         parameterPath3?: string,
 
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
         _default?: string,
     ): Promise<void> {
         return __request<void>(
-            ParametersServiceOptions.callWithWeirdParameterNames(
+            ParametersOptions.callWithWeirdParameterNames(
                 parameterHeader,
                 parameterQuery,
                 parameterForm,

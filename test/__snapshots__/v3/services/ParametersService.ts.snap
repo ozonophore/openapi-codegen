@@ -2,10 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './../models/./ModelWithString';
-import { request as __request } from './../core/request';
-import type { ApiRequestOptions } from './../core/ApiRequestOptions';
-import { OpenAPI } from './../core/OpenAPI';
+import type { IModelWithString } from '../models/ModelWithString';
+import { request as __request } from '../core/request';
+import type { ApiRequestOptions } from '../core/ApiRequestOptions';
+import { OpenAPI } from '../core/OpenAPI';
 
 const callWithParameters = (
     parameterHeader: string | null,
@@ -55,6 +55,9 @@ const callWithWeirdParameterNames = (
 
     parameterPath3?: string,
 
+    /**
+     * [WARN] Be careful! A reserved system word is used!
+     */
     _default?: string,
 ): ApiRequestOptions => ({
     method: 'GET',
@@ -135,6 +138,9 @@ export type TParametersOptions = {
 
         parameterPath3?: string,
 
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
         _default?: string,
     ) => ApiRequestOptions;
     getCallWithOptionalParam: (
@@ -220,6 +226,9 @@ export class ParametersService {
 
         parameterPath3?: string,
 
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
         _default?: string,
     ): Promise<void> {
         return __request<void>(

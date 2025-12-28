@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 import { TMultiOptions, TOptions } from '../common/Options';
 import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
+import { resolveHelper } from '../common/utils/pathHelpers';
 import { Parser as ParserV2 } from './api/v2/Parser';
 import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
@@ -76,7 +77,8 @@ async function generateFrom(
         outputSchemas,
     });
 
-    const context = new Context({ input, output: outputPaths, prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix }, sortByRequired });
+    const absoluteInput = isString(input) ? resolveHelper(process.cwd(), input) : input;
+    const context = new Context({ input: absoluteInput, output: outputPaths, prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix }, sortByRequired });
     const openApi = isString(input) ? await getOpenApiSpec(context, input) : input;
     const openApiVersion = getOpenApiVersion(openApi);
     const templates = registerHandlebarTemplates({

@@ -1,6 +1,6 @@
 {
     "name": "ts-openapi-codegen",
-    "version": "1.0.0-beta.13",
+    "version": "1.0.0-beta.14",
     "description": "Library that generates Typescript clients based on the OpenAPI specification. It bases on openapi-typescript-codegen",
     "author": "Alexey Zverev",
     "homepage": "https://github.com/ozonophore/openapi-codegen.git",
@@ -35,15 +35,18 @@
     ],
     "main": "dist/index.js",
     "module": "dist/index.js",
-    "types": "types/index.d.ts",
+    "types": "dist/index.d.ts",
     "bin": {
-        "ts-openapi-codegen-cli": "bin/index.js"
+        "openapi-codegen-cli": "dist/cli/index.js"
+    },
+    "directories": {
+        "example": "example"
     },
     "files": [
         "dist"
     ],
     "scripts": {
-        "clean": "rimraf ./dist ./generated ./test/generated ./test/e2e/generated ./samples/generated ./coverage ./node_modules/.cache",
+        "clean": "shx rm -rf ./dist ./generated ./test/generated ./test/e2e/generated ./samples/generated ./coverage ./node_modules/.cache",
         "build": "tsc -p .",
         "build:hbs": "tsx ./src/core/utils/precompileTemplates.ts",
         "release": "npm run build:hbs && npm run build",
@@ -57,11 +60,10 @@
         "prettier:fix": "prettier \"./src/**/*.ts\" \"./types/index.d.ts\" --write",
         "prepublish": "npm run clean && npm run release",
         "codecov": "codecov --token=89a9fe76-2714-4b5b-83e3-9d809615064d",
-        "find-deadcode": "ts-prune -e"
+        "find-deadcode": "knip"
     },
     "dependencies": {
         "@apidevtools/swagger-parser": "12.0.0",
-        "@inquirer/prompts": "^8.0.2",
         "boxen": "^5.1.2",
         "camelcase": "6.2.0",
         "chalk": "^4.1.2",
@@ -74,8 +76,6 @@
         "joi": "^17.13.3",
         "json-schema": "0.4.0",
         "leven": "^4.0.0",
-        "mkdirp": "1.0.4",
-        "rimraf": "3.0.2",
         "semver": "^7.7.1",
         "winston": "^3.17.0",
         "winston-daily-rotate-file": "^5.0.0"
@@ -94,7 +94,7 @@
         "@types/figlet": "^1.5.8",
         "@types/glob": "^8.1.0",
         "@types/json-schema": "^7.0.15",
-        "@types/node": "22.5.1",
+        "@types/node": "^22.5.1",
         "@types/node-fetch": "2.5.12",
         "@types/prettier": "3.0.0",
         "@types/qs": "6.9.7",
@@ -115,13 +115,15 @@
         "form-data": "4.0.0",
         "glob": "7.1.7",
         "globals": "^16.2.0",
+        "knip": "^5.77.1",
         "node-fetch": "2.6.1",
         "prettier": "^3.4.2",
         "puppeteer": "10.1.0",
         "qs": "6.10.1",
+        "shx": "^0.4.0",
         "ts-prune": "^0.10.3",
         "tsx": "^4.20.3",
-        "typescript": "5.8.3"
+        "typescript": "^5.8.3"
     },
     "peerDependencies": {
         "axios": ">=1.8.2 <=1.9.0",

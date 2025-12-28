@@ -44,7 +44,3 @@ export function resolveHelper(...pathSegments: string[]): string {
 export function normalizeHelper(p: string): string {
     return path.normalize(p).replace(REGEX_BACKSLASH, '/');
 }
-
-export function joinToDirHelper(parentFilePath: string, fileName: string): string {
-  return resolveHelper(dirNameHelper(parentFilePath), fileName);
-}

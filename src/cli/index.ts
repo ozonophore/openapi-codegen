@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Command, Option, OptionValues } from 'commander';
 import fs from 'fs';
 
@@ -110,6 +111,10 @@ program
     .action(async (options: OptionValues) => {
         await runInitOpenapiConfig(options);
     });
+
+program.exitOverride();
+// TODO: Включить позже!
+// program.showSuggestionAfterError(false);
 
 // Парсирование аргументов с обработкой ошибок
 try {

@@ -1,7 +1,7 @@
 import type { Type } from '../../../types/shared/Type.model';
 import { getMappedType, hasMappedType } from '../../../utils/getMappedType';
 import { getTypeName } from '../../../utils/getTypeName';
-import { replaceString } from '../../../utils/replaceString';
+import { normalizeString } from '../../../utils/normalizeString';
 import { resolveRefToImportPath } from '../../../utils/resolveRefToImportPath';
 import { stripNamespace } from '../../../utils/stripNamespace';
 import { Parser } from '../Parser';
@@ -12,7 +12,7 @@ import { Parser } from '../Parser';
  * @param parentRef Reference to a parent model
  */
 export function getType(this: Parser, value: string, parentRef: string): Type {
-    const normalizedValue = replaceString(value) || '';
+    const normalizedValue = normalizeString(value) || '';
 
     const result: Type = {
         type: 'any',
@@ -38,8 +38,8 @@ export function getType(this: Parser, value: string, parentRef: string): Type {
             refValuePath: normalizedValue,
             outputModelsPath: this.context.output?.outputModels,
         });
-        const type = this.getTypeNameByRef(getTypeName(valueClean));
-        const valueImportPath = !valuePath.startsWith('/') ? `./${valuePath}` : valuePath;
+        const type = this.getTypeNameByRef(getTypeName(valueClean), parentRef);
+        const valueImportPath = !valuePath.startsWith('./') ? `./${valuePath}` : valuePath;
         result.path = valuePath;
         result.type = type;
         result.base = type;

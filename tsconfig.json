@@ -27,10 +27,8 @@
     },
 
     "files": [
-        "./src/typings/hbs.d.ts",
-        "./src/typings/camelcase.d.ts",
-        "./src/typings/mkdirp.d.ts",
-        "./src/typings/rimraf.d.ts"
+        "types/hbs.d.ts",
+        "types/camelcase.d.ts",
     ],
 
     "include": [

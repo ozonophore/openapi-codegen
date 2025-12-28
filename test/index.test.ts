@@ -15,7 +15,6 @@ describe('@unit: generate', () => {
             httpClient: HttpClient.FETCH,
             useOptions: false,
             useUnionTypes: false,
-            excludeCoreServiceFiles: true,
             includeSchemasFiles: true,
         });
         const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v2');
@@ -36,7 +35,6 @@ describe('@unit: generate', () => {
             httpClient: HttpClient.FETCH,
             useOptions: false,
             useUnionTypes: false,
-            excludeCoreServiceFiles: true,
             includeSchemasFiles: true,
         });
         const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v3');
