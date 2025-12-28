@@ -42,22 +42,34 @@ export function migrateDataToLatestSchemaVersion({ rawInput, migrationPlans, ver
     const actualSchema = versionedSchemas[actualVersionIndex];
 
     for (let idx = guessedVersion.lastVersionIndex; idx < versionedSchemas.length - 1; idx++) {
-        const { error: firstError } = versionedSchemas[idx].schema.validate(currentData);
+        const currentVersionSchema = versionedSchemas[idx];
+        const { error: firstError } = currentVersionSchema.schema.validate(currentData);
         if (firstError) {
             getCurrentErrorMessage(firstError, replacingKeysMap);
         }
 
-        const fromVersion = versionedSchemas[idx].version;
+        const fromVersion = currentVersionSchema.version;
         const migrationPlan = migrationPlans.find(p => p.fromVersion === fromVersion);
 
         if (!migrationPlan) {
-            throw new Error(`No migration plan from ${fromVersion}`);
+            const availableVersions = migrationPlans.map(p => p.fromVersion).join(', ');
+            throw new Error(
+                `No migration plan from ${fromVersion}. ` +
+                `Available migration plans: ${availableVersions}. ` +
+                `This usually means the migration chain is incomplete.`
+            );
         }
 
+        const toVersion = versionedSchemas[idx + 1].version;
         const migratedRaw = migrationPlan.migrate(currentData);
+        
         const { error } = versionedSchemas[idx + 1].schema.validate(migratedRaw, { allowUnknown: false });
         if (error) {
-            throw new Error(error.message);
+            throw new Error(
+                `Migration from ${fromVersion} to ${toVersion} failed validation. ` +
+                `Error: ${error.message}. ` +
+                `Migration description: ${migrationPlan.description || 'No description provided'}.`
+            );
         }
         currentData = { ...migratedRaw };
 
