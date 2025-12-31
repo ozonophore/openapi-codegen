@@ -1,4 +1,5 @@
 import { SchemaMigrationPlan } from '../Types';
+import { createDefaultFieldsMigration } from '../Utils/createDefaultFieldsMigration';
 
 /**
  * Migration plan for option models.
@@ -9,14 +10,13 @@ export const optionsMigrationPlans: SchemaMigrationPlan<Record<string, any>, Rec
         toVersion: 'v2',
         migrate: ({ client, ...otherProps }) => ({ ...otherProps, httpClient: client }),
     },
-    {
-        fromVersion: 'v2',
-        toVersion: 'v3',
-        migrate: oldVersion => ({ ...oldVersion, useCancelableRequest: false }),
-    },
-    {
-        fromVersion: 'v3',
-        toVersion: 'v4',
-        migrate: oldVersion => ({ ...oldVersion, excludeCoreServiceFiles: false, includeSchemasFiles: false, sortByRequired: false, useSeparatedIndexes: false }),
-    },
+    createDefaultFieldsMigration('v2', 'v3', {
+        useCancelableRequest: false,
+    }),
+    createDefaultFieldsMigration('v3', 'v4', {
+        excludeCoreServiceFiles: false,
+        includeSchemasFiles: false,
+        sortByRequired: false,
+        useSeparatedIndexes: false,
+    }),
 ];

@@ -1,4 +1,5 @@
 import { SchemaMigrationPlan } from '../Types';
+import { createDefaultFieldsMigration } from '../Utils/createDefaultFieldsMigration';
 
 /**
  * Migration plan for multi options models.
@@ -12,14 +13,9 @@ export const multiOptionsMigrationPlan: SchemaMigrationPlan<Record<string, any>,
             httpClient: client,
         }),
     },
-    {
-        fromVersion: 'v2',
-        toVersion: 'v3',
-        migrate: oldVersion => ({
-            ...oldVersion,
-            useCancelableRequest: false,
-        }),
-    },
+    createDefaultFieldsMigration('v2', 'v3', {
+        useCancelableRequest: false,
+    }),
     {
         fromVersion: 'v3',
         toVersion: 'v4',
@@ -28,15 +24,10 @@ export const multiOptionsMigrationPlan: SchemaMigrationPlan<Record<string, any>,
             items: items.map((el: any) => ({ ...el, input, output, outputCore, outputServices, outputModels, outputSchemas })),
         }),
     },
-    {
-        fromVersion: 'v4',
-        toVersion: 'v5',
-        migrate: oldVersion => ({
-            ...oldVersion,
-            excludeCoreServiceFiles: false,
-            includeSchemasFiles: false,
-            sortByRequired: false,
-            useSeparatedIndexes: false,
-        }),
-    },
+    createDefaultFieldsMigration('v4', 'v5', {
+        excludeCoreServiceFiles: false,
+        includeSchemasFiles: false,
+        sortByRequired: false,
+        useSeparatedIndexes: false,
+    }),
 ];

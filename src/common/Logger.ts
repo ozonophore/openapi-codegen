@@ -2,6 +2,7 @@ import { createLogger, format, Logger as WinstonLogger, transports } from 'winst
 import DailyRotateFile from 'winston-daily-rotate-file';
 
 import { ELogLevel, ELogOutput } from './Enums';
+import { LOGGER_MESSAGES } from './LoggerMessages';
 import { joinHelper } from './utils/pathHelpers';
 
 interface LoggerOptions {
@@ -79,7 +80,7 @@ export class Logger {
     }
 
     public error(message: string, error?: any) {
-        this._logger.error(`Error: ${message}`, error);
+        this._logger.error(`${LOGGER_MESSAGES.ERROR.PREFIX} ${message}`, error);
         process.exit(1);
     }
 
@@ -90,7 +91,7 @@ export class Logger {
     public info(message: string, hasSeparator?: boolean) {
         this._logger.info(message);
         if (hasSeparator) {
-            this._logger.info('==========================================');
+            this._logger.info(LOGGER_MESSAGES.SEPARATOR);
         }
     }
 

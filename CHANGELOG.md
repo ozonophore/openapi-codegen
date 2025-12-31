@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.0] - 2025-12-28
+
+### Added
+- Added new `OpenApiClient` class (`src/core/OpenApiClient.ts`) as the main entry point for code generation, providing better separation of concerns and improved error handling.
+- Added centralized logger messages module (`src/common/LoggerMessages.ts`) for all logging text constants, enabling centralized management and internationalization support.
+- Added unified options schema system (`UnifiedOptionsVersioned`) supporting migration from legacy `OPTIONS` and `MULTI_OPTIONS` schemas to a unified format.
+- Added `AllVersionedSchemas` and `AllMigrationPlans` modules to support cross-schema migrations (from OPTIONS/MULTI_OPTIONS to UNIFIED_OPTIONS).
+- Added `getRelativeModelImportPath` utility function for improved relative path calculation for model imports.
+- Added utility functions `createDefaultFieldsMigration` and `createTrivialMigration` to simplify migration plan creation.
+- Added TypeScript type definitions for `mkdirp` and `rimraf` packages in `src/typings/`.
+
+### Changed
+- **BREAKING**: Refactored options structure: renamed `Options.ts` to `TRawOptions.ts` and introduced new type system with `TRawOptions`, `TFlatOptions`, and `TStrictFlatOptions` for better type safety.
+- **BREAKING**: Updated core API: `generate()` function now uses `OpenApiClient` internally, providing improved error handling and logging capabilities.
+- Refactored code generation flow: moved generation logic from direct function calls to `OpenApiClient` class methods for better maintainability.
+- Enhanced schema migration system: improved migration plans for `OPTIONS` and `MULTI_OPTIONS` schemas with better default value handling.
+- Updated all parsers (v2 and v3) to work with the new `OpenApiClient` architecture.
+- Improved logger integration: all logging messages now use centralized `LOGGER_MESSAGES` constants.
+- Updated `WriteClient` and `Context` classes to work with the new architecture.
+
+### Removed
+- **BREAKING**: Removed `getModelNameWithPrefix` utility function (functionality integrated into model helpers).
+- **BREAKING**: Removed `normalizeString` utility function (functionality moved to other helpers).
+- **BREAKING**: Removed `prepareOptions` utility function (options preparation now handled by `OpenApiClient`).
+- Removed `knip.json` configuration file.
+- Removed obsolete snapshot test file `test/__snapshots__/v2/services/V2Service.ts.snap`.
+
+### Fixed
+- Fixed relative import path calculation for models in complex nested scenarios.
+- Improved error handling in code generation process with better logging and error messages.
+- Enhanced schema migration reliability with better validation and error reporting.
+
+### Migration Notes
+- If you're using the `generate()` function directly, the API remains compatible, but internal implementation has changed.
+- Configuration files using old `OPTIONS` or `MULTI_OPTIONS` schemas will be automatically migrated to `UNIFIED_OPTIONS` format.
+- Custom code using removed utility functions (`getModelNameWithPrefix`, `normalizeString`, `prepareOptions`) should be updated to use the new architecture.
+
 ## [1.0.0] - 2025-12-27
 
 ### Changed
