@@ -1,0 +1,38 @@
+{
+{{#equals base 'string'}}
+    type: 'string'{{#if minLength}},
+    minLength: {{{minLength}}}{{/if}}{{#if maxLength}},
+    maxLength: {{{maxLength}}}{{/if}}{{#if pattern}},
+    pattern: '{{{pattern}}}'{{/if}}{{#if format}},
+    format: '{{{format}}}'{{/if}}{{#if isNullable}},
+    nullable: true{{/if}}
+{{else equals base 'number'}}
+    type: 'number'{{#if minimum}},
+    minimum: {{{minimum}}}{{/if}}{{#if maximum}},
+    maximum: {{{maximum}}}{{/if}}{{#if exclusiveMinimum}},
+    exclusiveMinimum: {{{exclusiveMinimum}}}{{/if}}{{#if exclusiveMaximum}},
+    exclusiveMaximum: {{{exclusiveMaximum}}}{{/if}}{{#if multipleOf}},
+    multipleOf: {{{multipleOf}}}{{/if}}{{#if isNullable}},
+    nullable: true{{/if}}
+{{else equals base 'integer'}}
+    type: 'integer'{{#if minimum}},
+    minimum: {{{minimum}}}{{/if}}{{#if maximum}},
+    maximum: {{{maximum}}}{{/if}}{{#if exclusiveMinimum}},
+    exclusiveMinimum: {{{exclusiveMinimum}}}{{/if}}{{#if exclusiveMaximum}},
+    exclusiveMaximum: {{{exclusiveMaximum}}}{{/if}}{{#if multipleOf}},
+    multipleOf: {{{multipleOf}}}{{/if}}{{#if isNullable}},
+    nullable: true{{/if}}
+{{else equals base 'boolean'}}
+    type: 'boolean'{{#if isNullable}},
+    nullable: true{{/if}}
+{{else equals base 'File'}}
+    type: 'string',
+    format: 'binary'{{#if isNullable}},
+    nullable: true{{/if}}
+{{else equals base 'null'}}
+    type: 'null'
+{{else}}
+    type: 'object'{{#if isNullable}},
+    nullable: true{{/if}}
+{{/equals}}
+}

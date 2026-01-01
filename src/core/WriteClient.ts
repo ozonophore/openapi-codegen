@@ -96,7 +96,7 @@ export class WriteClient {
             request,
             useCancelableRequest = false,
             useSeparatedIndexes = false,
-            validationLibrary = ValidationLibrary.JOI,
+            validationLibrary = ValidationLibrary.NONE,
         } = options;
 
         if (!excludeCoreServiceFiles) {

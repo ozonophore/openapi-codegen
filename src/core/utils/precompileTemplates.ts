@@ -65,6 +65,8 @@ const precompileTemplates = () => {
                             isBasicType: true,
                             yupBaseSchema: true,
                             joiBaseSchema: true,
+                            getRequiredFields: true,
+                            getEnumType: true,
                         },
                     });
 

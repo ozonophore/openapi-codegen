@@ -119,6 +119,16 @@ import partialJoiSchemaGeneric from '../../templatesCompiled/client/joi/partials
 import partialJoiSchemaReference from '../../templatesCompiled/client/joi/partials/joiSchemaReference';
 import partialJoiSchemaComposition from '../../templatesCompiled/client/joi/partials/joiSchemaComposition';
 
+import templateExportJsonSchemaSchema from '../../templatesCompiled/client/jsonschema/exportSchema';
+import partialJsonSchemaSchema from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchema';
+import partialJsonSchemaSchemaInterface from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaInterface';
+import partialJsonSchemaSchemaEnum from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaEnum';
+import partialJsonSchemaSchemaArray from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaArray';
+import partialJsonSchemaSchemaDictionary from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaDictionary';
+import partialJsonSchemaSchemaGeneric from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaGeneric';
+import partialJsonSchemaSchemaReference from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaReference';
+import partialJsonSchemaSchemaComposition from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaComposition';
+
 export interface Templates {
     indexes: {
         full: Handlebars.TemplateDelegate;
@@ -134,6 +144,7 @@ export interface Templates {
         zodSchema: Handlebars.TemplateDelegate;
         yupSchema: Handlebars.TemplateDelegate;
         joiSchema: Handlebars.TemplateDelegate;
+        jsonSchemaSchema: Handlebars.TemplateDelegate
         service: Handlebars.TemplateDelegate;
     };
     core: {
@@ -170,6 +181,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
             zodSchema: Handlebars.template(templateExportZodSchema),
             yupSchema: Handlebars.template(templateExportYupSchema),
             joiSchema: Handlebars.template(templateExportJoiSchema),
+            jsonSchemaSchema: Handlebars.template(templateExportJsonSchemaSchema),
             service: Handlebars.template(templateExportService),
         },
         core: {
@@ -284,7 +296,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
         Handlebars.registerPartial('yupSchemaReference', Handlebars.template(partialYupSchemaReference));
         Handlebars.registerPartial('yupSchemaComposition', Handlebars.template(partialYupSchemaComposition));
     }
-    
+
     // Register Joi partials if validationLibrary is JOI
     if (root?.validationLibrary === ValidationLibrary.JOI) {
         Handlebars.registerPartial('joiSchema', Handlebars.template(partialJoiSchema));
@@ -295,6 +307,17 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
         Handlebars.registerPartial('joiSchemaGeneric', Handlebars.template(partialJoiSchemaGeneric));
         Handlebars.registerPartial('joiSchemaReference', Handlebars.template(partialJoiSchemaReference));
         Handlebars.registerPartial('joiSchemaComposition', Handlebars.template(partialJoiSchemaComposition));
+    }
+
+    if (root.validationLibrary === ValidationLibrary.JSONSCHEMA) {
+        Handlebars.registerPartial('jsonschemaSchema', Handlebars.template(partialJsonSchemaSchema));
+        Handlebars.registerPartial('jsonschemaSchemaInterface', Handlebars.template(partialJsonSchemaSchemaInterface));
+        Handlebars.registerPartial('jsonschemaSchemaEnum', Handlebars.template(partialJsonSchemaSchemaEnum));
+        Handlebars.registerPartial('jsonschemaSchemaArray', Handlebars.template(partialJsonSchemaSchemaArray));
+        Handlebars.registerPartial('jsonschemaSchemaDictionary', Handlebars.template(partialJsonSchemaSchemaDictionary));
+        Handlebars.registerPartial('jsonschemaSchemaGeneric', Handlebars.template(partialJsonSchemaSchemaGeneric));
+        Handlebars.registerPartial('jsonschemaSchemaReference', Handlebars.template(partialJsonSchemaSchemaReference));
+        Handlebars.registerPartial('jsonschemaSchemaComposition', Handlebars.template(partialJsonSchemaSchemaComposition));
     }
 
     return templates;

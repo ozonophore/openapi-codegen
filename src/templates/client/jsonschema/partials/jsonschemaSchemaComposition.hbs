@@ -1,0 +1,28 @@
+{{#equals export 'one-of'}}
+{
+    oneOf: [
+{{#each properties}}
+        {{>jsonschemaSchema}}{{#unless @last}},{{/unless}}
+{{/each}}
+    ]{{#if isNullable}},
+    nullable: true{{/if}}
+}
+{{else equals export 'any-of'}}
+{
+    anyOf: [
+{{#each properties}}
+        {{>jsonschemaSchema}}{{#unless @last}},{{/unless}}
+{{/each}}
+    ]{{#if isNullable}},
+    nullable: true{{/if}}
+}
+{{else equals export 'all-of'}}
+{
+    allOf: [
+{{#each properties}}
+        {{>jsonschemaSchema}}{{#unless @last}},{{/unless}}
+{{/each}}
+    ]{{#if isNullable}},
+    nullable: true{{/if}}
+}
+{{/equals}}

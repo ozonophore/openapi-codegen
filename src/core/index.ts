@@ -109,6 +109,7 @@ async function generateFrom(
                 request,
                 useCancelableRequest,
                 useSeparatedIndexes,
+                validationLibrary,
             });
             break;
         }
@@ -130,6 +131,7 @@ async function generateFrom(
                 request,
                 useCancelableRequest,
                 useSeparatedIndexes,
+                validationLibrary,
             });
             break;
         }

@@ -148,4 +148,19 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
                 return 'Joi.any()';
         }
     });
+    Handlebars.registerHelper('getRequiredFields', function (this: any, properties: Model[]) {
+        const required = properties
+            .filter(prop => prop.isRequired)
+            .map(prop => `'${prop.name}'`)
+            .join(', ');
+        return required ? `required: [${required}],` : '';
+    });
+
+    Handlebars.registerHelper('getEnumType', function (this: any, enumerators: Enum[]) {
+        if (!enumerators || enumerators.length === 0) {
+            return 'string';
+        }
+        const firstEnum = enumerators[0];
+        return firstEnum.type === 'number' ? 'number' : 'string';
+    });
 }

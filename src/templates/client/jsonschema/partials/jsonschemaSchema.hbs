@@ -1,0 +1,19 @@
+{{#equals export 'interface'}}
+{{>jsonschemaSchemaInterface}}
+{{else equals export 'enum'}}
+{{>jsonschemaSchemaEnum}}
+{{else equals export 'array'}}
+{{>jsonschemaSchemaArray}}
+{{else equals export 'dictionary'}}
+{{>jsonschemaSchemaDictionary}}
+{{else equals export 'any-of'}}
+{{>jsonschemaSchemaComposition}}
+{{else equals export 'all-of'}}
+{{>jsonschemaSchemaComposition}}
+{{else equals export 'one-of'}}
+{{>jsonschemaSchemaComposition}}
+{{else equals export 'reference'}}
+{{>jsonschemaSchemaReference}}
+{{else}}
+{{>jsonschemaSchemaGeneric}}
+{{/equals}}

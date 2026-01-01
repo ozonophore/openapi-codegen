@@ -46,7 +46,9 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
               ? templates.exports.yupSchema
               : validationLibrary === ValidationLibrary.JOI
                 ? templates.exports.joiSchema
-                : templates.exports.schema;
+                : validationLibrary === ValidationLibrary.JSONSCHEMA
+                  ? templates.exports.jsonSchemaSchema
+                  : templates.exports.schema;
 
     for (const model of models) {
         const modelFolderPath = model?.path;
