@@ -1,11 +1,13 @@
-yup.lazy(() => yup.object().test('dictionary', 'Must be a dictionary', function(value) {
-    if (!value || typeof value !== 'object') return false;
-    const itemSchema = {{#if link}}{{#if link.alias}}{{{link.alias}}}Schema{{else}}{{{link.type}}}Schema{{/if}}{{else}}{{>yupSchemaGeneric}}{{/if}};
+yup.lazy(() => yup.object().test('dictionary', 'Must be a dictionary', function(value: any) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+    const itemSchema = {{#if link}}{{#if link.alias}}{{{link.alias}}}Schema{{else}}{{{link.type}}}Schema{{/if}}{{else}}{{#equals base 'File'}}yup.mixed(){{else equals base 'string'}}yup.string(){{else equals base 'number'}}yup.number(){{else equals base 'integer'}}yup.number().integer(){{else equals base 'boolean'}}yup.boolean(){{else}}yup.mixed(){{/equals}}{{/if}};
     for (const key in value) {
-        try {
-            itemSchema.validateSync(value[key]);
-        } catch {
-            return false;
+        if (Object.prototype.hasOwnProperty.call(value, key)) {
+            try {
+                itemSchema.validateSync(value[key]);
+            } catch {
+                return false;
+            }
         }
     }
     return true;

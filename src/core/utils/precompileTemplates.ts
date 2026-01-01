@@ -62,6 +62,7 @@ const precompileTemplates = () => {
                             normalizePath: true,
                             joinPath: true,
                             isNumericEnum: true,
+                            yupBaseSchema: true,
                         },
                     });
 

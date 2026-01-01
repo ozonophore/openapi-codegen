@@ -10,6 +10,8 @@ yup.number().integer(){{#if minimum}}.min({{{minimum}}}){{/if}}{{#if maximum}}.m
 }){{/if}}{{#if isNullable}}.nullable(){{/if}}
 {{else equals base 'boolean'}}
 yup.boolean(){{#if isNullable}}.nullable(){{/if}}
+{{else equals base 'File'}}
+yup.mixed(){{#if isNullable}}.nullable(){{/if}}
 {{else equals base 'null'}}
 yup.mixed().oneOf([null])
 {{else}}

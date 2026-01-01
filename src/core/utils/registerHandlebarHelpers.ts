@@ -93,4 +93,25 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
         const firstEnum = enumerators[0];
         return firstEnum.type === 'number' ? options.fn(this) : options.inverse(this);
     });
+
+    Handlebars.registerHelper('yupBaseSchema', function (this: any, base: string) {
+        const baseType = base?.toLowerCase() || 'mixed';
+
+        switch (baseType) {
+            case 'string':
+                return 'yup.string()';
+            case 'number':
+            case 'int':
+            case 'integer':
+                return baseType === 'integer' || baseType === 'int' ? 'yup.number().integer()' : 'yup.number()';
+            case 'boolean':
+                return 'yup.boolean()';
+            case 'file':
+                return 'yup.mixed()';
+            case 'null':
+                return 'yup.mixed().oneOf([null])';
+            default:
+                return 'yup.mixed()';
+        }
+    });
 }
