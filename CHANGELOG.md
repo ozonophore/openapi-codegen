@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.2] - 2026-01-07
+
+### Added
+- Added `validationLibrary` parameter to support multiple validation library options for schema generation: `none`, `zod`, `joi`, `yup`, `jsonschema`.
+- Added Handlebars templates for validation schema generation:
+  - Zod validation schemas (`zod/exportSchema.hbs` and partials)
+  - Yup validation schemas (`yup/exportSchema.hbs` and partials)
+  - Joi validation schemas (`joi/exportSchema.hbs` and partials)
+  - JSON Schema validation schemas (`jsonschema/exportSchema.hbs` and partials)
+- Added `ValidationLibrary` enum to define supported validation libraries.
+- Added migration plan from `UNIFIED_v1` to `UNIFIED_v2` schema that migrates `includeSchemasFiles` to `validationLibrary`.
+
+### Changed
+- **BREAKING**: Replaced `includeSchemasFiles` boolean parameter with `validationLibrary` enum parameter for more flexible validation schema generation.
+- Updated schema generation logic to support multiple validation libraries with library-specific templates.
+- Updated `writeClientSchemas` to use validation library-specific templates based on the selected library.
+
+### Removed
+- **BREAKING**: Removed `includeSchemasFiles` parameter (replaced by `validationLibrary`).
+
+### Migration Notes
+- The `includeSchemasFiles` parameter is automatically migrated to `validationLibrary`:
+  - `includeSchemasFiles: false` → `validationLibrary: 'none'`
+  - `includeSchemasFiles: true` → `validationLibrary: undefined` (will use default, typically `'none'`)
+- To generate validation schemas, set `validationLibrary` to one of: `'zod'`, `'joi'`, `'yup'`, or `'jsonschema'`.
+- Default value is `'none'` (no validation schemas generated).
+
 ## [2.0.0-beta.1] - 2026-01-06
 
 ### Added

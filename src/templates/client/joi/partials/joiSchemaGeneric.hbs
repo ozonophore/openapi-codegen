@@ -1,0 +1,15 @@
+{{#equals base 'string'}}
+Joi.string(){{#if minLength}}.min({{{minLength}}}){{/if}}{{#if maxLength}}.max({{{maxLength}}}){{/if}}{{#if pattern}}.pattern(/{{{pattern}}}/){{/if}}{{#if format}}{{#equals format 'date-time'}}.isoDate(){{else equals format 'date'}}.date(){{else equals format 'email'}}.email(){{else equals format 'uri'}}.uri(){{else equals format 'uuid'}}.uuid(){{/equals}}{{/if}}{{#if isNullable}}.allow(null){{/if}}
+{{else equals base 'number'}}
+Joi.number(){{#if minimum}}.min({{{minimum}}}){{/if}}{{#if maximum}}.max({{{maximum}}}){{/if}}{{#if multipleOf}}.multiple({{{multipleOf}}}){{/if}}{{#if isNullable}}.allow(null){{/if}}
+{{else equals base 'integer'}}
+Joi.number().integer(){{#if minimum}}.min({{{minimum}}}){{/if}}{{#if maximum}}.max({{{maximum}}}){{/if}}{{#if multipleOf}}.multiple({{{multipleOf}}}){{/if}}{{#if isNullable}}.allow(null){{/if}}
+{{else equals base 'boolean'}}
+Joi.boolean(){{#if isNullable}}.allow(null){{/if}}
+{{else equals base 'File'}}
+Joi.any(){{#if isNullable}}.allow(null){{/if}}
+{{else equals base 'null'}}
+Joi.any().allow(null)
+{{else}}
+Joi.any(){{#if isNullable}}.allow(null){{/if}}
+{{/equals}}

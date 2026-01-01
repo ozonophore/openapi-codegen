@@ -1,3 +1,4 @@
+import { ValidationLibrary } from '../../../core/types/enums/ValidationLibrary.enum';
 import { multiOptionsMigrationPlan } from '../MultiOptionsVersioned/MultiOptionsMigrationPlan';
 import { optionsMigrationPlans } from '../OptionsVersioned/OptionsMigrationPlans';
 import { SchemaMigrationPlan } from '../Types';
@@ -31,4 +32,11 @@ export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<
 
     // Migration from MULTI_OPTIONS v5 to UNIFIED v1
     createTrivialMigration('MULTI_OPTIONS_v5', 'UNIFIED_v1', 'Migrate from MULTI_OPTIONS to UNIFIED schema'),
+    {
+        fromVersion: 'UNIFIED_v1',
+        toVersion: 'UNIFIED_v2',
+        migrate: ({ includeSchemasFiles, ...otherProps }) => {
+            return { ...otherProps, validationLibrary: !includeSchemasFiles ? ValidationLibrary.NONE : undefined };
+        },
+    },
 ];

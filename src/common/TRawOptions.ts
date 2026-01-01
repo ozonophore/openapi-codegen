@@ -1,4 +1,5 @@
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 import { ELogLevel, ELogOutput } from './Enums';
 
 type TItemConfig = {
@@ -23,7 +24,6 @@ export type TRawOptions = {
     useOptions?: boolean;
     useUnionTypes?: boolean;
     excludeCoreServiceFiles?: boolean;
-    includeSchemasFiles?: boolean;
     request?: string;
     interfacePrefix?: string;
     enumPrefix?: string;
@@ -33,7 +33,8 @@ export type TRawOptions = {
     logTarget?: ELogOutput;
     sortByRequired?: boolean;
     useSeparatedIndexes?: boolean;
-};
+    validationLibrary?: ValidationLibrary
+}
 
 export type TFlatOptions = Omit<TRawOptions, 'items'>;
 

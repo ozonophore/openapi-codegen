@@ -1,0 +1,17 @@
+{{#if enum}}
+{{#isNumericEnum enum}}
+z.union([
+{{#each enum}}
+    z.literal({{{value}}}){{#unless @last}},{{/unless}}
+{{/each}}
+]){{#if isNullable}}.nullable(){{/if}}
+{{else}}
+z.enum([
+{{#each enum}}
+    {{{value}}}{{#unless @last}},{{/unless}}
+{{/each}}
+]){{#if isNullable}}.nullable(){{/if}}
+{{/isNumericEnum}}
+{{else}}
+z.any(){{#if isNullable}}.nullable(){{/if}}
+{{/if}}

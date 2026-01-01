@@ -10,6 +10,7 @@ import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
 import { OutputPaths } from './types/base/OutputPaths.model';
+import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
@@ -52,7 +53,6 @@ export class OpenApiClient {
             useOptions: item.useOptions ?? COMMON_DEFAULT_OPTIONS_VALUES.useOptions,
             useUnionTypes: item.useUnionTypes ?? COMMON_DEFAULT_OPTIONS_VALUES.useUnionTypes,
             excludeCoreServiceFiles: item.excludeCoreServiceFiles ?? COMMON_DEFAULT_OPTIONS_VALUES.excludeCoreServiceFiles,
-            includeSchemasFiles: item.includeSchemasFiles ?? COMMON_DEFAULT_OPTIONS_VALUES.includeSchemasFiles,
             request: item.request || COMMON_DEFAULT_OPTIONS_VALUES.request,
             interfacePrefix: item.interfacePrefix || COMMON_DEFAULT_OPTIONS_VALUES.interfacePrefix,
             enumPrefix: item.enumPrefix || COMMON_DEFAULT_OPTIONS_VALUES.enumPrefix,
@@ -62,6 +62,7 @@ export class OpenApiClient {
             logTarget: item.logTarget || COMMON_DEFAULT_OPTIONS_VALUES.logTarget,
             sortByRequired: item.sortByRequired ?? COMMON_DEFAULT_OPTIONS_VALUES.sortByRequired,
             useSeparatedIndexes: item.useSeparatedIndexes ?? COMMON_DEFAULT_OPTIONS_VALUES.useSeparatedIndexes,
+            validationLibrary: item.validationLibrary ?? COMMON_DEFAULT_OPTIONS_VALUES.validationLibrary,
         };
     }
 
@@ -122,7 +123,6 @@ export class OpenApiClient {
             useOptions,
             useUnionTypes,
             excludeCoreServiceFiles,
-            includeSchemasFiles,
             request,
             interfacePrefix,
             enumPrefix,
@@ -130,6 +130,7 @@ export class OpenApiClient {
             useCancelableRequest,
             sortByRequired,
             useSeparatedIndexes,
+            validationLibrary = ValidationLibrary.NONE,
         } = item;
         const outputPaths: OutputPaths = getOutputPaths({
             output,
@@ -146,6 +147,7 @@ export class OpenApiClient {
             httpClient,
             useUnionTypes,
             useOptions,
+            validationLibrary,
         });
         this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.DEFINING_VERSION);
         switch (openApiVersion) {
@@ -161,10 +163,10 @@ export class OpenApiClient {
                     useOptions,
                     useUnionTypes,
                     excludeCoreServiceFiles,
-                    includeSchemasFiles,
                     request,
                     useCancelableRequest,
                     useSeparatedIndexes,
+                    validationLibrary,
                 });
                 break;
             }
@@ -181,10 +183,10 @@ export class OpenApiClient {
                     useOptions,
                     useUnionTypes,
                     excludeCoreServiceFiles,
-                    includeSchemasFiles,
                     request,
                     useCancelableRequest,
                     useSeparatedIndexes,
+                    validationLibrary,
                 });
                 break;
             }

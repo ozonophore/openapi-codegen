@@ -1,0 +1,9 @@
+yup.object({
+{{#if properties}}
+{{#each properties}}
+    {{{name}}}: {{>yupSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
+{{/each}}
+{{else}}
+})
+{{/if}}
+}){{#if isNullable}}.nullable(){{/if}}

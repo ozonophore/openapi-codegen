@@ -7,6 +7,7 @@ import { ELogLevel, ELogOutput } from '../common/Enums';
 import { UpdateNotifier } from '../common/UpdateNotifier';
 import { joinHelper } from '../common/utils/pathHelpers';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 import { checkConfig } from './checkAndUpdateConfig/checkConfig';
 import { updateConfig } from './checkAndUpdateConfig/updateConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
@@ -48,7 +49,6 @@ program
     .option('--useOptions', 'Use options instead of arguments (default: false)')
     .option('--useUnionTypes', 'Use union types instead of enums (default: false)')
     .option('--excludeCoreServiceFiles', 'The generation of the core and services is excluded (default: false)')
-    .option('--includeSchemasFiles', 'The generation of model validation schemes is enabled (default: false)')
     .option('--request <value>', 'Path to custom request file')
     .option('--interfacePrefix <value>', 'Prefix for interface model(default: "I")', 'I')
     .option('--enumPrefix <value>', 'Prefix for enum model(default: "E")', 'E')
@@ -58,6 +58,7 @@ program
     .addOption(new Option('-t, --logTarget <target>', 'Target of logging').choices([...Object.values(ELogOutput)]).default(ELogOutput.CONSOLE))
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
     .option('--useSeparatedIndexes', 'Use separate index files for the core, models, schemas, and services.')
+    .addOption(new Option('--validationLibrary <value>', 'Validation library to use for schema validation').choices([...Object.values(ValidationLibrary)]).default(ValidationLibrary.NONE))
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })

@@ -1,4 +1,5 @@
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 import { ELogLevel, ELogOutput } from './Enums';
 import { Logger } from './Logger';
 import { TStrictFlatOptions } from './TRawOptions';
@@ -16,7 +17,6 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     useOptions: false,
     useUnionTypes: false,
     excludeCoreServiceFiles: false,
-    includeSchemasFiles: false,
     request: '',
     interfacePrefix: 'I',
     enumPrefix: 'E',
@@ -26,6 +26,7 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     logTarget: ELogOutput.CONSOLE,
     sortByRequired: false,
     useSeparatedIndexes: false,
+    validationLibrary: ValidationLibrary.NONE
 };
 
 export const APP_LOGGER = new Logger({
