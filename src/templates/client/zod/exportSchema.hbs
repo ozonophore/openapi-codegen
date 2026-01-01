@@ -1,5 +1,11 @@
 {{>header}}
 
+{{#if imports}}
+{{#each imports}}
+import { {{{name}}}Schema{{#if alias}} as {{{alias}}}Schema{{/if}} } from '{{{normalizePath path}}}';
+{{/each}}
+{{/if}}
+
 import { z } from 'zod';
 
 export const {{{name}}}Schema = {{>zodSchema}};
