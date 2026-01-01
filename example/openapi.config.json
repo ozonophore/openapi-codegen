@@ -2,7 +2,6 @@
     "output": "./generated",
     "client": "axios",
     "excludeCoreServiceFiles": true,
-    "includeSchemasFiles": true,
     "items": [{
         "input": "./openapi/spec.yml"
     }]

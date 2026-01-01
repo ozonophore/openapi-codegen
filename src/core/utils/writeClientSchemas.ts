@@ -4,6 +4,7 @@ import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { HttpClient } from '../types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../types/enums/ValidationLibrary.enum';
 import type { Model } from '../types/shared/Model.model';
 import { WriteClient } from '../WriteClient';
 import { Templates } from './registerHandlebarTemplates';
@@ -21,6 +22,7 @@ interface IWriteClientSchemas {
     outputSchemasPath: string;
     httpClient: HttpClient;
     useUnionTypes: boolean;
+    validationLibrary?: ValidationLibrary;
 }
 
 /**
@@ -32,9 +34,21 @@ interface IWriteClientSchemas {
  * @param useUnionTypes Use union types instead of enums
  */
 export async function writeClientSchemas(this: WriteClient, options: IWriteClientSchemas): Promise<void> {
-    const { models, templates, outputSchemasPath, httpClient, useUnionTypes } = options;
+    const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary } = options;
 
     this.logger.info('The recording of model validation schema files begins.');
+
+    // Choose template based on validation library
+    const schemaTemplate =
+        validationLibrary === ValidationLibrary.ZOD
+            ? templates.exports.zodSchema
+            : validationLibrary === ValidationLibrary.YUP
+              ? templates.exports.yupSchema
+              : validationLibrary === ValidationLibrary.JOI
+                ? templates.exports.joiSchema
+                : validationLibrary === ValidationLibrary.JSONSCHEMA
+                  ? templates.exports.jsonSchemaSchema
+                  : templates.exports.schema;
 
     for (const model of models) {
         const modelFolderPath = model?.path;
@@ -50,10 +64,11 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
 
         this.logger.info(`The recording of the file data begins: ${file}`);
 
-        const templateResult = templates.exports.schema({
+        const templateResult = schemaTemplate({
             ...model,
             httpClient,
             useUnionTypes,
+            validationLibrary,
         });
         const formattedValue = await format(templateResult);
         await fileSystemHelpers.writeFile(file, formattedValue);

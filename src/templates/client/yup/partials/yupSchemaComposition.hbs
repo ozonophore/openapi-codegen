@@ -1,0 +1,21 @@
+{{#equals export 'one-of'}}
+yup.mixed().oneOf([
+{{#each properties}}
+    {{>yupSchema}}{{#unless @last}},{{/unless}}
+{{/each}}
+]){{#if isNullable}}.nullable(){{/if}}
+{{else equals export 'any-of'}}
+yup.mixed().oneOf([
+{{#each properties}}
+    {{>yupSchema}}{{#unless @last}},{{/unless}}
+{{/each}}
+]){{#if isNullable}}.nullable(){{/if}}
+{{else equals export 'all-of'}}
+{{#each properties}}
+{{#if @first}}
+{{>yupSchema}}
+{{else}}
+.concat({{>yupSchema}})
+{{/if}}
+{{/each}}{{#if isNullable}}.nullable(){{/if}}
+{{/equals}}

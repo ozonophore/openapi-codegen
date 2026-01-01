@@ -1,0 +1,16 @@
+{
+    type: 'array',
+    items: {{#if link}}{{#isBasicType link}}{{>jsonschemaSchemaGeneric link}}{{else}}{{{link.type}}}Schema{{/isBasicType}}{{else}}{{>jsonschemaSchemaGeneric}}{{/if}},
+{{#if minItems}}
+    minItems: {{{minItems}}},
+{{/if}}
+{{#if maxItems}}
+    maxItems: {{{maxItems}}},
+{{/if}}
+{{#if uniqueItems}}
+    uniqueItems: {{{uniqueItems}}},
+{{/if}}
+{{#if isNullable}}
+    nullable: true,
+{{/if}}
+}

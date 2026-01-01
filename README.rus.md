@@ -63,7 +63,6 @@ openapi generate --input ./spec.json --output ./dist
 | `--useOptions` | - | boolean | `false` | Использовать опции вместо аргументов |
 | `--useUnionTypes` | - | boolean | `false` | Использовать union типы вместо enums |
 | `--excludeCoreServiceFiles` | - | boolean | `false` | Исключить генерацию core и сервисных файлов |
-| `--includeSchemasFiles` | - | boolean | `false` | Включить генерацию схем валидации моделей |
 | `--request` | - | string | - | Путь к пользовательскому файлу запросов |
 | `--interfacePrefix` | - | string | `I` | Префикс для интерфейсов моделей |
 | `--enumPrefix` | - | string | `E` | Префикс для enum моделей |
@@ -73,6 +72,7 @@ openapi generate --input ./spec.json --output ./dist
 | `--useSeparatedIndexes` | - | boolean | `false` | Использовать отдельные index файлы для core, models, schemas и services |
 | `--logLevel` | `-l` | string | `error` | Уровень логирования: `info`, `warn`, или `error` |
 | `--logTarget` | `-t` | string | `console` | Цель логирования: `console` или `file` |
+| `--validationLibrary` | - | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
 
 **Примеры:**
 ```bash
@@ -92,7 +92,6 @@ openapi generate \
   --httpClient fetch \
   --useOptions \
   --useUnionTypes \
-  --includeSchemasFiles \
   --logLevel info
 ```
 
@@ -142,7 +141,6 @@ openapi init-openapi-config --openapi-config ./my-config.json
     "useOptions": false,
     "useUnionTypes": false,
     "excludeCoreServiceFiles": false,
-    "includeSchemasFiles": false,
     "interfacePrefix": "I",
     "enumPrefix": "E",
     "typePrefix": "T",
@@ -159,7 +157,6 @@ openapi init-openapi-config --openapi-config ./my-config.json
     "output": "./dist",
     "client": "fetch",
     "excludeCoreServiceFiles": true,
-    "includeSchemasFiles": true,
     "items": [
         {
             "input": "./first.yml"
@@ -200,7 +197,6 @@ openapi init-openapi-config --openapi-config ./my-config.json
 | `useOptions` | boolean | `false` | Использовать опции вместо аргументов |
 | `useUnionTypes` | boolean | `false` | Использовать union типы вместо enums |
 | `excludeCoreServiceFiles` | boolean | `false` | Исключить генерацию core и сервисных файлов |
-| `includeSchemasFiles` | boolean | `false` | Включить генерацию схем валидации моделей |
 | `request` | string | - | Путь к пользовательскому файлу запросов |
 | `interfacePrefix` | string | `I` | Префикс для интерфейсов моделей |
 | `enumPrefix` | string | `E` | Префикс для enum моделей |
@@ -209,6 +205,7 @@ openapi init-openapi-config --openapi-config ./my-config.json
 | `sortByRequired` | boolean | `false` | Расширенная стратегия сортировки для аргументов |
 | `useSeparatedIndexes` | boolean | `false` | Использовать отдельные index файлы |
 | `items` | array | - | Массив конфигураций (для формата multi-options) |
+| `validationLibrary` | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
 
 **Примечание:** Вы можете использовать команду `init-openapi-config` для генерации шаблона файла конфигурации.
 
@@ -368,11 +365,19 @@ const order: Order = {
 }
 ```
 
-### Runtime схемы `--includeSchemasFiles`
+### Схемы проверки `--validationLibrary`
 По умолчанию генератор OpenAPI экспортирует только интерфейсы для ваших моделей. Эти интерфейсы помогут вам во время
-разработки, но не будут доступны в JavaScript во время выполнения. Однако Swagger позволяет определять свойства,
-которые могут быть полезны во время выполнения, например: `maxLength` строки или `pattern` для сопоставления и т.д. Допустим,
-у нас есть следующая модель:
+разработки, но не будут доступны в JavaScript во время выполнения. Однако OpenAPI позволяет определять свойства,
+которые могут быть полезны во время выполнения, например: `maxLength` строки или `pattern` для сопоставления и т.д.
+
+Параметр `--validationLibrary` позволяет генерировать схемы валидации времени выполнения с использованием популярных библиотек валидации:
+- **none** (по умолчанию) - Схемы валидации не генерируются
+- **zod** - Генерация схем валидации Zod
+- **joi** - Генерация схем валидации Joi
+- **yup** - Генерация схем валидации Yup
+- **jsonschema** - Генерация схем валидации JSON Schema
+
+Допустим, у нас есть следующая модель:
 
 ```json
 {
@@ -406,77 +411,89 @@ const order: Order = {
 }
 ```
 
-Это сгенерирует следующий интерфейс:
+**С Zod (`--validationLibrary zod`):**
 
-```typescript
-export interface MyModel {
-    key: string;
-    name: string;
-    readonly enabled?: boolean;
-    readonly modified?: string;
+```ts
+import { z } from 'zod';
+
+export const MyModelSchema = z.object({
+    key: z.string().max(64).regex(/^[a-zA-Z0-9_]*$/),
+    name: z.string().max(255),
+    enabled: z.boolean().readonly().optional(),
+    modified: z.string().datetime().readonly().optional(),
+});
+
+export type MyModel = z.infer<typeof MyModelSchema>;
+
+export function validateMyModel(data: unknown): MyModel {
+    return MyModelSchema.parse(data);
+}
+
+export function safeValidateMyModel(data: unknown): { success: true; data: MyModel } | { success: false; error: z.ZodError } {
+    const result = MyModelSchema.safeParse(data);
+    if (result.success) {
+        return { success: true, data: result.data };
+    }
+    return { success: false, error: result.error };
 }
 ```
 
-Интерфейс не содержит таких свойств, как `maxLength` или `pattern`. Однако они могут быть полезны,
-если мы хотим создать форму, где пользователь может создать такую модель. В этой форме вы будете итерироваться
-по свойствам для рендеринга полей формы на основе их типа и валидации ввода на основе свойства `maxLength`
-или `pattern`. Для этого нам нужно где-то хранить эту информацию... Для этого мы можем использовать
-флаг `--includeSchemasFiles` для генерации runtime модели рядом с обычным интерфейсом:
+**С Joi (`--validationLibrary joi`):**
 
-```typescript
-export const $MyModel = {
+```ts
+import Joi from 'joi';
+
+export const MyModelSchema = Joi.object({
+    key: Joi.string().max(64).pattern(/^[a-zA-Z0-9_]*$/).required(),
+    name: Joi.string().max(255).required(),
+    enabled: Joi.boolean().readonly(),
+    modified: Joi.string().isoDate().readonly(),
+});
+```
+
+**С Yup (`--validationLibrary yup`):**
+
+```ts
+import * as yup from 'yup';
+
+export const MyModelSchema = yup.object({
+    key: yup.string().max(64).matches(/^[a-zA-Z0-9_]*$/).required(),
+    name: yup.string().max(255).required(),
+    enabled: yup.boolean().readonly(),
+    modified: yup.string().datetime().readonly(),
+});
+```
+
+**С JSON Schema (`--validationLibrary jsonschema`):**
+
+```ts
+export const MyModelSchema = {
+    type: 'object',
+    required: ['key', 'name'],
     properties: {
         key: {
             type: 'string',
-            isRequired: true,
             maxLength: 64,
             pattern: '^[a-zA-Z0-9_]*$',
         },
         name: {
             type: 'string',
-            isRequired: true,
             maxLength: 255,
         },
         enabled: {
             type: 'boolean',
-            isReadOnly: true,
+            readOnly: true,
         },
         modified: {
             type: 'string',
-            isReadOnly: true,
             format: 'date-time',
+            readOnly: true,
         },
     },
 };
 ```
 
-Эти runtime объекты имеют префикс `$` и раскрывают все интересные атрибуты модели
-и её свойств. Теперь мы можем использовать этот объект для генерации формы:
-
-```typescript jsx
-import { $MyModel } from './generated';
-
-// Псевдокод для итерации по свойствам и возврата поля формы
-// поле формы может быть абстрактным компонентом, который рендерит правильный
-// тип поля и правила валидации на основе заданного ввода.
-const formFields = Object.entries($MyModel.properties).map(([key, value]) => (
-    <FormField
-        name={key}
-        type={value.type}
-        format={value.format}
-        maxLength={value.maxLength}
-        pattern={value.pattern}
-        isReadOnly={value.isReadOnly}
-    />
-));
-
-const MyForm = () => (
-    <form>
-        {formFields}
-    </form>
-);
-
-```
+Эти схемы валидации могут быть использованы для генерации форм, валидации ввода и проверки типов во время выполнения в вашем приложении.
 
 ### Отменяемый promise `--useCancelableRequest`
 По умолчанию генератор OpenAPI генерирует сервисы для доступа к API, которые используют неотменяемые запросы. Поэтому мы добавили возможность переключить генератор на генерацию отменяемых API запросов. Для этого используйте флаг `--useCancelableRequest`.

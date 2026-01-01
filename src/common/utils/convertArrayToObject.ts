@@ -2,7 +2,6 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
     const emptyResult = {
         items: [],
         excludeCoreServiceFiles: undefined,
-        includeSchemasFiles: undefined,
         request: undefined,
         useOptions: undefined,
         useCancelableRequest: undefined,
@@ -31,7 +30,6 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
             'useOptions',
             'useUnionTypes',
             'excludeCoreServiceFiles',
-            'includeSchemasFiles',
             'request',
             'interfacePrefix',
             'enumPrefix',
@@ -41,6 +39,7 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
             'logTarget',
             'sortByRequired',
             'useSeparatedIndexes',
+            'validationLibrary',
         ];
 
         const extractedFields = fieldsToExtract.reduce(

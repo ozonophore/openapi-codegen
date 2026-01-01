@@ -1,0 +1,29 @@
+{{>header}}
+
+{{#if imports}}
+{{#each imports}}
+import { {{{name}}}Schema{{#if alias}} as {{{alias}}}Schema{{/if}} } from '{{{normalizePath path}}}';
+{{/each}}
+{{/if}}
+
+import Joi from 'joi';
+
+export const {{{name}}}Schema = {{>joiSchema}};
+
+export type {{{name}}} = Joi.SchemaValue<typeof {{{name}}}Schema>;
+
+export function validate{{{name}}}(data: unknown): { value: {{{name}}}; error?: undefined } | { value?: undefined; error: Joi.ValidationError } {
+    const result = {{{name}}}Schema.validate(data);
+    if (result.error) {
+        return { error: result.error };
+    }
+    return { value: result.value as {{{name}}} };
+}
+
+export function validate{{{name}}}Sync(data: unknown): {{{name}}} {
+    const { value, error } = {{{name}}}Schema.validate(data);
+    if (error) {
+        throw error;
+    }
+    return value as {{{name}}};
+}

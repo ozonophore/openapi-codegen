@@ -4,6 +4,7 @@ import { describe, test } from 'node:test';
 
 import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 import { HttpClient } from '../../types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
 import { Model } from '../../types/shared/Model.model';
 import { WriteClient } from '../../WriteClient';
 import { Templates } from '../registerHandlebarTemplates';
@@ -52,6 +53,10 @@ describe('@unit: writeClientSchemas', () => {
             exports: {
                 model: () => 'model',
                 schema: () => 'schema',
+                zodSchema: () => 'zodSchema',
+                yupSchema: () => 'yupSchema',
+                joiSchema: () => 'joiSchema',
+                jsonSchemaSchema: () => 'jsonSchemaSchema',
                 service: () => 'service',
             },
             core: {
@@ -72,6 +77,7 @@ describe('@unit: writeClientSchemas', () => {
             outputSchemasPath: '/',
             httpClient: HttpClient.FETCH,
             useUnionTypes: false,
+            validationLibrary: ValidationLibrary.NONE,
         });
 
         assert.ok(
