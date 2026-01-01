@@ -1,6 +1,6 @@
 yup.lazy(() => yup.object().test('dictionary', 'Must be a dictionary', function(value: any) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
-    const itemSchema = {{#if link}}{{#if link.alias}}{{{link.alias}}}Schema{{else}}{{{link.type}}}Schema{{/if}}{{else}}{{yupBaseSchema base}}{{/if}};
+    const itemSchema = {{#if link}}{{#isBasicType link}}{{yupBaseSchema link.base}}{{else}}{{#if link.alias}}{{{link.alias}}}Schema{{else}}{{{link.type}}}Schema{{/if}}{{/isBasicType}}{{else}}{{yupBaseSchema base}}{{/if}};
     const dict = value as Record<string, any>;
     for (const key in dict) {
         if (Object.prototype.hasOwnProperty.call(dict, key)) {

@@ -94,6 +94,17 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
         return firstEnum.type === 'number' ? options.fn(this) : options.inverse(this);
     });
 
+    Handlebars.registerHelper('isBasicType', function (this: any, link: Model | null) {
+        if (!link) return false;
+        // Если есть imports, это реальная схема, а не базовый тип
+        if (link.imports && link.imports.length > 0) return false;
+        // Если есть path и это не базовый тип, это схема
+        if (link.path && link.path !== link.base?.toLowerCase()) return false;
+        // Проверяем, является ли base базовым типом
+        const basicTypes = ['string', 'number', 'integer', 'int', 'boolean', 'file', 'File', 'any', 'null'];
+        return basicTypes.includes(link.base);
+    });
+
     Handlebars.registerHelper('yupBaseSchema', function (this: any, base: string) {
         if (!base) return 'yup.mixed()';
 
