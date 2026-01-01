@@ -9,6 +9,7 @@ import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { HttpClient } from './types/enums/HttpClient.enum';
+import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
@@ -66,6 +67,7 @@ async function generateFrom(
         useCancelableRequest = false,
         sortByRequired = false,
         useSeparatedIndexes = false,
+        validationLibrary = ValidationLibrary.NONE,
     }: TOptions,
     writeClient: WriteClient
 ): Promise<void> {
@@ -85,6 +87,7 @@ async function generateFrom(
         httpClient,
         useUnionTypes,
         useOptions,
+        validationLibrary,
     });
 
     writeClient.logger.info('Defining the version of the openapi specification (2 or 3)');
@@ -106,6 +109,7 @@ async function generateFrom(
                 request,
                 useCancelableRequest,
                 useSeparatedIndexes,
+                validationLibrary,
             });
             break;
         }
@@ -127,6 +131,7 @@ async function generateFrom(
                 request,
                 useCancelableRequest,
                 useSeparatedIndexes,
+                validationLibrary,
             });
             break;
         }

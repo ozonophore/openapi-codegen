@@ -61,6 +61,12 @@ const precompileTemplates = () => {
                             containsSystemName: true,
                             normalizePath: true,
                             joinPath: true,
+                            isNumericEnum: true,
+                            isBasicType: true,
+                            yupBaseSchema: true,
+                            joiBaseSchema: true,
+                            getRequiredFields: true,
+                            getEnumType: true,
                         },
                     });
 

@@ -1,0 +1,17 @@
+{{#if enum}}
+{{#isNumericEnum enum}}
+yup.number().oneOf([
+{{#each enum}}
+    {{{value}}}{{#unless @last}},{{/unless}}
+{{/each}}
+]){{#if isNullable}}.nullable(){{/if}}
+{{else}}
+yup.string().oneOf([
+{{#each enum}}
+    {{{value}}}{{#unless @last}},{{/unless}}
+{{/each}}
+]){{#if isNullable}}.nullable(){{/if}}
+{{/isNumericEnum}}
+{{else}}
+yup.mixed(){{#if isNullable}}.nullable(){{/if}}
+{{/if}}

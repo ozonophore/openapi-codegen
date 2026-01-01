@@ -1,0 +1,1 @@
+Joi.array().items({{#if link}}{{#isBasicType link}}{{joiBaseSchema link.base}}{{else}}{{#if link.alias}}{{{link.alias}}}Schema{{else}}{{{link.type}}}Schema{{/if}}{{/isBasicType}}{{else}}{{joiBaseSchema base}}{{/if}}){{#if minItems}}.min({{{minItems}}}){{/if}}{{#if maxItems}}.max({{{maxItems}}}){{/if}}{{#if isNullable}}.allow(null){{/if}}
