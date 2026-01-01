@@ -41,8 +41,54 @@ export default {"1":function(container,depth0,helpers,partials,data) {
         return undefined
     };
 
-  return ((stack1 = container.invokePartial(lookupProperty(partials,"yupSchemaGeneric"),depth0,{"name":"yupSchemaGeneric","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "");
-},"8":function(container,depth0,helpers,partials,data) {
+  return ((stack1 = lookupProperty(helpers,"equals").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"base"),"File",{"name":"equals","hash":{},"fn":container.program(7, data, 0),"inverse":container.program(9, data, 0),"data":data,"loc":{"start":{"line":3,"column":119},"end":{"line":3,"column":360}}})) != null ? stack1 : "");
+},"7":function(container,depth0,helpers,partials,data) {
+    return "yup.mixed()";
+},"9":function(container,depth0,helpers,partials,data) {
+    var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
+  return ((stack1 = lookupProperty(helpers,"equals").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"base"),"string",{"name":"equals","hash":{},"fn":container.program(10, data, 0),"inverse":container.program(12, data, 0),"data":data,"loc":{"start":{"line":3,"column":153},"end":{"line":3,"column":349}}})) != null ? stack1 : "");
+},"10":function(container,depth0,helpers,partials,data) {
+    return "yup.string()";
+},"12":function(container,depth0,helpers,partials,data) {
+    var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
+  return ((stack1 = lookupProperty(helpers,"equals").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"base"),"number",{"name":"equals","hash":{},"fn":container.program(13, data, 0),"inverse":container.program(15, data, 0),"data":data,"loc":{"start":{"line":3,"column":194},"end":{"line":3,"column":349}}})) != null ? stack1 : "");
+},"13":function(container,depth0,helpers,partials,data) {
+    return "yup.number()";
+},"15":function(container,depth0,helpers,partials,data) {
+    var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
+  return ((stack1 = lookupProperty(helpers,"equals").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"base"),"integer",{"name":"equals","hash":{},"fn":container.program(16, data, 0),"inverse":container.program(18, data, 0),"data":data,"loc":{"start":{"line":3,"column":235},"end":{"line":3,"column":349}}})) != null ? stack1 : "");
+},"16":function(container,depth0,helpers,partials,data) {
+    return "yup.number().integer()";
+},"18":function(container,depth0,helpers,partials,data) {
+    var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+          return parent[propertyName];
+        }
+        return undefined
+    };
+
+  return ((stack1 = lookupProperty(helpers,"equals").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"base"),"boolean",{"name":"equals","hash":{},"fn":container.program(19, data, 0),"inverse":container.program(7, data, 0),"data":data,"loc":{"start":{"line":3,"column":287},"end":{"line":3,"column":349}}})) != null ? stack1 : "");
+},"19":function(container,depth0,helpers,partials,data) {
+    return "yup.boolean()";
+},"21":function(container,depth0,helpers,partials,data) {
     return ".nullable()";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {}), lookupProperty = container.lookupProperty || function(parent, propertyName) {
@@ -52,8 +98,8 @@ export default {"1":function(container,depth0,helpers,partials,data) {
         return undefined
     };
 
-  return "yup.lazy(() => yup.object().test('dictionary', 'Must be a dictionary', function(value) {\n    if (!value || typeof value !== 'object') return false;\n    const itemSchema = "
-    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"link"),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.program(6, data, 0),"data":data,"loc":{"start":{"line":3,"column":23},"end":{"line":3,"column":147}}})) != null ? stack1 : "")
-    + ";\n    for (const key in value) {\n        try {\n            itemSchema.validateSync(value[key]);\n        } catch {\n            return false;\n        }\n    }\n    return true;\n}))"
-    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"isNullable"),{"name":"if","hash":{},"fn":container.program(8, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":12,"column":3},"end":{"line":12,"column":39}}})) != null ? stack1 : "");
-},"usePartial":true,"useData":true}
+  return "yup.lazy(() => yup.object().test('dictionary', 'Must be a dictionary', function(value: any) {\n    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;\n    const itemSchema = "
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"link"),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.program(6, data, 0),"data":data,"loc":{"start":{"line":3,"column":23},"end":{"line":3,"column":367}}})) != null ? stack1 : "")
+    + ";\n    const dict = value as Record<string, any>;\n    for (const key in dict) {\n        if (Object.prototype.hasOwnProperty.call(dict, key)) {\n            try {\n                itemSchema.validateSync(dict[key]);\n            } catch {\n                return false;\n            }\n        }\n    }\n    return true;\n}))"
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"isNullable"),{"name":"if","hash":{},"fn":container.program(21, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":15,"column":3},"end":{"line":15,"column":39}}})) != null ? stack1 : "");
+},"useData":true}
