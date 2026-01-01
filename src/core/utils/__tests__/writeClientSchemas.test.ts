@@ -53,8 +53,9 @@ describe('@unit: writeClientSchemas', () => {
             exports: {
                 model: () => 'model',
                 schema: () => 'schema',
+                zodSchema: () => 'zodSchema',
+                yupSchema: () => 'yupSchema',
                 service: () => 'service',
-                zodSchema: () => 'zodSchema'
             },
             core: {
                 settings: () => 'settings',

@@ -1,12 +1,12 @@
-yup.object().shape({}, { strict: false }).test('dictionary', 'Must be a dictionary', function(value) {
+yup.lazy(() => yup.object().test('dictionary', 'Must be a dictionary', function(value) {
     if (!value || typeof value !== 'object') return false;
-    const schema = {{#if link}}{{#if link.alias}}{{{link.alias}}}Schema{{else}}{{{link.type}}}Schema{{/if}}{{else}}{{>yupSchemaGeneric}}{{/if}};
+    const itemSchema = {{#if link}}{{#if link.alias}}{{{link.alias}}}Schema{{else}}{{{link.type}}}Schema{{/if}}{{else}}{{>yupSchemaGeneric}}{{/if}};
     for (const key in value) {
         try {
-            schema.validateSync(value[key]);
+            itemSchema.validateSync(value[key]);
         } catch {
             return false;
         }
     }
     return true;
-}){{#if isNullable}}.nullable(){{/if}}
+})){{#if isNullable}}.nullable(){{/if}}

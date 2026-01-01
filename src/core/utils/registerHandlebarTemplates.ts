@@ -53,7 +53,7 @@ import templateSimpeIndex from '../../templatesCompiled/client/indexSimple';
 import templateCore from '../../templatesCompiled/client/indexCore';
 import templateModels from '../../templatesCompiled/client/indexModels';
 import templateSchemas from '../../templatesCompiled/client/indexShemas';
-import templateServices from '../../templatesCompiled/client/indexServices'
+import templateServices from '../../templatesCompiled/client/indexServices';
 import partialBase from '../../templatesCompiled/client/partials/base';
 import partialExportComposition from '../../templatesCompiled/client/partials/exportComposition';
 import partialExportEnum from '../../templatesCompiled/client/partials/exportEnum';
@@ -99,6 +99,16 @@ import partialZodSchemaGeneric from '../../templatesCompiled/client/zod/partials
 import partialZodSchemaReference from '../../templatesCompiled/client/zod/partials/zodSchemaReference';
 import partialZodSchemaComposition from '../../templatesCompiled/client/zod/partials/zodSchemaComposition';
 
+import templateExportYupSchema from '../../templatesCompiled/client/yup/exportSchema';
+import partialYupSchema from '../../templatesCompiled/client/yup/partials/yupSchema';
+import partialYupSchemaInterface from '../../templatesCompiled/client/yup/partials/yupSchemaInterface';
+import partialYupSchemaEnum from '../../templatesCompiled/client/yup/partials/yupSchemaEnum';
+import partialYupSchemaArray from '../../templatesCompiled/client/yup/partials/yupSchemaArray';
+import partialYupSchemaDictionary from '../../templatesCompiled/client/yup/partials/yupSchemaDictionary';
+import partialYupSchemaGeneric from '../../templatesCompiled/client/yup/partials/yupSchemaGeneric';
+import partialYupSchemaReference from '../../templatesCompiled/client/yup/partials/yupSchemaReference';
+import partialYupSchemaComposition from '../../templatesCompiled/client/yup/partials/yupSchemaComposition';
+
 export interface Templates {
     indexes: {
         full: Handlebars.TemplateDelegate;
@@ -107,12 +117,13 @@ export interface Templates {
         models: Handlebars.TemplateDelegate;
         schemas: Handlebars.TemplateDelegate;
         services: Handlebars.TemplateDelegate;
-    }
+    };
     exports: {
         model: Handlebars.TemplateDelegate;
         schema: Handlebars.TemplateDelegate;
-        service: Handlebars.TemplateDelegate;
         zodSchema: Handlebars.TemplateDelegate;
+        yupSchema: Handlebars.TemplateDelegate;
+        service: Handlebars.TemplateDelegate;
     };
     core: {
         settings: Handlebars.TemplateDelegate;
@@ -129,7 +140,7 @@ export interface Templates {
  * Read all the Handlebar templates that we need and return on wrapper object
  * so we can easily access the templates in out generator / write functions.
  */
-export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOptions: boolean; useUnionTypes: boolean; validationLibrary?: ValidationLibrary; }): Templates {
+export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOptions: boolean; useUnionTypes: boolean; validationLibrary?: ValidationLibrary }): Templates {
     registerHandlebarHelpers(root);
 
     // Main templates (entry points for the files we write to disk)
@@ -145,8 +156,9 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
         exports: {
             model: Handlebars.template(templateExportModel),
             schema: Handlebars.template(templateExportSchema),
-            service: Handlebars.template(templateExportService),
             zodSchema: Handlebars.template(templateExportZodSchema),
+            yupSchema: Handlebars.template(templateExportYupSchema),
+            service: Handlebars.template(templateExportService),
         },
         core: {
             settings: Handlebars.template(templateCoreSettings),
@@ -247,6 +259,18 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
         Handlebars.registerPartial('zodSchemaGeneric', Handlebars.template(partialZodSchemaGeneric));
         Handlebars.registerPartial('zodSchemaReference', Handlebars.template(partialZodSchemaReference));
         Handlebars.registerPartial('zodSchemaComposition', Handlebars.template(partialZodSchemaComposition));
+    }
+
+    // Register Yup partials if validationLibrary is YUP
+    if (root.validationLibrary === ValidationLibrary.YUP) {
+        Handlebars.registerPartial('yupSchema', Handlebars.template(partialYupSchema));
+        Handlebars.registerPartial('yupSchemaInterface', Handlebars.template(partialYupSchemaInterface));
+        Handlebars.registerPartial('yupSchemaEnum', Handlebars.template(partialYupSchemaEnum));
+        Handlebars.registerPartial('yupSchemaArray', Handlebars.template(partialYupSchemaArray));
+        Handlebars.registerPartial('yupSchemaDictionary', Handlebars.template(partialYupSchemaDictionary));
+        Handlebars.registerPartial('yupSchemaGeneric', Handlebars.template(partialYupSchemaGeneric));
+        Handlebars.registerPartial('yupSchemaReference', Handlebars.template(partialYupSchemaReference));
+        Handlebars.registerPartial('yupSchemaComposition', Handlebars.template(partialYupSchemaComposition));
     }
 
     return templates;

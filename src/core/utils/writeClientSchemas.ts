@@ -39,9 +39,8 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
     this.logger.info('The recording of model validation schema files begins.');
 
     // Choose template based on validation library
-    const schemaTemplate = validationLibrary === ValidationLibrary.ZOD 
-        ? templates.exports.zodSchema 
-        : templates.exports.schema;
+    const schemaTemplate =
+        validationLibrary === ValidationLibrary.ZOD ? templates.exports.zodSchema : validationLibrary === ValidationLibrary.YUP ? templates.exports.yupSchema : templates.exports.schema;
 
     for (const model of models) {
         const modelFolderPath = model?.path;
