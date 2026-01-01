@@ -109,6 +109,16 @@ import partialYupSchemaGeneric from '../../templatesCompiled/client/yup/partials
 import partialYupSchemaReference from '../../templatesCompiled/client/yup/partials/yupSchemaReference';
 import partialYupSchemaComposition from '../../templatesCompiled/client/yup/partials/yupSchemaComposition';
 
+import templateExportJoiSchema from '../../templatesCompiled/client/joi/exportSchema';
+import partialJoiSchema from '../../templatesCompiled/client/joi/partials/joiSchema';
+import partialJoiSchemaInterface from '../../templatesCompiled/client/joi/partials/joiSchemaInterface';
+import partialJoiSchemaEnum from '../../templatesCompiled/client/joi/partials/joiSchemaEnum';
+import partialJoiSchemaArray from '../../templatesCompiled/client/joi/partials/joiSchemaArray';
+import partialJoiSchemaDictionary from '../../templatesCompiled/client/joi/partials/joiSchemaDictionary';
+import partialJoiSchemaGeneric from '../../templatesCompiled/client/joi/partials/joiSchemaGeneric';
+import partialJoiSchemaReference from '../../templatesCompiled/client/joi/partials/joiSchemaReference';
+import partialJoiSchemaComposition from '../../templatesCompiled/client/joi/partials/joiSchemaComposition';
+
 export interface Templates {
     indexes: {
         full: Handlebars.TemplateDelegate;
@@ -123,6 +133,7 @@ export interface Templates {
         schema: Handlebars.TemplateDelegate;
         zodSchema: Handlebars.TemplateDelegate;
         yupSchema: Handlebars.TemplateDelegate;
+        joiSchema: Handlebars.TemplateDelegate;
         service: Handlebars.TemplateDelegate;
     };
     core: {
@@ -158,6 +169,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
             schema: Handlebars.template(templateExportSchema),
             zodSchema: Handlebars.template(templateExportZodSchema),
             yupSchema: Handlebars.template(templateExportYupSchema),
+            joiSchema: Handlebars.template(templateExportJoiSchema),
             service: Handlebars.template(templateExportService),
         },
         core: {
@@ -262,7 +274,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
     }
 
     // Register Yup partials if validationLibrary is YUP
-    if (root.validationLibrary === ValidationLibrary.YUP) {
+    if (root?.validationLibrary === ValidationLibrary.YUP) {
         Handlebars.registerPartial('yupSchema', Handlebars.template(partialYupSchema));
         Handlebars.registerPartial('yupSchemaInterface', Handlebars.template(partialYupSchemaInterface));
         Handlebars.registerPartial('yupSchemaEnum', Handlebars.template(partialYupSchemaEnum));
@@ -271,6 +283,18 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
         Handlebars.registerPartial('yupSchemaGeneric', Handlebars.template(partialYupSchemaGeneric));
         Handlebars.registerPartial('yupSchemaReference', Handlebars.template(partialYupSchemaReference));
         Handlebars.registerPartial('yupSchemaComposition', Handlebars.template(partialYupSchemaComposition));
+    }
+    
+    // Register Joi partials if validationLibrary is JOI
+    if (root?.validationLibrary === ValidationLibrary.JOI) {
+        Handlebars.registerPartial('joiSchema', Handlebars.template(partialJoiSchema));
+        Handlebars.registerPartial('joiSchemaInterface', Handlebars.template(partialJoiSchemaInterface));
+        Handlebars.registerPartial('joiSchemaEnum', Handlebars.template(partialJoiSchemaEnum));
+        Handlebars.registerPartial('joiSchemaArray', Handlebars.template(partialJoiSchemaArray));
+        Handlebars.registerPartial('joiSchemaDictionary', Handlebars.template(partialJoiSchemaDictionary));
+        Handlebars.registerPartial('joiSchemaGeneric', Handlebars.template(partialJoiSchemaGeneric));
+        Handlebars.registerPartial('joiSchemaReference', Handlebars.template(partialJoiSchemaReference));
+        Handlebars.registerPartial('joiSchemaComposition', Handlebars.template(partialJoiSchemaComposition));
     }
 
     return templates;

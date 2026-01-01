@@ -1,4 +1,5 @@
-import { HttpClient } from '../core';
+import { HttpClient } from '../core/types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 
 export type TOptions = {
     input: string | Record<string, any>;
@@ -20,6 +21,7 @@ export type TOptions = {
     useCancelableRequest?: boolean;
     sortByRequired?: boolean;
     useSeparatedIndexes?: boolean;
+    validationLibrary?: ValidationLibrary
 };
 
 export type TMultiOptions = {

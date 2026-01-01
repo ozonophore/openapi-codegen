@@ -1,0 +1,9 @@
+Joi.object({
+{{#if properties}}
+{{#each properties}}
+    {{{name}}}: {{>joiSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
+{{/each}}
+{{else}}
+})
+{{/if}}
+}){{#if isNullable}}.allow(null){{/if}}

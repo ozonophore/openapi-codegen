@@ -64,6 +64,7 @@ const precompileTemplates = () => {
                             isNumericEnum: true,
                             isBasicType: true,
                             yupBaseSchema: true,
+                            joiBaseSchema: true,
                         },
                     });
 

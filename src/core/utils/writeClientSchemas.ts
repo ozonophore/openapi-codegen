@@ -40,7 +40,13 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
 
     // Choose template based on validation library
     const schemaTemplate =
-        validationLibrary === ValidationLibrary.ZOD ? templates.exports.zodSchema : validationLibrary === ValidationLibrary.YUP ? templates.exports.yupSchema : templates.exports.schema;
+        validationLibrary === ValidationLibrary.ZOD
+            ? templates.exports.zodSchema
+            : validationLibrary === ValidationLibrary.YUP
+              ? templates.exports.yupSchema
+              : validationLibrary === ValidationLibrary.JOI
+                ? templates.exports.joiSchema
+                : templates.exports.schema;
 
     for (const model of models) {
         const modelFolderPath = model?.path;

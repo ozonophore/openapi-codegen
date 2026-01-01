@@ -126,4 +126,26 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
                 return 'yup.mixed()';
         }
     });
+
+    Handlebars.registerHelper('joiBaseSchema', function (this: any, base: string) {
+        if (!base) return 'Joi.any()';
+
+        const baseLower = base.toLowerCase();
+
+        switch (baseLower) {
+            case 'string':
+                return 'Joi.string()';
+            case 'number':
+                return 'Joi.number()';
+            case 'integer':
+            case 'int':
+                return 'Joi.number().integer()';
+            case 'boolean':
+                return 'Joi.boolean()';
+            case 'file':
+                return 'Joi.any()';
+            default:
+                return 'Joi.any()';
+        }
+    });
 }

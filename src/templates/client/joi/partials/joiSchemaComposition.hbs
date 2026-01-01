@@ -1,0 +1,21 @@
+{{#equals export 'one-of'}}
+Joi.alternatives().try(
+{{#each properties}}
+    {{>joiSchema}}{{#unless @last}},{{/unless}}
+{{/each}}
+){{#if isNullable}}.allow(null){{/if}}
+{{else equals export 'any-of'}}
+Joi.alternatives().try(
+{{#each properties}}
+    {{>joiSchema}}{{#unless @last}},{{/unless}}
+{{/each}}
+){{#if isNullable}}.allow(null){{/if}}
+{{else equals export 'all-of'}}
+{{#each properties}}
+{{#if @first}}
+{{>joiSchema}}
+{{else}}
+.concat({{>joiSchema}})
+{{/if}}
+{{/each}}{{#if isNullable}}.allow(null){{/if}}
+{{/equals}}

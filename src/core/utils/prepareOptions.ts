@@ -1,5 +1,6 @@
 import { TOptions } from "../../common/Options"
 import { HttpClient } from "../types/enums/HttpClient.enum"
+import { ValidationLibrary } from "../types/enums/ValidationLibrary.enum"
 import { isBoolean } from "./isBoolean"
 
 /**
@@ -26,5 +27,6 @@ export function prepareOptions(options: TOptions): TOptions {
         typePrefix: options?.typePrefix ? options.typePrefix : 'T',
         useCancelableRequest: isBoolean(options?.useCancelableRequest),
         useSeparatedIndexes: isBoolean(options?.useSeparatedIndexes),
+        validationLibrary: options?.validationLibrary ? options.validationLibrary : ValidationLibrary.NONE
     }
 }
