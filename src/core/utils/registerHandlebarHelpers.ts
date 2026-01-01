@@ -95,21 +95,22 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
     });
 
     Handlebars.registerHelper('yupBaseSchema', function (this: any, base: string) {
-        const baseType = base?.toLowerCase() || 'mixed';
+        if (!base) return 'yup.mixed()';
 
-        switch (baseType) {
+        const baseLower = base.toLowerCase();
+
+        switch (baseLower) {
             case 'string':
                 return 'yup.string()';
             case 'number':
-            case 'int':
+                return 'yup.number()';
             case 'integer':
-                return baseType === 'integer' || baseType === 'int' ? 'yup.number().integer()' : 'yup.number()';
+            case 'int':
+                return 'yup.number().integer()';
             case 'boolean':
                 return 'yup.boolean()';
             case 'file':
                 return 'yup.mixed()';
-            case 'null':
-                return 'yup.mixed().oneOf([null])';
             default:
                 return 'yup.mixed()';
         }
