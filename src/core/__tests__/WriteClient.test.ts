@@ -48,6 +48,8 @@ describe('@unit: writeClient', () => {
                 schema: () => 'schema',
                 zodSchema: () => 'zodSchema',
                 yupSchema: () => 'yupSchema',
+                joiSchema: () => 'joiSchema',
+                jsonSchemaSchema: () => 'jsonSchemaSchema',
                 service: () => 'service',
             },
             core: {

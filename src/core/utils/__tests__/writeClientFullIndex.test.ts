@@ -30,6 +30,8 @@ describe('@unit: writeClientFullIndex', () => {
                 schema: () => 'schema',
                 zodSchema: () => 'zodSchema',
                 yupSchema: () => 'yupSchema',
+                joiSchema: () => 'joiSchema',
+                jsonSchemaSchema: () => 'jsonSchemaSchema',
                 service: () => 'service',
             },
             core: {
