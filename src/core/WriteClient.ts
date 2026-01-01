@@ -8,6 +8,7 @@ import { ExportedService } from './types/base/ExportedService.model';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { SimpleClientArtifacts } from './types/base/SimpleClientArtifacts.model';
 import { HttpClient } from './types/enums/HttpClient.enum';
+import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import type { Client } from './types/shared/Client.model';
 import { prepareAlias } from './utils/prepareAlias';
 import { Templates } from './utils/registerHandlebarTemplates';
@@ -49,6 +50,7 @@ type TWriteClientProps = {
     request?: string;
     useCancelableRequest?: boolean;
     useSeparatedIndexes?: boolean;
+    validationLibrary?: ValidationLibrary
 };
 
 type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOptions' | 'request' | 'useCancelableRequest' | 'useSeparatedIndexes'>;
@@ -94,6 +96,7 @@ export class WriteClient {
             request,
             useCancelableRequest = false,
             useSeparatedIndexes = false,
+            validationLibrary = ValidationLibrary.NONE,
         } = options;
 
         if (!excludeCoreServiceFiles) {
@@ -137,6 +140,7 @@ export class WriteClient {
                 outputSchemasPath: outputPaths.outputSchemas,
                 httpClient,
                 useUnionTypes,
+                validationLibrary,
             });
             await this.writeClientSchemasIndex({
                 models: client.models,

@@ -1,4 +1,5 @@
-import { HttpClient } from '../core';
+import { HttpClient } from '../core/types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 import { ELogLevel, ELogOutput } from './Enums';
 import { Logger } from './Logger';
 
@@ -22,6 +23,7 @@ export const COMMON_DEFAULT_OPTIONS_VALUES = {
     logTarget: ELogOutput.CONSOLE,
     sortByRequired: false,
     useSeparatedIndexes: false,
+    validationLibrary: ValidationLibrary.NONE
 };
 
 export const APP_LOGGER = new Logger({

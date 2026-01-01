@@ -53,6 +53,7 @@ describe('@unit: writeClientModels', () => {
                 model: () => 'model',
                 schema: () => 'schema',
                 service: () => 'service',
+                zodSchema: () => 'zodSchema',
             },
             core: {
                 settings: () => 'settings',

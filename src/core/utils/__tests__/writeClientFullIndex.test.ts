@@ -29,6 +29,7 @@ describe('@unit: writeClientFullIndex', () => {
                 model: () => 'model',
                 schema: () => 'schema',
                 service: () => 'service',
+                zodSchema: () => 'zodSchema',
             },
             core: {
                 settings: () => 'settings',

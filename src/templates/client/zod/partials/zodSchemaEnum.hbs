@@ -1,0 +1,5 @@
+z.enum([
+{{#each enum}}
+    {{{value}}}{{#unless @last}},{{/unless}}
+{{/each}}
+]){{#if isNullable}}.nullable(){{/if}}

@@ -87,6 +87,17 @@ import partialTypeReference from '../../templatesCompiled/client/partials/typeRe
 import partialTypeUnion from '../../templatesCompiled/client/partials/typeUnion';
 import { registerHandlebarHelpers } from './registerHandlebarHelpers';
 import { HttpClient } from '../types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../types/enums/ValidationLibrary.enum';
+
+import templateExportZodSchema from '../../templatesCompiled/client/zod/exportSchema';
+import partialZodSchema from '../../templatesCompiled/client/zod/partials/zodSchema';
+import partialZodSchemaInterface from '../../templatesCompiled/client/zod/partials/zodSchemaInterface';
+import partialZodSchemaEnum from '../../templatesCompiled/client/zod/partials/zodSchemaEnum';
+import partialZodSchemaArray from '../../templatesCompiled/client/zod/partials/zodSchemaArray';
+import partialZodSchemaDictionary from '../../templatesCompiled/client/zod/partials/zodSchemaDictionary';
+import partialZodSchemaGeneric from '../../templatesCompiled/client/zod/partials/zodSchemaGeneric';
+import partialZodSchemaReference from '../../templatesCompiled/client/zod/partials/zodSchemaReference';
+import partialZodSchemaComposition from '../../templatesCompiled/client/zod/partials/zodSchemaComposition';
 
 export interface Templates {
     indexes: {
@@ -101,6 +112,7 @@ export interface Templates {
         model: Handlebars.TemplateDelegate;
         schema: Handlebars.TemplateDelegate;
         service: Handlebars.TemplateDelegate;
+        zodSchema: Handlebars.TemplateDelegate;
     };
     core: {
         settings: Handlebars.TemplateDelegate;
@@ -117,7 +129,7 @@ export interface Templates {
  * Read all the Handlebar templates that we need and return on wrapper object
  * so we can easily access the templates in out generator / write functions.
  */
-export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOptions: boolean; useUnionTypes: boolean }): Templates {
+export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOptions: boolean; useUnionTypes: boolean; validationLibrary?: ValidationLibrary; }): Templates {
     registerHandlebarHelpers(root);
 
     // Main templates (entry points for the files we write to disk)
@@ -134,6 +146,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
             model: Handlebars.template(templateExportModel),
             schema: Handlebars.template(templateExportSchema),
             service: Handlebars.template(templateExportService),
+            zodSchema: Handlebars.template(templateExportZodSchema),
         },
         core: {
             settings: Handlebars.template(templateCoreSettings),
@@ -223,6 +236,18 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
     Handlebars.registerPartial('axios/getResponseHeader', Handlebars.template(axiosGetResponseHeader));
     Handlebars.registerPartial('axios/sendRequest', Handlebars.template(axiosSendRequest));
     Handlebars.registerPartial('axios/request', Handlebars.template(axiosRequest));
+
+    // Register Zod partials if validationLibrary is ZOD
+    if (root?.validationLibrary === ValidationLibrary.ZOD) {
+        Handlebars.registerPartial('zodSchema', Handlebars.template(partialZodSchema));
+        Handlebars.registerPartial('zodSchemaInterface', Handlebars.template(partialZodSchemaInterface));
+        Handlebars.registerPartial('zodSchemaEnum', Handlebars.template(partialZodSchemaEnum));
+        Handlebars.registerPartial('zodSchemaArray', Handlebars.template(partialZodSchemaArray));
+        Handlebars.registerPartial('zodSchemaDictionary', Handlebars.template(partialZodSchemaDictionary));
+        Handlebars.registerPartial('zodSchemaGeneric', Handlebars.template(partialZodSchemaGeneric));
+        Handlebars.registerPartial('zodSchemaReference', Handlebars.template(partialZodSchemaReference));
+        Handlebars.registerPartial('zodSchemaComposition', Handlebars.template(partialZodSchemaComposition));
+    }
 
     return templates;
 }

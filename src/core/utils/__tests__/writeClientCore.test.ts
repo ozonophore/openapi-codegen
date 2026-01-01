@@ -38,6 +38,7 @@ describe('@unit: writeClientCore', () => {
                 model: () => 'model',
                 schema: () => 'schema',
                 service: () => 'service',
+                zodSchema: () => 'zodSchema',
             },
             core: {
                 settings: () => 'settings',
