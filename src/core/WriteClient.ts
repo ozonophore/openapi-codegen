@@ -132,6 +132,10 @@ export class WriteClient {
             });
         }
 
+        /**
+         * TODO: Нужно собирать импорты из всех вложенных моделей (link, properties в composition и т.д.) и передавать их в шаблон.
+         * Это делается в writeClientSchemas или в парсере моделей.
+         */
         if (includeSchemasFiles) {
             await fileSystemHelpers.mkdir(outputPaths.outputSchemas);
             await this.writeClientSchemas({

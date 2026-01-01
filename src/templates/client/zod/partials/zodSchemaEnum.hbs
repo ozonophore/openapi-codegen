@@ -1,5 +1,5 @@
 {{#if enum}}
-{{#if (eq (first enum).type 'number')}}
+{{#isNumericEnum enum}}
 z.union([
 {{#each enum}}
     z.literal({{{value}}}){{#unless @last}},{{/unless}}
@@ -11,7 +11,7 @@ z.enum([
     {{{value}}}{{#unless @last}},{{/unless}}
 {{/each}}
 ]){{#if isNullable}}.nullable(){{/if}}
-{{/if}}
+{{/isNumericEnum}}
 {{else}}
 z.any(){{#if isNullable}}.nullable(){{/if}}
 {{/if}}

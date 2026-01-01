@@ -61,6 +61,7 @@ const precompileTemplates = () => {
                             containsSystemName: true,
                             normalizePath: true,
                             joinPath: true,
+                            isNumericEnum: true,
                         },
                     });
 

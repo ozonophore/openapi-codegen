@@ -85,4 +85,12 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
 
         return `${cleanedFirstPath}/${cleanedSecondPath}`.replace(REGEX_BACKSLASH, '/').replace(REGEX_MULTIPLE_SLASHES, '/');
     });
+
+    Handlebars.registerHelper('isNumericEnum', function (this: any, enumerators: Enum[], options: Handlebars.HelperOptions) {
+        if (!enumerators || enumerators.length === 0) {
+            return options.inverse(this);
+        }
+        const firstEnum = enumerators[0];
+        return firstEnum.type === 'number' ? options.fn(this) : options.inverse(this);
+    });
 }
