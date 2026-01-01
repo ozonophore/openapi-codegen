@@ -4,6 +4,7 @@ import { describe, mock, test } from 'node:test';
 
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { HttpClient } from '../types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../types/enums/ValidationLibrary.enum';
 import type { Client } from '../types/shared/Client.model';
 import { getOutputPaths } from '../utils/getOutputPaths';
 import { Templates } from '../utils/registerHandlebarTemplates';
@@ -46,6 +47,10 @@ describe('@unit: writeClient', () => {
             exports: {
                 model: () => 'model',
                 schema: () => 'schema',
+                zodSchema: () => 'zodSchema',
+                yupSchema: () => 'yupSchema',
+                joiSchema: () => 'joiSchema',
+                jsonSchemaSchema: () => 'jsonSchemaSchema',
                 service: () => 'service',
             },
             core: {
@@ -71,7 +76,7 @@ describe('@unit: writeClient', () => {
             useOptions: false,
             useUnionTypes: false,
             excludeCoreServiceFiles: false,
-            includeSchemasFiles: false,
+            validationLibrary: ValidationLibrary.NONE,
         });
 
         assert.ok(mkdirCalls.length > 0, 'mkdir should be called at least once');

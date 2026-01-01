@@ -1,0 +1,19 @@
+{{#equals export 'interface'}}
+{{>joiSchemaInterface}}
+{{else equals export 'enum'}}
+{{>joiSchemaEnum}}
+{{else equals export 'array'}}
+{{>joiSchemaArray}}
+{{else equals export 'dictionary'}}
+{{>joiSchemaDictionary}}
+{{else equals export 'any-of'}}
+{{>joiSchemaComposition}}
+{{else equals export 'all-of'}}
+{{>joiSchemaComposition}}
+{{else equals export 'one-of'}}
+{{>joiSchemaComposition}}
+{{else equals export 'reference'}}
+{{>joiSchemaReference}}
+{{else}}
+{{>joiSchemaGeneric}}
+{{/equals}}

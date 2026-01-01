@@ -1,0 +1,25 @@
+{{>header}}
+
+{{#if imports}}
+{{#each imports}}
+import { {{{name}}}Schema{{#if alias}} as {{{alias}}}Schema{{/if}} } from '{{{normalizePath path}}}';
+{{/each}}
+{{/if}}
+
+import * as yup from 'yup';
+
+export const {{{name}}}Schema = {{>yupSchema}};
+
+export type {{{name}}} = yup.InferType<typeof {{{name}}}Schema>;
+
+export async function validate{{{name}}}(data: unknown): Promise<{{{name}}}> {
+    return await {{{name}}}Schema.validate(data);
+}
+
+export function validate{{{name}}}Sync(data: unknown): {{{name}}} {
+    return {{{name}}}Schema.validateSync(data);
+}
+
+export function validate{{{name}}}SyncStrict(data: unknown): {{{name}}} {
+    return {{{name}}}Schema.validateSync(data, { strict: true });
+}

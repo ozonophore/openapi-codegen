@@ -1,0 +1,25 @@
+{{>header}}
+
+{{#if imports}}
+{{#each imports}}
+import { {{{name}}}Schema{{#if alias}} as {{{alias}}}Schema{{/if}} } from '{{{normalizePath path}}}';
+{{/each}}
+{{/if}}
+
+import { z } from 'zod';
+
+export const {{{name}}}Schema = {{>zodSchema}};
+
+export type {{{name}}} = z.infer<typeof {{{name}}}Schema>;
+
+export function validate{{{name}}}(data: unknown): {{{name}}} {
+    return {{{name}}}Schema.parse(data);
+}
+
+export function safeValidate{{{name}}}(data: unknown): { success: true; data: {{{name}}} } | { success: false; error: z.ZodError } {
+    const result = {{{name}}}Schema.safeParse(data);
+    if (result.success) {
+        return { success: true, data: result.data };
+    }
+    return { success: false, error: result.error };
+}

@@ -55,7 +55,7 @@ import templateSimpeIndex from '../../templatesCompiled/client/indexSimple';
 import templateCore from '../../templatesCompiled/client/indexCore';
 import templateModels from '../../templatesCompiled/client/indexModels';
 import templateSchemas from '../../templatesCompiled/client/indexShemas';
-import templateServices from '../../templatesCompiled/client/indexServices'
+import templateServices from '../../templatesCompiled/client/indexServices';
 import partialBase from '../../templatesCompiled/client/partials/base';
 import partialExportComposition from '../../templatesCompiled/client/partials/exportComposition';
 import partialExportEnum from '../../templatesCompiled/client/partials/exportEnum';
@@ -89,6 +89,47 @@ import partialTypeReference from '../../templatesCompiled/client/partials/typeRe
 import partialTypeUnion from '../../templatesCompiled/client/partials/typeUnion';
 import { registerHandlebarHelpers } from './registerHandlebarHelpers';
 import { HttpClient } from '../types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../types/enums/ValidationLibrary.enum';
+
+import templateExportZodSchema from '../../templatesCompiled/client/zod/exportSchema';
+import partialZodSchema from '../../templatesCompiled/client/zod/partials/zodSchema';
+import partialZodSchemaInterface from '../../templatesCompiled/client/zod/partials/zodSchemaInterface';
+import partialZodSchemaEnum from '../../templatesCompiled/client/zod/partials/zodSchemaEnum';
+import partialZodSchemaArray from '../../templatesCompiled/client/zod/partials/zodSchemaArray';
+import partialZodSchemaDictionary from '../../templatesCompiled/client/zod/partials/zodSchemaDictionary';
+import partialZodSchemaGeneric from '../../templatesCompiled/client/zod/partials/zodSchemaGeneric';
+import partialZodSchemaReference from '../../templatesCompiled/client/zod/partials/zodSchemaReference';
+import partialZodSchemaComposition from '../../templatesCompiled/client/zod/partials/zodSchemaComposition';
+
+import templateExportYupSchema from '../../templatesCompiled/client/yup/exportSchema';
+import partialYupSchema from '../../templatesCompiled/client/yup/partials/yupSchema';
+import partialYupSchemaInterface from '../../templatesCompiled/client/yup/partials/yupSchemaInterface';
+import partialYupSchemaEnum from '../../templatesCompiled/client/yup/partials/yupSchemaEnum';
+import partialYupSchemaArray from '../../templatesCompiled/client/yup/partials/yupSchemaArray';
+import partialYupSchemaDictionary from '../../templatesCompiled/client/yup/partials/yupSchemaDictionary';
+import partialYupSchemaGeneric from '../../templatesCompiled/client/yup/partials/yupSchemaGeneric';
+import partialYupSchemaReference from '../../templatesCompiled/client/yup/partials/yupSchemaReference';
+import partialYupSchemaComposition from '../../templatesCompiled/client/yup/partials/yupSchemaComposition';
+
+import templateExportJoiSchema from '../../templatesCompiled/client/joi/exportSchema';
+import partialJoiSchema from '../../templatesCompiled/client/joi/partials/joiSchema';
+import partialJoiSchemaInterface from '../../templatesCompiled/client/joi/partials/joiSchemaInterface';
+import partialJoiSchemaEnum from '../../templatesCompiled/client/joi/partials/joiSchemaEnum';
+import partialJoiSchemaArray from '../../templatesCompiled/client/joi/partials/joiSchemaArray';
+import partialJoiSchemaDictionary from '../../templatesCompiled/client/joi/partials/joiSchemaDictionary';
+import partialJoiSchemaGeneric from '../../templatesCompiled/client/joi/partials/joiSchemaGeneric';
+import partialJoiSchemaReference from '../../templatesCompiled/client/joi/partials/joiSchemaReference';
+import partialJoiSchemaComposition from '../../templatesCompiled/client/joi/partials/joiSchemaComposition';
+
+import templateExportJsonSchemaSchema from '../../templatesCompiled/client/jsonschema/exportSchema';
+import partialJsonSchemaSchema from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchema';
+import partialJsonSchemaSchemaInterface from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaInterface';
+import partialJsonSchemaSchemaEnum from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaEnum';
+import partialJsonSchemaSchemaArray from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaArray';
+import partialJsonSchemaSchemaDictionary from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaDictionary';
+import partialJsonSchemaSchemaGeneric from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaGeneric';
+import partialJsonSchemaSchemaReference from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaReference';
+import partialJsonSchemaSchemaComposition from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaComposition';
 
 export interface Templates {
     indexes: {
@@ -98,10 +139,14 @@ export interface Templates {
         models: Handlebars.TemplateDelegate;
         schemas: Handlebars.TemplateDelegate;
         services: Handlebars.TemplateDelegate;
-    }
+    };
     exports: {
         model: Handlebars.TemplateDelegate;
         schema: Handlebars.TemplateDelegate;
+        zodSchema: Handlebars.TemplateDelegate;
+        yupSchema: Handlebars.TemplateDelegate;
+        joiSchema: Handlebars.TemplateDelegate;
+        jsonSchemaSchema: Handlebars.TemplateDelegate
         service: Handlebars.TemplateDelegate;
     };
     core: {
@@ -121,7 +166,7 @@ export interface Templates {
  * Read all the Handlebar templates that we need and return on wrapper object
  * so we can easily access the templates in out generator / write functions.
  */
-export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOptions: boolean; useUnionTypes: boolean }): Templates {
+export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOptions: boolean; useUnionTypes: boolean; validationLibrary?: ValidationLibrary }): Templates {
     registerHandlebarHelpers(root);
 
     // Main templates (entry points for the files we write to disk)
@@ -137,6 +182,10 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
         exports: {
             model: Handlebars.template(templateExportModel),
             schema: Handlebars.template(templateExportSchema),
+            zodSchema: Handlebars.template(templateExportZodSchema),
+            yupSchema: Handlebars.template(templateExportYupSchema),
+            joiSchema: Handlebars.template(templateExportJoiSchema),
+            jsonSchemaSchema: Handlebars.template(templateExportJsonSchemaSchema),
             service: Handlebars.template(templateExportService),
         },
         core: {
@@ -229,6 +278,53 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
     Handlebars.registerPartial('axios/getResponseHeader', Handlebars.template(axiosGetResponseHeader));
     Handlebars.registerPartial('axios/sendRequest', Handlebars.template(axiosSendRequest));
     Handlebars.registerPartial('axios/request', Handlebars.template(axiosRequest));
+
+    // Register Zod partials if validationLibrary is ZOD
+    if (root?.validationLibrary === ValidationLibrary.ZOD) {
+        Handlebars.registerPartial('zodSchema', Handlebars.template(partialZodSchema));
+        Handlebars.registerPartial('zodSchemaInterface', Handlebars.template(partialZodSchemaInterface));
+        Handlebars.registerPartial('zodSchemaEnum', Handlebars.template(partialZodSchemaEnum));
+        Handlebars.registerPartial('zodSchemaArray', Handlebars.template(partialZodSchemaArray));
+        Handlebars.registerPartial('zodSchemaDictionary', Handlebars.template(partialZodSchemaDictionary));
+        Handlebars.registerPartial('zodSchemaGeneric', Handlebars.template(partialZodSchemaGeneric));
+        Handlebars.registerPartial('zodSchemaReference', Handlebars.template(partialZodSchemaReference));
+        Handlebars.registerPartial('zodSchemaComposition', Handlebars.template(partialZodSchemaComposition));
+    }
+
+    // Register Yup partials if validationLibrary is YUP
+    if (root?.validationLibrary === ValidationLibrary.YUP) {
+        Handlebars.registerPartial('yupSchema', Handlebars.template(partialYupSchema));
+        Handlebars.registerPartial('yupSchemaInterface', Handlebars.template(partialYupSchemaInterface));
+        Handlebars.registerPartial('yupSchemaEnum', Handlebars.template(partialYupSchemaEnum));
+        Handlebars.registerPartial('yupSchemaArray', Handlebars.template(partialYupSchemaArray));
+        Handlebars.registerPartial('yupSchemaDictionary', Handlebars.template(partialYupSchemaDictionary));
+        Handlebars.registerPartial('yupSchemaGeneric', Handlebars.template(partialYupSchemaGeneric));
+        Handlebars.registerPartial('yupSchemaReference', Handlebars.template(partialYupSchemaReference));
+        Handlebars.registerPartial('yupSchemaComposition', Handlebars.template(partialYupSchemaComposition));
+    }
+
+    // Register Joi partials if validationLibrary is JOI
+    if (root?.validationLibrary === ValidationLibrary.JOI) {
+        Handlebars.registerPartial('joiSchema', Handlebars.template(partialJoiSchema));
+        Handlebars.registerPartial('joiSchemaInterface', Handlebars.template(partialJoiSchemaInterface));
+        Handlebars.registerPartial('joiSchemaEnum', Handlebars.template(partialJoiSchemaEnum));
+        Handlebars.registerPartial('joiSchemaArray', Handlebars.template(partialJoiSchemaArray));
+        Handlebars.registerPartial('joiSchemaDictionary', Handlebars.template(partialJoiSchemaDictionary));
+        Handlebars.registerPartial('joiSchemaGeneric', Handlebars.template(partialJoiSchemaGeneric));
+        Handlebars.registerPartial('joiSchemaReference', Handlebars.template(partialJoiSchemaReference));
+        Handlebars.registerPartial('joiSchemaComposition', Handlebars.template(partialJoiSchemaComposition));
+    }
+
+    if (root.validationLibrary === ValidationLibrary.JSONSCHEMA) {
+        Handlebars.registerPartial('jsonschemaSchema', Handlebars.template(partialJsonSchemaSchema));
+        Handlebars.registerPartial('jsonschemaSchemaInterface', Handlebars.template(partialJsonSchemaSchemaInterface));
+        Handlebars.registerPartial('jsonschemaSchemaEnum', Handlebars.template(partialJsonSchemaSchemaEnum));
+        Handlebars.registerPartial('jsonschemaSchemaArray', Handlebars.template(partialJsonSchemaSchemaArray));
+        Handlebars.registerPartial('jsonschemaSchemaDictionary', Handlebars.template(partialJsonSchemaSchemaDictionary));
+        Handlebars.registerPartial('jsonschemaSchemaGeneric', Handlebars.template(partialJsonSchemaSchemaGeneric));
+        Handlebars.registerPartial('jsonschemaSchemaReference', Handlebars.template(partialJsonSchemaSchemaReference));
+        Handlebars.registerPartial('jsonschemaSchemaComposition', Handlebars.template(partialJsonSchemaSchemaComposition));
+    }
 
     return templates;
 }

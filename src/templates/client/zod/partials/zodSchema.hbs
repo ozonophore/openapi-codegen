@@ -1,0 +1,19 @@
+{{#equals export 'interface'}}
+{{>zodSchemaInterface}}
+{{else equals export 'enum'}}
+{{>zodSchemaEnum}}
+{{else equals export 'array'}}
+{{>zodSchemaArray}}
+{{else equals export 'dictionary'}}
+{{>zodSchemaDictionary}}
+{{else equals export 'any-of'}}
+{{>zodSchemaComposition}}
+{{else equals export 'all-of'}}
+{{>zodSchemaComposition}}
+{{else equals export 'one-of'}}
+{{>zodSchemaComposition}}
+{{else equals export 'reference'}}
+{{>zodSchemaReference}}
+{{else}}
+{{>zodSchemaGeneric}}
+{{/equals}}

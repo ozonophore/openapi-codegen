@@ -4,6 +4,7 @@ import { describe, test } from 'node:test';
 
 import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 import { HttpClient } from '../../types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
 import { Model } from '../../types/shared/Model.model';
 import { WriteClient } from '../../WriteClient';
 import { templates } from '../__mocks__/templates';
@@ -48,6 +49,7 @@ describe('@unit: writeClientSchemas', () => {
             outputSchemasPath: '/',
             httpClient: HttpClient.FETCH,
             useUnionTypes: false,
+            validationLibrary: ValidationLibrary.NONE,
         });
 
         assert.ok(

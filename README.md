@@ -64,7 +64,6 @@ openapi generate --input ./spec.json --output ./dist
 | `--useOptions` | - | boolean | `false` | Use options instead of arguments |
 | `--useUnionTypes` | - | boolean | `false` | Use union types instead of enums |
 | `--excludeCoreServiceFiles` | - | boolean | `false` | Exclude generation of core and service files |
-| `--includeSchemasFiles` | - | boolean | `false` | Enable generation of model validation schemas |
 | `--request` | - | string | - | Path to custom request file |
 | `--interfacePrefix` | - | string | `I` | Prefix for interface models |
 | `--enumPrefix` | - | string | `E` | Prefix for enum models |
@@ -74,6 +73,7 @@ openapi generate --input ./spec.json --output ./dist
 | `--useSeparatedIndexes` | - | boolean | `false` | Use separate index files for core, models, schemas, and services |
 | `--logLevel` | `-l` | string | `error` | Logging level: `info`, `warn`, or `error` |
 | `--logTarget` | `-t` | string | `console` | Logging target: `console` or `file` |
+| `--validationLibrary` | - | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
 
 **Examples:**
 ```bash
@@ -93,7 +93,6 @@ openapi generate \
   --httpClient fetch \
   --useOptions \
   --useUnionTypes \
-  --includeSchemasFiles \
   --logLevel info
 ```
 
@@ -143,7 +142,6 @@ Instead of passing all options via CLI, you can use a configuration file. Create
     "useOptions": false,
     "useUnionTypes": false,
     "excludeCoreServiceFiles": false,
-    "includeSchemasFiles": false,
     "interfacePrefix": "I",
     "enumPrefix": "E",
     "typePrefix": "T",
@@ -160,7 +158,6 @@ Instead of passing all options via CLI, you can use a configuration file. Create
     "output": "./dist",
     "client": "fetch",
     "excludeCoreServiceFiles": true,
-    "includeSchemasFiles": true,
     "items": [
         {
             "input": "./first.yml"
@@ -201,7 +198,6 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `useOptions` | boolean | `false` | Use options instead of arguments |
 | `useUnionTypes` | boolean | `false` | Use union types instead of enums |
 | `excludeCoreServiceFiles` | boolean | `false` | Exclude core and service files generation |
-| `includeSchemasFiles` | boolean | `false` | Enable model validation schemas generation |
 | `request` | string | - | Path to custom request file |
 | `interfacePrefix` | string | `I` | Prefix for interface models |
 | `enumPrefix` | string | `E` | Prefix for enum models |
@@ -210,6 +206,7 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `sortByRequired` | boolean | `false` | Extended sorting strategy for arguments |
 | `useSeparatedIndexes` | boolean | `false` | Use separate index files |
 | `items` | array | - | Array of configurations (for multi-options format) |
+| `validationLibrary` | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
 
 **Note:** You can use the `init-openapi-config` command to generate a template configuration file.
 
@@ -369,11 +366,19 @@ const order: Order = {
 }
 ```
 
-### Runtime schemas `--includeSchemasFiles`
+### Validation schemas `--validationLibrary`
 By default, the OpenAPI generator only exports interfaces for your models. These interfaces will help you during
-development, but will not be available in JavaScript during runtime. However, Swagger allows you to define properties
-that can be useful during runtime, for instance: `maxLength` of a string or a `pattern` to match, etc. Let's say
-we have the following model:
+development, but will not be available in JavaScript during runtime. However, OpenAPI allows you to define properties
+that can be useful during runtime, for instance: `maxLength` of a string or a `pattern` to match, etc.
+
+The `--validationLibrary` parameter allows you to generate runtime validation schemas using popular validation libraries:
+- **none** (default) - No validation schemas generated
+- **zod** - Generate Zod validation schemas
+- **joi** - Generate Joi validation schemas
+- **yup** - Generate Yup validation schemas
+- **jsonschema** - Generate JSON Schema validation schemas
+
+Let's say we have the following model:
 
 ```json
 {
@@ -407,77 +412,88 @@ we have the following model:
 }
 ```
 
-This will generate the following interface:
+**With Zod (`--validationLibrary zod`):**
 
-```typescript
-export interface MyModel {
-    key: string;
-    name: string;
-    readonly enabled?: boolean;
-    readonly modified?: string;
+```ts
+import { z } from 'zod';
+
+export const MyModelSchema = z.object({
+    key: z.string().max(64).regex(/^[a-zA-Z0-9_]*$/),
+    name: z.string().max(255),
+    enabled: z.boolean().readonly().optional(),
+    modified: z.string().datetime().readonly().optional(),
+});
+
+export type MyModel = z.infer<typeof MyModelSchema>;
+
+export function validateMyModel(data: unknown): MyModel {
+    return MyModelSchema.parse(data);
+}
+
+export function safeValidateMyModel(data: unknown): { success: true; data: MyModel } | { success: false; error: z.ZodError } {
+    const result = MyModelSchema.safeParse(data);
+    if (result.success) {
+        return { success: true, data: result.data };
+    }
+    return { success: false, error: result.error };
 }
 ```
 
-The interface does not contain any properties like `maxLength` or `pattern`. However, they could be useful
-if we wanted to create some form where a user could create such a model. In that form you would iterate
-over the properties to render form fields based on their type and validate the input based on the `maxLength`
-or `pattern` property. This requires us to have this information somewhere... For this we can use the
-flag `--includeSchemasFiles` to generate a runtime model next to the normal interface:
+**With Joi (`--validationLibrary joi`):**
 
-```typescript
-export const $MyModel = {
+```ts
+import Joi from 'joi';
+
+export const MyModelSchema = Joi.object({
+    key: Joi.string().max(64).pattern(/^[a-zA-Z0-9_]*$/).required(),
+    name: Joi.string().max(255).required(),
+    enabled: Joi.boolean().readonly(),
+    modified: Joi.string().isoDate().readonly(),
+});
+```
+
+**With Yup (`--validationLibrary yup`):**
+
+```ts
+import * as yup from 'yup';
+
+export const MyModelSchema = yup.object({
+    key: yup.string().max(64).matches(/^[a-zA-Z0-9_]*$/).required(),
+    name: yup.string().max(255).required(),
+    enabled: yup.boolean().readonly(),
+    modified: yup.string().datetime().readonly(),
+});
+```
+
+**With JSON Schema (`--validationLibrary jsonschema`):**
+
+```ts
+export const MyModelSchema = {
+    type: 'object',
+    required: ['key', 'name'],
     properties: {
         key: {
             type: 'string',
-            isRequired: true,
             maxLength: 64,
             pattern: '^[a-zA-Z0-9_]*$',
         },
         name: {
             type: 'string',
-            isRequired: true,
             maxLength: 255,
         },
         enabled: {
             type: 'boolean',
-            isReadOnly: true,
+            readOnly: true,
         },
         modified: {
             type: 'string',
-            isReadOnly: true,
             format: 'date-time',
+            readOnly: true,
         },
     },
 };
 ```
-
-These runtime object are prefixed with a `$` character and expose all the interesting attributes of a model
-and its properties. We can now use this object to generate the form:
-
-```typescript jsx
-import { $MyModel } from './generated';
-
-// Some pseudo code to iterate over the properties and return a form field
-// the form field could be some abstract component that renders the correct
-// field type and validation rules based on the given input.
-const formFields = Object.entries($MyModel.properties).map(([key, value]) => (
-    <FormField
-        name={key}
-        type={value.type}
-        format={value.format}
-        maxLength={value.maxLength}
-        pattern={value.pattern}
-        isReadOnly={value.isReadOnly}
-    />
-));
-
-const MyForm = () => (
-    <form>
-        {formFields}
-    </form>
-);
-
-```
+These validation schemas can be used for form generation, input validation, and runtime type checking in your application.
 
 ### Cancelable promise `--useCancelableRequest`
 By default, the OpenAPI generator generates services for accessing the API that use non-cancellable requests. Therefore, we have added the ability to switch the generator to generate canceled API requests. To do this, use the flag `--useCancelableRequest`.

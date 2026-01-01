@@ -1,5 +1,7 @@
 import Joi from 'joi';
 
+import { ValidationLibrary } from '../../core/types/enums/ValidationLibrary.enum';
+
 /**
  * The scheme of a set of path parameters for finite directories.
  */
@@ -33,6 +35,14 @@ export const specialParametersSchemasV2 = Joi.object({
 
     excludeCoreServiceFiles: Joi.boolean().optional(),
     includeSchemasFiles: Joi.boolean().optional(),
+});
+
+export const specialParametersSchemasV3 = Joi.object({
+    useOptions: Joi.boolean().optional(),
+    useUnionTypes: Joi.boolean().optional(),
+
+    excludeCoreServiceFiles: Joi.boolean().optional(),
+    validationLibrary: Joi.string().valid(...Object.values(ValidationLibrary)).optional(),
 });
 
 /**

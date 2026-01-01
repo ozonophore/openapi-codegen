@@ -1,0 +1,1 @@
+Joi.object().pattern(Joi.string(), {{#if link}}{{#isBasicType link}}{{joiBaseSchema link.base}}{{else}}{{#if link.alias}}{{{link.alias}}}Schema{{else}}{{{link.type}}}Schema{{/if}}{{/isBasicType}}{{else}}{{joiBaseSchema base}}{{/if}}){{#if isNullable}}.allow(null){{/if}}

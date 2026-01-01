@@ -2,16 +2,49 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
+const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
+
 export const IModelWithEnumSchema = {
+    type: 'object',
     properties: {
         test: {
-            type: 'Enum',
+            enum: ['Success', 'Warning', 'Error'],
+            type: 'string',
         },
         statusCode: {
-            type: 'Enum',
+            enum: ['100', '200 FOO', '300 FOO_BAR', '400 foo-bar', '500 foo.bar', '600 foo&bar'],
+            type: 'string',
         },
         bool: {
             type: 'boolean',
         },
     },
+
+    additionalProperties: false,
 };
+
+export type IModelWithEnum = any; // JSON Schema doesn't provide type inference
+
+export function validateIModelWithEnum(
+    data: unknown,
+): { valid: true; data: IModelWithEnum } | { valid: false; errors: Ajv.ErrorObject[] } {
+    const validate = ajv.compile(IModelWithEnumSchema);
+    const valid = validate(data);
+    if (valid) {
+        return { valid: true, data: data as IModelWithEnum };
+    }
+    return { valid: false, errors: validate.errors || [] };
+}
+
+export function validateIModelWithEnumSync(data: unknown): IModelWithEnum {
+    const validate = ajv.compile(IModelWithEnumSchema);
+    const valid = validate(data);
+    if (!valid) {
+        throw new Error(ajv.errorsText(validate.errors));
+    }
+    return data as IModelWithEnum;
+}

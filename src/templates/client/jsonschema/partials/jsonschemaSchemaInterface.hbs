@@ -1,0 +1,23 @@
+{
+    type: 'object',
+{{#if properties}}
+    properties: {
+{{#each properties}}
+        {{{name}}}: {{>jsonschemaSchema}}{{#unless @last}},{{/unless}}
+{{/each}}
+    },
+{{getRequiredFields properties}}
+{{else}}
+    properties: {},
+{{/if}}
+{{#if maxProperties}}
+    maxProperties: {{{maxProperties}}},
+{{/if}}
+{{#if minProperties}}
+    minProperties: {{{minProperties}}},
+{{/if}}
+{{#if isNullable}}
+    nullable: true,
+{{/if}}
+    additionalProperties: false
+}

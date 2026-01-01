@@ -2,7 +2,8 @@ import { EVersionedSchemaType } from '../Enums';
 import { multiOptionsVersionedSchema } from '../MultiOptionsVersioned/MultiOptionsVersionedSchemas';
 import { optionsVersionedSchemas } from '../OptionsVersioned/OptionsVersionedSchemas';
 import { VersionedSchema } from '../Types';
-import { unifiedOptionsSchemaV1 } from '../UnifiedOptionsVersioned/UnifiedOptionsSchemaV1';
+import { unifiedOptionsSchemaV1 } from './UnifiedOptionsSchemaV1';
+import { unifiedOptionsSchemaV2 } from './UnifiedOptionsSchemaV2';
 
 /**
  * Adds a prefix to all version strings in a versioned schema array.
@@ -35,4 +36,9 @@ export const allVersionedSchemas: VersionedSchema<Record<string, any>>[] = [
         schema: unifiedOptionsSchemaV1,
         type: EVersionedSchemaType.UNIFIED_OPTIONS,
     },
+    {
+        version: 'UNIFIED_v2',
+        schema: unifiedOptionsSchemaV2,
+        type: EVersionedSchemaType.UNIFIED_OPTIONS,
+    }
 ];
