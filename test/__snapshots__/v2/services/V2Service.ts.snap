@@ -6,35 +6,33 @@ import type { IDictionaryWithReference } from '../models/DictionaryWithReference
 import type { IModelWithArray } from '../models/ModelWithArray';
 import type { IModelWithDictionary } from '../models/ModelWithDictionary';
 import type { IModelWithEnumInteger } from '../models/ModelWithEnumInteger';
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
-const getCallWithModelWithDictionaryReference = (): ApiRequestOptions => ({
+const getCallWithModelWithDictionaryReference = (): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/getModelWithDictionaryReference`,
 });
 
-const getCallWithModelWithDictionary = (): ApiRequestOptions => ({
+const getCallWithModelWithDictionary = (): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/getModelWithDictionary`,
 });
 
-const getCallWithSimpleInteger = (): ApiRequestOptions => ({
+const getCallWithSimpleInteger = (): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/simpleEnum`,
 });
 
-const getCallWithModelArray = (): ApiRequestOptions => ({
+const getCallWithModelArray = (): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/getModelWithArray`,
 });
 
 export type TV2Options = {
-    getCallWithModelWithDictionaryReference: () => ApiRequestOptions;
-    getCallWithModelWithDictionary: () => ApiRequestOptions;
-    getCallWithSimpleInteger: () => ApiRequestOptions;
-    getCallWithModelArray: () => ApiRequestOptions;
+    getCallWithModelWithDictionaryReference: () => RequestConfig;
+    getCallWithModelWithDictionary: () => RequestConfig;
+    getCallWithSimpleInteger: () => RequestConfig;
+    getCallWithModelArray: () => RequestConfig;
 };
 
 export const V2Options: TV2Options = {
@@ -44,33 +42,38 @@ export const V2Options: TV2Options = {
     getCallWithModelArray: getCallWithModelArray,
 };
 
-export class V2Service {
+export class V2Service<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @returns IDictionaryWithReference Message for default response
      * @throws ApiError
      */
-    public static getCallWithModelWithDictionaryReference(): Promise<IDictionaryWithReference> {
-        return __request<IDictionaryWithReference>(V2Options.getCallWithModelWithDictionaryReference(), OpenAPI);
+    public getCallWithModelWithDictionaryReference(options?: TOptions): Promise<IDictionaryWithReference> {
+        return this.executor.request<IDictionaryWithReference>(
+            V2Options.getCallWithModelWithDictionaryReference(),
+            options,
+        );
     }
     /**
      * @returns IModelWithDictionary Message for default response
      * @throws ApiError
      */
-    public static getCallWithModelWithDictionary(): Promise<IModelWithDictionary> {
-        return __request<IModelWithDictionary>(V2Options.getCallWithModelWithDictionary(), OpenAPI);
+    public getCallWithModelWithDictionary(options?: TOptions): Promise<IModelWithDictionary> {
+        return this.executor.request<IModelWithDictionary>(V2Options.getCallWithModelWithDictionary(), options);
     }
     /**
      * @returns IModelWithEnumInteger Message for default response
      * @throws ApiError
      */
-    public static getCallWithSimpleInteger(): Promise<IModelWithEnumInteger> {
-        return __request<IModelWithEnumInteger>(V2Options.getCallWithSimpleInteger(), OpenAPI);
+    public getCallWithSimpleInteger(options?: TOptions): Promise<IModelWithEnumInteger> {
+        return this.executor.request<IModelWithEnumInteger>(V2Options.getCallWithSimpleInteger(), options);
     }
     /**
      * @returns IModelWithArray Message for default response
      * @throws ApiError
      */
-    public static getCallWithModelArray(): Promise<IModelWithArray> {
-        return __request<IModelWithArray>(V2Options.getCallWithModelArray(), OpenAPI);
+    public getCallWithModelArray(options?: TOptions): Promise<IModelWithArray> {
+        return this.executor.request<IModelWithArray>(V2Options.getCallWithModelArray(), options);
     }
 }

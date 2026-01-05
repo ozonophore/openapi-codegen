@@ -53,6 +53,9 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
     }
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'request.ts'), templates.core.request(context));
+    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'request-executor.ts'), templates.core.requestExecutor({}));
+    // TODO: Добавлять только, если не выбран custom-ный request
+    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'legacy-request-adapter.ts'), templates.core.legacyRequestAdapter({}));
 
     if (request) {
         const requestFile = resolveHelper(process.cwd(), request);

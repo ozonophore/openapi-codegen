@@ -6,7 +6,7 @@ import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { Client } from '../../types/shared/Client.model';
 import { WriteClient } from '../../WriteClient';
-import { Templates } from '../registerHandlebarTemplates';
+import { templates } from '../__mocks__/templates';
 
 describe('@unit: writeClientCore', () => {
     test('writes to filesystem', async () => {
@@ -23,31 +23,6 @@ describe('@unit: writeClientCore', () => {
             version: '1.0',
             models: [],
             services: [],
-        };
-
-        const templates: Templates = {
-            indexes: {
-                full: () => 'fullIndex',
-                simple: () => 'simpleIndex',
-                core: () => 'coreIndex',
-                models: () => 'modelsIndex',
-                schemas: () => 'schemasIndex',
-                services: () => 'servicesIndex',
-            },
-            exports: {
-                model: () => 'model',
-                schema: () => 'schema',
-                service: () => 'service',
-            },
-            core: {
-                settings: () => 'settings',
-                apiError: () => 'apiError',
-                apiRequestOptions: () => 'apiRequestOptions',
-                apiResult: () => 'apiResult',
-                request: () => 'request',
-                cancelablePromise: () => 'cancelablePromise',
-                httpStatusCode: () => 'httpStatusCode',
-            },
         };
 
         const useCancelableRequest = true;

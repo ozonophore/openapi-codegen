@@ -2,53 +2,51 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
-const getCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+const getCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/simple`,
 });
 
-const putCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+const putCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'PUT',
     path: `/api/v{api-version}/simple`,
 });
 
-const postCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+const postCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/simple`,
 });
 
-const deleteCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+const deleteCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'DELETE',
     path: `/api/v{api-version}/simple`,
 });
 
-const optionsCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+const optionsCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'OPTIONS',
     path: `/api/v{api-version}/simple`,
 });
 
-const headCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+const headCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'HEAD',
     path: `/api/v{api-version}/simple`,
 });
 
-const patchCallWithoutParametersAndResponse = (): ApiRequestOptions => ({
+const patchCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'PATCH',
     path: `/api/v{api-version}/simple`,
 });
 
 export type TSimpleOptions = {
-    getCallWithoutParametersAndResponse: () => ApiRequestOptions;
-    putCallWithoutParametersAndResponse: () => ApiRequestOptions;
-    postCallWithoutParametersAndResponse: () => ApiRequestOptions;
-    deleteCallWithoutParametersAndResponse: () => ApiRequestOptions;
-    optionsCallWithoutParametersAndResponse: () => ApiRequestOptions;
-    headCallWithoutParametersAndResponse: () => ApiRequestOptions;
-    patchCallWithoutParametersAndResponse: () => ApiRequestOptions;
+    getCallWithoutParametersAndResponse: () => RequestConfig;
+    putCallWithoutParametersAndResponse: () => RequestConfig;
+    postCallWithoutParametersAndResponse: () => RequestConfig;
+    deleteCallWithoutParametersAndResponse: () => RequestConfig;
+    optionsCallWithoutParametersAndResponse: () => RequestConfig;
+    headCallWithoutParametersAndResponse: () => RequestConfig;
+    patchCallWithoutParametersAndResponse: () => RequestConfig;
 };
 
 export const SimpleOptions: TSimpleOptions = {
@@ -61,47 +59,49 @@ export const SimpleOptions: TSimpleOptions = {
     patchCallWithoutParametersAndResponse: patchCallWithoutParametersAndResponse,
 };
 
-export class SimpleService {
+export class SimpleService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @throws ApiError
      */
-    public static getCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.getCallWithoutParametersAndResponse(), OpenAPI);
+    public getCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.getCallWithoutParametersAndResponse(), options);
     }
     /**
      * @throws ApiError
      */
-    public static putCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.putCallWithoutParametersAndResponse(), OpenAPI);
+    public putCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.putCallWithoutParametersAndResponse(), options);
     }
     /**
      * @throws ApiError
      */
-    public static postCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.postCallWithoutParametersAndResponse(), OpenAPI);
+    public postCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.postCallWithoutParametersAndResponse(), options);
     }
     /**
      * @throws ApiError
      */
-    public static deleteCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.deleteCallWithoutParametersAndResponse(), OpenAPI);
+    public deleteCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.deleteCallWithoutParametersAndResponse(), options);
     }
     /**
      * @throws ApiError
      */
-    public static optionsCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.optionsCallWithoutParametersAndResponse(), OpenAPI);
+    public optionsCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.optionsCallWithoutParametersAndResponse(), options);
     }
     /**
      * @throws ApiError
      */
-    public static headCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.headCallWithoutParametersAndResponse(), OpenAPI);
+    public headCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.headCallWithoutParametersAndResponse(), options);
     }
     /**
      * @throws ApiError
      */
-    public static patchCallWithoutParametersAndResponse(): Promise<void> {
-        return __request<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), OpenAPI);
+    public patchCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), options);
     }
 }

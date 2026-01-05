@@ -6,7 +6,7 @@ import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { Service } from '../../types/shared/Service.model';
 import { WriteClient } from '../../WriteClient';
-import { Templates } from '../registerHandlebarTemplates';
+import { templates } from '../__mocks__/templates';
 
 describe('@unit: writeClientServices', () => {
     test('writes to filesystem', async () => {
@@ -27,30 +27,6 @@ describe('@unit: writeClientServices', () => {
             },
         ];
 
-        const templates: Templates = {
-            indexes: {
-                full: () => 'fullIndex',
-                simple: () => 'simpleIndex',
-                core: () => 'coreIndex',
-                models: () => 'modelsIndex',
-                schemas: () => 'schemasIndex',
-                services: () => 'servicesIndex',
-            },
-            exports: {
-                model: () => 'model',
-                schema: () => 'schema',
-                service: () => 'service',
-            },
-            core: {
-                settings: () => 'settings',
-                apiError: () => 'apiError',
-                apiRequestOptions: () => 'apiRequestOptions',
-                apiResult: () => 'apiResult',
-                request: () => 'request',
-                cancelablePromise: () => 'cancelablePromise',
-                httpStatusCode: () => 'httpStatusCode',
-            },
-        };
         const writeClient = new WriteClient();
         await writeClient.writeClientServices({
             services,

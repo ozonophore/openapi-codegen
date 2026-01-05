@@ -5,16 +5,14 @@
 import type { TModelThatExtendsExtends } from '../models/ModelThatExtendsExtends';
 import type { TModelThatExtends } from '../models/ModelThatExtends';
 import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
-const callWithResponse = (): ApiRequestOptions => ({
+const callWithResponse = (): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/response`,
 });
 
-const callWithDuplicateResponses = (): ApiRequestOptions => ({
+const callWithDuplicateResponses = (): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/response`,
     errors: {
@@ -24,7 +22,7 @@ const callWithDuplicateResponses = (): ApiRequestOptions => ({
     },
 });
 
-const callWithResponses = (): ApiRequestOptions => ({
+const callWithResponses = (): RequestConfig => ({
     method: 'PUT',
     path: `/api/v{api-version}/response`,
     errors: {
@@ -35,9 +33,9 @@ const callWithResponses = (): ApiRequestOptions => ({
 });
 
 export type TResponseOptions = {
-    callWithResponse: () => ApiRequestOptions;
-    callWithDuplicateResponses: () => ApiRequestOptions;
-    callWithResponses: () => ApiRequestOptions;
+    callWithResponse: () => RequestConfig;
+    callWithDuplicateResponses: () => RequestConfig;
+    callWithResponses: () => RequestConfig;
 };
 
 export const ResponseOptions: TResponseOptions = {
@@ -46,20 +44,22 @@ export const ResponseOptions: TResponseOptions = {
     callWithResponses: callWithResponses,
 };
 
-export class ResponseService {
+export class ResponseService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @returns IModelWithString
      * @throws ApiError
      */
-    public static callWithResponse(): Promise<IModelWithString> {
-        return __request<IModelWithString>(ResponseOptions.callWithResponse(), OpenAPI);
+    public callWithResponse(options?: TOptions): Promise<IModelWithString> {
+        return this.executor.request<IModelWithString>(ResponseOptions.callWithResponse(), options);
     }
     /**
      * @returns IModelWithString Message for default response
      * @throws ApiError
      */
-    public static callWithDuplicateResponses(): Promise<IModelWithString> {
-        return __request<IModelWithString>(ResponseOptions.callWithDuplicateResponses(), OpenAPI);
+    public callWithDuplicateResponses(options?: TOptions): Promise<IModelWithString> {
+        return this.executor.request<IModelWithString>(ResponseOptions.callWithDuplicateResponses(), options);
     }
     /**
      * @returns any Message for 200 response
@@ -68,7 +68,7 @@ export class ResponseService {
      * @returns TModelThatExtendsExtends Message for 202 response
      * @throws ApiError
      */
-    public static callWithResponses(): Promise<
+    public callWithResponses(options?: TOptions): Promise<
         | {
               readonly '@namespace.string'?: string;
               readonly '@namespace.integer'?: number;
@@ -78,7 +78,7 @@ export class ResponseService {
         | TModelThatExtends
         | TModelThatExtendsExtends
     > {
-        return __request<
+        return this.executor.request<
             | {
                   readonly '@namespace.string'?: string;
                   readonly '@namespace.integer'?: number;
@@ -87,6 +87,6 @@ export class ResponseService {
             | IModelWithString
             | TModelThatExtends
             | TModelThatExtendsExtends
-        >(ResponseOptions.callWithResponses(), OpenAPI);
+        >(ResponseOptions.callWithResponses(), options);
     }
 }

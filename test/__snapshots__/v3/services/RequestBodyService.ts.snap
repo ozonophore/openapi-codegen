@@ -3,11 +3,9 @@
 /* eslint-disable */
 
 import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
-const postRequestBodyService = (requestBody?: IModelWithString): ApiRequestOptions => ({
+const postRequestBodyService = (requestBody?: IModelWithString): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/requestBody/`,
     body: requestBody,
@@ -15,19 +13,25 @@ const postRequestBodyService = (requestBody?: IModelWithString): ApiRequestOptio
 });
 
 export type TRequestBodyOptions = {
-    postRequestBodyService: (requestBody?: IModelWithString) => ApiRequestOptions;
+    postRequestBodyService: (requestBody?: IModelWithString) => RequestConfig;
 };
 
 export const RequestBodyOptions: TRequestBodyOptions = {
     postRequestBodyService: postRequestBodyService,
 };
 
-export class RequestBodyService {
+export class RequestBodyService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @param requestBody A reusable request body
      * @throws ApiError
      */
-    public static postRequestBodyService(requestBody?: IModelWithString): Promise<void> {
-        return __request<void>(RequestBodyOptions.postRequestBodyService(requestBody), OpenAPI);
+    public postRequestBodyService(
+        requestBody?: IModelWithString,
+
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(RequestBodyOptions.postRequestBodyService(requestBody), options);
     }
 }

@@ -2,35 +2,33 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
-const duplicateName = (): ApiRequestOptions => ({
+const duplicateName = (): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/duplicate`,
 });
 
-const duplicateName1 = (): ApiRequestOptions => ({
+const duplicateName1 = (): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/duplicate`,
 });
 
-const duplicateName2 = (): ApiRequestOptions => ({
+const duplicateName2 = (): RequestConfig => ({
     method: 'PUT',
     path: `/api/v{api-version}/duplicate`,
 });
 
-const duplicateName3 = (): ApiRequestOptions => ({
+const duplicateName3 = (): RequestConfig => ({
     method: 'DELETE',
     path: `/api/v{api-version}/duplicate`,
 });
 
 export type TDuplicateOptions = {
-    duplicateName: () => ApiRequestOptions;
-    duplicateName1: () => ApiRequestOptions;
-    duplicateName2: () => ApiRequestOptions;
-    duplicateName3: () => ApiRequestOptions;
+    duplicateName: () => RequestConfig;
+    duplicateName1: () => RequestConfig;
+    duplicateName2: () => RequestConfig;
+    duplicateName3: () => RequestConfig;
 };
 
 export const DuplicateOptions: TDuplicateOptions = {
@@ -40,29 +38,31 @@ export const DuplicateOptions: TDuplicateOptions = {
     duplicateName3: duplicateName3,
 };
 
-export class DuplicateService {
+export class DuplicateService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @throws ApiError
      */
-    public static duplicateName(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName(), OpenAPI);
+    public duplicateName(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(DuplicateOptions.duplicateName(), options);
     }
     /**
      * @throws ApiError
      */
-    public static duplicateName1(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName1(), OpenAPI);
+    public duplicateName1(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(DuplicateOptions.duplicateName1(), options);
     }
     /**
      * @throws ApiError
      */
-    public static duplicateName2(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName2(), OpenAPI);
+    public duplicateName2(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(DuplicateOptions.duplicateName2(), options);
     }
     /**
      * @throws ApiError
      */
-    public static duplicateName3(): Promise<void> {
-        return __request<void>(DuplicateOptions.duplicateName3(), OpenAPI);
+    public duplicateName3(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(DuplicateOptions.duplicateName3(), options);
     }
 }

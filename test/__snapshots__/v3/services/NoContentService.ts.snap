@@ -2,29 +2,29 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
-const callWithNoContentResponse = (): ApiRequestOptions => ({
+const callWithNoContentResponse = (): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/no-content`,
 });
 
 export type TNoContentOptions = {
-    callWithNoContentResponse: () => ApiRequestOptions;
+    callWithNoContentResponse: () => RequestConfig;
 };
 
 export const NoContentOptions: TNoContentOptions = {
     callWithNoContentResponse: callWithNoContentResponse,
 };
 
-export class NoContentService {
+export class NoContentService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @returns void
      * @throws ApiError
      */
-    public static callWithNoContentResponse(): Promise<void> {
-        return __request<void>(NoContentOptions.callWithNoContentResponse(), OpenAPI);
+    public callWithNoContentResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(NoContentOptions.callWithNoContentResponse(), options);
     }
 }
