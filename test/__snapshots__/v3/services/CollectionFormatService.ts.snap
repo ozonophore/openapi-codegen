@@ -2,9 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const collectionFormat = (
     parameterArrayCsv: Array<string> | null,
@@ -12,7 +10,7 @@ const collectionFormat = (
     parameterArrayTsv: Array<string> | null,
     parameterArrayPipes: Array<string> | null,
     parameterArrayMulti: Array<string> | null,
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/collectionFormat`,
     query: {
@@ -31,14 +29,16 @@ export type TCollectionFormatOptions = {
         parameterArrayTsv: Array<string> | null,
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
 };
 
 export const CollectionFormatOptions: TCollectionFormatOptions = {
     collectionFormat: collectionFormat,
 };
 
-export class CollectionFormatService {
+export class CollectionFormatService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @param parameterArrayCsv This is an array parameter that is send as csv format (comma-separated values)
      * @param parameterArraySsv This is an array parameter that is send as ssv format (space-separated values)
@@ -47,14 +47,15 @@ export class CollectionFormatService {
      * @param parameterArrayMulti This is an array parameter that is send as multi format (multiple parameter instances)
      * @throws ApiError
      */
-    public static collectionFormat(
+    public collectionFormat(
         parameterArrayCsv: Array<string> | null,
         parameterArraySsv: Array<string> | null,
         parameterArrayTsv: Array<string> | null,
         parameterArrayPipes: Array<string> | null,
         parameterArrayMulti: Array<string> | null,
+        options?: TOptions,
     ): Promise<void> {
-        return __request<void>(
+        return this.executor.request<void>(
             CollectionFormatOptions.collectionFormat(
                 parameterArrayCsv,
                 parameterArraySsv,
@@ -62,7 +63,7 @@ export class CollectionFormatService {
                 parameterArrayPipes,
                 parameterArrayMulti,
             ),
-            OpenAPI,
+            options,
         );
     }
 }

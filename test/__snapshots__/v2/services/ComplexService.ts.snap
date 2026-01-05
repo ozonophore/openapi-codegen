@@ -3,9 +3,7 @@
 /* eslint-disable */
 
 import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const complexTypes = (
     parameterObject: {
@@ -16,7 +14,7 @@ const complexTypes = (
         };
     },
     parameterReference: IModelWithString,
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/complex`,
     query: {
@@ -39,21 +37,23 @@ export type TComplexOptions = {
             };
         },
         parameterReference: IModelWithString,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
 };
 
 export const ComplexOptions: TComplexOptions = {
     complexTypes: complexTypes,
 };
 
-export class ComplexService {
+export class ComplexService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @param parameterObject Parameter containing object
      * @param parameterReference Parameter containing reference
      * @returns IModelWithString Successful response
      * @throws ApiError
      */
-    public static complexTypes(
+    public complexTypes(
         parameterObject: {
             first?: {
                 second?: {
@@ -62,10 +62,12 @@ export class ComplexService {
             };
         },
         parameterReference: IModelWithString,
+
+        options?: TOptions,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(
+        return this.executor.request<Array<IModelWithString>>(
             ComplexOptions.complexTypes(parameterObject, parameterReference),
-            OpenAPI,
+            options,
         );
     }
 }

@@ -39,6 +39,8 @@ import nodeSendRequest from '../../templatesCompiled/client/core/node/sendReques
 import templateCoreSettings from '../../templatesCompiled/client/core/OpenAPI';
 import templateCancellablePromise from '../../templatesCompiled/client/core/CancelablePromise';
 import templateCoreRequest from '../../templatesCompiled/client/core/request';
+import templateCoreRequestExecutor from '../../templatesCompiled/client/core/request-executor';
+import templateLegacyRequestAdapter from '../../templatesCompiled/client/core/legacy-request-adapter';
 import xhrGetHeaders from '../../templatesCompiled/client/core/xhr/getHeaders';
 import xhrGetRequestBody from '../../templatesCompiled/client/core/xhr/getRequestBody';
 import xhrGetResponseBody from '../../templatesCompiled/client/core/xhr/getResponseBody';
@@ -110,6 +112,8 @@ export interface Templates {
         request: Handlebars.TemplateDelegate;
         cancelablePromise: Handlebars.TemplateDelegate;
         httpStatusCode: Handlebars.TemplateDelegate;
+        requestExecutor: Handlebars.TemplateDelegate;
+        legacyRequestAdapter: Handlebars.TemplateDelegate;
     };
 }
 
@@ -143,6 +147,8 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
             request: Handlebars.template(templateCoreRequest),
             cancelablePromise: Handlebars.template(templateCancellablePromise),
             httpStatusCode: Handlebars.template(templateHttpStatuses),
+            requestExecutor: Handlebars.template(templateCoreRequestExecutor),
+            legacyRequestAdapter: Handlebars.template(templateLegacyRequestAdapter),
         },
     };
 

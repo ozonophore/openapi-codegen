@@ -56,6 +56,8 @@ describe('@unit: writeClient', () => {
                 request: () => 'request',
                 cancelablePromise: () => 'cancelablePromise',
                 httpStatusCode: () => 'httpStatusCode',
+                legacyRequestAdapter: () => 'legacyRequestAdapter',
+                requestExecutor: () => 'requestExecutor',
             },
         };
 

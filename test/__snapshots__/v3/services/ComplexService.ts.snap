@@ -6,9 +6,7 @@ import type { IModelWithArray } from '../models/ModelWithArray';
 import type { IModelWithDictionary } from '../models/ModelWithDictionary';
 import type { IModelWithEnum } from '../models/ModelWithEnum';
 import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const complexTypes = (
     parameterObject: {
@@ -19,7 +17,7 @@ const complexTypes = (
         };
     },
     parameterReference: IModelWithString,
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/complex`,
     query: {
@@ -48,7 +46,7 @@ const complexParams = (
             readonly name?: string | null;
         };
     },
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'PUT',
     path: `/api/v{api-version}/complex/${id}`,
     body: requestBody,
@@ -65,7 +63,7 @@ export type TComplexOptions = {
             };
         },
         parameterReference: IModelWithString,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
     complexParams: (
         id: number,
 
@@ -82,7 +80,7 @@ export type TComplexOptions = {
                 readonly name?: string | null;
             };
         },
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
 };
 
 export const ComplexOptions: TComplexOptions = {
@@ -90,14 +88,16 @@ export const ComplexOptions: TComplexOptions = {
     complexParams: complexParams,
 };
 
-export class ComplexService {
+export class ComplexService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @param parameterObject Parameter containing object
      * @param parameterReference Parameter containing reference
      * @returns IModelWithString Successful response
      * @throws ApiError
      */
-    public static complexTypes(
+    public complexTypes(
         parameterObject: {
             first?: {
                 second?: {
@@ -106,10 +106,12 @@ export class ComplexService {
             };
         },
         parameterReference: IModelWithString,
+
+        options?: TOptions,
     ): Promise<Array<IModelWithString>> {
-        return __request<Array<IModelWithString>>(
+        return this.executor.request<Array<IModelWithString>>(
             ComplexOptions.complexTypes(parameterObject, parameterReference),
-            OpenAPI,
+            options,
         );
     }
     /**
@@ -118,7 +120,7 @@ export class ComplexService {
      * @returns IModelWithString Success
      * @throws ApiError
      */
-    public static complexParams(
+    public complexParams(
         id: number,
 
         requestBody?: {
@@ -134,7 +136,8 @@ export class ComplexService {
                 readonly name?: string | null;
             };
         },
+        options?: TOptions,
     ): Promise<IModelWithString> {
-        return __request<IModelWithString>(ComplexOptions.complexParams(id, requestBody), OpenAPI);
+        return this.executor.request<IModelWithString>(ComplexOptions.complexParams(id, requestBody), options);
     }
 }

@@ -2,11 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
-const callWithResultFromHeader = (): ApiRequestOptions => ({
+const callWithResultFromHeader = (): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/header`,
     responseHeader: 'operation-location',
@@ -17,19 +15,21 @@ const callWithResultFromHeader = (): ApiRequestOptions => ({
 });
 
 export type THeaderOptions = {
-    callWithResultFromHeader: () => ApiRequestOptions;
+    callWithResultFromHeader: () => RequestConfig;
 };
 
 export const HeaderOptions: THeaderOptions = {
     callWithResultFromHeader: callWithResultFromHeader,
 };
 
-export class HeaderService {
+export class HeaderService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @returns string Successful response
      * @throws ApiError
      */
-    public static callWithResultFromHeader(): Promise<string> {
-        return __request<string>(HeaderOptions.callWithResultFromHeader(), OpenAPI);
+    public callWithResultFromHeader(options?: TOptions): Promise<string> {
+        return this.executor.request<string>(HeaderOptions.callWithResultFromHeader(), options);
     }
 }

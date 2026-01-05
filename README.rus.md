@@ -509,6 +509,79 @@ export function request<T>(config: TOpenAPIConfig, options: ApiRequestOptions): 
 }
 ```
 
+### Пользовательский Request Executor
+
+Начиная с версии 2.0.0, сгенерированные сервисы используют интерфейс `RequestExecutor` вместо прямых вызовов core-функции `request`. Это позволяет вам предоставить свою собственную реализацию запросов или адаптировать существующие.
+
+**Использование пользовательского RequestExecutor:**
+
+Вы можете создать свою собственную реализацию `RequestExecutor`:
+
+```ts
+import type { RequestExecutor, RequestConfig } from './generated/core/request-executor';
+import { SimpleService } from './generated/services/SimpleService';
+
+// Определите свой тип опций (опционально)
+interface MyCustomOptions {
+    timeout?: number;
+    retries?: number;
+}
+
+// Создайте пользовательский executor
+const customExecutor: RequestExecutor<MyCustomOptions> = {
+    async request<TResponse>(config: RequestConfig, options?: MyCustomOptions): Promise<TResponse> {
+        // Ваша пользовательская логика запросов здесь
+        const response = await fetch(config.url, {
+            method: config.method,
+            headers: config.headers,
+            body: config.body ? JSON.stringify(config.body) : undefined,
+            signal: options?.timeout ? AbortSignal.timeout(options.timeout) : undefined,
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Request failed: ${response.statusText}`);
+        }
+        
+        return response.json();
+    },
+};
+
+// Используйте его со сгенерированными сервисами
+const simpleService = new SimpleService<MyCustomOptions>(customExecutor);
+await simpleService.getCallWithoutParametersAndResponse({ timeout: 5000, retries: 3 });
+```
+
+**Использование legacy request adapter:**
+
+Если у вас есть существующий пользовательский файл `request` (указанный через опцию `--request`), вы можете использовать хелпер `createLegacyExecutor` для адаптации его к новому интерфейсу `RequestExecutor`:
+
+```ts
+import { createLegacyExecutor } from './generated/core/legacy-request-adapter';
+import { OpenAPI } from './generated/core/OpenAPI';
+import { SimpleService } from './generated/services/SimpleService';
+
+// Legacy адаптер оборачивает вашу существующую функцию request
+const executor = createLegacyExecutor(OpenAPI);
+
+// Опционально, вы можете мапить пользовательские опции в ApiRequestOptions
+interface XHROptions {
+    timeout?: number;
+}
+
+const executorWithOptions = createLegacyExecutor<XHROptions>(OpenAPI, (options) => {
+    // Мапьте ваши пользовательские опции в ApiRequestOptions при необходимости
+    return {
+        // Добавьте любые поля ApiRequestOptions на основе options
+    };
+});
+
+// Используйте со сервисами
+const simpleService = new SimpleService(executor);
+await simpleService.getCallWithoutParametersAndResponse();
+```
+
+**Примечание:** Опция --request по-прежнему работает для кастомизации core-функции request. Сгенерированный legacy-request-adapter автоматически будет использовать вашу пользовательскую реализацию request при создании адаптера.
+
 ### Стратегия сортировки аргументов функций `--sortByRequired`
 По умолчанию генератор OpenAPI сортирует параметры сервисных функций согласно упрощенной схеме. Если вам нужна более строгая опция сортировки, используйте флаг `--sortByRequired`. Упрощенная опция сортировки похожа на ту, что использовалась в версии 0.2.3 генератора OpenAPI. Этот флаг позволяет обновиться до новой версии генератора, если вы "застряли" на версии 0.2.3.
 
