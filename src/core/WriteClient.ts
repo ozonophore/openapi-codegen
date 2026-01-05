@@ -60,8 +60,8 @@ export class WriteClient {
     private config: Map<string, TAPIClientGeneratorConfig[]> = new Map();
     private _logger: Logger;
 
-    constructor() {
-        this._logger = new Logger({
+    constructor(logger?: Logger) {
+        this._logger = logger || new Logger({
             level: ELogLevel.ERROR,
             instanceId: 'client',
             logOutput: ELogOutput.CONSOLE,
