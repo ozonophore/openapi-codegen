@@ -85,4 +85,82 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
 
         return `${cleanedFirstPath}/${cleanedSecondPath}`.replace(REGEX_BACKSLASH, '/').replace(REGEX_MULTIPLE_SLASHES, '/');
     });
+
+    Handlebars.registerHelper('isNumericEnum', function (this: any, enumerators: Enum[], options: Handlebars.HelperOptions) {
+        if (!enumerators || enumerators.length === 0) {
+            return options.inverse(this);
+        }
+        const firstEnum = enumerators[0];
+        return firstEnum.type === 'number' ? options.fn(this) : options.inverse(this);
+    });
+
+    Handlebars.registerHelper('isBasicType', function (this: any, link: Model | null) {
+        if (!link) return false;
+        // Если есть imports, это реальная схема, а не базовый тип
+        if (link.imports && link.imports.length > 0) return false;
+        // Если есть path и это не базовый тип, это схема
+        if (link.path && link.path !== link.base?.toLowerCase()) return false;
+        // Проверяем, является ли base базовым типом
+        const basicTypes = ['string', 'number', 'integer', 'int', 'boolean', 'file', 'File', 'any', 'null'];
+        return basicTypes.includes(link.base);
+    });
+
+    Handlebars.registerHelper('yupBaseSchema', function (this: any, base: string) {
+        if (!base) return 'yup.mixed()';
+
+        const baseLower = base.toLowerCase();
+
+        switch (baseLower) {
+            case 'string':
+                return 'yup.string()';
+            case 'number':
+                return 'yup.number()';
+            case 'integer':
+            case 'int':
+                return 'yup.number().integer()';
+            case 'boolean':
+                return 'yup.boolean()';
+            case 'file':
+                return 'yup.mixed()';
+            default:
+                return 'yup.mixed()';
+        }
+    });
+
+    Handlebars.registerHelper('joiBaseSchema', function (this: any, base: string) {
+        if (!base) return 'Joi.any()';
+
+        const baseLower = base.toLowerCase();
+
+        switch (baseLower) {
+            case 'string':
+                return 'Joi.string()';
+            case 'number':
+                return 'Joi.number()';
+            case 'integer':
+            case 'int':
+                return 'Joi.number().integer()';
+            case 'boolean':
+                return 'Joi.boolean()';
+            case 'file':
+                return 'Joi.any()';
+            default:
+                return 'Joi.any()';
+        }
+    });
+    Handlebars.registerHelper('getRequiredFields', function (this: any, properties: Model[]) {
+        const required = properties
+            .filter(prop => prop.isRequired)
+            .map(prop => `'${prop.name}'`)
+            .join(', ');
+        return required ? `required: [${required}],` : '';
+    });
+
+    Handlebars.registerHelper('getEnumType', function (this: any, enumerators: Enum[]) {
+        if (!enumerators || enumerators.length === 0) {
+            return 'string';
+        }
+        const firstEnum = enumerators[0];
+        return firstEnum.type === 'number' ? 'number' : 'string';
+    });
 }

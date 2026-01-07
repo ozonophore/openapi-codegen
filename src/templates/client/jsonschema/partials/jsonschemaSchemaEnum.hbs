@@ -1,0 +1,15 @@
+{
+{{#if enum}}
+    enum: [
+{{#each enum}}
+        {{{value}}}{{#unless @last}},{{/unless}}
+{{/each}}
+    ],
+    type: '{{getEnumType enum}}',
+{{else}}
+    type: 'any',
+{{/if}}
+{{#if isNullable}}
+    nullable: true,
+{{/if}}
+}

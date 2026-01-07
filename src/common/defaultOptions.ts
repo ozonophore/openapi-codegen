@@ -1,6 +1,7 @@
 import Joi from 'joi';
 
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 
 export const defaultOptions = Joi.object({
     input: Joi.string().required(),
@@ -16,7 +17,6 @@ export const defaultOptions = Joi.object({
     useUnionTypes: Joi.boolean().optional(),
 
     excludeCoreServiceFiles: Joi.boolean().optional(),
-    includeSchemasFiles: Joi.boolean().optional(),
 
     request: Joi.string().optional(),
     interfacePrefix: Joi.string().optional(),
@@ -25,4 +25,5 @@ export const defaultOptions = Joi.object({
 
     useCancelableRequest: Joi.boolean().optional(),
     useSeparatedIndexes: Joi.boolean().optional(),
+    validationLibrary: Joi.string().valid(...Object.values(ValidationLibrary)).optional(),
 }).unknown(false);

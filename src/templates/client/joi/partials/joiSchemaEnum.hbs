@@ -1,0 +1,17 @@
+{{#if enum}}
+{{#isNumericEnum enum}}
+Joi.number().valid(
+{{#each enum}}
+    {{{value}}}{{#unless @last}},{{/unless}}
+{{/each}}
+){{#if isNullable}}.allow(null){{/if}}
+{{else}}
+Joi.string().valid(
+{{#each enum}}
+    {{{value}}}{{#unless @last}},{{/unless}}
+{{/each}}
+){{#if isNullable}}.allow(null){{/if}}
+{{/isNumericEnum}}
+{{else}}
+Joi.any(){{#if isNullable}}.allow(null){{/if}}
+{{/if}}

@@ -5,6 +5,7 @@ import { sync } from 'glob';
 import path from 'path';
 
 import { generate, HttpClient } from '../src';
+import { ValidationLibrary } from '../src/core/types/enums/ValidationLibrary.enum';
 import { toMatchSnapshot } from './utils/toMatchSnapshot';
 
 describe('@unit: generate', () => {
@@ -15,7 +16,7 @@ describe('@unit: generate', () => {
             httpClient: HttpClient.FETCH,
             useOptions: false,
             useUnionTypes: false,
-            includeSchemasFiles: true,
+            validationLibrary: ValidationLibrary.JSONSCHEMA,
         });
         const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v2');
         const files = sync(path.join(generatedDir, '**', '*.ts'));
@@ -35,7 +36,7 @@ describe('@unit: generate', () => {
             httpClient: HttpClient.FETCH,
             useOptions: false,
             useUnionTypes: false,
-            includeSchemasFiles: true,
+            validationLibrary: ValidationLibrary.JSONSCHEMA,
         });
         const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v3');
         const files = sync(path.join(generatedDir, '**', '*.ts'));

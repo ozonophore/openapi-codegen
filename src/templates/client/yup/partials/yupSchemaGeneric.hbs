@@ -1,0 +1,19 @@
+{{#equals base 'string'}}
+yup.string(){{#if minLength}}.min({{{minLength}}}){{/if}}{{#if maxLength}}.max({{{maxLength}}}){{/if}}{{#if pattern}}.matches(/{{{pattern}}}/){{/if}}{{#if format}}{{#equals format 'date-time'}}.date(){{else equals format 'date'}}.date(){{else equals format 'email'}}.email(){{else equals format 'uri'}}.url(){{else equals format 'uuid'}}.uuid(){{/equals}}{{/if}}{{#if isNullable}}.nullable(){{/if}}
+{{else equals base 'number'}}
+yup.number(){{#if minimum}}.min({{{minimum}}}){{/if}}{{#if maximum}}.max({{{maximum}}}){{/if}}{{#if multipleOf}}.test('multipleOf', 'Must be a multiple of {{{multipleOf}}}', function(value) {
+    return value == null || value % {{{multipleOf}}} === 0;
+}){{/if}}{{#if isNullable}}.nullable(){{/if}}
+{{else equals base 'integer'}}
+yup.number().integer(){{#if minimum}}.min({{{minimum}}}){{/if}}{{#if maximum}}.max({{{maximum}}}){{/if}}{{#if multipleOf}}.test('multipleOf', 'Must be a multiple of {{{multipleOf}}}', function(value) {
+    return value == null || value % {{{multipleOf}}} === 0;
+}){{/if}}{{#if isNullable}}.nullable(){{/if}}
+{{else equals base 'boolean'}}
+yup.boolean(){{#if isNullable}}.nullable(){{/if}}
+{{else equals base 'File'}}
+yup.mixed(){{#if isNullable}}.nullable(){{/if}}
+{{else equals base 'null'}}
+yup.mixed().oneOf([null])
+{{else}}
+yup.mixed(){{#if isNullable}}.nullable(){{/if}}
+{{/equals}}

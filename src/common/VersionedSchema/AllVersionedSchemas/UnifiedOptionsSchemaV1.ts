@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { HttpClient } from '../../../core';
+import { HttpClient } from '../../../core/types/enums/HttpClient.enum';
 import { 
     additionalParametersSchemaV2, 
     experimentalParametersSchemaV2, 

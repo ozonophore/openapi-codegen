@@ -10,7 +10,6 @@ describe('@unit: convertArrayToObject', () => {
         const expected = {
             items: [],
             excludeCoreServiceFiles: undefined,
-            includeSchemasFiles: undefined,
             request: undefined,
             useOptions: undefined,
             useCancelableRequest: undefined,
@@ -32,7 +31,6 @@ describe('@unit: convertArrayToObject', () => {
             enumPrefix: undefined,
             excludeCoreServiceFiles: undefined,
             httpClient: undefined,
-            includeSchemasFiles: undefined,
             interfacePrefix: undefined,
             items: [
                 {
@@ -53,6 +51,7 @@ describe('@unit: convertArrayToObject', () => {
             useOptions: true,
             useSeparatedIndexes: undefined,
             useUnionTypes: undefined,
+            validationLibrary: undefined
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -66,7 +65,6 @@ describe('@unit: convertArrayToObject', () => {
             enumPrefix: undefined,
             excludeCoreServiceFiles: undefined,
             httpClient: undefined,
-            includeSchemasFiles: undefined,
             interfacePrefix: undefined,
             items: [
                 {
@@ -95,6 +93,7 @@ describe('@unit: convertArrayToObject', () => {
             useOptions: true,
             useSeparatedIndexes: undefined,
             useUnionTypes: undefined,
+            validationLibrary: undefined
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -109,7 +108,6 @@ describe('@unit: convertArrayToObject', () => {
             enumPrefix: undefined,
             excludeCoreServiceFiles: undefined,
             httpClient: undefined,
-            includeSchemasFiles: undefined,
             interfacePrefix: undefined,
             items: [
                 {
@@ -138,6 +136,7 @@ describe('@unit: convertArrayToObject', () => {
             useOptions: true,
             useSeparatedIndexes: undefined,
             useUnionTypes: undefined,
+            validationLibrary: undefined
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -152,7 +151,6 @@ describe('@unit: convertArrayToObject', () => {
             enumPrefix: undefined,
             excludeCoreServiceFiles: undefined,
             httpClient: undefined,
-            includeSchemasFiles: undefined,
             interfacePrefix: undefined,
             items: [
                 {
@@ -181,6 +179,7 @@ describe('@unit: convertArrayToObject', () => {
             useOptions: undefined,
             useSeparatedIndexes: undefined,
             useUnionTypes: undefined,
+            validationLibrary: undefined
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -195,7 +194,6 @@ describe('@unit: convertArrayToObject', () => {
             enumPrefix: undefined,
             excludeCoreServiceFiles: undefined,
             httpClient: undefined,
-            includeSchemasFiles: undefined,
             interfacePrefix: undefined,
             items: [
                 {
@@ -224,6 +222,7 @@ describe('@unit: convertArrayToObject', () => {
             useOptions: undefined,
             useSeparatedIndexes: undefined,
             useUnionTypes: undefined,
+            validationLibrary: undefined
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
