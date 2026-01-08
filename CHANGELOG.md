@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.3] - 2025-12-28
+
+### Added
+- Added Zod-based validation system for CLI options and configuration files, providing better type safety and validation.
+- Added CLI schema modules (`src/cli/schemas/`) for command-specific validation:
+  - `base.ts` - base CLI options schema
+  - `checkConfig.ts` - check-config command schema
+  - `configSchemas.ts` - unified configuration file schemas (TRawOptions, TFlatOptions, TItemConfig)
+  - `generate.ts` - generate command schema with conditional validation
+  - `init.ts` - init command schema
+  - `updateConfig.ts` - update-config command schema
+- Added validation module (`src/cli/validation/`) with error formatting utilities:
+  - `validateCLIOptions.ts` - Zod-based validation functions with formatted error messages
+  - `errorFormatter.ts` - CLI-friendly error message formatting
+
+### Changed
+- Refactored `TRawOptions.ts` to re-export types from Zod schemas, ensuring consistency between types and validation rules.
+- Updated `runGenerateOpenApi.ts` to use Zod validation for CLI options before processing, improving error detection and user experience.
+- Enhanced validation logic: added conditional checks (e.g., `excludeCoreServiceFiles` vs `request` compatibility, required `input`/`output` when config file is missing).
+
 ## [2.0.0-beta.2] - 2025-12-29
 
 ### Added
