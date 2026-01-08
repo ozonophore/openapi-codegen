@@ -1,4 +1,4 @@
-import { ZodError, ZodIssue } from 'zod';
+import { ZodError } from 'zod';
 
 /**
  * Форматирует Zod ошибку в читаемое сообщение для CLI
@@ -20,7 +20,7 @@ export function formatZodErrorForCLI(error: ZodError): string {
 /**
  * Форматирует отдельную Zod issue в читаемое сообщение
  */
-function formatIssue(issue: ZodIssue): string {
+function formatIssue(issue: ZodError['issues'][number]): string {
     const path = formatPath(issue.path);
     const message = issue.message;
 
@@ -29,73 +29,78 @@ function formatIssue(issue: ZodIssue): string {
         return message;
     }
 
-    // Форматируем стандартные ошибки
-    switch (issue.code) {
-        case 'invalid_type':
-            if (issue.received === 'undefined') {
-                return `${path}: "${formatPath(issue.path).replace(/^--/, '')}" is required${getContextMessage(issue)}`;
-            }
-            return `${path}: Expected ${issue.expected}, received ${issue.received}${getContextMessage(issue)}`;
-
-        case 'invalid_enum_value':
-            return `${path}: "${issue.received}" is not a valid value. Expected one of: ${issue.options.join(', ')}`;
-
-        case 'invalid_string':
-            if ('validation' in issue) {
-                if (issue.validation === 'email') {
-                    return `${path}: "${formatPath(issue.path).replace(/^--/, '')}" must be a valid email`;
-                }
-                if (issue.validation === 'url') {
-                    return `${path}: "${formatPath(issue.path).replace(/^--/, '')}" must be a valid URL`;
-                }
-            }
-            return `${path}: ${message}`;
-
-        case 'too_small':
-            if ('minimum' in issue) {
-                const fieldName = formatPath(issue.path).replace(/^--/, '');
-                if (issue.type === 'string') {
-                    return `${path}: "${fieldName}" must be at least ${issue.minimum} characters long`;
-                }
-                if (issue.type === 'number') {
-                    return `${path}: "${fieldName}" must be at least ${issue.minimum}`;
-                }
-                if (issue.type === 'array') {
-                    return `${path}: "${fieldName}" must contain at least ${issue.minimum} items`;
-                }
-            }
-            return `${path}: ${message}`;
-
-        case 'too_big':
-            if ('maximum' in issue) {
-                const fieldName = formatPath(issue.path).replace(/^--/, '');
-                if (issue.type === 'string') {
-                    return `${path}: "${fieldName}" must be at most ${issue.maximum} characters long`;
-                }
-                if (issue.type === 'number') {
-                    return `${path}: "${fieldName}" must be at most ${issue.maximum}`;
-                }
-                if (issue.type === 'array') {
-                    return `${path}: "${fieldName}" must contain at most ${issue.maximum} items`;
-                }
-            }
-            return `${path}: ${message}`;
-
-        case 'invalid_date':
-            return `${path}: "${formatPath(issue.path).replace(/^--/, '')}" must be a valid date`;
-
-        case 'invalid_literal':
-            return `${path}: Expected literal ${JSON.stringify(issue.expected)}, received ${JSON.stringify(issue.received)}`;
-
-        default:
-            return `${path}: ${message}`;
+    // Форматируем стандартные ошибки с использованием type guards
+    if (issue.code === 'invalid_type') {
+        if ('received' in issue && issue.received === 'undefined') {
+            const fieldName = formatPath(issue.path).replace(/^--/, '');
+            return `${path}: "${fieldName}" is required`;
+        }
+        if ('expected' in issue && 'received' in issue) {
+            return `${path}: Expected ${issue.expected}, received ${issue.received}`;
+        }
     }
+
+    if (issue.code === 'invalid_format' && 'format' in issue) {
+        const fieldName = formatPath(issue.path).replace(/^--/, '');
+        const format = issue.format as string;
+        if (format === 'email') {
+            return `${path}: "${fieldName}" must be a valid email`;
+        }
+        if (format === 'url') {
+            return `${path}: "${fieldName}" must be a valid URL`;
+        }
+        return `${path}: "${fieldName}" has invalid format: ${format}`;
+    }
+
+    if (issue.code === 'too_small' && 'minimum' in issue && 'type' in issue) {
+        const fieldName = formatPath(issue.path).replace(/^--/, '');
+        const type = issue.type as string;
+        const minimum = issue.minimum as number;
+
+        if (type === 'string') {
+            return `${path}: "${fieldName}" must be at least ${minimum} characters long`;
+        }
+        if (type === 'number') {
+            return `${path}: "${fieldName}" must be at least ${minimum}`;
+        }
+        if (type === 'array') {
+            return `${path}: "${fieldName}" must contain at least ${minimum} items`;
+        }
+    }
+
+    if (issue.code === 'too_big' && 'maximum' in issue && 'type' in issue) {
+        const fieldName = formatPath(issue.path).replace(/^--/, '');
+        const type = issue.type as string;
+        const maximum = issue.maximum as number;
+
+        if (type === 'string') {
+            return `${path}: "${fieldName}" must be at most ${maximum} characters long`;
+        }
+        if (type === 'number') {
+            return `${path}: "${fieldName}" must be at most ${maximum}`;
+        }
+        if (type === 'array') {
+            return `${path}: "${fieldName}" must contain at most ${maximum} items`;
+        }
+    }
+
+    if (issue.code === 'invalid_value') {
+        const fieldName = formatPath(issue.path).replace(/^--/, '');
+        return `${path}: "${fieldName}" has invalid value`;
+    }
+
+    if (issue.code === 'unrecognized_keys' && 'keys' in issue) {
+        return `${path}: Unrecognized keys: ${(issue.keys as readonly string[]).join(', ')}`;
+    }
+
+    // Для всех остальных случаев используем стандартное сообщение
+    return `${path}: ${message}`;
 }
 
 /**
  * Форматирует путь к полю в читаемый формат
  */
-function formatPath(path: (string | number)[]): string {
+function formatPath(path: (string | number | symbol)[]): string {
     if (path.length === 0) {
         return 'root';
     }
@@ -108,7 +113,10 @@ function formatPath(path: (string | number)[]): string {
             if (typeof segment === 'number') {
                 return `[${segment}]`;
             }
-            return segment;
+            if (typeof segment === 'symbol') {
+                return `[Symbol(${segment.description || 'unknown'})]`;
+            }
+            return String(segment);
         })
         .join('.');
 
@@ -119,16 +127,4 @@ function formatPath(path: (string | number)[]): string {
     }
 
     return formattedPath;
-}
-
-/**
- * Получает дополнительный контекст из issue для улучшения сообщения
- */
-function getContextMessage(issue: ZodIssue): string {
-    // Если есть union errors, можем добавить информацию о доступных опциях
-    if (issue.code === 'invalid_union') {
-        return ' (check union options)';
-    }
-
-    return '';
 }
