@@ -1,42 +1,11 @@
-import { HttpClient } from '../core/types/enums/HttpClient.enum';
-import { ELogLevel, ELogOutput } from './Enums';
+import { TFlatOptions } from '../cli/schemas/configSchemas';
 
-type TItemConfig = {
-    input: string;
-    output: string;
-    outputCore?: string;
-    outputServices?: string;
-    outputModels?: string;
-    outputSchemas?: string;
-    request?: string;
-}
+// Реэкспортируем типы из Zod схем для единообразия
+export type { TFlatOptions, TItemConfig, TRawOptions } from '../cli/schemas/configSchemas';
 
-export type TRawOptions = {
-    items?: TItemConfig[];
-    input?: string;
-    output?: string;
-    outputCore?: string;
-    outputServices?: string;
-    outputModels?: string;
-    outputSchemas?: string;
-    httpClient?: HttpClient;
-    useOptions?: boolean;
-    useUnionTypes?: boolean;
-    excludeCoreServiceFiles?: boolean;
-    includeSchemasFiles?: boolean;
-    request?: string;
-    interfacePrefix?: string;
-    enumPrefix?: string;
-    typePrefix?: string;
-    useCancelableRequest?: boolean;
-    logLevel?: ELogLevel;
-    logTarget?: ELogOutput;
-    sortByRequired?: boolean;
-    useSeparatedIndexes?: boolean;
-}
-
-export type TFlatOptions = Omit<TRawOptions, 'items'>;
+// Реэкспортируем схемы для использования в валидации
+export { baseFlatOptionsSchema, flatOptionsSchema, itemConfigSchema, rawOptionsSchema } from '../cli/schemas/configSchemas';
 
 export type TStrictFlatOptions = {
-  [P in keyof TFlatOptions]-?: NonNullable<TFlatOptions[P]>;
+    [P in keyof TFlatOptions]-?: NonNullable<TFlatOptions[P]>;
 };
