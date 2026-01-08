@@ -3,12 +3,16 @@ import { OptionValues } from 'commander';
 import { APP_LOGGER } from '../../common/Consts';
 import { defaultOptions } from '../../common/defaultOptions';
 import { EMigrationMode } from '../../common/Enums';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
+import { TRawOptions } from '../../common/TRawOptions';
 import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { allMigrationPlans } from '../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
 import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
 import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
+import { generateOptionsSchema } from '../schemas/generate';
+import { validateCLIOptions } from '../validation';
 
 /**
  * Запускает генерацию OpenAPI клиента
@@ -18,9 +22,29 @@ export async function runGenerateOpenApi(options: OptionValues): Promise<void> {
     const { openapiConfig, ...clientOptions } = options;
 
     try {
-        const hasMinimumRequiredOptions = !!clientOptions.input && !!clientOptions.output;
+        // Валидация опций через Zod
+        const validationResult = validateCLIOptions(generateOptionsSchema, {
+            openapiConfig,
+            ...clientOptions,
+        });
+
+        if (!validationResult.success) {
+            APP_LOGGER.error(validationResult.error);
+            process.exit(1);
+        }
+
+        const validatedOptions = validationResult.data;
+
+        // Если есть минимальные опции (input и output), используем их
+        const hasMinimumRequiredOptions = !!validatedOptions.input && !!validatedOptions.output;
         if (hasMinimumRequiredOptions) {
-            const { error: defaultValuesError, value } = defaultOptions.validate(clientOptions);
+            // Используем старую Joi валидацию для обратной совместимости
+            // В будущем можно заменить на Zod
+            const { error: defaultValuesError, value } = defaultOptions.validate({
+                input: validatedOptions.input,
+                output: validatedOptions.output,
+                ...clientOptions,
+            });
 
             if (defaultValuesError) {
                 await OpenAPI.generate(value);
@@ -28,9 +52,10 @@ export async function runGenerateOpenApi(options: OptionValues): Promise<void> {
             }
         }
 
-        const configData = loadConfigIfExists(openapiConfig);
+        const configData = loadConfigIfExists(validatedOptions.openapiConfig);
         if (!configData) {
-            APP_LOGGER.error('The configuration file is missing');
+            APP_LOGGER.error(LOGGER_MESSAGES.CONFIG.FILE_MISSING);
+            process.exit(1);
         }
 
         const preparedOptions = convertArrayToObject(configData);
@@ -44,14 +69,15 @@ export async function runGenerateOpenApi(options: OptionValues): Promise<void> {
         });
 
         if (!migratedOptions) {
-            APP_LOGGER.error("Couldn't convert the set of options to the current version");
-        } else {
-            const { value } = migratedOptions;
-            
-            await OpenAPI.generate(value);
+            APP_LOGGER.error(LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED);
+            process.exit(1);
         }
+
+        const { value } = migratedOptions;
+        await OpenAPI.generate(value as TRawOptions);
         process.exit(0);
     } catch (error: any) {
         APP_LOGGER.error(error.message);
+        process.exit(1);
     }
 }
