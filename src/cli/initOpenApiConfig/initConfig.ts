@@ -6,6 +6,7 @@ import { confirmDialog } from '../interactive/confirmDialog';
 import { OPEN_API_CONFIG_SELECT_OPTIONS } from '../interactive/constants';
 import { selectDialog } from '../interactive/selectDialog';
 import { EConfigType } from '../interactive/types';
+import { CLITemplates } from './Types';
 import { buildConfig, buildExampleConfig } from './utils/buildConfig';
 import { findSpecFiles } from './utils/findSpecFiles';
 import { validateSpecFiles } from './utils/validateSpecFiles';
@@ -16,7 +17,7 @@ import { writeConfigFile } from './utils/writeConfigFile';
  * @param openapiConfig - Путь к файлу конфигурации
  * @param specsDir - Путь к директории со спецификациями
  */
-export async function initConfig(openapiConfig: string, specsDir: string): Promise<void> {
+export async function initConfig(openapiConfig: string, specsDir: string, templates: CLITemplates): Promise<void> {
     const configPath = resolveHelper(process.cwd(), openapiConfig);
     const configExists = await fileSystemHelpers.exists(configPath);
 
