@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { httpClientSchema, logLevelSchema, logTargetSchema } from '../../cli/schemas/base';
+import { ValidationLibrary } from '../../core/types/enums/ValidationLibrary.enum';
 
 /**
  * Схема для отдельного элемента конфигурации (используется в массиве items)
@@ -45,13 +46,13 @@ export const commonOptionsSchema = z.object({
     useOptions: z.boolean().optional().default(false),
     useUnionTypes: z.boolean().optional().default(false),
     excludeCoreServiceFiles: z.boolean().optional().default(false),
-    includeSchemasFiles: z.boolean().optional().default(false),
     request: z.string().min(1).optional(),
     useCancelableRequest: z.boolean().optional().default(false),
     logLevel: logLevelSchema.optional(),
     logTarget: logTargetSchema.optional(),
     sortByRequired: z.boolean().optional().default(false),
     useSeparatedIndexes: z.boolean().optional().default(false),
+    validationLibrary: z.nativeEnum(ValidationLibrary).optional()
 });
 
 /**
