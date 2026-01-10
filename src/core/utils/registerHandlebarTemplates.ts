@@ -48,7 +48,6 @@ import xhrGetResponseHeader from '../../templatesCompiled/client/core/xhr/getRes
 import xhrRequest from '../../templatesCompiled/client/core/xhr/request';
 import xhrSendRequest from '../../templatesCompiled/client/core/xhr/sendRequest';
 import templateExportModel from '../../templatesCompiled/client/exportModel';
-import templateExportSchema from '../../templatesCompiled/client/exportSchema';
 import templateExportService from '../../templatesCompiled/client/exportService';
 import templateFullIndex from '../../templatesCompiled/client/indexFull';
 import templateSimpeIndex from '../../templatesCompiled/client/indexSimple';
@@ -142,11 +141,7 @@ export interface Templates {
     };
     exports: {
         model: Handlebars.TemplateDelegate;
-        schema: Handlebars.TemplateDelegate;
-        zodSchema: Handlebars.TemplateDelegate;
-        yupSchema: Handlebars.TemplateDelegate;
-        joiSchema: Handlebars.TemplateDelegate;
-        jsonSchemaSchema: Handlebars.TemplateDelegate
+        schema: Handlebars.TemplateDelegate | undefined;
         service: Handlebars.TemplateDelegate;
     };
     core: {
@@ -181,11 +176,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
         },
         exports: {
             model: Handlebars.template(templateExportModel),
-            schema: Handlebars.template(templateExportSchema),
-            zodSchema: Handlebars.template(templateExportZodSchema),
-            yupSchema: Handlebars.template(templateExportYupSchema),
-            joiSchema: Handlebars.template(templateExportJoiSchema),
-            jsonSchemaSchema: Handlebars.template(templateExportJsonSchemaSchema),
+            schema: undefined,
             service: Handlebars.template(templateExportService),
         },
         core: {
@@ -281,6 +272,8 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
 
     // Register Zod partials if validationLibrary is ZOD
     if (root?.validationLibrary === ValidationLibrary.ZOD) {
+        templates.exports.schema = Handlebars.template(templateExportZodSchema);
+
         Handlebars.registerPartial('zodSchema', Handlebars.template(partialZodSchema));
         Handlebars.registerPartial('zodSchemaInterface', Handlebars.template(partialZodSchemaInterface));
         Handlebars.registerPartial('zodSchemaEnum', Handlebars.template(partialZodSchemaEnum));
@@ -293,6 +286,8 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
 
     // Register Yup partials if validationLibrary is YUP
     if (root?.validationLibrary === ValidationLibrary.YUP) {
+        templates.exports.schema = Handlebars.template(templateExportYupSchema);
+
         Handlebars.registerPartial('yupSchema', Handlebars.template(partialYupSchema));
         Handlebars.registerPartial('yupSchemaInterface', Handlebars.template(partialYupSchemaInterface));
         Handlebars.registerPartial('yupSchemaEnum', Handlebars.template(partialYupSchemaEnum));
@@ -305,6 +300,8 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
 
     // Register Joi partials if validationLibrary is JOI
     if (root?.validationLibrary === ValidationLibrary.JOI) {
+        templates.exports.schema = Handlebars.template(templateExportJoiSchema);
+
         Handlebars.registerPartial('joiSchema', Handlebars.template(partialJoiSchema));
         Handlebars.registerPartial('joiSchemaInterface', Handlebars.template(partialJoiSchemaInterface));
         Handlebars.registerPartial('joiSchemaEnum', Handlebars.template(partialJoiSchemaEnum));
@@ -316,6 +313,8 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
     }
 
     if (root.validationLibrary === ValidationLibrary.JSONSCHEMA) {
+        templates.exports.schema = Handlebars.template(templateExportJsonSchemaSchema);
+
         Handlebars.registerPartial('jsonschemaSchema', Handlebars.template(partialJsonSchemaSchema));
         Handlebars.registerPartial('jsonschemaSchemaInterface', Handlebars.template(partialJsonSchemaSchemaInterface));
         Handlebars.registerPartial('jsonschemaSchemaEnum', Handlebars.template(partialJsonSchemaSchemaEnum));
