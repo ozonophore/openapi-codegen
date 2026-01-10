@@ -83,6 +83,7 @@ function isPathToFile(path: string): boolean {
 }
 
 const fileSystemHelpers = {
+    readdir,
     readFile,
     writeFile,
     copyFile,

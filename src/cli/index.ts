@@ -12,7 +12,7 @@ import { checkConfig } from './checkAndUpdateConfig/checkConfig';
 import { updateConfig } from './checkAndUpdateConfig/updateConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
 import { EOptionType } from './initOpenApiConfig/Enums';
-import { runInitOpenapiConfig } from './initOpenApiConfig/runInitOpenapiConfig';
+import { initConfig } from './initOpenApiConfig/initConfig';
 import { getCLIName } from './utils';
 
 const packageDetails = JSON.parse(fs.readFileSync(joinHelper(__dirname, '../../package.json'), 'utf-8'));
@@ -104,6 +104,7 @@ program
     .description('Generates a configuration file template for a set of single or multiple options')
     .addHelpText('before', getCLIName(APP_NAME))
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
+    .option('-sd, --specs-dir <value>', 'Путь до директории с файлами спецификации', 'openapi')
     .addOption(
         new Option('-t, --type <type>', 'A variant of the set of options for running the client generator (default: "OPTION")').choices([...Object.values(EOptionType)]).default(EOptionType.OPTION)
     )
@@ -111,7 +112,7 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await runInitOpenapiConfig(options);
+        await initConfig(options.openapiConfig, options.specsDir);
     });
 
 program.exitOverride();
