@@ -1,5 +1,6 @@
 import {
     copyFile as __copyFile,
+    cp as __cp,
     exists as __exists,
     mkdir as __mkdir,
     readdir as __readdir,
@@ -27,6 +28,7 @@ const readFile = promisify(__readFile);
 const writeFile = promisify(__writeFile);
 const copyFile = promisify(__copyFile);
 const exists = promisify(__exists);
+const cp = promisify(__cp);
 
 // Рекурсивное создание директорий (замена mkdirp)
 const mkdir = async (path: string): Promise<void> => {
@@ -88,6 +90,7 @@ const fileSystemHelpers = {
     writeFile,
     copyFile,
     exists,
+    cp,
     mkdir,
     rmdir,
     isDirectory,

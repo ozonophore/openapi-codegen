@@ -12,6 +12,7 @@ import { checkConfig } from './checkAndUpdateConfig/checkConfig';
 import { updateConfig } from './checkAndUpdateConfig/updateConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
 import { initConfig } from './initOpenApiConfig/initConfig';
+import { previewChanges } from './previewChanges/previewChanges';
 import { getCLIName } from './utils';
 
 const packageDetails = JSON.parse(fs.readFileSync(joinHelper(__dirname, '../../package.json'), 'utf-8'));
@@ -112,6 +113,24 @@ program
     })
     .action(async (options: OptionValues) => {
         await initConfig(options);
+    });
+
+/**
+ * preview-changes - Команда для предпросмотра изменений перед генерацией
+ */
+program
+    .command('preview-changes')
+    .description('Preview changes that will be made to generated code before applying them')
+    .addHelpText('before', getCLIName(APP_NAME))
+    .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
+    .option('-gd, --generated-dir <value>', 'Directory with previously generated code (default: "generated")', 'generated')
+    .option('-pd, --preview-dir <value>', 'Temporary directory for preview generation (default: "generated-preview")', 'generated-preview')
+    .option('-dd, --diff-dir <value>', 'Directory to save diff files (default: "generated-diff")', 'generated-diff')
+    .hook('preAction', async () => {
+        await updateNotifier.checkAndNotify();
+    })
+    .action(async (options: OptionValues) => {
+        await previewChanges(options);
     });
 
 program.exitOverride();
