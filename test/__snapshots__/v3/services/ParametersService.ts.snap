@@ -3,9 +3,7 @@
 /* eslint-disable */
 
 import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const callWithParameters = (
     parameterHeader: string | null,
@@ -19,7 +17,7 @@ const callWithParameters = (
     parameterPath: string | null,
 
     requestBody: IModelWithString | null,
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath}`,
     cookies: {
@@ -59,7 +57,7 @@ const callWithWeirdParameterNames = (
      * [WARN] Be careful! A reserved system word is used!
      */
     _default?: string,
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
     cookies: {
@@ -83,7 +81,7 @@ const getCallWithOptionalParam = (
     requestBody: IModelWithString,
 
     parameter?: string,
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/`,
     query: {
@@ -97,7 +95,7 @@ const postCallWithOptionalParam = (
     parameter: string,
 
     requestBody?: IModelWithString,
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/parameters/`,
     query: {
@@ -120,7 +118,7 @@ export type TParametersOptions = {
         parameterPath: string | null,
 
         requestBody: IModelWithString | null,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
     callWithWeirdParameterNames: (
         parameterHeader: string | null,
 
@@ -142,17 +140,17 @@ export type TParametersOptions = {
          * [WARN] Be careful! A reserved system word is used!
          */
         _default?: string,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
     getCallWithOptionalParam: (
         requestBody: IModelWithString,
 
         parameter?: string,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
     postCallWithOptionalParam: (
         parameter: string,
 
         requestBody?: IModelWithString,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
 };
 
 export const ParametersOptions: TParametersOptions = {
@@ -162,7 +160,9 @@ export const ParametersOptions: TParametersOptions = {
     postCallWithOptionalParam: postCallWithOptionalParam,
 };
 
-export class ParametersService {
+export class ParametersService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @param parameterHeader This is the parameter that goes into the header
      * @param parameterQuery This is the parameter that goes into the query params
@@ -172,7 +172,7 @@ export class ParametersService {
      * @param requestBody This is the parameter that goes into the body
      * @throws ApiError
      */
-    public static callWithParameters(
+    public callWithParameters(
         parameterHeader: string | null,
 
         parameterQuery: string | null,
@@ -184,8 +184,10 @@ export class ParametersService {
         parameterPath: string | null,
 
         requestBody: IModelWithString | null,
+
+        options?: TOptions,
     ): Promise<void> {
-        return __request<void>(
+        return this.executor.request<void>(
             ParametersOptions.callWithParameters(
                 parameterHeader,
                 parameterQuery,
@@ -194,7 +196,7 @@ export class ParametersService {
                 parameterPath,
                 requestBody,
             ),
-            OpenAPI,
+            options,
         );
     }
     /**
@@ -209,7 +211,7 @@ export class ParametersService {
      * @param _default This is the parameter with a reserved keyword
      * @throws ApiError
      */
-    public static callWithWeirdParameterNames(
+    public callWithWeirdParameterNames(
         parameterHeader: string | null,
 
         parameterQuery: string | null,
@@ -230,8 +232,10 @@ export class ParametersService {
          * [WARN] Be careful! A reserved system word is used!
          */
         _default?: string,
+
+        options?: TOptions,
     ): Promise<void> {
-        return __request<void>(
+        return this.executor.request<void>(
             ParametersOptions.callWithWeirdParameterNames(
                 parameterHeader,
                 parameterQuery,
@@ -243,7 +247,7 @@ export class ParametersService {
                 parameterPath3,
                 _default,
             ),
-            OpenAPI,
+            options,
         );
     }
     /**
@@ -251,23 +255,30 @@ export class ParametersService {
      * @param parameter This is an optional parameter
      * @throws ApiError
      */
-    public static getCallWithOptionalParam(
+    public getCallWithOptionalParam(
         requestBody: IModelWithString,
 
         parameter?: string,
+
+        options?: TOptions,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.getCallWithOptionalParam(requestBody, parameter), OpenAPI);
+        return this.executor.request<void>(ParametersOptions.getCallWithOptionalParam(requestBody, parameter), options);
     }
     /**
      * @param parameter This is a required parameter
      * @param requestBody This is an optional parameter
      * @throws ApiError
      */
-    public static postCallWithOptionalParam(
+    public postCallWithOptionalParam(
         parameter: string,
 
         requestBody?: IModelWithString,
+
+        options?: TOptions,
     ): Promise<void> {
-        return __request<void>(ParametersOptions.postCallWithOptionalParam(parameter, requestBody), OpenAPI);
+        return this.executor.request<void>(
+            ParametersOptions.postCallWithOptionalParam(parameter, requestBody),
+            options,
+        );
     }
 }

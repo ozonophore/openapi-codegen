@@ -9,7 +9,7 @@ type TItemConfig = {
     outputModels?: string;
     outputSchemas?: string;
     request?: string;
-}
+};
 
 export type TRawOptions = {
     items?: TItemConfig[];
@@ -33,10 +33,10 @@ export type TRawOptions = {
     logTarget?: ELogOutput;
     sortByRequired?: boolean;
     useSeparatedIndexes?: boolean;
-}
+};
 
 export type TFlatOptions = Omit<TRawOptions, 'items'>;
 
 export type TStrictFlatOptions = {
-  [P in keyof TFlatOptions]-?: NonNullable<TFlatOptions[P]>;
+    [P in keyof TFlatOptions]-?: NonNullable<TFlatOptions[P]>;
 };

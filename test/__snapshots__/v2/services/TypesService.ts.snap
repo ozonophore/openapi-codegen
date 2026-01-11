@@ -2,9 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const types = (
     parameterArray: Array<string>,
@@ -15,7 +13,7 @@ const types = (
     parameterBoolean: boolean = true,
     parameterObject: any = null,
     id?: number,
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/types`,
     query: {
@@ -43,14 +41,16 @@ export type TTypesOptions = {
         parameterObject?: any,
 
         id?: number,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
 };
 
 export const TypesOptions: TTypesOptions = {
     types: types,
 };
 
-export class TypesService {
+export class TypesService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @param parameterArray This is an array parameter
      * @param parameterDictionary This is a dictionary parameter
@@ -66,7 +66,7 @@ export class TypesService {
      * @returns any Response is a simple object
      * @throws ApiError
      */
-    public static types(
+    public types(
         parameterArray: Array<string>,
         parameterDictionary: Record<string, string>,
         parameterEnum: 'Success' | 'Warning' | 'Error',
@@ -75,8 +75,10 @@ export class TypesService {
         parameterBoolean: boolean = true,
         parameterObject: any = null,
         id?: number,
+
+        options?: TOptions,
     ): Promise<number | string | boolean | any> {
-        return __request<number | string | boolean | any>(
+        return this.executor.request<number | string | boolean | any>(
             TypesOptions.types(
                 parameterArray,
                 parameterDictionary,
@@ -87,7 +89,7 @@ export class TypesService {
                 parameterObject,
                 id,
             ),
-            OpenAPI,
+            options,
         );
     }
 }

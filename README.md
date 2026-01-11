@@ -510,6 +510,80 @@ export function request<T>(config: TOpenAPIConfig, options: ApiRequestOptions): 
 }
 ```
 
+### Custom Request Executor
+
+Starting from version 2.0.0-beta.1, generated services use the `RequestExecutor` interface instead of calling the core `request` function directly. This allows you to provide your own request implementation or adapt existing ones.
+
+**Using a custom RequestExecutor:**
+
+You can create your own `RequestExecutor` implementation:
+
+```ts
+import type { RequestExecutor, RequestConfig } from './generated/core/request-executor';
+import { SimpleService } from './generated/services/SimpleService';
+
+// Define your custom options type (optional)
+interface MyCustomOptions {
+    timeout?: number;
+    retries?: number;
+}
+
+// Create a custom executor
+const customExecutor: RequestExecutor<MyCustomOptions> = {
+    async request<TResponse>(config: RequestConfig, options?: MyCustomOptions): Promise<TResponse> {
+        // Your custom request logic here
+        const response = await fetch(config.url, {
+            method: config.method,
+            headers: config.headers,
+            body: config.body ? JSON.stringify(config.body) : undefined,
+            signal: options?.timeout ? AbortSignal.timeout(options.timeout) : undefined,
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Request failed: ${response.statusText}`);
+        }
+        
+        return response.json();
+    },
+};
+
+// Use it with generated services
+const simpleService = new SimpleService<MyCustomOptions>(customExecutor);
+await simpleService.getCallWithoutParametersAndResponse({ timeout: 5000, retries: 3 });
+```
+
+**Using legacy request adapter:**
+
+If you have an existing custom `request` file (specified via `--request` option), you can use the `createLegacyExecutor` helper to adapt it to the new `RequestExecutor` interface:
+
+```ts
+import { createLegacyExecutor } from './generated/core/legacy-request-adapter';
+import { OpenAPI } from './generated/core/OpenAPI';
+import { SimpleService } from './generated/services/SimpleService';
+
+// The legacy adapter wraps your existing request function
+const executor = createLegacyExecutor(OpenAPI);
+
+// Optionally, you can map custom options to ApiRequestOptions
+interface XHROptions {
+    timeout?: number;
+}
+
+const executorWithOptions = createLegacyExecutor<XHROptions>(OpenAPI, (options) => {
+    // Map your custom options to ApiRequestOptions if needed
+    return {
+        // Add any ApiRequestOptions fields based on options
+    };
+});
+
+// Use with services
+const simpleService = new SimpleService(executor);
+await simpleService.getCallWithoutParametersAndResponse();
+```
+
+**Note:** The `--request` option still works for customizing the core `request` function. The generated 
+`legacy-request-adapter` will automatically use your custom request implementation when creating the adapter.
+
 ### Sorting strategy for function arguments `--sortByRequired`
 By default, the OpenAPI generator sorts the parameters of service functions according to a simplified scheme. If you need a more strict sorting option, then you need to use the `--sortByRequired` flag. The simplified sorting option is similar to the one used in version 0.2.3 of the OpenAPI generator. This flag allows you to upgrade to a new version of the generator if you are "stuck" on version 0.2.3.
 

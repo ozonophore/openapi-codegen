@@ -5,15 +5,13 @@
 import type { EEnumWithNumbers } from '../models/EnumWithNumbers';
 import type { EEnumWithStrings } from '../models/EnumWithStrings';
 import type { EEnumWithStringsWithType } from '../models/EnumWithStringsWithType';
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const callWithEnums = (requestBody?: {
     enumWithNumbers?: EEnumWithNumbers;
     enumWithStrings?: EEnumWithStrings;
     enumWithStringsWithType?: EEnumWithStringsWithType;
-}): ApiRequestOptions => ({
+}): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/enums`,
     body: requestBody,
@@ -25,23 +23,28 @@ export type TEnumsOptions = {
         enumWithNumbers?: EEnumWithNumbers;
         enumWithStrings?: EEnumWithStrings;
         enumWithStringsWithType?: EEnumWithStringsWithType;
-    }) => ApiRequestOptions;
+    }) => RequestConfig;
 };
 
 export const EnumsOptions: TEnumsOptions = {
     callWithEnums: callWithEnums,
 };
 
-export class EnumsService {
+export class EnumsService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @param requestBody
      * @throws ApiError
      */
-    public static callWithEnums(requestBody?: {
-        enumWithNumbers?: EEnumWithNumbers;
-        enumWithStrings?: EEnumWithStrings;
-        enumWithStringsWithType?: EEnumWithStringsWithType;
-    }): Promise<void> {
-        return __request<void>(EnumsOptions.callWithEnums(requestBody), OpenAPI);
+    public callWithEnums(
+        requestBody?: {
+            enumWithNumbers?: EEnumWithNumbers;
+            enumWithStrings?: EEnumWithStrings;
+            enumWithStringsWithType?: EEnumWithStringsWithType;
+        },
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(EnumsOptions.callWithEnums(requestBody), options);
     }
 }

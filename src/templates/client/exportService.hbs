@@ -8,12 +8,10 @@ import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{joinPath 
 {{#if @root.useCancelableRequest}}
 import type { CancelablePromise } from '{{{joinPath @root.outputCore 'CancelablePromise'}}}';
 {{/if}}
-import { request as __request } from '{{{joinPath @root.outputCore 'request'}}}';
-import type { ApiRequestOptions } from '{{{joinPath @root.outputCore 'ApiRequestOptions'}}}';
-import { OpenAPI } from '{{{joinPath @root.outputCore 'OpenAPI'}}}';
+import type { RequestExecutor, RequestConfig } from '{{{joinPath @root.outputCore 'request-executor'}}}';
 
 {{#each operations}}
-const {{{name}}} = ({{>parameters}}): ApiRequestOptions => ({
+const {{{name}}} = ({{>parameters}}): RequestConfig => ({
     {{>serviceOption}}
 });
 
@@ -21,17 +19,18 @@ const {{{name}}} = ({{>parameters}}): ApiRequestOptions => ({
 
 export type T{{{originName}}}Options = {
 {{#each operations}}
-    {{{name}}}: ({{>parametersDefinition}}) => ApiRequestOptions;
+    {{{name}}}: ({{>parametersDefinition}}) => RequestConfig;
 {{/each}}
-}
+};
 
 export const {{{originName}}}Options: T{{{originName}}}Options = {
 {{#each operations}}
     {{{name}}}: {{{name}}},
 {{/each}}
-}
+};
 
-export class {{{name}}} {
+export class {{{name}}}<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
 
     {{#each operations}}
     /**
@@ -57,11 +56,20 @@ export class {{{name}}} {
      * @throws ApiError
      */
     {{#if @root.useCancelableRequest}}
-    public static {{{name}}}({{>parameters}}): CancelablePromise<{{>result default="void"}}> {
+    public {{{name}}}(
+        {{>parameters}}
+        options?: TOptions,
+    ): CancelablePromise<{{>result default="void"}}> {
     {{else}}
-    public static {{{name}}}({{>parameters}}): Promise<{{>result default="void"}}> {
+    public {{{name}}}(
+        {{>parameters}}
+        options?: TOptions,
+    ): Promise<{{>result default="void"}}> {
     {{/if}}
-        return __request<{{>result default="void"}}>({{../originName}}Options.{{{name}}}({{>parameterValues~}}), OpenAPI);
+        return this.executor.request<{{>result default="void"}}>(
+            {{{../originName}}}Options.{{{name}}}({{>parameterValues~}}),
+            options
+        );
     }
     {{/each}}
 }

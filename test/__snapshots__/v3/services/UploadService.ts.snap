@@ -2,11 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
-const uploadFile = (file: Blob): ApiRequestOptions => ({
+const uploadFile = (file: Blob): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/upload`,
     formData: {
@@ -15,20 +13,26 @@ const uploadFile = (file: Blob): ApiRequestOptions => ({
 });
 
 export type TUploadOptions = {
-    uploadFile: (file: Blob) => ApiRequestOptions;
+    uploadFile: (file: Blob) => RequestConfig;
 };
 
 export const UploadOptions: TUploadOptions = {
     uploadFile: uploadFile,
 };
 
-export class UploadService {
+export class UploadService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @param file Supply a file reference for upload
      * @returns boolean
      * @throws ApiError
      */
-    public static uploadFile(file: Blob): Promise<boolean> {
-        return __request<boolean>(UploadOptions.uploadFile(file), OpenAPI);
+    public uploadFile(
+        file: Blob,
+
+        options?: TOptions,
+    ): Promise<boolean> {
+        return this.executor.request<boolean>(UploadOptions.uploadFile(file), options);
     }
 }

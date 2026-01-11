@@ -3,9 +3,7 @@
 /* eslint-disable */
 
 import type { IModelWithString } from '../models/ModelWithString';
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const callWithDefaultParameters = (
     parameterString: string = 'Hello World!',
@@ -15,7 +13,7 @@ const callWithDefaultParameters = (
     parameterModel: IModelWithString = {
         prop: 'Hello World!',
     },
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/defaults`,
     query: {
@@ -35,7 +33,7 @@ const callWithDefaultOptionalParameters = (
     parameterModel: IModelWithString = {
         prop: 'Hello World!',
     },
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/defaults`,
     query: {
@@ -56,7 +54,7 @@ const callToTestOrderOfParams = (
 
     parameterStringWithDefault: string = 'Hello World!',
     parameterStringWithEmptyDefault: string = '',
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'PUT',
     path: `/api/v{api-version}/defaults`,
     query: {
@@ -79,7 +77,7 @@ export type TDefaultsOptions = {
 
         parameterEnum?: 'Success' | 'Warning' | 'Error',
         parameterModel?: IModelWithString,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
     callWithDefaultOptionalParameters: (
         parameterString?: string,
 
@@ -89,7 +87,7 @@ export type TDefaultsOptions = {
 
         parameterEnum?: 'Success' | 'Warning' | 'Error',
         parameterModel?: IModelWithString,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
     callToTestOrderOfParams: (
         parameterStringWithNoDefault: string,
 
@@ -102,7 +100,7 @@ export type TDefaultsOptions = {
         parameterStringWithDefault?: string,
 
         parameterStringWithEmptyDefault?: string,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
 };
 
 export const DefaultsOptions: TDefaultsOptions = {
@@ -111,7 +109,9 @@ export const DefaultsOptions: TDefaultsOptions = {
     callToTestOrderOfParams: callToTestOrderOfParams,
 };
 
-export class DefaultsService {
+export class DefaultsService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @param parameterString This is a simple string with default value
      * @param parameterNumber This is a simple number with default value
@@ -120,7 +120,7 @@ export class DefaultsService {
      * @param parameterModel This is a simple model with default value
      * @throws ApiError
      */
-    public static callWithDefaultParameters(
+    public callWithDefaultParameters(
         parameterString: string = 'Hello World!',
         parameterNumber: number = 123,
         parameterBoolean: boolean = true,
@@ -128,8 +128,9 @@ export class DefaultsService {
         parameterModel: IModelWithString = {
             prop: 'Hello World!',
         },
+        options?: TOptions,
     ): Promise<void> {
-        return __request<void>(
+        return this.executor.request<void>(
             DefaultsOptions.callWithDefaultParameters(
                 parameterString,
                 parameterNumber,
@@ -137,7 +138,7 @@ export class DefaultsService {
                 parameterEnum,
                 parameterModel,
             ),
-            OpenAPI,
+            options,
         );
     }
     /**
@@ -148,7 +149,7 @@ export class DefaultsService {
      * @param parameterModel This is a simple model that is optional with default value
      * @throws ApiError
      */
-    public static callWithDefaultOptionalParameters(
+    public callWithDefaultOptionalParameters(
         parameterString: string = 'Hello World!',
         parameterNumber: number = 123,
         parameterBoolean: boolean = true,
@@ -156,8 +157,9 @@ export class DefaultsService {
         parameterModel: IModelWithString = {
             prop: 'Hello World!',
         },
+        options?: TOptions,
     ): Promise<void> {
-        return __request<void>(
+        return this.executor.request<void>(
             DefaultsOptions.callWithDefaultOptionalParameters(
                 parameterString,
                 parameterNumber,
@@ -165,7 +167,7 @@ export class DefaultsService {
                 parameterEnum,
                 parameterModel,
             ),
-            OpenAPI,
+            options,
         );
     }
     /**
@@ -177,7 +179,7 @@ export class DefaultsService {
      * @param parameterStringWithEmptyDefault This is a string with empty default
      * @throws ApiError
      */
-    public static callToTestOrderOfParams(
+    public callToTestOrderOfParams(
         parameterStringWithNoDefault: string,
 
         parameterOptionalStringWithDefault: string = 'Hello World!',
@@ -186,8 +188,9 @@ export class DefaultsService {
 
         parameterStringWithDefault: string = 'Hello World!',
         parameterStringWithEmptyDefault: string = '',
+        options?: TOptions,
     ): Promise<void> {
-        return __request<void>(
+        return this.executor.request<void>(
             DefaultsOptions.callToTestOrderOfParams(
                 parameterStringWithNoDefault,
                 parameterOptionalStringWithDefault,
@@ -196,7 +199,7 @@ export class DefaultsService {
                 parameterStringWithDefault,
                 parameterStringWithEmptyDefault,
             ),
-            OpenAPI,
+            options,
         );
     }
 }

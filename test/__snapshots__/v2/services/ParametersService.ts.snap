@@ -2,9 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { request as __request } from '../core/request';
-import type { ApiRequestOptions } from '../core/ApiRequestOptions';
-import { OpenAPI } from '../core/OpenAPI';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const callWithParameters = (
     parameterHeader: string,
@@ -16,7 +14,7 @@ const callWithParameters = (
     parameterBody: string,
 
     parameterPath: string,
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath}`,
     headers: {
@@ -50,7 +48,7 @@ const callWithWeirdParameterNames = (
      * [WARN] Be careful! A reserved system word is used!
      */
     _default?: string,
-): ApiRequestOptions => ({
+): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
     headers: {
@@ -77,7 +75,7 @@ export type TParametersOptions = {
         parameterBody: string,
 
         parameterPath: string,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
     callWithWeirdParameterNames: (
         parameterHeader: string,
 
@@ -97,7 +95,7 @@ export type TParametersOptions = {
          * [WARN] Be careful! A reserved system word is used!
          */
         _default?: string,
-    ) => ApiRequestOptions;
+    ) => RequestConfig;
 };
 
 export const ParametersOptions: TParametersOptions = {
@@ -105,7 +103,9 @@ export const ParametersOptions: TParametersOptions = {
     callWithWeirdParameterNames: callWithWeirdParameterNames,
 };
 
-export class ParametersService {
+export class ParametersService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
     /**
      * @param parameterHeader This is the parameter that goes into the header
      * @param parameterQuery This is the parameter that goes into the query params
@@ -114,7 +114,7 @@ export class ParametersService {
      * @param parameterPath This is the parameter that goes into the path
      * @throws ApiError
      */
-    public static callWithParameters(
+    public callWithParameters(
         parameterHeader: string,
 
         parameterQuery: string,
@@ -124,8 +124,10 @@ export class ParametersService {
         parameterBody: string,
 
         parameterPath: string,
+
+        options?: TOptions,
     ): Promise<void> {
-        return __request<void>(
+        return this.executor.request<void>(
             ParametersOptions.callWithParameters(
                 parameterHeader,
                 parameterQuery,
@@ -133,7 +135,7 @@ export class ParametersService {
                 parameterBody,
                 parameterPath,
             ),
-            OpenAPI,
+            options,
         );
     }
     /**
@@ -147,7 +149,7 @@ export class ParametersService {
      * @param _default This is the parameter with a reserved keyword
      * @throws ApiError
      */
-    public static callWithWeirdParameterNames(
+    public callWithWeirdParameterNames(
         parameterHeader: string,
 
         parameterQuery: string,
@@ -166,8 +168,10 @@ export class ParametersService {
          * [WARN] Be careful! A reserved system word is used!
          */
         _default?: string,
+
+        options?: TOptions,
     ): Promise<void> {
-        return __request<void>(
+        return this.executor.request<void>(
             ParametersOptions.callWithWeirdParameterNames(
                 parameterHeader,
                 parameterQuery,
@@ -178,7 +182,7 @@ export class ParametersService {
                 parameterPath3,
                 _default,
             ),
-            OpenAPI,
+            options,
         );
     }
 }

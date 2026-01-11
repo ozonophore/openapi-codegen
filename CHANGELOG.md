@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.1] - 2026-01-06
+
+### Added
+- Added core `RequestExecutor` / `RequestConfig` abstraction and Handlebars template to generate a type-safe request executor interface in the core layer.
+- Added `legacy-request-adapter` core template and generated file that adapts the existing `request(options: ApiRequestOptions, config: OpenAPI)` runtime to the new `RequestExecutor` interface, preserving compatibility with current HTTP client implementations.
+
+### Changed
+- **BREAKING**: Updated service generation templates to build thin service classes over `RequestExecutor` instead of calling the core `request` function directly; service methods now accept optional transport options and delegate requests to an injected executor.
+- Updated Handlebars templates registration and `writeClientCore` to emit the new core files (`request-executor.ts`, `legacy-request-adapter.ts`) alongside existing `ApiRequestOptions`, `OpenAPI` and `request` runtime files.
+- Adjusted service option templates to construct `RequestConfig` objects consumed by the new `RequestExecutor` abstraction.
+
 ## [2.0.0-beta.0] - 2025-12-28
 
 ### Added
