@@ -1,5 +1,3 @@
-import { OptionValues } from 'commander';
-
 import { APP_LOGGER } from '../../common/Consts';
 import { TRawOptions } from '../../common/TRawOptions';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
@@ -8,36 +6,22 @@ import { confirmDialog } from '../interactive/confirmDialog';
 import { OPEN_API_CONFIG_SELECT_OPTIONS } from '../interactive/constants';
 import { selectDialog } from '../interactive/selectDialog';
 import { EConfigType } from '../interactive/types';
-import { InitOptions, initOptionsSchema } from '../schemas';
-import { validateCLIOptions } from '../validation';
+import { InitOptions } from '../schemas';
+import { CLITemplates } from './Types';
 import { buildConfig, buildExampleConfig } from './utils/buildConfig';
 import { findSpecFiles } from './utils/findSpecFiles';
 import { validateSpecFiles } from './utils/validateSpecFiles';
 import { writeConfigFile } from './utils/writeConfigFile';
 
+type InitConfigParams = Pick<InitOptions, 'openapiConfig' | 'specsDir' | 'request'> & {
+    templates: CLITemplates;
+}
+
 /**
  * Инициализирует файл конфигурации OpenAPI
- * @param openapiConfig - Путь к файлу конфигурации
- * @param specsDir - Путь к директории со спецификациями
  */
-export async function initConfig(options: OptionValues): Promise<void> {
-    let validatedOptions: InitOptions;
-    try {
-        // Валидация опций через Zod
-        const validationResult = validateCLIOptions(initOptionsSchema, options);
-
-        if (!validationResult.success) {
-            APP_LOGGER.error(validationResult.error);
-            process.exit(1);
-        }
-
-        validatedOptions = validationResult.data as InitOptions;
-    } catch (error: any) {
-        APP_LOGGER.error(error.message);
-        process.exit(1);
-    }
-
-    const configPath = resolveHelper(process.cwd(), validatedOptions.openapiConfig);
+export async function initConfig(params: InitConfigParams): Promise<void> {
+    const configPath = resolveHelper(process.cwd(), params.openapiConfig);
     const configExists = await fileSystemHelpers.exists(configPath);
 
     // Шаг 3: Проверка существования файла конфигурации
@@ -53,7 +37,7 @@ export async function initConfig(options: OptionValues): Promise<void> {
         }
     }
 
-    const currentSpecsDir = validatedOptions.specsDir;
+    const currentSpecsDir = params.specsDir;
 
     // Шаг 4: Формирование файла конфигурации
     // Поиск файлов спецификаций
@@ -93,7 +77,7 @@ export async function initConfig(options: OptionValues): Promise<void> {
                     initial: false,
                 });
             }
-            customRequest = validatedOptions.request;
+            customRequest = params.request;
         }
 
         config = await buildConfig(validatedSpecs, useMultiOption, customRequest, perSpecRequest);
@@ -135,5 +119,5 @@ export async function initConfig(options: OptionValues): Promise<void> {
     }
 
     // Записываем конфигурацию на диск
-    await writeConfigFile(validatedOptions.openapiConfig, config);
+    await writeConfigFile(params.openapiConfig, config, params.templates);
 }

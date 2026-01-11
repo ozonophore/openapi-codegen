@@ -1,3 +1,5 @@
+import * as Handlebars from 'handlebars/runtime';
+
 import templateRequest from '../../../templatesCompiled/cli/customRequest';
 import templateRequestExecutor from '../../../templatesCompiled/cli/customRequestExecutor';
 import templateConfig from '../../../templatesCompiled/cli/openApiConfig';

@@ -16,7 +16,7 @@ export async function format(input: string, parser?: LiteralUnion<BuiltInParserN
         });
 
         return formatedCode;
-    } catch {
+    } catch (error: any) {
         throw new Error('Could not to format the value via prettier');
     }
 }
