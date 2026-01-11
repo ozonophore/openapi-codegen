@@ -4,6 +4,33 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.0.0-beta.2] - 2026-01-07
+
+### Добавлено
+- Добавлен параметр `validationLibrary` для поддержки нескольких библиотек валидации при генерации схем: `none`, `zod`, `joi`, `yup`, `jsonschema`.
+- Добавлены Handlebars шаблоны для генерации схем валидации:
+  - Схемы валидации Zod (`zod/exportSchema.hbs` и партиалы)
+  - Схемы валидации Yup (`yup/exportSchema.hbs` и партиалы)
+  - Схемы валидации Joi (`joi/exportSchema.hbs` и партиалы)
+  - Схемы валидации JSON Schema (`jsonschema/exportSchema.hbs` и партиалы)
+- Добавлен enum `ValidationLibrary` для определения поддерживаемых библиотек валидации.
+- Добавлен план миграции из `UNIFIED_v1` в `UNIFIED_v2` схему, который мигрирует `includeSchemasFiles` в `validationLibrary`.
+
+### Изменено
+- **BREAKING**: Заменён параметр `includeSchemasFiles` (boolean) на параметр `validationLibrary` (enum) для более гибкой генерации схем валидации.
+- Обновлена логика генерации схем для поддержки нескольких библиотек валидации с библиотеко-специфичными шаблонами.
+- Обновлён `writeClientSchemas` для использования библиотеко-специфичных шаблонов на основе выбранной библиотеки.
+
+### Удалено
+- **BREAKING**: Удалён параметр `includeSchemasFiles` (заменён на `validationLibrary`).
+
+### Примечания по миграции
+- Параметр `includeSchemasFiles` автоматически мигрируется в `validationLibrary`:
+  - `includeSchemasFiles: false` → `validationLibrary: 'none'`
+  - `includeSchemasFiles: true` → `validationLibrary: undefined` (будет использовано значение по умолчанию, обычно `'none'`)
+- Для генерации схем валидации установите `validationLibrary` в одно из значений: `'zod'`, `'joi'`, `'yup'`, или `'jsonschema'`.
+- Значение по умолчанию: `'none'` (схемы валидации не генерируются).
+
 ## [2.0.0-beta.1] - 2026-01-06
 
 ### Добавлено

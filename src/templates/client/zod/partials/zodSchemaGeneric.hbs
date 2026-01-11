@@ -1,0 +1,13 @@
+{{#equals base 'string'}}
+z.string(){{#if minLength}}.min({{{minLength}}}){{/if}}{{#if maxLength}}.max({{{maxLength}}}){{/if}}{{#if pattern}}.regex(/{{{pattern}}}/){{/if}}{{#if format}}{{#equals format 'date-time'}}.datetime(){{else equals format 'date'}}.date(){{else equals format 'email'}}.email(){{else equals format 'uri'}}.url(){{else equals format 'uuid'}}.uuid(){{/equals}}{{/if}}{{#if isNullable}}.nullable(){{/if}}
+{{else equals base 'number'}}
+z.number(){{#if minimum}}.min({{{minimum}}}){{/if}}{{#if maximum}}.max({{{maximum}}}){{/if}}{{#if multipleOf}}.multipleOf({{{multipleOf}}}){{/if}}{{#if isNullable}}.nullable(){{/if}}
+{{else equals base 'integer'}}
+z.number().int(){{#if minimum}}.min({{{minimum}}}){{/if}}{{#if maximum}}.max({{{maximum}}}){{/if}}{{#if multipleOf}}.multipleOf({{{multipleOf}}}){{/if}}{{#if isNullable}}.nullable(){{/if}}
+{{else equals base 'boolean'}}
+z.boolean(){{#if isNullable}}.nullable(){{/if}}
+{{else equals base 'null'}}
+z.null()
+{{else}}
+z.any(){{#if isNullable}}.nullable(){{/if}}
+{{/equals}}

@@ -2,10 +2,41 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
+const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
+
 export const IModelWithStringSchema = {
+    type: 'object',
     properties: {
         prop: {
             type: 'string',
         },
     },
+
+    additionalProperties: false,
 };
+
+export type IModelWithString = any; // JSON Schema doesn't provide type inference
+
+export function validateIModelWithString(
+    data: unknown,
+): { valid: true; data: IModelWithString } | { valid: false; errors: Ajv.ErrorObject[] } {
+    const validate = ajv.compile(IModelWithStringSchema);
+    const valid = validate(data);
+    if (valid) {
+        return { valid: true, data: data as IModelWithString };
+    }
+    return { valid: false, errors: validate.errors || [] };
+}
+
+export function validateIModelWithStringSync(data: unknown): IModelWithString {
+    const validate = ajv.compile(IModelWithStringSchema);
+    const valid = validate(data);
+    if (!valid) {
+        throw new Error(ajv.errorsText(validate.errors));
+    }
+    return data as IModelWithString;
+}
