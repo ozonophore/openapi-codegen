@@ -6,12 +6,17 @@ import { EMigrationMode } from '../../common/Enums';
 import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
-import { dirNameHelper, joinHelper, relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { dirNameHelper, joinHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { allMigrationPlans } from '../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
 import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
 import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
 import { TRawOptions } from '../schemas/configSchemas';
+import { compareFiles } from './utils/compareFiles';
+import { formatDiff } from './utils/formatDiff';
+import { isDirectoryEmpty } from './utils/isDirectoryEmpty';
+import { readDirectoryRecursive } from './utils/readDirectoryRecursive';
+import { updateOutputPaths } from './utils/updateOutputPaths';
 
 interface FileChange {
     file: string;
@@ -20,120 +25,12 @@ interface FileChange {
 }
 
 /**
- * Рекурсивно читает все файлы в директории
- */
-async function readDirectoryRecursive(dirPath: string, basePath: string = dirPath): Promise<string[]> {
-    const files: string[] = [];
-    const entries = await fileSystemHelpers.readdir(dirPath);
-
-    for (const entry of entries) {
-        const fullPath = joinHelper(dirPath, entry);
-        let relativePath = relativeHelper(basePath, fullPath);
-        // Убираем префикс ./ если он есть
-        if (relativePath.startsWith('./')) {
-            relativePath = relativePath.substring(2);
-        }
-
-        if (fileSystemHelpers.isDirectory(fullPath)) {
-            const subFiles = await readDirectoryRecursive(fullPath, basePath);
-            files.push(...subFiles);
-        } else if (fileSystemHelpers.isPathToFile(fullPath)) {
-            files.push(relativePath);
-        }
-    }
-
-    return files;
-}
-
-
-/**
- * Проверяет, пуста ли директория
- */
-async function isDirectoryEmpty(dirPath: string): Promise<boolean> {
-    if (!(await fileSystemHelpers.exists(dirPath))) {
-        return true;
-    }
-
-    if (!fileSystemHelpers.isDirectory(dirPath)) {
-        return true;
-    }
-
-    const entries = await fileSystemHelpers.readdir(dirPath);
-    return entries.length === 0;
-}
-
-/**
- * Обновляет пути output в опциях для генерации в preview директорию
- */
-function updateOutputPaths(options: TRawOptions, previewDir: string): TRawOptions {
-    if (options.items && Array.isArray(options.items)) {
-        return {
-            ...options,
-            items: options.items.map(item => ({
-                ...item,
-                output: previewDir,
-                outputCore: item.outputCore ? joinHelper(previewDir, 'core') : undefined,
-                outputServices: item.outputServices ? joinHelper(previewDir, 'services') : undefined,
-                outputModels: item.outputModels ? joinHelper(previewDir, 'models') : undefined,
-                outputSchemas: item.outputSchemas ? joinHelper(previewDir, 'schemas') : undefined,
-            })),
-        };
-    }
-
-    return {
-        ...options,
-        output: previewDir,
-        outputCore: options.outputCore ? joinHelper(previewDir, 'core') : undefined,
-        outputServices: options.outputServices ? joinHelper(previewDir, 'services') : undefined,
-        outputModels: options.outputModels ? joinHelper(previewDir, 'models') : undefined,
-        outputSchemas: options.outputSchemas ? joinHelper(previewDir, 'schemas') : undefined,
-    };
-}
-
-/**
- * Сравнивает два файла и возвращает diff
- */
-async function compareFiles(oldPath: string, newPath: string): Promise<diff.Change[] | null> {
-    const oldContent = await fileSystemHelpers.readFile(oldPath, 'utf-8');
-    const newContent = await fileSystemHelpers.readFile(newPath, 'utf-8');
-    const fileDiff = diff.diffLines(oldContent, newContent);
-
-    if (fileDiff.some(part => part.added || part.removed)) {
-        return fileDiff;
-    }
-
-    return null;
-}
-
-/**
- * Форматирует diff для сохранения в файл
- */
-function formatDiff(filePath: string, fileDiff: diff.Change[]): string {
-    const lines: string[] = [`File: ${filePath}`, '='.repeat(80), ''];
-
-    fileDiff.forEach(part => {
-        const prefix = part.added ? '+' : part.removed ? '-' : ' ';
-        const lines_ = part.value.split('\n');
-        lines_.forEach(line => {
-            if (line || lines_.length > 1) {
-                lines.push(`${prefix} ${line}`);
-            }
-        });
-    });
-
-    return lines.join('\n');
-}
-
-/**
  * Основная функция для предпросмотра изменений
+ * 
+ * TODO: Добавить проверку опций команды перед выполнением
  */
 export async function previewChanges(options: OptionValues): Promise<void> {
-    const {
-        openapiConfig,
-        generatedDir = 'generated',
-        previewDir = 'generated-preview',
-        diffDir = 'generated-diff',
-    } = options;
+    const { openapiConfig, generatedDir = 'generated', previewDir = 'generated-preview', diffDir = 'generated-diff' } = options;
 
     try {
         const resolvedGeneratedDir = resolveHelper(process.cwd(), generatedDir);
