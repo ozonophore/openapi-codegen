@@ -20,20 +20,26 @@ const callWithParameters = (
 ): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath}`,
-    cookies: {
-        parameterCookie: parameterCookie,
-    },
+
     headers: {
         parameterHeader: parameterHeader,
     },
+
+    cookies: {
+        parameterCookie: parameterCookie,
+    },
+
     query: {
         parameterQuery: parameterQuery,
     },
-    formData: {
+
+    body: requestBody,
+    requestMediaType: 'application/json',
+
+    body: {
         parameterForm: parameterForm,
     },
-    body: requestBody,
-    mediaType: 'application/json',
+    requestMediaType: 'multipart/form-data',
 });
 
 const callWithWeirdParameterNames = (
@@ -60,21 +66,27 @@ const callWithWeirdParameterNames = (
 ): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
-    cookies: {
-        'PARAMETER-COOKIE': parameterCookie,
-    },
+
     headers: {
         'parameter.header': parameterHeader,
     },
+
+    cookies: {
+        'PARAMETER-COOKIE': parameterCookie,
+    },
+
     query: {
         'parameter-query': parameterQuery,
         default: _default,
     },
-    formData: {
+
+    body: requestBody,
+    requestMediaType: 'application/json',
+
+    body: {
         parameter_form: parameterForm,
     },
-    body: requestBody,
-    mediaType: 'application/json',
+    requestMediaType: 'multipart/form-data',
 });
 
 const getCallWithOptionalParam = (
@@ -84,11 +96,13 @@ const getCallWithOptionalParam = (
 ): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/`,
+
     query: {
         parameter: parameter,
     },
+
     body: requestBody,
-    mediaType: 'application/json',
+    requestMediaType: 'application/json',
 });
 
 const postCallWithOptionalParam = (
@@ -98,11 +112,13 @@ const postCallWithOptionalParam = (
 ): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/parameters/`,
+
     query: {
         parameter: parameter,
     },
+
     body: requestBody,
-    mediaType: 'application/json',
+    requestMediaType: 'application/json',
 });
 
 export type TParametersOptions = {

@@ -1,8 +1,10 @@
 {
-    "output": "./generated",
-    "client": "axios",
-    "excludeCoreServiceFiles": true,
+    "httpClient": "fetch",
     "items": [{
-        "input": "./openapi/spec.yml"
+        "input": "./test/spec/v2.json",
+        "output": "./test/generated/v2/"
+    }, {
+        "input": "./test/spec/v3.json",
+        "output": "./test/generated/v3/"
     }]
 }

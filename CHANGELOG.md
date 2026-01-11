@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.4] - 2026-01-18
+
+### Added
+- Introduced a new CLI command previewChanges that allows previewing generated code changes without writing them to disk.
+- Implemented a set of utilities for file and directory comparison, diff formatting, and output path updates.
+- Added documentation for the previewChanges command.
+### Changed
+- Refactored OpenAPI client generation:
+- Generation logic was renamed and restructured for better clarity and extensibility.
+- Updated configuration schemas (UnifiedOptionsSchema v1 and v2).
+- Improved filesystem helper utilities.
+- Updated Handlebars client templates and their compiled counterparts.
+- Enhanced request executor logic and service parameter/option generation.
+### Tests
+- Updated unit tests and snapshot tests for OpenAPI v2 and v3.
+- Refreshed snapshots for services, types, parameters, multipart requests, and response handling.
+- Removed obsolete snapshots.
+### Misc
+- Updated dependencies (package.json, package-lock.json).
+- Removed deprecated documentation (Note.md).
+
 ## [2.0.0-beta.3] - 2026-01-08
 
 ### Added

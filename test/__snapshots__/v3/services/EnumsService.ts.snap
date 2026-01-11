@@ -14,8 +14,9 @@ const callWithEnums = (requestBody?: {
 }): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/enums`,
+
     body: requestBody,
-    mediaType: 'application/json; charset=utf-8',
+    requestMediaType: 'application/json; charset=utf-8',
 });
 
 export type TEnumsOptions = {

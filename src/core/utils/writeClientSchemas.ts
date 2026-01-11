@@ -35,46 +35,35 @@ interface IWriteClientSchemas {
  */
 export async function writeClientSchemas(this: WriteClient, options: IWriteClientSchemas): Promise<void> {
     const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary } = options;
+    if (templates.exports.schema) {
+        this.logger.info('The recording of model validation schema files begins.');
 
-    this.logger.info('The recording of model validation schema files begins.');
+        for (const model of models) {
+            const modelFolderPath = model?.path;
+            const dir = dirNameHelper(modelFolderPath);
+            if (dir) {
+                const directory = resolveHelper(outputSchemasPath, dir);
 
-    // Choose template based on validation library
-    const schemaTemplate =
-        validationLibrary === ValidationLibrary.ZOD
-            ? templates.exports.zodSchema
-            : validationLibrary === ValidationLibrary.YUP
-              ? templates.exports.yupSchema
-              : validationLibrary === ValidationLibrary.JOI
-                ? templates.exports.joiSchema
-                : validationLibrary === ValidationLibrary.JSONSCHEMA
-                  ? templates.exports.jsonSchemaSchema
-                  : templates.exports.schema;
+                this.logger.info(`A directory is being created: ${directory}`);
 
-    for (const model of models) {
-        const modelFolderPath = model?.path;
-        const dir = dirNameHelper(modelFolderPath);
-        if (dir) {
-            const directory = resolveHelper(outputSchemasPath, dir);
+                mkdirSync(directory, { recursive: true });
+            }
+            const file = resolveHelper(outputSchemasPath, `${modelFolderPath}Schema.ts`);
 
-            this.logger.info(`A directory is being created: ${directory}`);
+            this.logger.info(`The recording of the file data begins: ${file}`);
 
-            mkdirSync(directory, { recursive: true });
+            const templateResult = templates.exports.schema({
+                ...model,
+                httpClient,
+                useUnionTypes,
+                validationLibrary,
+            });
+            const formattedValue = await format(templateResult);
+            await fileSystemHelpers.writeFile(file, formattedValue);
+
+            this.logger.info(`File recording completed: ${file}`);
         }
-        const file = resolveHelper(outputSchemasPath, `${modelFolderPath}Schema.ts`);
 
-        this.logger.info(`The recording of the file data begins: ${file}`);
-
-        const templateResult = schemaTemplate({
-            ...model,
-            httpClient,
-            useUnionTypes,
-            validationLibrary,
-        });
-        const formattedValue = await format(templateResult);
-        await fileSystemHelpers.writeFile(file, formattedValue);
-
-        this.logger.info(`File recording completed: ${file}`);
+        this.logger.info('The recording of model validation schema files has been completed successfully');
     }
-
-    this.logger.info('The recording of model validation schema files has been completed successfully');
 }

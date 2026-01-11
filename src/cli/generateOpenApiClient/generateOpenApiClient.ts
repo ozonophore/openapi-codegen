@@ -18,7 +18,7 @@ import { validateCLIOptions } from '../validation';
  * Запускает генерацию OpenAPI клиента
  * Поддерживает как конфиг-файл, так и параметры из CLI
  */
-export async function runGenerateOpenApi(options: OptionValues): Promise<void> {
+export async function generateOpenApiClient(options: OptionValues): Promise<void> {
     const { openapiConfig, ...clientOptions } = options;
 
     try {
