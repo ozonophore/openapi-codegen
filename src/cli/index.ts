@@ -11,7 +11,6 @@ import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 import { checkConfig } from './checkAndUpdateConfig/checkConfig';
 import { updateConfig } from './checkAndUpdateConfig/updateConfig';
 import { runGenerateOpenApi } from './generate/runGenerateOpenApi';
-import { EOptionType } from './initOpenApiConfig/Enums';
 import { initConfig } from './initOpenApiConfig/initConfig';
 import { getCLIName } from './utils';
 
@@ -105,14 +104,14 @@ program
     .addHelpText('before', getCLIName(APP_NAME))
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
     .option('-sd, --specs-dir <value>', 'Путь до директории с файлами спецификации', 'openapi')
-    .addOption(
-        new Option('-t, --type <type>', 'A variant of the set of options for running the client generator (default: "OPTION")').choices([...Object.values(EOptionType)]).default(EOptionType.OPTION)
-    )
+    .option('--request <value>', 'Path to custom request file')
+    .option('--useCancelableRequest', 'Use cancelled promise as returned data type in request (default: false)')
+    .option('--useInteractiveMode', 'Использовать интерактивный режим команды. В терминале будут задаваться вопросы  (default: false)')
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await initConfig(options.openapiConfig, options.specsDir);
+        await initConfig(options);
     });
 
 program.exitOverride();

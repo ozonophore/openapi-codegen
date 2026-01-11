@@ -25,6 +25,7 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
         }));
 
         const firstItem = optionsArr[0];
+        // TODO: надо как-то регламентировать, какие поля тут могут и должны быть указаны! И стоит ли их обновлять!
         const fieldsToExtract = [
             'httpClient',
             'useOptions',

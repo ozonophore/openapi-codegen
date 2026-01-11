@@ -3,10 +3,16 @@ import { initConfig } from "./initConfig";
 import { initCustomRequest } from "./initCustomRequest";
 import { registerHandlebarTemplates } from "./utils/registerHandlebarTemplates";
 
+type InitParams = {
+    openapiConfig: string;
+    specDir: string;
+    useCancelableRequest?: boolean;
+}
+
 /**
  * TODO: интеррактивность по флагу! Выполнение команды в зависимости от вкл/выкл интеррактивности
  */
-export async function init() {
+export async function init(params: InitParams) {
     const templates = registerHandlebarTemplates();
     const shouldInitConfig = await confirmDialog({
         message: "Желаете сформировать конфигурационный файл для быстрого запуска генератора?",
@@ -14,7 +20,7 @@ export async function init() {
     });
     if (shouldInitConfig) {
         // TODO: генерация по шаблону!
-        await initConfig('', '', templates);
+        await initConfig(params.openapiConfig, params.specDir, templates);
     }
 
     const shouldInitCustomRequest = await confirmDialog({
@@ -23,6 +29,6 @@ export async function init() {
     });
 
     if (shouldInitCustomRequest) {
-        await initCustomRequest(templates);
+        await initCustomRequest(templates, params?.useCancelableRequest);
     }
 }

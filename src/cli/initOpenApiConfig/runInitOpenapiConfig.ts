@@ -1,9 +1,9 @@
 import { OptionValues } from 'commander';
 import * as Handlebars from 'handlebars/runtime';
-import { format } from 'prettier';
 
 import { APP_LOGGER, DEFAULT_OPENAPI_CONFIG_FILENAME } from '../../common/Consts';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
+import { format } from '../../common/utils/format';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { getFileName } from '../../core/utils/getFileName';
@@ -21,7 +21,7 @@ export async function runInitOpenapiConfig(params: OptionValues) {
             const file = resolveHelper(process.cwd(), configFilePath);
             const configTemplate = Handlebars.template(openApiCongigTemplate);
             const templateResult = configTemplate({ useMultyOptions: optionType === EOptionType.MULTIOPTION });
-            const formattedValue = await format(templateResult, { parser: 'json' });
+            const formattedValue = await format(templateResult, 'json' );
             await fileSystemHelpers.writeFile(file, formattedValue);
             APP_LOGGER.info(`File recording completed: ${file}`);
         } else {

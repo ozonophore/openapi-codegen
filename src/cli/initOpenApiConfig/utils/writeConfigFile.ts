@@ -1,9 +1,9 @@
 import path from 'path';
-import { format } from 'prettier';
 
 import { APP_LOGGER } from '../../../common/Consts';
 import { TRawOptions } from '../../../common/TRawOptions';
 import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
+import { format } from '../../../common/utils/format';
 import { resolveHelper } from '../../../common/utils/pathHelpers';
 
 /**
@@ -23,7 +23,7 @@ export async function writeConfigFile(configPath: string, config: TRawOptions): 
     }
 
     const jsonString = JSON.stringify(config, null, 2);
-    const formattedData = await format(jsonString, { parser: 'json' });
+    const formattedData = await format(jsonString, 'json');
     
     await fileSystemHelpers.writeFile(resolvedPath, formattedData);
     APP_LOGGER.info(`Configuration file created: ${resolvedPath}`);
