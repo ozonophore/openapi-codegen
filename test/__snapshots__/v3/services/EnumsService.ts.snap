@@ -13,9 +13,11 @@ const callWithEnums = (requestBody?: {
     enumWithStringsWithType?: EEnumWithStringsWithType;
 }): RequestConfig => ({
     method: 'POST',
-    path: `/api/v{api-version}/enums`,
+    url: `/api/v{api-version}/enums`,
+    headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+    },
     body: requestBody,
-    mediaType: 'application/json; charset=utf-8',
 });
 
 export type TEnumsOptions = {

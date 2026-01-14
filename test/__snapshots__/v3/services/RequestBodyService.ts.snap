@@ -7,9 +7,11 @@ import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const postRequestBodyService = (requestBody?: IModelWithString): RequestConfig => ({
     method: 'POST',
-    path: `/api/v{api-version}/requestBody/`,
+    url: `/api/v{api-version}/requestBody/`,
+    headers: {
+        'Content-Type': 'application/json',
+    },
     body: requestBody,
-    mediaType: 'application/json',
 });
 
 export type TRequestBodyOptions = {

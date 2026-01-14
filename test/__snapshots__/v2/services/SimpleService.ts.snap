@@ -6,37 +6,37 @@ import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const getCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/simple`,
+    url: `/api/v{api-version}/simple`,
 });
 
 const putCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'PUT',
-    path: `/api/v{api-version}/simple`,
+    url: `/api/v{api-version}/simple`,
 });
 
 const postCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'POST',
-    path: `/api/v{api-version}/simple`,
+    url: `/api/v{api-version}/simple`,
 });
 
 const deleteCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'DELETE',
-    path: `/api/v{api-version}/simple`,
+    url: `/api/v{api-version}/simple`,
 });
 
 const optionsCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'OPTIONS',
-    path: `/api/v{api-version}/simple`,
+    url: `/api/v{api-version}/simple`,
 });
 
 const headCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'HEAD',
-    path: `/api/v{api-version}/simple`,
+    url: `/api/v{api-version}/simple`,
 });
 
 const patchCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'PATCH',
-    path: `/api/v{api-version}/simple`,
+    url: `/api/v{api-version}/simple`,
 });
 
 export type TSimpleOptions = {

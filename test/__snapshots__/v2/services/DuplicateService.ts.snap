@@ -6,22 +6,22 @@ import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const duplicateName = (): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/duplicate`,
+    url: `/api/v{api-version}/duplicate`,
 });
 
 const duplicateName1 = (): RequestConfig => ({
     method: 'POST',
-    path: `/api/v{api-version}/duplicate`,
+    url: `/api/v{api-version}/duplicate`,
 });
 
 const duplicateName2 = (): RequestConfig => ({
     method: 'PUT',
-    path: `/api/v{api-version}/duplicate`,
+    url: `/api/v{api-version}/duplicate`,
 });
 
 const duplicateName3 = (): RequestConfig => ({
     method: 'DELETE',
-    path: `/api/v{api-version}/duplicate`,
+    url: `/api/v{api-version}/duplicate`,
 });
 
 export type TDuplicateOptions = {

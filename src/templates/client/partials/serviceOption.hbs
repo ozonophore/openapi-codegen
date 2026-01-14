@@ -1,18 +1,46 @@
 method: '{{{method}}}',
-path: `{{{path}}}`,
-{{#if parametersCookie}}
-    cookies: {
-    {{#each parametersCookie}}
-        '{{{prop}}}': {{{name}}},
-    {{/each}}
-    },
-{{/if}}
+url: `{{{path}}}`,
 {{#if parametersHeader}}
     headers: {
     {{#each parametersHeader}}
-        '{{{prop}}}': {{{name}}},
+        '{{{prop}}}': String({{{name}}}),
     {{/each}}
+    {{#if parametersCookie}}
+        Cookie: [
+        {{#each parametersCookie}}
+            `{{{prop}}}=` + String({{{name}}}),
+        {{/each}}
+        ].join('; '),
+    {{/if}}
+    {{#if parametersBody}}
+        {{#if parametersBody.mediaType}}
+            'Content-Type': '{{{parametersBody.mediaType}}}',
+        {{/if}}
+    {{/if}}
     },
+{{else}}
+    {{#if parametersCookie}}
+        headers: {
+        Cookie: [
+        {{#each parametersCookie}}
+            `{{{prop}}}=` + String({{{name}}}),
+        {{/each}}
+        ].join('; '),
+        {{#if parametersBody}}
+            {{#if parametersBody.mediaType}}
+                'Content-Type': '{{{parametersBody.mediaType}}}',
+            {{/if}}
+        {{/if}}
+        },
+    {{else}}
+        {{#if parametersBody}}
+            {{#if parametersBody.mediaType}}
+                headers: {
+                    'Content-Type': '{{{parametersBody.mediaType}}}',
+                },
+            {{/if}}
+        {{/if}}
+    {{/if}}
 {{/if}}
 {{#if parametersQuery}}
     query: {
@@ -22,25 +50,13 @@ path: `{{{path}}}`,
     },
 {{/if}}
 {{#if parametersForm}}
-    formData: {
+    body: {
     {{#each parametersForm}}
         '{{{prop}}}': {{{name}}},
     {{/each}}
     },
-{{/if}}
-{{#if parametersBody}}
-    body: {{{parametersBody.name}}},
-    {{#if parametersBody.mediaType}}
-        mediaType: '{{{parametersBody.mediaType}}}',
+{{else}}
+    {{#if parametersBody}}
+        body: {{{parametersBody.name}}},
     {{/if}}
-{{/if}}
-{{#if responseHeader}}
-    responseHeader: '{{{responseHeader}}}',
-{{/if}}
-{{#if errors}}
-    errors: {
-    {{#each errors}}
-        {{{code}}}: `{{{description}}}`,
-    {{/each}}
-    },
 {{/if}}

@@ -19,21 +19,18 @@ const callWithParameters = (
     requestBody: IModelWithString | null,
 ): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/parameters/${parameterPath}`,
-    cookies: {
-        parameterCookie: parameterCookie,
-    },
+    url: `/api/v{api-version}/parameters/${parameterPath}`,
     headers: {
-        parameterHeader: parameterHeader,
+        parameterHeader: String(parameterHeader),
+        Cookie: [`parameterCookie=` + String(parameterCookie)].join('; '),
+        'Content-Type': 'application/json',
     },
     query: {
         parameterQuery: parameterQuery,
     },
-    formData: {
+    body: {
         parameterForm: parameterForm,
     },
-    body: requestBody,
-    mediaType: 'application/json',
 });
 
 const callWithWeirdParameterNames = (
@@ -59,22 +56,19 @@ const callWithWeirdParameterNames = (
     _default?: string,
 ): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
-    cookies: {
-        'PARAMETER-COOKIE': parameterCookie,
-    },
+    url: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
     headers: {
-        'parameter.header': parameterHeader,
+        'parameter.header': String(parameterHeader),
+        Cookie: [`PARAMETER-COOKIE=` + String(parameterCookie)].join('; '),
+        'Content-Type': 'application/json',
     },
     query: {
         'parameter-query': parameterQuery,
         default: _default,
     },
-    formData: {
+    body: {
         parameter_form: parameterForm,
     },
-    body: requestBody,
-    mediaType: 'application/json',
 });
 
 const getCallWithOptionalParam = (
@@ -83,12 +77,14 @@ const getCallWithOptionalParam = (
     parameter?: string,
 ): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/parameters/`,
+    url: `/api/v{api-version}/parameters/`,
+    headers: {
+        'Content-Type': 'application/json',
+    },
     query: {
         parameter: parameter,
     },
     body: requestBody,
-    mediaType: 'application/json',
 });
 
 const postCallWithOptionalParam = (
@@ -97,12 +93,14 @@ const postCallWithOptionalParam = (
     requestBody?: IModelWithString,
 ): RequestConfig => ({
     method: 'POST',
-    path: `/api/v{api-version}/parameters/`,
+    url: `/api/v{api-version}/parameters/`,
+    headers: {
+        'Content-Type': 'application/json',
+    },
     query: {
         parameter: parameter,
     },
     body: requestBody,
-    mediaType: 'application/json',
 });
 
 export type TParametersOptions = {

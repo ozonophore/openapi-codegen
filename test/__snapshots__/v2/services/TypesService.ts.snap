@@ -15,7 +15,7 @@ const types = (
     id?: number,
 ): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/types`,
+    url: `/api/v{api-version}/types`,
     query: {
         parameterArray: parameterArray,
         parameterDictionary: parameterDictionary,

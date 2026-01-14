@@ -15,7 +15,7 @@ const callWithDefaultParameters = (
     },
 ): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/defaults`,
+    url: `/api/v{api-version}/defaults`,
     query: {
         parameterString: parameterString,
         parameterNumber: parameterNumber,
@@ -35,7 +35,7 @@ const callWithDefaultOptionalParameters = (
     },
 ): RequestConfig => ({
     method: 'POST',
-    path: `/api/v{api-version}/defaults`,
+    url: `/api/v{api-version}/defaults`,
     query: {
         parameterString: parameterString,
         parameterNumber: parameterNumber,
@@ -56,7 +56,7 @@ const callToTestOrderOfParams = (
     parameterStringWithEmptyDefault: string = '',
 ): RequestConfig => ({
     method: 'PUT',
-    path: `/api/v{api-version}/defaults`,
+    url: `/api/v{api-version}/defaults`,
     query: {
         parameterStringWithNoDefault: parameterStringWithNoDefault,
         parameterOptionalStringWithDefault: parameterOptionalStringWithDefault,

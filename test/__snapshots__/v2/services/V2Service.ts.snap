@@ -10,22 +10,22 @@ import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const getCallWithModelWithDictionaryReference = (): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/getModelWithDictionaryReference`,
+    url: `/api/v{api-version}/getModelWithDictionaryReference`,
 });
 
 const getCallWithModelWithDictionary = (): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/getModelWithDictionary`,
+    url: `/api/v{api-version}/getModelWithDictionary`,
 });
 
 const getCallWithSimpleInteger = (): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/simpleEnum`,
+    url: `/api/v{api-version}/simpleEnum`,
 });
 
 const getCallWithModelArray = (): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/getModelWithArray`,
+    url: `/api/v{api-version}/getModelWithArray`,
 });
 
 export type TV2Options = {

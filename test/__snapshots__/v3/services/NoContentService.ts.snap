@@ -6,7 +6,7 @@ import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const callWithNoContentResponse = (): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/no-content`,
+    url: `/api/v{api-version}/no-content`,
 });
 
 export type TNoContentOptions = {

@@ -7,14 +7,16 @@ import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const multipartResponse = (): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/multipart`,
+    url: `/api/v{api-version}/multipart`,
 });
 
 const multipartRequest = (formData?: { content?: string; data?: IModelWithString | null }): RequestConfig => ({
     method: 'POST',
-    path: `/api/v{api-version}/multipart`,
+    url: `/api/v{api-version}/multipart`,
+    headers: {
+        'Content-Type': 'multipart/form-data',
+    },
     body: formData,
-    mediaType: 'multipart/form-data',
 });
 
 export type TMultipartOptions = {

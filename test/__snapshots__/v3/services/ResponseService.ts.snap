@@ -9,27 +9,17 @@ import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const callWithResponse = (): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/response`,
+    url: `/api/v{api-version}/response`,
 });
 
 const callWithDuplicateResponses = (): RequestConfig => ({
     method: 'POST',
-    path: `/api/v{api-version}/response`,
-    errors: {
-        500: `Message for 500 error`,
-        501: `Message for 501 error`,
-        502: `Message for 502 error`,
-    },
+    url: `/api/v{api-version}/response`,
 });
 
 const callWithResponses = (): RequestConfig => ({
     method: 'PUT',
-    path: `/api/v{api-version}/response`,
-    errors: {
-        500: `Message for 500 error`,
-        501: `Message for 501 error`,
-        502: `Message for 502 error`,
-    },
+    url: `/api/v{api-version}/response`,
 });
 
 export type TResponseOptions = {

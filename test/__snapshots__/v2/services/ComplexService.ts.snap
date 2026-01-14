@@ -16,14 +16,10 @@ const complexTypes = (
     parameterReference: IModelWithString,
 ): RequestConfig => ({
     method: 'GET',
-    path: `/api/v{api-version}/complex`,
+    url: `/api/v{api-version}/complex`,
     query: {
         parameterObject: parameterObject,
         parameterReference: parameterReference,
-    },
-    errors: {
-        400: `400 server error`,
-        500: `500 server error`,
     },
 });
 
