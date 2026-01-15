@@ -1,29 +1,32 @@
 import { SchemaMigrationPlan } from '../Types';
 import { createDefaultFieldsMigration } from '../Utils/createDefaultFieldsMigration';
+import { createFieldTransformationMigration } from '../Utils/createFieldTransformationMigration';
 
 /**
  * Migration plan for multi options models.
  */
 export const multiOptionsMigrationPlan: SchemaMigrationPlan<Record<string, any>, Record<string, any>>[] = [
-    {
-        fromVersion: 'v1',
-        toVersion: 'v2',
-        migrate: ({ client, ...otherProps }) => ({
+    createFieldTransformationMigration(
+        'v1',
+        'v2',
+        ({ client, ...otherProps }) => ({
             ...otherProps,
             httpClient: client,
         }),
-    },
+        'Renames client field to httpClient'
+    ),
     createDefaultFieldsMigration('v2', 'v3', {
         useCancelableRequest: false,
     }),
-    {
-        fromVersion: 'v3',
-        toVersion: 'v4',
-        migrate: ({ items, input, output, outputCore, outputServices, outputModels, outputSchemas, ...otherProps }) => ({
+    createFieldTransformationMigration(
+        'v3',
+        'v4',
+        ({ items, input, output, outputCore, outputServices, outputModels, outputSchemas, ...otherProps }) => ({
             ...otherProps,
             items: items.map((el: any) => ({ ...el, input, output, outputCore, outputServices, outputModels, outputSchemas })),
         }),
-    },
+        'Moves input, output, and output paths from root level into each item in the items array'
+    ),
     createDefaultFieldsMigration('v4', 'v5', {
         excludeCoreServiceFiles: false,
         includeSchemasFiles: false,

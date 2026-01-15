@@ -2,7 +2,9 @@ import { ValidationLibrary } from '../../../core/types/enums/ValidationLibrary.e
 import { multiOptionsMigrationPlan } from '../MultiOptionsVersioned/MultiOptionsMigrationPlan';
 import { optionsMigrationPlans } from '../OptionsVersioned/OptionsMigrationPlans';
 import { SchemaMigrationPlan } from '../Types';
+import { createFieldTransformationMigration } from '../Utils/createFieldTransformationMigration';
 import { createTrivialMigration } from '../Utils/createTrivialMigration';
+import { getLatestVersionFromMigrationPlans } from '../Utils/getLatestVersionFromMigrationPlans';
 
 /**
  * Adds a prefix to all version strings in a migration plan array.
@@ -24,19 +26,28 @@ export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<
     // ===== OPTIONS migrations (with prefix) =====
     ...addVersionPrefixToMigrationPlans(optionsMigrationPlans, 'OPTIONS'),
 
-    // Migration from OPTIONS v4 to UNIFIED v1
-    createTrivialMigration('OPTIONS_v4', 'UNIFIED_v1', 'Migrate from OPTIONS to UNIFIED schema'),
+    // Migration from OPTIONS latest version to UNIFIED v1
+    createTrivialMigration(
+        `OPTIONS_${getLatestVersionFromMigrationPlans(optionsMigrationPlans)}`,
+        'UNIFIED_v1',
+        'Migrate from OPTIONS to UNIFIED schema'
+    ),
 
     // ===== MULTI_OPTIONS migrations (with prefix) =====
     ...addVersionPrefixToMigrationPlans(multiOptionsMigrationPlan, 'MULTI_OPTIONS'),
 
-    // Migration from MULTI_OPTIONS v5 to UNIFIED v1
-    createTrivialMigration('MULTI_OPTIONS_v5', 'UNIFIED_v1', 'Migrate from MULTI_OPTIONS to UNIFIED schema'),
-    {
-        fromVersion: 'UNIFIED_v1',
-        toVersion: 'UNIFIED_v2',
-        migrate: ({ includeSchemasFiles, ...otherProps }) => {
+    // Migration from MULTI_OPTIONS latest version to UNIFIED v1
+    createTrivialMigration(
+        `MULTI_OPTIONS_${getLatestVersionFromMigrationPlans(multiOptionsMigrationPlan)}`,
+        'UNIFIED_v1',
+        'Migrate from MULTI_OPTIONS to UNIFIED schema'
+    ),
+    createFieldTransformationMigration(
+        'UNIFIED_v1',
+        'UNIFIED_v2',
+        ({ includeSchemasFiles, ...otherProps }) => {
             return { ...otherProps, validationLibrary: !includeSchemasFiles ? ValidationLibrary.NONE : undefined };
         },
-    },
+        'Transforms includeSchemasFiles to validationLibrary: if includeSchemasFiles is false, sets validationLibrary to NONE'
+    ),
 ];

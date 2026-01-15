@@ -34,10 +34,45 @@ export class OpenApiClient {
             return rawOptions.items.map(item => ({
                 ...item,
                 request: item.request ?? rawOptions.request, // ?? для fallback на глобальный
+                useOptions: rawOptions.useOptions,
+                useUnionTypes: rawOptions.useUnionTypes,
+                excludeCoreServiceFiles: rawOptions.excludeCoreServiceFiles,
+                interfacePrefix: rawOptions.interfacePrefix,
+                enumPrefix: rawOptions.enumPrefix,
+                typePrefix: rawOptions.typePrefix,
+                useCancelableRequest: rawOptions.useCancelableRequest,
+                logLevel: rawOptions.logLevel,
+                logTarget: rawOptions.logTarget,
+                sortByRequired: rawOptions.sortByRequired,
+                useSeparatedIndexes: rawOptions.useSeparatedIndexes,
+                validationLibrary: rawOptions.validationLibrary,
             }));
         } else {
             // Плоский формат (из CLI или старого конфига): Один item с глобальным request
-            return [rawOptions];
+            return [
+                {
+                    input: rawOptions.input ?? '',
+                    output: rawOptions.output ?? '',
+                    outputCore: rawOptions.outputCore,
+                    outputServices: rawOptions.outputServices,
+                    outputModels: rawOptions.outputModels,
+                    outputSchemas: rawOptions.outputSchemas,
+                    httpClient: rawOptions.httpClient,
+                    useOptions: rawOptions.useOptions,
+                    useUnionTypes: rawOptions.useUnionTypes,
+                    excludeCoreServiceFiles: rawOptions.excludeCoreServiceFiles,
+                    request: rawOptions.request,
+                    interfacePrefix: rawOptions.interfacePrefix,
+                    enumPrefix: rawOptions.enumPrefix,
+                    typePrefix: rawOptions.typePrefix,
+                    useCancelableRequest: rawOptions.useCancelableRequest,
+                    logLevel: rawOptions.logLevel,
+                    logTarget: rawOptions.logTarget,
+                    sortByRequired: rawOptions.sortByRequired,
+                    useSeparatedIndexes: rawOptions.useSeparatedIndexes,
+                    validationLibrary: rawOptions.validationLibrary,
+                },
+            ];
         }
     }
 

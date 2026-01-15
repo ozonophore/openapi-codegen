@@ -1,42 +1,10 @@
-import { HttpClient } from '../core/types/enums/HttpClient.enum';
-import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
-import { ELogLevel, ELogOutput } from './Enums';
+import { z } from 'zod';
 
-type TItemConfig = {
-    input: string;
-    output: string;
-    outputCore?: string;
-    outputServices?: string;
-    outputModels?: string;
-    outputSchemas?: string;
-    request?: string;
-};
+import { flatOptionsSchema, rawOptionsSchema } from "./schemas/configSchemas";
 
-export type TRawOptions = {
-    items?: TItemConfig[];
-    input?: string;
-    output?: string;
-    outputCore?: string;
-    outputServices?: string;
-    outputModels?: string;
-    outputSchemas?: string;
-    httpClient?: HttpClient;
-    useOptions?: boolean;
-    useUnionTypes?: boolean;
-    excludeCoreServiceFiles?: boolean;
-    request?: string;
-    interfacePrefix?: string;
-    enumPrefix?: string;
-    typePrefix?: string;
-    useCancelableRequest?: boolean;
-    logLevel?: ELogLevel;
-    logTarget?: ELogOutput;
-    sortByRequired?: boolean;
-    useSeparatedIndexes?: boolean;
-    validationLibrary?: ValidationLibrary
-}
+export type TRawOptions = z.infer<typeof rawOptionsSchema>;
 
-export type TFlatOptions = Omit<TRawOptions, 'items'>;
+export type TFlatOptions = z.infer<typeof flatOptionsSchema>;
 
 export type TStrictFlatOptions = {
     [P in keyof TFlatOptions]-?: NonNullable<TFlatOptions[P]>;
