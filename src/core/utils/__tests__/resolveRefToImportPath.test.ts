@@ -294,6 +294,16 @@ describe('@unit resolveRefToImportPath — correctly resolves links to component
             const normalized = normalizePath(result);
             assert.ok(normalized.includes('User') || normalized === './User');
         });
+
+        test('external file reference with parentFilePath as directory', () => {
+            const result = resolveRefToImportPath({
+                mainSpecPath: '/Developer/my-app/api/openapi_spec.yaml',
+                parentFilePath: '/Developer/my-app/api/ui/components/dir/some.yaml',
+                refValuePath: '../components/dir/file_name.yaml',
+                outputModelsPath: '/generated/models',
+            });
+            assert.equal(normalizePath(result), './ui/components/dir/FileName');
+        });
     });
 
     describe('ABSOLUTE_PATH (default case)', () => {

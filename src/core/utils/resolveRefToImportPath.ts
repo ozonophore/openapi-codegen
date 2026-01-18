@@ -17,11 +17,7 @@ interface IParams {
  * Resolves model path and returns relative path or fallback name.
  * Returns fallback if the path is outside outputModelsPath, otherwise returns relative path.
  */
-function resolveModelPath(
-    absModelPath: string,
-    absOutputModelsPath: string,
-    fallbackName: string
-): string {
+function resolveModelPath(absModelPath: string, absOutputModelsPath: string, fallbackName: string): string {
     if (!absModelPath.startsWith(absOutputModelsPath + '/') && absModelPath !== absOutputModelsPath) {
         return `./${fallbackName}`;
     }
@@ -32,14 +28,7 @@ function resolveModelPath(
  * Resolves fragment reference (LOCAL_FRAGMENT or EXTERNAL_FILE_FRAGMENT).
  * Both types use the same logic: resolve model path based on parent file location.
  */
-function resolveFragmentRef(
-    modelName: string,
-    parentFilePath: string,
-    mainSpecPath: string,
-    sourceRoot: string,
-    outputModelsPath: string,
-    absOutputModelsPath: string
-): string {
+function resolveFragmentRef(modelName: string, parentFilePath: string, mainSpecPath: string, sourceRoot: string, outputModelsPath: string, absOutputModelsPath: string): string {
     const cleanParentForLocal = stripNamespace(parentFilePath || mainSpecPath);
     const parentDirInSource = dirNameHelper(cleanParentForLocal);
     const parentDirInOutput = mapPathToTargetDirSafe(parentDirInSource, sourceRoot, outputModelsPath);
@@ -53,12 +42,7 @@ function resolveFragmentRef(
  * Resolves external file or absolute path reference.
  * Maps the target file path to output directory and returns relative path or fallback.
  */
-function resolveExternalFileOrAbsolutePath(
-    targetFileAbs: string,
-    sourceRoot: string,
-    outputModelsPath: string,
-    absOutputModelsPath: string
-): string {
+function resolveExternalFileOrAbsolutePath(targetFileAbs: string, sourceRoot: string, outputModelsPath: string, absOutputModelsPath: string): string {
     const targetPathInOutput = mapPathToTargetDirSafe(targetFileAbs, sourceRoot, outputModelsPath);
     const absTargetPath = resolveHelper(targetPathInOutput);
     const fallbackName = stripNamespace(basename(targetFileAbs));
@@ -70,11 +54,7 @@ function resolveExternalFileOrAbsolutePath(
  * Prepares parent directory for resolving relative references.
  * Handles both file and directory paths.
  */
-function prepareParentDirForResolve(
-    parentFilePath: string,
-    mainSpecPath: string,
-    sourceRoot: string
-): string {
+function prepareParentDirForResolve(parentFilePath: string, mainSpecPath: string, sourceRoot: string): string {
     const parentParsed = parentFilePath ? parseRef(parentFilePath) : null;
     const parentRaw = parentParsed?.filePath ? parentParsed.filePath : '';
     const parentClean = stripNamespace(parentRaw);
@@ -94,11 +74,10 @@ function prepareParentDirForResolve(
 function removeParentBasenamePrefix(refValueClean: string, parentDirForResolveWithSep: string): string {
     const baseNameParent = basename(parentDirForResolveWithSep);
     const baseNameParentWithSep = baseNameParent.endsWith('/') ? baseNameParent : baseNameParent + '/';
-    
-    return refValueClean.startsWith(baseNameParentWithSep) 
-        ? refValueClean.replace(baseNameParentWithSep, '') 
-        : refValueClean;
+
+    return refValueClean.startsWith(baseNameParentWithSep) ? refValueClean.replace(baseNameParentWithSep, '') : refValueClean;
 }
+
 
 /**
  * Resolves $ref reference to import path for generated code.
@@ -117,28 +96,14 @@ export function resolveRefToImportPath({ mainSpecPath, parentFilePath, refValueP
     // LOCAL_FRAGMENT: reference to component in the same file (e.g., #/components/schemas/User)
     if (parsed.type === RefType.LOCAL_FRAGMENT) {
         const modelName = stripNamespace(refValuePath);
-        return resolveFragmentRef(
-            modelName,
-            parentFilePath,
-            mainSpecPath,
-            sourceRoot,
-            outputModelsPath,
-            absOutputModelsPath
-        );
+        return resolveFragmentRef(modelName, parentFilePath, mainSpecPath, sourceRoot, outputModelsPath, absOutputModelsPath);
     }
 
     // EXTERNAL_FILE_FRAGMENT: reference to component in external file (e.g., ./file.yaml#/components/schemas/User)
     if (parsed.type === RefType.EXTERNAL_FILE_FRAGMENT) {
         const refFileRaw = parsed?.fragment ? parsed.fragment : '';
         const modelName = stripNamespace(refFileRaw || '') || '';
-        return resolveFragmentRef(
-            modelName,
-            parentFilePath,
-            mainSpecPath,
-            sourceRoot,
-            outputModelsPath,
-            absOutputModelsPath
-        );
+        return resolveFragmentRef(modelName, parentFilePath, mainSpecPath, sourceRoot, outputModelsPath, absOutputModelsPath);
     }
 
     // Prepare parent directory for resolving relative references
@@ -149,7 +114,20 @@ export function resolveRefToImportPath({ mainSpecPath, parentFilePath, refValueP
 
     // EXTERNAL_FILE: reference to external file (e.g., ./file.yaml)
     if (parsed.type === RefType.EXTERNAL_FILE) {
-        const targetFileAbs = joinHelper(parentDirForResolveWithSep, currentRefValue);
+        const adjustedRefSegments = currentRefValue.split('/');
+        let adjustedParentDir = parentDirForResolveWithSep;
+
+        while (adjustedRefSegments[0] === '..') {
+            adjustedParentDir = dirNameHelper(adjustedParentDir);
+            adjustedRefSegments.shift();
+        }
+
+        const parentBase = basename(adjustedParentDir);
+        if (adjustedRefSegments[0] === parentBase) {
+            adjustedRefSegments.shift();
+        }
+
+        const targetFileAbs = resolveHelper(adjustedParentDir, ...adjustedRefSegments);
         return resolveExternalFileOrAbsolutePath(
             targetFileAbs,
             sourceRoot,
@@ -159,14 +137,7 @@ export function resolveRefToImportPath({ mainSpecPath, parentFilePath, refValueP
     }
 
     // ABSOLUTE_PATH (default case): absolute path reference
-    const targetFileAbs = fileSystemHelpers.isPathToFile(refValueClean) 
-        ? joinHelper(parentDirForResolveWithSep, refValueClean)
-        : resolveHelper(parentDirForResolveWithSep, refValueClean);
+    const targetFileAbs = fileSystemHelpers.isPathToFile(refValueClean) ? joinHelper(parentDirForResolveWithSep, refValueClean) : resolveHelper(parentDirForResolveWithSep, refValueClean);
 
-    return resolveExternalFileOrAbsolutePath(
-        targetFileAbs,
-        sourceRoot,
-        outputModelsPath,
-        absOutputModelsPath
-    );
+    return resolveExternalFileOrAbsolutePath(targetFileAbs, sourceRoot, outputModelsPath, absOutputModelsPath);
 }
