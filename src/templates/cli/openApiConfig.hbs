@@ -1,19 +1,32 @@
-{{#if useMultyOptions}}
+{{#if @root.useMultyOptions}}
 {
-    "items": [
-        {
-            "input": "/folder/pogect/openapi/spec_file.yaml",
-            "output": "./generated/rest-api"
-        }
-    ],
-    "httpClient": "fetch",
-    "sortByRequired": true
+    "items": {{@root.items}},
+    "httpClient": "{{@root.httpClient}}",
+    "sortByRequired": {{@root.sortByRequired}},
+    "enumPrefix": "{{@root.enumPrefix}}",
+    "excludeCoreServiceFiles": {{@root.excludeCoreServiceFiles}},
+    "interfacePrefix": "{{@root.interfacePrefix}}",
+    "typePrefix": "{{@root.typePrefix}}",
+    "useCancelableRequest": {{@root.useCancelableRequest}},
+    "useOptions": {{@root.useOptions}},
+    "useSeparatedIndexes": {{@root.useSeparatedIndexes}},
+    "useUnionTypes": {{@root.useUnionTypes}},
+    {{#if @root.request}}"request": "{{@root.request}}"{{/if}}
 }
 {{else}}
 {
-    "input": "/folder/pogect/openapi/spec_file.yaml",
-    "output": "./generated/rest-api",
-    "httpClient": "fetch",
-    "sortByRequired": true
+    "input": "{{@root.input}}",
+    "output": "{{@root.output}}",
+    "httpClient": "{{@root.httpClient}}",
+    "sortByRequired": {{@root.sortByRequired}},
+    "enumPrefix": "{{@root.enumPrefix}}",
+    "excludeCoreServiceFiles": {{@root.excludeCoreServiceFiles}},
+    "interfacePrefix": "{{@root.interfacePrefix}}",
+    "typePrefix": "{{@root.typePrefix}}",
+    "useCancelableRequest": {{@root.useCancelableRequest}},
+    "useOptions": {{@root.useOptions}},
+    "useSeparatedIndexes": {{@root.useSeparatedIndexes}},
+    "useUnionTypes": {{@root.useUnionTypes}},
+    {{#if @root.request}}"request": "{{@root.request}}"{{/if}}
 }
 {{/if}}
