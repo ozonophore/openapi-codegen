@@ -1,0 +1,84 @@
+{{>header}}
+
+import type { RequestExecutor, RequestConfig } from './request-executor';
+{{#if useCancelableRequest}}
+import type { CancelablePromise } from './CancelablePromise';
+{{/if}}
+
+/**
+ * Определите свой тип опций (опционально)
+ * Измените этот интерфейс в соответствии с вашими потребностями
+ */
+interface MyCustomOptions {
+    timeout?: number;
+    retries?: number;
+}
+
+/**
+ * Создайте пользовательский executor
+ * Реализуйте свою логику запросов здесь
+ *
+ * @example Пример использования:
+ * 
+ * import { SimpleService } from './generated/services/SimpleService';
+ * 
+ * const simpleService = new SimpleService<MyCustomOptions>(customExecutor);
+ * await simpleService.getCallWithoutParametersAndResponse({ timeout: 5000, retries: 3 });
+ */
+{{#if useCancelableRequest}}
+export const customExecutor: RequestExecutor<MyCustomOptions> = {
+    async request<TResponse>(config: RequestConfig, options?: MyCustomOptions): CancelablePromise<TResponse> {
+        return new CancelablePromise(async (resolve, reject, onCancel) => {
+            try {
+                const abortController = new AbortController();
+                
+                if (options?.timeout) {
+                    const timeoutId = setTimeout(() => abortController.abort(), options.timeout);
+                    onCancel(() => clearTimeout(timeoutId));
+                }
+                
+                onCancel(() => abortController.abort());
+                
+                if (onCancel.isCancelled) {
+                    return;
+                }
+                
+                // Ваша пользовательская логика запросов здесь
+                const response = await fetch(config.url, {
+                    method: config.method,
+                    headers: config.headers,
+                    body: config.body ? JSON.stringify(config.body) : undefined,
+                    signal: abortController.signal,
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Request failed: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                resolve(data);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    },
+};
+{{else}}
+export const customExecutor: RequestExecutor<MyCustomOptions> = {
+    async request<TResponse>(config: RequestConfig, options?: MyCustomOptions): Promise<TResponse> {
+        // Ваша пользовательская логика запросов здесь
+        const response = await fetch(config.url, {
+            method: config.method,
+            headers: config.headers,
+            body: config.body ? JSON.stringify(config.body) : undefined,
+            signal: options?.timeout ? AbortSignal.timeout(options.timeout) : undefined,
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Request failed: ${response.statusText}`);
+        }
+        
+        return response.json();
+    },
+};
+{{/if}}
