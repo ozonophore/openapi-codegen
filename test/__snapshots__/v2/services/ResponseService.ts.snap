@@ -15,21 +15,11 @@ const callWithResponse = (): RequestConfig => ({
 const callWithDuplicateResponses = (): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/response`,
-    errors: {
-        500: `Message for 500 error`,
-        501: `Message for 501 error`,
-        502: `Message for 502 error`,
-    },
 });
 
 const callWithResponses = (): RequestConfig => ({
     method: 'PUT',
     path: `/api/v{api-version}/response`,
-    errors: {
-        500: `Message for 500 error`,
-        501: `Message for 501 error`,
-        502: `Message for 502 error`,
-    },
 });
 
 export type TResponseOptions = {

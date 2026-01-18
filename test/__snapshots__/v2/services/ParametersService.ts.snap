@@ -17,16 +17,21 @@ const callWithParameters = (
 ): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath}`,
+
     headers: {
         parameterHeader: parameterHeader,
     },
+
     query: {
         parameterQuery: parameterQuery,
     },
-    formData: {
+
+    body: parameterBody,
+
+    body: {
         parameterForm: parameterForm,
     },
-    body: parameterBody,
+    requestMediaType: 'multipart/form-data',
 });
 
 const callWithWeirdParameterNames = (
@@ -51,17 +56,22 @@ const callWithWeirdParameterNames = (
 ): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
+
     headers: {
         'parameter.header': parameterHeader,
     },
+
     query: {
         'parameter-query': parameterQuery,
         default: _default,
     },
-    formData: {
+
+    body: parameterBody,
+
+    body: {
         parameter_form: parameterForm,
     },
-    body: parameterBody,
+    requestMediaType: 'multipart/form-data',
 });
 
 export type TParametersOptions = {
