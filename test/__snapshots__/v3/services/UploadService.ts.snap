@@ -7,9 +7,11 @@ import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 const uploadFile = (file: Blob): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/upload`,
-    formData: {
+
+    body: {
         file: file,
     },
+    requestMediaType: 'multipart/form-data',
 });
 
 export type TUploadOptions = {

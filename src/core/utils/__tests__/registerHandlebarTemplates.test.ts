@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import test, { describe } from 'node:test';
 
 import { HttpClient } from '../../types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
 import { registerHandlebarTemplates } from '../registerHandlebarTemplates';
 
 describe('@unit: registerHandlebarTemplates', () => {
@@ -10,6 +11,7 @@ describe('@unit: registerHandlebarTemplates', () => {
             httpClient: HttpClient.FETCH,
             useOptions: false,
             useUnionTypes: false,
+            validationLibrary: ValidationLibrary.ZOD,
         });
         assert.notEqual(templates.indexes.full, undefined);
         assert.notEqual(templates.indexes.models, undefined);

@@ -13,6 +13,7 @@ const collectionFormat = (
 ): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/collectionFormat`,
+
     query: {
         parameterArrayCSV: parameterArrayCsv,
         parameterArraySSV: parameterArraySsv,

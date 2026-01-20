@@ -13,8 +13,9 @@ const multipartResponse = (): RequestConfig => ({
 const multipartRequest = (formData?: { content?: string; data?: IModelWithString | null }): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/multipart`,
+
     body: formData,
-    mediaType: 'multipart/form-data',
+    requestMediaType: 'multipart/form-data',
 });
 
 export type TMultipartOptions = {

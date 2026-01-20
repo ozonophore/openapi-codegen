@@ -7,11 +7,6 @@ import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 const callWithResultFromHeader = (): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/header`,
-    responseHeader: 'operation-location',
-    errors: {
-        400: `400 server error`,
-        500: `500 server error`,
-    },
 });
 
 export type THeaderOptions = {

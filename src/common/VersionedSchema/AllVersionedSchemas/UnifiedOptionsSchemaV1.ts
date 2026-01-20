@@ -1,18 +1,13 @@
 import Joi from 'joi';
 
 import { HttpClient } from '../../../core/types/enums/HttpClient.enum';
-import { 
-    additionalParametersSchemaV2, 
-    experimentalParametersSchemaV2, 
-    outputPathsSchema, 
-    specialParametersSchemasV2 
-} from '../CommonSchemas';
+import { additionalParametersSchemaV2, experimentalParametersSchemaV2, outputPathsSchema, specialParametersSchemasV2 } from '../CommonSchemas';
 import { mergeObjectSchemas } from '../Utils/mergeObjectSchemas';
 
 const itemSchema = mergeObjectSchemas(
     Joi.object({
         input: Joi.string().required().description('Путь, URL или строка OpenAPI спецификации'),
-        httpClient: Joi.string().valid(...Object.values(HttpClient)).optional(),
+        request: Joi.string().optional(),
     }),
     outputPathsSchema,
     additionalParametersSchemaV2,
@@ -26,12 +21,8 @@ const itemSchema = mergeObjectSchemas(
 export const unifiedOptionsSchemaV1 = mergeObjectSchemas(
     Joi.object({
         // Multi-item configuration
-        items: Joi.array()
-            .items(itemSchema)
-            .min(1)
-            .optional()
-            .description('Массив спецификаций для генерации'),
-        
+        items: Joi.array().items(itemSchema).min(1).optional().description('Массив спецификаций для генерации'),
+
         // Single-item configuration (mutually exclusive with items)
         input: Joi.string()
             .when('items', {
@@ -47,6 +38,9 @@ export const unifiedOptionsSchemaV1 = mergeObjectSchemas(
                 otherwise: Joi.required(),
             })
             .description('Выходная директория'),
+        httpClient: Joi.string()
+            .valid(...Object.values(HttpClient))
+            .optional(),
     }),
     outputPathsSchema, // outputCore, outputServices, etc. for single-item mode
     specialParametersSchemasV2,
