@@ -1,9 +1,9 @@
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
+import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import type { Client } from '../types/shared/Client.model';
 import { WriteClient } from '../WriteClient';
-import { Templates } from './registerHandlebarTemplates';
 
 /**
  * @param client Client object, containing, models, schemas and services
@@ -44,6 +44,8 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
 
     this.logger.info("The recording of the kernel files begins");
 
+    const hasCustomRequest = !!request;
+
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'OpenAPI.ts'), templates.core.settings(context));
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
@@ -55,9 +57,9 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'request.ts'), templates.core.request(context));
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'request-executor.ts'), templates.core.requestExecutor({}));
     // TODO: Добавлять только, если не выбран custom-ный request
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'legacy-request-adapter.ts'), templates.core.legacyRequestAdapter({}));
+    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'createExecutorAdapter.ts'), templates.core.createExecutorAdapter({ useCustomRequest: hasCustomRequest }));
 
-    if (request) {
+    if (hasCustomRequest) {
         const requestFile = resolveHelper(process.cwd(), request);
         const requestFileExists = await fileSystemHelpers.exists(requestFile);
         if (!requestFileExists) {

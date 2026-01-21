@@ -3,11 +3,11 @@ import { PathOrFileDescriptor } from 'node:fs';
 import { describe, mock, test } from 'node:test';
 
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
+import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ValidationLibrary } from '../types/enums/ValidationLibrary.enum';
 import type { Client } from '../types/shared/Client.model';
 import { getOutputPaths } from '../utils/getOutputPaths';
-import { Templates } from '../utils/registerHandlebarTemplates';
 import { WriteClient } from '../WriteClient';
 
 describe('@unit: writeClient', () => {
@@ -45,6 +45,7 @@ describe('@unit: writeClient', () => {
                 services: () => 'servicesIndex',
             },
             exports: {
+                client: () => 'client',
                 model: () => 'model',
                 schema: () => 'schema',
                 service: () => 'service',
@@ -57,7 +58,7 @@ describe('@unit: writeClient', () => {
                 request: () => 'request',
                 cancelablePromise: () => 'cancelablePromise',
                 httpStatusCode: () => 'httpStatusCode',
-                legacyRequestAdapter: () => 'legacyRequestAdapter',
+                createExecutorAdapter: () => 'createExecutorAdapter',
                 requestExecutor: () => 'requestExecutor',
             },
         };

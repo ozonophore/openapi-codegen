@@ -2,45 +2,39 @@ method: '{{{method}}}',
 path: `{{{path}}}`,
 
 {{#if parametersHeader}}
-    headers: {
-    {{#each parametersHeader}}
-        '{{{prop}}}':
-        {{{name}}},
-    {{/each}}
-    },
+headers: {
+{{#each parametersHeader}}
+  '{{{prop}}}': {{{name}}},
+{{/each}}
+},
 {{/if}}
 
 {{#if parametersCookie}}
-    cookies: {
-    {{#each parametersCookie}}
-        '{{{prop}}}':
-        {{{name}}},
-    {{/each}}
-    },
+cookies: {
+{{#each parametersCookie}}
+  '{{{prop}}}': {{{name}}},
+{{/each}}
+},
 {{/if}}
 
 {{#if parametersQuery}}
-    query: {
-    {{#each parametersQuery}}
-        '{{{prop}}}':
-        {{{name}}},
-    {{/each}}
-    },
-{{/if}}
-
-{{#if parametersBody}}
-    body:
-    {{{parametersBody.name}}},
-    {{#if parametersBody.mediaType}}
-        requestMediaType: '{{{parametersBody.mediaType}}}',
-    {{/if}}
+query: {
+{{#each parametersQuery}}
+  '{{{prop}}}': {{{name}}},
+{{/each}}
+},
 {{/if}}
 
 {{#if parametersForm}}
-    body: {
-    {{#each parametersForm}}
-        '{{{prop}}}':
-        {{{name}}},
-    {{/each}}
-    }, requestMediaType: 'multipart/form-data',
+body: {
+{{#each parametersForm}}
+  '{{{prop}}}': {{{name}}},
+{{/each}}
+},
+requestMediaType: 'multipart/form-data',
+{{else if parametersBody}}
+body: {{{parametersBody.name}}},
+{{#if parametersBody.mediaType}}
+requestMediaType: '{{{parametersBody.mediaType}}}',
+{{/if}}
 {{/if}}

@@ -67,6 +67,7 @@ const precompileTemplates = () => {
                             joiBaseSchema: true,
                             getRequiredFields: true,
                             getEnumType: true,
+                            camelCase: true,
                         },
                     });
 

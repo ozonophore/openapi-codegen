@@ -1,0 +1,32 @@
+{{>header}}
+
+import { OpenAPI } from '{{{joinPath @root.outputCore 'OpenAPI'}}}';
+import type { TOpenAPIConfig } from '{{{joinPath @root.outputCore 'OpenAPI'}}}';
+import type { RequestExecutor } from '{{{joinPath @root.outputCore 'request-executor'}}}';
+import { createExecutorAdapter } from '{{{joinPath @root.outputCore 'createExecutorAdapter'}}}';
+
+{{#each services}}
+import { {{name}} } from './services/{{name}}';
+{{/each}}
+
+export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
+  openApi?: Partial<TOpenAPIConfig>;
+  executor?: RequestExecutor<TExecutorOptions>;
+}
+
+export function createClient<TExecutorOptions extends Record<string, any>>(
+  options: ClientOptions<TExecutorOptions> = {},
+) {
+  const openApiConfig: TOpenAPIConfig = {
+    ...OpenAPI,
+    ...options.openApi,
+  };
+
+  const executor = createExecutorAdapter<TExecutorOptions>(openApiConfig);
+
+  return {
+    {{#each services}}
+    {{camelCase name}}: new {{name}}(executor),
+    {{/each}}
+  };
+}

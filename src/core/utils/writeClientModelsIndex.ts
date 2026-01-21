@@ -1,8 +1,8 @@
 import { resolveHelper } from '../../common/utils/pathHelpers';
+import { Templates } from '../types/base/Templates.model';
 import { Model } from '../types/shared/Model.model';
 import { WriteClient } from '../WriteClient';
 import { appendUniqueLinesToFile } from './appendUniqueLinesToFile';
-import { Templates } from './registerHandlebarTemplates';
 
 interface IOptionsProps {
     models: Model[];
