@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.5] - 2026-01-21
+
+### Added
+- New init CLI command for OpenAPI configuration initialization.
+- Step-by-step initialization flow:
+  - OpenAPI specification discovery and validation;
+  - configuration file generation;
+  - custom request or request executor generation.
+- Utilities for:
+  - specification file discovery;
+  - single and multiple spec validation;
+  - config generation and writing;
+  - Handlebars template registration for CLI.
+- New CLI templates and their compiled counterparts.
+### Changed
+-Updated CLI entrypoint and option schemas for the init command.
+-Refactored OpenAPI config initialization logic:
+  - logic split into reusable, well-scoped modules.
+-Updated shared constants and filesystem helper utilities.
+-Improved $ref to import path resolution in core generation logic.
+-Updated openApiConfig template.
+### Removed
+-Removed deprecated runInitOpenapiConfig initialization command.
+### Fixed
+-Fixed relative $ref resolution for external files and nested directories.
+-Fixed cases where parentFilePath points to a directory instead of a file.
+
 ## [2.0.0-beta.4] - 2026-01-18
 
 ### Added

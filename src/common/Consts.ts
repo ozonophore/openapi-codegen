@@ -34,3 +34,9 @@ export const APP_LOGGER = new Logger({
     instanceId: 'cli',
     logOutput: ELogOutput.CONSOLE,
 });
+
+export const DEFAULT_SPECS_DIR = 'openapi/';
+
+export const DEFAULT_CUSTOM_REQUEST_PATH = './src/custom/request.ts'
+
+export const DEFAULT_OUTPUT_API_DIR = './generated';
