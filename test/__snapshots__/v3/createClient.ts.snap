@@ -1,0 +1,56 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { OpenAPI } from './core/OpenAPI';
+import type { TOpenAPIConfig } from './core/OpenAPI';
+import type { RequestExecutor } from './core/request-executor';
+import { createExecutorAdapter } from './core/createExecutorAdapter';
+
+import { SimpleService } from './services/SimpleService';
+import { ParametersService } from './services/ParametersService';
+import { RequestBodyService } from './services/RequestBodyService';
+import { DefaultsService } from './services/DefaultsService';
+import { DuplicateService } from './services/DuplicateService';
+import { NoContentService } from './services/NoContentService';
+import { ResponseService } from './services/ResponseService';
+import { CollectionFormatService } from './services/CollectionFormatService';
+import { TypesService } from './services/TypesService';
+import { UploadService } from './services/UploadService';
+import { ComplexService } from './services/ComplexService';
+import { MultipartService } from './services/MultipartService';
+import { HeaderService } from './services/HeaderService';
+import { EnumsService } from './services/EnumsService';
+
+export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
+    openApi?: Partial<TOpenAPIConfig>;
+    executor?: RequestExecutor<TExecutorOptions>;
+}
+
+export function createClient<TExecutorOptions extends Record<string, any>>(
+    options: ClientOptions<TExecutorOptions> = {},
+) {
+    const openApiConfig: TOpenAPIConfig = {
+        ...OpenAPI,
+        ...options.openApi,
+    };
+
+    const executor = createExecutorAdapter<TExecutorOptions>(openApiConfig);
+
+    return {
+        SimpleService: new SimpleService(executor),
+        ParametersService: new ParametersService(executor),
+        RequestBodyService: new RequestBodyService(executor),
+        DefaultsService: new DefaultsService(executor),
+        DuplicateService: new DuplicateService(executor),
+        NoContentService: new NoContentService(executor),
+        ResponseService: new ResponseService(executor),
+        CollectionFormatService: new CollectionFormatService(executor),
+        TypesService: new TypesService(executor),
+        UploadService: new UploadService(executor),
+        ComplexService: new ComplexService(executor),
+        MultipartService: new MultipartService(executor),
+        HeaderService: new HeaderService(executor),
+        EnumsService: new EnumsService(executor),
+    };
+}

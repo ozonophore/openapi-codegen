@@ -1,4 +1,4 @@
-import { Templates } from "../../utils/registerHandlebarTemplates";
+import { Templates } from "../../types/base/Templates.model";
 import { ExportedModel } from "./ExportedModel.model";
 import { ExportedService } from "./ExportedService.model";
 

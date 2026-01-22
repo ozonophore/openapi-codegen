@@ -1,3 +1,4 @@
+import camelCase from 'camelcase';
 import * as Handlebars from 'handlebars/runtime';
 
 import { REGEX_BACKSLASH, REGEX_DOT_SLASH, REGEX_LEADING_DOT_SLASH, REGEX_MULTIPLE_SLASHES, REGEX_TRAILING_SLASH } from '../types/Consts';
@@ -162,5 +163,13 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
         }
         const firstEnum = enumerators[0];
         return firstEnum.type === 'number' ? 'number' : 'string';
+    });
+
+    Handlebars.registerHelper('camelCase', function (this: any, value: string) {
+        const name = camelCase(value, { pascalCase: true });
+        if (name && !name.endsWith('Service')) {
+            return `${name}Service`;
+        }
+        return name;
     });
 }

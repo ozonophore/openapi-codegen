@@ -1,0 +1,52 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { OpenAPI } from './core/OpenAPI';
+import type { TOpenAPIConfig } from './core/OpenAPI';
+import type { RequestExecutor } from './core/request-executor';
+import { createExecutorAdapter } from './core/createExecutorAdapter';
+
+import { V2Service } from './services/V2Service';
+import { V2Service } from './services/V2Service';
+import { SimpleService } from './services/SimpleService';
+import { ParametersService } from './services/ParametersService';
+import { DefaultsService } from './services/DefaultsService';
+import { DuplicateService } from './services/DuplicateService';
+import { NoContentService } from './services/NoContentService';
+import { ResponseService } from './services/ResponseService';
+import { CollectionFormatService } from './services/CollectionFormatService';
+import { TypesService } from './services/TypesService';
+import { ComplexService } from './services/ComplexService';
+import { HeaderService } from './services/HeaderService';
+
+export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
+    openApi?: Partial<TOpenAPIConfig>;
+    executor?: RequestExecutor<TExecutorOptions>;
+}
+
+export function createClient<TExecutorOptions extends Record<string, any>>(
+    options: ClientOptions<TExecutorOptions> = {},
+) {
+    const openApiConfig: TOpenAPIConfig = {
+        ...OpenAPI,
+        ...options.openApi,
+    };
+
+    const executor = createExecutorAdapter<TExecutorOptions>(openApiConfig);
+
+    return {
+        V2Service: new V2Service(executor),
+        V2Service: new V2Service(executor),
+        SimpleService: new SimpleService(executor),
+        ParametersService: new ParametersService(executor),
+        DefaultsService: new DefaultsService(executor),
+        DuplicateService: new DuplicateService(executor),
+        NoContentService: new NoContentService(executor),
+        ResponseService: new ResponseService(executor),
+        CollectionFormatService: new CollectionFormatService(executor),
+        TypesService: new TypesService(executor),
+        ComplexService: new ComplexService(executor),
+        HeaderService: new HeaderService(executor),
+    };
+}

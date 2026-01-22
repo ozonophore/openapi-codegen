@@ -3,6 +3,8 @@
 /* eslint-disable */
 
 export { ApiError } from '././core/ApiError';
+export { RequestConfig, RequestExecutor } from '././core/request-executor';
+export { createExecutorAdapter } from '././core/createExecutorAdapter';
 export { OpenAPI } from '././core/OpenAPI';
 export type { TOpenAPIConfig } from '././core/OpenAPI';
 
@@ -42,3 +44,5 @@ export { ComplexService } from '././services/ComplexService';
 export { MultipartService } from '././services/MultipartService';
 export { HeaderService } from '././services/HeaderService';
 export { EnumsService } from '././services/EnumsService';
+
+export { ClientOptions, createClient } from './createClient';

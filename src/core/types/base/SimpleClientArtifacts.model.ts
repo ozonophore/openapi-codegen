@@ -1,4 +1,4 @@
-import { Templates } from "../../utils/registerHandlebarTemplates";
+import { Templates } from "../../types/base/Templates.model";
 
 export type SimpleClientArtifacts = {
     templates: Templates;

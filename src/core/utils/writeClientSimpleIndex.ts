@@ -1,7 +1,7 @@
+import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { SimpleClientArtifacts } from '../types/base/SimpleClientArtifacts.model';
 import { WriteClient } from '../WriteClient';
-import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 
 /**
  * Generate the OpenAPI client index file using the Handlebar template and write it to disk.

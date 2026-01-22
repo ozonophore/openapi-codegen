@@ -33,9 +33,6 @@ const callWithParameters = (
         parameterQuery: parameterQuery,
     },
 
-    body: requestBody,
-    requestMediaType: 'application/json',
-
     body: {
         parameterForm: parameterForm,
     },
@@ -79,9 +76,6 @@ const callWithWeirdParameterNames = (
         'parameter-query': parameterQuery,
         default: _default,
     },
-
-    body: requestBody,
-    requestMediaType: 'application/json',
 
     body: {
         parameter_form: parameterForm,

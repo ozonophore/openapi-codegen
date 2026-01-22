@@ -128,5 +128,6 @@ export default {"1":function(container,depth0,helpers,partials,data,blockParams,
     + "\n\n"
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"schemas"),{"name":"if","hash":{},"fn":container.program(9, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":16,"column":0},"end":{"line":20,"column":7}}})) != null ? stack1 : "")
     + "\n"
-    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"services"),{"name":"if","hash":{},"fn":container.program(13, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":22,"column":0},"end":{"line":26,"column":7}}})) != null ? stack1 : "");
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"services"),{"name":"if","hash":{},"fn":container.program(13, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":22,"column":0},"end":{"line":26,"column":7}}})) != null ? stack1 : "")
+    + "\nexport { ClientOptions, createClient } from './createClient';\n";
 },"usePartial":true,"useData":true,"useDepths":true}

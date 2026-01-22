@@ -1,4 +1,6 @@
-{{>header}}
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
 
 import type { RequestExecutor, RequestConfig } from './request-executor';
 import type { ApiRequestOptions } from './ApiRequestOptions';
@@ -6,21 +8,15 @@ import type { TOpenAPIConfig } from './OpenAPI';
 import { OpenAPI } from './OpenAPI';
 import { request as __request } from './request';
 
-/**
- * Legacy RequestExecutor-адаптер поверх существующего request(ApiRequestOptions, OpenAPI).
- *
- * TOptions — тип рантайм-опций транспорта (IXHROptions, IFetchOptions и т.п.).
- * mapOptions — опциональная функция, которая мапит TOptions → часть ApiRequestOptions.
- */
-export function createLegacyExecutor<TOptions = unknown>(
+export function createExecutorAdapter<TRequestOptions extends Record<string, any>>(
     openApiConfig: TOpenAPIConfig = OpenAPI,
-    mapOptions?: (options: TOptions | undefined) => Partial<ApiRequestOptions>,
-): RequestExecutor<TOptions> {
+    mapOptions?: (options: TRequestOptions | undefined) => Partial<ApiRequestOptions>,
+): RequestExecutor<TRequestOptions> {
     return {
-        request<TResponse>(config: RequestConfig, options?: TOptions): Promise<TResponse> {
+        request<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<TResponse> {
             const baseOptions: ApiRequestOptions = {
                 method: config.method as ApiRequestOptions['method'],
-                path: config.url,         // RequestConfig.url → ApiRequestOptions.path
+                path: config.path,
                 headers: config.headers,
                 query: config.query,
                 body: config.body,

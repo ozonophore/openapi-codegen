@@ -114,26 +114,13 @@ export function resolveRefToImportPath({ mainSpecPath, parentFilePath, refValueP
 
     // EXTERNAL_FILE: reference to external file (e.g., ./file.yaml)
     if (parsed.type === RefType.EXTERNAL_FILE) {
-        const adjustedRefSegments = currentRefValue.split('/');
-        let adjustedParentDir = parentDirForResolveWithSep;
-
-        while (adjustedRefSegments[0] === '..') {
-            adjustedParentDir = dirNameHelper(adjustedParentDir);
-            adjustedRefSegments.shift();
+        const targetFileAbs = joinHelper(parentDirForResolveWithSep, currentRefValue);
+        // ВАЖНО: проверка self-reference
+        if (parentFilePath && fileSystemHelpers.isSameFilePath(targetFileAbs, parentFilePath)) {
+            const modelName = stripNamespace(parentFilePath);
+            return resolveFragmentRef(modelName, parentFilePath, mainSpecPath, sourceRoot, outputModelsPath, absOutputModelsPath);
         }
-
-        const parentBase = basename(adjustedParentDir);
-        if (adjustedRefSegments[0] === parentBase) {
-            adjustedRefSegments.shift();
-        }
-
-        const targetFileAbs = resolveHelper(adjustedParentDir, ...adjustedRefSegments);
-        return resolveExternalFileOrAbsolutePath(
-            targetFileAbs,
-            sourceRoot,
-            outputModelsPath,
-            absOutputModelsPath
-        );
+        return resolveExternalFileOrAbsolutePath(targetFileAbs, sourceRoot, outputModelsPath, absOutputModelsPath);
     }
 
     // ABSOLUTE_PATH (default case): absolute path reference

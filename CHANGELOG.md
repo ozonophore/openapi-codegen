@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.6] — 2026-01-22
+
+### Added
+- Function `isSameFilePath` added to centralized `fileSystemHelpers` module for better file path comparison
+- Helper `camelCase` added for Handlebars template processing
+- New executor adapter generation (`createExecutorAdapter.hbs`) replacing the outdated query adapter
+- Template types model exported to support better type registration
+
+### Changed
+- `Templates` type moved from core module to dedicated `src/core/types/base/Templates.model.ts` file for better organization
+- `resolveRefToImportPath` function refactored to handle external file references more robustly
+- Handlebars template registration logic simplified
+- Service options template (`serviceOption.hbs`) improved with better parameter handling
+- Index files refactored for clearer exports structure (`indexCore.hbs`, `indexFull.hbs`, `indexSimple.hbs`)
+
+### Removed
+- Legacy query adapter (`legacy-request-adapter.hbs`) removed in favor of new executor adapter approach
+
+### Fixed
+- Self-reference check added to `resolveRefToImportPath` for proper external file link resolution
+- Improved handling of edge cases in template compilation
+
+### Tests
+- Updated unit tests for `resolveRefToImportPath` function with new test cases
+- Updated snapshot test files for both OpenAPI v2 and v3 specifications
+- Updated WriteClient test suite with executor adapter test cases
+
 ## [2.0.0-beta.5] - 2026-01-21
 
 ### Added

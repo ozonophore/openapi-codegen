@@ -1,6 +1,8 @@
 {{>header}}
 
 export { ApiError } from './ApiError';
+export { RequestConfig, RequestExecutor } from './request-executor';
+export { createLegacyExecutor } from './legacy-request-adapter';
 {{#if @root.useCancelableRequest}}
 export { CancelablePromise } from './CancelablePromise';
 {{/if}}

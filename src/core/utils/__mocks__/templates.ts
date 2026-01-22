@@ -1,4 +1,4 @@
-import { Templates } from '../registerHandlebarTemplates';
+import { Templates } from '../../types/base/Templates.model';
 
 export const templates: Templates = {
     indexes: {
@@ -10,6 +10,7 @@ export const templates: Templates = {
         services: () => 'servicesIndex',
     },
     exports: {
+        client: () => 'client',
         model: () => 'model',
         schema: () => 'schema',
         service: () => 'service',
@@ -22,7 +23,7 @@ export const templates: Templates = {
         request: () => 'request',
         cancelablePromise: () => 'cancelablePromise',
         httpStatusCode: () => 'httpStatusCode',
-        legacyRequestAdapter: () => 'legacyRequestAdapter',
+        createExecutorAdapter: () => 'createExecutorAdapter',
         requestExecutor: () => 'requestExecutor',
     },
 };

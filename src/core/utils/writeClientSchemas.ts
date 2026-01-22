@@ -3,11 +3,11 @@ import { mkdirSync } from 'fs';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ValidationLibrary } from '../types/enums/ValidationLibrary.enum';
 import type { Model } from '../types/shared/Model.model';
 import { WriteClient } from '../WriteClient';
-import { Templates } from './registerHandlebarTemplates';
 
 /**
  * @param models Array of Models to write

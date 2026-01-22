@@ -40,13 +40,14 @@ import templateCoreSettings from '../../templatesCompiled/client/core/OpenAPI';
 import templateCancellablePromise from '../../templatesCompiled/client/core/CancelablePromise';
 import templateCoreRequest from '../../templatesCompiled/client/core/request';
 import templateCoreRequestExecutor from '../../templatesCompiled/client/core/request-executor';
-import templateLegacyRequestAdapter from '../../templatesCompiled/client/core/legacy-request-adapter';
+import templateCreateExecutor from '../../templatesCompiled/client/core/createExecutorAdapter';
 import xhrGetHeaders from '../../templatesCompiled/client/core/xhr/getHeaders';
 import xhrGetRequestBody from '../../templatesCompiled/client/core/xhr/getRequestBody';
 import xhrGetResponseBody from '../../templatesCompiled/client/core/xhr/getResponseBody';
 import xhrGetResponseHeader from '../../templatesCompiled/client/core/xhr/getResponseHeader';
 import xhrRequest from '../../templatesCompiled/client/core/xhr/request';
 import xhrSendRequest from '../../templatesCompiled/client/core/xhr/sendRequest';
+import templateClient from '../../templatesCompiled/client/exportClient';
 import templateExportModel from '../../templatesCompiled/client/exportModel';
 import templateExportService from '../../templatesCompiled/client/exportService';
 import templateFullIndex from '../../templatesCompiled/client/indexFull';
@@ -130,32 +131,7 @@ import partialJsonSchemaSchemaGeneric from '../../templatesCompiled/client/jsons
 import partialJsonSchemaSchemaReference from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaReference';
 import partialJsonSchemaSchemaComposition from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaComposition';
 
-export interface Templates {
-    indexes: {
-        full: Handlebars.TemplateDelegate;
-        simple: Handlebars.TemplateDelegate;
-        core: Handlebars.TemplateDelegate;
-        models: Handlebars.TemplateDelegate;
-        schemas: Handlebars.TemplateDelegate;
-        services: Handlebars.TemplateDelegate;
-    };
-    exports: {
-        model: Handlebars.TemplateDelegate;
-        schema: Handlebars.TemplateDelegate | undefined;
-        service: Handlebars.TemplateDelegate;
-    };
-    core: {
-        settings: Handlebars.TemplateDelegate;
-        apiError: Handlebars.TemplateDelegate;
-        apiRequestOptions: Handlebars.TemplateDelegate;
-        apiResult: Handlebars.TemplateDelegate;
-        request: Handlebars.TemplateDelegate;
-        cancelablePromise: Handlebars.TemplateDelegate;
-        httpStatusCode: Handlebars.TemplateDelegate;
-        requestExecutor: Handlebars.TemplateDelegate;
-        legacyRequestAdapter: Handlebars.TemplateDelegate;
-    };
-}
+import { Templates } from '../types/base/Templates.model';
 
 /**
  * Read all the Handlebar templates that we need and return on wrapper object
@@ -175,6 +151,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
             services: Handlebars.template(templateServices),
         },
         exports: {
+            client: Handlebars.template(templateClient),
             model: Handlebars.template(templateExportModel),
             schema: undefined,
             service: Handlebars.template(templateExportService),
@@ -188,7 +165,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
             cancelablePromise: Handlebars.template(templateCancellablePromise),
             httpStatusCode: Handlebars.template(templateHttpStatuses),
             requestExecutor: Handlebars.template(templateCoreRequestExecutor),
-            legacyRequestAdapter: Handlebars.template(templateLegacyRequestAdapter),
+            createExecutorAdapter: Handlebars.template(templateCreateExecutor),
         },
     };
 

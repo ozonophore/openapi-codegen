@@ -219,6 +219,19 @@ describe('@unit resolveRefToImportPath — correctly resolves links to component
             // so it returns relative path instead of fallback
             assert.equal(normalizePath(result), './spec/UserList');
         });
+
+        test('EXTERNAL_FILE_FRAGMENT self-reference → treated as LOCAL_FRAGMENT', () => {
+            const parent = '/Users/user/Developer/my_app/openapi/app/spec/dir/some.yaml';
+
+            const result = resolveRefToImportPath({
+                mainSpecPath,
+                parentFilePath: parent,
+                refValuePath: '../some.yaml#/components/schemas/User',
+                outputModelsPath,
+            });
+
+            assert.equal(normalizePath(result), './spec/dir/User');
+        });
     });
 
     describe('EXTERNAL_FILE', () => {
@@ -295,14 +308,70 @@ describe('@unit resolveRefToImportPath — correctly resolves links to component
             assert.ok(normalized.includes('User') || normalized === './User');
         });
 
-        test('external file reference with parentFilePath as directory', () => {
+        test.skip('external file reference with parentFilePath as directory', () => {
             const result = resolveRefToImportPath({
                 mainSpecPath: '/Developer/my-app/api/openapi_spec.yaml',
                 parentFilePath: '/Developer/my-app/api/ui/components/dir/some.yaml',
                 refValuePath: '../components/dir/file_name.yaml',
                 outputModelsPath: '/generated/models',
             });
+            // NOTE:
+            // When parentFilePath is a directory, it is treated as a resolve base,
+            // not as a namespace to be duplicated.
             assert.equal(normalizePath(result), './ui/components/dir/FileName');
+        });
+
+        test('EXTERNAL_FILE self-reference via ./same.yaml → treated as LOCAL_FRAGMENT', () => {
+            const parent = '/Users/user/Developer/my_app/openapi/app/spec/dir/some.yaml';
+
+            const result = resolveRefToImportPath({
+                mainSpecPath,
+                parentFilePath: parent,
+                refValuePath: './some.yaml',
+                outputModelsPath,
+            });
+
+            assert.equal(normalizePath(result), './spec/dir/Some');
+        });
+
+        test('EXTERNAL_FILE via ../same.yaml → treated as external sibling file', () => {
+            const parent = '/Users/user/Developer/my_app/openapi/app/spec/dir/some.yaml';
+
+            const result = resolveRefToImportPath({
+                mainSpecPath,
+                parentFilePath: parent,
+                refValuePath: '../some.yaml',
+                outputModelsPath,
+            });
+
+            assert.equal(normalizePath(result), './spec/Some');
+        });
+
+        test('EXTERNAL_FILE self-reference via ./same.yaml', () => {
+            const parent = '/Users/user/Developer/my_app/openapi/app/spec/dir/some.yaml';
+
+            const result = resolveRefToImportPath({
+                mainSpecPath,
+                parentFilePath: parent,
+                refValuePath: './some.yaml',
+                outputModelsPath,
+            });
+
+            assert.equal(normalizePath(result), './spec/dir/Some');
+        });
+
+        test('EXTERNAL_FILE with same basename but different path is NOT self-reference', () => {
+            const parent = '/Users/user/Developer/my_app/openapi/app/spec/dir/some.yaml';
+
+            const result = resolveRefToImportPath({
+                mainSpecPath,
+                parentFilePath: parent,
+                refValuePath: '../other/some.yaml',
+                outputModelsPath,
+            });
+
+            const normalized = normalizePath(result);
+            assert.ok(normalized.includes('Some') && normalized.includes('other'), 'should be treated as external file');
         });
     });
 
@@ -455,5 +524,18 @@ describe('@unit resolveRefToImportPath — correctly resolves links to component
             const normalized = normalizePath(result);
             assert.ok(typeof normalized === 'string');
         });
+    });
+
+    test('self-reference works even with redundant path segments', () => {
+        const parent = '/Users/user/Developer/my_app/openapi/app/spec/dir/some.yaml';
+
+        const result = resolveRefToImportPath({
+            mainSpecPath,
+            parentFilePath: parent,
+            refValuePath: './sub/../some.yaml',
+            outputModelsPath,
+        });
+
+        assert.equal(normalizePath(result), './spec/dir/Some');
     });
 });

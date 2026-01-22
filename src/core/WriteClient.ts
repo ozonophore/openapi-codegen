@@ -7,15 +7,16 @@ import { ExportedModel } from './types/base/ExportedModel.model';
 import { ExportedService } from './types/base/ExportedService.model';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { SimpleClientArtifacts } from './types/base/SimpleClientArtifacts.model';
+import { Templates } from './types/base/Templates.model';
 import { HttpClient } from './types/enums/HttpClient.enum';
 import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import type { Client } from './types/shared/Client.model';
 import { prepareAlias } from './utils/prepareAlias';
-import { Templates } from './utils/registerHandlebarTemplates';
 import { sortModelByName } from './utils/sortModelByName';
 import { unique } from './utils/unique';
 import { writeClientCore } from './utils/writeClientCore';
 import { writeClientCoreIndex } from './utils/writeClientCoreIndex';
+import { writeClientExecutor } from './utils/writeClientExecutor';
 import { writeClientFullIndex } from './utils/writeClientFullIndex';
 import { writeClientModels } from './utils/writeClientModels';
 import { writeClientModelsIndex } from './utils/writeClientModelsIndex';
@@ -119,6 +120,12 @@ export class WriteClient {
                 templates,
                 outputServices,
                 useSeparatedIndexes,
+            });
+            await this.writeClientExecutor({
+                outputPath: outputPaths.output,
+                outputCorePath: relativeHelper(outputPaths.output, outputCore),
+                services: client.services,
+                templates,
             });
         }
 
@@ -371,4 +378,5 @@ export class WriteClient {
     public writeClientServices = writeClientServices;
     public writeClientServicesIndex = writeClientServicesIndex;
     public writeClientSimpleIndex = writeClientSimpleIndex;
+    public writeClientExecutor = writeClientExecutor;
 }

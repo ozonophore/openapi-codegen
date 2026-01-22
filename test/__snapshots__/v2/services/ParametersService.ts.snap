@@ -26,8 +26,6 @@ const callWithParameters = (
         parameterQuery: parameterQuery,
     },
 
-    body: parameterBody,
-
     body: {
         parameterForm: parameterForm,
     },
@@ -65,8 +63,6 @@ const callWithWeirdParameterNames = (
         'parameter-query': parameterQuery,
         default: _default,
     },
-
-    body: parameterBody,
 
     body: {
         parameter_form: parameterForm,
