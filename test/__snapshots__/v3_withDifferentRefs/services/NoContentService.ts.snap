@@ -1,0 +1,30 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const callWithNoContentResponse = (): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/no-content`,
+});
+
+export type TNoContentOptions = {
+    callWithNoContentResponse: () => RequestConfig;
+};
+
+export const NoContentOptions: TNoContentOptions = {
+    callWithNoContentResponse: callWithNoContentResponse,
+};
+
+export class NoContentService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public callWithNoContentResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(NoContentOptions.callWithNoContentResponse(), options);
+    }
+}

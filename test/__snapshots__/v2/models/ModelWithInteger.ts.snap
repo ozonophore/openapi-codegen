@@ -1,0 +1,13 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a model with one number property
+ */
+export interface IModelWithInteger {
+    /**
+     * This is a simple number property
+     */
+    prop?: number;
+}

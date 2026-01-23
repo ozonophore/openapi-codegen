@@ -12,23 +12,15 @@ export { EEnumWithNumbers } from '././models/EnumWithNumbers';
 export { EEnumWithStrings } from '././models/EnumWithStrings';
 export { EEnumWithStringsWithType } from '././models/EnumWithStringsWithType';
 export type { IModelWithArray } from '././models/ModelWithArray';
+export type { IModelWithCircularReference } from '././models/ModelWithCircularReference';
 export type { IModelWithDictionary } from '././models/ModelWithDictionary';
 export { IModelWithEnum } from '././models/ModelWithEnum';
+export type { IModelWithProperties } from '././models/ModelWithProperties';
 export type { IModelWithString } from '././models/ModelWithString';
+export type { SimpleRequestBody } from '././models/SimpleRequestBody';
 export type { TArrayWithArray } from '././models/ArrayWithArray';
 export type { TModelThatExtends } from '././models/ModelThatExtends';
 export type { TModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
-
-export { EEnumWithNumbersSchema } from '././schemas/EnumWithNumbersSchema';
-export { EEnumWithStringsSchema } from '././schemas/EnumWithStringsSchema';
-export { EEnumWithStringsWithTypeSchema } from '././schemas/EnumWithStringsWithTypeSchema';
-export { IModelWithArraySchema } from '././schemas/ModelWithArraySchema';
-export { IModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
-export { IModelWithEnumSchema } from '././schemas/ModelWithEnumSchema';
-export { IModelWithStringSchema } from '././schemas/ModelWithStringSchema';
-export { TArrayWithArraySchema } from '././schemas/ArrayWithArraySchema';
-export { TModelThatExtendsSchema } from '././schemas/ModelThatExtendsSchema';
-export { TModelThatExtendsExtendsSchema } from '././schemas/ModelThatExtendsExtendsSchema';
 
 export { SimpleService } from '././services/SimpleService';
 export { ParametersService } from '././services/ParametersService';

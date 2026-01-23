@@ -1,0 +1,9 @@
+description: This is a model with duplicated imports
+type: object
+properties:
+  propA:
+    "$ref": "ModelWithString.yml"
+  propB:
+    "$ref": "ModelWithString.yml"
+  propC:
+    "$ref": "ModelWithString.yml"

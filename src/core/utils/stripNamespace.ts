@@ -17,7 +17,7 @@ export function stripNamespace(value: string): string {
         const directoryName = foundFile ? dirNameHelper(foundFile[1]) : dirNameHelper(value);
 
         const extName = extname(value);
-        const baseName = extName.toLowerCase().match(/(\.json|\.yaml|\.yml)$/g) ? getClassName(basename(value, extName)) : getClassName(basename(value));
+        const baseName = extName ? getClassName(basename(value, extName)) : getClassName(basename(value));
         return directoryName ? joinHelper(directoryName, baseName) : baseName;
     }
     const clearValue = value

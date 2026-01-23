@@ -1,0 +1,88 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithStringLocal } from '../models/ModelWithStringLocal';
+import type { IModelWithString } from '../models/schemas/base/ModelWithString';
+import type { TModelThatExtends } from '../models/schemas/compositions/ModelThatExtends';
+import type { INested } from '../models/schemas/compositions/Nested';
+import type { TPropExtendsA } from '../models/schemas/compositions/PropExtendsA';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const callWithResponse = (): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/response`,
+});
+
+const callWithDuplicateResponses = (): RequestConfig => ({
+    method: 'POST',
+    path: `/api/v{api-version}/response`,
+});
+
+const callWithResponses = (): RequestConfig => ({
+    method: 'PUT',
+    path: `/api/v{api-version}/response`,
+});
+
+export type TResponseOptions = {
+    callWithResponse: () => RequestConfig;
+    callWithDuplicateResponses: () => RequestConfig;
+    callWithResponses: () => RequestConfig;
+};
+
+export const ResponseOptions: TResponseOptions = {
+    callWithResponse: callWithResponse,
+    callWithDuplicateResponses: callWithDuplicateResponses,
+    callWithResponses: callWithResponses,
+};
+
+export class ResponseService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @returns IModelWithStringLocal
+     * @throws ApiError
+     */
+    public callWithResponse(options?: TOptions): Promise<IModelWithStringLocal> {
+        return this.executor.request<IModelWithStringLocal>(ResponseOptions.callWithResponse(), options);
+    }
+    /**
+     * @returns TPropExtendsA Message for default response
+     * @returns IModelWithString Message for 201 response
+     * @throws ApiError
+     */
+    public callWithDuplicateResponses(options?: TOptions): Promise<TPropExtendsA | IModelWithString> {
+        return this.executor.request<TPropExtendsA | IModelWithString>(
+            ResponseOptions.callWithDuplicateResponses(),
+            options,
+        );
+    }
+    /**
+     * @returns any Successful response
+     * @returns IModelWithString Message for default response
+     * @returns TModelThatExtends Message for 201 response
+     * @returns INested Message for 202 response
+     * @throws ApiError
+     */
+    public callWithResponses(options?: TOptions): Promise<
+        | {
+              readonly '@namespace.string'?: string;
+              readonly '@namespace.integer'?: number;
+              readonly value?: Array<IModelWithStringLocal>;
+          }
+        | IModelWithString
+        | TModelThatExtends
+        | INested
+    > {
+        return this.executor.request<
+            | {
+                  readonly '@namespace.string'?: string;
+                  readonly '@namespace.integer'?: number;
+                  readonly value?: Array<IModelWithStringLocal>;
+              }
+            | IModelWithString
+            | TModelThatExtends
+            | INested
+        >(ResponseOptions.callWithResponses(), options);
+    }
+}

@@ -1,0 +1,12 @@
+description: This is a model with multiple properties
+type: object
+properties:
+  id:
+    type: integer
+    description: The unique identifier
+  name:
+    type: string
+    description: The name of the object
+  active:
+    type: boolean
+    description: Whether the object is active

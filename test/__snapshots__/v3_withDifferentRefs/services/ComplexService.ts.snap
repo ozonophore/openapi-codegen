@@ -1,0 +1,144 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithStringLocal } from '../models/ModelWithStringLocal';
+import type { IModelWithString as IModelWithString$1 } from '../models/schemas/base/ModelWithString';
+import type { IModelWithArray } from '../models/schemas/collections/ModelWithArray';
+import type { IModelWithDictionary } from '../models/schemas/compositions/ModelWithDictionary';
+import type { EEnumWithNumbers } from '../models/schemas/enums/EnumWithNumbers';
+import type { IModelWithEnum } from '../models/schemas/enums/ModelWithEnum';
+import type { IModelWithString as IModelWithString$2 } from '../models/schemas/ModelWithString';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const complexTypes = (
+    parameterObject: {
+        first?: {
+            second?: {
+                third?: string;
+            };
+        };
+    },
+    parameterReference: IModelWithStringLocal,
+): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/complex`,
+
+    query: {
+        parameterObject: parameterObject,
+        parameterReference: parameterReference,
+    },
+});
+
+const complexParams = (
+    id: number,
+
+    requestBody?: {
+        readonly key: string | null;
+        name: string | null;
+        enabled: boolean;
+        type: EEnumWithNumbers;
+        listOfModels?: Array<IModelWithString> | null;
+        listOfStrings?: Array<string> | null;
+        parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+        readonly user?: {
+            readonly id?: number;
+            readonly name?: string | null;
+        };
+    },
+): RequestConfig => ({
+    method: 'PUT',
+    path: `/api/v{api-version}/complex/${id}`,
+
+    body: requestBody,
+    requestMediaType: 'application/json-patch+json',
+});
+
+export type TComplexOptions = {
+    complexTypes: (
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string;
+                };
+            };
+        },
+        parameterReference: IModelWithStringLocal,
+    ) => RequestConfig;
+    complexParams: (
+        id: number,
+
+        requestBody?: {
+            readonly key: string | null;
+            name: string | null;
+            enabled: boolean;
+            type: EEnumWithNumbers;
+            listOfModels?: Array<IModelWithString> | null;
+            listOfStrings?: Array<string> | null;
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            readonly user?: {
+                readonly id?: number;
+                readonly name?: string | null;
+            };
+        },
+    ) => RequestConfig;
+};
+
+export const ComplexOptions: TComplexOptions = {
+    complexTypes: complexTypes,
+    complexParams: complexParams,
+};
+
+export class ComplexService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @param parameterObject Parameter containing object
+     * @param parameterReference Parameter containing reference
+     * @returns IModelWithString Successful response
+     * @throws ApiError
+     */
+    public complexTypes(
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string;
+                };
+            };
+        },
+        parameterReference: IModelWithStringLocal,
+
+        options?: TOptions,
+    ): Promise<Array<IModelWithString>> {
+        return this.executor.request<Array<IModelWithString>>(
+            ComplexOptions.complexTypes(parameterObject, parameterReference),
+            options,
+        );
+    }
+    /**
+     * @param id
+     * @param requestBody
+     * @returns IModelWithString Success
+     * @throws ApiError
+     */
+    public complexParams(
+        id: number,
+
+        requestBody?: {
+            readonly key: string | null;
+            name: string | null;
+            enabled: boolean;
+            type: EEnumWithNumbers;
+            listOfModels?: Array<IModelWithString> | null;
+            listOfStrings?: Array<string> | null;
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            readonly user?: {
+                readonly id?: number;
+                readonly name?: string | null;
+            };
+        },
+        options?: TOptions,
+    ): Promise<IModelWithString$1> {
+        return this.executor.request<IModelWithString$1>(ComplexOptions.complexParams(id, requestBody), options);
+    }
+}

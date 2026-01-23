@@ -6,30 +6,30 @@ import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const collectionFormat = (
     parameterArrayCsv: Array<string>,
+    parameterArrayMulti: Array<string>,
+    parameterArrayPipes: Array<string>,
     parameterArraySsv: Array<string>,
     parameterArrayTsv: Array<string>,
-    parameterArrayPipes: Array<string>,
-    parameterArrayMulti: Array<string>,
 ): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/collectionFormat`,
 
     query: {
         parameterArrayCSV: parameterArrayCsv,
+        parameterArrayMulti: parameterArrayMulti,
+        parameterArrayPipes: parameterArrayPipes,
         parameterArraySSV: parameterArraySsv,
         parameterArrayTSV: parameterArrayTsv,
-        parameterArrayPipes: parameterArrayPipes,
-        parameterArrayMulti: parameterArrayMulti,
     },
 });
 
 export type TCollectionFormatOptions = {
     collectionFormat: (
         parameterArrayCsv: Array<string>,
+        parameterArrayMulti: Array<string>,
+        parameterArrayPipes: Array<string>,
         parameterArraySsv: Array<string>,
         parameterArrayTsv: Array<string>,
-        parameterArrayPipes: Array<string>,
-        parameterArrayMulti: Array<string>,
     ) => RequestConfig;
 };
 
@@ -42,27 +42,27 @@ export class CollectionFormatService<TOptions = unknown> {
 
     /**
      * @param parameterArrayCsv This is an array parameter that is send as csv format (comma-separated values)
+     * @param parameterArrayMulti This is an array parameter that is send as multi format (multiple parameter instances)
+     * @param parameterArrayPipes This is an array parameter that is send as pipes format (pipe-separated values)
      * @param parameterArraySsv This is an array parameter that is send as ssv format (space-separated values)
      * @param parameterArrayTsv This is an array parameter that is send as tsv format (tab-separated values)
-     * @param parameterArrayPipes This is an array parameter that is send as pipes format (pipe-separated values)
-     * @param parameterArrayMulti This is an array parameter that is send as multi format (multiple parameter instances)
      * @throws ApiError
      */
     public collectionFormat(
         parameterArrayCsv: Array<string>,
+        parameterArrayMulti: Array<string>,
+        parameterArrayPipes: Array<string>,
         parameterArraySsv: Array<string>,
         parameterArrayTsv: Array<string>,
-        parameterArrayPipes: Array<string>,
-        parameterArrayMulti: Array<string>,
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(
             CollectionFormatOptions.collectionFormat(
                 parameterArrayCsv,
+                parameterArrayMulti,
+                parameterArrayPipes,
                 parameterArraySsv,
                 parameterArrayTsv,
-                parameterArrayPipes,
-                parameterArrayMulti,
             ),
             options,
         );

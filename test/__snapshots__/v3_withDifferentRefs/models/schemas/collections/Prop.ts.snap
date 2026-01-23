@@ -1,0 +1,10 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithString } from './../base/ModelWithString';
+
+/**
+ * Array of models
+ */
+export type TProp = Array<IModelWithString>;

@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.7] — 2026-01-22
+
+### Added
+- Added new model snapshot tests for OpenAPI v2 and v3, including:
+  - circular references;
+  - nested and compositional schemas;
+  - enum types and collections.
+- Added extended test coverage for scenarios with different $ref strategies (`v3_withDifferentRefs`).
+- A new OpenAPI specification has been added for testing the alternative structure of `$ref`.
+
+### Changed
+- Refactored model and type parsing logic for OpenAPI v2 and v3:
+  - updated `getModels` and `getType`;
+  - improved handling of complex and nested schemas.
+- Updated client generation Context.
+- Improved OpenAPI spec loading and processing (`getOpenApiSpec`).
+- Improved namespace handling (`stripNamespace`).
+- Updated filesystem helper utilities.
+- Updated OpenAPI config initialization types and logic in CLI.
+- Updated project dependencies and configuration.
+
+### Removed
+- Completely removed legacy `$ref` resolution logic:
+  - removed related helper types, enums, and utilities;
+  - removed associated unit tests.
+- Removed obsolete schema snapshot tests and legacy request adapter snapshots.
+
+### Tests
+- Significantly expanded snapshot test coverage for:
+  - models;
+  - services;
+  - core client artifacts.
+- Updated existing snapshot tests for OpenAPI v2 and v3.
+
 ## [2.0.0-beta.6] — 2026-01-22
 
 ### Added

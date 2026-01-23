@@ -1,0 +1,31 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithCircularReference } from '../models/schemas/base/ModelWithCircularReference';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const callWithCircularModel = (): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/circular`,
+});
+
+export type TCircularOptions = {
+    callWithCircularModel: () => RequestConfig;
+};
+
+export const CircularOptions: TCircularOptions = {
+    callWithCircularModel: callWithCircularModel,
+};
+
+export class CircularService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @returns IModelWithCircularReference
+     * @throws ApiError
+     */
+    public callWithCircularModel(options?: TOptions): Promise<IModelWithCircularReference> {
+        return this.executor.request<IModelWithCircularReference>(CircularOptions.callWithCircularModel(), options);
+    }
+}

@@ -1,0 +1,208 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithEnum } from '../models/schemas/enums/ModelWithEnum';
+import type { IModelWithProperties } from '../models/schemas/ModelWithProperties';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const callWithDefaultParameters = (
+    parameterBoolean: boolean | null = true,
+    parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+    parameterNumber: number | null = 123,
+    parameterString: string | null = 'Hello World!',
+    parameterModel: IModelWithProperties | null = {
+        prop: 'Hello World!',
+    },
+): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/defaults`,
+
+    query: {
+        parameterBoolean: parameterBoolean,
+        parameterEnum: parameterEnum,
+        parameterNumber: parameterNumber,
+        parameterString: parameterString,
+        parameterModel: parameterModel,
+    },
+});
+
+const callWithDefaultOptionalParameters = (
+    parameterBoolean: boolean = true,
+    parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+    parameterNumber: number = 123,
+    parameterString: string = 'Hello World!',
+    parameterModel: IModelWithEnum = {
+        prop: 'Hello World!',
+    },
+): RequestConfig => ({
+    method: 'POST',
+    path: `/api/v{api-version}/defaults`,
+
+    query: {
+        parameterBoolean: parameterBoolean,
+        parameterEnum: parameterEnum,
+        parameterNumber: parameterNumber,
+        parameterString: parameterString,
+        parameterModel: parameterModel,
+    },
+});
+
+const callToTestOrderOfParams = (
+    parameterStringWithNoDefault: string,
+
+    parameterOptionalStringWithDefault: string = 'Hello World!',
+    parameterOptionalStringWithEmptyDefault: string = '',
+    parameterStringWithDefault: string = 'Hello World!',
+    parameterStringWithEmptyDefault: string = '',
+    parameterOptionalStringWithNoDefault?: string,
+): RequestConfig => ({
+    method: 'PUT',
+    path: `/api/v{api-version}/defaults`,
+
+    query: {
+        parameterStringWithNoDefault: parameterStringWithNoDefault,
+        parameterOptionalStringWithDefault: parameterOptionalStringWithDefault,
+        parameterOptionalStringWithEmptyDefault: parameterOptionalStringWithEmptyDefault,
+        parameterStringWithDefault: parameterStringWithDefault,
+        parameterStringWithEmptyDefault: parameterStringWithEmptyDefault,
+        parameterOptionalStringWithNoDefault: parameterOptionalStringWithNoDefault,
+    },
+});
+
+export type TDefaultsOptions = {
+    callWithDefaultParameters: (
+        parameterBoolean?: boolean | null,
+
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
+        parameterNumber?: number | null,
+
+        parameterString?: string | null,
+
+        parameterModel?: IModelWithProperties | null,
+    ) => RequestConfig;
+    callWithDefaultOptionalParameters: (
+        parameterBoolean?: boolean,
+
+        parameterEnum?: 'Success' | 'Warning' | 'Error',
+        parameterNumber?: number,
+
+        parameterString?: string,
+
+        parameterModel?: IModelWithEnum,
+    ) => RequestConfig;
+    callToTestOrderOfParams: (
+        parameterStringWithNoDefault: string,
+
+        parameterOptionalStringWithDefault?: string,
+
+        parameterOptionalStringWithEmptyDefault?: string,
+
+        parameterStringWithDefault?: string,
+
+        parameterStringWithEmptyDefault?: string,
+
+        parameterOptionalStringWithNoDefault?: string,
+    ) => RequestConfig;
+};
+
+export const DefaultsOptions: TDefaultsOptions = {
+    callWithDefaultParameters: callWithDefaultParameters,
+    callWithDefaultOptionalParameters: callWithDefaultOptionalParameters,
+    callToTestOrderOfParams: callToTestOrderOfParams,
+};
+
+export class DefaultsService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @param parameterBoolean This is a simple boolean with default value
+     * @param parameterEnum This is a simple enum with default value
+     * @param parameterNumber This is a simple number with default value
+     * @param parameterString This is a simple string with default value
+     * @param parameterModel This is a simple model with default value
+     * @throws ApiError
+     */
+    public callWithDefaultParameters(
+        parameterBoolean: boolean | null = true,
+        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+        parameterNumber: number | null = 123,
+        parameterString: string | null = 'Hello World!',
+        parameterModel: IModelWithProperties | null = {
+            prop: 'Hello World!',
+        },
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(
+            DefaultsOptions.callWithDefaultParameters(
+                parameterBoolean,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterModel,
+            ),
+            options,
+        );
+    }
+    /**
+     * @param parameterBoolean This is a simple boolean that is optional with default value
+     * @param parameterEnum This is a simple enum that is optional with default value
+     * @param parameterNumber This is a simple number that is optional with default value
+     * @param parameterString This is a simple string that is optional with default value
+     * @param parameterModel This is a simple model that is optional with default value
+     * @throws ApiError
+     */
+    public callWithDefaultOptionalParameters(
+        parameterBoolean: boolean = true,
+        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+        parameterNumber: number = 123,
+        parameterString: string = 'Hello World!',
+        parameterModel: IModelWithEnum = {
+            prop: 'Hello World!',
+        },
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(
+            DefaultsOptions.callWithDefaultOptionalParameters(
+                parameterBoolean,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterModel,
+            ),
+            options,
+        );
+    }
+    /**
+     * @param parameterStringWithNoDefault This is a string with no default
+     * @param parameterOptionalStringWithDefault This is a optional string with default
+     * @param parameterOptionalStringWithEmptyDefault This is a optional string with empty default
+     * @param parameterStringWithDefault This is a string with default
+     * @param parameterStringWithEmptyDefault This is a string with empty default
+     * @param parameterOptionalStringWithNoDefault This is a optional string with no default
+     * @throws ApiError
+     */
+    public callToTestOrderOfParams(
+        parameterStringWithNoDefault: string,
+
+        parameterOptionalStringWithDefault: string = 'Hello World!',
+        parameterOptionalStringWithEmptyDefault: string = '',
+        parameterStringWithDefault: string = 'Hello World!',
+        parameterStringWithEmptyDefault: string = '',
+        parameterOptionalStringWithNoDefault?: string,
+
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(
+            DefaultsOptions.callToTestOrderOfParams(
+                parameterStringWithNoDefault,
+                parameterOptionalStringWithDefault,
+                parameterOptionalStringWithEmptyDefault,
+                parameterStringWithDefault,
+                parameterStringWithEmptyDefault,
+                parameterOptionalStringWithNoDefault,
+            ),
+            options,
+        );
+    }
+}

@@ -1,0 +1,42 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const multipartResponse = (): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/multipart`,
+});
+
+export type TMultipartOptions = {
+    multipartResponse: () => RequestConfig;
+};
+
+export const MultipartOptions: TMultipartOptions = {
+    multipartResponse: multipartResponse,
+};
+
+export class MultipartService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @returns any OK
+     * @throws ApiError
+     */
+    public multipartResponse(options?: TOptions): Promise<{
+        file?: string;
+        metadata?: {
+            foo?: string;
+            bar?: string;
+        };
+    }> {
+        return this.executor.request<{
+            file?: string;
+            metadata?: {
+                foo?: string;
+                bar?: string;
+            };
+        }>(MultipartOptions.multipartResponse(), options);
+    }
+}

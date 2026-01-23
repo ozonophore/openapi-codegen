@@ -1,0 +1,40 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const uploadFile = (file: Blob): RequestConfig => ({
+    method: 'POST',
+    path: `/api/v{api-version}/upload`,
+
+    body: {
+        file: file,
+    },
+    requestMediaType: 'multipart/form-data',
+});
+
+export type TUploadOptions = {
+    uploadFile: (file: Blob) => RequestConfig;
+};
+
+export const UploadOptions: TUploadOptions = {
+    uploadFile: uploadFile,
+};
+
+export class UploadService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @param file Supply a file reference for upload
+     * @returns boolean
+     * @throws ApiError
+     */
+    public uploadFile(
+        file: Blob,
+
+        options?: TOptions,
+    ): Promise<boolean> {
+        return this.executor.request<boolean>(UploadOptions.uploadFile(file), options);
+    }
+}

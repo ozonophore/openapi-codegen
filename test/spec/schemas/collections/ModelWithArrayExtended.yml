@@ -1,0 +1,21 @@
+description: Extended array model with multiple sections
+type: object
+properties:
+  prop:
+    type: array
+    items:
+      "$ref": "../base/ModelWithString.yml"
+    description: Array of models
+  propWithFile:
+    type: array
+    items:
+      type: File
+    description: Array of files
+  propWithNumber:
+    type: array
+    items:
+      type: int
+    description: Array of numbers
+  additional:
+    type: object
+    description: Additional properties

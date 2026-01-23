@@ -10,19 +10,14 @@ export type { TOpenAPIConfig } from '././core/OpenAPI';
 
 export type { IDictionaryWithReference } from '././models/DictionaryWithReference';
 export type { IModelWithArray } from '././models/ModelWithArray';
+export type { IModelWithCircularReference } from '././models/ModelWithCircularReference';
 export type { IModelWithDictionary } from '././models/ModelWithDictionary';
 export { IModelWithEnumInteger } from '././models/ModelWithEnumInteger';
+export type { IModelWithInteger } from '././models/ModelWithInteger';
+export type { IModelWithProperties } from '././models/ModelWithProperties';
 export type { IModelWithString } from '././models/ModelWithString';
 export type { TModelThatExtends } from '././models/ModelThatExtends';
 export type { TModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';
-
-export { IDictionaryWithReferenceSchema } from '././schemas/DictionaryWithReferenceSchema';
-export { IModelWithArraySchema } from '././schemas/ModelWithArraySchema';
-export { IModelWithDictionarySchema } from '././schemas/ModelWithDictionarySchema';
-export { IModelWithEnumIntegerSchema } from '././schemas/ModelWithEnumIntegerSchema';
-export { IModelWithStringSchema } from '././schemas/ModelWithStringSchema';
-export { TModelThatExtendsSchema } from '././schemas/ModelThatExtendsSchema';
-export { TModelThatExtendsExtendsSchema } from '././schemas/ModelThatExtendsExtendsSchema';
 
 export { V2Service } from '././services/V2Service';
 export { SimpleService } from '././services/SimpleService';

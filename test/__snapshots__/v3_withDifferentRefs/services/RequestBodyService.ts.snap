@@ -1,0 +1,38 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithString } from '../models/schemas/base/ModelWithString';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const postRequestBodyService = (requestBody?: IModelWithString): RequestConfig => ({
+    method: 'POST',
+    path: `/api/v{api-version}/requestBody/`,
+
+    body: requestBody,
+    requestMediaType: 'application/json',
+});
+
+export type TRequestBodyOptions = {
+    postRequestBodyService: (requestBody?: IModelWithString) => RequestConfig;
+};
+
+export const RequestBodyOptions: TRequestBodyOptions = {
+    postRequestBodyService: postRequestBodyService,
+};
+
+export class RequestBodyService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @param requestBody A reusable request body
+     * @throws ApiError
+     */
+    public postRequestBodyService(
+        requestBody?: IModelWithString,
+
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(RequestBodyOptions.postRequestBodyService(requestBody), options);
+    }
+}

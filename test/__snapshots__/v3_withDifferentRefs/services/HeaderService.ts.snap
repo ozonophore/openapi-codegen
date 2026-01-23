@@ -1,0 +1,30 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const callWithResultFromHeader = (): RequestConfig => ({
+    method: 'POST',
+    path: `/api/v{api-version}/header`,
+});
+
+export type THeaderOptions = {
+    callWithResultFromHeader: () => RequestConfig;
+};
+
+export const HeaderOptions: THeaderOptions = {
+    callWithResultFromHeader: callWithResultFromHeader,
+};
+
+export class HeaderService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @returns string Successful response
+     * @throws ApiError
+     */
+    public callWithResultFromHeader(options?: TOptions): Promise<string> {
+        return this.executor.request<string>(HeaderOptions.callWithResultFromHeader(), options);
+    }
+}

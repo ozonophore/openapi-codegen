@@ -1,0 +1,19 @@
+description: Extended composition with allOf sections
+type: object
+allOf:
+  - "$ref": "../base/ModelWithString.yml"
+  - type: object
+    properties:
+      propExtendsA:
+        type: string
+        description: First extension property
+      propExtendsB:
+        "$ref": "../base/ModelWithString.yml"
+      propExtendsC:
+        type: string
+        description: Additional extension property
+  - type: object
+    properties:
+      metadata:
+        type: object
+        description: Extended metadata

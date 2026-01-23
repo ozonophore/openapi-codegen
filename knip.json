@@ -5,7 +5,7 @@
         "interface": true,
         "type": true
     },
-    "ignore": ["src/core/utils/isFileName.ts", "src/templates/**", "test/custom/**", "test/e2e/assets/**", "tools/jestSetup.ts"],
+    "ignore": ["src/cli/schemas/**", "src/templatesCompiled/**", "src/templates/**", "test/custom/**", "test/e2e/assets/**", "tools/jestSetup.ts"],
     "ignoreDependencies": [
         "@babel/cli",
         "@types/axios",

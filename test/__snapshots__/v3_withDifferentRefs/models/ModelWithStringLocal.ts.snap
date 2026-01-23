@@ -1,0 +1,13 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * This is a model with one string property (LOCAL_FRAGMENT example)
+ */
+export interface IModelWithStringLocal {
+    /**
+     * This is a simple string property
+     */
+    prop?: string;
+}

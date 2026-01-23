@@ -6,15 +6,15 @@ import type { IModelWithString } from '../models/ModelWithString';
 import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const callWithParameters = (
-    parameterHeader: string | null,
-
-    parameterQuery: string | null,
+    parameterCookie: string | null,
 
     parameterForm: string | null,
 
-    parameterCookie: string | null,
+    parameterHeader: string | null,
 
     parameterPath: string | null,
+
+    parameterQuery: string | null,
 
     requestBody: IModelWithString | null,
 ): RequestConfig => ({
@@ -40,26 +40,26 @@ const callWithParameters = (
 });
 
 const callWithWeirdParameterNames = (
+    parameterCookie: string | null,
+
+    parameterForm: string | null,
+
     parameterHeader: string | null,
 
     parameterQuery: string | null,
 
-    parameterForm: string | null,
-
-    parameterCookie: string | null,
-
     requestBody: IModelWithString | null,
+
+    /**
+     * [WARN] Be careful! A reserved system word is used!
+     */
+    _default?: string,
 
     parameterPath1?: string,
 
     parameterPath2?: string,
 
     parameterPath3?: string,
-
-    /**
-     * [WARN] Be careful! A reserved system word is used!
-     */
-    _default?: string,
 ): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
@@ -117,39 +117,39 @@ const postCallWithOptionalParam = (
 
 export type TParametersOptions = {
     callWithParameters: (
-        parameterHeader: string | null,
-
-        parameterQuery: string | null,
+        parameterCookie: string | null,
 
         parameterForm: string | null,
 
-        parameterCookie: string | null,
+        parameterHeader: string | null,
 
         parameterPath: string | null,
+
+        parameterQuery: string | null,
 
         requestBody: IModelWithString | null,
     ) => RequestConfig;
     callWithWeirdParameterNames: (
+        parameterCookie: string | null,
+
+        parameterForm: string | null,
+
         parameterHeader: string | null,
 
         parameterQuery: string | null,
 
-        parameterForm: string | null,
-
-        parameterCookie: string | null,
-
         requestBody: IModelWithString | null,
+
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
+        _default?: string,
 
         parameterPath1?: string,
 
         parameterPath2?: string,
 
         parameterPath3?: string,
-
-        /**
-         * [WARN] Be careful! A reserved system word is used!
-         */
-        _default?: string,
     ) => RequestConfig;
     getCallWithOptionalParam: (
         requestBody: IModelWithString,
@@ -174,24 +174,24 @@ export class ParametersService<TOptions = unknown> {
     constructor(private readonly executor: RequestExecutor<TOptions>) {}
 
     /**
-     * @param parameterHeader This is the parameter that goes into the header
-     * @param parameterQuery This is the parameter that goes into the query params
-     * @param parameterForm This is the parameter that goes into the form data
      * @param parameterCookie This is the parameter that goes into the cookie
+     * @param parameterForm This is the parameter that goes into the form data
+     * @param parameterHeader This is the parameter that goes into the header
      * @param parameterPath This is the parameter that goes into the path
+     * @param parameterQuery This is the parameter that goes into the query params
      * @param requestBody This is the parameter that goes into the body
      * @throws ApiError
      */
     public callWithParameters(
-        parameterHeader: string | null,
-
-        parameterQuery: string | null,
+        parameterCookie: string | null,
 
         parameterForm: string | null,
 
-        parameterCookie: string | null,
+        parameterHeader: string | null,
 
         parameterPath: string | null,
+
+        parameterQuery: string | null,
 
         requestBody: IModelWithString | null,
 
@@ -199,38 +199,43 @@ export class ParametersService<TOptions = unknown> {
     ): Promise<void> {
         return this.executor.request<void>(
             ParametersOptions.callWithParameters(
-                parameterHeader,
-                parameterQuery,
-                parameterForm,
                 parameterCookie,
+                parameterForm,
+                parameterHeader,
                 parameterPath,
+                parameterQuery,
                 requestBody,
             ),
             options,
         );
     }
     /**
+     * @param parameterCookie This is the parameter that goes into the cookie
+     * @param parameterForm This is the parameter that goes into the request form data
      * @param parameterHeader This is the parameter that goes into the request header
      * @param parameterQuery This is the parameter that goes into the request query params
-     * @param parameterForm This is the parameter that goes into the request form data
-     * @param parameterCookie This is the parameter that goes into the cookie
      * @param requestBody This is the parameter that goes into the body
+     * @param _default This is the parameter with a reserved keyword
      * @param parameterPath1 This is the parameter that goes into the path
      * @param parameterPath2 This is the parameter that goes into the path
      * @param parameterPath3 This is the parameter that goes into the path
-     * @param _default This is the parameter with a reserved keyword
      * @throws ApiError
      */
     public callWithWeirdParameterNames(
+        parameterCookie: string | null,
+
+        parameterForm: string | null,
+
         parameterHeader: string | null,
 
         parameterQuery: string | null,
 
-        parameterForm: string | null,
-
-        parameterCookie: string | null,
-
         requestBody: IModelWithString | null,
+
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
+        _default?: string,
 
         parameterPath1?: string,
 
@@ -238,24 +243,19 @@ export class ParametersService<TOptions = unknown> {
 
         parameterPath3?: string,
 
-        /**
-         * [WARN] Be careful! A reserved system word is used!
-         */
-        _default?: string,
-
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(
             ParametersOptions.callWithWeirdParameterNames(
+                parameterCookie,
+                parameterForm,
                 parameterHeader,
                 parameterQuery,
-                parameterForm,
-                parameterCookie,
                 requestBody,
+                _default,
                 parameterPath1,
                 parameterPath2,
                 parameterPath3,
-                _default,
             ),
             options,
         );

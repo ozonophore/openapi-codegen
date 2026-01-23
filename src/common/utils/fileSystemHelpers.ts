@@ -5,7 +5,6 @@ import {
     mkdir as __mkdir,
     readdir as __readdir,
     readFile as __readFile,
-    realpathSync,
     rmdir as __rmdir,
     stat as __stat,
     statSync,
@@ -85,14 +84,6 @@ function isPathToFile(path: string): boolean {
     }
 }
 
-function isSameFilePath(a: string, b: string): boolean {
-    try {
-        return realpathSync(a) === realpathSync(b);
-    } catch {
-        return false;
-    }
-}
-
 const fileSystemHelpers = {
     readFile,
     writeFile,
@@ -104,7 +95,6 @@ const fileSystemHelpers = {
     isDirectory,
     isPathToFile,
     readdir,
-    isSameFilePath,
 };
 
 export { fileSystemHelpers };
