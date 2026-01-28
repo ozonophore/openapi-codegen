@@ -1,0 +1,33 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { RequestExecutor, RequestConfig } from './request-executor';
+import type { ApiRequestOptions } from './ApiRequestOptions';
+import type { TOpenAPIConfig } from './OpenAPI';
+import { OpenAPI } from './OpenAPI';
+import { request as __request } from './request';
+
+export function createExecutorAdapter<TRequestOptions extends Record<string, any>>(
+    openApiConfig: TOpenAPIConfig = OpenAPI,
+    mapOptions?: (options: TRequestOptions | undefined) => Partial<ApiRequestOptions>,
+): RequestExecutor<TRequestOptions> {
+    return {
+        request<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<TResponse> {
+            const baseOptions: ApiRequestOptions = {
+                method: config.method as ApiRequestOptions['method'],
+                path: config.path,
+                headers: config.headers,
+                query: config.query,
+                body: config.body,
+            };
+
+            const mergedOptions: ApiRequestOptions = {
+                ...baseOptions,
+                ...(mapOptions ? mapOptions(options) : {}),
+            };
+
+            return __request<TResponse>(mergedOptions, openApiConfig);
+        },
+    };
+}

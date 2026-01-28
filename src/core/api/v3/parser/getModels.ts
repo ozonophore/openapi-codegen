@@ -1,6 +1,5 @@
 import type { Model } from '../../../types/shared/Model.model';
 import { getModelNameWithPrefix } from '../../../utils/getModelNameWithPrefix';
-import { getRefFromSchema } from '../../../utils/getRefFromSchema';
 import { resolveModelImports, setDuplicateModelAliases } from '../../../utils/modelHelpers';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
 import { unique } from '../../../utils/unique';
@@ -9,7 +8,7 @@ import type { OpenApi } from '../types/OpenApi.model';
 
 export function getModels(this: Parser, openApi: OpenApi): Model[] {
     let models: Model[] = [];
-    const listOfModelsRef = getRefFromSchema(this.context, openApi);
+    const listOfModelsRef = this.context.getAllCanonicalRefs();
     if (listOfModelsRef) {
         for (const modelRef of listOfModelsRef) {
             const definition: any = this.context.get(modelRef);

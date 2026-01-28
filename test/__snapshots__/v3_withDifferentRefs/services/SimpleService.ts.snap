@@ -1,0 +1,107 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const getCallWithoutParametersAndResponse = (): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/simple`,
+});
+
+const putCallWithoutParametersAndResponse = (): RequestConfig => ({
+    method: 'PUT',
+    path: `/api/v{api-version}/simple`,
+});
+
+const postCallWithoutParametersAndResponse = (): RequestConfig => ({
+    method: 'POST',
+    path: `/api/v{api-version}/simple`,
+});
+
+const deleteCallWithoutParametersAndResponse = (): RequestConfig => ({
+    method: 'DELETE',
+    path: `/api/v{api-version}/simple`,
+});
+
+const optionsCallWithoutParametersAndResponse = (): RequestConfig => ({
+    method: 'OPTIONS',
+    path: `/api/v{api-version}/simple`,
+});
+
+const headCallWithoutParametersAndResponse = (): RequestConfig => ({
+    method: 'HEAD',
+    path: `/api/v{api-version}/simple`,
+});
+
+const patchCallWithoutParametersAndResponse = (): RequestConfig => ({
+    method: 'PATCH',
+    path: `/api/v{api-version}/simple`,
+});
+
+export type TSimpleOptions = {
+    getCallWithoutParametersAndResponse: () => RequestConfig;
+    putCallWithoutParametersAndResponse: () => RequestConfig;
+    postCallWithoutParametersAndResponse: () => RequestConfig;
+    deleteCallWithoutParametersAndResponse: () => RequestConfig;
+    optionsCallWithoutParametersAndResponse: () => RequestConfig;
+    headCallWithoutParametersAndResponse: () => RequestConfig;
+    patchCallWithoutParametersAndResponse: () => RequestConfig;
+};
+
+export const SimpleOptions: TSimpleOptions = {
+    getCallWithoutParametersAndResponse: getCallWithoutParametersAndResponse,
+    putCallWithoutParametersAndResponse: putCallWithoutParametersAndResponse,
+    postCallWithoutParametersAndResponse: postCallWithoutParametersAndResponse,
+    deleteCallWithoutParametersAndResponse: deleteCallWithoutParametersAndResponse,
+    optionsCallWithoutParametersAndResponse: optionsCallWithoutParametersAndResponse,
+    headCallWithoutParametersAndResponse: headCallWithoutParametersAndResponse,
+    patchCallWithoutParametersAndResponse: patchCallWithoutParametersAndResponse,
+};
+
+export class SimpleService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @throws ApiError
+     */
+    public getCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.getCallWithoutParametersAndResponse(), options);
+    }
+    /**
+     * @throws ApiError
+     */
+    public putCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.putCallWithoutParametersAndResponse(), options);
+    }
+    /**
+     * @throws ApiError
+     */
+    public postCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.postCallWithoutParametersAndResponse(), options);
+    }
+    /**
+     * @throws ApiError
+     */
+    public deleteCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.deleteCallWithoutParametersAndResponse(), options);
+    }
+    /**
+     * @throws ApiError
+     */
+    public optionsCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.optionsCallWithoutParametersAndResponse(), options);
+    }
+    /**
+     * @throws ApiError
+     */
+    public headCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.headCallWithoutParametersAndResponse(), options);
+    }
+    /**
+     * @throws ApiError
+     */
+    public patchCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), options);
+    }
+}

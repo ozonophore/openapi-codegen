@@ -1,0 +1,16 @@
+description: Extended dictionary model with fragment sections
+type: object
+properties:
+  properties:
+    type: object
+    description: Dictionary of properties
+    additionalProperties:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+  metadata:
+    type: object
+    description: Additional metadata

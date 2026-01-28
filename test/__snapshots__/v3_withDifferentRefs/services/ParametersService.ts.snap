@@ -1,0 +1,297 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithStringLocal } from '../models/ModelWithStringLocal';
+import type { IModelWithString } from '../models/schemas/base/ModelWithString';
+import type { IModelWithArray } from '../models/schemas/collections/ModelWithArray';
+import type { Properties } from '../models/schemas/compositions/Properties';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const callWithParameters = (
+    parameterCookie: string | null,
+
+    parameterForm: string | null,
+
+    parameterHeader: string | null,
+
+    parameterPath: string | null,
+
+    parameterQuery: string | null,
+
+    requestBody: IModelWithString | null,
+): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/parameters/${parameterPath}`,
+
+    headers: {
+        parameterHeader: parameterHeader,
+    },
+
+    cookies: {
+        parameterCookie: parameterCookie,
+    },
+
+    query: {
+        parameterQuery: parameterQuery,
+    },
+
+    body: {
+        parameterForm: parameterForm,
+    },
+    requestMediaType: 'multipart/form-data',
+});
+
+const callWithWeirdParameterNames = (
+    parameterCookie: string | null,
+
+    parameterForm: string | null,
+
+    parameterHeader: string | null,
+
+    parameterQuery: string | null,
+
+    requestBody: IModelWithStringLocal | null,
+
+    /**
+     * [WARN] Be careful! A reserved system word is used!
+     */
+    _default?: string,
+
+    parameterPath1?: string,
+
+    parameterPath2?: string,
+
+    parameterPath3?: string,
+): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
+
+    headers: {
+        'parameter.header': parameterHeader,
+    },
+
+    cookies: {
+        'PARAMETER-COOKIE': parameterCookie,
+    },
+
+    query: {
+        'parameter-query': parameterQuery,
+        default: _default,
+    },
+
+    body: {
+        parameter_form: parameterForm,
+    },
+    requestMediaType: 'multipart/form-data',
+});
+
+const getCallWithOptionalParam = (
+    requestBody: IModelWithArray,
+
+    parameter?: string,
+): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/parameters/`,
+
+    query: {
+        parameter: parameter,
+    },
+
+    body: requestBody,
+    requestMediaType: 'application/json',
+});
+
+const postCallWithOptionalParam = (
+    parameter: string,
+
+    requestBody?: Properties,
+): RequestConfig => ({
+    method: 'POST',
+    path: `/api/v{api-version}/parameters/`,
+
+    query: {
+        parameter: parameter,
+    },
+
+    body: requestBody,
+    requestMediaType: 'application/json',
+});
+
+export type TParametersOptions = {
+    callWithParameters: (
+        parameterCookie: string | null,
+
+        parameterForm: string | null,
+
+        parameterHeader: string | null,
+
+        parameterPath: string | null,
+
+        parameterQuery: string | null,
+
+        requestBody: IModelWithString | null,
+    ) => RequestConfig;
+    callWithWeirdParameterNames: (
+        parameterCookie: string | null,
+
+        parameterForm: string | null,
+
+        parameterHeader: string | null,
+
+        parameterQuery: string | null,
+
+        requestBody: IModelWithStringLocal | null,
+
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
+        _default?: string,
+
+        parameterPath1?: string,
+
+        parameterPath2?: string,
+
+        parameterPath3?: string,
+    ) => RequestConfig;
+    getCallWithOptionalParam: (
+        requestBody: IModelWithArray,
+
+        parameter?: string,
+    ) => RequestConfig;
+    postCallWithOptionalParam: (
+        parameter: string,
+
+        requestBody?: Properties,
+    ) => RequestConfig;
+};
+
+export const ParametersOptions: TParametersOptions = {
+    callWithParameters: callWithParameters,
+    callWithWeirdParameterNames: callWithWeirdParameterNames,
+    getCallWithOptionalParam: getCallWithOptionalParam,
+    postCallWithOptionalParam: postCallWithOptionalParam,
+};
+
+export class ParametersService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @param parameterCookie This is the parameter that goes into the cookie
+     * @param parameterForm This is the parameter that goes into the form data
+     * @param parameterHeader This is the parameter that goes into the header
+     * @param parameterPath This is the parameter that goes into the path
+     * @param parameterQuery This is the parameter that goes into the query params
+     * @param requestBody This is the parameter that goes into the body
+     * @throws ApiError
+     */
+    public callWithParameters(
+        parameterCookie: string | null,
+
+        parameterForm: string | null,
+
+        parameterHeader: string | null,
+
+        parameterPath: string | null,
+
+        parameterQuery: string | null,
+
+        requestBody: IModelWithString | null,
+
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(
+            ParametersOptions.callWithParameters(
+                parameterCookie,
+                parameterForm,
+                parameterHeader,
+                parameterPath,
+                parameterQuery,
+                requestBody,
+            ),
+            options,
+        );
+    }
+    /**
+     * @param parameterCookie This is the parameter that goes into the cookie
+     * @param parameterForm This is the parameter that goes into the request form data
+     * @param parameterHeader This is the parameter that goes into the request header
+     * @param parameterQuery This is the parameter that goes into the request query params
+     * @param requestBody This is the parameter that goes into the body
+     * @param _default This is the parameter with a reserved keyword
+     * @param parameterPath1 This is the parameter that goes into the path
+     * @param parameterPath2 This is the parameter that goes into the path
+     * @param parameterPath3 This is the parameter that goes into the path
+     * @throws ApiError
+     */
+    public callWithWeirdParameterNames(
+        parameterCookie: string | null,
+
+        parameterForm: string | null,
+
+        parameterHeader: string | null,
+
+        parameterQuery: string | null,
+
+        requestBody: IModelWithStringLocal | null,
+
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
+        _default?: string,
+
+        parameterPath1?: string,
+
+        parameterPath2?: string,
+
+        parameterPath3?: string,
+
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(
+            ParametersOptions.callWithWeirdParameterNames(
+                parameterCookie,
+                parameterForm,
+                parameterHeader,
+                parameterQuery,
+                requestBody,
+                _default,
+                parameterPath1,
+                parameterPath2,
+                parameterPath3,
+            ),
+            options,
+        );
+    }
+    /**
+     * @param requestBody This is a required parameter
+     * @param parameter This is an optional parameter
+     * @throws ApiError
+     */
+    public getCallWithOptionalParam(
+        requestBody: IModelWithArray,
+
+        parameter?: string,
+
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(ParametersOptions.getCallWithOptionalParam(requestBody, parameter), options);
+    }
+    /**
+     * @param parameter This is a required parameter
+     * @param requestBody This is an optional parameter
+     * @throws ApiError
+     */
+    public postCallWithOptionalParam(
+        parameter: string,
+
+        requestBody?: Properties,
+
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(
+            ParametersOptions.postCallWithOptionalParam(parameter, requestBody),
+            options,
+        );
+    }
+}

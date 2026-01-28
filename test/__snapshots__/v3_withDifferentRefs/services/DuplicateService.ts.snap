@@ -1,0 +1,68 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const duplicateName = (): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/duplicate`,
+});
+
+const duplicateName1 = (): RequestConfig => ({
+    method: 'POST',
+    path: `/api/v{api-version}/duplicate`,
+});
+
+const duplicateName2 = (): RequestConfig => ({
+    method: 'PUT',
+    path: `/api/v{api-version}/duplicate`,
+});
+
+const duplicateName3 = (): RequestConfig => ({
+    method: 'DELETE',
+    path: `/api/v{api-version}/duplicate`,
+});
+
+export type TDuplicateOptions = {
+    duplicateName: () => RequestConfig;
+    duplicateName1: () => RequestConfig;
+    duplicateName2: () => RequestConfig;
+    duplicateName3: () => RequestConfig;
+};
+
+export const DuplicateOptions: TDuplicateOptions = {
+    duplicateName: duplicateName,
+    duplicateName1: duplicateName1,
+    duplicateName2: duplicateName2,
+    duplicateName3: duplicateName3,
+};
+
+export class DuplicateService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @throws ApiError
+     */
+    public duplicateName(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(DuplicateOptions.duplicateName(), options);
+    }
+    /**
+     * @throws ApiError
+     */
+    public duplicateName1(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(DuplicateOptions.duplicateName1(), options);
+    }
+    /**
+     * @throws ApiError
+     */
+    public duplicateName2(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(DuplicateOptions.duplicateName2(), options);
+    }
+    /**
+     * @throws ApiError
+     */
+    public duplicateName3(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(DuplicateOptions.duplicateName3(), options);
+    }
+}

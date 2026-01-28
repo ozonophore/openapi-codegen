@@ -1,0 +1,15 @@
+description: This is a model with one property containing an array
+type: object
+properties:
+  prop:
+    type: array
+    items:
+      "$ref": "../base/ModelWithString.yml"
+  propWithFile:
+    type: array
+    items:
+      type: File
+  propWithNumber:
+    type: array
+    items:
+      type: int

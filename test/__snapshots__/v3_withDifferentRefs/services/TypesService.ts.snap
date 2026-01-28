@@ -1,0 +1,99 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { EEnumWithStrings } from '../models/schemas/EnumWithStrings';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const types = (
+    parameterArray: Array<string> | null,
+    parameterDictionary: any,
+    parameterEnum: EEnumWithStrings | null,
+
+    parameterBoolean: boolean | null = true,
+    parameterNumber: number = 123,
+    parameterObject: any = null,
+    parameterString: string | null = 'default',
+    id?: number,
+): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/types`,
+
+    query: {
+        parameterArray: parameterArray,
+        parameterDictionary: parameterDictionary,
+        parameterEnum: parameterEnum,
+        parameterBoolean: parameterBoolean,
+        parameterNumber: parameterNumber,
+        parameterObject: parameterObject,
+        parameterString: parameterString,
+    },
+});
+
+export type TTypesOptions = {
+    types: (
+        parameterArray: Array<string> | null,
+        parameterDictionary: any,
+        parameterEnum: EEnumWithStrings | null,
+
+        parameterBoolean?: boolean | null,
+
+        parameterNumber?: number,
+
+        parameterObject?: any,
+        parameterString?: string | null,
+
+        id?: number,
+    ) => RequestConfig;
+};
+
+export const TypesOptions: TTypesOptions = {
+    types: types,
+};
+
+export class TypesService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @param parameterArray This is an array parameter
+     * @param parameterDictionary This is a dictionary parameter
+     * @param parameterEnum This is an enum parameter
+     * @param parameterBoolean This is a boolean parameter
+     * @param parameterNumber This is a number parameter
+     * @param parameterObject This is an object parameter
+     * @param parameterString This is a string parameter
+     * @param id This is a number parameter
+     * @returns number Response is a simple number
+     * @returns string Response is a simple string
+     * @returns boolean Response is a simple boolean
+     * @returns any Response is a simple object
+     * @throws ApiError
+     */
+    public types(
+        parameterArray: Array<string> | null,
+        parameterDictionary: any,
+        parameterEnum: EEnumWithStrings | null,
+
+        parameterBoolean: boolean | null = true,
+        parameterNumber: number = 123,
+        parameterObject: any = null,
+        parameterString: string | null = 'default',
+        id?: number,
+
+        options?: TOptions,
+    ): Promise<number | string | boolean | any> {
+        return this.executor.request<number | string | boolean | any>(
+            TypesOptions.types(
+                parameterArray,
+                parameterDictionary,
+                parameterEnum,
+                parameterBoolean,
+                parameterNumber,
+                parameterObject,
+                parameterString,
+                id,
+            ),
+            options,
+        );
+    }
+}

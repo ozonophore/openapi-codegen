@@ -1,0 +1,47 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { EEnumWithNumbers } from '../models/schemas/EnumWithNumbers';
+import type { EEnumWithStrings } from '../models/schemas/EnumWithStrings';
+import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+
+const callWithEnums = (requestBody?: {
+    enumWithNumbers?: EEnumWithNumbers;
+    enumWithStrings?: EEnumWithStrings;
+}): RequestConfig => ({
+    method: 'POST',
+    path: `/api/v{api-version}/enums`,
+
+    body: requestBody,
+    requestMediaType: 'application/json; charset=utf-8',
+});
+
+export type TEnumsOptions = {
+    callWithEnums: (requestBody?: {
+        enumWithNumbers?: EEnumWithNumbers;
+        enumWithStrings?: EEnumWithStrings;
+    }) => RequestConfig;
+};
+
+export const EnumsOptions: TEnumsOptions = {
+    callWithEnums: callWithEnums,
+};
+
+export class EnumsService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @param requestBody
+     * @throws ApiError
+     */
+    public callWithEnums(
+        requestBody?: {
+            enumWithNumbers?: EEnumWithNumbers;
+            enumWithStrings?: EEnumWithStrings;
+        },
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(EnumsOptions.callWithEnums(requestBody), options);
+    }
+}

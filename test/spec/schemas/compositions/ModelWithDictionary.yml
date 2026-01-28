@@ -1,0 +1,7 @@
+description: This is a model with one property containing a dictionary
+type: object
+properties:
+  prop:
+    type: object
+    additionalProperties:
+      type: string

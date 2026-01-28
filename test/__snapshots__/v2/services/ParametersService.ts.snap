@@ -5,15 +5,15 @@
 import type { RequestExecutor, RequestConfig } from '../core/request-executor';
 
 const callWithParameters = (
-    parameterHeader: string,
-
-    parameterQuery: string,
+    parameterBody: string,
 
     parameterForm: string,
 
-    parameterBody: string,
+    parameterHeader: string,
 
     parameterPath: string,
+
+    parameterQuery: string,
 ): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath}`,
@@ -33,24 +33,24 @@ const callWithParameters = (
 });
 
 const callWithWeirdParameterNames = (
+    parameterBody: string,
+
+    parameterForm: string,
+
     parameterHeader: string,
 
     parameterQuery: string,
 
-    parameterForm: string,
-
-    parameterBody: string,
+    /**
+     * [WARN] Be careful! A reserved system word is used!
+     */
+    _default?: string,
 
     parameterPath1?: string,
 
     parameterPath2?: string,
 
     parameterPath3?: string,
-
-    /**
-     * [WARN] Be careful! A reserved system word is used!
-     */
-    _default?: string,
 ): RequestConfig => ({
     method: 'GET',
     path: `/api/v{api-version}/parameters/${parameterPath1}/${parameterPath2}/${parameterPath3}`,
@@ -72,35 +72,35 @@ const callWithWeirdParameterNames = (
 
 export type TParametersOptions = {
     callWithParameters: (
-        parameterHeader: string,
-
-        parameterQuery: string,
+        parameterBody: string,
 
         parameterForm: string,
 
-        parameterBody: string,
+        parameterHeader: string,
 
         parameterPath: string,
+
+        parameterQuery: string,
     ) => RequestConfig;
     callWithWeirdParameterNames: (
+        parameterBody: string,
+
+        parameterForm: string,
+
         parameterHeader: string,
 
         parameterQuery: string,
 
-        parameterForm: string,
-
-        parameterBody: string,
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
+        _default?: string,
 
         parameterPath1?: string,
 
         parameterPath2?: string,
 
         parameterPath3?: string,
-
-        /**
-         * [WARN] Be careful! A reserved system word is used!
-         */
-        _default?: string,
     ) => RequestConfig;
 };
 
@@ -113,56 +113,61 @@ export class ParametersService<TOptions = unknown> {
     constructor(private readonly executor: RequestExecutor<TOptions>) {}
 
     /**
-     * @param parameterHeader This is the parameter that goes into the header
-     * @param parameterQuery This is the parameter that goes into the query params
-     * @param parameterForm This is the parameter that goes into the form data
      * @param parameterBody This is the parameter that is send as request body
+     * @param parameterForm This is the parameter that goes into the form data
+     * @param parameterHeader This is the parameter that goes into the header
      * @param parameterPath This is the parameter that goes into the path
+     * @param parameterQuery This is the parameter that goes into the query params
      * @throws ApiError
      */
     public callWithParameters(
-        parameterHeader: string,
-
-        parameterQuery: string,
+        parameterBody: string,
 
         parameterForm: string,
 
-        parameterBody: string,
+        parameterHeader: string,
 
         parameterPath: string,
+
+        parameterQuery: string,
 
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(
             ParametersOptions.callWithParameters(
-                parameterHeader,
-                parameterQuery,
-                parameterForm,
                 parameterBody,
+                parameterForm,
+                parameterHeader,
                 parameterPath,
+                parameterQuery,
             ),
             options,
         );
     }
     /**
+     * @param parameterBody This is the parameter that is send as request body
+     * @param parameterForm This is the parameter that goes into the request form data
      * @param parameterHeader This is the parameter that goes into the request header
      * @param parameterQuery This is the parameter that goes into the request query params
-     * @param parameterForm This is the parameter that goes into the request form data
-     * @param parameterBody This is the parameter that is send as request body
+     * @param _default This is the parameter with a reserved keyword
      * @param parameterPath1 This is the parameter that goes into the path
      * @param parameterPath2 This is the parameter that goes into the path
      * @param parameterPath3 This is the parameter that goes into the path
-     * @param _default This is the parameter with a reserved keyword
      * @throws ApiError
      */
     public callWithWeirdParameterNames(
+        parameterBody: string,
+
+        parameterForm: string,
+
         parameterHeader: string,
 
         parameterQuery: string,
 
-        parameterForm: string,
-
-        parameterBody: string,
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
+        _default?: string,
 
         parameterPath1?: string,
 
@@ -170,23 +175,18 @@ export class ParametersService<TOptions = unknown> {
 
         parameterPath3?: string,
 
-        /**
-         * [WARN] Be careful! A reserved system word is used!
-         */
-        _default?: string,
-
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(
             ParametersOptions.callWithWeirdParameterNames(
+                parameterBody,
+                parameterForm,
                 parameterHeader,
                 parameterQuery,
-                parameterForm,
-                parameterBody,
+                _default,
                 parameterPath1,
                 parameterPath2,
                 parameterPath3,
-                _default,
             ),
             options,
         );

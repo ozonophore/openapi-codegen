@@ -8,10 +8,10 @@ const types = (
     parameterArray: Array<string>,
     parameterDictionary: Record<string, string>,
     parameterEnum: 'Success' | 'Warning' | 'Error',
-    parameterNumber: number = 123,
-    parameterString: string = 'default',
     parameterBoolean: boolean = true,
+    parameterNumber: number = 123,
     parameterObject: any = null,
+    parameterString: string = 'default',
     id?: number,
 ): RequestConfig => ({
     method: 'GET',
@@ -21,10 +21,10 @@ const types = (
         parameterArray: parameterArray,
         parameterDictionary: parameterDictionary,
         parameterEnum: parameterEnum,
-        parameterNumber: parameterNumber,
-        parameterString: parameterString,
         parameterBoolean: parameterBoolean,
+        parameterNumber: parameterNumber,
         parameterObject: parameterObject,
+        parameterString: parameterString,
     },
 });
 
@@ -33,13 +33,13 @@ export type TTypesOptions = {
         parameterArray: Array<string>,
         parameterDictionary: Record<string, string>,
         parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterNumber?: number,
-
-        parameterString?: string,
-
         parameterBoolean?: boolean,
 
+        parameterNumber?: number,
+
         parameterObject?: any,
+
+        parameterString?: string,
 
         id?: number,
     ) => RequestConfig;
@@ -56,10 +56,10 @@ export class TypesService<TOptions = unknown> {
      * @param parameterArray This is an array parameter
      * @param parameterDictionary This is a dictionary parameter
      * @param parameterEnum This is an enum parameter
-     * @param parameterNumber This is a number parameter
-     * @param parameterString This is a string parameter
      * @param parameterBoolean This is a boolean parameter
+     * @param parameterNumber This is a number parameter
      * @param parameterObject This is an object parameter
+     * @param parameterString This is a string parameter
      * @param id This is a number parameter
      * @returns number Response is a simple number
      * @returns string Response is a simple string
@@ -71,10 +71,10 @@ export class TypesService<TOptions = unknown> {
         parameterArray: Array<string>,
         parameterDictionary: Record<string, string>,
         parameterEnum: 'Success' | 'Warning' | 'Error',
-        parameterNumber: number = 123,
-        parameterString: string = 'default',
         parameterBoolean: boolean = true,
+        parameterNumber: number = 123,
         parameterObject: any = null,
+        parameterString: string = 'default',
         id?: number,
 
         options?: TOptions,
@@ -84,10 +84,10 @@ export class TypesService<TOptions = unknown> {
                 parameterArray,
                 parameterDictionary,
                 parameterEnum,
-                parameterNumber,
-                parameterString,
                 parameterBoolean,
+                parameterNumber,
                 parameterObject,
+                parameterString,
                 id,
             ),
             options,

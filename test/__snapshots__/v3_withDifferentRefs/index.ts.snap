@@ -1,0 +1,46 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+export { ApiError } from '././core/ApiError';
+export { RequestConfig, RequestExecutor } from '././core/request-executor';
+export { createExecutorAdapter } from '././core/createExecutorAdapter';
+export { OpenAPI } from '././core/OpenAPI';
+export type { TOpenAPIConfig } from '././core/OpenAPI';
+
+export { EEnumWithNumbers as EEnumWithNumbers$0 } from '././models/schemas/enums/EnumWithNumbers';
+export { EEnumWithNumbers as EEnumWithNumbers$1 } from '././models/schemas/EnumWithNumbers';
+export { EEnumWithStrings } from '././models/schemas/EnumWithStrings';
+export type { IModelWithArray } from '././models/schemas/collections/ModelWithArray';
+export type { IModelWithCircularReference } from '././models/schemas/base/ModelWithCircularReference';
+export type { IModelWithDictionary } from '././models/schemas/compositions/ModelWithDictionary';
+export type { IModelWithDuplicateImports } from '././models/schemas/base/ModelWithDuplicateImports';
+export { IModelWithEnum } from '././models/schemas/enums/ModelWithEnum';
+export type { IModelWithProperties } from '././models/schemas/ModelWithProperties';
+export type { IModelWithString as IModelWithString$0 } from '././models/schemas/base/ModelWithString';
+export type { IModelWithString as IModelWithString$1 } from '././models/schemas/ModelWithString';
+export type { IModelWithStringLocal } from '././models/ModelWithStringLocal';
+export type { INested } from '././models/schemas/compositions/Nested';
+export type { Properties } from '././models/schemas/compositions/Properties';
+export type { SimpleRequestBody } from '././models/SimpleRequestBody';
+export type { TModelThatExtends } from '././models/schemas/compositions/ModelThatExtends';
+export type { TProp } from '././models/schemas/collections/Prop';
+export type { TPropExtendsA } from '././models/schemas/compositions/PropExtendsA';
+
+export { SimpleService } from '././services/SimpleService';
+export { ParametersService } from '././services/ParametersService';
+export { RequestBodyService } from '././services/RequestBodyService';
+export { DefaultsService } from '././services/DefaultsService';
+export { DuplicateService } from '././services/DuplicateService';
+export { NoContentService } from '././services/NoContentService';
+export { ResponseService } from '././services/ResponseService';
+export { CollectionFormatService } from '././services/CollectionFormatService';
+export { TypesService } from '././services/TypesService';
+export { UploadService } from '././services/UploadService';
+export { ComplexService } from '././services/ComplexService';
+export { MultipartService } from '././services/MultipartService';
+export { HeaderService } from '././services/HeaderService';
+export { CircularService } from '././services/CircularService';
+export { EnumsService } from '././services/EnumsService';
+
+export { ClientOptions, createClient } from './createClient';

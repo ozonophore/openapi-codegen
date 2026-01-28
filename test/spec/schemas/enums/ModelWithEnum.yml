@@ -1,0 +1,23 @@
+description: This is a model with one enum
+type: object
+properties:
+  test:
+    description: This is a simple enum with strings
+    enum:
+      - Success
+      - Warning
+      - Error
+  statusCode:
+    description: These are the HTTP error code enums
+    enum:
+      - '100'
+      - 200 FOO
+      - 300 FOO_BAR
+      - 400 foo-bar
+      - 500 foo.bar
+      - 600 foo&bar
+  bool:
+    description: Simple boolean enum
+    enum:
+      - true
+      - false

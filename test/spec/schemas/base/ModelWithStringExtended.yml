@@ -1,0 +1,28 @@
+description: Extended model with multiple schemas for fragment references
+type: object
+properties:
+  id:
+    type: string
+    description: Unique identifier
+  data:
+    type: object
+    description: Data container
+components:
+  schemas:
+    ModelWithString:
+      description: This is a model with one string property
+      type: object
+      properties:
+        prop:
+          description: This is a simple string property
+          type: string
+    ExtendedModel:
+      description: Extended version with additional fields
+      type: object
+      properties:
+        prop:
+          description: This is a simple string property
+          type: string
+        extended:
+          description: Additional extended property
+          type: string

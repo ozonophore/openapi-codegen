@@ -1,0 +1,14 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IModelWithString } from './ModelWithString';
+
+/**
+ * This is a model with duplicated imports
+ */
+export interface IModelWithDuplicateImports {
+    propA?: IModelWithString;
+    propB?: IModelWithString;
+    propC?: IModelWithString;
+}

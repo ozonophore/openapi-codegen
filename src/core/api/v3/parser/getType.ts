@@ -1,8 +1,8 @@
+import { relativeHelper } from '../../../../common/utils/pathHelpers';
 import type { Type } from '../../../types/shared/Type.model';
 import { getMappedType, hasMappedType } from '../../../utils/getMappedType';
 import { getTypeName } from '../../../utils/getTypeName';
 import { normalizeString } from '../../../utils/normalizeString';
-import { resolveRefToImportPath } from '../../../utils/resolveRefToImportPath';
 import { stripNamespace } from '../../../utils/stripNamespace';
 import { Parser } from '../Parser';
 
@@ -31,13 +31,22 @@ export function getType(this: Parser, value: string, parentRef: string): Type {
             result.base = mapped;
         }
     } else if (valueClean) {
-        // Safely calculate the path that the specification file will have in outputModels folder
-        const valuePath = resolveRefToImportPath({
-            mainSpecPath: this.context.root?.path || '',
-            parentFilePath: parentRef,
-            refValuePath: normalizedValue,
-            outputModelsPath: this.context.output?.outputModels,
-        });
+        /**
+         * canonicalValue может быть пустой строкой.
+         * В этом случае надо брать непосредственно normalizedValue - это относительный путь или фрагмент.
+         * Предполагаем, что в таком случае расчитывать нет нужды. Это путь от папки outputModels
+         */
+        const canonicalValue = this.context.resolveCanonicalRef(normalizedValue);
+        let valuePath = valueClean;
+
+        if (canonicalValue) {
+            const refValuePath = canonicalValue?.fragment ? `${canonicalValue.outputFile}${canonicalValue.fragment}` : canonicalValue?.outputFile || '';
+            const cleanedRefValuePath = stripNamespace(refValuePath);
+            valuePath = relativeHelper(this.context.output?.outputModels, cleanedRefValuePath);
+        }
+
+        valuePath = !valuePath.startsWith('./') && !valuePath.startsWith('../') ? `./${valuePath}` : valuePath;
+
         const type = this.getTypeNameByRef(getTypeName(valueClean), parentRef);
         const valueImportPath = !valuePath.startsWith('./') ? `./${valuePath}` : valuePath;
         result.path = valuePath;

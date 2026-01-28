@@ -1,0 +1,18 @@
+export interface RequestConfig {
+  method: string;
+  path: string;
+
+  headers?: Record<string, string>;
+  query?: Record<string, any>;
+  body?: unknown;
+
+  requestMediaType?: string;
+  cookies?: Record<string, string>;
+}
+
+export interface RequestExecutor<TOptions = unknown> {
+  request<TResponse>(
+    config: RequestConfig,
+    options?: TOptions
+  ): Promise<TResponse>;
+}
