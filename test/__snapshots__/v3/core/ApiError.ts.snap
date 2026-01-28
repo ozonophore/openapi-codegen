@@ -2,20 +2,18 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ApiResult } from './ApiResult';
+export class ApiError<TBody = unknown> extends Error {
+    readonly status: number;
+    readonly body?: TBody;
+    readonly headers?: Record<string, string>;
+    readonly request: RequestConfig;
 
-export class ApiError extends Error {
-    public readonly url: string;
-    public readonly status: number;
-    public readonly statusText: string;
-    public readonly body: any;
-
-    constructor(response: ApiResult, message: string) {
-        super(message);
-
-        this.url = response.url;
-        this.status = response.status;
-        this.statusText = response.statusText;
-        this.body = response.body;
+    constructor(params: { status: number; message: string; body?: TBody; headers?: Record<string, string>; request: RequestConfig }) {
+        super(params.message);
+        this.name = 'ApiError';
+        this.status = params.status;
+        this.body = params.body;
+        this.headers = params.headers;
+        this.request = params.request;
     }
 }

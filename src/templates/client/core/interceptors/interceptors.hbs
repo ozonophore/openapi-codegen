@@ -1,0 +1,12 @@
+{{>header}}
+
+import { RequestConfig } from '../executor/requestExecutor';
+
+export type RequestInterceptor =
+  (config: RequestConfig) => RequestConfig | Promise<RequestConfig>;
+
+export type ResponseInterceptor<T = unknown> =
+  (response: T, context: RequestConfig) => T | Promise<T>;
+
+export type ErrorInterceptor =
+  (error: unknown, context: RequestConfig) => unknown | Promise<unknown>;

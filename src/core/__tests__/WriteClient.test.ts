@@ -60,6 +60,9 @@ describe('@unit: writeClient', () => {
                 httpStatusCode: () => 'httpStatusCode',
                 createExecutorAdapter: () => 'createExecutorAdapter',
                 requestExecutor: () => 'requestExecutor',
+                apiErrorInterceptor: () => 'apiErrorInterceptor',
+                interceptors: () => 'interceptors',
+                withInterceptors: () => 'withInterceptors'
             },
         };
 

@@ -1,8 +1,11 @@
 {{>header}}
 
 export { ApiError } from './ApiError';
-export { RequestConfig, RequestExecutor } from './request-executor';
-export { createLegacyExecutor } from './legacy-request-adapter';
+export { RequestConfig, RequestExecutor } from './executor/requestExecutor';
+export { createExecutorAdapter } from './executor/createExecutorAdapter';
+export { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './interceptors/interceptors';
+export { apiErrorInterceptor } from './interceptors/apiErrorInterceptor';
+export { withInterceptors } from './interceptors/withInterceptors';
 {{#if @root.useCancelableRequest}}
 export { CancelablePromise } from './CancelablePromise';
 {{/if}}

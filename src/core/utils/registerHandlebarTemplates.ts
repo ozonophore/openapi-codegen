@@ -39,8 +39,11 @@ import nodeSendRequest from '../../templatesCompiled/client/core/node/sendReques
 import templateCoreSettings from '../../templatesCompiled/client/core/OpenAPI';
 import templateCancellablePromise from '../../templatesCompiled/client/core/CancelablePromise';
 import templateCoreRequest from '../../templatesCompiled/client/core/request';
-import templateCoreRequestExecutor from '../../templatesCompiled/client/core/request-executor';
-import templateCreateExecutor from '../../templatesCompiled/client/core/createExecutorAdapter';
+import templateCoreRequestExecutor from '../../templatesCompiled/client/core/executor/requestExecutor';
+import templateCreateExecutor from '../../templatesCompiled/client/core/executor/createExecutorAdapter';
+import templateInterceptors from '../../templatesCompiled/client/core/interceptors/interceptors';
+import templateApiErrorInterceptor from '../../templatesCompiled/client/core/interceptors/apiErrorInterceptor';
+import templateWithInterceptors from '../../templatesCompiled/client/core/interceptors/withInterceptors';
 import xhrGetHeaders from '../../templatesCompiled/client/core/xhr/getHeaders';
 import xhrGetRequestBody from '../../templatesCompiled/client/core/xhr/getRequestBody';
 import xhrGetResponseBody from '../../templatesCompiled/client/core/xhr/getResponseBody';
@@ -131,6 +134,7 @@ import partialJsonSchemaSchemaGeneric from '../../templatesCompiled/client/jsons
 import partialJsonSchemaSchemaReference from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaReference';
 import partialJsonSchemaSchemaComposition from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaComposition';
 
+
 import { Templates } from '../types/base/Templates.model';
 
 /**
@@ -166,6 +170,9 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
             httpStatusCode: Handlebars.template(templateHttpStatuses),
             requestExecutor: Handlebars.template(templateCoreRequestExecutor),
             createExecutorAdapter: Handlebars.template(templateCreateExecutor),
+            interceptors: Handlebars.template(templateInterceptors),
+            apiErrorInterceptor: Handlebars.template(templateApiErrorInterceptor),
+            withInterceptors: Handlebars.template(templateWithInterceptors),
         },
     };
 

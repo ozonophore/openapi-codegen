@@ -91,7 +91,11 @@ export class WriteClient {
         } = options;
 
         if (!excludeCoreServiceFiles) {
+            const executorPath = resolveHelper(outputPaths.outputCore, 'executor');
+            const interceptorsPath = resolveHelper(outputPaths.outputCore, 'interceptors');
             await fileSystemHelpers.mkdir(outputPaths.outputCore);
+            await fileSystemHelpers.mkdir(executorPath);
+            await fileSystemHelpers.mkdir(interceptorsPath);
             await this.writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest });
             await this.writeClientCoreIndex({
                 templates,

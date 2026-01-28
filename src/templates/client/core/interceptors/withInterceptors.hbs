@@ -1,0 +1,41 @@
+{{>header}}
+
+import { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './interceptors';
+import { RequestConfig, RequestExecutor } from '../executor/requestExecutor';
+
+export function withInterceptors<TOptions extends Record<string, any> = Record<string, never>>(
+    executor: RequestExecutor<TOptions>,
+    interceptors: {
+        onRequest?: RequestInterceptor[];
+        onResponse?: ResponseInterceptor[];
+        onError?: ErrorInterceptor[];
+    }
+): RequestExecutor<TOptions> {
+    return {
+        async request<TResponse>(config: RequestConfig, options?: TOptions): Promise<TResponse> {
+            let currentConfig = config;
+
+            try {
+                for (const i of interceptors.onRequest ?? []) {
+                    currentConfig = await i(currentConfig);
+                }
+
+                let response: Awaited<TResponse> = await executor.request<TResponse>(config, options);
+
+                for (const interceptor of interceptors.onResponse ?? []) {
+                    response = (await interceptor(response, config)) as Awaited<TResponse>;
+                }
+
+                return response as TResponse;
+            } catch (caught) {
+                let error = caught;
+
+                for (const interceptor of interceptors.onError ?? []) {
+                    error = await interceptor(error, config);
+                }
+
+                throw error;
+            }
+        },
+    };
+}

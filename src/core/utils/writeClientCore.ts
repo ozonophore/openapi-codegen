@@ -55,9 +55,11 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
     }
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'request.ts'), templates.core.request(context));
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'request-executor.ts'), templates.core.requestExecutor({}));
-    // TODO: Добавлять только, если не выбран custom-ный request
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'createExecutorAdapter.ts'), templates.core.createExecutorAdapter({ useCustomRequest: hasCustomRequest }));
+    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'executor/requestExecutor.ts'), templates.core.requestExecutor({}));
+    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'executor/createExecutorAdapter.ts'), templates.core.createExecutorAdapter({ useCustomRequest: hasCustomRequest }));
+    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'interceptors/interceptors.ts'), templates.core.interceptors({}));
+    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'interceptors/apiErrorInterceptor.ts'), templates.core.apiErrorInterceptor({}));
+    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'interceptors/withInterceptors.ts'), templates.core.withInterceptors({}));
 
     if (hasCustomRequest) {
         const requestFile = resolveHelper(process.cwd(), request);

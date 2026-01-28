@@ -5,7 +5,7 @@
 /* eslint: disable */
 // @ts-nocheck
 export default {"1":function(container,depth0,helpers,partials,data) {
-    return "import type { ApiRequestOptions } from './ApiRequestOptions';\nimport type { TOpenAPIConfig } from './OpenAPI';\nimport { OpenAPI } from './OpenAPI';\n";
+    return "import type { ApiRequestOptions } from '../ApiRequestOptions';\nimport type { TOpenAPIConfig } from '../OpenAPI';\nimport { OpenAPI } from '../OpenAPI';\n";
 },"3":function(container,depth0,helpers,partials,data) {
     return "    openApiConfig: TOpenAPIConfig = OpenAPI,\n    mapOptions?: (options: TRequestOptions | undefined) => Partial<ApiRequestOptions>,\n";
 },"5":function(container,depth0,helpers,partials,data) {
@@ -21,9 +21,9 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     };
 
   return ((stack1 = container.invokePartial(lookupProperty(partials,"header"),depth0,{"name":"header","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "\nimport type { RequestExecutor, RequestConfig } from './request-executor';\n"
+    + "\nimport type { RequestExecutor, RequestConfig } from './requestExecutor';\n"
     + ((stack1 = lookupProperty(helpers,"unless").call(alias1,lookupProperty(lookupProperty(data,"root"),"useCustomRequest"),{"name":"unless","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":0},"end":{"line":8,"column":11}}})) != null ? stack1 : "")
-    + "import { request as __request } from './request';\n\nexport function createExecutorAdapter<TRequestOptions extends Record<string, any>>(\n"
+    + "import { request as __request } from '../request';\n\nexport function createExecutorAdapter<TRequestOptions extends Record<string, any>>(\n"
     + ((stack1 = lookupProperty(helpers,"unless").call(alias1,lookupProperty(lookupProperty(data,"root"),"useCustomRequest"),{"name":"unless","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":12,"column":0},"end":{"line":15,"column":11}}})) != null ? stack1 : "")
     + "): RequestExecutor<TRequestOptions> {\n    return {\n"
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(lookupProperty(data,"root"),"useCustomRequest"),{"name":"if","hash":{},"fn":container.program(5, data, 0),"inverse":container.program(7, data, 0),"data":data,"loc":{"start":{"line":18,"column":8},"end":{"line":39,"column":15}}})) != null ? stack1 : "")

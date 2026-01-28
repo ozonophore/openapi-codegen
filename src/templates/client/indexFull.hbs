@@ -3,8 +3,8 @@
 
 {{#each core}}
 export { ApiError{{#notEquals ../core.length 1}} as ApiError${{{@index}}}{{/notEquals}} } from './{{{joinPath this 'ApiError'}}}';
-export { RequestConfig{{#notEquals ../core.length 1}} as RequestConfig${{{@index}}}{{/notEquals}}, RequestExecutor{{#notEquals ../core.length 1}} as RequestExecutor${{{@index}}}{{/notEquals}} } from './{{{joinPath this 'request-executor'}}}';
-export { createExecutorAdapter{{#notEquals ../core.length 1}} as createExecutorAdapter${{{@index}}}{{/notEquals}} } from './{{{joinPath this 'createExecutorAdapter'}}}';
+export { RequestConfig{{#notEquals ../core.length 1}} as RequestConfig${{{@index}}}{{/notEquals}}, RequestExecutor{{#notEquals ../core.length 1}} as RequestExecutor${{{@index}}}{{/notEquals}} } from './{{{joinPath this './executor/requestExecutor'}}}';
+export { createExecutorAdapter{{#notEquals ../core.length 1}} as createExecutorAdapter${{{@index}}}{{/notEquals}} } from './{{{joinPath this './executor/createExecutorAdapter'}}}';
 {{#if @root.useCancelableRequest}}
 export { CancelablePromise } from './{{{joinPath this 'CancelablePromise'}}}';
 {{/if}}
