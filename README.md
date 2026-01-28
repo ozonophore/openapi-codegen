@@ -526,6 +526,110 @@ export function request<T>(config: TOpenAPIConfig, options: ApiRequestOptions): 
 }
 ```
 
+### RequestExecutor
+
+Starting from version **2.0.0** the generated services use the `RequestExecutor` interface
+instead of direct calls to the `request` core function.
+
+The `RequestExecutor` is a single HTTP logic integration point responsible for executing requests
+and extending client behavior. It allows you to:
+- use any transport (fetch/axios/xhr/custom);
+- Centrally handle requests, responses, and errors;
+- expand the client's behavior without changing the generated services.
+
+#### Interceptors
+
+`RequestExecutor` supports **interceptors**, which allow you to implement additional
+logic at different stages of the request lifecycle.:
+
+- `onRequest` — modification of the request before sending (headers, auth, logging);
+- `onResponse` — processing successful responses;
+- `onError` — centralized error handling.
+
+Interceptors are applied at the executor level and are automatically used by all
+generated services.
+
+```ts
+import { createClient } from './generated';
+
+const client = createClient({
+    interceptors: {
+        onRequest: [
+            (config) => ({
+                ...config,
+                headers: {
+                    ...config.headers,
+                    Authorization: 'Bearer token',
+                },
+            }),
+        ],
+        onError: [
+            (error) => {
+                console.error(error);
+                throw error;
+            },
+        ],
+    },
+});
+```
+
+#### Custom implementation of RequestExecutor with interceptors
+
+A custom `RequestExecutor` can be used together with interceptors.
+In this case, the executor is responsible only for the transport and execution of the request,
+while the interceptors are responsible for the extensible business logic (authorization, logging, error handling).
+
+```ts
+import type { RequestExecutor, RequestConfig } from './generated/core/executor/requestExecutor';
+import { withInterceptors } from './generated/core/interceptors/withInterceptors';
+import { SimpleService } from './generated/services/SimpleService';
+
+interface MyCustomOptions {
+    timeout?: number;
+}
+
+const baseExecutor: RequestExecutor<MyCustomOptions> = {
+    async request<T>(config: RequestConfig, options?: MyCustomOptions): Promise<T> {
+        const response = await fetch(config.url, {
+            method: config.method,
+            headers: config.headers,
+            body: config.body ? JSON.stringify(config.body) : undefined,
+            signal: options?.timeout
+                ? AbortSignal.timeout(options.timeout)
+                : undefined,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Request failed: ${response.status}`);
+        }
+
+        return response.json();
+    },
+};
+
+// Wrapping the executor interceptors
+const executor = withInterceptors(baseExecutor, {
+    onRequest: [
+        (config) => ({
+            ...config,
+            headers: {
+                ...config.headers,
+                Authorization: 'Bearer token',
+            },
+        }),
+    ],
+    onError: [
+        (error) => {
+            console.error(error);
+            throw error;
+        },
+    ],
+});
+
+const service = new SimpleService(executor);
+await service.getCallWithoutParametersAndResponse({ timeout: 5000 });
+```
+
 ### Sorting strategy for function arguments `--sortByRequired`
 By default, the OpenAPI generator sorts the parameters of service functions according to a simplified scheme. If you need a more strict sorting option, then you need to use the `--sortByRequired` flag. The simplified sorting option is similar to the one used in version 0.2.3 of the OpenAPI generator. This flag allows you to upgrade to a new version of the generator if you are "stuck" on version 0.2.3.
 

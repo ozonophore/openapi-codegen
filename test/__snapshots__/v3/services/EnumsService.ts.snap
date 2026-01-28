@@ -5,7 +5,7 @@
 import type { EEnumWithNumbers } from '../models/EnumWithNumbers';
 import type { EEnumWithStrings } from '../models/EnumWithStrings';
 import type { EEnumWithStringsWithType } from '../models/EnumWithStringsWithType';
-import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+import type { RequestExecutor, RequestConfig } from '../core/requestExecutor';
 
 const callWithEnums = (requestBody?: {
     enumWithNumbers?: EEnumWithNumbers;

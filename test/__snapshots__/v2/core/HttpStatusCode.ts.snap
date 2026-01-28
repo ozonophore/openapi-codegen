@@ -1,3 +1,7 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
 export enum EHTTP_STATUS_CODES {
     BAD_REQUEST = 400,
     UNAUTHORIZED = 401,
