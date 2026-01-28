@@ -5,7 +5,7 @@
 import type { TModelThatExtendsExtends } from '../models/ModelThatExtendsExtends';
 import type { TModelThatExtends } from '../models/ModelThatExtends';
 import type { IModelWithString } from '../models/ModelWithString';
-import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+import type { RequestExecutor, RequestConfig } from '../core/requestExecutor';
 
 const callWithResponse = (): RequestConfig => ({
     method: 'GET',

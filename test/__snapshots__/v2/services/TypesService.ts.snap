@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+import type { RequestExecutor, RequestConfig } from '../core/requestExecutor';
 
 const types = (
     parameterArray: Array<string>,

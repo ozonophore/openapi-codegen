@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.8] — 2026-01-28
+
+### Added
+- Added interceptor support to the client core:
+  - `withInterceptors`;
+  - `interceptors`;
+  - `apiErrorInterceptor`.
+- Introduced a new executor structure:
+  - dedicated `core/executor` directory;
+  - added `requestExecutor`.
+- Added snapshot tests for executor and interceptors for OpenAPI v2 and v3.
+
+### Changed
+- Refactored executor architecture:
+  - `createExecutorAdapter` and `request-executor` templates moved to `core/executor`;
+  - updated template registration and generation logic.
+- Updated client core templates:
+  - `ApiError`;
+  - `CancelablePromise`;
+  - `HttpStatusCode`.
+- Updated client generation logic:
+  - `WriteClient`;
+  - `writeClientCore`.
+- Updated client index generation (`indexCore`, `indexFull`).
+- Updated client and service export templates.
+- Updated documentation (`README.md`, `README.rus.md`).
+
+### Removed
+- Completely removed the legacy request executor and related snapshot tests.
+
+### Tests
+- Significantly updated snapshot coverage for client generation for OpenAPI v2 and v3.
+- Added snapshot tests for interceptors and the new executor.
+
 ## [2.0.0-beta.7] — 2026-01-22
 
 ### Added
