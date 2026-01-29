@@ -1,18 +1,31 @@
-import Joi from "joi";
+import { z } from "zod";
 
 import { HttpClient } from "../../../core";
-import { additionalParametersSchema,outputPathsSchema, specialParametersSchemas } from "../CommonSchemas";
-import { mergeObjectSchemas } from "../Utils/mergeObjectSchemas";
+import { optionsSchemaV1 } from "./OptionsSchemaV1";
 
-/**
- * The scheme of a set of generator options (Версия 2).
- */
-export const optionsSchemaV2 = mergeObjectSchemas(
-    Joi.object({
-        input: Joi.string().required(),
-        httpClient: Joi.string().valid(...Object.values(HttpClient)),
-    }),
-    outputPathsSchema,
-    specialParametersSchemas,
-    additionalParametersSchema,
-);
+export const optionsSchemaV2 = optionsSchemaV1.omit({ client: true }).extend({
+    httpClient: z.enum(HttpClient),
+});
+
+/*
+type TOptions = {
+    output: string;
+    input: string;
+    httpClient: HttpClient.FETCH | HttpClient.XHR | HttpClient.NODE | HttpClient.AXIOS;
+    outputCore: string | undefined;
+    outputServices: string | undefined;
+    outputModels: string | undefined;
+    outputSchemas: string | undefined;
+    useOptions: boolean | undefined;
+    useUnionTypes: boolean | undefined;
+    exportCore: boolean | undefined;
+    exportServices: boolean | undefined;
+    exportModels: boolean | undefined;
+    exportSchemas: boolean | undefined;
+    clean: boolean | undefined;
+    request: string | undefined;
+    interfacePrefix: string | undefined;
+    enumPrefix: string | undefined;
+    typePrefix: string | undefined;
+}
+*/

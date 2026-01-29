@@ -1,83 +1,69 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { ValidationLibrary } from '../../core/types/enums/ValidationLibrary.enum';
 
-/**
- * The scheme of a set of path parameters for finite directories.
- */
-export const outputPathsSchema = Joi.object({
-    output: Joi.string().required(),
-    outputCore: Joi.string().optional(),
-    outputServices: Joi.string().optional(),
-    outputModels: Joi.string().optional(),
-    outputSchemas: Joi.string().optional(),
+/** Output paths */
+
+export const outputPathsSchema = z.object({
+    output: z.string().min(1),
+    outputCore: z.string().optional(),
+    outputServices: z.string().optional(),
+    outputModels: z.string().optional(),
+    outputSchemas: z.string().optional(),
 });
 
-/**
- * The scheme of the "accessibility" parameter set.
- */
-export const specialParametersSchemas = Joi.object({
-    useOptions: Joi.boolean().optional(),
-    useUnionTypes: Joi.boolean().optional(),
+/** Special parameters */
 
-    exportCore: Joi.boolean().optional(),
-    exportServices: Joi.boolean().optional(),
-    exportModels: Joi.boolean().optional(),
-    exportSchemas: Joi.boolean().optional(),
+const baseSpecialParametersSchema = z.object({
+    useOptions: z.boolean().optional(),
+    useUnionTypes: z.boolean().optional(),
 });
 
-/**
- * The scheme of the "accessibility" parameter set.
- */
-export const specialParametersSchemasV2 = Joi.object({
-    useOptions: Joi.boolean().optional(),
-    useUnionTypes: Joi.boolean().optional(),
+export const specialParametersSchemas = baseSpecialParametersSchema.merge(
+    z.object({
+        exportCore: z.boolean().optional(),
+        exportServices: z.boolean().optional(),
+        exportModels: z.boolean().optional(),
+        exportSchemas: z.boolean().optional(),
+    })
+);
 
-    excludeCoreServiceFiles: Joi.boolean().optional(),
-    includeSchemasFiles: Joi.boolean().optional(),
+export const specialParametersSchemasV2 = baseSpecialParametersSchema.merge(
+    z.object({
+        excludeCoreServiceFiles: z.boolean().optional(),
+        includeSchemasFiles: z.boolean().optional(),
+    })
+);
+
+export const specialParametersSchemasV3 = baseSpecialParametersSchema.merge(
+    z.object({
+        excludeCoreServiceFiles: z.boolean().optional(),
+        validationLibrary: z.enum(ValidationLibrary).optional(),
+    })
+);
+
+/** Additional parameters */
+
+export const additionalParametersSchema = z.object({
+    clean: z.boolean().optional(),
+    request: z.string().optional(),
+    interfacePrefix: z.string().optional(),
+    enumPrefix: z.string().optional(),
+    typePrefix: z.string().optional(),
 });
 
-export const specialParametersSchemasV3 = Joi.object({
-    useOptions: Joi.boolean().optional(),
-    useUnionTypes: Joi.boolean().optional(),
-
-    excludeCoreServiceFiles: Joi.boolean().optional(),
-    validationLibrary: Joi.string().valid(...Object.values(ValidationLibrary)).optional(),
+export const additionalParametersSchemaV2 = additionalParametersSchema.omit({
+    clean: true,
 });
 
-/**
- * The scheme of additional parameters.
- */
-export const additionalParametersSchema = Joi.object({
-    clean: Joi.boolean().optional(),
-    request: Joi.string().optional(),
-    interfacePrefix: Joi.string().optional(),
-    enumPrefix: Joi.string().optional(),
-    typePrefix: Joi.string().optional(),
+/** Experimental parameters */
+
+export const experimentalParametersSchema = z.object({
+    useCancelableRequest: z.boolean().optional(),
 });
 
-/**
- * The scheme of additional parameters.
- */
-export const additionalParametersSchemaV2 = Joi.object({
-    request: Joi.string().optional(),
-    interfacePrefix: Joi.string().optional(),
-    enumPrefix: Joi.string().optional(),
-    typePrefix: Joi.string().optional(),
-});
-
-/**
- * The schema of experimental parameters.
- */
-export const experimentalParametersSchema = Joi.object({
-    useCancelableRequest: Joi.boolean().optional(),
-});
-
-/**
- * The schema of experimental parameters.
- */
-export const experimentalParametersSchemaV2 = Joi.object({
-    useCancelableRequest: Joi.boolean().optional(),
-    sortByRequired: Joi.boolean().optional(),
-    useSeparatedIndexes: Joi.boolean().optional(),
+export const experimentalParametersSchemaV2 = z.object({
+    ...experimentalParametersSchema.shape,
+    sortByRequired: z.boolean().optional(),
+    useSeparatedIndexes: z.boolean().optional(),
 });
