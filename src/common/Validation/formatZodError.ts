@@ -3,25 +3,25 @@ import { ZodError } from 'zod';
 /**
  * Форматирует Zod ошибку в читаемое сообщение для CLI
  */
-export function formatZodErrorForCLI(error: ZodError): string {
+export function formatZodError(error: ZodError): string[] {
     if (!error || error.issues.length === 0) {
-        return 'Validation error occurred';
+        return [];
     }
 
     const messages: string[] = [];
 
     for (const issue of error.issues) {
-        messages.push(formatIssue(issue));
+        messages.push(formatZodIssue(issue));
     }
 
-    return messages.join('\n');
+    return messages;
 }
 
 /**
  * Форматирует отдельную Zod issue в читаемое сообщение
  */
-function formatIssue(issue: ZodError['issues'][number]): string {
-    const path = formatPath(issue.path);
+function formatZodIssue(issue: ZodError['issues'][number]): string {
+    const path = formatZodPath(issue.path);
     const message = issue.message;
 
     // Если issue имеет кастомное сообщение, используем его
@@ -32,7 +32,7 @@ function formatIssue(issue: ZodError['issues'][number]): string {
     // Форматируем стандартные ошибки с использованием type guards
     if (issue.code === 'invalid_type') {
         if ('received' in issue && issue.received === 'undefined') {
-            const fieldName = formatPath(issue.path).replace(/^--/, '');
+            const fieldName = formatZodPath(issue.path).replace(/^--/, '');
             return `${path}: "${fieldName}" is required`;
         }
         if ('expected' in issue && 'received' in issue) {
@@ -41,7 +41,7 @@ function formatIssue(issue: ZodError['issues'][number]): string {
     }
 
     if (issue.code === 'invalid_format' && 'format' in issue) {
-        const fieldName = formatPath(issue.path).replace(/^--/, '');
+        const fieldName = formatZodPath(issue.path).replace(/^--/, '');
         const format = issue.format as string;
         if (format === 'email') {
             return `${path}: "${fieldName}" must be a valid email`;
@@ -53,7 +53,7 @@ function formatIssue(issue: ZodError['issues'][number]): string {
     }
 
     if (issue.code === 'too_small' && 'minimum' in issue && 'type' in issue) {
-        const fieldName = formatPath(issue.path).replace(/^--/, '');
+        const fieldName = formatZodPath(issue.path).replace(/^--/, '');
         const type = issue.type as string;
         const minimum = issue.minimum as number;
 
@@ -69,7 +69,7 @@ function formatIssue(issue: ZodError['issues'][number]): string {
     }
 
     if (issue.code === 'too_big' && 'maximum' in issue && 'type' in issue) {
-        const fieldName = formatPath(issue.path).replace(/^--/, '');
+        const fieldName = formatZodPath(issue.path).replace(/^--/, '');
         const type = issue.type as string;
         const maximum = issue.maximum as number;
 
@@ -85,7 +85,7 @@ function formatIssue(issue: ZodError['issues'][number]): string {
     }
 
     if (issue.code === 'invalid_value') {
-        const fieldName = formatPath(issue.path).replace(/^--/, '');
+        const fieldName = formatZodPath(issue.path).replace(/^--/, '');
         return `${path}: "${fieldName}" has invalid value`;
     }
 
@@ -100,7 +100,7 @@ function formatIssue(issue: ZodError['issues'][number]): string {
 /**
  * Форматирует путь к полю в читаемый формат
  */
-function formatPath(path: (string | number | symbol)[]): string {
+export function formatZodPath(path: (string | number | symbol)[]): string {
     if (path.length === 0) {
         return 'root';
     }

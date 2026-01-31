@@ -1,4 +1,7 @@
+import { z } from 'zod';
+
 import { EMigrationMode } from '../../Enums';
+import { validateZodOptions, validateZodOptionsRaw } from '../../Validation/validateZodOptions';
 import { EVersionedSchemaType } from '../Enums';
 import { SchemaMigrationPlan, VersionedSchema, VersionMatchResult } from '../Types';
 import { determineBestMatchingSchemaVersion } from './determineBestMatchingSchemaVersion';
@@ -12,7 +15,7 @@ import { validateAndSuggestKeyCorrections } from './validateAndSuggestKeyCorrect
 type MigrateToLatestProps = {
     rawInput: Record<string, any>;
     migrationPlans: SchemaMigrationPlan<Record<string, any>, Record<string, any>>[];
-    versionedSchemas: VersionedSchema<Record<string, any>>[];
+    versionedSchemas: VersionedSchema<z.ZodTypeAny>[];
     migrationMode: EMigrationMode;
 };
 
@@ -43,9 +46,9 @@ export function migrateDataToLatestSchemaVersion({ rawInput, migrationPlans, ver
 
     for (let idx = guessedVersion.lastVersionIndex; idx < versionedSchemas.length - 1; idx++) {
         const currentVersionSchema = versionedSchemas[idx];
-        const { error: firstError } = currentVersionSchema.schema.validate(currentData);
-        if (firstError) {
-            getCurrentErrorMessage(firstError, replacingKeysMap);
+        const firstValidationResult = validateZodOptionsRaw(currentVersionSchema.schema, currentData);
+        if (!firstValidationResult.success) {
+            getCurrentErrorMessage(firstValidationResult.error, replacingKeysMap);
         }
 
         const fromVersion = currentVersionSchema.version;
@@ -63,11 +66,11 @@ export function migrateDataToLatestSchemaVersion({ rawInput, migrationPlans, ver
         const toVersion = versionedSchemas[idx + 1].version;
         const migratedRaw = migrationPlan.migrate(currentData);
         
-        const { error } = versionedSchemas[idx + 1].schema.validate(migratedRaw, { allowUnknown: false });
-        if (error) {
+        const validationResult = validateZodOptions(versionedSchemas[idx + 1].schema, migratedRaw);
+        if (!validationResult.success) {
             throw new Error(
                 `Migration from ${fromVersion} to ${toVersion} failed validation. ` +
-                `Error: ${error.message}. ` +
+                `Error: ${validationResult.errors.join('\n')}. ` +
                 `Migration description: ${migrationPlan.description || 'No description provided'}.`
             );
         }
@@ -82,9 +85,9 @@ export function migrateDataToLatestSchemaVersion({ rawInput, migrationPlans, ver
         }
     }
 
-    const { error } = actualSchema.schema.validate(currentData, { allowUnknown: false });
-    if (error) {
-        getCurrentErrorMessage(error, replacingKeysMap);
+    const validationResult = validateZodOptionsRaw(actualSchema.schema, currentData);
+    if (!validationResult.success) {
+        getCurrentErrorMessage(validationResult.error, replacingKeysMap);
     }
 
     return { value: currentData, guessedVersion, schemaVersion: actualSchema.version, schemaType: actualSchema.type };

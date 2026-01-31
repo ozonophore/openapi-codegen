@@ -1,9 +1,9 @@
 import { OptionValues } from 'commander';
 
 import { APP_LOGGER } from '../../common/Consts';
+import { validateZodOptions } from '../../common/Validation/validateZodOptions';
 import { confirmDialog } from '../interactive/confirmDialog';
 import { InitOptions, initOptionsSchema } from '../schemas';
-import { validateCLIOptions } from '../validation';
 import { initConfig } from './initConfig';
 import { initCustomRequest } from './initCustomRequest';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
@@ -15,10 +15,10 @@ export async function init(options: OptionValues) {
     let validatedOptions: InitOptions;
     try {
         // Валидация опций через Zod
-        const validationResult = validateCLIOptions(initOptionsSchema, options);
+        const validationResult = validateZodOptions(initOptionsSchema, options);
 
         if (!validationResult.success) {
-            APP_LOGGER.error(validationResult.error);
+            APP_LOGGER.error(validationResult.errors.join('\n'));
             process.exit(1);
         }
 

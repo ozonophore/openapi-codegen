@@ -7,7 +7,7 @@ export const LOGGER_MESSAGES = {
     GENERATION: {
         STARTED: (count: number) => `Generation has begun. Total number of specification files: ${count}`,
         FINISHED: 'Generation has been finished',
-        FINISHED_WITH_DURATION: (duration: string) => `Generation completed in ${duration} ms`,
+        FINISHED_WITH_DURATION: (duration: string) => `Generation completed in ${duration} sec`,
         DURATION_FOR_FILE: (file: string, duration: string) => `Duration for "${file}": ${duration} sec`,
         NO_OPTIONS: 'No options provided for generation',
     },

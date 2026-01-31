@@ -1,23 +1,25 @@
-import {z} from 'zod';
+import { z } from 'zod';
 
-import { specialParametersSchemasV3 } from '../CommonSchemas';
-import { unifiedOptionsSchemaV1 } from './UnifiedOptionsSchemaV1';
+import { debugSettingsShape } from './UnifiedBase';
+import { unifiedOptionsSchemaV2 } from './UnifiedOptionsSchemaV2';
 
-export const unifiedOptionsSchemaV2 = z.object({
-    ...unifiedOptionsSchemaV1.shape,
-    ...specialParametersSchemasV3.shape,
+export const unifiedOptionsSchemaV3 = z.object({
+    ...unifiedOptionsSchemaV2.shape,
+    ...debugSettingsShape.shape,
 });
 
 /*
 type TUnified = {
-    output: string;
+    httpClient: HttpClient.FETCH | HttpClient.XHR | HttpClient.NODE | HttpClient.AXIOS;
+    logLevel: ELogLevel.INFO | ELogLevel.WARN | ELogLevel.ERROR | undefined;
+    logTarget: ELogOutput.CONSOLE | ELogOutput.FILE | undefined;
     useOptions: boolean | undefined;
     useUnionTypes: boolean | undefined;
     excludeCoreServiceFiles: boolean | undefined;
     validationLibrary: ValidationLibrary.NONE | ValidationLibrary.ZOD | ValidationLibrary.JOI | ValidationLibrary.YUP | ValidationLibrary.JSONSCHEMA | undefined;
-    useCancelableRequest: boolean | undefined;
     sortByRequired: boolean | undefined;
     useSeparatedIndexes: boolean | undefined;
+    useCancelableRequest: boolean | undefined;
     request: string | undefined;
     interfacePrefix: string | undefined;
     enumPrefix: string | undefined;
@@ -29,6 +31,6 @@ type TUnified = {
     outputSchemas: string | undefined;
     items: { ... 13 more }[] | undefined;
     input: string | undefined;
-    httpClient: HttpClient.FETCH | HttpClient.XHR | HttpClient.NODE | HttpClient.AXIOS | undefined;
+    output: string | undefined;
 }
 */
