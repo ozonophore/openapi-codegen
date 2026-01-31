@@ -25,5 +25,8 @@ export interface Templates {
         httpStatusCode: Handlebars.TemplateDelegate;
         requestExecutor: Handlebars.TemplateDelegate;
         createExecutorAdapter: Handlebars.TemplateDelegate;
+        interceptors: Handlebars.TemplateDelegate;
+        apiErrorInterceptor: Handlebars.TemplateDelegate;
+        withInterceptors: Handlebars.TemplateDelegate;
     };
 }

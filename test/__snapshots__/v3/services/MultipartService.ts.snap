@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { IModelWithString } from '../models/ModelWithString';
-import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+import type { RequestExecutor, RequestConfig } from '../core/requestExecutor';
 
 const multipartResponse = (): RequestConfig => ({
     method: 'GET',

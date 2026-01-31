@@ -195,7 +195,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"imports"),{"name":"if","hash":{},"fn":container.program(1, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":3,"column":0},"end":{"line":7,"column":7}}})) != null ? stack1 : "")
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(lookupProperty(data,"root"),"useCancelableRequest"),{"name":"if","hash":{},"fn":container.program(5, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":8,"column":0},"end":{"line":10,"column":7}}})) != null ? stack1 : "")
     + "import type { RequestExecutor, RequestConfig } from '"
-    + ((stack1 = lookupProperty(helpers,"joinPath").call(alias1,lookupProperty(lookupProperty(data,"root"),"outputCore"),"request-executor",{"name":"joinPath","hash":{},"data":data,"loc":{"start":{"line":11,"column":53},"end":{"line":11,"column":103}}})) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"joinPath").call(alias1,lookupProperty(lookupProperty(data,"root"),"outputCore"),"requestExecutor",{"name":"joinPath","hash":{},"data":data,"loc":{"start":{"line":11,"column":53},"end":{"line":11,"column":102}}})) != null ? stack1 : "")
     + "';\n\n"
     + ((stack1 = lookupProperty(helpers,"each").call(alias1,lookupProperty(depth0,"operations"),{"name":"each","hash":{},"fn":container.program(7, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":13,"column":0},"end":{"line":18,"column":9}}})) != null ? stack1 : "")
     + "\nexport type T"
