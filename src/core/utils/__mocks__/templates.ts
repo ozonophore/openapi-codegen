@@ -25,5 +25,8 @@ export const templates: Templates = {
         httpStatusCode: () => 'httpStatusCode',
         createExecutorAdapter: () => 'createExecutorAdapter',
         requestExecutor: () => 'requestExecutor',
+        apiErrorInterceptor: () => 'apiErrorInterceptor',
+        interceptors: () => 'interceptors',
+        withInterceptors: () => 'withInterceptors',
     },
 };

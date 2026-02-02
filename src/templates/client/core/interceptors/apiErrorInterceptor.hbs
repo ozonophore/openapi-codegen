@@ -1,0 +1,26 @@
+{{>header}}
+
+import { ErrorInterceptor } from './interceptors';
+import { ApiError } from '../ApiError';
+
+interface ExecutorError {
+    status: number;
+    body?: unknown;
+    headers?: Record<string, string>;
+}
+
+export const apiErrorInterceptor: ErrorInterceptor = (error, request) => {
+    if (typeof error === 'object' && error && 'status' in error) {
+        const e = error as ExecutorError;
+
+        throw new ApiError({
+            status: e.status,
+            message: `Request failed with status ${e.status}`,
+            body: e.body,
+            headers: e.headers,
+            request,
+        });
+    }
+
+    throw error;
+};

@@ -2,8 +2,10 @@
 
 import { OpenAPI } from '{{{joinPath @root.outputCore 'OpenAPI'}}}';
 import type { TOpenAPIConfig } from '{{{joinPath @root.outputCore 'OpenAPI'}}}';
-import type { RequestExecutor } from '{{{joinPath @root.outputCore 'request-executor'}}}';
-import { createExecutorAdapter } from '{{{joinPath @root.outputCore 'createExecutorAdapter'}}}';
+import { createExecutorAdapter } from '{{{joinPath @root.outputCore './executor/createExecutorAdapter'}}}';
+import { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from '{{{joinPath @root.outputCore './interceptors/interceptors'}}}';
+import { withInterceptors } from '{{{joinPath @root.outputCore './interceptors/withInterceptors'}}}';
+import { apiErrorInterceptor } from '{{{joinPath @root.outputCore './interceptors/apiErrorInterceptor'}}}';
 
 {{#each services}}
 import { {{name}} } from './services/{{name}}';
@@ -11,7 +13,11 @@ import { {{name}} } from './services/{{name}}';
 
 export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
   openApi?: Partial<TOpenAPIConfig>;
-  executor?: RequestExecutor<TExecutorOptions>;
+  interceptors?: {
+    onRequest?: RequestInterceptor[];
+    onResponse?: ResponseInterceptor[];
+    onError?: ErrorInterceptor[];
+  }
 }
 
 export function createClient<TExecutorOptions extends Record<string, any>>(
@@ -22,7 +28,14 @@ export function createClient<TExecutorOptions extends Record<string, any>>(
     ...options.openApi,
   };
 
-  const executor = createExecutorAdapter<TExecutorOptions>(openApiConfig);
+  let executor = createExecutorAdapter<TExecutorOptions>(openApiConfig);
+  if (options?.interceptors) {
+    executor = withInterceptors(executor, {
+      onError: [apiErrorInterceptor, ...(options.interceptors?.onError ?? [])],
+      onRequest: options.interceptors?.onRequest,
+      onResponse: options.interceptors?.onResponse,
+    });
+  }
 
   return {
     {{#each services}}

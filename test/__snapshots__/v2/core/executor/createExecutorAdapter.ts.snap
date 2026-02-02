@@ -1,25 +1,18 @@
-{{>header}}
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
 
-import type { RequestExecutor, RequestConfig } from './request-executor';
-{{#unless @root.useCustomRequest}}
-import type { ApiRequestOptions } from './ApiRequestOptions';
-import type { TOpenAPIConfig } from './OpenAPI';
-import { OpenAPI } from './OpenAPI';
-{{/unless}}
-import { request as __request } from './request';
+import type { RequestExecutor, RequestConfig } from './requestExecutor';
+import type { ApiRequestOptions } from '../ApiRequestOptions';
+import type { TOpenAPIConfig } from '../OpenAPI';
+import { OpenAPI } from '../OpenAPI';
+import { request as __request } from '../request';
 
 export function createExecutorAdapter<TRequestOptions extends Record<string, any>>(
-{{#unless @root.useCustomRequest}}
     openApiConfig: TOpenAPIConfig = OpenAPI,
     mapOptions?: (options: TRequestOptions | undefined) => Partial<ApiRequestOptions>,
-{{/unless}}
 ): RequestExecutor<TRequestOptions> {
     return {
-        {{#if @root.useCustomRequest}}
-        request<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<TResponse> {
-            return __request(config, options) as Promise<TResponse>;
-        },
-        {{else}}
         request<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<TResponse> {
             const baseOptions: ApiRequestOptions = {
                 method: config.method as ApiRequestOptions['method'],
@@ -36,6 +29,5 @@ export function createExecutorAdapter<TRequestOptions extends Record<string, any
 
             return __request<TResponse>(mergedOptions, openApiConfig);
         },
-        {{/if}}
     };
 }

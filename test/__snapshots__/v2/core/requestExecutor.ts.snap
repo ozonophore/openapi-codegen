@@ -1,3 +1,7 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
 export interface RequestConfig {
   method: string;
   path: string;

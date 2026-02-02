@@ -4,6 +4,40 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.0.0-beta.8] — 2026-01-28
+
+### Добавлено
+- Добавлена поддержка interceptors в клиентском core:
+  - `withInterceptors`;
+  - `interceptors`;
+  - `apiErrorInterceptor`.
+- Добавлена новая структура executor’а:
+  - выделена директория `core/executor`;
+  - добавлен `requestExecutor`.
+- Добавлены snapshot-тесты для executor’а и interceptors для OpenAPI v2 и v3.
+
+### Изменено
+- Переработана архитектура executor’а:
+  - шаблоны `createExecutorAdapter` и `request-executor` перенесены в `core/executor`;
+  - обновлена логика генерации и регистрации шаблонов.
+- Обновлены core-шаблоны клиента:
+  - `ApiError`;
+  - `CancelablePromise`;
+  - `HttpStatusCode`.
+- Обновлена логика генерации клиента:
+  - `WriteClient`;
+  - `writeClientCore`.
+- Обновлены шаблоны и генерация index-файлов (`indexCore`, `indexFull`).
+- Обновлены шаблоны экспорта клиента и сервисов.
+- Обновлена документация (`README.md`, `README.rus.md`).
+
+### Удалено
+- Полностью удалён legacy request executor и связанные snapshot-тесты.
+
+### Тесты
+- Существенно обновлены snapshot-тесты генерации клиента для OpenAPI v2 и v3.
+- Добавлены snapshot-тесты для interceptor’ов и нового executor’а.
+
 ## [2.0.0-beta.7] — 2026-01-22
 
 ### Добавлено

@@ -3,8 +3,8 @@
 /* eslint-disable */
 
 export { ApiError } from '././core/ApiError';
-export { RequestConfig, RequestExecutor } from '././core/request-executor';
-export { createExecutorAdapter } from '././core/createExecutorAdapter';
+export { RequestConfig, RequestExecutor } from '././core/executor/requestExecutor';
+export { createExecutorAdapter } from '././core/executor/createExecutorAdapter';
 export { OpenAPI } from '././core/OpenAPI';
 export type { TOpenAPIConfig } from '././core/OpenAPI';
 
