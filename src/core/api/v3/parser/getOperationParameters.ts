@@ -19,7 +19,7 @@ export function getOperationParameters(this: Parser, openApi: OpenApi, parameter
 
     // Iterate over the parameters
     parameters.forEach(parameterOrReference => {
-        const parameterDef = (parameterOrReference.$ref ? (this.context.get(parameterOrReference.$ref) as Record<string, any>) : parameterOrReference) as OpenApiParameter;
+        const parameterDef = (parameterOrReference.$ref ? (this.context.get(parameterOrReference.$ref, parentRef) as Record<string, any>) : parameterOrReference) as OpenApiParameter;
         const parameter = this.getOperationParameter(openApi, parameterDef, parentRef);
 
         // We ignore the "api-version" param, since we do not want to add this

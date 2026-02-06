@@ -8,10 +8,12 @@ import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { dirNameHelper, joinHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { validateZodOptions } from '../../common/Validation/validateZodOptions';
 import { allMigrationPlans } from '../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
 import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
 import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
+import { previewChangesSchema,TPreviewChangesOptions } from '../schemas';
 import { compareFiles } from './utils/compareFiles';
 import { formatDiff } from './utils/formatDiff';
 import { isDirectoryEmpty } from './utils/isDirectoryEmpty';
@@ -30,11 +32,18 @@ interface FileChange {
  * TODO: Добавить проверку опций команды перед выполнением
  */
 export async function previewChanges(options: OptionValues): Promise<void> {
-    const { openapiConfig, generatedDir = 'generated', previewDir = 'generated-preview', diffDir = 'generated-diff' } = options;
+    const validationResult = validateZodOptions(previewChangesSchema, options);
 
-    const resolvedGeneratedDir = resolveHelper(process.cwd(), generatedDir);
-    const resolvedPreviewDir = resolveHelper(process.cwd(), previewDir);
-    const resolvedDiffDir = resolveHelper(process.cwd(), diffDir);
+    if (!validationResult.success) {
+        APP_LOGGER.error(validationResult.errors.join('\n'));
+        process.exit(1);
+    }
+
+    const { openapiConfig, generatedDir, previewDir, diffDir } = validationResult.data as TPreviewChangesOptions;
+
+    const resolvedGeneratedDir = resolveHelper(process.cwd(), generatedDir || '');
+    const resolvedPreviewDir = resolveHelper(process.cwd(), previewDir || '');
+    const resolvedDiffDir = resolveHelper(process.cwd(), diffDir || '');
 
     let previewDirCreated = false;
 
@@ -73,7 +82,7 @@ export async function previewChanges(options: OptionValues): Promise<void> {
 
         // 4. Обновление путей output для генерации в preview директорию
         const migratedValue = migratedOptions.value as TRawOptions;
-        const previewOptions = updateOutputPaths(migratedValue, previewDir, generatedDir) as TRawOptions;
+        const previewOptions = updateOutputPaths(migratedValue, previewDir || '', generatedDir || '') as TRawOptions;
 
         // 5. Генерация кода в preview директорию
         APP_LOGGER.info(`Generating code to preview directory: ${previewDir}`);

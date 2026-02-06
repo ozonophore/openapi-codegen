@@ -1,10 +1,12 @@
+import { z } from 'zod';
+
+import { validateZodOptionsRaw } from '../../Validation/validateZodOptions';
 import { VersionedSchema, VersionMatchResult } from '../Types';
-import { getErrorFieldsFromValidation } from './getErrorFieldsFromValidation';
 import { getUniqueKeysFromSchemas } from './getUniqueKeysFromSchemas';
 import { getUniqueObjectKeys } from './getUniqueObjectKeys';
 
 // Determining the most appropriate schema version
-export function determineBestMatchingSchemaVersion(inputData: Record<string, any>, versionedSchemas: VersionedSchema<Record<string, any>>[]): VersionMatchResult {
+export function determineBestMatchingSchemaVersion(inputData: Record<string, any>, versionedSchemas: VersionedSchema<z.ZodTypeAny>[]): VersionMatchResult {
     if (!versionedSchemas.length) {
         throw new Error('The list of schemes cannot be empty');
     }
@@ -13,8 +15,8 @@ export function determineBestMatchingSchemaVersion(inputData: Record<string, any
 
     const matchingSchemas = versionedSchemas
         .map(({ schema, version }, idx) => {
-            const { error } = schema.validate(inputData, { allowUnknown: true });
-            const errorFields = getErrorFieldsFromValidation(error).filter(err => err.type !== 'any.only');
+            const validationResult = validateZodOptionsRaw(schema, inputData);
+            const errorFields = !validationResult.success ? validationResult.error.issues.filter(err => err.code !== 'invalid_value') : [];
 
             return errorFields.length === 0 ? { version, index: idx } : null;
         })
@@ -31,8 +33,8 @@ export function determineBestMatchingSchemaVersion(inputData: Record<string, any
 
     const schemaMatches = versionedSchemas.map(({ schema, version }, idx) => {
         const schemaKeys = getUniqueKeysFromSchemas([schema]);
-        const { error } = schema.validate(inputData, { allowUnknown: true });
-        const errorFields = getErrorFieldsFromValidation(error).filter(err => err.type !== 'any.only');
+        const validationResult = validateZodOptionsRaw(schema, inputData);
+        const errorFields = !validationResult.success ? validationResult.error.issues.filter(err => err.code !== 'invalid_value') : [];
         const matchingKeys = inputKeys.filter(key => schemaKeys.has(key));
 
         return { index: idx, version, errorFields, matchingKeys };

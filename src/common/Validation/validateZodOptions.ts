@@ -1,16 +1,16 @@
 import { ZodError, ZodSchema } from 'zod';
 
-import { formatZodErrorForCLI } from './errorFormatter';
+import { formatZodError } from './formatZodError';
 
 /**
  * Результат валидации
  */
-export type ValidationResult<T> = { success: true; data: T } | { success: false; error: string };
+export type ValidationResult<T> = { success: true; data: T } | { success: false; errors: string[] };
 
 /**
  * Валидирует данные с помощью Zod схемы и возвращает отформатированный результат
  */
-export function validateCLIOptions<T>(schema: ZodSchema<T>, data: unknown): ValidationResult<T> {
+export function validateZodOptions<T>(schema: ZodSchema<T>, data: unknown): ValidationResult<T> {
     try {
         const result = schema.parse(data);
         return { success: true, data: result };
@@ -18,14 +18,11 @@ export function validateCLIOptions<T>(schema: ZodSchema<T>, data: unknown): Vali
         if (error instanceof ZodError) {
             return {
                 success: false,
-                error: formatZodErrorForCLI(error),
+                errors: formatZodError(error),
             };
         }
 
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown validation error',
-        };
+        throw new Error(error instanceof Error ? error.message : 'Unknown validation error')
     }
 }
 
@@ -33,7 +30,7 @@ export function validateCLIOptions<T>(schema: ZodSchema<T>, data: unknown): Vali
  * Валидирует данные с помощью Zod схемы и возвращает raw результат
  * (полезно когда нужен доступ к ZodError для дополнительной обработки)
  */
-export function validateCLIOptionsRaw<T>(schema: ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; error: ZodError } {
+export function validateZodOptionsRaw<T>(schema: ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; error: ZodError } {
     const result = schema.safeParse(data);
 
     if (result.success) {

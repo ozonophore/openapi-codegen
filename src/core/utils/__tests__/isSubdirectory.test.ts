@@ -4,8 +4,8 @@ import { describe, test } from 'node:test';
 import { resolveHelper } from '../../../common/utils/pathHelpers';
 import { isSubDirectory } from '../isSubdirectory';
 
-describe('@unit: isSubDirectory', () => {
-    test.skip('should return correct result', () => {
+describe.skip('@unit: isSubDirectory', () => {
+    test('should return correct result', () => {
         assert.strictEqual(isSubDirectory(resolveHelper('/'), resolveHelper('/')), false);
         assert.strictEqual(isSubDirectory(resolveHelper('.'), resolveHelper('.')), false);
         assert.strictEqual(isSubDirectory(resolveHelper('./project'), resolveHelper('./project')), false);

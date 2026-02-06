@@ -14,7 +14,7 @@ export function getOperationResponses(this: Parser, openApi: OpenApi, responses:
     for (const code in responses) {
         if (safeHasOwn(responses, code)) {
             const responseOrReference = responses[code];
-            const response = (responseOrReference.$ref ? (this.context.get(responseOrReference.$ref) as Record<string, any>) : responseOrReference) as OpenApiResponse;
+            const response = (responseOrReference.$ref ? (this.context.get(responseOrReference.$ref, parentRef) as Record<string, any>) : responseOrReference) as OpenApiResponse;
             const responseCode = getOperationResponseCode(code);
 
             if (responseCode) {

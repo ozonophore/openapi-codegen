@@ -36,7 +36,7 @@ export function getType(this: Parser, value: string, parentRef: string): Type {
          * В этом случае надо брать непосредственно normalizedValue - это относительный путь или фрагмент.
          * Предполагаем, что в таком случае расчитывать нет нужды. Это путь от папки outputModels
          */
-        const canonicalValue = this.context.resolveCanonicalRef(normalizedValue);
+        const canonicalValue = this.context.resolveCanonicalRef(normalizedValue, parentRef);
         let valuePath = valueClean;
 
         if (canonicalValue) {
@@ -46,7 +46,8 @@ export function getType(this: Parser, value: string, parentRef: string): Type {
         }
 
         valuePath = !valuePath.startsWith('./') && !valuePath.startsWith('../') ? `./${valuePath}` : valuePath;
-        const type = this.getTypeNameByRef(getTypeName(valueClean), parentRef);
+        const type = this.getTypeNameByRef(getTypeName(valueClean), normalizedValue, parentRef);
+
         const valueImportPath = !valuePath.startsWith('./') ? `./${valuePath}` : valuePath;
         result.path = valuePath;
         result.type = type;

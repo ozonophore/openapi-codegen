@@ -17,9 +17,10 @@ export function getServices(this: Parser, openApi: OpenApi): Service[] {
         if (safeHasOwn(openApi.paths, url)) {
             // Grab path and parse any global path parameters
             const pathByUrl = openApi.paths[url];
-            const path = (pathByUrl.$ref ? (this.context.get(pathByUrl.$ref) as Record<string, any>) : pathByUrl) as OpenApiPath;
-            const pathParams = this.getOperationParameters(openApi, path.parameters || [], '');
-            const parentFileRef = pathByUrl.$ref || this.context.root?.path || '';
+            const rootPath = this.context.root?.path || '';
+            const path = (pathByUrl.$ref ? (this.context.get(pathByUrl.$ref, rootPath) as Record<string, any>) : pathByUrl) as OpenApiPath;
+            const parentFileRef = pathByUrl.$ref || rootPath;
+            const pathParams = this.getOperationParameters(openApi, path.parameters || [], parentFileRef);
 
             // Parse all the methods for this path
             forEachOperationInPath(path, (method, op) => {

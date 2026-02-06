@@ -24,9 +24,9 @@ export class Parser {
         return this._context;
     }
 
-    public getTypeNameByRef(value: string, ref?: string): string {
+    public getTypeNameByRef(value: string, ref: string, parentSourceFile?: string): string {
         if (ref) {
-            const definition: any = this.context.get(ref);
+            const definition: any = this.context.get(ref, parentSourceFile);
             
             return getModelNameWithPrefix(value, definition, this._context.prefix);
         }

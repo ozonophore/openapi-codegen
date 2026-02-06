@@ -55,7 +55,7 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
 
     if (op.requestBody) {
         const sortByRequired = this.context.sortByRequired ? sortByRequiredExtended : sortByRequiredSimple;
-        const requestBodyDef = (op.requestBody.$ref ? this.context.get(op.requestBody.$ref) : op.requestBody) as OpenApiRequestBody;
+        const requestBodyDef = (op.requestBody.$ref ? this.context.get(op.requestBody.$ref, parentFileRef) : op.requestBody) as OpenApiRequestBody;
         const requestBody = this.getOperationRequestBody(openApi, requestBodyDef, parentFileRef);
         operation.imports.push(...requestBody.imports);
         operation.parameters.push(requestBody);

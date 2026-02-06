@@ -16,6 +16,7 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     httpClient: HttpClient.FETCH,
     useOptions: false,
     useUnionTypes: false,
+    includeSchemasFiles: false,
     excludeCoreServiceFiles: false,
     request: '',
     interfacePrefix: 'I',
@@ -40,3 +41,7 @@ export const DEFAULT_SPECS_DIR = 'openapi/';
 export const DEFAULT_CUSTOM_REQUEST_PATH = './src/custom/request.ts'
 
 export const DEFAULT_OUTPUT_API_DIR = './generated';
+
+export const DEFAULT_PREVIEW_CHANGES_DIR = './.ts-openapi-codegen-preview-changes';
+
+export const DEFAULT_DIFF_CHANGES_DIR = './.ts-openapi-codegen-diff-changes';

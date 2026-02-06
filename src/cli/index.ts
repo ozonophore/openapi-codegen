@@ -2,7 +2,7 @@
 import { Command, Option, OptionValues } from 'commander';
 import fs from 'fs';
 
-import { APP_LOGGER, DEFAULT_OPENAPI_CONFIG_FILENAME } from '../common/Consts';
+import { APP_LOGGER, DEFAULT_DIFF_CHANGES_DIR, DEFAULT_OPENAPI_CONFIG_FILENAME, DEFAULT_OUTPUT_API_DIR, DEFAULT_PREVIEW_CHANGES_DIR } from '../common/Consts';
 import { ELogLevel, ELogOutput } from '../common/Enums';
 import { UpdateNotifier } from '../common/UpdateNotifier';
 import { joinHelper } from '../common/utils/pathHelpers';
@@ -93,7 +93,7 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await updateConfig(options.openapiConfig);
+        await updateConfig(options);
     });
 
 /**
@@ -122,10 +122,10 @@ program
     .command('preview-changes')
     .description('Preview changes that will be made to generated code before applying them')
     .addHelpText('before', getCLIName(APP_NAME))
-    .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
-    .option('-gd, --generated-dir <value>', 'Directory with previously generated code (default: "generated")', './generated')
-    .option('-pd, --preview-dir <value>', 'Temporary directory for preview generation (default: "generated-preview")', './generated-preview')
-    .option('-dd, --diff-dir <value>', 'Directory to save diff files (default: "generated-diff")', './generated-diff')
+    .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options (default: "openapi.config.json")', DEFAULT_OPENAPI_CONFIG_FILENAME)
+    .option('-gd, --generated-dir <value>', 'Directory with previously generated code (default: "generated")', DEFAULT_OUTPUT_API_DIR)
+    .option('-pd, --preview-dir <value>', 'Temporary directory for preview generation (default: ".ts-openapi-codegen-preview-changes)', DEFAULT_PREVIEW_CHANGES_DIR)
+    .option('-dd, --diff-dir <value>', 'Directory to save diff files (default: ".ts-openapi-codegen-diff-changes")', DEFAULT_DIFF_CHANGES_DIR)
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })

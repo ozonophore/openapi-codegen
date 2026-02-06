@@ -15,7 +15,11 @@ export namespace {{{name}}} {
      * {{{description}}}
      */
     {{/if}}
+    {{#if alias}}
+    export enum {{{alias}}} {
+    {{else}}
     export enum {{{name}}} {
+    {{/if}}
         {{#each enum}}
         {{{name}}} = {{{value}}},
         {{/each}}

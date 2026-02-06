@@ -7,12 +7,12 @@ import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { TRawOptions } from '../../common/TRawOptions';
 import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
+import { validateZodOptions } from '../../common/Validation/validateZodOptions';
 import { allMigrationPlans } from '../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
 import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
 import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
-import { generateOptionsSchema } from '../schemas/generate';
-import { validateCLIOptions } from '../validation';
+import { GenerateOptions, generateOptionsSchema } from '../schemas';
 
 /**
  * Запускает генерацию OpenAPI клиента
@@ -22,18 +22,17 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
     const { openapiConfig, ...clientOptions } = options;
 
     try {
-        // Валидация опций через Zod
-        const validationResult = validateCLIOptions(generateOptionsSchema, {
+        const validationResult = validateZodOptions(generateOptionsSchema, {
             openapiConfig,
             ...clientOptions,
         });
 
         if (!validationResult.success) {
-            APP_LOGGER.error(validationResult.error);
+            APP_LOGGER.error(validationResult.errors.join('\n'));
             process.exit(1);
         }
 
-        const validatedOptions = validationResult.data;
+        const validatedOptions = validationResult.data as GenerateOptions;
 
         // Если есть минимальные опции (input и output), используем их
         const hasMinimumRequiredOptions = !!validatedOptions.input && !!validatedOptions.output;

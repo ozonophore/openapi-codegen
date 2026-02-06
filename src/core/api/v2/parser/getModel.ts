@@ -4,7 +4,6 @@ import { getComment } from '../../../utils/getComment';
 import { getEnum } from '../../../utils/getEnum';
 import { getEnumFromDescription } from '../../../utils/getEnumFromDescription';
 import { getPattern } from '../../../utils/getPattern';
-import { normalizeRef } from '../../../utils/normalizeRef';
 import { Parser } from '../Parser';
 import { ModelConfig } from '../types/ModelConfig.model';
 
@@ -47,8 +46,7 @@ export function getModel(this: Parser, config: ModelConfig): Model {
     };
 
     if (definition.$ref) {
-        const normalizedRef = normalizeRef(definition.$ref, parentRef);
-        const definitionRef = this.getType(definition.$ref, normalizedRef);
+        const definitionRef = this.getType(definition.$ref, parentRef);
         model.export = 'reference';
         model.type = definitionRef.type;
         model.base = definitionRef.base;
@@ -82,8 +80,7 @@ export function getModel(this: Parser, config: ModelConfig): Model {
 
     if (definition.type === 'array' && definition.items) {
         if (definition.items.$ref) {
-            const normalizedRef = normalizeRef(definition.items.$ref, parentRef);
-            const arrayItems = this.getType(definition.items.$ref, normalizedRef);
+            const arrayItems = this.getType(definition.items.$ref, parentRef);
             model.export = 'array';
             model.type = arrayItems.type;
             model.base = arrayItems.base;

@@ -63,13 +63,46 @@ export function mergeOperationImportsIntoService(service: Service, operation: an
 /**
  * Internal helper: apply alias value to models that reference the import.
  */
+function normalizeImportPath(path: string): string {
+    return path.startsWith('./') ? path.slice(2) : path;
+}
+
+function applyAliasToModel(model: Model, value: Import) {
+    const modelPath = normalizeImportPath(model.path);
+    const importPath = normalizeImportPath(value.path);
+
+    if (modelPath === importPath && model.type === value.name && value.alias) {
+        model.alias = value.alias;
+        model.base = value.alias;
+    }
+
+    if (value.alias && model.imports?.some(imprt => normalizeImportPath(imprt.path) === importPath && imprt.name === value.name)) {
+        if (model.base === value.name) {
+            model.base = value.alias;
+        }
+        if (model.type === value.name) {
+            model.type = value.alias;
+        }
+        if (!model.alias) {
+            model.alias = value.alias;
+        }
+    }
+
+    if (model.link) {
+        applyAliasToModel(model.link, value);
+    }
+
+    if (model.properties?.length) {
+        model.properties.forEach(child => applyAliasToModel(child, value));
+    }
+
+    if (model.enums?.length) {
+        model.enums.forEach(child => applyAliasToModel(child, value));
+    }
+}
+
 function fillModelsByAlias(items: Model[] = [], value: Import) {
-    items
-        .filter(result => result.path === value.path && result.type === value.name && value.alias)
-        .forEach(result => {
-            result.alias = value.alias;
-            result.base = value.alias;
-        });
+    items.forEach(item => applyAliasToModel(item, value));
 }
 
 /**

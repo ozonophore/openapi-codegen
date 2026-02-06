@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { flatOptionsSchema, rawOptionsSchema } from "./schemas/configSchemas";
+import { flatOptionsSchema,rawOptionsSchema } from './VersionedSchema/AllVersionedSchemas/UnifiedVersionedSchemas';
 
 export type TRawOptions = z.infer<typeof rawOptionsSchema>;
 

@@ -21,7 +21,7 @@ type InitConfigParams = Pick<InitOptions, 'openapiConfig' | 'specsDir' | 'reques
  * Инициализирует файл конфигурации OpenAPI
  */
 export async function initConfig(params: InitConfigParams): Promise<void> {
-    const configPath = resolveHelper(process.cwd(), params.openapiConfig);
+    const configPath = resolveHelper(process.cwd(), params.openapiConfig || '');
     const configExists = await fileSystemHelpers.exists(configPath);
 
     // Шаг 3: Проверка существования файла конфигурации
@@ -37,7 +37,7 @@ export async function initConfig(params: InitConfigParams): Promise<void> {
         }
     }
 
-    const currentSpecsDir = params.specsDir;
+    const currentSpecsDir = params.specsDir || '';
 
     // Шаг 4: Формирование файла конфигурации
     // Поиск файлов спецификаций
@@ -119,5 +119,5 @@ export async function initConfig(params: InitConfigParams): Promise<void> {
     }
 
     // Записываем конфигурацию на диск
-    await writeConfigFile(params.openapiConfig, config, params.templates);
+    await writeConfigFile(params.openapiConfig || '', config, params.templates);
 }
