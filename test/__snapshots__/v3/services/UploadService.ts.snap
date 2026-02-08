@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { RequestExecutor, RequestConfig } from '../core/requestExecutor';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 
 const uploadFile = (file: Blob): RequestConfig => ({
     method: 'POST',

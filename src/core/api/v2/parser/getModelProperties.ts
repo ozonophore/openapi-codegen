@@ -3,7 +3,6 @@ import type { Model } from '../../../types/shared/Model.model';
 import { escapeName } from '../../../utils/escapeName';
 import { getComment } from '../../../utils/getComment';
 import { getPattern } from '../../../utils/getPattern';
-import { normalizeRef } from '../../../utils/normalizeRef';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiSchema } from '../types/OpenApiSchema.model';
@@ -15,8 +14,7 @@ export function getModelProperties(this: Parser, openApi: OpenApi, definition: O
             const property = definition.properties[propertyName];
             const propertyRequired = definition.required?.includes(propertyName) || property.default !== undefined;
             if (property.$ref) {
-                const normalizedRef = normalizeRef(property.$ref, parentRef);
-                const model = this.getType(property.$ref, normalizedRef);
+                const model = this.getType(property.$ref, parentRef);
                 models.push({
                     name: escapeName(propertyName),
                     alias: '',

@@ -1,6 +1,12 @@
 {
     "httpClient": "fetch",
     "items": [{
+        "input": "./test/spec/v2.json",
+        "output": "./test/generated/v2/"
+    }, {
+        "input": "./test/spec/v3.json",
+        "output": "./test/generated/v3/"
+    }, {
         "input": "./test/spec/v3.withDifferentRefs.yml",
         "output": "./test/generated/v3_withDifferentRefs/"
     }]

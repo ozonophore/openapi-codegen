@@ -1,49 +1,34 @@
-import Joi from 'joi';
+import {z} from 'zod';
 
-import { HttpClient } from '../../../core/types/enums/HttpClient.enum';
-import { additionalParametersSchemaV2, experimentalParametersSchemaV2, outputPathsSchema, specialParametersSchemasV3 } from '../CommonSchemas';
-import { mergeObjectSchemas } from '../Utils/mergeObjectSchemas';
+import { specialParametersSchemasV3 } from '../CommonSchemas';
+import { unifiedOptionsSchemaV1 } from './UnifiedOptionsSchemaV1';
 
-const itemSchema = mergeObjectSchemas(
-    Joi.object({
-        input: Joi.string().required().description('Путь, URL или строка OpenAPI спецификации'),
-        request: Joi.string().optional(),
-    }),
-    outputPathsSchema,
-    additionalParametersSchemaV2,
-    experimentalParametersSchemaV2
-);
+export const unifiedOptionsSchemaV2 = z.object({
+    ...unifiedOptionsSchemaV1.shape,
+    ...specialParametersSchemasV3.shape,
+});
 
-/**
- * Unified options schema that supports both single and multi-item configurations.
- * Use either 'items' array for multiple specs OR 'input'/'output' for single spec.
- */
-export const unifiedOptionsSchemaV2 = mergeObjectSchemas(
-    Joi.object({
-        // Multi-item configuration
-        items: Joi.array().items(itemSchema).min(1).optional().description('Массив спецификаций для генерации'),
-
-        // Single-item configuration (mutually exclusive with items)
-        input: Joi.string()
-            .when('items', {
-                is: Joi.exist(),
-                then: Joi.forbidden(),
-                otherwise: Joi.required(),
-            })
-            .description('Путь, URL или строка OpenAPI спецификации'),
-        output: Joi.string()
-            .when('items', {
-                is: Joi.exist(),
-                then: Joi.forbidden(),
-                otherwise: Joi.required(),
-            })
-            .description('Выходная директория'),
-        httpClient: Joi.string()
-            .valid(...Object.values(HttpClient))
-            .optional(),
-    }),
-    outputPathsSchema, // outputCore, outputServices, etc. for single-item mode
-    specialParametersSchemasV3,
-    additionalParametersSchemaV2,
-    experimentalParametersSchemaV2
-).xor('items', 'input');
+/*
+type TUnified = {
+    output: string;
+    useOptions: boolean | undefined;
+    useUnionTypes: boolean | undefined;
+    excludeCoreServiceFiles: boolean | undefined;
+    validationLibrary: ValidationLibrary.NONE | ValidationLibrary.ZOD | ValidationLibrary.JOI | ValidationLibrary.YUP | ValidationLibrary.JSONSCHEMA | undefined;
+    useCancelableRequest: boolean | undefined;
+    sortByRequired: boolean | undefined;
+    useSeparatedIndexes: boolean | undefined;
+    request: string | undefined;
+    interfacePrefix: string | undefined;
+    enumPrefix: string | undefined;
+    typePrefix: string | undefined;
+    includeSchemasFiles: boolean | undefined;
+    outputCore: string | undefined;
+    outputServices: string | undefined;
+    outputModels: string | undefined;
+    outputSchemas: string | undefined;
+    items: { ... 13 more }[] | undefined;
+    input: string | undefined;
+    httpClient: HttpClient.FETCH | HttpClient.XHR | HttpClient.NODE | HttpClient.AXIOS | undefined;
+}
+*/

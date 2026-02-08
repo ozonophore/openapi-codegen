@@ -33,9 +33,11 @@ export class OpenApiClient {
             // Для items: Наследуем глобальный request, если не переопределён
             return rawOptions.items.map(item => ({
                 ...item,
+                httpClient: rawOptions.httpClient,
                 request: item.request ?? rawOptions.request, // ?? для fallback на глобальный
                 useOptions: rawOptions.useOptions,
                 useUnionTypes: rawOptions.useUnionTypes,
+                includeSchemasFiles: rawOptions.includeSchemasFiles,
                 excludeCoreServiceFiles: rawOptions.excludeCoreServiceFiles,
                 interfacePrefix: rawOptions.interfacePrefix,
                 enumPrefix: rawOptions.enumPrefix,
@@ -60,6 +62,7 @@ export class OpenApiClient {
                     httpClient: rawOptions.httpClient,
                     useOptions: rawOptions.useOptions,
                     useUnionTypes: rawOptions.useUnionTypes,
+                    includeSchemasFiles: rawOptions.includeSchemasFiles,
                     excludeCoreServiceFiles: rawOptions.excludeCoreServiceFiles,
                     request: rawOptions.request,
                     interfacePrefix: rawOptions.interfacePrefix,
@@ -87,6 +90,7 @@ export class OpenApiClient {
             httpClient: item.httpClient || COMMON_DEFAULT_OPTIONS_VALUES.httpClient,
             useOptions: item.useOptions ?? COMMON_DEFAULT_OPTIONS_VALUES.useOptions,
             useUnionTypes: item.useUnionTypes ?? COMMON_DEFAULT_OPTIONS_VALUES.useUnionTypes,
+            includeSchemasFiles: item.includeSchemasFiles ?? COMMON_DEFAULT_OPTIONS_VALUES.includeSchemasFiles,
             excludeCoreServiceFiles: item.excludeCoreServiceFiles ?? COMMON_DEFAULT_OPTIONS_VALUES.excludeCoreServiceFiles,
             request: item.request || COMMON_DEFAULT_OPTIONS_VALUES.request,
             interfacePrefix: item.interfacePrefix || COMMON_DEFAULT_OPTIONS_VALUES.interfacePrefix,
@@ -118,17 +122,17 @@ export class OpenApiClient {
         this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.STARTED(items.length));
 
         try {
-            const start = process.hrtime();
+            const start = process.hrtime.bigint();
             for (const option of items) {
                 await this.cleanOutputDirectories(option);
             }
 
             for (const option of items) {
-                const fileStart = process.hrtime();
+                const fileStart = process.hrtime.bigint();
                 await this.generateSingle(option);
-                const [fileSeconds, fileNanoseconds] = process.hrtime(fileStart);
-                const fileDuration = fileSeconds + fileNanoseconds / 1e6;
-                this.writeClient.logger.info(LOGGER_MESSAGES.GENERATION.DURATION_FOR_FILE(option.input, fileDuration.toFixed(2)));
+                const fileEnd = process.hrtime.bigint();
+                const fileDurationInSeconds = Number(fileEnd - fileStart) / 1e9;
+                this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.DURATION_FOR_FILE(option.input, fileDurationInSeconds.toFixed(3)));
             }
             if (items[0]?.useSeparatedIndexes) {
                 await this.writeClient.combineAndWrightSimple();
@@ -136,9 +140,9 @@ export class OpenApiClient {
                 await this.writeClient.combineAndWrite();
             }
             this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.FINISHED);
-            const [seconds, nanoseconds] = process.hrtime(start);
-            const durationInMs = seconds + nanoseconds / 1e6;
-            this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.FINISHED_WITH_DURATION(durationInMs.toFixed(2)));
+            const end = process.hrtime.bigint();
+            const durationInSeconds = Number(end - start) / 1e9;
+            this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.FINISHED_WITH_DURATION(durationInSeconds.toFixed(3)));
         } catch (error: any) {
             this.writeClient.logger.error(LOGGER_MESSAGES.ERROR.GENERIC(error.message));
         }

@@ -8,7 +8,7 @@ import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{joinPath 
 {{#if @root.useCancelableRequest}}
 import type { CancelablePromise } from '{{{joinPath @root.outputCore 'CancelablePromise'}}}';
 {{/if}}
-import type { RequestExecutor, RequestConfig } from '{{{joinPath @root.outputCore 'requestExecutor'}}}';
+import type { RequestExecutor, RequestConfig } from '{{{joinPath @root.outputCore './executor/requestExecutor'}}}';
 
 {{#each operations}}
 const {{{name}}} = ({{>parameters}}): RequestConfig => ({

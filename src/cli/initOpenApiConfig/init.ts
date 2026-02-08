@@ -1,9 +1,9 @@
 import { OptionValues } from 'commander';
 
 import { APP_LOGGER } from '../../common/Consts';
+import { validateZodOptions } from '../../common/Validation/validateZodOptions';
 import { confirmDialog } from '../interactive/confirmDialog';
 import { InitOptions, initOptionsSchema } from '../schemas';
-import { validateCLIOptions } from '../validation';
 import { initConfig } from './initConfig';
 import { initCustomRequest } from './initCustomRequest';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
@@ -12,21 +12,14 @@ import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
  * Фнукция изначальной настройки файлов конфигурации для последующего запуска генератора
  */
 export async function init(options: OptionValues) {
-    let validatedOptions: InitOptions;
-    try {
-        // Валидация опций через Zod
-        const validationResult = validateCLIOptions(initOptionsSchema, options);
+    const validationResult = validateZodOptions(initOptionsSchema, options);
 
-        if (!validationResult.success) {
-            APP_LOGGER.error(validationResult.error);
-            process.exit(1);
-        }
-
-        validatedOptions = validationResult.data as InitOptions;
-    } catch (error: any) {
-        APP_LOGGER.error(error.message);
+    if (!validationResult.success) {
+        APP_LOGGER.error(validationResult.errors.join('\n'));
         process.exit(1);
     }
+
+    const validatedOptions = validationResult.data as InitOptions;
 
     const templates = registerHandlebarTemplates();
 

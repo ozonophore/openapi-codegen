@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.9] — 2026-02-07
+
+### Added
+- Added unified versioned schemas with base and refinements for single vs multi configs.
+- Added Zod-based validation helpers in `common/Validation` for CLI options.
+- Added `previewChanges` CLI schema.
+
+### Changed
+- Updated CLI commands (`generate`, `check-openapi-config`, `update-openapi-config`, `init-openapi-config`, `preview-changes`) to use unified Zod validation with clearer errors.
+- Updated default directories for `preview-changes` to hidden working folders:
+  - `.ts-openapi-codegen-preview-changes`;
+  - `.ts-openapi-codegen-diff-changes`.
+- Updated migration and schema utilities to rely on the unified schema layer.
+- Updated service export template and composition export partial.
+
+### Removed
+- Removed legacy CLI validation module and legacy schema utilities.
+
+### Fixed
+- Fixed canonical `$ref` handling for relative refs in `Context`.
+- Fixed alias propagation for nested service types and enum aliases in compositions.
+
+### Tests
+- Updated snapshot tests for OpenAPI v2 and v3 services.
+
 ## [2.0.0-beta.8] — 2026-01-28
 
 ### Added

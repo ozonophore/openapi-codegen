@@ -1,24 +1,41 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { HttpClient } from '../../../core';
 import { additionalParametersSchema, outputPathsSchema, specialParametersSchemas } from '../CommonSchemas';
-import { mergeObjectSchemas } from '../Utils/mergeObjectSchemas';
 
-/**
- * The scheme of a set of generator options (v1)
+const multiItemInputSchema = z.object({
+    input: z.string(),
+});
+
+export const multiOptionsSchemaV1 = z.object({
+    ...outputPathsSchema.shape,
+    ...specialParametersSchemas.shape,
+    ...additionalParametersSchema.shape,
+    input: z.string(),
+    client: z.enum(HttpClient).optional(),
+    items: z.array(multiItemInputSchema).min(1),
+});
+
+/*
+ type TMulti = {
+    input: string;
+    items: { ... 1 more }[];
+    output: string;
+    client: HttpClient.FETCH | HttpClient.XHR | HttpClient.NODE | HttpClient.AXIOS | undefined;
+    clean: boolean | undefined;
+    request: string | undefined;
+    interfacePrefix: string | undefined;
+    enumPrefix: string | undefined;
+    typePrefix: string | undefined;
+    useOptions: boolean | undefined;
+    useUnionTypes: boolean | undefined;
+    exportCore: boolean | undefined;
+    exportServices: boolean | undefined;
+    exportModels: boolean | undefined;
+    exportSchemas: boolean | undefined;
+    outputCore: string | undefined;
+    outputServices: string | undefined;
+    outputModels: string | undefined;
+    outputSchemas: string | undefined;
+}
  */
-export const multiOptionsSchemaV1 = mergeObjectSchemas(
-    Joi.object({
-        input: Joi.string().required(),
-        client: Joi.string().valid(...Object.values(HttpClient)),
-        items: Joi.array()
-            .items({
-                input: Joi.string().required(),
-            })
-            .min(1)
-            .required(),
-    }),
-    outputPathsSchema,
-    specialParametersSchemas,
-    additionalParametersSchema
-);
