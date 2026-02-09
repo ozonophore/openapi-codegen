@@ -212,6 +212,8 @@ export default {"1":function(container,depth0,helpers,partials,data,blockParams,
     + " } from './"
     + ((stack1 = lookupProperty(helpers,"joinPath").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"package"),lookupProperty(depth0,"name"),{"name":"joinPath","hash":{},"data":data,"loc":{"start":{"line":38,"column":30},"end":{"line":38,"column":57}}})) != null ? stack1 : "")
     + "';\n";
+},"34":function(container,depth0,helpers,partials,data) {
+    return "export { ClientOptions, createClient } from './createClient';\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data,blockParams,depths) {
     var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {}), lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
@@ -225,5 +227,6 @@ export default {"1":function(container,depth0,helpers,partials,data,blockParams,
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"models"),{"name":"if","hash":{},"fn":container.program(17, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":15,"column":0},"end":{"line":28,"column":7}}})) != null ? stack1 : "")
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"schemas"),{"name":"if","hash":{},"fn":container.program(27, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":29,"column":0},"end":{"line":34,"column":7}}})) != null ? stack1 : "")
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"services"),{"name":"if","hash":{},"fn":container.program(31, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":35,"column":0},"end":{"line":40,"column":7}}})) != null ? stack1 : "")
-    + "\nexport { ClientOptions, createClient } from './createClient';\n";
+    + "\n"
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"core"),{"name":"if","hash":{},"fn":container.program(34, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":42,"column":0},"end":{"line":44,"column":7}}})) != null ? stack1 : "");
 },"usePartial":true,"useData":true,"useDepths":true}

@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.10] — 2026-02-13
+
+### Added
+- Added new unit tests for `getRelativeModelPath`, `resolveRefPath`, `modelHelpers`, `serviceHelpers`, `postProcessModelImports`, `postProcessServiceImports`, and `writeClientExecutor`.
+- Added a new `v3withAlias` snapshot suite, including `core/executor`, `core/interceptors`, models, and services.
+- Added a new `v3withAlias` spec scenario (`/api/aliasMatrix`) to validate request/response alias handling.
+
+### Changed
+- Switched OpenAPI v2/v3 ref parsing in `getType` to `getRelativeModelPath` for consistent model path normalization.
+- Updated `getOpenApiSpec` to temporarily switch `cwd` to the input spec directory during `parser.resolve`, then restore the previous `cwd`.
+- Updated `postProcessModelImports` and `postProcessServiceImports`:
+  - model self-imports are now filtered by resolved path instead of name-only matching;
+  - service imports with the same name as the service are no longer dropped by name-only filtering.
+- Added service deduplication by name in `writeClientExecutor` before `createClient` generation.
+- Updated `indexFull`/`indexSimple` templates (and compiled templates) so `createClient` export is generated only when `core` is enabled.
+- Updated `ApiError` and `catchErrors` templates: `ApiError` now accepts structured params (`status`, `message`, `request`, optional `body`/`headers`) instead of `ApiResult`.
+
+### Fixed
+- Fixed model import path joining when paths start with `./` by adding the missing slash.
+- Fixed duplicate alias propagation across nested model structures (`link`, `properties`, `enums`) and service-level types.
+- Fixed external `$ref` resolution by removing aggressive path deduplication that broke valid repeated directory segments.
+- Fixed snapshots and generated typing in alias-conflict and dictionary-parameter scenarios (`Record<string, string> | null`).
+
+### Removed
+- Removed `advancedDeduplicatePath` as it caused incorrect path normalization.
+
+
 ## [2.0.0-beta.9] — 2026-02-07
 
 ### Added

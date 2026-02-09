@@ -605,7 +605,7 @@ paths:
           nullable: true
           schema:
             type: object
-            items:
+            additionalProperties:
               type: string
         - description: This is an enum parameter
           name: parameterEnum

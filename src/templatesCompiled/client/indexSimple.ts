@@ -112,6 +112,8 @@ export default {"1":function(container,depth0,helpers,partials,data,blockParams,
 
   return " as Services$"
     + ((stack1 = container.lambda(container.strict(data, "index", {"start":{"line":24,"column":59},"end":{"line":24,"column":65}} ), depth0)) != null ? stack1 : "");
+},"17":function(container,depth0,helpers,partials,data) {
+    return "export { ClientOptions, createClient } from './createClient';\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data,blockParams,depths) {
     var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {}), lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
@@ -129,5 +131,6 @@ export default {"1":function(container,depth0,helpers,partials,data,blockParams,
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"schemas"),{"name":"if","hash":{},"fn":container.program(9, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":16,"column":0},"end":{"line":20,"column":7}}})) != null ? stack1 : "")
     + "\n"
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"services"),{"name":"if","hash":{},"fn":container.program(13, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":22,"column":0},"end":{"line":26,"column":7}}})) != null ? stack1 : "")
-    + "\nexport { ClientOptions, createClient } from './createClient';\n";
+    + "\n"
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"core"),{"name":"if","hash":{},"fn":container.program(17, data, 0, blockParams, depths),"inverse":container.noop,"data":data,"loc":{"start":{"line":28,"column":0},"end":{"line":30,"column":7}}})) != null ? stack1 : "");
 },"usePartial":true,"useData":true,"useDepths":true}

@@ -4,6 +4,33 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.0.0-beta.10] — 2026-02-13
+
+### Добавлено
+- Добавлены новые unit-тесты для `getRelativeModelPath`, `resolveRefPath`, `modelHelpers`, `serviceHelpers`, `postProcessModelImports`, `postProcessServiceImports` и `writeClientExecutor`.
+- Добавлен snapshot-набор для `v3withAlias`, включая `core/executor`, `core/interceptors`, модели и сервисы.
+- Добавлен новый сценарий в спецификацию `v3withAlias` (`/api/aliasMatrix`) для проверки alias между request/response моделями.
+
+### Изменено
+- Парсинг ссылок в OpenAPI v2/v3 (`getType`) переведён на `getRelativeModelPath` для единообразной нормализации путей к моделям.
+- Обновлён `getOpenApiSpec`: на время `parser.resolve` рабочая директория переключается в директорию входной спецификации и затем восстанавливается.
+- Обновлены `postProcessModelImports` и `postProcessServiceImports`:
+  - self-import в моделях теперь отфильтровывается по реальному пути, а не только по имени;
+  - одноимённые импорты в сервисах больше не удаляются только из-за совпадения имени с сервисом.
+- В `writeClientExecutor` добавлена дедупликация сервисов по имени перед генерацией `createClient`.
+- В шаблонах `indexFull`/`indexSimple` (и compiled-версиях) экспорт `createClient` теперь генерируется только при включённом `core`.
+- Обновлены шаблоны `ApiError` и `catchErrors`: `ApiError` принимает структурированные параметры (`status`, `message`, `request`, и опционально `body`/`headers`) вместо передачи `ApiResult`.
+
+### Исправлено
+- Исправлено формирование путей импортов моделей при `./` (добавлен отсутствующий `/`).
+- Исправлена прокладка alias для дублирующихся импортов в вложенные структуры (`link`, `properties`, `enums`) и сервисные типы.
+- Исправлено разрешение внешних `$ref`: убрана агрессивная дедупликация сегментов пути, которая ломала валидные пути с повторяющимися директориями.
+- Исправлены snapshot’ы и generated-типизация для кейсов с конфликтующими alias и словарными параметрами (`Record<string, string> | null`).
+
+### Удалено
+- Удалена утилита `advancedDeduplicatePath` как источник некорректной нормализации путей.
+
+
 ## [2.0.0-beta.9] — 2026-02-07
 
 ### Добавлено

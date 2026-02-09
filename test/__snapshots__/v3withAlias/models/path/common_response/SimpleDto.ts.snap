@@ -1,0 +1,17 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * Some description
+ */
+export interface ISimpleDto {
+    /**
+     * Number as string
+     */
+    number?: string;
+    /**
+     * Some name
+     */
+    namey?: string;
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Alias response",
+  "description": "Response payload with duplicate model names from different paths",
+  "type": "object",
+  "properties": {
+    "resultRequest": {
+      "$ref": "../common_request/simpleDTO.json"
+    },
+    "resultResponse": {
+      "$ref": "../common_response/simpleDTO.json"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "../common_request/simpleDTO.json"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "../common_response/simpleDTO.json"
+      }
+    }
+  },
+  "additionalProperties": false
+}

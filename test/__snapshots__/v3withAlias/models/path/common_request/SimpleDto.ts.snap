@@ -1,0 +1,16 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { TType } from './Type';
+
+/**
+ * Some description
+ */
+export interface ISimpleDto {
+    value?: TType;
+    /**
+     * Some name
+     */
+    name?: string;
+}

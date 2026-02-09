@@ -29,3 +29,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: path/common_response/simpleDTO.json
+    /api/aliasMatrix:
+        post:
+            operationId: PostAliasMatrix
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: path/alias_request/simpleDTO.json
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: path/alias_response/simpleDTO.json

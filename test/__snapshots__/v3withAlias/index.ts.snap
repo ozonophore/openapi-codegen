@@ -1,0 +1,20 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+export { ApiError } from '././core/ApiError';
+export { RequestConfig, RequestExecutor } from '././core/executor/requestExecutor';
+export { createExecutorAdapter } from '././core/executor/createExecutorAdapter';
+export { OpenAPI } from '././core/OpenAPI';
+export type { TOpenAPIConfig } from '././core/OpenAPI';
+
+export type { ISimpleDto as ISimpleDto$0 } from '././models/path/common_response/SimpleDto';
+export type { ISimpleDto as ISimpleDto$1 } from '././models/path/common_request/SimpleDto';
+export type { ISimpleDto as ISimpleDto$2 } from '././models/path/alias_request/SimpleDto';
+export type { ISimpleDto as ISimpleDto$3 } from '././models/path/alias_response/SimpleDto';
+export type { TType } from '././models/path/common_request/Type';
+export type { V3WithAlias } from '././models/V3WithAlias';
+
+export { V3WithAliasService } from '././services/V3WithAliasService';
+
+export { ClientOptions, createClient } from './createClient';

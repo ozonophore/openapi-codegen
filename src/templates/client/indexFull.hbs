@@ -39,4 +39,6 @@ export { {{{name}}} } from './{{{joinPath package name}}}';
 {{/each}}
 {{/if}}
 
+{{#if core}}
 export { ClientOptions, createClient } from './createClient';
+{{/if}}

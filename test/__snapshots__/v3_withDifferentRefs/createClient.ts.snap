@@ -4,8 +4,10 @@
 
 import { OpenAPI } from './core/OpenAPI';
 import type { TOpenAPIConfig } from './core/OpenAPI';
-import type { RequestExecutor } from './core/request-executor';
-import { createExecutorAdapter } from './core/createExecutorAdapter';
+import { createExecutorAdapter } from './core/executor/createExecutorAdapter';
+import { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './core/interceptors/interceptors';
+import { withInterceptors } from './core/interceptors/withInterceptors';
+import { apiErrorInterceptor } from './core/interceptors/apiErrorInterceptor';
 
 import { SimpleService } from './services/SimpleService';
 import { ParametersService } from './services/ParametersService';
@@ -25,7 +27,11 @@ import { EnumsService } from './services/EnumsService';
 
 export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
     openApi?: Partial<TOpenAPIConfig>;
-    executor?: RequestExecutor<TExecutorOptions>;
+    interceptors?: {
+        onRequest?: RequestInterceptor[];
+        onResponse?: ResponseInterceptor[];
+        onError?: ErrorInterceptor[];
+    };
 }
 
 export function createClient<TExecutorOptions extends Record<string, any>>(
@@ -36,7 +42,14 @@ export function createClient<TExecutorOptions extends Record<string, any>>(
         ...options.openApi,
     };
 
-    const executor = createExecutorAdapter<TExecutorOptions>(openApiConfig);
+    let executor = createExecutorAdapter<TExecutorOptions>(openApiConfig);
+    if (options?.interceptors) {
+        executor = withInterceptors(executor, {
+            onError: [apiErrorInterceptor, ...(options.interceptors?.onError ?? [])],
+            onRequest: options.interceptors?.onRequest,
+            onResponse: options.interceptors?.onResponse,
+        });
+    }
 
     return {
         SimpleService: new SimpleService(executor),

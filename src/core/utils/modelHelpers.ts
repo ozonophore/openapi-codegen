@@ -1,6 +1,7 @@
 import path from 'path';
 
 import { dirNameHelper, relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import type { Import } from '../types/shared/Import.model';
 import type { Model } from '../types/shared/Model.model';
 
 /**
@@ -48,8 +49,42 @@ export function setDuplicateModelAliases(models: Model[]): Model[] {
  * @returns the same array of models (modified)
  */
 export function resolveModelImports(models: Model[], outputModelsDir: string): Model[] {
+    const normalizeImportPath = (value: string): string => (value.startsWith('./') ? value.slice(2) : value);
+    const applyAliasToModel = (model: Model, imprt: Import): void => {
+        const modelPath = normalizeImportPath(model.path);
+        const importPath = normalizeImportPath(imprt.path);
+
+        if (modelPath === importPath && model.type === imprt.name && imprt.alias) {
+            model.alias = imprt.alias;
+            model.base = imprt.alias;
+            model.type = imprt.alias;
+        }
+
+        if (imprt.alias && model.imports?.some(item => normalizeImportPath(item.path) === importPath && item.name === imprt.name)) {
+            if (model.base === imprt.name) {
+                model.base = imprt.alias;
+            }
+            if (model.type === imprt.name) {
+                model.type = imprt.alias;
+            }
+        }
+
+        if (model.link) {
+            applyAliasToModel(model.link, imprt);
+        }
+
+        if (model.properties?.length) {
+            model.properties.forEach(child => applyAliasToModel(child, imprt));
+        }
+
+        if (model.enums?.length) {
+            model.enums.forEach(child => applyAliasToModel(child, imprt));
+        }
+    };
+
     models.forEach(model => {
-        model.imports = model.imports.map(imprt => {
+        const importsWithSourcePath = model.imports.map(imprt => {
+            const sourcePath = imprt.path;
             const importModel = models.find(value => {
                 const normalizedPath = !value.path.startsWith('./') ? `./${value.path}` : value.path;
                 return normalizedPath === imprt.path && value.name === imprt.name;
@@ -66,15 +101,26 @@ export function resolveModelImports(models: Model[], outputModelsDir: string): M
                 if (relativePath === '') {
                     importPath = `./${file}`;
                 } else if (relativePath.startsWith('./')) {
-                    importPath = `${relativePath}${file}`
+                    importPath = `${relativePath}/${file}`
                 } else {
                     importPath =  `${relativePath}/${file}`;
                 }
             }
-            return Object.assign(imprt, {
+            const mappedImport = Object.assign(imprt, {
                 alias: importAlias,
                 path: importPath,
             });
+            return { mappedImport, sourcePath };
+        });
+
+        model.imports = importsWithSourcePath.map(item => item.mappedImport);
+
+        importsWithSourcePath.forEach(item => {
+            applyAliasToModel(model, item.mappedImport);
+            applyAliasToModel(
+                model,
+                Object.assign({}, item.mappedImport, { path: item.sourcePath }),
+            );
         });
     });
     return models;

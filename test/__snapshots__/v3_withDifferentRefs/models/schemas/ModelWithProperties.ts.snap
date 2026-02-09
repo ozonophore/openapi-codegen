@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString } from './ModelWithString';
+import type { IModelWithString as IModelWithString$2 } from './ModelWithString';
 
 /**
  * This is a model with one nested property
@@ -14,7 +14,7 @@ export interface IModelWithProperties {
     string?: string;
     number?: number;
     boolean?: boolean;
-    reference?: IModelWithString;
+    reference?: IModelWithString$2;
     'property with space'?: string;
     default?: string;
     try?: string;
