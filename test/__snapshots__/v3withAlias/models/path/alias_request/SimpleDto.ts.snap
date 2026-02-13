@@ -1,0 +1,19 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { ISimpleDto as ISimpleDto$2 } from './../common_request/SimpleDto';
+import type { ISimpleDto as ISimpleDto$1 } from './../common_response/SimpleDto';
+
+/**
+ * Request payload with duplicate model names from different paths
+ */
+export interface ISimpleDto {
+    directRequest?: ISimpleDto$2;
+    directResponse?: ISimpleDto$1;
+    arrayOfResponse?: Array<ISimpleDto$1>;
+    dictionaryOfRequest?: Record<string, ISimpleDto$2>;
+    oneOfRefs?: ISimpleDto$2 | ISimpleDto$1;
+    anyOfRefs?: ISimpleDto$2 | ISimpleDto$1;
+    allOfRefs?: ISimpleDto$2 & ISimpleDto$1;
+}

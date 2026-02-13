@@ -8,10 +8,16 @@ import { generate, HttpClient } from '../src';
 import { ValidationLibrary } from '../src/core/types/enums/ValidationLibrary.enum';
 import { toMatchSnapshot } from './utils/toMatchSnapshot';
 
+const repoRoot = path.join(__dirname, '..');
+if (process.cwd() !== repoRoot) {
+    process.chdir(repoRoot);
+}
+
 describe('@unit: generate', () => {
     test('v2: generated files match snapshots', async () => {
+        const input = path.join(__dirname, 'spec', 'v2.json');
         await generate({
-            input: './test/spec/v2.json',
+            input,
             output: './test/generated/v2/',
             httpClient: HttpClient.FETCH,
             useOptions: false,
@@ -37,8 +43,9 @@ describe('@unit: generate', () => {
     });
 
     test('v3: generated files match snapshots', async () => {
+        const input = path.join(__dirname, 'spec', 'v3.json');
         await generate({
-            input: './test/spec/v3.json',
+            input,
             output: './test/generated/v3/',
             httpClient: HttpClient.FETCH,
             useOptions: false,
@@ -63,10 +70,38 @@ describe('@unit: generate', () => {
         });
     });
 
-    // TODO: Проблема при запуске test:coverage по средствам Github Actions
-    test.skip('v3_withDifferentRefs: generated files match snapshots', async () => {
+    test('v3withAlias: generated files match snapshots', async () => {
+        const input = path.join(__dirname, 'spec', 'v3withAlias.yaml');
         await generate({
-            input: './test/spec/v3.withDifferentRefs.yml',
+            input,
+            output: './test/generated/v3withAlias/',
+            httpClient: HttpClient.FETCH,
+            useOptions: false,
+            useUnionTypes: false,
+            validationLibrary: ValidationLibrary.NONE,
+            enumPrefix: "E",
+            excludeCoreServiceFiles: false,
+            interfacePrefix: "I",
+            sortByRequired: true,
+            typePrefix: "T",
+            useCancelableRequest: false,
+            useSeparatedIndexes: false,
+        });
+        const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v3withAlias');
+        const files = sync(path.join(generatedDir, '**', '*.ts'));
+        
+        files.forEach(file => {
+            const rel = path.relative(generatedDir, file);
+            const snapPath = path.join(process.cwd(), 'test', '__snapshots__', 'v3withAlias', rel + '.snap');
+            const content = readFileSync(file, 'utf8').toString();
+            toMatchSnapshot(content, snapPath);
+        });
+    });
+
+    test('v3_withDifferentRefs: generated files match snapshots', async () => {
+        const input = path.join(__dirname, 'spec', 'v3.withDifferentRefs.yml');
+        await generate({
+            input,
             output: './test/generated/v3_withDifferentRefs/',
             httpClient: HttpClient.FETCH,
             useOptions: false,

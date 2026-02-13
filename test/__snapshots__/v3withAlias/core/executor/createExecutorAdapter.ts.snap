@@ -2,11 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { RequestExecutor, RequestConfig } from './request-executor';
-import type { ApiRequestOptions } from './ApiRequestOptions';
-import type { TOpenAPIConfig } from './OpenAPI';
-import { OpenAPI } from './OpenAPI';
-import { request as __request } from './request';
+import type { RequestExecutor, RequestConfig } from './requestExecutor';
+import type { ApiRequestOptions } from '../ApiRequestOptions';
+import type { TOpenAPIConfig } from '../OpenAPI';
+import { OpenAPI } from '../OpenAPI';
+import { request as __request } from '../request';
 
 export function createExecutorAdapter<TRequestOptions extends Record<string, any>>(
     openApiConfig: TOpenAPIConfig = OpenAPI,

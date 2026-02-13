@@ -5,15 +5,11 @@
   "type": "object",
   "properties": {
     "value": {
-      "type": "string",
-      "description": "Some description"
+      "$ref": "./type.json"
     },
     "name": {
       "type": "string",
       "description": "Some name"
-    },
-    "value": {
-      "$ref": "../subtype/type.json"
     }
   },
   "additionalProperties": false

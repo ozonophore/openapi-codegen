@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { IModelWithString } from '../models/schemas/base/ModelWithString';
-import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 
 const postRequestBodyService = (requestBody?: IModelWithString): RequestConfig => ({
     method: 'POST',

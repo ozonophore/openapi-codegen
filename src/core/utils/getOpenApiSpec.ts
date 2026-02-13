@@ -1,7 +1,7 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
-import { resolveHelper } from '../../common/utils/pathHelpers';
+import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { Context } from '../Context';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 
@@ -18,7 +18,19 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
     }
 
     const parser = new SwaggerParser();
-    const resolved = await parser.resolve(absoluteInput);
+    const previousCwd = process.cwd();
+    const inputDir = dirNameHelper(absoluteInput);
+    if (previousCwd !== inputDir) {
+        process.chdir(inputDir);
+    }
+    let resolved;
+    try {
+        resolved = await parser.resolve(absoluteInput);
+    } finally {
+        if (process.cwd() !== previousCwd) {
+            process.chdir(previousCwd);
+        }
+    }
     context.addRefs(resolved);
     
     // Получить основную схему

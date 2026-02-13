@@ -25,4 +25,6 @@ export *{{#notEquals ../services.length 1}} as Services${{{@index}}}{{/notEquals
 {{/each}}
 {{/if}}
 
+{{#if core}}
 export { ClientOptions, createClient } from './createClient';
+{{/if}}

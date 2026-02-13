@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { IModelWithCircularReference } from '../models/schemas/base/ModelWithCircularReference';
-import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 
 const callWithCircularModel = (): RequestConfig => ({
     method: 'GET',

@@ -18,6 +18,7 @@ import { postProcessClient } from './utils/postProcessClient';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { WriteClient } from './WriteClient';
 
+
 export class OpenApiClient {
     private _writeClient: WriteClient | null = null;
 

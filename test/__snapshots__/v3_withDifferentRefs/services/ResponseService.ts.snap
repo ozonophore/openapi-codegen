@@ -7,7 +7,7 @@ import type { IModelWithString } from '../models/schemas/base/ModelWithString';
 import type { TModelThatExtends } from '../models/schemas/compositions/ModelThatExtends';
 import type { INested } from '../models/schemas/compositions/Nested';
 import type { TPropExtendsA } from '../models/schemas/compositions/PropExtendsA';
-import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 
 const callWithResponse = (): RequestConfig => ({
     method: 'GET',

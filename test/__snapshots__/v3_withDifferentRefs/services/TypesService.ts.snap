@@ -3,11 +3,11 @@
 /* eslint-disable */
 
 import type { EEnumWithStrings } from '../models/schemas/EnumWithStrings';
-import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 
 const types = (
     parameterArray: Array<string> | null,
-    parameterDictionary: any,
+    parameterDictionary: Record<string, string> | null,
     parameterEnum: EEnumWithStrings | null,
 
     parameterBoolean: boolean | null = true,
@@ -33,7 +33,7 @@ const types = (
 export type TTypesOptions = {
     types: (
         parameterArray: Array<string> | null,
-        parameterDictionary: any,
+        parameterDictionary: Record<string, string> | null,
         parameterEnum: EEnumWithStrings | null,
 
         parameterBoolean?: boolean | null,
@@ -71,7 +71,7 @@ export class TypesService<TOptions = unknown> {
      */
     public types(
         parameterArray: Array<string> | null,
-        parameterDictionary: any,
+        parameterDictionary: Record<string, string> | null,
         parameterEnum: EEnumWithStrings | null,
 
         parameterBoolean: boolean | null = true,

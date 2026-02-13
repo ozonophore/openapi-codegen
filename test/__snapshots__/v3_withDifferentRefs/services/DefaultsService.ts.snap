@@ -4,7 +4,7 @@
 
 import type { IModelWithEnum } from '../models/schemas/enums/ModelWithEnum';
 import type { IModelWithProperties } from '../models/schemas/ModelWithProperties';
-import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 
 const callWithDefaultParameters = (
     parameterBoolean: boolean | null = true,

@@ -1,5 +1,7 @@
 {{>header}}
 
+import { RequestConfig } from './executor/requestExecutor';
+
 export class ApiError<TBody = unknown> extends Error {
     readonly status: number;
     readonly body?: TBody;

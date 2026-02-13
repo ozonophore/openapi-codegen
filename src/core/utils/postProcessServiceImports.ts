@@ -10,6 +10,5 @@ import { unique } from './unique';
 export function postProcessServiceImports(service: Service): Import[] {
     return service.imports
         .filter(unique)
-        .sort(sort)
-        .filter(item => service.name !== item.name);
+        .sort(sort);
 }

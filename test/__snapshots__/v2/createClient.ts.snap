@@ -10,7 +10,6 @@ import { withInterceptors } from './core/interceptors/withInterceptors';
 import { apiErrorInterceptor } from './core/interceptors/apiErrorInterceptor';
 
 import { V2Service } from './services/V2Service';
-import { V2Service } from './services/V2Service';
 import { SimpleService } from './services/SimpleService';
 import { ParametersService } from './services/ParametersService';
 import { DefaultsService } from './services/DefaultsService';
@@ -49,7 +48,6 @@ export function createClient<TExecutorOptions extends Record<string, any>>(
     }
 
     return {
-        V2Service: new V2Service(executor),
         V2Service: new V2Service(executor),
         SimpleService: new SimpleService(executor),
         ParametersService: new ParametersService(executor),

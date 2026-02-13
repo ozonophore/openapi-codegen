@@ -1,0 +1,16 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { ISimpleDto as ISimpleDto$2 } from './../common_request/SimpleDto';
+import type { ISimpleDto as ISimpleDto$1 } from './../common_response/SimpleDto';
+
+/**
+ * Response payload with duplicate model names from different paths
+ */
+export interface ISimpleDto {
+    resultRequest?: ISimpleDto$2;
+    resultResponse?: ISimpleDto$1;
+    items?: Array<ISimpleDto$2>;
+    metadata?: Record<string, ISimpleDto$1>;
+}

@@ -1,6 +1,7 @@
 import { relativeHelper } from '../../../../common/utils/pathHelpers';
 import type { Type } from '../../../types/shared/Type.model';
 import { getMappedType, hasMappedType } from '../../../utils/getMappedType';
+import { getRelativeModelPath } from '../../../utils/getRelativeModelPath';
 import { getTypeName } from '../../../utils/getTypeName';
 import { normalizeString } from '../../../utils/normalizeString';
 import { stripNamespace } from '../../../utils/stripNamespace';
@@ -45,7 +46,8 @@ export function getType(this: Parser, value: string, parentRef: string): Type {
             valuePath = relativeHelper(this.context.output?.outputModels, cleanedRefValuePath);
         }
 
-        valuePath = !valuePath.startsWith('./') && !valuePath.startsWith('../') ? `./${valuePath}` : valuePath;
+        valuePath = getRelativeModelPath(this.context.output?.outputModels, valuePath);
+
         const type = this.getTypeNameByRef(getTypeName(valueClean), normalizedValue, parentRef);
 
         const valueImportPath = !valuePath.startsWith('./') ? `./${valuePath}` : valuePath;

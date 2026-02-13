@@ -1,5 +1,4 @@
 import { dirNameHelper,  resolveHelper } from '../../common/utils/pathHelpers';
-import { advancedDeduplicatePath } from './advancedDeduplicatePath';
 import { ParsedRef, RefType } from './parseRef';
 
 /**
@@ -19,9 +18,7 @@ export function resolveRefPath(parsedRef: ParsedRef, parentFilePath: string): st
         case RefType.EXTERNAL_FILE_FRAGMENT:
             // Resolve relative to parent file directory
             if (parsedRef.filePath) {
-                const resolvedPath = resolveHelper(parentDir, parsedRef.filePath);
-                // Clean any duplicate path segments
-                return advancedDeduplicatePath(resolvedPath);
+                return resolveHelper(parentDir, parsedRef.filePath);
             }
             return parentFilePath;
 

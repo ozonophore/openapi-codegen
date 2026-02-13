@@ -195,11 +195,19 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
 
     const error = errors[result.status];
     if (error) {
-        throw new ApiError(result, error);
+        throw new ApiError({
+            message: result.statusText,
+            status: result.status,
+            request: options,
+        });
     }
 
     if (!result.ok) {
-        throw new ApiError(result, 'Generic Error');
+        throw new ApiError({
+            message: 'Generic Error',
+            status: result.status,
+            request: options,
+        });
     }
 }
 

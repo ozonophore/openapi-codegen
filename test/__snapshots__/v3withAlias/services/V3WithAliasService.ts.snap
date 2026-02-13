@@ -1,0 +1,78 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { ISimpleDto as ISimpleDto$3 } from '../models/path/alias_request/SimpleDto';
+import type { ISimpleDto as ISimpleDto$4 } from '../models/path/alias_response/SimpleDto';
+import type { ISimpleDto as ISimpleDto$2 } from '../models/path/common_request/SimpleDto';
+import type { ISimpleDto as ISimpleDto$1 } from '../models/path/common_response/SimpleDto';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+
+const getCallWithoutResponse = (): RequestConfig => ({
+    method: 'GET',
+    path: `/api/simpleWithAlias`,
+});
+
+const postCallWithAlias = (requestBody?: ISimpleDto$2): RequestConfig => ({
+    method: 'POST',
+    path: `/api/simpleWithAlias`,
+
+    body: requestBody,
+    requestMediaType: 'application/json',
+});
+
+const postAliasMatrix = (requestBody?: ISimpleDto$3): RequestConfig => ({
+    method: 'POST',
+    path: `/api/aliasMatrix`,
+
+    body: requestBody,
+    requestMediaType: 'application/json',
+});
+
+export type TV3WithAliasOptions = {
+    getCallWithoutResponse: () => RequestConfig;
+    postCallWithAlias: (requestBody?: ISimpleDto$2) => RequestConfig;
+    postAliasMatrix: (requestBody?: ISimpleDto$3) => RequestConfig;
+};
+
+export const V3WithAliasOptions: TV3WithAliasOptions = {
+    getCallWithoutResponse: getCallWithoutResponse,
+    postCallWithAlias: postCallWithAlias,
+    postAliasMatrix: postAliasMatrix,
+};
+
+export class V3WithAliasService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @returns ISimpleDto$1 OK
+     * @throws ApiError
+     */
+    public getCallWithoutResponse(options?: TOptions): Promise<ISimpleDto$1> {
+        return this.executor.request<ISimpleDto$1>(V3WithAliasOptions.getCallWithoutResponse(), options);
+    }
+    /**
+     * @param requestBody
+     * @returns ISimpleDto$1 OK
+     * @throws ApiError
+     */
+    public postCallWithAlias(
+        requestBody?: ISimpleDto$2,
+
+        options?: TOptions,
+    ): Promise<ISimpleDto$1> {
+        return this.executor.request<ISimpleDto$1>(V3WithAliasOptions.postCallWithAlias(requestBody), options);
+    }
+    /**
+     * @param requestBody
+     * @returns ISimpleDto$4 OK
+     * @throws ApiError
+     */
+    public postAliasMatrix(
+        requestBody?: ISimpleDto$3,
+
+        options?: TOptions,
+    ): Promise<ISimpleDto$4> {
+        return this.executor.request<ISimpleDto$4>(V3WithAliasOptions.postAliasMatrix(requestBody), options);
+    }
+}

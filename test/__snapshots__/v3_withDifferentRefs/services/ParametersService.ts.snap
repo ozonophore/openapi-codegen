@@ -6,7 +6,7 @@ import type { IModelWithStringLocal } from '../models/ModelWithStringLocal';
 import type { IModelWithString } from '../models/schemas/base/ModelWithString';
 import type { IModelWithArray } from '../models/schemas/collections/ModelWithArray';
 import type { Properties } from '../models/schemas/compositions/Properties';
-import type { RequestExecutor, RequestConfig } from '../core/request-executor';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 
 const callWithParameters = (
     parameterCookie: string | null,
