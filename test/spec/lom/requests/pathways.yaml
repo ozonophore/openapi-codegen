@@ -1,0 +1,12 @@
+get:
+  tags: [Pathways]
+  summary: Получить список путей
+  responses:
+    '200':
+      description: Список путей
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/Pathway.yaml'

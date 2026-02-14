@@ -1,0 +1,37 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IIngredient } from '../models/components/schemas/Ingredient';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+
+const getIngredientsService = (sequenceId: string): RequestConfig => ({
+    method: 'GET',
+    path: `/sequences/${sequenceId}/ingredients`,
+});
+
+export type TIngredientsOptions = {
+    getIngredientsService: (sequenceId: string) => RequestConfig;
+};
+
+export const IngredientsOptions: TIngredientsOptions = {
+    getIngredientsService: getIngredientsService,
+};
+
+export class IngredientsService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * Получить ингредиенты для последовательности
+     * @param sequenceId
+     * @returns IIngredient Список ингредиентов
+     * @throws ApiError
+     */
+    public getIngredientsService(
+        sequenceId: string,
+
+        options?: TOptions,
+    ): Promise<Array<IIngredient>> {
+        return this.executor.request<Array<IIngredient>>(IngredientsOptions.getIngredientsService(sequenceId), options);
+    }
+}

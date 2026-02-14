@@ -6,6 +6,7 @@ import { APP_LOGGER, DEFAULT_DIFF_CHANGES_DIR, DEFAULT_OPENAPI_CONFIG_FILENAME, 
 import { ELogLevel, ELogOutput } from '../common/Enums';
 import { UpdateNotifier } from '../common/UpdateNotifier';
 import { joinHelper } from '../common/utils/pathHelpers';
+import { EmptySchemaStrategy } from '../core/types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
 import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 import { checkConfig } from './checkAndUpdateConfig/checkConfig';
@@ -59,6 +60,7 @@ program
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
     .option('--useSeparatedIndexes', 'Use separate index files for the core, models, schemas, and services.')
     .addOption(new Option('--validationLibrary <value>', 'Validation library to use for schema validation').choices([...Object.values(ValidationLibrary)]).default(ValidationLibrary.NONE))
+    .addOption(new Option('--emptySchemaStrategy <value>', 'How to handle empty generated schemas').choices([...Object.values(EmptySchemaStrategy)]).default(EmptySchemaStrategy.KEEP))
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })

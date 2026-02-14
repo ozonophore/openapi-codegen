@@ -1,0 +1,57 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
+const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
+
+export const ISequenceSchema = {
+    type: 'object',
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+        },
+        pathwayId: {
+            type: 'string',
+            format: 'uuid',
+        },
+        number: {
+            type: 'number',
+            maximum: 9,
+        },
+        name: {
+            type: 'string',
+        },
+        description: {
+            type: 'string',
+        },
+    },
+    required: ['id', 'pathwayId', 'number', 'name'],
+    additionalProperties: false,
+};
+
+export type ISequence = any; // JSON Schema doesn't provide type inference
+
+export function validateISequence(
+    data: unknown,
+): { valid: true; data: ISequence } | { valid: false; errors: Ajv.ErrorObject[] } {
+    const validate = ajv.compile(ISequenceSchema);
+    const valid = validate(data);
+    if (valid) {
+        return { valid: true, data: data as ISequence };
+    }
+    return { valid: false, errors: validate.errors || [] };
+}
+
+export function validateISequenceSync(data: unknown): ISequence {
+    const validate = ajv.compile(ISequenceSchema);
+    const valid = validate(data);
+    if (!valid) {
+        throw new Error(ajv.errorsText(validate.errors));
+    }
+    return data as ISequence;
+}

@@ -2,7 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 
-/**
- * Some description
- */
-export type TType = string;
+export interface IngredientsBySequence {}

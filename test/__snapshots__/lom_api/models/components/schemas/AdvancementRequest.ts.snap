@@ -1,0 +1,10 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IIngredient } from './Ingredient';
+
+export interface IAdvancementRequest {
+    currentSequenceId: string;
+    ingredients: Array<IIngredient>;
+}

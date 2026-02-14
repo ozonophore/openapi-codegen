@@ -3,5 +3,5 @@ z.union([{{#each properties}}{{>zodSchema}}{{#unless @last}}, {{/unless}}{{/each
 {{else equals export 'any-of'}}
 z.union([{{#each properties}}{{>zodSchema}}{{#unless @last}}, {{/unless}}{{/each}}]){{#if isNullable}}.nullable(){{/if}}
 {{else equals export 'all-of'}}
-z.intersection({{#each properties}}{{>zodSchema}}{{#unless @last}}, {{/unless}}{{/each}}){{#if isNullable}}.nullable(){{/if}}
+{{#each properties}}{{#if @first}}{{>zodSchema}}{{else}}.and({{>zodSchema}}){{/if}}{{/each}}{{#if isNullable}}.nullable(){{/if}}
 {{/equals}}

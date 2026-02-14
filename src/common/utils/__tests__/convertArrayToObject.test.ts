@@ -51,7 +51,8 @@ describe('@unit: convertArrayToObject', () => {
             useOptions: true,
             useSeparatedIndexes: undefined,
             useUnionTypes: undefined,
-            validationLibrary: undefined
+            validationLibrary: undefined,
+            emptySchemaStrategy: undefined,
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -93,7 +94,8 @@ describe('@unit: convertArrayToObject', () => {
             useOptions: true,
             useSeparatedIndexes: undefined,
             useUnionTypes: undefined,
-            validationLibrary: undefined
+            validationLibrary: undefined,
+            emptySchemaStrategy: undefined,
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -136,7 +138,8 @@ describe('@unit: convertArrayToObject', () => {
             useOptions: true,
             useSeparatedIndexes: undefined,
             useUnionTypes: undefined,
-            validationLibrary: undefined
+            validationLibrary: undefined,
+            emptySchemaStrategy: undefined,
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -179,7 +182,8 @@ describe('@unit: convertArrayToObject', () => {
             useOptions: undefined,
             useSeparatedIndexes: undefined,
             useUnionTypes: undefined,
-            validationLibrary: undefined
+            validationLibrary: undefined,
+            emptySchemaStrategy: undefined,
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);
@@ -222,7 +226,8 @@ describe('@unit: convertArrayToObject', () => {
             useOptions: undefined,
             useSeparatedIndexes: undefined,
             useUnionTypes: undefined,
-            validationLibrary: undefined
+            validationLibrary: undefined,
+            emptySchemaStrategy: undefined,
         };
         const result = convertArrayToObject(input);
         assert.deepStrictEqual(result, expected);

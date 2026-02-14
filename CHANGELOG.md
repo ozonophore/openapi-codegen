@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.11] — 2026-02-15
+
+### Added
+- Added `emptySchemaStrategy` option with values: `keep`, `semantic`, `skip`.
+- Added focused behavior tests for empty schema strategies in `test/emptySchemaStrategy.test.ts`.
+
+### Changed
+- Updated CLI and config documentation tables in `README.md` and `README.rus.md` with `emptySchemaStrategy`.
+- Split test intent:
+  - `test/index.test.ts` remains for broad snapshot regression checks;
+  - `test/emptySchemaStrategy.test.ts` covers strategy-specific behavior.
+
+### Fixed
+- Fixed empty schema generation for all validation libraries: `zod`, `joi`, `yup`, `jsonschema`.
+- Fixed schema import paths in validation templates to consistently reference `*Schema` files.
+- Fixed formatter-breaking template output for empty interface schemas (`joi`/`yup` cases).
+
 ## [2.0.0-beta.10] — 2026-02-13
 
 ### Added

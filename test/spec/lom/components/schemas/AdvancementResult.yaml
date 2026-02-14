@@ -1,0 +1,12 @@
+type: object
+required: [success]
+properties:
+  success:
+    type: boolean
+  nextSequenceId:
+    type: string
+    format: uuid
+    nullable: true
+  message:
+    type: string
+    example: Продвижение успешно завершено.

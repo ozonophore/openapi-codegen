@@ -3,6 +3,7 @@ import { PathOrFileDescriptor } from 'node:fs';
 import { describe, test } from 'node:test';
 
 import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
+import { EmptySchemaStrategy } from '../../types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
 import { Model } from '../../types/shared/Model.model';
@@ -50,6 +51,7 @@ describe('@unit: writeClientSchemas', () => {
             httpClient: HttpClient.FETCH,
             useUnionTypes: false,
             validationLibrary: ValidationLibrary.NONE,
+            emptySchemaStrategy: EmptySchemaStrategy.KEEP,
         });
 
         assert.ok(

@@ -7,9 +7,6 @@
 {{/each}}
     },
 {{getRequiredFields properties}}
-{{else}}
-    properties: {},
-{{/if}}
 {{#if maxProperties}}
     maxProperties: {{{maxProperties}}},
 {{/if}}
@@ -20,4 +17,30 @@
     nullable: true,
 {{/if}}
     additionalProperties: false
+{{else}}
+{{#equals emptySchemaStrategy 'semantic'}}
+{{#if maxProperties}}
+    maxProperties: {{{maxProperties}}},
+{{/if}}
+{{#if minProperties}}
+    minProperties: {{{minProperties}}},
+{{/if}}
+{{#if isNullable}}
+    nullable: true,
+{{/if}}
+    additionalProperties: true
+{{else}}
+    properties: {},
+{{#if maxProperties}}
+    maxProperties: {{{maxProperties}}},
+{{/if}}
+{{#if minProperties}}
+    minProperties: {{{minProperties}}},
+{{/if}}
+{{#if isNullable}}
+    nullable: true,
+{{/if}}
+    additionalProperties: false
+{{/equals}}
+{{/if}}
 }

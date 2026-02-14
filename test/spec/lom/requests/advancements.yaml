@@ -1,0 +1,21 @@
+post:
+  tags: [Advancement]
+  summary: Продвижение по последовательности
+  description: >
+    Проверяет наличие ингредиентов и выполняет продвижение
+    на следующую последовательность.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/AdvancementRequest.yaml'
+  responses:
+    '200':
+      description: Продвижение успешно
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/AdvancementResult.yaml'
+    '400':
+      $ref: '../components/responses/BadRequest.yaml'

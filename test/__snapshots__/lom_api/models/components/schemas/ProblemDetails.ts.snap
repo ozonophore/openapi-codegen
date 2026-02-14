@@ -1,0 +1,9 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+export interface IProblemDetails {
+    title: string;
+    detail?: string;
+    status: number;
+}
