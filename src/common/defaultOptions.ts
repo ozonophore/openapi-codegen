@@ -1,5 +1,6 @@
 import Joi from 'joi';
 
+import { EmptySchemaStrategy } from '../core/types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
 import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 
@@ -26,4 +27,5 @@ export const defaultOptions = Joi.object({
     useCancelableRequest: Joi.boolean().optional(),
     useSeparatedIndexes: Joi.boolean().optional(),
     validationLibrary: Joi.string().valid(...Object.values(ValidationLibrary)).optional(),
+    emptySchemaStrategy: Joi.string().valid(...Object.values(EmptySchemaStrategy)).optional(),
 }).unknown(false);

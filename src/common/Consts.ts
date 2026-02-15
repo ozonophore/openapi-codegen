@@ -1,3 +1,4 @@
+import { EmptySchemaStrategy } from '../core/types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
 import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 import { ELogLevel, ELogOutput } from './Enums';
@@ -27,7 +28,8 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     logTarget: ELogOutput.CONSOLE,
     sortByRequired: false,
     useSeparatedIndexes: false,
-    validationLibrary: ValidationLibrary.NONE
+    validationLibrary: ValidationLibrary.NONE,
+    emptySchemaStrategy: EmptySchemaStrategy.KEEP,
 };
 
 export const APP_LOGGER = new Logger({

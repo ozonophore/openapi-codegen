@@ -73,6 +73,7 @@ openapi generate --input ./spec.json --output ./dist
 | `--logLevel` | `-l` | string | `error` | Уровень логирования: `info`, `warn`, или `error` |
 | `--logTarget` | `-t` | string | `console` | Цель логирования: `console` или `file` |
 | `--validationLibrary` | - | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
+| `--emptySchemaStrategy` | - | string | `keep` | Стратегия для пустых схем: `keep`, `semantic`, или `skip` |
 
 **Примеры:**
 ```bash
@@ -206,6 +207,7 @@ openapi init-openapi-config --openapi-config ./my-config.json
 | `useSeparatedIndexes` | boolean | `false` | Использовать отдельные index файлы |
 | `items` | array | - | Массив конфигураций (для формата multi-options) |
 | `validationLibrary` | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
+| `emptySchemaStrategy` | string | `keep` | Стратегия для пустых схем: `keep`, `semantic`, или `skip` |
 
 **Примечание:** Вы можете использовать команду `init-openapi-config` для генерации шаблона файла конфигурации.
 
@@ -841,6 +843,4 @@ npm install form-data --save-dev
 [stars-image]: https://img.shields.io/github/stars/ozonophore/openapi-codegen.svg
 [librariesio-image]: https://img.shields.io/librariesio/github/ozonophore/openapi-codegen
 [lines-image]: https://img.shields.io/tokei/lines/github/ozonophore/openapi-codegen
-
-
 

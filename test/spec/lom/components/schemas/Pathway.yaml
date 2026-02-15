@@ -1,0 +1,12 @@
+type: object
+required: [id, name, description]
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    type: string
+    example: Seer
+  description:
+    type: string
+    example: Путь прорицателя, связанный с тайнами и знанием.

@@ -27,7 +27,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"alias"),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":25},"end":{"line":5,"column":66}}})) != null ? stack1 : "")
     + " } from '"
     + ((stack1 = lookupProperty(helpers,"normalizePath").call(alias1,lookupProperty(depth0,"path"),{"name":"normalizePath","hash":{},"data":data,"loc":{"start":{"line":5,"column":75},"end":{"line":5,"column":99}}})) != null ? stack1 : "")
-    + "';\n";
+    + "Schema';\n";
 },"3":function(container,depth0,helpers,partials,data) {
     var stack1;
 
@@ -65,5 +65,5 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":19,"column":81},"end":{"line":19,"column":85}} ), depth0)) != null ? stack1 : "")
     + " } | { success: false; error: z.ZodError } {\n    const result = "
     + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":20,"column":22},"end":{"line":20,"column":26}} ), depth0)) != null ? stack1 : "")
-    + "Schema.safeParse(data);\n    if (result.success) {\n        return { success: true, data: result.data };\n    }\n    return { success: false, error: result.error };\n}";
+    + "Schema.safeParse(data);\n    if (result.success) {\n        return { success: true, data: result.data };\n    }\n    return { success: false, error: result.error };\n}\n";
 },"usePartial":true,"useData":true}

@@ -74,6 +74,7 @@ openapi generate --input ./spec.json --output ./dist
 | `--logLevel` | `-l` | string | `error` | Logging level: `info`, `warn`, or `error` |
 | `--logTarget` | `-t` | string | `console` | Logging target: `console` or `file` |
 | `--validationLibrary` | - | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
+| `--emptySchemaStrategy` | - | string | `keep` | Strategy for empty schemas: `keep`, `semantic`, or `skip` |
 
 **Examples:**
 ```bash
@@ -207,6 +208,7 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `useSeparatedIndexes` | boolean | `false` | Use separate index files |
 | `items` | array | - | Array of configurations (for multi-options format) |
 | `validationLibrary` | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
+| `emptySchemaStrategy` | string | `keep` | Strategy for empty schemas: `keep`, `semantic`, or `skip` |
 
 **Note:** You can use the `init-openapi-config` command to generate a template configuration file.
 

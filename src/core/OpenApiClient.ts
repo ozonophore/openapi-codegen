@@ -10,6 +10,7 @@ import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
 import { OutputPaths } from './types/base/OutputPaths.model';
+import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
 import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
@@ -49,6 +50,7 @@ export class OpenApiClient {
                 sortByRequired: rawOptions.sortByRequired,
                 useSeparatedIndexes: rawOptions.useSeparatedIndexes,
                 validationLibrary: rawOptions.validationLibrary,
+                emptySchemaStrategy: rawOptions.emptySchemaStrategy,
             }));
         } else {
             // Плоский формат (из CLI или старого конфига): Один item с глобальным request
@@ -75,6 +77,7 @@ export class OpenApiClient {
                     sortByRequired: rawOptions.sortByRequired,
                     useSeparatedIndexes: rawOptions.useSeparatedIndexes,
                     validationLibrary: rawOptions.validationLibrary,
+                    emptySchemaStrategy: rawOptions.emptySchemaStrategy,
                 },
             ];
         }
@@ -103,6 +106,7 @@ export class OpenApiClient {
             sortByRequired: item.sortByRequired ?? COMMON_DEFAULT_OPTIONS_VALUES.sortByRequired,
             useSeparatedIndexes: item.useSeparatedIndexes ?? COMMON_DEFAULT_OPTIONS_VALUES.useSeparatedIndexes,
             validationLibrary: item.validationLibrary ?? COMMON_DEFAULT_OPTIONS_VALUES.validationLibrary,
+            emptySchemaStrategy: item.emptySchemaStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.emptySchemaStrategy,
         };
     }
 
@@ -171,6 +175,7 @@ export class OpenApiClient {
             sortByRequired,
             useSeparatedIndexes,
             validationLibrary = ValidationLibrary.NONE,
+            emptySchemaStrategy = EmptySchemaStrategy.KEEP,
         } = item;
         const outputPaths: OutputPaths = getOutputPaths({
             output,
@@ -207,6 +212,7 @@ export class OpenApiClient {
                     useCancelableRequest,
                     useSeparatedIndexes,
                     validationLibrary,
+                    emptySchemaStrategy,
                 });
                 break;
             }
@@ -227,6 +233,7 @@ export class OpenApiClient {
                     useCancelableRequest,
                     useSeparatedIndexes,
                     validationLibrary,
+                    emptySchemaStrategy,
                 });
                 break;
             }

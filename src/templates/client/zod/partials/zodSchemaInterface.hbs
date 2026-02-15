@@ -4,6 +4,13 @@ z.object({
     {{{name}}}: {{>zodSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
 {{/each}}
 {{else}}
+{{#equals emptySchemaStrategy 'semantic'}}
+}).catchall(z.unknown())
+{{else}}
+})
+{{/equals}}
+{{/if}}
+{{#if properties}}
 })
 {{/if}}
-}){{#if isNullable}}.nullable(){{/if}}
+{{#if isNullable}}.nullable(){{/if}}

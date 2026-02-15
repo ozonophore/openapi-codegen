@@ -1,0 +1,52 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IPathway } from '../models/components/schemas/Pathway';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+
+const getPathwaysService = (): RequestConfig => ({
+    method: 'GET',
+    path: `/pathways`,
+});
+
+const getPathwaysService1 = (pathwayId: string): RequestConfig => ({
+    method: 'GET',
+    path: `/pathways/${pathwayId}`,
+});
+
+export type TPathwaysOptions = {
+    getPathwaysService: () => RequestConfig;
+    getPathwaysService1: (pathwayId: string) => RequestConfig;
+};
+
+export const PathwaysOptions: TPathwaysOptions = {
+    getPathwaysService: getPathwaysService,
+    getPathwaysService1: getPathwaysService1,
+};
+
+export class PathwaysService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * Получить список путей
+     * @returns IPathway Список путей
+     * @throws ApiError
+     */
+    public getPathwaysService(options?: TOptions): Promise<Array<IPathway>> {
+        return this.executor.request<Array<IPathway>>(PathwaysOptions.getPathwaysService(), options);
+    }
+    /**
+     * Получить информацию о пути
+     * @param pathwayId
+     * @returns IPathway Информация о пути
+     * @throws ApiError
+     */
+    public getPathwaysService1(
+        pathwayId: string,
+
+        options?: TOptions,
+    ): Promise<IPathway> {
+        return this.executor.request<IPathway>(PathwaysOptions.getPathwaysService1(pathwayId), options);
+    }
+}

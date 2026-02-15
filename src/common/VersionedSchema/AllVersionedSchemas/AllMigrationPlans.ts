@@ -1,7 +1,10 @@
+import { EmptySchemaStrategy } from '../../../core/types/enums/EmptySchemaStrategy.enum';
 import { ValidationLibrary } from '../../../core/types/enums/ValidationLibrary.enum';
+import { ELogLevel, ELogOutput } from '../../Enums';
 import { multiOptionsMigrationPlan } from '../MultiOptionsVersioned/MultiOptionsMigrationPlan';
 import { optionsMigrationPlans } from '../OptionsVersioned/OptionsMigrationPlans';
 import { SchemaMigrationPlan } from '../Types';
+import { createDefaultFieldsMigration } from '../Utils/createDefaultFieldsMigration';
 import { createFieldTransformationMigration } from '../Utils/createFieldTransformationMigration';
 import { createTrivialMigration } from '../Utils/createTrivialMigration';
 import { getLatestVersionFromMigrationPlans } from '../Utils/getLatestVersionFromMigrationPlans';
@@ -50,4 +53,19 @@ export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<
         },
         'Transforms includeSchemasFiles to validationLibrary: if includeSchemasFiles is false, sets validationLibrary to NONE'
     ),
+    createDefaultFieldsMigration(
+        'UNIFIED_v2',
+        'UNIFIED_v3',
+        {
+            logLevel: ELogLevel.ERROR,
+            logTarget: ELogOutput.CONSOLE
+        }
+    ),
+    createDefaultFieldsMigration(
+        'UNIFIED_v3',
+        'UNIFIED_v4',
+        {
+            emptySchemaStrategy: EmptySchemaStrategy.KEEP
+        }
+    )
 ];

@@ -1,0 +1,46 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { IAdvancementRequest } from '../models/components/schemas/AdvancementRequest';
+import type { IAdvancementResult } from '../models/components/schemas/AdvancementResult';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+
+const postAdvancementService = (requestBody: IAdvancementRequest): RequestConfig => ({
+    method: 'POST',
+    path: `/advancements`,
+
+    body: requestBody,
+    requestMediaType: 'application/json',
+});
+
+export type TAdvancementOptions = {
+    postAdvancementService: (requestBody: IAdvancementRequest) => RequestConfig;
+};
+
+export const AdvancementOptions: TAdvancementOptions = {
+    postAdvancementService: postAdvancementService,
+};
+
+export class AdvancementService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * Продвижение по последовательности
+     * Проверяет наличие ингредиентов и выполняет продвижение на следующую последовательность.
+     *
+     * @param requestBody
+     * @returns IAdvancementResult Продвижение успешно
+     * @throws ApiError
+     */
+    public postAdvancementService(
+        requestBody: IAdvancementRequest,
+
+        options?: TOptions,
+    ): Promise<IAdvancementResult> {
+        return this.executor.request<IAdvancementResult>(
+            AdvancementOptions.postAdvancementService(requestBody),
+            options,
+        );
+    }
+}

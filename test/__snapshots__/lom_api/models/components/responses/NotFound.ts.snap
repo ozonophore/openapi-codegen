@@ -1,0 +1,8 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+/**
+ * Ресурс не найден
+ */
+export interface NotFound {}

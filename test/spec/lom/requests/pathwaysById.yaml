@@ -1,0 +1,19 @@
+get:
+  tags: [Pathways]
+  summary: Получить информацию о пути
+  parameters:
+    - name: pathwayId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    '200':
+      description: Информация о пути
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Pathway.yaml'
+    '404':
+      $ref: '../components/responses/NotFound.yaml'

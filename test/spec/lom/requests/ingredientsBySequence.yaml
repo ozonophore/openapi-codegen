@@ -1,0 +1,19 @@
+get:
+  tags: [Ingredients]
+  summary: Получить ингредиенты для последовательности
+  parameters:
+    - name: sequenceId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    '200':
+      description: Список ингредиентов
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/Ingredient.yaml'

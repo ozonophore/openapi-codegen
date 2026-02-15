@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { EmptySchemaStrategy } from '../../core/types/enums/EmptySchemaStrategy.enum';
 import { ValidationLibrary } from '../../core/types/enums/ValidationLibrary.enum';
 
 /** Output paths */
@@ -19,28 +20,30 @@ const baseSpecialParametersSchema = z.object({
     useUnionTypes: z.boolean().optional(),
 });
 
-export const specialParametersSchemas = baseSpecialParametersSchema.merge(
-    z.object({
-        exportCore: z.boolean().optional(),
-        exportServices: z.boolean().optional(),
-        exportModels: z.boolean().optional(),
-        exportSchemas: z.boolean().optional(),
-    })
-);
+export const specialParametersSchemas = z.object({
+    ...baseSpecialParametersSchema.shape,
+    exportCore: z.boolean().optional(),
+    exportServices: z.boolean().optional(),
+    exportModels: z.boolean().optional(),
+    exportSchemas: z.boolean().optional(),
+});
 
-export const specialParametersSchemasV2 = baseSpecialParametersSchema.merge(
-    z.object({
-        excludeCoreServiceFiles: z.boolean().optional(),
-        includeSchemasFiles: z.boolean().optional(),
-    })
-);
+export const specialParametersSchemasV2 = z.object({
+    ...baseSpecialParametersSchema.shape,
+    excludeCoreServiceFiles: z.boolean().optional(),
+    includeSchemasFiles: z.boolean().optional(),
+});
 
-export const specialParametersSchemasV3 = baseSpecialParametersSchema.merge(
-    z.object({
-        excludeCoreServiceFiles: z.boolean().optional(),
-        validationLibrary: z.enum(ValidationLibrary).optional(),
-    })
-);
+export const specialParametersSchemasV3 = z.object({
+    ...baseSpecialParametersSchema.shape,
+    excludeCoreServiceFiles: z.boolean().optional(),
+    validationLibrary: z.enum(ValidationLibrary).optional(),
+});
+
+export const specialParametersSchemasV4 = z.object({
+    ...specialParametersSchemasV3.shape,
+    emptySchemaStrategy: z.enum(EmptySchemaStrategy).optional(),
+});
 
 /** Additional parameters */
 

@@ -40,6 +40,7 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
             'sortByRequired',
             'useSeparatedIndexes',
             'validationLibrary',
+            'emptySchemaStrategy',
         ];
 
         const extractedFields = fieldsToExtract.reduce(

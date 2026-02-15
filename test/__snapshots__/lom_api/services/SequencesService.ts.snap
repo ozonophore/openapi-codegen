@@ -1,0 +1,57 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { ISequence } from '../models/components/schemas/Sequence';
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+
+const getSequencesService = (pathwayId: string): RequestConfig => ({
+    method: 'GET',
+    path: `/pathways/${pathwayId}/sequences`,
+});
+
+const getSequencesService1 = (sequenceId: string): RequestConfig => ({
+    method: 'GET',
+    path: `/sequences/${sequenceId}`,
+});
+
+export type TSequencesOptions = {
+    getSequencesService: (pathwayId: string) => RequestConfig;
+    getSequencesService1: (sequenceId: string) => RequestConfig;
+};
+
+export const SequencesOptions: TSequencesOptions = {
+    getSequencesService: getSequencesService,
+    getSequencesService1: getSequencesService1,
+};
+
+export class SequencesService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * Получить последовательности пути
+     * @param pathwayId
+     * @returns ISequence Список последовательностей
+     * @throws ApiError
+     */
+    public getSequencesService(
+        pathwayId: string,
+
+        options?: TOptions,
+    ): Promise<Array<ISequence>> {
+        return this.executor.request<Array<ISequence>>(SequencesOptions.getSequencesService(pathwayId), options);
+    }
+    /**
+     * Получить информацию о последовательности
+     * @param sequenceId
+     * @returns ISequence Информация о последовательности
+     * @throws ApiError
+     */
+    public getSequencesService1(
+        sequenceId: string,
+
+        options?: TOptions,
+    ): Promise<ISequence> {
+        return this.executor.request<ISequence>(SequencesOptions.getSequencesService1(sequenceId), options);
+    }
+}

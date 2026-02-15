@@ -1,0 +1,49 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { OpenAPI } from './core/OpenAPI';
+import type { TOpenAPIConfig } from './core/OpenAPI';
+import { createExecutorAdapter } from './core/executor/createExecutorAdapter';
+import { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './core/interceptors/interceptors';
+import { withInterceptors } from './core/interceptors/withInterceptors';
+import { apiErrorInterceptor } from './core/interceptors/apiErrorInterceptor';
+
+import { PathwaysService } from './services/PathwaysService';
+import { SequencesService } from './services/SequencesService';
+import { IngredientsService } from './services/IngredientsService';
+import { AdvancementService } from './services/AdvancementService';
+
+export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
+    openApi?: Partial<TOpenAPIConfig>;
+    interceptors?: {
+        onRequest?: RequestInterceptor[];
+        onResponse?: ResponseInterceptor[];
+        onError?: ErrorInterceptor[];
+    };
+}
+
+export function createClient<TExecutorOptions extends Record<string, any>>(
+    options: ClientOptions<TExecutorOptions> = {},
+) {
+    const openApiConfig: TOpenAPIConfig = {
+        ...OpenAPI,
+        ...options.openApi,
+    };
+
+    let executor = createExecutorAdapter<TExecutorOptions>(openApiConfig);
+    if (options?.interceptors) {
+        executor = withInterceptors(executor, {
+            onError: [apiErrorInterceptor, ...(options.interceptors?.onError ?? [])],
+            onRequest: options.interceptors?.onRequest,
+            onResponse: options.interceptors?.onResponse,
+        });
+    }
+
+    return {
+        PathwaysService: new PathwaysService(executor),
+        SequencesService: new SequencesService(executor),
+        IngredientsService: new IngredientsService(executor),
+        AdvancementService: new AdvancementService(executor),
+    };
+}

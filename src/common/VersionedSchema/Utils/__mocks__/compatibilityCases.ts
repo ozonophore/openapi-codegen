@@ -88,4 +88,10 @@ export const compatibilityCases: CompatibilityCase[] = [
         to: 'v3',
         expect: [{ type: 'added', key: 'logLevel' }, { type: 'added', key: 'logTarget' }],
     },
+    {
+        type: EVersionedSchemaType.UNIFIED_OPTIONS,
+        from: 'v3',
+        to: 'v4',
+        expect: [{ type: 'added', key: 'emptySchemaStrategy' }]
+    }
 ];

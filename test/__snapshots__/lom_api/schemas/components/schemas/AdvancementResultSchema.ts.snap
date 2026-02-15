@@ -1,0 +1,50 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
+const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
+
+export const IAdvancementResultSchema = {
+    type: 'object',
+    properties: {
+        success: {
+            type: 'boolean',
+        },
+        nextSequenceId: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true,
+        },
+        message: {
+            type: 'string',
+        },
+    },
+    required: ['success'],
+    additionalProperties: false,
+};
+
+export type IAdvancementResult = any; // JSON Schema doesn't provide type inference
+
+export function validateIAdvancementResult(
+    data: unknown,
+): { valid: true; data: IAdvancementResult } | { valid: false; errors: Ajv.ErrorObject[] } {
+    const validate = ajv.compile(IAdvancementResultSchema);
+    const valid = validate(data);
+    if (valid) {
+        return { valid: true, data: data as IAdvancementResult };
+    }
+    return { valid: false, errors: validate.errors || [] };
+}
+
+export function validateIAdvancementResultSync(data: unknown): IAdvancementResult {
+    const validate = ajv.compile(IAdvancementResultSchema);
+    const valid = validate(data);
+    if (!valid) {
+        throw new Error(ajv.errorsText(validate.errors));
+    }
+    return data as IAdvancementResult;
+}

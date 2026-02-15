@@ -1,0 +1,12 @@
+type: object
+required: [id, name, quantity]
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    type: string
+    example: Dragon Scale Powder
+  quantity:
+    type: integer
+    example: 2

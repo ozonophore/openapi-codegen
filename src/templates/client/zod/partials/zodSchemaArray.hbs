@@ -1,1 +1,1 @@
-z.array({{#if link}}{{#if link.alias}}{{{link.alias}}}Schema{{else}}{{{link.type}}}Schema{{/if}}{{else}}z.{{{base}}}(){{/if}}){{#if minItems}}.min({{{minItems}}}){{/if}}{{#if maxItems}}.max({{{maxItems}}}){{/if}}{{#if isNullable}}.nullable(){{/if}}
+z.array({{#if link}}{{>zodSchema link}}{{else}}{{zodBaseSchema base}}{{/if}}){{#if minItems}}.min({{{minItems}}}){{/if}}{{#if maxItems}}.max({{{maxItems}}}){{/if}}{{#if isNullable}}.nullable(){{/if}}

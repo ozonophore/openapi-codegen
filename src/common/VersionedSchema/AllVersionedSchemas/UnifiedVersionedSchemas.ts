@@ -6,6 +6,7 @@ import { buildVersionedSchema } from '../Utils/buildVersionedSchema';
 import { unifiedOptionsSchemaV1 } from './UnifiedOptionsSchemaV1';
 import { unifiedOptionsSchemaV2 } from './UnifiedOptionsSchemaV2';
 import { unifiedOptionsSchemaV3 } from './UnifiedOptionsSchemaV3';
+import { unifiedOptionsSchemaV4 } from './UnifiedOptionsSchemaV4';
 
 export const unifiedVersionedSchemas: VersionedSchema<z.ZodTypeAny>[] = [
     buildVersionedSchema({
@@ -23,9 +24,14 @@ export const unifiedVersionedSchemas: VersionedSchema<z.ZodTypeAny>[] = [
         base: unifiedOptionsSchemaV3,
         type: EVersionedSchemaType.UNIFIED_OPTIONS,
     }),
+    buildVersionedSchema({
+        version: 'v4',
+        base: unifiedOptionsSchemaV4,
+        type: EVersionedSchemaType.UNIFIED_OPTIONS,
+    })
 ];
 
-export const rawOptionsSchema = unifiedOptionsSchemaV3;
+export const rawOptionsSchema = unifiedOptionsSchemaV4;
 
 export const flatOptionsSchema = rawOptionsSchema.omit({ items: true }).extend({
     input: z.string().min(1, 'Input is required'),

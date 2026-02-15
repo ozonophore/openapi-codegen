@@ -1,9 +1,13 @@
-Joi.object({
 {{#if properties}}
+Joi.object({
 {{#each properties}}
     {{{name}}}: {{>joiSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
 {{/each}}
-{{else}}
-})
-{{/if}}
 }){{#if isNullable}}.allow(null){{/if}}
+{{else}}
+{{#equals emptySchemaStrategy 'semantic'}}
+Joi.object().unknown(true){{#if isNullable}}.allow(null){{/if}}
+{{else}}
+Joi.object({}){{#if isNullable}}.allow(null){{/if}}
+{{/equals}}
+{{/if}}

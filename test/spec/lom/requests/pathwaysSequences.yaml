@@ -1,0 +1,19 @@
+get:
+  tags: [Sequences]
+  summary: Получить последовательности пути
+  parameters:
+    - name: pathwayId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    '200':
+      description: Список последовательностей
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/Sequence.yaml'

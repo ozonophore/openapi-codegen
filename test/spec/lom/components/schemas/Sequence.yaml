@@ -1,0 +1,19 @@
+type: object
+required: [id, pathwayId, number, name]
+properties:
+  id:
+    type: string
+    format: uuid
+  pathwayId:
+    type: string
+    format: uuid
+  number:
+    type: integer
+    minimum: 0
+    maximum: 9
+    example: 9
+  name:
+    type: string
+    example: Apprentice
+  description:
+    type: string
