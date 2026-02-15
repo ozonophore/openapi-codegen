@@ -136,8 +136,7 @@ program
     });
 
 program.exitOverride();
-// TODO: Включить позже!
-// program.showSuggestionAfterError(false);
+program.showSuggestionAfterError(false);
 
 // Парсирование аргументов с обработкой ошибок
 try {
