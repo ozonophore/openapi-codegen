@@ -11,7 +11,7 @@ import { apiErrorInterceptor } from '{{{joinPath @root.outputCore './interceptor
 import { {{name}} } from './services/{{name}}';
 {{/each}}
 
-export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
+export interface ClientOptions {
   openApi?: Partial<TOpenAPIConfig>;
   interceptors?: {
     onRequest?: RequestInterceptor[];
@@ -21,7 +21,7 @@ export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
 }
 
 export function createClient<TExecutorOptions extends Record<string, any>>(
-  options: ClientOptions<TExecutorOptions> = {},
+  options: ClientOptions = {},
 ) {
   const openApiConfig: TOpenAPIConfig = {
     ...OpenAPI,

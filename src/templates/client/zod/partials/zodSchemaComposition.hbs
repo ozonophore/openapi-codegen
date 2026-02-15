@@ -1,7 +1,7 @@
 {{#equals export 'one-of'}}
-z.union([{{#each properties}}{{>zodSchema}}{{#unless @last}}, {{/unless}}{{/each}}]){{#if isNullable}}.nullable(){{/if}}
+z.union([{{#each properties}}{{>zod/zodSchema}}{{#unless @last}}, {{/unless}}{{/each}}]){{#if isNullable}}.nullable(){{/if}}
 {{else equals export 'any-of'}}
-z.union([{{#each properties}}{{>zodSchema}}{{#unless @last}}, {{/unless}}{{/each}}]){{#if isNullable}}.nullable(){{/if}}
+z.union([{{#each properties}}{{>zod/zodSchema}}{{#unless @last}}, {{/unless}}{{/each}}]){{#if isNullable}}.nullable(){{/if}}
 {{else equals export 'all-of'}}
-{{#each properties}}{{#if @first}}{{>zodSchema}}{{else}}.and({{>zodSchema}}){{/if}}{{/each}}{{#if isNullable}}.nullable(){{/if}}
+{{#each properties}}{{#if @first}}{{>zod/zodSchema}}{{else}}.and({{>zod/zodSchema}}){{/if}}{{/each}}{{#if isNullable}}.nullable(){{/if}}
 {{/equals}}

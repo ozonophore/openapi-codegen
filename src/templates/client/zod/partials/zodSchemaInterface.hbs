@@ -1,7 +1,7 @@
 z.object({
 {{#if properties}}
 {{#each properties}}
-    {{{name}}}: {{>zodSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
+    {{{name}}}: {{>zod/zodSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
 {{/each}}
 {{else}}
 {{#equals emptySchemaStrategy 'semantic'}}

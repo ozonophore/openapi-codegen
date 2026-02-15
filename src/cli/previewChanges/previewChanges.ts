@@ -26,43 +26,127 @@ interface FileChange {
     diff?: diff.Change[];
 }
 
+interface ChangesSummary {
+    added: string[];
+    removed: string[];
+    modified: string[];
+    total: number;
+}
+
+function buildSummary(changes: FileChange[]): ChangesSummary {
+    const added: string[] = [];
+    const removed: string[] = [];
+    const modified: string[] = [];
+
+    for (const change of changes) {
+        if (change.status === 'added') {
+            added.push(change.file);
+            continue;
+        }
+
+        if (change.status === 'removed') {
+            removed.push(change.file);
+            continue;
+        }
+
+        modified.push(change.file);
+    }
+
+    added.sort();
+    removed.sort();
+    modified.sort();
+
+    return {
+        added,
+        removed,
+        modified,
+        total: changes.length,
+    };
+}
+
+function toFileLink(filePath: string): string {
+    return `./${filePath}.md`;
+}
+
+function toCategoryMarkdown(
+    title: string,
+    files: string[],
+): string {
+    const lines = [`# ${title}`, ''];
+
+    if (files.length === 0) {
+        lines.push('_No files_', '');
+        return lines.join('\n');
+    }
+
+    for (const file of files) {
+        lines.push(`- [${file}](${toFileLink(file)})`);
+    }
+
+    lines.push('');
+    return lines.join('\n');
+}
+
+function toSummaryMarkdown(summary: ChangesSummary): string {
+    return [
+        '# Preview Changes Summary',
+        '',
+        `Total changes: ${summary.total}`,
+        `Added files: ${summary.added.length}`,
+        `Removed files: ${summary.removed.length}`,
+        `Modified files: ${summary.modified.length}`,
+        '',
+        '## Reports',
+        '- [Added files](./added-files.md)',
+        '- [Removed files](./removed-files.md)',
+        '- [Modified files](./modified-files.md)',
+        '',
+        '## Added',
+        ...summary.added.map(file => `- [${file}](${toFileLink(file)})`),
+        '',
+        '## Removed',
+        ...summary.removed.map(file => `- [${file}](${toFileLink(file)})`),
+        '',
+        '## Modified',
+        ...summary.modified.map(file => `- [${file}](${toFileLink(file)})`),
+        '',
+    ].join('\n');
+}
+
 /**
  * Основная функция для предпросмотра изменений
  * 
  * TODO: Добавить проверку опций команды перед выполнением
  */
 export async function previewChanges(options: OptionValues): Promise<void> {
-    const validationResult = validateZodOptions(previewChangesSchema, options);
-
-    if (!validationResult.success) {
-        APP_LOGGER.error(validationResult.errors.join('\n'));
-        process.exit(1);
-    }
-
-    const { openapiConfig, generatedDir, previewDir, diffDir } = validationResult.data as TPreviewChangesOptions;
-
-    const resolvedGeneratedDir = resolveHelper(process.cwd(), generatedDir || '');
-    const resolvedPreviewDir = resolveHelper(process.cwd(), previewDir || '');
-    const resolvedDiffDir = resolveHelper(process.cwd(), diffDir || '');
-
+    let exitCode = 0;
+    let resolvedPreviewDir = '';
     let previewDirCreated = false;
 
     try {
+        const validationResult = validateZodOptions(previewChangesSchema, options);
+
+        if (!validationResult.success) {
+            APP_LOGGER.error(validationResult.errors.join('\n'));
+            exitCode = 1;
+            return;
+        }
+
+        const { openapiConfig, generatedDir, previewDir, diffDir } = validationResult.data as TPreviewChangesOptions;
+        const resolvedGeneratedDir = resolveHelper(process.cwd(), generatedDir || '');
+        resolvedPreviewDir = resolveHelper(process.cwd(), previewDir || '');
+        const resolvedDiffDir = resolveHelper(process.cwd(), diffDir || '');
+
         // 1. Проверка директории со сгенерированным кодом
         if (await isDirectoryEmpty(resolvedGeneratedDir)) {
             APP_LOGGER.info(`Directory "${generatedDir}" is empty or does not exist. Nothing to compare.`);
-            process.exit(0);
+            return;
         }
 
-        // 2. Создание временной директории для preview
-        await fileSystemHelpers.mkdir(resolvedPreviewDir);
-        previewDirCreated = true;
-
-        // 3. Загрузка конфигурации
+        // 2. Загрузка конфигурации
         const configData = loadConfigIfExists(openapiConfig);
         if (!configData) {
-            APP_LOGGER.error('The configuration file is missing');
-            process.exit(1);
+            throw new Error('The configuration file is missing');
         }
 
         const preparedOptions = convertArrayToObject(configData);
@@ -76,9 +160,13 @@ export async function previewChanges(options: OptionValues): Promise<void> {
         });
 
         if (!migratedOptions) {
-            APP_LOGGER.error("Couldn't convert the set of options to the current version");
-            process.exit(1);
+            throw new Error("Couldn't convert the set of options to the current version");
         }
+
+        // 3. Подготовка и создание временной директории preview
+        await fileSystemHelpers.rmdir(resolvedPreviewDir);
+        await fileSystemHelpers.mkdir(resolvedPreviewDir);
+        previewDirCreated = true;
 
         // 4. Обновление путей output для генерации в preview директорию
         const migratedValue = migratedOptions.value as TRawOptions;
@@ -93,14 +181,16 @@ export async function previewChanges(options: OptionValues): Promise<void> {
         const oldFiles = await readDirectoryRecursive(resolvedGeneratedDir);
         const newFiles = await readDirectoryRecursive(resolvedPreviewDir);
 
-        const allFiles = new Set([...oldFiles, ...newFiles]);
+        const oldFileSet = new Set(oldFiles);
+        const newFileSet = new Set(newFiles);
+        const allFiles = new Set([...oldFileSet, ...newFileSet]);
         const changes: FileChange[] = [];
 
-        for (const file of allFiles) {
+        for (const file of [...allFiles].sort()) {
             const oldPath = joinHelper(resolvedGeneratedDir, file);
             const newPath = joinHelper(resolvedPreviewDir, file);
-            const oldExists = await fileSystemHelpers.exists(oldPath);
-            const newExists = await fileSystemHelpers.exists(newPath);
+            const oldExists = oldFileSet.has(file);
+            const newExists = newFileSet.has(file);
 
             if (oldExists && newExists) {
                 // Файл существует в обеих директориях - сравниваем
@@ -131,6 +221,7 @@ export async function previewChanges(options: OptionValues): Promise<void> {
 
         // 7. Сохранение результатов в diff директорию
         if (changes.length > 0) {
+            await fileSystemHelpers.rmdir(resolvedDiffDir);
             await fileSystemHelpers.mkdir(resolvedDiffDir);
 
             for (const change of changes) {
@@ -151,29 +242,60 @@ export async function previewChanges(options: OptionValues): Promise<void> {
                 APP_LOGGER.info(`Diff saved: ${diffFilePath}`);
             }
 
+            const summary = buildSummary(changes);
+            await fileSystemHelpers.writeFile(
+                joinHelper(resolvedDiffDir, 'added-files.md'),
+                toCategoryMarkdown('Added Files', summary.added),
+                'utf-8',
+            );
+            await fileSystemHelpers.writeFile(
+                joinHelper(resolvedDiffDir, 'removed-files.md'),
+                toCategoryMarkdown('Removed Files', summary.removed),
+                'utf-8',
+            );
+            await fileSystemHelpers.writeFile(
+                joinHelper(resolvedDiffDir, 'modified-files.md'),
+                toCategoryMarkdown('Modified Files', summary.modified),
+                'utf-8',
+            );
+            await fileSystemHelpers.writeFile(
+                joinHelper(resolvedDiffDir, 'summary.json'),
+                JSON.stringify(summary, null, 2),
+                'utf-8',
+            );
+            await fileSystemHelpers.writeFile(
+                joinHelper(resolvedDiffDir, 'summary.md'),
+                toSummaryMarkdown(summary),
+                'utf-8',
+            );
+
             APP_LOGGER.info(`\nTotal changes: ${changes.length}`);
             APP_LOGGER.info(`Diff files saved to: ${diffDir}`);
         } else {
+            await fileSystemHelpers.rmdir(resolvedDiffDir);
             APP_LOGGER.info('No changes detected. All files are identical.');
         }
 
-        // 8. Удаление временной директории preview
-        APP_LOGGER.info(`Cleaning up preview directory: ${previewDir}`);
-        await fileSystemHelpers.rmdir(resolvedPreviewDir);
-        previewDirCreated = false;
-
-        process.exit(0);
     } catch (error: any) {
-        // Очистка preview директории в случае ошибки
-        if (previewDirCreated) {
+        exitCode = 1;
+        APP_LOGGER.error(error.message);
+    } finally {
+        if (previewDirCreated || resolvedPreviewDir) {
             try {
-                APP_LOGGER.info(`Cleaning up preview directory after error: ${previewDir}`);
-                await fileSystemHelpers.rmdir(resolvedPreviewDir);
+                if (resolvedPreviewDir) {
+                    APP_LOGGER.info(`Cleaning up preview directory: ${resolvedPreviewDir}`);
+                    await fileSystemHelpers.rmdir(resolvedPreviewDir);
+                }
             } catch (cleanupError: any) {
                 APP_LOGGER.error(`Failed to cleanup preview directory: ${cleanupError.message}`);
+                exitCode = 1;
             }
         }
-        APP_LOGGER.error(error.message);
+    }
+
+    if (exitCode !== 0) {
         process.exit(1);
     }
+
+    process.exit(0);
 }
