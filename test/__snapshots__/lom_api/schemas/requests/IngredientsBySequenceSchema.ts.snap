@@ -1,0 +1,37 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
+const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
+
+export const IngredientsBySequenceSchema = {
+    type: 'object',
+    properties: {},
+    additionalProperties: false,
+};
+
+export type IngredientsBySequence = any; // JSON Schema doesn't provide type inference
+
+export function validateIngredientsBySequence(
+    data: unknown,
+): { valid: true; data: IngredientsBySequence } | { valid: false; errors: Ajv.ErrorObject[] } {
+    const validate = ajv.compile(IngredientsBySequenceSchema);
+    const valid = validate(data);
+    if (valid) {
+        return { valid: true, data: data as IngredientsBySequence };
+    }
+    return { valid: false, errors: validate.errors || [] };
+}
+
+export function validateIngredientsBySequenceSync(data: unknown): IngredientsBySequence {
+    const validate = ajv.compile(IngredientsBySequenceSchema);
+    const valid = validate(data);
+    if (!valid) {
+        throw new Error(ajv.errorsText(validate.errors));
+    }
+    return data as IngredientsBySequence;
+}

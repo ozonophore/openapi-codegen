@@ -4,6 +4,7 @@ import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { Templates } from '../types/base/Templates.model';
+import { EmptySchemaStrategy } from '../types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ValidationLibrary } from '../types/enums/ValidationLibrary.enum';
 import type { Model } from '../types/shared/Model.model';
@@ -23,6 +24,11 @@ interface IWriteClientSchemas {
     httpClient: HttpClient;
     useUnionTypes: boolean;
     validationLibrary?: ValidationLibrary;
+    emptySchemaStrategy: EmptySchemaStrategy;
+}
+
+export function isEmptySchemaModel(model: Model): boolean {
+    return model.export === 'interface' && model.properties.length === 0;
 }
 
 /**
@@ -33,12 +39,14 @@ interface IWriteClientSchemas {
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useUnionTypes Use union types instead of enums
  */
-export async function writeClientSchemas(this: WriteClient, options: IWriteClientSchemas): Promise<void> {
-    const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary } = options;
+export async function writeClientSchemas(this: WriteClient, options: IWriteClientSchemas): Promise<Model[]> {
+    const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary, emptySchemaStrategy } = options;
     if (templates.exports.schema) {
         this.logger.info('The recording of model validation schema files begins.');
 
-        for (const model of models) {
+        const modelsToWrite = emptySchemaStrategy === EmptySchemaStrategy.SKIP ? models.filter(model => !isEmptySchemaModel(model)) : models;
+
+        for (const model of modelsToWrite) {
             const modelFolderPath = model?.path;
             const dir = dirNameHelper(modelFolderPath);
             if (dir) {
@@ -57,6 +65,7 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
                 httpClient,
                 useUnionTypes,
                 validationLibrary,
+                emptySchemaStrategy,
             });
             const formattedValue = await format(templateResult);
             await fileSystemHelpers.writeFile(file, formattedValue);
@@ -65,5 +74,9 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
         }
 
         this.logger.info('The recording of model validation schema files has been completed successfully');
+
+        return modelsToWrite;
     }
+
+    return [];
 }

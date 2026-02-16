@@ -1,0 +1,43 @@
+openapi: 3.1.0
+
+info:
+  title: Lord of the Mysteries API
+  description: >
+    API, вдохновлённое вселенной "Повелитель тайн".
+    Позволяет работать с путями, последовательностями и продвижением по ним.
+  version: 1.0.0
+
+servers:
+  - url: https://api.lotm.example.com
+    description: Production server
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Pathways
+    description: Пути и их информация
+  - name: Sequences
+    description: Последовательности пути
+  - name: Ingredients
+    description: Ингредиенты для продвижения
+  - name: Advancement
+    description: Продвижение по последовательности
+
+paths:
+  /pathways:
+    $ref: 'requests/pathways.yaml'
+
+  /pathways/{pathwayId}:
+    $ref: 'requests/pathwaysById.yaml'
+
+  /pathways/{pathwayId}/sequences:
+    $ref: 'requests/pathwaysSequences.yaml'
+
+  /sequences/{sequenceId}:
+    $ref: 'requests/sequenceById.yaml'
+
+  /sequences/{sequenceId}/ingredients:
+    $ref: 'requests/ingredientsBySequence.yaml'
+
+  /advancements:
+    $ref: 'requests/advancements.yaml'

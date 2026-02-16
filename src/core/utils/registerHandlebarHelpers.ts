@@ -149,6 +149,33 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
                 return 'Joi.any()';
         }
     });
+
+    Handlebars.registerHelper('zodBaseSchema', function (this: any, base: string) {
+        if (!base) return 'z.any()';
+
+        const baseLower = base.toLowerCase();
+
+        switch (baseLower) {
+            case 'string':
+                return 'z.string()';
+            case 'number':
+                return 'z.number()';
+            case 'integer':
+            case 'int':
+                return 'z.number().int()';
+            case 'boolean':
+                return 'z.boolean()';
+            case 'null':
+                return 'z.null()';
+            case 'uuid':
+                return 'z.uuid()';
+            case 'file':
+            case 'any':
+                return 'z.any()';
+            default:
+                return `${base}Schema`;
+        }
+    });
     Handlebars.registerHelper('getRequiredFields', function (this: any, properties: Model[]) {
         const required = properties
             .filter(prop => prop.isRequired)

@@ -4,6 +4,7 @@ import { describe, mock, test } from 'node:test';
 
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { Templates } from '../types/base/Templates.model';
+import { EmptySchemaStrategy } from '../types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ValidationLibrary } from '../types/enums/ValidationLibrary.enum';
 import type { Client } from '../types/shared/Client.model';
@@ -77,6 +78,7 @@ describe('@unit: writeClient', () => {
             useUnionTypes: false,
             excludeCoreServiceFiles: false,
             validationLibrary: ValidationLibrary.NONE,
+            emptySchemaStrategy: EmptySchemaStrategy.KEEP,
         });
 
         assert.ok(mkdirCalls.length > 0, 'mkdir should be called at least once');

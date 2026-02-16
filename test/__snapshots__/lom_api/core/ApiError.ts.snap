@@ -1,0 +1,21 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import { RequestConfig } from './executor/requestExecutor';
+
+export class ApiError<TBody = unknown> extends Error {
+    readonly status: number;
+    readonly body?: TBody;
+    readonly headers?: Record<string, string>;
+    readonly request: RequestConfig;
+
+    constructor(params: { status: number; message: string; body?: TBody; headers?: Record<string, string>; request: RequestConfig }) {
+        super(params.message);
+        this.name = 'ApiError';
+        this.status = params.status;
+        this.body = params.body;
+        this.headers = params.headers;
+        this.request = params.request;
+    }
+}

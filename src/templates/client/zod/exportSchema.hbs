@@ -2,7 +2,7 @@
 
 {{#if imports}}
 {{#each imports}}
-import { {{{name}}}Schema{{#if alias}} as {{{alias}}}Schema{{/if}} } from '{{{normalizePath path}}}';
+import { {{{name}}}Schema{{#if alias}} as {{{alias}}}Schema{{/if}} } from '{{{normalizePath path}}}Schema';
 {{/each}}
 {{/if}}
 

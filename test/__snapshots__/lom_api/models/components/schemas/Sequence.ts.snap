@@ -1,0 +1,11 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+export interface ISequence {
+    id: string;
+    pathwayId: string;
+    number: number;
+    name: string;
+    description?: string;
+}

@@ -1,0 +1,9 @@
+type: object
+required: [title, status]
+properties:
+  title:
+    type: string
+  detail:
+    type: string
+  status:
+    type: integer

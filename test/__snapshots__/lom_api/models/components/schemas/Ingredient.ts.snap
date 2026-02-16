@@ -1,0 +1,9 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+export interface IIngredient {
+    id: string;
+    name: string;
+    quantity: number;
+}

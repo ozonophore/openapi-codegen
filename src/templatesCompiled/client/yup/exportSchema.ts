@@ -27,7 +27,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"alias"),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":5,"column":25},"end":{"line":5,"column":66}}})) != null ? stack1 : "")
     + " } from '"
     + ((stack1 = lookupProperty(helpers,"normalizePath").call(alias1,lookupProperty(depth0,"path"),{"name":"normalizePath","hash":{},"data":data,"loc":{"start":{"line":5,"column":75},"end":{"line":5,"column":99}}})) != null ? stack1 : "")
-    + "';\n";
+    + "Schema';\n";
 },"3":function(container,depth0,helpers,partials,data) {
     var stack1;
 
@@ -71,5 +71,5 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":23,"column":64},"end":{"line":23,"column":68}} ), depth0)) != null ? stack1 : "")
     + " {\n    return "
     + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":24,"column":14},"end":{"line":24,"column":18}} ), depth0)) != null ? stack1 : "")
-    + "Schema.validateSync(data, { strict: true });\n}";
+    + "Schema.validateSync(data, { strict: true });\n}\n";
 },"usePartial":true,"useData":true}

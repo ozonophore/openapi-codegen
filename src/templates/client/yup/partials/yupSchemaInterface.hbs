@@ -1,9 +1,13 @@
-yup.object({
 {{#if properties}}
+yup.object({
 {{#each properties}}
     {{{name}}}: {{>yupSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
 {{/each}}
-{{else}}
-})
-{{/if}}
 }){{#if isNullable}}.nullable(){{/if}}
+{{else}}
+{{#equals emptySchemaStrategy 'semantic'}}
+yup.object().noUnknown(false){{#if isNullable}}.nullable(){{/if}}
+{{else}}
+yup.object({}){{#if isNullable}}.nullable(){{/if}}
+{{/equals}}
+{{/if}}

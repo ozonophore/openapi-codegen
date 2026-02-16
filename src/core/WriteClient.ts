@@ -8,9 +8,11 @@ import { ExportedService } from './types/base/ExportedService.model';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { SimpleClientArtifacts } from './types/base/SimpleClientArtifacts.model';
 import { Templates } from './types/base/Templates.model';
+import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from './types/enums/HttpClient.enum';
 import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import type { Client } from './types/shared/Client.model';
+import type { Model } from './types/shared/Model.model';
 import { prepareAlias } from './utils/prepareAlias';
 import { sortModelByName } from './utils/sortModelByName';
 import { unique } from './utils/unique';
@@ -51,9 +53,12 @@ type TWriteClientProps = {
     useCancelableRequest?: boolean;
     useSeparatedIndexes?: boolean;
     validationLibrary?: ValidationLibrary;
+    emptySchemaStrategy: EmptySchemaStrategy;
 };
 
-type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOptions' | 'request' | 'useCancelableRequest' | 'useSeparatedIndexes'>;
+type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOptions' | 'request' | 'useCancelableRequest' | 'useSeparatedIndexes'> & {
+    schemaModels: Model[];
+};
 
 /**
  * The client which is writing all items and keep the parameters to write index file
@@ -88,6 +93,7 @@ export class WriteClient {
             useCancelableRequest = false,
             useSeparatedIndexes = false,
             validationLibrary = ValidationLibrary.NONE,
+            emptySchemaStrategy,
         } = options;
 
         if (!excludeCoreServiceFiles) {
@@ -139,21 +145,57 @@ export class WriteClient {
          */
         if (validationLibrary !== ValidationLibrary.NONE) {
             await fileSystemHelpers.mkdir(outputPaths.outputSchemas);
-            await this.writeClientSchemas({
+            const schemaModels = await this.writeClientSchemas({
                 models: client.models,
                 templates,
                 outputSchemasPath: outputPaths.outputSchemas,
                 httpClient,
                 useUnionTypes,
                 validationLibrary,
+                emptySchemaStrategy,
             });
             await this.writeClientSchemasIndex({
-                models: client.models,
+                models: schemaModels,
                 templates,
                 outputSchemasPath: outputPaths.outputSchemas,
                 useSeparatedIndexes,
             });
+            await this.writeModelsAndFinalize({
+                client,
+                templates,
+                outputPaths,
+                httpClient,
+                useOptions,
+                useUnionTypes,
+                excludeCoreServiceFiles,
+                request,
+                useCancelableRequest,
+                useSeparatedIndexes,
+                validationLibrary,
+                emptySchemaStrategy,
+                schemaModels,
+            });
+            return;
         }
+        await this.writeModelsAndFinalize({
+            client,
+            templates,
+            outputPaths,
+            httpClient,
+            useOptions,
+            useUnionTypes,
+            excludeCoreServiceFiles,
+            request,
+            useCancelableRequest,
+            useSeparatedIndexes,
+            validationLibrary,
+            emptySchemaStrategy,
+            schemaModels: [],
+        });
+    }
+
+    private async writeModelsAndFinalize(config: TWriteClientProps & { schemaModels: Model[] }) {
+        const { client, templates, outputPaths, httpClient, useUnionTypes, useSeparatedIndexes, excludeCoreServiceFiles, validationLibrary, emptySchemaStrategy, schemaModels } = config;
 
         await fileSystemHelpers.mkdir(outputPaths.outputModels);
         await this.writeClientModels({
@@ -178,6 +220,8 @@ export class WriteClient {
             useUnionTypes,
             excludeCoreServiceFiles,
             validationLibrary,
+            emptySchemaStrategy,
+            schemaModels,
         });
     }
 
@@ -213,7 +257,7 @@ export class WriteClient {
         const result: Map<string, SimpleClientArtifacts> = new Map<string, SimpleClientArtifacts>();
         for (const [key, value] of this.config.entries()) {
             for (const item of value) {
-                const { outputPaths, templates, excludeCoreServiceFiles, validationLibrary } = item;
+                const { outputPaths, templates, excludeCoreServiceFiles, validationLibrary, schemaModels } = item;
                 const outputCore = this.getOutputPath(outputPaths?.outputCore, key, 'core');
                 const outputModels = this.getOutputPath(outputPaths?.outputModels, key, 'models');
                 const outputSchemas = this.getOutputPath(outputPaths?.outputSchemas, key, 'schemas');
@@ -238,7 +282,7 @@ export class WriteClient {
                     clientIndex.models.push(relativePathModel);
                 }
 
-                if (validationLibrary !== ValidationLibrary.NONE) {
+                if (validationLibrary !== ValidationLibrary.NONE && schemaModels.length > 0) {
                     const relativePathSchema = relativeHelper(key, outputSchemas);
                     if (!clientIndex.schemas.includes(relativePathSchema)) {
                         clientIndex.schemas.push(relativePathSchema);
@@ -254,7 +298,7 @@ export class WriteClient {
         const result: Map<string, ClientArtifacts> = new Map<string, ClientArtifacts>();
         for (const [key, value] of this.config.entries()) {
             for (const item of value) {
-                const { outputPaths, client, templates, useUnionTypes, excludeCoreServiceFiles, validationLibrary } = item;
+                const { outputPaths, client, templates, useUnionTypes, excludeCoreServiceFiles, validationLibrary, schemaModels } = item;
                 const outputCore = this.getOutputPath(outputPaths?.outputCore, key, 'core');
                 const outputModels = this.getOutputPath(outputPaths?.outputModels, key, 'models');
                 const outputSchemas = this.getOutputPath(outputPaths?.outputSchemas, key, 'schemas');
@@ -296,7 +340,7 @@ export class WriteClient {
                         clientIndex.models.push(modelFinal);
                     }
 
-                    if (validationLibrary !== ValidationLibrary.NONE) {
+                    if (validationLibrary !== ValidationLibrary.NONE && schemaModels.some(schemaModel => schemaModel.name === model.name && schemaModel.path === model.path)) {
                         const schema = { ...modelFinal, package: relativePathSchema };
 
                         if (!clientIndex.schemas.some(s => this.isSameShema(s, schema))) {
