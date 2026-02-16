@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.12] — 2026-02-16
+
+### Changed
+- Updated schema version matching logic in `determineBestMatchingSchemaVersion`:
+  - candidate ranking now also accounts for unknown keys via a strict shadow-check;
+  - tie-breaking is stabilized for mixed schema families (`OPTIONS`, `MULTI_OPTIONS`, `UNIFIED_OPTIONS`).
+- Updated migration flow in `migrateDataToLatestSchemaVersion` to follow migration graph edges (`fromVersion -> toVersion`) instead of array index order.
+- Aligned unified migration version names in `allMigrationPlans` with schema versions (`UNIFIED_OPTIONS_v*`).
+- Added JSDoc documentation for internal scoring/migration types and utility functions in version matching/migration modules.
+
+### Fixed
+- Fixed incorrect start-version detection in mixed schema sets where newer unified schemas could be selected too aggressively.
+- Fixed migration chain traversal that could jump into a neighboring schema family due to index-based iteration.
+- Fixed potential runtime failures caused by migration plans pointing to mismatched unified version names.
+
+### Tests
+- Added regression coverage for mixed schema migration path selection in `migrateDataToLatestSchemaVersion.test.ts`.
+
 ## [2.0.0-beta.11] — 2026-02-15
 
 ### Added

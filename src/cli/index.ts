@@ -80,7 +80,7 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await checkConfig(options.openapiConfig);
+        await checkConfig(options);
     });
 
 /**

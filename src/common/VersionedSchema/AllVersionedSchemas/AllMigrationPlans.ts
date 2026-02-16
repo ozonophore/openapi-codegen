@@ -22,7 +22,7 @@ function addVersionPrefixToMigrationPlans(plans: SchemaMigrationPlan<Record<stri
 
 /**
  * Unified migration plan that includes all migrations from all schema types.
- * Migrates from any old version to the latest UNIFIED_v1 schema.
+ * Migrates from any old version to the latest UNIFIED_OPTIONS_v1 schema.
  * Reuses existing migration plans to avoid code duplication.
  */
 export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<string, any>>[] = [
@@ -32,7 +32,7 @@ export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<
     // Migration from OPTIONS latest version to UNIFIED v1
     createTrivialMigration(
         `OPTIONS_${getLatestVersionFromMigrationPlans(optionsMigrationPlans)}`,
-        'UNIFIED_v1',
+        'UNIFIED_OPTIONS_v1',
         'Migrate from OPTIONS to UNIFIED schema'
     ),
 
@@ -42,28 +42,28 @@ export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<
     // Migration from MULTI_OPTIONS latest version to UNIFIED v1
     createTrivialMigration(
         `MULTI_OPTIONS_${getLatestVersionFromMigrationPlans(multiOptionsMigrationPlan)}`,
-        'UNIFIED_v1',
+        'UNIFIED_OPTIONS_v1',
         'Migrate from MULTI_OPTIONS to UNIFIED schema'
     ),
     createFieldTransformationMigration(
-        'UNIFIED_v1',
-        'UNIFIED_v2',
+        'UNIFIED_OPTIONS_v1',
+        'UNIFIED_OPTIONS_v2',
         ({ includeSchemasFiles, ...otherProps }) => {
             return { ...otherProps, validationLibrary: !includeSchemasFiles ? ValidationLibrary.NONE : undefined };
         },
         'Transforms includeSchemasFiles to validationLibrary: if includeSchemasFiles is false, sets validationLibrary to NONE'
     ),
     createDefaultFieldsMigration(
-        'UNIFIED_v2',
-        'UNIFIED_v3',
+        'UNIFIED_OPTIONS_v2',
+        'UNIFIED_OPTIONS_v3',
         {
             logLevel: ELogLevel.ERROR,
             logTarget: ELogOutput.CONSOLE
         }
     ),
     createDefaultFieldsMigration(
-        'UNIFIED_v3',
-        'UNIFIED_v4',
+        'UNIFIED_OPTIONS_v3',
+        'UNIFIED_OPTIONS_v4',
         {
             emptySchemaStrategy: EmptySchemaStrategy.KEEP
         }
