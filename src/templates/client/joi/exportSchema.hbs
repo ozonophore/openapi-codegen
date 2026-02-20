@@ -10,7 +10,7 @@ import Joi from 'joi';
 
 export const {{{name}}}Schema = {{>joiSchema}};
 
-export type {{{name}}} = Joi.SchemaValue<typeof {{{name}}}Schema>;
+export type {{{name}}} = Joi.Schema<typeof {{{name}}}Schema>;
 
 export function validate{{{name}}}(data: unknown): { value: {{{name}}}; error?: undefined } | { value?: undefined; error: Joi.ValidationError } {
     const result = {{{name}}}Schema.validate(data);
