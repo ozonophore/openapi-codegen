@@ -1,3 +1,5 @@
+import { basename } from 'path';
+
 import { TRawOptions } from '../../../common/TRawOptions';
 import { joinHelper, relativeHelper, resolveHelper } from '../../../common/utils/pathHelpers';
 
@@ -27,6 +29,12 @@ export function updateOutputPaths(
         // Убираем префикс ./ если он есть
         if (relativePath.startsWith('./')) {
             relativePath = relativePath.substring(2);
+        }
+
+        // Если путь выходит за пределы generatedDir, используем basename для безопасного переноса
+        if (relativePath.startsWith('../')) {
+            const outputBaseName = basename(resolvedOldPath);
+            return joinHelper(previewDir, outputBaseName);
         }
         
         // Если путь пустой или равен текущей директории, возвращаем previewDir

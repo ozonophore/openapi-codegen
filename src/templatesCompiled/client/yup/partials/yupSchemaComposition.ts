@@ -26,8 +26,8 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     };
 
   return "    "
-    + ((stack1 = container.invokePartial(lookupProperty(partials,"yupSchema"),depth0,{"name":"yupSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + ((stack1 = lookupProperty(helpers,"unless").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(data,"last"),{"name":"unless","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":18},"end":{"line":4,"column":47}}})) != null ? stack1 : "")
+    + ((stack1 = container.invokePartial(lookupProperty(partials,"yup/yupSchema"),depth0,{"name":"yup/yupSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"unless").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(data,"last"),{"name":"unless","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":22},"end":{"line":4,"column":51}}})) != null ? stack1 : "")
     + "\n";
 },"3":function(container,depth0,helpers,partials,data) {
     return ",";
@@ -79,7 +79,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
         return undefined
     };
 
-  return ((stack1 = container.invokePartial(lookupProperty(partials,"yupSchema"),depth0,{"name":"yupSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "");
+  return ((stack1 = container.invokePartial(lookupProperty(partials,"yup/yupSchema"),depth0,{"name":"yup/yupSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "");
 },"13":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
@@ -89,7 +89,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     };
 
   return ".concat("
-    + ((stack1 = container.invokePartial(lookupProperty(partials,"yupSchema"),depth0,{"name":"yupSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
+    + ((stack1 = container.invokePartial(lookupProperty(partials,"yup/yupSchema"),depth0,{"name":"yup/yupSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
     + ")\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {

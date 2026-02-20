@@ -25,7 +25,7 @@ import { HeaderService } from './services/HeaderService';
 import { CircularService } from './services/CircularService';
 import { EnumsService } from './services/EnumsService';
 
-export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
+export interface ClientOptions {
     openApi?: Partial<TOpenAPIConfig>;
     interceptors?: {
         onRequest?: RequestInterceptor[];
@@ -34,9 +34,7 @@ export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
     };
 }
 
-export function createClient<TExecutorOptions extends Record<string, any>>(
-    options: ClientOptions<TExecutorOptions> = {},
-) {
+export function createClient<TExecutorOptions extends Record<string, any>>(options: ClientOptions = {}) {
     const openApiConfig: TOpenAPIConfig = {
         ...OpenAPI,
         ...options.openApi,

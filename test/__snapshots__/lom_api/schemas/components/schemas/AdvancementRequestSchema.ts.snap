@@ -4,7 +4,7 @@
 
 import { IIngredientSchema } from './IngredientSchema';
 
-import Ajv from 'ajv';
+import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 
 const ajv = new Ajv({ allErrors: true });
@@ -32,7 +32,7 @@ export type IAdvancementRequest = any; // JSON Schema doesn't provide type infer
 
 export function validateIAdvancementRequest(
     data: unknown,
-): { valid: true; data: IAdvancementRequest } | { valid: false; errors: Ajv.ErrorObject[] } {
+): { valid: true; data: IAdvancementRequest } | { valid: false; errors: ErrorObject[] } {
     const validate = ajv.compile(IAdvancementRequestSchema);
     const valid = validate(data);
     if (valid) {

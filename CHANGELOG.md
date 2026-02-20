@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.12] — 2026-02-16
+
+### Added
+- Added structured preview reports for `preview-changes`:
+  - `summary.json`;
+  - `summary.md`;
+  - `added-files.md`;
+  - `removed-files.md`;
+  - `modified-files.md`.
+- Added internal workflow documentation for preview changes in `src/cli/previewChanges/PreviewChanges.md`.
+
+### Changed
+- Refactored `preview-changes` execution flow:
+  - unified cleanup and exit handling with `try/catch/finally`;
+  - deterministic file comparison order;
+  - switched existence checks to set-based membership from recursive directory scans.
+- Updated output path remapping for preview generation to safely handle paths outside `generatedDir` by falling back to `basename`.
+- Enabled `program.showSuggestionAfterError(false)` in CLI startup.
+- Updated `example/openapi.config.json` with `axios` and extended generation options.
+- Updated dependency `commander` from `8.0.0` to `9.0.0`.
+- Added `.ts-openapi-codegen-diff-changes` to `.gitignore`.
+
+### Fixed
+- Fixed stale diff artifacts by clearing the diff output directory before writing a new report.
+- Fixed preview temp directory lifecycle by always cleaning it in `finally`.
+- Fixed `preview-changes` behavior when no changes are detected by removing previous diff reports.
+
 ## [2.0.0-beta.11] — 2026-02-15
 
 ### Added

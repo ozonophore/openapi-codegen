@@ -12,7 +12,7 @@ export interface Templates {
     exports: {
         client: Handlebars.TemplateDelegate;
         model: Handlebars.TemplateDelegate;
-        schema: Handlebars.TemplateDelegate | undefined;
+        schema: Handlebars.TemplateDelegate;
         service: Handlebars.TemplateDelegate;
     };
     core: {

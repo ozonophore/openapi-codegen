@@ -1,7 +1,7 @@
 {{#if properties}}
 yup.object({
 {{#each properties}}
-    {{{name}}}: {{>yupSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
+    {{{name}}}: {{>yup/yupSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
 {{/each}}
 }){{#if isNullable}}.nullable(){{/if}}
 {{else}}

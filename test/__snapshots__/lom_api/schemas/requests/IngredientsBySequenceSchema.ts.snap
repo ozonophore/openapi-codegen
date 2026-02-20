@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import Ajv from 'ajv';
+import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 
 const ajv = new Ajv({ allErrors: true });
@@ -18,7 +18,7 @@ export type IngredientsBySequence = any; // JSON Schema doesn't provide type inf
 
 export function validateIngredientsBySequence(
     data: unknown,
-): { valid: true; data: IngredientsBySequence } | { valid: false; errors: Ajv.ErrorObject[] } {
+): { valid: true; data: IngredientsBySequence } | { valid: false; errors: ErrorObject[] } {
     const validate = ajv.compile(IngredientsBySequenceSchema);
     const valid = validate(data);
     if (valid) {

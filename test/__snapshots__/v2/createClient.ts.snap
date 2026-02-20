@@ -21,7 +21,7 @@ import { TypesService } from './services/TypesService';
 import { ComplexService } from './services/ComplexService';
 import { HeaderService } from './services/HeaderService';
 
-export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
+export interface ClientOptions {
     openApi?: Partial<TOpenAPIConfig>;
     interceptors?: {
         onRequest?: RequestInterceptor[];
@@ -30,9 +30,7 @@ export interface ClientOptions<TExecutorOptions extends Record<string, any>> {
     };
 }
 
-export function createClient<TExecutorOptions extends Record<string, any>>(
-    options: ClientOptions<TExecutorOptions> = {},
-) {
+export function createClient<TExecutorOptions extends Record<string, any>>(options: ClientOptions = {}) {
     const openApiConfig: TOpenAPIConfig = {
         ...OpenAPI,
         ...options.openApi,

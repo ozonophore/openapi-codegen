@@ -12,7 +12,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
         return undefined
     };
 
-  return ((stack1 = container.invokePartial(lookupProperty(partials,"zodSchema"),lookupProperty(depth0,"link"),{"name":"zodSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "");
+  return ((stack1 = container.invokePartial(lookupProperty(partials,"zod/zodSchema"),lookupProperty(depth0,"link"),{"name":"zod/zodSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "");
 },"3":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
@@ -21,7 +21,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
         return undefined
     };
 
-  return ((stack1 = lookupProperty(helpers,"zodBaseSchema").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"base"),{"name":"zodBaseSchema","hash":{},"data":data,"loc":{"start":{"line":1,"column":60},"end":{"line":1,"column":82}}})) != null ? stack1 : "");
+  return ((stack1 = lookupProperty(helpers,"zodBaseSchema").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"base"),{"name":"zodBaseSchema","hash":{},"data":data,"loc":{"start":{"line":1,"column":64},"end":{"line":1,"column":86}}})) != null ? stack1 : "");
 },"5":function(container,depth0,helpers,partials,data) {
     return ".nullable()";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
@@ -33,8 +33,8 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     };
 
   return "z.record(z.string(), "
-    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"link"),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.program(3, data, 0),"data":data,"loc":{"start":{"line":1,"column":21},"end":{"line":1,"column":89}}})) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"link"),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.program(3, data, 0),"data":data,"loc":{"start":{"line":1,"column":21},"end":{"line":1,"column":93}}})) != null ? stack1 : "")
     + ")"
-    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"isNullable"),{"name":"if","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":1,"column":90},"end":{"line":1,"column":126}}})) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"isNullable"),{"name":"if","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":1,"column":94},"end":{"line":1,"column":130}}})) != null ? stack1 : "")
     + "\n";
 },"usePartial":true,"useData":true}

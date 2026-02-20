@@ -2,7 +2,7 @@
 {
     oneOf: [
 {{#each properties}}
-        {{>jsonschemaSchema}}{{#unless @last}},{{/unless}}
+        {{>jsonschema/jsonschemaSchema}}{{#unless @last}},{{/unless}}
 {{/each}}
     ]{{#if isNullable}},
     nullable: true{{/if}}
@@ -11,7 +11,7 @@
 {
     anyOf: [
 {{#each properties}}
-        {{>jsonschemaSchema}}{{#unless @last}},{{/unless}}
+        {{>jsonschema/jsonschemaSchema}}{{#unless @last}},{{/unless}}
 {{/each}}
     ]{{#if isNullable}},
     nullable: true{{/if}}
@@ -20,7 +20,7 @@
 {
     allOf: [
 {{#each properties}}
-        {{>jsonschemaSchema}}{{#unless @last}},{{/unless}}
+        {{>jsonschema/jsonschemaSchema}}{{#unless @last}},{{/unless}}
 {{/each}}
     ]{{#if isNullable}},
     nullable: true{{/if}}

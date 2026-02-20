@@ -28,9 +28,9 @@ export default {"1":function(container,depth0,helpers,partials,data) {
   return "    "
     + ((stack1 = container.lambda(container.strict(depth0, "name", {"start":{"line":4,"column":7},"end":{"line":4,"column":11}} ), depth0)) != null ? stack1 : "")
     + ": "
-    + ((stack1 = container.invokePartial(lookupProperty(partials,"joiSchema"),depth0,{"name":"joiSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + ((stack1 = lookupProperty(helpers,"unless").call(alias1,lookupProperty(depth0,"isRequired"),{"name":"unless","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":30},"end":{"line":4,"column":74}}})) != null ? stack1 : "")
-    + ((stack1 = lookupProperty(helpers,"unless").call(alias1,lookupProperty(data,"last"),{"name":"unless","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":74},"end":{"line":4,"column":103}}})) != null ? stack1 : "")
+    + ((stack1 = container.invokePartial(lookupProperty(partials,"joi/joiSchema"),depth0,{"name":"joi/joiSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"unless").call(alias1,lookupProperty(depth0,"isRequired"),{"name":"unless","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":34},"end":{"line":4,"column":78}}})) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"unless").call(alias1,lookupProperty(data,"last"),{"name":"unless","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":4,"column":78},"end":{"line":4,"column":107}}})) != null ? stack1 : "")
     + "\n";
 },"3":function(container,depth0,helpers,partials,data) {
     return ".optional()";

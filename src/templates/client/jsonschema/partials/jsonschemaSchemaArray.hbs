@@ -1,6 +1,6 @@
 {
     type: 'array',
-    items: {{#if link}}{{#isBasicType link}}{{>jsonschemaSchemaGeneric link}}{{else}}{{{link.type}}}Schema{{/isBasicType}}{{else}}{{>jsonschemaSchemaGeneric}}{{/if}},
+    items: {{#if link}}{{#isBasicType link}}{{>jsonschema/jsonschemaSchemaGeneric link}}{{else}}{{{link.type}}}Schema{{/isBasicType}}{{else}}{{>jsonschema/jsonschemaSchemaGeneric}}{{/if}},
 {{#if minItems}}
     minItems: {{{minItems}}},
 {{/if}}

@@ -1,7 +1,7 @@
 {{#if properties}}
 Joi.object({
 {{#each properties}}
-    {{{name}}}: {{>joiSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
+    {{{name}}}: {{>joi/joiSchema}}{{#unless isRequired}}.optional(){{/unless}}{{#unless @last}},{{/unless}}
 {{/each}}
 }){{#if isNullable}}.allow(null){{/if}}
 {{else}}

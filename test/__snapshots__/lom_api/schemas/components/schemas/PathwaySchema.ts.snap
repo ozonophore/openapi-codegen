@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import Ajv from 'ajv';
+import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 
 const ajv = new Ajv({ allErrors: true });
@@ -30,7 +30,7 @@ export type IPathway = any; // JSON Schema doesn't provide type inference
 
 export function validateIPathway(
     data: unknown,
-): { valid: true; data: IPathway } | { valid: false; errors: Ajv.ErrorObject[] } {
+): { valid: true; data: IPathway } | { valid: false; errors: ErrorObject[] } {
     const validate = ajv.compile(IPathwaySchema);
     const valid = validate(data);
     if (valid) {
