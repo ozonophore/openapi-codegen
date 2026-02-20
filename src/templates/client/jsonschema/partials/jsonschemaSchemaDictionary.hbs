@@ -1,6 +1,6 @@
 {
     type: 'object',
-    additionalProperties: {{#if link}}{{#isBasicType link}}{{>jsonschemaSchemaGeneric link}}{{else}}{{{link.type}}}Schema{{/isBasicType}}{{else}}{{>jsonschemaSchemaGeneric}}{{/if}},
+    additionalProperties: {{#if link}}{{#isBasicType link}}{{>jsonschema/jsonschemaSchemaGeneric link}}{{else}}{{{link.type}}}Schema{{/isBasicType}}{{else}}{{>jsonschema/jsonschemaSchemaGeneric}}{{/if}},
 {{#if isNullable}}
     nullable: true,
 {{/if}}

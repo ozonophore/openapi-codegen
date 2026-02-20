@@ -48,7 +48,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     + "\nimport Joi from 'joi';\n\nexport const "
     + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":11,"column":16},"end":{"line":11,"column":20}} ), depth0)) != null ? stack1 : "")
     + "Schema = "
-    + ((stack1 = container.invokePartial(lookupProperty(partials,"joiSchema"),depth0,{"name":"joiSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
+    + ((stack1 = container.invokePartial(lookupProperty(partials,"joi/joiSchema"),depth0,{"name":"joi/joiSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
     + ";\n\nexport type "
     + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":13,"column":15},"end":{"line":13,"column":19}} ), depth0)) != null ? stack1 : "")
     + " = Joi.Schema<typeof "

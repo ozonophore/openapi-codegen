@@ -1,3 +1,4 @@
-{{>header}}
-
-export const {{{name}}}Schema = {{>schema}};
+{{~#equals @root.validationLibrary 'zod'}}{{>zod/exportSchema}}{{/equals~}}
+{{~#equals @root.validationLibrary 'joi'}}{{>joi/exportSchema}}{{/equals~}}
+{{~#equals @root.validationLibrary 'yup'}}{{>yup/exportSchema}}{{/equals~}}
+{{~#equals @root.validationLibrary 'jsonschema'}}{{>jsonschema/exportSchema}}{{/equals~}}

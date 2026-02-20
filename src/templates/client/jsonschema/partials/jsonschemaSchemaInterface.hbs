@@ -3,7 +3,7 @@
 {{#if properties}}
     properties: {
 {{#each properties}}
-        {{{name}}}: {{>jsonschemaSchema}}{{#unless @last}},{{/unless}}
+        {{{name}}}: {{>jsonschema/jsonschemaSchema}}{{#unless @last}},{{/unless}}
 {{/each}}
     },
 {{getRequiredFields properties}}

@@ -1,1 +1,1 @@
-z.record(z.string(), {{#if link}}{{>zodSchema link}}{{else}}{{zodBaseSchema base}}{{/if}}){{#if isNullable}}.nullable(){{/if}}
+z.record(z.string(), {{#if link}}{{>zod/zodSchema link}}{{else}}{{zodBaseSchema base}}{{/if}}){{#if isNullable}}.nullable(){{/if}}

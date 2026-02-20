@@ -48,7 +48,7 @@ export default {"1":function(container,depth0,helpers,partials,data) {
     + "\nimport Ajv, { ErrorObject } from 'ajv';\nimport addFormats from 'ajv-formats';\n\nconst ajv = new Ajv({ allErrors: true });\naddFormats(ajv);\n\nexport const "
     + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":15,"column":16},"end":{"line":15,"column":20}} ), depth0)) != null ? stack1 : "")
     + "Schema = "
-    + ((stack1 = container.invokePartial(lookupProperty(partials,"jsonschemaSchema"),depth0,{"name":"jsonschemaSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
+    + ((stack1 = container.invokePartial(lookupProperty(partials,"jsonschema/jsonschemaSchema"),depth0,{"name":"jsonschema/jsonschemaSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
     + ";\n\nexport type "
     + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":17,"column":15},"end":{"line":17,"column":19}} ), depth0)) != null ? stack1 : "")
     + " = any; // JSON Schema doesn't provide type inference\n\nexport function validate"

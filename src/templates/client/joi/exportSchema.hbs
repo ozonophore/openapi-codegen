@@ -8,7 +8,7 @@ import { {{{name}}}Schema{{#if alias}} as {{{alias}}}Schema{{/if}} } from '{{{no
 
 import Joi from 'joi';
 
-export const {{{name}}}Schema = {{>joiSchema}};
+export const {{{name}}}Schema = {{>joi/joiSchema}};
 
 export type {{{name}}} = Joi.Schema<typeof {{{name}}}Schema>;
 

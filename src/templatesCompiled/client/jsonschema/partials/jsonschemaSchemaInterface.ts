@@ -32,8 +32,8 @@ export default {"1":function(container,depth0,helpers,partials,data) {
   return "        "
     + ((stack1 = container.lambda(container.strict(depth0, "name", {"start":{"line":6,"column":11},"end":{"line":6,"column":15}} ), depth0)) != null ? stack1 : "")
     + ": "
-    + ((stack1 = container.invokePartial(lookupProperty(partials,"jsonschemaSchema"),depth0,{"name":"jsonschemaSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + ((stack1 = lookupProperty(helpers,"unless").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(data,"last"),{"name":"unless","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":41},"end":{"line":6,"column":70}}})) != null ? stack1 : "")
+    + ((stack1 = container.invokePartial(lookupProperty(partials,"jsonschema/jsonschemaSchema"),depth0,{"name":"jsonschema/jsonschemaSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"unless").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(data,"last"),{"name":"unless","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":6,"column":52},"end":{"line":6,"column":81}}})) != null ? stack1 : "")
     + "\n";
 },"3":function(container,depth0,helpers,partials,data) {
     return ",";

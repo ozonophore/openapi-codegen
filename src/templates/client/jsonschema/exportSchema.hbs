@@ -12,7 +12,7 @@ import addFormats from 'ajv-formats';
 const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
 
-export const {{{name}}}Schema = {{>jsonschemaSchema}};
+export const {{{name}}}Schema = {{>jsonschema/jsonschemaSchema}};
 
 export type {{{name}}} = any; // JSON Schema doesn't provide type inference
 
