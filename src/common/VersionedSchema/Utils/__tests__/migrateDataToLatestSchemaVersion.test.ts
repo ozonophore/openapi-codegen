@@ -79,3 +79,24 @@ test('@unit: migrateDataToLatestSchemaVersion (unified schemas)', () => {
     assert.strictEqual(result?.value.httpClient, 'fetch');
     assert.strictEqual(result?.value.validationLibrary, ValidationLibrary.NONE);
 });
+
+test('@unit: migrateDataToLatestSchemaVersion (all schemas: chooses old options branch before unified)', () => {
+    const rawInput = {
+        input: './spec.json',
+        output: './dist',
+        httpClient: 'fetch',
+        exportCore: true,
+    };
+
+    const result = migrateDataToLatestSchemaVersion({
+        rawInput,
+        migrationPlans: allMigrationPlans,
+        versionedSchemas: allVersionedSchemas,
+        migrationMode: EMigrationMode.VALIDATE_CONFIG,
+    });
+
+    assert.ok(result);
+    assert.strictEqual(result?.schemaType, EVersionedSchemaType.UNIFIED_OPTIONS);
+    assert.strictEqual(result?.schemaVersion, 'UNIFIED_OPTIONS_v4');
+    assert.ok(result?.guessedVersion.latestVersion.startsWith('OPTIONS_'));
+});
