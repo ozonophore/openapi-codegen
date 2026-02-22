@@ -5,6 +5,7 @@
 import type { IAdvancementRequest } from '../models/components/schemas/AdvancementRequest';
 import type { IAdvancementResult } from '../models/components/schemas/AdvancementResult';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const postAdvancementService = (requestBody: IAdvancementRequest): RequestConfig => ({
     method: 'POST',
@@ -39,6 +40,17 @@ export class AdvancementService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<IAdvancementResult> {
         return this.executor.request<IAdvancementResult>(
+            AdvancementOptions.postAdvancementService(requestBody),
+            options,
+        );
+    }
+
+    public postAdvancementServiceRaw(
+        requestBody: IAdvancementRequest,
+
+        options?: TOptions,
+    ): Promise<ApiResult<IAdvancementResult>> {
+        return this.executor.requestRaw<IAdvancementResult>(
             AdvancementOptions.postAdvancementService(requestBody),
             options,
         );

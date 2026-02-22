@@ -13,5 +13,5 @@ export default {"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpe
     };
 
   return ((stack1 = container.invokePartial(lookupProperty(partials,"header"),depth0,{"name":"header","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "\nexport type ApiResult = {\n    readonly url: string;\n    readonly ok: boolean;\n    readonly status: number;\n    readonly statusText: string;\n    readonly body: any;\n}\n";
+    + "\nexport type ApiResult<TBody = unknown> = {\n    readonly url: string;\n    readonly ok: boolean;\n    readonly status: number;\n    readonly statusText: string;\n    readonly body: TBody;\n}\n";
 },"usePartial":true,"useData":true}

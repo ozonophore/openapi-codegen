@@ -1,7 +1,6 @@
 import { OptionValues } from 'commander';
 
 import { APP_LOGGER } from '../../common/Consts';
-import { defaultOptions } from '../../common/defaultOptions';
 import { EMigrationMode } from '../../common/Enums';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { TRawOptions } from '../../common/TRawOptions';
@@ -10,9 +9,20 @@ import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { validateZodOptions } from '../../common/Validation/validateZodOptions';
 import { allMigrationPlans } from '../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
 import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
+import { flatOptionsSchema } from '../../common/VersionedSchema/AllVersionedSchemas/UnifiedVersionedSchemas';
 import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
 import { GenerateOptions, generateOptionsSchema } from '../schemas';
+
+const generateCliFlatSchema = flatOptionsSchema.strict().superRefine((data, ctx) => {
+    if (data.excludeCoreServiceFiles === true && data.request) {
+        ctx.addIssue({
+            code: 'custom',
+            message: '"request" can only be used when "excludeCoreServiceFiles" is false',
+            path: ['request'],
+        });
+    }
+});
 
 /**
  * Запускает генерацию OpenAPI клиента
@@ -37,24 +47,31 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
         // Если есть минимальные опции (input и output), используем их
         const hasMinimumRequiredOptions = !!validatedOptions.input && !!validatedOptions.output;
         if (hasMinimumRequiredOptions) {
-            // Используем старую Joi валидацию для обратной совместимости
-            // В будущем можно заменить на Zod
-            const { error: defaultValuesError, value } = defaultOptions.validate({
+            const directOptionsValidationResult = validateZodOptions(generateCliFlatSchema, {
                 input: validatedOptions.input,
                 output: validatedOptions.output,
                 ...clientOptions,
             });
 
-            if (defaultValuesError) {
-                await OpenAPI.generate(value);
-                process.exit(0);
+            if (!directOptionsValidationResult.success) {
+                APP_LOGGER.error(directOptionsValidationResult.errors.join('\n'));
+                process.exit(1);
             }
+
+            await OpenAPI.generate(directOptionsValidationResult.data as TRawOptions);
+            process.exit(0);
         }
 
         const configData = loadConfigIfExists(validatedOptions.openapiConfig);
         if (!configData) {
-            APP_LOGGER.error(LOGGER_MESSAGES.CONFIG.FILE_MISSING);
+            APP_LOGGER.error(
+                `${LOGGER_MESSAGES.CONFIG.FILE_MISSING}\nProvide non-empty "--input" and "--output" options, or a valid "--openapi-config" file path.`
+            );
             process.exit(1);
+        }
+
+        if (Array.isArray(configData)) {
+            APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.ARRAY_DEPRECATED);
         }
 
         const preparedOptions = convertArrayToObject(configData);

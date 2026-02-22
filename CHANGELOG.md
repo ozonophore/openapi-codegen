@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-beta.14] — 2026-02-23
+
+### Added
+- Added `customExecutorPath` support to generation options:
+  - new CLI/config option `customExecutorPath`;
+  - generated `createClient` can use a custom `createExecutorAdapter`.
+- Added runtime extension point `executorFactory` in generated `createClient` options.
+- Added raw response execution pipeline:
+  - `RequestExecutor.requestRaw<TResponse>()`;
+  - generated service methods `*Raw(...)`;
+  - core request templates now export `requestRaw(...)`.
+- Added generic body typing for `ApiResult<TBody>`.
+- Added deprecation warning for array-based config format (`LOGGER_MESSAGES.CONFIG.ARRAY_DEPRECATED`) in generation/preview/config validation flows.
+
+### Changed
+- Updated direct CLI generation validation in `generateOpenApiClient`:
+  - removed legacy Joi-based `defaultOptions` validation;
+  - switched to Zod validation based on `flatOptionsSchema`.
+- Updated direct generation control flow to run `OpenAPI.generate(...)` only after successful validation.
+- Improved `generate` fallback error text when neither valid `--input/--output` nor an existing config file is available.
+- Updated unified schema V4 / options typing:
+  - `customExecutorPath` is now part of unified options schema;
+  - latest unified schema is resolved through `unifiedSchemaDefinitions`.
+- Updated config normalization utilities to preserve/promote `customExecutorPath` in legacy array/object conversions.
+- Updated README docs (EN/RU) with `customExecutorPath` usage and `executorFactory` examples.
+
+### Removed
+- Removed obsolete legacy validation module `src/common/defaultOptions.ts`.
+
+### Fixed
+- Fixed migration warning command text in `migrateDataToLatestSchemaVersion` to reference `openapi-codegen-cli update-config`.
+- Fixed request/core typing consistency by propagating `ApiResult<T>` across request templates and generated executor contracts.
+
+### Tests
+- Updated compatibility and utility tests to cover `customExecutorPath` migration/normalization behavior.
+
 ## [2.0.0-beta.13] — 2026-02-22
 
 ### Added

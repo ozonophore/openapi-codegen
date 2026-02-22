@@ -4,6 +4,7 @@
 
 import type { IModelWithString } from '../models/ModelWithString';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const complexTypes = (
     parameterObject: {
@@ -63,6 +64,24 @@ export class ComplexService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<Array<IModelWithString>> {
         return this.executor.request<Array<IModelWithString>>(
+            ComplexOptions.complexTypes(parameterObject, parameterReference),
+            options,
+        );
+    }
+
+    public complexTypesRaw(
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string;
+                };
+            };
+        },
+        parameterReference: IModelWithString,
+
+        options?: TOptions,
+    ): Promise<ApiResult<Array<IModelWithString>>> {
+        return this.executor.requestRaw<Array<IModelWithString>>(
             ComplexOptions.complexTypes(parameterObject, parameterReference),
             options,
         );

@@ -64,6 +64,32 @@ import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
  * @throws ApiError
  */
 {{#if @root.useCancelableRequest}}
+export function requestRaw<T>(options: ApiRequestOptions, config: TOpenAPIConfig): CancelablePromise<ApiResult<T>> {
+    return new CancelablePromise(async (resolve, reject, onCancel) => {
+        try {
+            const url = getUrl(options, config);
+
+            if (!onCancel.isCancelled) {
+                const response = await sendRequest(options, url, config, onCancel);
+                const responseBody = await getResponseBody(response);
+                const responseHeader = getResponseHeader(response, options.responseHeader);
+                const result: ApiResult<T> = {
+                    url,
+                    ok: response.ok,
+                    status: response.status,
+                    statusText: response.statusText,
+                    body: (responseHeader || responseBody) as T,
+                };
+
+                catchErrors(options, result);
+                resolve(result);
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 export function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): CancelablePromise<T> {
     return new CancelablePromise(async (resolve, reject, onCancel) => {
         try {
@@ -73,12 +99,12 @@ export function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): 
                 const response = await sendRequest(options, url, config, onCancel);
                 const responseBody = await getResponseBody(response);
                 const responseHeader = getResponseHeader(response, options.responseHeader);
-                const result: ApiResult = {
+                const result: ApiResult<T> = {
                     url,
                     ok: response.ok,
                     status: response.status,
                     statusText: response.statusText,
-                    body: responseHeader || responseBody,
+                    body: (responseHeader || responseBody) as T,
                 };
 
                 catchErrors(options, result);
@@ -91,6 +117,11 @@ export function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): 
 }
 {{else}}
 export async function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<T> {
+    const result = await requestRaw<T>(options, config);
+    return result.body;
+}
+
+export async function requestRaw<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<ApiResult<T>> {
     return new Promise(async (resolve, reject) => {
         try {
             const url = getUrl(options, config);
@@ -98,16 +129,16 @@ export async function request<T>(options: ApiRequestOptions, config: TOpenAPICon
             const responseBody = await getResponseBody(response);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 
-            const result: ApiResult = {
+            const result: ApiResult<T> = {
                 url,
                 ok: response.ok,
                 status: response.status,
                 statusText: response.statusText,
-                body: responseHeader || responseBody,
+                body: (responseHeader || responseBody) as T,
             };
 
             catchErrors(options, result);
-            resolve(result.body);
+            resolve(result);
         } catch (error) {
             reject(error);
         }

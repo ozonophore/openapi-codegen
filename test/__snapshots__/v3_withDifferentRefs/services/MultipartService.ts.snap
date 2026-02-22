@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const multipartResponse = (): RequestConfig => ({
     method: 'GET',
@@ -32,6 +33,24 @@ export class MultipartService<TOptions = unknown> {
         };
     }> {
         return this.executor.request<{
+            file?: string;
+            metadata?: {
+                foo?: string;
+                bar?: string;
+            };
+        }>(MultipartOptions.multipartResponse(), options);
+    }
+
+    public multipartResponseRaw(options?: TOptions): Promise<
+        ApiResult<{
+            file?: string;
+            metadata?: {
+                foo?: string;
+                bar?: string;
+            };
+        }>
+    > {
+        return this.executor.requestRaw<{
             file?: string;
             metadata?: {
                 foo?: string;

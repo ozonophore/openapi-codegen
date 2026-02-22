@@ -51,6 +51,7 @@ program
     .option('--useUnionTypes', 'Use union types instead of enums (default: false)')
     .option('--excludeCoreServiceFiles', 'The generation of the core and services is excluded (default: false)')
     .option('--request <value>', 'Path to custom request file')
+    .option('--customExecutorPath <value>', 'Path to custom createExecutorAdapter module')
     .option('--interfacePrefix <value>', 'Prefix for interface model(default: "I")', 'I')
     .option('--enumPrefix <value>', 'Prefix for enum model(default: "E")', 'E')
     .option('--typePrefix <value>', 'Prefix for type model(default: "T")', 'T')

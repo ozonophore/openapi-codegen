@@ -8,6 +8,7 @@ import type { TModelThatExtends } from '../models/schemas/compositions/ModelThat
 import type { INested } from '../models/schemas/compositions/Nested';
 import type { TPropExtendsA } from '../models/schemas/compositions/PropExtendsA';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const callWithResponse = (): RequestConfig => ({
     method: 'GET',
@@ -46,6 +47,10 @@ export class ResponseService<TOptions = unknown> {
     public callWithResponse(options?: TOptions): Promise<IModelWithStringLocal> {
         return this.executor.request<IModelWithStringLocal>(ResponseOptions.callWithResponse(), options);
     }
+
+    public callWithResponseRaw(options?: TOptions): Promise<ApiResult<IModelWithStringLocal>> {
+        return this.executor.requestRaw<IModelWithStringLocal>(ResponseOptions.callWithResponse(), options);
+    }
     /**
      * @returns TPropExtendsA Message for default response
      * @returns IModelWithString Message for 201 response
@@ -53,6 +58,13 @@ export class ResponseService<TOptions = unknown> {
      */
     public callWithDuplicateResponses(options?: TOptions): Promise<TPropExtendsA | IModelWithString> {
         return this.executor.request<TPropExtendsA | IModelWithString>(
+            ResponseOptions.callWithDuplicateResponses(),
+            options,
+        );
+    }
+
+    public callWithDuplicateResponsesRaw(options?: TOptions): Promise<ApiResult<TPropExtendsA | IModelWithString>> {
+        return this.executor.requestRaw<TPropExtendsA | IModelWithString>(
             ResponseOptions.callWithDuplicateResponses(),
             options,
         );
@@ -75,6 +87,30 @@ export class ResponseService<TOptions = unknown> {
         | INested
     > {
         return this.executor.request<
+            | {
+                  readonly '@namespace.string'?: string;
+                  readonly '@namespace.integer'?: number;
+                  readonly value?: Array<IModelWithStringLocal>;
+              }
+            | IModelWithString
+            | TModelThatExtends
+            | INested
+        >(ResponseOptions.callWithResponses(), options);
+    }
+
+    public callWithResponsesRaw(options?: TOptions): Promise<
+        ApiResult<
+            | {
+                  readonly '@namespace.string'?: string;
+                  readonly '@namespace.integer'?: number;
+                  readonly value?: Array<IModelWithStringLocal>;
+              }
+            | IModelWithString
+            | TModelThatExtends
+            | INested
+        >
+    > {
+        return this.executor.requestRaw<
             | {
                   readonly '@namespace.string'?: string;
                   readonly '@namespace.integer'?: number;

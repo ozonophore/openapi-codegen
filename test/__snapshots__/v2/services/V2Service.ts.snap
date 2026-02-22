@@ -7,6 +7,7 @@ import type { IModelWithArray } from '../models/ModelWithArray';
 import type { IModelWithDictionary } from '../models/ModelWithDictionary';
 import type { IModelWithEnumInteger } from '../models/ModelWithEnumInteger';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const getCallWithModelWithDictionaryReference = (): RequestConfig => ({
     method: 'GET',
@@ -55,12 +56,25 @@ export class V2Service<TOptions = unknown> {
             options,
         );
     }
+
+    public getCallWithModelWithDictionaryReferenceRaw(
+        options?: TOptions,
+    ): Promise<ApiResult<IDictionaryWithReference>> {
+        return this.executor.requestRaw<IDictionaryWithReference>(
+            V2Options.getCallWithModelWithDictionaryReference(),
+            options,
+        );
+    }
     /**
      * @returns IModelWithDictionary Message for default response
      * @throws ApiError
      */
     public getCallWithModelWithDictionary(options?: TOptions): Promise<IModelWithDictionary> {
         return this.executor.request<IModelWithDictionary>(V2Options.getCallWithModelWithDictionary(), options);
+    }
+
+    public getCallWithModelWithDictionaryRaw(options?: TOptions): Promise<ApiResult<IModelWithDictionary>> {
+        return this.executor.requestRaw<IModelWithDictionary>(V2Options.getCallWithModelWithDictionary(), options);
     }
     /**
      * @returns IModelWithEnumInteger Message for default response
@@ -69,11 +83,19 @@ export class V2Service<TOptions = unknown> {
     public getCallWithSimpleInteger(options?: TOptions): Promise<IModelWithEnumInteger> {
         return this.executor.request<IModelWithEnumInteger>(V2Options.getCallWithSimpleInteger(), options);
     }
+
+    public getCallWithSimpleIntegerRaw(options?: TOptions): Promise<ApiResult<IModelWithEnumInteger>> {
+        return this.executor.requestRaw<IModelWithEnumInteger>(V2Options.getCallWithSimpleInteger(), options);
+    }
     /**
      * @returns IModelWithArray Message for default response
      * @throws ApiError
      */
     public getCallWithModelArray(options?: TOptions): Promise<IModelWithArray> {
         return this.executor.request<IModelWithArray>(V2Options.getCallWithModelArray(), options);
+    }
+
+    public getCallWithModelArrayRaw(options?: TOptions): Promise<ApiResult<IModelWithArray>> {
+        return this.executor.requestRaw<IModelWithArray>(V2Options.getCallWithModelArray(), options);
     }
 }

@@ -38,7 +38,7 @@ npm install ts-openapi-codegen --save-dev
 
 ## Usage
 
-The CLI tool supports three main commands: `generate`, `check-openapi-config`, and `init-openapi-config`.
+The CLI tool supports five commands: `generate`, `check-config`, `update-config`, `init`, and `preview-changes`.
 
 ### Command: `generate`
 
@@ -65,6 +65,7 @@ openapi generate --input ./spec.json --output ./dist
 | `--useUnionTypes` | - | boolean | `false` | Use union types instead of enums |
 | `--excludeCoreServiceFiles` | - | boolean | `false` | Exclude generation of core and service files |
 | `--request` | - | string | - | Path to custom request file |
+| `--customExecutorPath` | - | string | - | Path to custom `createExecutorAdapter` module |
 | `--interfacePrefix` | - | string | `I` | Prefix for interface models |
 | `--enumPrefix` | - | string | `E` | Prefix for enum models |
 | `--typePrefix` | - | string | `T` | Prefix for type models |
@@ -97,38 +98,70 @@ openapi generate \
   --logLevel info
 ```
 
-### Command: `check-openapi-config`
+### Command: `check-config`
 
 Validates the configuration file structure and values.
 
 **Usage:**
 ```bash
-openapi check-openapi-config
-openapi check-openapi-config --openapi-config ./custom-config.json
+openapi check-config
+openapi check-config --openapi-config ./custom-config.json
 ```
 
 **Options:**
 - `--openapi-config` / `-ocn` - Path to configuration file (default: `openapi.config.json`)
 
-### Command: `init-openapi-config`
+### Command: `update-config`
+
+Updates the configuration file to the latest supported schema version.
+
+**Usage:**
+```bash
+openapi update-config
+openapi update-config --openapi-config ./custom-config.json
+```
+
+**Options:**
+- `--openapi-config` / `-ocn` - Path to configuration file (default: `openapi.config.json`)
+
+### Command: `init`
 
 Generates a configuration file template.
 
 **Usage:**
 ```bash
-# Generate single options template
-openapi init-openapi-config
-
-# Generate multi-options template
-openapi init-openapi-config --type MULTIOPTION
+# Generate config using default settings
+openapi init
 
 # Custom config file name
-openapi init-openapi-config --openapi-config ./my-config.json
+openapi init --openapi-config ./my-config.json
+
+# Specify directory with OpenAPI specs
+openapi init --specs-dir ./openapi
 ```
 
 **Options:**
 - `--openapi-config` / `-ocn` - Path to output configuration file (default: `openapi.config.json`)
-- `--type` / `-t` - Template type: `OPTION` (single) or `MULTIOPTION` (multiple) (default: `OPTION`)
+- `--specs-dir` / `-sd` - Directory with OpenAPI specification files (default: `./openapi`)
+- `--request` - Path to custom request file
+- `--useCancelableRequest` - Generate cancelable request handling
+- `--useInteractiveMode` - Enable interactive mode for guided setup
+
+### Command: `preview-changes`
+
+Previews differences between already generated code and newly generated output without overwriting your current generated directory.
+
+**Usage:**
+```bash
+openapi preview-changes
+openapi preview-changes --openapi-config ./custom-config.json
+```
+
+**Options:**
+- `--openapi-config` / `-ocn` - Path to configuration file (default: `openapi.config.json`)
+- `--generated-dir` / `-gd` - Directory with current generated files (default: `./generated`)
+- `--preview-dir` / `-pd` - Temporary preview generation directory (default: `./.ts-openapi-codegen-preview-changes`)
+- `--diff-dir` / `-dd` - Directory for diff reports (default: `./.ts-openapi-codegen-diff-changes`)
 
 ### Configuration File
 
@@ -149,7 +182,8 @@ Instead of passing all options via CLI, you can use a configuration file. Create
     "useCancelableRequest": false,
     "sortByRequired": false,
     "useSeparatedIndexes": false,
-    "request": "./custom-request.ts"
+    "request": "./custom-request.ts",
+    "customExecutorPath": "./custom/createExecutorAdapter.ts"
 }
 ```
 
@@ -200,6 +234,7 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `useUnionTypes` | boolean | `false` | Use union types instead of enums |
 | `excludeCoreServiceFiles` | boolean | `false` | Exclude core and service files generation |
 | `request` | string | - | Path to custom request file |
+| `customExecutorPath` | string | - | Path to custom `createExecutorAdapter` module |
 | `interfacePrefix` | string | `I` | Prefix for interface models |
 | `enumPrefix` | string | `E` | Prefix for enum models |
 | `typePrefix` | string | `T` | Prefix for type models |
@@ -210,7 +245,7 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `validationLibrary` | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Strategy for empty schemas: `keep`, `semantic`, or `skip` |
 
-**Note:** You can use the `init-openapi-config` command to generate a template configuration file.
+**Note:** You can use the `init` command to generate a template configuration file.
 
 ## Examples
 
@@ -224,7 +259,7 @@ openapi generate --input ./spec.json --output ./dist
 **With configuration file:**
 ```bash
 # First, create config file
-openapi init-openapi-config
+openapi init
 
 # Then generate
 openapi generate
@@ -232,7 +267,13 @@ openapi generate
 
 **Check configuration:**
 ```bash
-openapi check-openapi-config
+openapi check-config
+openapi update-config
+```
+
+**Preview changes before applying:**
+```bash
+openapi preview-changes
 ```
 
 ### Using NPX
@@ -249,8 +290,10 @@ npx ts-openapi-codegen generate --input ./spec.json --output ./dist
     "scripts": {
         "generate": "openapi generate --input ./spec.json --output ./dist",
         "generate:config": "openapi generate",
-        "check-config": "openapi check-openapi-config",
-        "init-config": "openapi init-openapi-config"
+        "check-config": "openapi check-config",
+        "update-config": "openapi update-config",
+        "init-config": "openapi init",
+        "preview-changes": "openapi preview-changes"
     }
 }
 ```
@@ -630,6 +673,31 @@ const executor = withInterceptors(baseExecutor, {
 
 const service = new SimpleService(executor);
 await service.getCallWithoutParametersAndResponse({ timeout: 5000 });
+```
+
+#### Using generated `createClient` with `customExecutorPath` and `executorFactory`
+
+If you set `customExecutorPath` in generation config, `createClient.ts` imports your custom
+`createExecutorAdapter` and uses it as the default executor.
+
+You can additionally pass `executorFactory` at runtime to wrap/extend this default executor
+(for retry, tracing, metrics, etc.) without changing generated services.
+
+```ts
+import { createClient } from './generated';
+
+const client = createClient({
+    executorFactory: ({ openApiConfig, createDefaultExecutor }) => {
+        const baseExecutor = createDefaultExecutor();
+
+        return {
+            async request<TResponse>(config, options) {
+                console.debug('Request to', openApiConfig.BASE, config.path);
+                return baseExecutor.request<TResponse>(config, options);
+            },
+        };
+    },
+});
 ```
 
 ### Sorting strategy for function arguments `--sortByRequired`

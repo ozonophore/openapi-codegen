@@ -7,6 +7,7 @@ import type { ISimpleDto as ISimpleDto$4 } from '../models/path/alias_response/S
 import type { ISimpleDto as ISimpleDto$2 } from '../models/path/common_request/SimpleDto';
 import type { ISimpleDto as ISimpleDto$1 } from '../models/path/common_response/SimpleDto';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const getCallWithoutResponse = (): RequestConfig => ({
     method: 'GET',
@@ -51,6 +52,10 @@ export class V3WithAliasService<TOptions = unknown> {
     public getCallWithoutResponse(options?: TOptions): Promise<ISimpleDto$1> {
         return this.executor.request<ISimpleDto$1>(V3WithAliasOptions.getCallWithoutResponse(), options);
     }
+
+    public getCallWithoutResponseRaw(options?: TOptions): Promise<ApiResult<ISimpleDto$1>> {
+        return this.executor.requestRaw<ISimpleDto$1>(V3WithAliasOptions.getCallWithoutResponse(), options);
+    }
     /**
      * @param requestBody
      * @returns ISimpleDto$1 OK
@@ -63,6 +68,14 @@ export class V3WithAliasService<TOptions = unknown> {
     ): Promise<ISimpleDto$1> {
         return this.executor.request<ISimpleDto$1>(V3WithAliasOptions.postCallWithAlias(requestBody), options);
     }
+
+    public postCallWithAliasRaw(
+        requestBody?: ISimpleDto$2,
+
+        options?: TOptions,
+    ): Promise<ApiResult<ISimpleDto$1>> {
+        return this.executor.requestRaw<ISimpleDto$1>(V3WithAliasOptions.postCallWithAlias(requestBody), options);
+    }
     /**
      * @param requestBody
      * @returns ISimpleDto$4 OK
@@ -74,5 +87,13 @@ export class V3WithAliasService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<ISimpleDto$4> {
         return this.executor.request<ISimpleDto$4>(V3WithAliasOptions.postAliasMatrix(requestBody), options);
+    }
+
+    public postAliasMatrixRaw(
+        requestBody?: ISimpleDto$3,
+
+        options?: TOptions,
+    ): Promise<ApiResult<ISimpleDto$4>> {
+        return this.executor.requestRaw<ISimpleDto$4>(V3WithAliasOptions.postAliasMatrix(requestBody), options);
     }
 }

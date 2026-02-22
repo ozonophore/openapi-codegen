@@ -5,6 +5,7 @@
 import type { IModelWithEnum } from '../models/schemas/enums/ModelWithEnum';
 import type { IModelWithProperties } from '../models/schemas/ModelWithProperties';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const callWithDefaultParameters = (
     parameterBoolean: boolean | null = true,
@@ -144,6 +145,28 @@ export class DefaultsService<TOptions = unknown> {
             options,
         );
     }
+
+    public callWithDefaultParametersRaw(
+        parameterBoolean: boolean | null = true,
+        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+        parameterNumber: number | null = 123,
+        parameterString: string | null = 'Hello World!',
+        parameterModel: IModelWithProperties | null = {
+            prop: 'Hello World!',
+        },
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(
+            DefaultsOptions.callWithDefaultParameters(
+                parameterBoolean,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterModel,
+            ),
+            options,
+        );
+    }
     /**
      * @param parameterBoolean This is a simple boolean that is optional with default value
      * @param parameterEnum This is a simple enum that is optional with default value
@@ -163,6 +186,28 @@ export class DefaultsService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(
+            DefaultsOptions.callWithDefaultOptionalParameters(
+                parameterBoolean,
+                parameterEnum,
+                parameterNumber,
+                parameterString,
+                parameterModel,
+            ),
+            options,
+        );
+    }
+
+    public callWithDefaultOptionalParametersRaw(
+        parameterBoolean: boolean = true,
+        parameterEnum: 'Success' | 'Warning' | 'Error' = 'Success',
+        parameterNumber: number = 123,
+        parameterString: string = 'Hello World!',
+        parameterModel: IModelWithEnum = {
+            prop: 'Hello World!',
+        },
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(
             DefaultsOptions.callWithDefaultOptionalParameters(
                 parameterBoolean,
                 parameterEnum,
@@ -194,6 +239,30 @@ export class DefaultsService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(
+            DefaultsOptions.callToTestOrderOfParams(
+                parameterStringWithNoDefault,
+                parameterOptionalStringWithDefault,
+                parameterOptionalStringWithEmptyDefault,
+                parameterStringWithDefault,
+                parameterStringWithEmptyDefault,
+                parameterOptionalStringWithNoDefault,
+            ),
+            options,
+        );
+    }
+
+    public callToTestOrderOfParamsRaw(
+        parameterStringWithNoDefault: string,
+
+        parameterOptionalStringWithDefault: string = 'Hello World!',
+        parameterOptionalStringWithEmptyDefault: string = '',
+        parameterStringWithDefault: string = 'Hello World!',
+        parameterStringWithEmptyDefault: string = '',
+        parameterOptionalStringWithNoDefault?: string,
+
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(
             DefaultsOptions.callToTestOrderOfParams(
                 parameterStringWithNoDefault,
                 parameterOptionalStringWithDefault,

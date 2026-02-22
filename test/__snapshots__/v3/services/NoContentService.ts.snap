@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const callWithNoContentResponse = (): RequestConfig => ({
     method: 'GET',
@@ -26,5 +27,9 @@ export class NoContentService<TOptions = unknown> {
      */
     public callWithNoContentResponse(options?: TOptions): Promise<void> {
         return this.executor.request<void>(NoContentOptions.callWithNoContentResponse(), options);
+    }
+
+    public callWithNoContentResponseRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(NoContentOptions.callWithNoContentResponse(), options);
     }
 }

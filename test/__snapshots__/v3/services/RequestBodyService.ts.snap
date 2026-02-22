@@ -4,6 +4,7 @@
 
 import type { IModelWithString } from '../models/ModelWithString';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const postRequestBodyService = (requestBody?: IModelWithString): RequestConfig => ({
     method: 'POST',
@@ -34,5 +35,13 @@ export class RequestBodyService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(RequestBodyOptions.postRequestBodyService(requestBody), options);
+    }
+
+    public postRequestBodyServiceRaw(
+        requestBody?: IModelWithString,
+
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(RequestBodyOptions.postRequestBodyService(requestBody), options);
     }
 }

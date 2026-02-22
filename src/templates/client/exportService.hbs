@@ -9,6 +9,7 @@ import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{joinPath 
 import type { CancelablePromise } from '{{{joinPath @root.outputCore 'CancelablePromise'}}}';
 {{/if}}
 import type { RequestExecutor, RequestConfig } from '{{{joinPath @root.outputCore './executor/requestExecutor'}}}';
+import type { ApiResult } from '{{{joinPath @root.outputCore 'ApiResult'}}}';
 
 {{#each operations}}
 const {{{name}}} = ({{>parameters}}): RequestConfig => ({
@@ -67,6 +68,23 @@ export class {{{name}}}<TOptions = unknown> {
     ): Promise<{{>result default="void"}}> {
     {{/if}}
         return this.executor.request<{{>result default="void"}}>(
+            {{{../originName}}}Options.{{{name}}}({{>parameterValues~}}),
+            options
+        );
+    }
+
+    {{#if @root.useCancelableRequest}}
+    public {{{name}}}Raw(
+        {{>parameters}}
+        options?: TOptions,
+    ): CancelablePromise<ApiResult<{{>result default="void"}}>> {
+    {{else}}
+    public {{{name}}}Raw(
+        {{>parameters}}
+        options?: TOptions,
+    ): Promise<ApiResult<{{>result default="void"}}>> {
+    {{/if}}
+        return this.executor.requestRaw<{{>result default="void"}}>(
             {{{../originName}}}Options.{{{name}}}({{>parameterValues~}}),
             options
         );

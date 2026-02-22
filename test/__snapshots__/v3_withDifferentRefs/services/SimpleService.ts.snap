@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const getCallWithoutParametersAndResponse = (): RequestConfig => ({
     method: 'GET',
@@ -68,11 +69,19 @@ export class SimpleService<TOptions = unknown> {
     public getCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
         return this.executor.request<void>(SimpleOptions.getCallWithoutParametersAndResponse(), options);
     }
+
+    public getCallWithoutParametersAndResponseRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(SimpleOptions.getCallWithoutParametersAndResponse(), options);
+    }
     /**
      * @throws ApiError
      */
     public putCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
         return this.executor.request<void>(SimpleOptions.putCallWithoutParametersAndResponse(), options);
+    }
+
+    public putCallWithoutParametersAndResponseRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(SimpleOptions.putCallWithoutParametersAndResponse(), options);
     }
     /**
      * @throws ApiError
@@ -80,11 +89,19 @@ export class SimpleService<TOptions = unknown> {
     public postCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
         return this.executor.request<void>(SimpleOptions.postCallWithoutParametersAndResponse(), options);
     }
+
+    public postCallWithoutParametersAndResponseRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(SimpleOptions.postCallWithoutParametersAndResponse(), options);
+    }
     /**
      * @throws ApiError
      */
     public deleteCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
         return this.executor.request<void>(SimpleOptions.deleteCallWithoutParametersAndResponse(), options);
+    }
+
+    public deleteCallWithoutParametersAndResponseRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(SimpleOptions.deleteCallWithoutParametersAndResponse(), options);
     }
     /**
      * @throws ApiError
@@ -92,16 +109,28 @@ export class SimpleService<TOptions = unknown> {
     public optionsCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
         return this.executor.request<void>(SimpleOptions.optionsCallWithoutParametersAndResponse(), options);
     }
+
+    public optionsCallWithoutParametersAndResponseRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(SimpleOptions.optionsCallWithoutParametersAndResponse(), options);
+    }
     /**
      * @throws ApiError
      */
     public headCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
         return this.executor.request<void>(SimpleOptions.headCallWithoutParametersAndResponse(), options);
     }
+
+    public headCallWithoutParametersAndResponseRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(SimpleOptions.headCallWithoutParametersAndResponse(), options);
+    }
     /**
      * @throws ApiError
      */
     public patchCallWithoutParametersAndResponse(options?: TOptions): Promise<void> {
         return this.executor.request<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), options);
+    }
+
+    public patchCallWithoutParametersAndResponseRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(SimpleOptions.patchCallWithoutParametersAndResponse(), options);
     }
 }

@@ -4,6 +4,7 @@
 
 import type { IModelWithCircularReference } from '../models/schemas/base/ModelWithCircularReference';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const callWithCircularModel = (): RequestConfig => ({
     method: 'GET',
@@ -27,5 +28,9 @@ export class CircularService<TOptions = unknown> {
      */
     public callWithCircularModel(options?: TOptions): Promise<IModelWithCircularReference> {
         return this.executor.request<IModelWithCircularReference>(CircularOptions.callWithCircularModel(), options);
+    }
+
+    public callWithCircularModelRaw(options?: TOptions): Promise<ApiResult<IModelWithCircularReference>> {
+        return this.executor.requestRaw<IModelWithCircularReference>(CircularOptions.callWithCircularModel(), options);
     }
 }

@@ -4,6 +4,42 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.0.0-beta.14] — 2026-02-23
+
+### Добавлено
+- Добавлена поддержка `customExecutorPath` в опциях генерации:
+  - новый CLI/config-параметр `customExecutorPath`;
+  - сгенерированный `createClient` может использовать пользовательский `createExecutorAdapter`.
+- Добавлена runtime-точка расширения `executorFactory` в опциях сгенерированного `createClient`.
+- Добавлен поток выполнения raw-ответов:
+  - `RequestExecutor.requestRaw<TResponse>()`;
+  - сгенерированные сервисные методы `*Raw(...)`;
+  - core request-шаблоны теперь экспортируют `requestRaw(...)`.
+- Добавлена generic-типизация тела ответа `ApiResult<TBody>`.
+- Добавлено предупреждение о deprecated array-формате конфигурации (`LOGGER_MESSAGES.CONFIG.ARRAY_DEPRECATED`) в потоках generate/preview/валидации конфига.
+
+### Изменено
+- Обновлена валидация direct CLI-генерации в `generateOpenApiClient`:
+  - удалена legacy Joi-валидация через `defaultOptions`;
+  - добавлена Zod-валидация на базе `flatOptionsSchema`.
+- Обновлён поток direct-генерации: `OpenAPI.generate(...)` вызывается только при успешной валидации.
+- Улучшен текст ошибки в `generate` для fallback-сценария, когда нет валидных `--input/--output` и отсутствует доступный config-файл.
+- Обновлены unified-схема V4 и типизация опций:
+  - `customExecutorPath` добавлен в unified options schema;
+  - получение latest unified schema переведено на `unifiedSchemaDefinitions`.
+- Обновлены утилиты нормализации конфига для сохранения/продвижения `customExecutorPath` при конвертации legacy array/object форматов.
+- Обновлена документация `README.md` и `README.rus.md` по `customExecutorPath` и использованию `executorFactory`.
+
+### Удалено
+- Удалён устаревший legacy-модуль валидации `src/common/defaultOptions.ts`.
+
+### Исправлено
+- Исправлен текст команды в предупреждении миграции `migrateDataToLatestSchemaVersion`: теперь указан `openapi-codegen-cli update-config`.
+- Исправлена согласованность типизации request/core за счет распространения `ApiResult<T>` в request-шаблонах и контракте сгенерированного executor.
+
+### Тесты
+- Обновлены compatibility и utility тесты для покрытия миграции/нормализации `customExecutorPath`.
+
 ## [2.0.0-beta.13] — 2026-02-22
 
 ### Добавлено

@@ -7,6 +7,7 @@ import type { IModelWithDictionary } from '../models/ModelWithDictionary';
 import type { IModelWithEnum } from '../models/ModelWithEnum';
 import type { IModelWithString } from '../models/ModelWithString';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const complexTypes = (
     parameterObject: {
@@ -112,6 +113,24 @@ export class ComplexService<TOptions = unknown> {
             options,
         );
     }
+
+    public complexTypesRaw(
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string;
+                };
+            };
+        },
+        parameterReference: IModelWithString,
+
+        options?: TOptions,
+    ): Promise<ApiResult<Array<IModelWithString>>> {
+        return this.executor.requestRaw<Array<IModelWithString>>(
+            ComplexOptions.complexTypes(parameterObject, parameterReference),
+            options,
+        );
+    }
     /**
      * @param id
      * @param requestBody
@@ -137,5 +156,26 @@ export class ComplexService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<IModelWithString> {
         return this.executor.request<IModelWithString>(ComplexOptions.complexParams(id, requestBody), options);
+    }
+
+    public complexParamsRaw(
+        id: number,
+
+        requestBody?: {
+            readonly key: string | null;
+            name: string | null;
+            enabled: boolean;
+            readonly type: 'Monkey' | 'Horse' | 'Bird';
+            listOfModels?: Array<IModelWithString> | null;
+            listOfStrings?: Array<string> | null;
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            readonly user?: {
+                readonly id?: number;
+                readonly name?: string | null;
+            };
+        },
+        options?: TOptions,
+    ): Promise<ApiResult<IModelWithString>> {
+        return this.executor.requestRaw<IModelWithString>(ComplexOptions.complexParams(id, requestBody), options);
     }
 }

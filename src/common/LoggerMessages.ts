@@ -77,6 +77,7 @@ export const LOGGER_MESSAGES = {
         FILE_UPDATED: (configPath: string) => `Configuration file "${configPath}" has been updated`,
         ACTION_SKIPPED: 'Action skipped.',
         UNKNOWN_ACTION: (action: string) => `Unknown action: ${action}`,
+        ARRAY_DEPRECATED: 'Using an array of configurations is deprecated and support will be removed in future versions. Please switch to using an object with named configurations.',
     },
 
     // ========== Error Messages ==========

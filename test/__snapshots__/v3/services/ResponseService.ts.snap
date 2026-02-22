@@ -6,6 +6,7 @@ import type { TModelThatExtendsExtends } from '../models/ModelThatExtendsExtends
 import type { TModelThatExtends } from '../models/ModelThatExtends';
 import type { IModelWithString } from '../models/ModelWithString';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const callWithResponse = (): RequestConfig => ({
     method: 'GET',
@@ -44,12 +45,20 @@ export class ResponseService<TOptions = unknown> {
     public callWithResponse(options?: TOptions): Promise<IModelWithString> {
         return this.executor.request<IModelWithString>(ResponseOptions.callWithResponse(), options);
     }
+
+    public callWithResponseRaw(options?: TOptions): Promise<ApiResult<IModelWithString>> {
+        return this.executor.requestRaw<IModelWithString>(ResponseOptions.callWithResponse(), options);
+    }
     /**
      * @returns IModelWithString Message for default response
      * @throws ApiError
      */
     public callWithDuplicateResponses(options?: TOptions): Promise<IModelWithString> {
         return this.executor.request<IModelWithString>(ResponseOptions.callWithDuplicateResponses(), options);
+    }
+
+    public callWithDuplicateResponsesRaw(options?: TOptions): Promise<ApiResult<IModelWithString>> {
+        return this.executor.requestRaw<IModelWithString>(ResponseOptions.callWithDuplicateResponses(), options);
     }
     /**
      * @returns any Message for 200 response
@@ -69,6 +78,30 @@ export class ResponseService<TOptions = unknown> {
         | TModelThatExtendsExtends
     > {
         return this.executor.request<
+            | {
+                  readonly '@namespace.string'?: string;
+                  readonly '@namespace.integer'?: number;
+                  readonly value?: Array<IModelWithString>;
+              }
+            | IModelWithString
+            | TModelThatExtends
+            | TModelThatExtendsExtends
+        >(ResponseOptions.callWithResponses(), options);
+    }
+
+    public callWithResponsesRaw(options?: TOptions): Promise<
+        ApiResult<
+            | {
+                  readonly '@namespace.string'?: string;
+                  readonly '@namespace.integer'?: number;
+                  readonly value?: Array<IModelWithString>;
+              }
+            | IModelWithString
+            | TModelThatExtends
+            | TModelThatExtendsExtends
+        >
+    > {
+        return this.executor.requestRaw<
             | {
                   readonly '@namespace.string'?: string;
                   readonly '@namespace.integer'?: number;

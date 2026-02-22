@@ -37,7 +37,7 @@ npm install ts-openapi-codegen --save-dev
 
 ## Использование
 
-CLI инструмент поддерживает три основные команды: `generate`, `check-openapi-config`, и `init-openapi-config`.
+CLI инструмент поддерживает пять команд: `generate`, `check-config`, `update-config`, `init` и `preview-changes`.
 
 ### Команда: `generate`
 
@@ -64,6 +64,7 @@ openapi generate --input ./spec.json --output ./dist
 | `--useUnionTypes` | - | boolean | `false` | Использовать union типы вместо enums |
 | `--excludeCoreServiceFiles` | - | boolean | `false` | Исключить генерацию core и сервисных файлов |
 | `--request` | - | string | - | Путь к пользовательскому файлу запросов |
+| `--customExecutorPath` | - | string | - | Путь к пользовательскому модулю `createExecutorAdapter` |
 | `--interfacePrefix` | - | string | `I` | Префикс для интерфейсов моделей |
 | `--enumPrefix` | - | string | `E` | Префикс для enum моделей |
 | `--typePrefix` | - | string | `T` | Префикс для type моделей |
@@ -96,38 +97,70 @@ openapi generate \
   --logLevel info
 ```
 
-### Команда: `check-openapi-config`
+### Команда: `check-config`
 
 Проверяет структуру и значения файла конфигурации.
 
 **Использование:**
 ```bash
-openapi check-openapi-config
-openapi check-openapi-config --openapi-config ./custom-config.json
+openapi check-config
+openapi check-config --openapi-config ./custom-config.json
 ```
 
 **Опции:**
 - `--openapi-config` / `-ocn` - Путь к файлу конфигурации (по умолчанию: `openapi.config.json`)
 
-### Команда: `init-openapi-config`
+### Команда: `update-config`
+
+Обновляет файл конфигурации до последней поддерживаемой версии схемы.
+
+**Использование:**
+```bash
+openapi update-config
+openapi update-config --openapi-config ./custom-config.json
+```
+
+**Опции:**
+- `--openapi-config` / `-ocn` - Путь к файлу конфигурации (по умолчанию: `openapi.config.json`)
+
+### Команда: `init`
 
 Генерирует шаблон файла конфигурации.
 
 **Использование:**
 ```bash
-# Генерация шаблона с одним набором опций
-openapi init-openapi-config
-
-# Генерация шаблона с несколькими наборами опций
-openapi init-openapi-config --type MULTIOPTION
+# Генерация шаблона с настройками по умолчанию
+openapi init
 
 # Пользовательское имя файла конфигурации
-openapi init-openapi-config --openapi-config ./my-config.json
+openapi init --openapi-config ./my-config.json
+
+# Явно указать директорию со спецификациями OpenAPI
+openapi init --specs-dir ./openapi
 ```
 
 **Опции:**
 - `--openapi-config` / `-ocn` - Путь к выходному файлу конфигурации (по умолчанию: `openapi.config.json`)
-- `--type` / `-t` - Тип шаблона: `OPTION` (одиночный) или `MULTIOPTION` (множественный) (по умолчанию: `OPTION`)
+- `--specs-dir` / `-sd` - Директория с файлами OpenAPI спецификаций (по умолчанию: `./openapi`)
+- `--request` - Путь к пользовательскому request-файлу
+- `--useCancelableRequest` - Включить генерацию cancelable request
+- `--useInteractiveMode` - Включить интерактивный режим настройки
+
+### Команда: `preview-changes`
+
+Показывает различия между уже сгенерированным кодом и новым результатом генерации без перезаписи текущей директории generated-кода.
+
+**Использование:**
+```bash
+openapi preview-changes
+openapi preview-changes --openapi-config ./custom-config.json
+```
+
+**Опции:**
+- `--openapi-config` / `-ocn` - Путь к файлу конфигурации (по умолчанию: `openapi.config.json`)
+- `--generated-dir` / `-gd` - Директория с текущим generated-кодом (по умолчанию: `./generated`)
+- `--preview-dir` / `-pd` - Временная директория для preview-генерации (по умолчанию: `./.ts-openapi-codegen-preview-changes`)
+- `--diff-dir` / `-dd` - Директория для diff-отчетов (по умолчанию: `./.ts-openapi-codegen-diff-changes`)
 
 ### Файл конфигурации
 
@@ -148,7 +181,8 @@ openapi init-openapi-config --openapi-config ./my-config.json
     "useCancelableRequest": false,
     "sortByRequired": false,
     "useSeparatedIndexes": false,
-    "request": "./custom-request.ts"
+    "request": "./custom-request.ts",
+    "customExecutorPath": "./custom/createExecutorAdapter.ts"
 }
 ```
 
@@ -199,6 +233,7 @@ openapi init-openapi-config --openapi-config ./my-config.json
 | `useUnionTypes` | boolean | `false` | Использовать union типы вместо enums |
 | `excludeCoreServiceFiles` | boolean | `false` | Исключить генерацию core и сервисных файлов |
 | `request` | string | - | Путь к пользовательскому файлу запросов |
+| `customExecutorPath` | string | - | Путь к пользовательскому модулю `createExecutorAdapter` |
 | `interfacePrefix` | string | `I` | Префикс для интерфейсов моделей |
 | `enumPrefix` | string | `E` | Префикс для enum моделей |
 | `typePrefix` | string | `T` | Префикс для type моделей |
@@ -209,7 +244,7 @@ openapi init-openapi-config --openapi-config ./my-config.json
 | `validationLibrary` | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Стратегия для пустых схем: `keep`, `semantic`, или `skip` |
 
-**Примечание:** Вы можете использовать команду `init-openapi-config` для генерации шаблона файла конфигурации.
+**Примечание:** Вы можете использовать команду `init` для генерации шаблона файла конфигурации.
 
 ## Примеры
 
@@ -223,7 +258,7 @@ openapi generate --input ./spec.json --output ./dist
 **С файлом конфигурации:**
 ```bash
 # Сначала создайте файл конфигурации
-openapi init-openapi-config
+openapi init
 
 # Затем выполните генерацию
 openapi generate
@@ -231,7 +266,13 @@ openapi generate
 
 **Проверка конфигурации:**
 ```bash
-openapi check-openapi-config
+openapi check-config
+openapi update-config
+```
+
+**Предпросмотр изменений перед применением:**
+```bash
+openapi preview-changes
 ```
 
 ### Использование NPX
@@ -248,8 +289,10 @@ npx ts-openapi-codegen generate --input ./spec.json --output ./dist
     "scripts": {
         "generate": "openapi generate --input ./spec.json --output ./dist",
         "generate:config": "openapi generate",
-        "check-config": "openapi check-openapi-config",
-        "init-config": "openapi init-openapi-config"
+        "check-config": "openapi check-config",
+        "update-config": "openapi update-config",
+        "init-config": "openapi init",
+        "preview-changes": "openapi preview-changes"
     }
 }
 ```
@@ -632,6 +675,31 @@ const service = new SimpleService(executor);
 await service.getCallWithoutParametersAndResponse({ timeout: 5000 });
 ```
 
+#### Использование сгенерированного `createClient` с `customExecutorPath` и `executorFactory`
+
+Если в конфигурации генерации задан `customExecutorPath`, в `createClient.ts` будет импортирован ваш
+пользовательский `createExecutorAdapter`, и он станет базовым executor по умолчанию.
+
+Дополнительно в runtime можно передать `executorFactory`, чтобы обернуть/расширить этот базовый executor
+(retry, tracing, metrics и т.д.) без изменения сгенерированных сервисов.
+
+```ts
+import { createClient } from './generated';
+
+const client = createClient({
+    executorFactory: ({ openApiConfig, createDefaultExecutor }) => {
+        const baseExecutor = createDefaultExecutor();
+
+        return {
+            async request<TResponse>(config, options) {
+                console.debug('Request to', openApiConfig.BASE, config.path);
+                return baseExecutor.request<TResponse>(config, options);
+            },
+        };
+    },
+});
+```
+
 ### Стратегия сортировки аргументов функций `--sortByRequired`
 По умолчанию генератор OpenAPI сортирует параметры сервисных функций согласно упрощенной схеме. Если вам нужна более строгая опция сортировки, используйте флаг `--sortByRequired`. Упрощенная опция сортировки похожа на ту, что использовалась в версии 0.2.3 генератора OpenAPI. Этот флаг позволяет обновиться до новой версии генератора, если вы "застряли" на версии 0.2.3.
 
@@ -843,4 +911,3 @@ npm install form-data --save-dev
 [stars-image]: https://img.shields.io/github/stars/ozonophore/openapi-codegen.svg
 [librariesio-image]: https://img.shields.io/librariesio/github/ozonophore/openapi-codegen
 [lines-image]: https://img.shields.io/tokei/lines/github/ozonophore/openapi-codegen
-

@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const collectionFormat = (
     parameterArrayCsv: Array<string> | null,
@@ -57,6 +58,26 @@ export class CollectionFormatService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(
+            CollectionFormatOptions.collectionFormat(
+                parameterArrayCsv,
+                parameterArrayMulti,
+                parameterArrayPipes,
+                parameterArraySsv,
+                parameterArrayTsv,
+            ),
+            options,
+        );
+    }
+
+    public collectionFormatRaw(
+        parameterArrayCsv: Array<string> | null,
+        parameterArrayMulti: Array<string> | null,
+        parameterArrayPipes: Array<string> | null,
+        parameterArraySsv: Array<string> | null,
+        parameterArrayTsv: Array<string> | null,
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(
             CollectionFormatOptions.collectionFormat(
                 parameterArrayCsv,
                 parameterArrayMulti,

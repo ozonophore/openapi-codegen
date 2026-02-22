@@ -8,6 +8,8 @@ import { WriteClient } from '../WriteClient';
 interface WriteClientExecutor {
     outputPath: string;
     outputCorePath: string;
+    request?: string;
+    customExecutorPath?: string;
     services: Service[];
     templates: Templates;
 }
@@ -24,13 +26,16 @@ function deduplicateServicesByName(services: Service[]): Service[] {
 }
 
 export async function writeClientExecutor(this: WriteClient, options: WriteClientExecutor): Promise<void> {
-    const { outputPath, outputCorePath, templates, services } = options;
+    const { outputPath, outputCorePath, templates, services, request, customExecutorPath } = options;
     const file = resolveHelper(outputPath, 'createClient.ts');
     const uniqueServices = deduplicateServicesByName(services);
+    const hasCustomRequest = !!request;
 
     this.logger.info(`Началась запись файла ${file}`);
     const templateResult = templates.exports.client({
         outputCore: outputCorePath,
+        useCustomRequest: hasCustomRequest,
+        customExecutorPath,
         services: uniqueServices,
     });
     const formattedValue = await format(templateResult);

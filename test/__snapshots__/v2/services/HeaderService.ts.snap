@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const callWithResultFromHeader = (): RequestConfig => ({
     method: 'POST',
@@ -26,5 +27,9 @@ export class HeaderService<TOptions = unknown> {
      */
     public callWithResultFromHeader(options?: TOptions): Promise<string> {
         return this.executor.request<string>(HeaderOptions.callWithResultFromHeader(), options);
+    }
+
+    public callWithResultFromHeaderRaw(options?: TOptions): Promise<ApiResult<string>> {
+        return this.executor.requestRaw<string>(HeaderOptions.callWithResultFromHeader(), options);
     }
 }

@@ -7,6 +7,7 @@ import type { IModelWithString } from '../models/schemas/base/ModelWithString';
 import type { IModelWithArray } from '../models/schemas/collections/ModelWithArray';
 import type { Properties } from '../models/schemas/compositions/Properties';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const callWithParameters = (
     parameterCookie: string | null,
@@ -212,6 +213,34 @@ export class ParametersService<TOptions = unknown> {
             options,
         );
     }
+
+    public callWithParametersRaw(
+        parameterCookie: string | null,
+
+        parameterForm: string | null,
+
+        parameterHeader: string | null,
+
+        parameterPath: string | null,
+
+        parameterQuery: string | null,
+
+        requestBody: IModelWithString | null,
+
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(
+            ParametersOptions.callWithParameters(
+                parameterCookie,
+                parameterForm,
+                parameterHeader,
+                parameterPath,
+                parameterQuery,
+                requestBody,
+            ),
+            options,
+        );
+    }
     /**
      * @param parameterCookie This is the parameter that goes into the cookie
      * @param parameterForm This is the parameter that goes into the request form data
@@ -263,6 +292,46 @@ export class ParametersService<TOptions = unknown> {
             options,
         );
     }
+
+    public callWithWeirdParameterNamesRaw(
+        parameterCookie: string | null,
+
+        parameterForm: string | null,
+
+        parameterHeader: string | null,
+
+        parameterQuery: string | null,
+
+        requestBody: IModelWithStringLocal | null,
+
+        /**
+         * [WARN] Be careful! A reserved system word is used!
+         */
+        _default?: string,
+
+        parameterPath1?: string,
+
+        parameterPath2?: string,
+
+        parameterPath3?: string,
+
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(
+            ParametersOptions.callWithWeirdParameterNames(
+                parameterCookie,
+                parameterForm,
+                parameterHeader,
+                parameterQuery,
+                requestBody,
+                _default,
+                parameterPath1,
+                parameterPath2,
+                parameterPath3,
+            ),
+            options,
+        );
+    }
     /**
      * @param requestBody This is a required parameter
      * @param parameter This is an optional parameter
@@ -277,6 +346,19 @@ export class ParametersService<TOptions = unknown> {
     ): Promise<void> {
         return this.executor.request<void>(ParametersOptions.getCallWithOptionalParam(requestBody, parameter), options);
     }
+
+    public getCallWithOptionalParamRaw(
+        requestBody: IModelWithArray,
+
+        parameter?: string,
+
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(
+            ParametersOptions.getCallWithOptionalParam(requestBody, parameter),
+            options,
+        );
+    }
     /**
      * @param parameter This is a required parameter
      * @param requestBody This is an optional parameter
@@ -290,6 +372,19 @@ export class ParametersService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(
+            ParametersOptions.postCallWithOptionalParam(parameter, requestBody),
+            options,
+        );
+    }
+
+    public postCallWithOptionalParamRaw(
+        parameter: string,
+
+        requestBody?: Properties,
+
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(
             ParametersOptions.postCallWithOptionalParam(parameter, requestBody),
             options,
         );

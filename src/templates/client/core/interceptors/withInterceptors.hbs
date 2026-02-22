@@ -1,5 +1,6 @@
 {{>header}}
 
+import type { ApiResult } from '../ApiResult';
 import { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './interceptors';
 import { RequestConfig, RequestExecutor } from '../executor/requestExecutor';
 
@@ -11,27 +12,59 @@ export function withInterceptors<TOptions extends Record<string, any> = Record<s
         onError?: ErrorInterceptor[];
     }
 ): RequestExecutor<TOptions> {
+    const runRequestInterceptors = async (config: RequestConfig): Promise<RequestConfig> => {
+        let currentConfig = config;
+
+        for (const interceptor of interceptors.onRequest ?? []) {
+            currentConfig = await interceptor(currentConfig);
+        }
+
+        return currentConfig;
+    };
+
+    const runResponseInterceptors = async <TResponse>(
+        response: TResponse,
+        config: RequestConfig
+    ): Promise<TResponse> => {
+        let currentResponse = response;
+
+        for (const interceptor of interceptors.onResponse ?? []) {
+            currentResponse = (await interceptor(currentResponse, config)) as TResponse;
+        }
+
+        return currentResponse;
+    };
+
     return {
         async request<TResponse>(config: RequestConfig, options?: TOptions): Promise<TResponse> {
-            let currentConfig = config;
-
             try {
-                for (const i of interceptors.onRequest ?? []) {
-                    currentConfig = await i(currentConfig);
-                }
+                const currentConfig = await runRequestInterceptors(config);
+                const response = await executor.request<TResponse>(currentConfig, options);
 
-                let response: Awaited<TResponse> = await executor.request<TResponse>(config, options);
-
-                for (const interceptor of interceptors.onResponse ?? []) {
-                    response = (await interceptor(response, config)) as Awaited<TResponse>;
-                }
-
-                return response as TResponse;
+                return runResponseInterceptors(response, currentConfig);
             } catch (caught) {
                 let error = caught;
+                const currentConfig = config;
 
                 for (const interceptor of interceptors.onError ?? []) {
-                    error = await interceptor(error, config);
+                    error = await interceptor(error, currentConfig);
+                }
+
+                throw error;
+            }
+        },
+        async requestRaw<TResponse>(config: RequestConfig, options?: TOptions): Promise<ApiResult<TResponse>> {
+            try {
+                const currentConfig = await runRequestInterceptors(config);
+                const response = await executor.requestRaw<TResponse>(currentConfig, options);
+
+                return runResponseInterceptors(response, currentConfig);
+            } catch (caught) {
+                let error = caught;
+                const currentConfig = config;
+
+                for (const interceptor of interceptors.onError ?? []) {
+                    error = await interceptor(error, currentConfig);
                 }
 
                 throw error;
