@@ -8,7 +8,7 @@ import { {{{name}}}Schema{{#if alias}} as {{{alias}}}Schema{{/if}} } from '{{{no
 
 import * as yup from 'yup';
 
-export const {{{name}}}Schema = {{>yupSchema}};
+export const {{{name}}}Schema = {{>yup/yupSchema}};
 
 export type {{{name}}} = yup.InferType<typeof {{{name}}}Schema>;
 

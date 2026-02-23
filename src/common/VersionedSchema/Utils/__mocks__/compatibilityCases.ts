@@ -62,6 +62,19 @@ export const compatibilityCases: CompatibilityCase[] = [
     },
     {
         type: EVersionedSchemaType.MULTI_OPTIONS,
+        from: 'v3',
+        to: 'v4',
+        expect: [
+            { type: 'removed', key: 'output' },
+            { type: 'removed', key: 'outputCore' },
+            { type: 'removed', key: 'outputServices' },
+            { type: 'removed', key: 'outputModels' },
+            { type: 'removed', key: 'outputSchemas' },
+            { type: 'removed', key: 'input' },
+        ],
+    },
+    {
+        type: EVersionedSchemaType.MULTI_OPTIONS,
         from: 'v4',
         to: 'v5',
         expect: [

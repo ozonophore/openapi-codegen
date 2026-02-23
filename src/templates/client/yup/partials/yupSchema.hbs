@@ -1,19 +1,19 @@
 {{#equals export 'interface'}}
-{{>yupSchemaInterface}}
+{{>yup/yupSchemaInterface}}
 {{else equals export 'enum'}}
-{{>yupSchemaEnum}}
+{{>yup/yupSchemaEnum}}
 {{else equals export 'array'}}
-{{>yupSchemaArray}}
+{{>yup/yupSchemaArray}}
 {{else equals export 'dictionary'}}
-{{>yupSchemaDictionary}}
+{{>yup/yupSchemaDictionary}}
 {{else equals export 'any-of'}}
-{{>yupSchemaComposition}}
+{{>yup/yupSchemaComposition}}
 {{else equals export 'all-of'}}
-{{>yupSchemaComposition}}
+{{>yup/yupSchemaComposition}}
 {{else equals export 'one-of'}}
-{{>yupSchemaComposition}}
+{{>yup/yupSchemaComposition}}
 {{else equals export 'reference'}}
-{{>yupSchemaReference}}
+{{>yup/yupSchemaReference}}
 {{else}}
-{{>yupSchemaGeneric}}
+{{>yup/yupSchemaGeneric}}
 {{/equals}}

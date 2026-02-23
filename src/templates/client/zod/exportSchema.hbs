@@ -8,7 +8,7 @@ import { {{{name}}}Schema{{#if alias}} as {{{alias}}}Schema{{/if}} } from '{{{no
 
 import { z } from 'zod';
 
-export const {{{name}}}Schema = {{>zodSchema}};
+export const {{{name}}}Schema = {{>zod/zodSchema}};
 
 export type {{{name}}} = z.infer<typeof {{{name}}}Schema>;
 

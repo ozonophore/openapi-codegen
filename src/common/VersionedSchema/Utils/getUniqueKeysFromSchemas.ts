@@ -21,7 +21,7 @@ function collectKeys(schema: z.ZodTypeAny, result: Set<string>) {
 
 /**
  * Get all the unique parameter keys of all Joi schemes in the array
- * @param schemas array of joi schemes
+ * @param schemas array of zod schemes
  * @returns All the unique parameter keys of all Joi schemes in the array
  */
 export function getUniqueKeysFromSchemas(schemas: z.ZodTypeAny[]): Set<string> {

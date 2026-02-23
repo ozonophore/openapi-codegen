@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import Ajv from 'ajv';
+import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 
 const ajv = new Ajv({ allErrors: true });
@@ -16,9 +16,7 @@ export const LomApiSchema = {
 
 export type LomApi = any; // JSON Schema doesn't provide type inference
 
-export function validateLomApi(
-    data: unknown,
-): { valid: true; data: LomApi } | { valid: false; errors: Ajv.ErrorObject[] } {
+export function validateLomApi(data: unknown): { valid: true; data: LomApi } | { valid: false; errors: ErrorObject[] } {
     const validate = ajv.compile(LomApiSchema);
     const valid = validate(data);
     if (valid) {

@@ -18,3 +18,4 @@ samples/swagger-codegen-cli-v3.jar
 generated
 yarn.lock
 __logs__
+.ts-openapi-codegen-diff-changes
