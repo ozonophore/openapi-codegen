@@ -1,12 +1,17 @@
 {{>header}}
 
+import type { ApiResult } from '../ApiResult';
 import type { RequestExecutor, RequestConfig } from './requestExecutor';
 {{#unless @root.useCustomRequest}}
 import type { ApiRequestOptions } from '../ApiRequestOptions';
 import type { TOpenAPIConfig } from '../OpenAPI';
 import { OpenAPI } from '../OpenAPI';
 {{/unless}}
+{{#if @root.useCustomRequest}}
 import { request as __request } from '../request';
+{{else}}
+import { request as __request, requestRaw as __requestRaw } from '../request';
+{{/if}}
 
 export function createExecutorAdapter<TRequestOptions extends Record<string, any>>(
 {{#unless @root.useCustomRequest}}
@@ -16,10 +21,31 @@ export function createExecutorAdapter<TRequestOptions extends Record<string, any
 ): RequestExecutor<TRequestOptions> {
     return {
         {{#if @root.useCustomRequest}}
+        requestRaw<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<ApiResult<TResponse>> {
+            return __request(config, options) as Promise<ApiResult<TResponse>>;
+        },
         request<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<TResponse> {
             return __request(config, options) as Promise<TResponse>;
         },
         {{else}}
+        requestRaw<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<ApiResult<TResponse>> {
+            const baseOptions: ApiRequestOptions = {
+                method: config.method as ApiRequestOptions['method'],
+                path: config.path,
+                headers: config.headers,
+                query: config.query,
+                body: config.body,
+                cookies: config.cookies,
+                mediaType: config.requestMediaType,
+            };
+
+            const mergedOptions: ApiRequestOptions = {
+                ...baseOptions,
+                ...(mapOptions ? mapOptions(options) : {}),
+            };
+
+            return __requestRaw<TResponse>(mergedOptions, openApiConfig);
+        },
         request<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<TResponse> {
             const baseOptions: ApiRequestOptions = {
                 method: config.method as ApiRequestOptions['method'],
@@ -27,6 +53,8 @@ export function createExecutorAdapter<TRequestOptions extends Record<string, any
                 headers: config.headers,
                 query: config.query,
                 body: config.body,
+                cookies: config.cookies,
+                mediaType: config.requestMediaType,
             };
 
             const mergedOptions: ApiRequestOptions = {

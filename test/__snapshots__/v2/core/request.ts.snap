@@ -181,7 +181,7 @@ async function getResponseBody(response: Response): Promise<any> {
 }
 
 
-function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
+function catchErrors(options: ApiRequestOptions, result: ApiResult<unknown>): void {
     const errors: Record<string, string> = {
         [EHTTP_STATUS_CODES.BAD_GATEWAY]: EHTTP_STATUS_NAME.BAD_GATEWAY,
         [EHTTP_STATUS_CODES.BAD_REQUEST]: EHTTP_STATUS_NAME.BAD_REQUEST,
@@ -220,6 +220,11 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
  * @throws ApiError
  */
 export async function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<T> {
+    const result = await requestRaw<T>(options, config);
+    return result.body;
+}
+
+export async function requestRaw<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<ApiResult<T>> {
     return new Promise(async (resolve, reject) => {
         try {
             const url = getUrl(options, config);
@@ -227,16 +232,16 @@ export async function request<T>(options: ApiRequestOptions, config: TOpenAPICon
             const responseBody = await getResponseBody(response);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 
-            const result: ApiResult = {
+            const result: ApiResult<T> = {
                 url,
                 ok: response.ok,
                 status: response.status,
                 statusText: response.statusText,
-                body: responseHeader || responseBody,
+                body: (responseHeader || responseBody) as T,
             };
 
             catchErrors(options, result);
-            resolve(result.body);
+            resolve(result);
         } catch (error) {
             reject(error);
         }

@@ -4,201 +4,79 @@ import { describe, test } from 'node:test';
 import { convertArrayToObject } from '../convertArrayToObject';
 
 describe('@unit: convertArrayToObject', () => {
-    test('Empty array', () => {
-        const input: any[] = [];
-        const result = convertArrayToObject(input);
-        const expected = {
+    test('returns default shape for null', () => {
+        const result = convertArrayToObject(null);
+
+        assert.deepStrictEqual(result, {
             items: [],
             excludeCoreServiceFiles: undefined,
             request: undefined,
+            customExecutorPath: undefined,
             useOptions: undefined,
             useCancelableRequest: undefined,
-        };
-        assert.deepStrictEqual(result, expected);
+        });
     });
 
-    test('An array with one element', () => {
+    test('returns default shape for empty array', () => {
+        const result = convertArrayToObject([]);
+
+        assert.deepStrictEqual(result, {
+            items: [],
+            excludeCoreServiceFiles: undefined,
+            request: undefined,
+            customExecutorPath: undefined,
+            useOptions: undefined,
+            useCancelableRequest: undefined,
+        });
+    });
+
+    test('passes through object config unchanged', () => {
+        const input = { input: './spec.json', output: './generated', httpClient: 'axios' };
+        const result = convertArrayToObject(input);
+
+        assert.strictEqual(result, input);
+    });
+
+    test('converts legacy array and keeps per-item request/customExecutorPath', () => {
         const input = [
             {
                 input: 'url1',
                 output: 'res1',
-                exportCore: true,
                 request: 'req1',
+                customExecutorPath: 'exec-1',
+                httpClient: 'axios',
+                useOptions: true,
+            },
+            {
+                input: 'url2',
+                output: 'res2',
+                request: 'req2',
+                customExecutorPath: 'exec-2',
+                httpClient: 'axios',
                 useOptions: true,
             },
         ];
-        const expected = {
-            enumPrefix: undefined,
-            excludeCoreServiceFiles: undefined,
-            httpClient: undefined,
-            interfacePrefix: undefined,
-            items: [
-                {
-                    input: 'url1',
-                    output: 'res1',
-                    outputCore: undefined,
-                    outputServices: undefined,
-                    outputModels: undefined,
-                    outputSchemas: undefined,
-                },
-            ],
-            logLevel: undefined,
-            logTarget: undefined,
-            request: 'req1',
-            sortByRequired: undefined,
-            typePrefix: undefined,
-            useCancelableRequest: undefined,
-            useOptions: true,
-            useSeparatedIndexes: undefined,
-            useUnionTypes: undefined,
-            validationLibrary: undefined,
-            emptySchemaStrategy: undefined,
-        };
-        const result = convertArrayToObject(input);
-        assert.deepStrictEqual(result, expected);
-    });
-    test('Multiple elements with the same outer margins', () => {
-        const input = [
-            { input: 'url1', output: 'res1', exportCore: true, request: 'req1', useOptions: true },
-            { input: 'url2', output: 'res2', exportCore: true, request: 'req1', useOptions: true },
-        ];
-        const expected = {
-            enumPrefix: undefined,
-            excludeCoreServiceFiles: undefined,
-            httpClient: undefined,
-            interfacePrefix: undefined,
-            items: [
-                {
-                    input: 'url1',
-                    output: 'res1',
-                    outputCore: undefined,
-                    outputServices: undefined,
-                    outputModels: undefined,
-                    outputSchemas: undefined,
-                },
-                {
-                    input: 'url2',
-                    output: 'res2',
-                    outputCore: undefined,
-                    outputServices: undefined,
-                    outputModels: undefined,
-                    outputSchemas: undefined,
-                },
-            ],
-            logLevel: undefined,
-            logTarget: undefined,
-            request: 'req1',
-            sortByRequired: undefined,
-            typePrefix: undefined,
-            useCancelableRequest: undefined,
-            useOptions: true,
-            useSeparatedIndexes: undefined,
-            useUnionTypes: undefined,
-            validationLibrary: undefined,
-            emptySchemaStrategy: undefined,
-        };
-        const result = convertArrayToObject(input);
-        assert.deepStrictEqual(result, expected);
-    });
 
-    test('Multiple elements with different external margins', () => {
-        const input = [
-            { input: 'url1', output: 'res1', exportCore: true, request: 'req1', useOptions: true },
-            { input: 'url2', output: 'res2', exportCore: false, request: 'req2', useOptions: false },
-        ];
-        const expected = {
-            enumPrefix: undefined,
+        const result = convertArrayToObject(input);
+
+        assert.deepStrictEqual(result, {
+            httpClient: 'axios',
+            useOptions: true,
+            useUnionTypes: undefined,
             excludeCoreServiceFiles: undefined,
-            httpClient: undefined,
+            includeSchemasFiles: undefined,
             interfacePrefix: undefined,
-            items: [
-                {
-                    input: 'url1',
-                    output: 'res1',
-                    outputCore: undefined,
-                    outputServices: undefined,
-                    outputModels: undefined,
-                    outputSchemas: undefined,
-                },
-                {
-                    input: 'url2',
-                    output: 'res2',
-                    outputCore: undefined,
-                    outputServices: undefined,
-                    outputModels: undefined,
-                    outputSchemas: undefined,
-                },
-            ],
-            logLevel: undefined,
-            logTarget: undefined,
-            request: 'req1',
-            sortByRequired: undefined,
+            enumPrefix: undefined,
             typePrefix: undefined,
             useCancelableRequest: undefined,
-            useOptions: true,
-            useSeparatedIndexes: undefined,
-            useUnionTypes: undefined,
-            validationLibrary: undefined,
-            emptySchemaStrategy: undefined,
-        };
-        const result = convertArrayToObject(input);
-        assert.deepStrictEqual(result, expected);
-    });
-
-    test('No optional fields', () => {
-        const input = [
-            { input: 'url1', output: 'res1' },
-            { input: 'url2', output: 'res2' },
-        ];
-        const expected = {
-            enumPrefix: undefined,
-            excludeCoreServiceFiles: undefined,
-            httpClient: undefined,
-            interfacePrefix: undefined,
-            items: [
-                {
-                    input: 'url1',
-                    output: 'res1',
-                    outputCore: undefined,
-                    outputServices: undefined,
-                    outputModels: undefined,
-                    outputSchemas: undefined,
-                },
-                {
-                    input: 'url2',
-                    output: 'res2',
-                    outputCore: undefined,
-                    outputServices: undefined,
-                    outputModels: undefined,
-                    outputSchemas: undefined,
-                },
-            ],
             logLevel: undefined,
             logTarget: undefined,
+            sortByRequired: undefined,
+            useSeparatedIndexes: undefined,
+            validationLibrary: undefined,
+            emptySchemaStrategy: undefined,
             request: undefined,
-            sortByRequired: undefined,
-            typePrefix: undefined,
-            useCancelableRequest: undefined,
-            useOptions: undefined,
-            useSeparatedIndexes: undefined,
-            useUnionTypes: undefined,
-            validationLibrary: undefined,
-            emptySchemaStrategy: undefined,
-        };
-        const result = convertArrayToObject(input);
-        assert.deepStrictEqual(result, expected);
-    });
-
-    test('Mixed presence of optional fields', () => {
-        const input = [
-            { input: 'url1', output: 'res1', exportCore: true },
-            { input: 'url2', output: 'res2', request: 'req2' },
-        ];
-        const expected = {
-            enumPrefix: undefined,
-            excludeCoreServiceFiles: undefined,
-            httpClient: undefined,
-            interfacePrefix: undefined,
+            customExecutorPath: undefined,
             items: [
                 {
                     input: 'url1',
@@ -207,6 +85,8 @@ describe('@unit: convertArrayToObject', () => {
                     outputServices: undefined,
                     outputModels: undefined,
                     outputSchemas: undefined,
+                    request: 'req1',
+                    customExecutorPath: 'exec-1',
                 },
                 {
                     input: 'url2',
@@ -215,21 +95,46 @@ describe('@unit: convertArrayToObject', () => {
                     outputServices: undefined,
                     outputModels: undefined,
                     outputSchemas: undefined,
+                    request: 'req2',
+                    customExecutorPath: 'exec-2',
                 },
             ],
-            logLevel: undefined,
-            logTarget: undefined,
-            request: undefined,
-            sortByRequired: undefined,
-            typePrefix: undefined,
-            useCancelableRequest: undefined,
-            useOptions: undefined,
-            useSeparatedIndexes: undefined,
-            useUnionTypes: undefined,
-            validationLibrary: undefined,
-            emptySchemaStrategy: undefined,
-        };
+        });
+    });
+
+    test('promotes request/customExecutorPath to root when they are equal for all items', () => {
+        const input = [
+            { input: 'url1', output: 'res1', request: 'req', customExecutorPath: 'exec' },
+            { input: 'url2', output: 'res2', request: 'req', customExecutorPath: 'exec' },
+        ];
+
         const result = convertArrayToObject(input);
-        assert.deepStrictEqual(result, expected);
+
+        assert.strictEqual(result.request, 'req');
+        assert.strictEqual(result.customExecutorPath, 'exec');
+    });
+
+    test('supports legacy "client" alias by normalizing it to httpClient', () => {
+        const input = [
+            { input: 'url1', output: 'res1', client: 'axios', useOptions: true },
+            { input: 'url2', output: 'res2', client: 'axios', useOptions: true },
+        ];
+
+        const result = convertArrayToObject(input);
+
+        assert.strictEqual(result.httpClient, 'axios');
+        assert.strictEqual(result.useOptions, true);
+    });
+
+    test('throws on conflicting root-driven fields', () => {
+        const input = [
+            { input: 'url1', output: 'res1', useOptions: true },
+            { input: 'url2', output: 'res2', useOptions: false },
+        ];
+
+        assert.throws(
+            () => convertArrayToObject(input),
+            /conflicting "useOptions" values/
+        );
     });
 });

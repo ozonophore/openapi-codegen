@@ -3,6 +3,7 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
         items: [],
         excludeCoreServiceFiles: undefined,
         request: undefined,
+        customExecutorPath: undefined,
         useOptions: undefined,
         useCancelableRequest: undefined,
     };
@@ -15,22 +16,13 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
         if (optionsArr.length === 0) {
             return emptyResult;
         }
-        const items = optionsArr.map(item => ({
-            input: item.input,
-            output: item.output,
-            outputCore: item.outputCore,
-            outputServices: item.outputServices,
-            outputModels: item.outputModels,
-            outputSchemas: item.outputSchemas,
-        }));
 
-        const firstItem = optionsArr[0];
-        const fieldsToExtract = [
+        const rootDrivenFields = [
             'httpClient',
             'useOptions',
             'useUnionTypes',
             'excludeCoreServiceFiles',
-            'request',
+            'includeSchemasFiles',
             'interfacePrefix',
             'enumPrefix',
             'typePrefix',
@@ -43,16 +35,73 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
             'emptySchemaStrategy',
         ];
 
-        const extractedFields = fieldsToExtract.reduce(
+        const getNormalizedFieldValue = (item: Record<string, any>, field: string): any => {
+            if (field === 'httpClient') {
+                return item.httpClient ?? item.client;
+            }
+            return item[field];
+        };
+
+        const getRootValueOrThrow = (field: string): any => {
+            const definedValues = optionsArr
+                .map(item => getNormalizedFieldValue(item, field))
+                .filter(value => value !== undefined);
+
+            if (definedValues.length === 0) {
+                return undefined;
+            }
+
+            const firstValue = definedValues[0];
+            const hasConflict = definedValues.some(value => value !== firstValue);
+
+            if (hasConflict) {
+                throw new Error(
+                    `Legacy array config has conflicting "${field}" values. ` +
+                    `This option must have the same value for all array items.`
+                );
+            }
+
+            return firstValue;
+        };
+
+        const getCommonOptionalRootValue = (field: 'request' | 'customExecutorPath'): any => {
+            const definedValues = optionsArr
+                .map(item => item[field])
+                .filter(value => value !== undefined);
+
+            if (definedValues.length === 0) {
+                return undefined;
+            }
+
+            const firstValue = definedValues[0];
+            const hasConflict = definedValues.some(value => value !== firstValue);
+
+            return hasConflict ? undefined : firstValue;
+        };
+
+        const items = optionsArr.map(item => ({
+            input: item.input,
+            output: item.output,
+            outputCore: item.outputCore,
+            outputServices: item.outputServices,
+            outputModels: item.outputModels,
+            outputSchemas: item.outputSchemas,
+            request: item.request,
+            customExecutorPath: item.customExecutorPath,
+        }));
+
+        const extractedRootFields = rootDrivenFields.reduce(
             (acc, field) => ({
                 ...acc,
-                [field]: firstItem[field],
+                [field]: getRootValueOrThrow(field),
             }),
             {}
         );
 
         return {
-            ...extractedFields,
+            ...extractedRootFields,
+            request: getCommonOptionalRootValue('request'),
+            customExecutorPath: getCommonOptionalRootValue('customExecutorPath'),
             items,
         };
     }

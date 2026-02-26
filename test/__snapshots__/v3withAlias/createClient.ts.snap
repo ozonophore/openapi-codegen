@@ -5,7 +5,8 @@
 import { OpenAPI } from './core/OpenAPI';
 import type { TOpenAPIConfig } from './core/OpenAPI';
 import { createExecutorAdapter } from './core/executor/createExecutorAdapter';
-import { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './core/interceptors/interceptors';
+import type { RequestExecutor } from './core/executor/requestExecutor';
+import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './core/interceptors/interceptors';
 import { withInterceptors } from './core/interceptors/withInterceptors';
 import { apiErrorInterceptor } from './core/interceptors/apiErrorInterceptor';
 
@@ -18,6 +19,10 @@ export interface ClientOptions {
         onResponse?: ResponseInterceptor[];
         onError?: ErrorInterceptor[];
     };
+    executorFactory?: <TExecutorOptions extends Record<string, any>>(params: {
+        openApiConfig: TOpenAPIConfig;
+        createDefaultExecutor: () => RequestExecutor<TExecutorOptions>;
+    }) => RequestExecutor<TExecutorOptions>;
 }
 
 export function createClient<TExecutorOptions extends Record<string, any>>(options: ClientOptions = {}) {
@@ -26,7 +31,12 @@ export function createClient<TExecutorOptions extends Record<string, any>>(optio
         ...options.openApi,
     };
 
-    let executor = createExecutorAdapter<TExecutorOptions>(openApiConfig);
+    const createDefaultExecutor = (): RequestExecutor<TExecutorOptions> =>
+        createExecutorAdapter<TExecutorOptions>(openApiConfig);
+
+    let executor = options.executorFactory
+        ? options.executorFactory<TExecutorOptions>({ openApiConfig, createDefaultExecutor })
+        : createDefaultExecutor();
     if (options?.interceptors) {
         executor = withInterceptors(executor, {
             onError: [apiErrorInterceptor, ...(options.interceptors?.onError ?? [])],

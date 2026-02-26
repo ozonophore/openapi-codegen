@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const types = (
     parameterArray: Array<string>,
@@ -80,6 +81,33 @@ export class TypesService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<number | string | boolean | any> {
         return this.executor.request<number | string | boolean | any>(
+            TypesOptions.types(
+                parameterArray,
+                parameterDictionary,
+                parameterEnum,
+                parameterBoolean,
+                parameterNumber,
+                parameterObject,
+                parameterString,
+                id,
+            ),
+            options,
+        );
+    }
+
+    public typesRaw(
+        parameterArray: Array<string>,
+        parameterDictionary: Record<string, string>,
+        parameterEnum: 'Success' | 'Warning' | 'Error',
+        parameterBoolean: boolean = true,
+        parameterNumber: number = 123,
+        parameterObject: any = null,
+        parameterString: string = 'default',
+        id?: number,
+
+        options?: TOptions,
+    ): Promise<ApiResult<number | string | boolean | any>> {
+        return this.executor.requestRaw<number | string | boolean | any>(
             TypesOptions.types(
                 parameterArray,
                 parameterDictionary,

@@ -5,6 +5,7 @@
 import type { EEnumWithNumbers } from '../models/schemas/EnumWithNumbers';
 import type { EEnumWithStrings } from '../models/schemas/EnumWithStrings';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const callWithEnums = (requestBody?: {
     enumWithNumbers?: EEnumWithNumbers;
@@ -43,5 +44,15 @@ export class EnumsService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(EnumsOptions.callWithEnums(requestBody), options);
+    }
+
+    public callWithEnumsRaw(
+        requestBody?: {
+            enumWithNumbers?: EEnumWithNumbers;
+            enumWithStrings?: EEnumWithStrings;
+        },
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(EnumsOptions.callWithEnums(requestBody), options);
     }
 }

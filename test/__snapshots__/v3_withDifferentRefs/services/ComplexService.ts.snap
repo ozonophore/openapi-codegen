@@ -10,6 +10,7 @@ import type { EEnumWithNumbers } from '../models/schemas/enums/EnumWithNumbers';
 import type { IModelWithEnum } from '../models/schemas/enums/ModelWithEnum';
 import type { IModelWithString as IModelWithString$2 } from '../models/schemas/ModelWithString';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const complexTypes = (
     parameterObject: {
@@ -115,6 +116,24 @@ export class ComplexService<TOptions = unknown> {
             options,
         );
     }
+
+    public complexTypesRaw(
+        parameterObject: {
+            first?: {
+                second?: {
+                    third?: string;
+                };
+            };
+        },
+        parameterReference: IModelWithStringLocal,
+
+        options?: TOptions,
+    ): Promise<ApiResult<Array<IModelWithString$1>>> {
+        return this.executor.requestRaw<Array<IModelWithString$1>>(
+            ComplexOptions.complexTypes(parameterObject, parameterReference),
+            options,
+        );
+    }
     /**
      * @param id
      * @param requestBody
@@ -140,5 +159,26 @@ export class ComplexService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<IModelWithString$1> {
         return this.executor.request<IModelWithString$1>(ComplexOptions.complexParams(id, requestBody), options);
+    }
+
+    public complexParamsRaw(
+        id: number,
+
+        requestBody?: {
+            readonly key: string | null;
+            name: string | null;
+            enabled: boolean;
+            type: EEnumWithNumbers;
+            listOfModels?: Array<IModelWithString$2> | null;
+            listOfStrings?: Array<string> | null;
+            parameters: IModelWithString$1 | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            readonly user?: {
+                readonly id?: number;
+                readonly name?: string | null;
+            };
+        },
+        options?: TOptions,
+    ): Promise<ApiResult<IModelWithString$1>> {
+        return this.executor.requestRaw<IModelWithString$1>(ComplexOptions.complexParams(id, requestBody), options);
     }
 }

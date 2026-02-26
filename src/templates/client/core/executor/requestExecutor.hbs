@@ -1,5 +1,7 @@
 {{>header}}
 
+import type { ApiResult } from '../ApiResult';
+
 export interface RequestConfig {
   method: string;
   path: string;
@@ -17,4 +19,9 @@ export interface RequestExecutor<TOptions = unknown> {
     config: RequestConfig,
     options?: TOptions
   ): Promise<TResponse>;
+
+  requestRaw<TResponse>(
+    config: RequestConfig,
+    options?: TOptions
+  ): Promise<ApiResult<TResponse>>;
 }

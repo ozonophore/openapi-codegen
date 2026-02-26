@@ -4,6 +4,7 @@
 
 import type { ISequence } from '../models/components/schemas/Sequence';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const getSequencesService = (pathwayId: string): RequestConfig => ({
     method: 'GET',
@@ -41,6 +42,14 @@ export class SequencesService<TOptions = unknown> {
     ): Promise<Array<ISequence>> {
         return this.executor.request<Array<ISequence>>(SequencesOptions.getSequencesService(pathwayId), options);
     }
+
+    public getSequencesServiceRaw(
+        pathwayId: string,
+
+        options?: TOptions,
+    ): Promise<ApiResult<Array<ISequence>>> {
+        return this.executor.requestRaw<Array<ISequence>>(SequencesOptions.getSequencesService(pathwayId), options);
+    }
     /**
      * Получить информацию о последовательности
      * @param sequenceId
@@ -53,5 +62,13 @@ export class SequencesService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<ISequence> {
         return this.executor.request<ISequence>(SequencesOptions.getSequencesService1(sequenceId), options);
+    }
+
+    public getSequencesService1Raw(
+        sequenceId: string,
+
+        options?: TOptions,
+    ): Promise<ApiResult<ISequence>> {
+        return this.executor.requestRaw<ISequence>(SequencesOptions.getSequencesService1(sequenceId), options);
     }
 }

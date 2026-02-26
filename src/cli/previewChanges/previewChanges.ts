@@ -3,6 +3,7 @@ import * as diff from 'diff';
 
 import { APP_LOGGER } from '../../common/Consts';
 import { EMigrationMode } from '../../common/Enums';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { TRawOptions } from '../../common/TRawOptions';
 import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
@@ -13,7 +14,7 @@ import { allMigrationPlans } from '../../common/VersionedSchema/AllVersionedSche
 import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
 import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
-import { previewChangesSchema,TPreviewChangesOptions } from '../schemas';
+import { previewChangesSchema, TPreviewChangesOptions } from '../schemas';
 import { compareFiles } from './utils/compareFiles';
 import { formatDiff } from './utils/formatDiff';
 import { isDirectoryEmpty } from './utils/isDirectoryEmpty';
@@ -115,7 +116,7 @@ function toSummaryMarkdown(summary: ChangesSummary): string {
 
 /**
  * Основная функция для предпросмотра изменений
- * 
+ *
  * TODO: Добавить проверку опций команды перед выполнением
  */
 export async function previewChanges(options: OptionValues): Promise<void> {
@@ -147,6 +148,10 @@ export async function previewChanges(options: OptionValues): Promise<void> {
         const configData = loadConfigIfExists(openapiConfig);
         if (!configData) {
             throw new Error('The configuration file is missing');
+        }
+
+        if (Array.isArray(configData)) {
+            APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.ARRAY_DEPRECATED);
         }
 
         const preparedOptions = convertArrayToObject(configData);

@@ -3,9 +3,13 @@
 import { OpenAPI } from '{{{joinPath @root.outputCore 'OpenAPI'}}}';
 import type { TOpenAPIConfig } from '{{{joinPath @root.outputCore 'OpenAPI'}}}';
 import { createExecutorAdapter } from '{{{joinPath @root.outputCore './executor/createExecutorAdapter'}}}';
-import { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from '{{{joinPath @root.outputCore './interceptors/interceptors'}}}';
+import type { RequestExecutor } from '{{{joinPath @root.outputCore './executor/requestExecutor'}}}';
+import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from '{{{joinPath @root.outputCore './interceptors/interceptors'}}}';
 import { withInterceptors } from '{{{joinPath @root.outputCore './interceptors/withInterceptors'}}}';
 import { apiErrorInterceptor } from '{{{joinPath @root.outputCore './interceptors/apiErrorInterceptor'}}}';
+{{#if @root.customExecutorPath}}
+import { createExecutorAdapter as createCustomExecutorAdapter } from '{{{@root.customExecutorPath}}}';
+{{/if}}
 
 {{#each services}}
 import { {{name}} } from './services/{{name}}';
@@ -17,7 +21,11 @@ export interface ClientOptions {
     onRequest?: RequestInterceptor[];
     onResponse?: ResponseInterceptor[];
     onError?: ErrorInterceptor[];
-  }
+  };
+  executorFactory?: <TExecutorOptions extends Record<string, any>>(params: {
+    openApiConfig: TOpenAPIConfig;
+    createDefaultExecutor: () => RequestExecutor<TExecutorOptions>;
+  }) => RequestExecutor<TExecutorOptions>;
 }
 
 export function createClient<TExecutorOptions extends Record<string, any>>(
@@ -28,7 +36,16 @@ export function createClient<TExecutorOptions extends Record<string, any>>(
     ...options.openApi,
   };
 
-  let executor = createExecutorAdapter<TExecutorOptions>(openApiConfig);
+  const createDefaultExecutor = (): RequestExecutor<TExecutorOptions> =>
+    {{#if @root.customExecutorPath}}
+    createCustomExecutorAdapter<TExecutorOptions>({{#unless @root.useCustomRequest}}openApiConfig{{/unless}});
+    {{else}}
+    createExecutorAdapter<TExecutorOptions>({{#unless @root.useCustomRequest}}openApiConfig{{/unless}});
+    {{/if}}
+
+  let executor = options.executorFactory
+    ? options.executorFactory<TExecutorOptions>({ openApiConfig, createDefaultExecutor })
+    : createDefaultExecutor();
   if (options?.interceptors) {
     executor = withInterceptors(executor, {
       onError: [apiErrorInterceptor, ...(options.interceptors?.onError ?? [])],

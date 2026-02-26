@@ -13,5 +13,5 @@ export default {"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpe
     };
 
   return ((stack1 = container.invokePartial(lookupProperty(partials,"header"),depth0,{"name":"header","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "\nexport interface RequestConfig {\n  method: string;\n  path: string;\n\n  headers?: Record<string, string>;\n  query?: Record<string, any>;\n  body?: unknown;\n\n  requestMediaType?: string;\n  cookies?: Record<string, string>;\n}\n\nexport interface RequestExecutor<TOptions = unknown> {\n  request<TResponse>(\n    config: RequestConfig,\n    options?: TOptions\n  ): Promise<TResponse>;\n}";
+    + "\nimport type { ApiResult } from '../ApiResult';\n\nexport interface RequestConfig {\n  method: string;\n  path: string;\n\n  headers?: Record<string, string>;\n  query?: Record<string, any>;\n  body?: unknown;\n\n  requestMediaType?: string;\n  cookies?: Record<string, string>;\n}\n\nexport interface RequestExecutor<TOptions = unknown> {\n  request<TResponse>(\n    config: RequestConfig,\n    options?: TOptions\n  ): Promise<TResponse>;\n\n  requestRaw<TResponse>(\n    config: RequestConfig,\n    options?: TOptions\n  ): Promise<ApiResult<TResponse>>;\n}\n";
 },"usePartial":true,"useData":true}

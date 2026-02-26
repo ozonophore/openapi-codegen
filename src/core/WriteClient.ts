@@ -50,6 +50,7 @@ type TWriteClientProps = {
     useUnionTypes: boolean;
     excludeCoreServiceFiles: boolean;
     request?: string;
+    customExecutorPath?: string;
     useCancelableRequest?: boolean;
     useSeparatedIndexes?: boolean;
     validationLibrary?: ValidationLibrary;
@@ -90,6 +91,7 @@ export class WriteClient {
             useUnionTypes,
             excludeCoreServiceFiles = false,
             request,
+            customExecutorPath,
             useCancelableRequest = false,
             useSeparatedIndexes = false,
             validationLibrary = ValidationLibrary.NONE,
@@ -136,6 +138,8 @@ export class WriteClient {
                 outputCorePath: relativeHelper(outputPaths.output, outputCore),
                 services: client.services,
                 templates,
+                request,
+                customExecutorPath,
             });
         }
 
@@ -169,6 +173,7 @@ export class WriteClient {
                 useUnionTypes,
                 excludeCoreServiceFiles,
                 request,
+                customExecutorPath,
                 useCancelableRequest,
                 useSeparatedIndexes,
                 validationLibrary,
@@ -186,6 +191,7 @@ export class WriteClient {
             useUnionTypes,
             excludeCoreServiceFiles,
             request,
+            customExecutorPath,
             useCancelableRequest,
             useSeparatedIndexes,
             validationLibrary,

@@ -2,10 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type ApiResult = {
+export type ApiResult<TBody = unknown> = {
     readonly url: string;
     readonly ok: boolean;
     readonly status: number;
     readonly statusText: string;
-    readonly body: any;
+    readonly body: TBody;
 }

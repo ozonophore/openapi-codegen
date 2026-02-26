@@ -1,22 +1,16 @@
-import {z} from 'zod'
+import { z } from 'zod'
 
-import { EmptySchemaStrategy } from '../../../core/types/enums/EmptySchemaStrategy.enum'
 import { specialParametersSchemasV4 } from '../CommonSchemas'
 import { unifiedOptionsSchemaV3 } from './UnifiedOptionsSchemaV3'
 
-const unifiedOptionsSchemaV3Extended = unifiedOptionsSchemaV3.extend({
+export const unifiedOptionsSchemaV4 = unifiedOptionsSchemaV3.extend({
     ...specialParametersSchemasV4.shape,
-})
-
-export const unifiedOptionsSchemaV4 = z.object({
-    ...unifiedOptionsSchemaV3Extended.shape,
-    emptySchemaStrategy: z.enum(EmptySchemaStrategy).optional()
+    customExecutorPath: z.string().optional(),
 })
 
 /*
 type TUnified = {
     httpClient: HttpClient.FETCH | HttpClient.XHR | HttpClient.NODE | HttpClient.AXIOS;
-    emptySchemaStrategy: EmptySchemaStrategy.SEMANTIC | EmptySchemaStrategy.SKIP | EmptySchemaStrategy.KEEP | undefined;
     logLevel: ELogLevel.INFO | ELogLevel.WARN | ELogLevel.ERROR | undefined;
     logTarget: ELogOutput.CONSOLE | ELogOutput.FILE | undefined;
     sortByRequired: boolean | undefined;
@@ -34,6 +28,8 @@ type TUnified = {
     items: { ... 13 more }[] | undefined;
     input: string | undefined;
     output: string | undefined;
+    customExecutorPath: string | undefined;
+    emptySchemaStrategy: EmptySchemaStrategy.SEMANTIC | EmptySchemaStrategy.SKIP | EmptySchemaStrategy.KEEP | undefined;
     excludeCoreServiceFiles: boolean | undefined;
     validationLibrary: ValidationLibrary.NONE | ValidationLibrary.ZOD | ValidationLibrary.JOI | ValidationLibrary.YUP | ValidationLibrary.JSONSCHEMA | undefined;
     useOptions: boolean | undefined;

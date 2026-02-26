@@ -4,6 +4,7 @@
 
 import type { IIngredient } from '../models/components/schemas/Ingredient';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const getIngredientsService = (sequenceId: string): RequestConfig => ({
     method: 'GET',
@@ -33,5 +34,16 @@ export class IngredientsService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<Array<IIngredient>> {
         return this.executor.request<Array<IIngredient>>(IngredientsOptions.getIngredientsService(sequenceId), options);
+    }
+
+    public getIngredientsServiceRaw(
+        sequenceId: string,
+
+        options?: TOptions,
+    ): Promise<ApiResult<Array<IIngredient>>> {
+        return this.executor.requestRaw<Array<IIngredient>>(
+            IngredientsOptions.getIngredientsService(sequenceId),
+            options,
+        );
     }
 }

@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const duplicateName = (): RequestConfig => ({
     method: 'GET',
@@ -47,11 +48,19 @@ export class DuplicateService<TOptions = unknown> {
     public duplicateName(options?: TOptions): Promise<void> {
         return this.executor.request<void>(DuplicateOptions.duplicateName(), options);
     }
+
+    public duplicateNameRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(DuplicateOptions.duplicateName(), options);
+    }
     /**
      * @throws ApiError
      */
     public duplicateName1(options?: TOptions): Promise<void> {
         return this.executor.request<void>(DuplicateOptions.duplicateName1(), options);
+    }
+
+    public duplicateName1Raw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(DuplicateOptions.duplicateName1(), options);
     }
     /**
      * @throws ApiError
@@ -59,10 +68,18 @@ export class DuplicateService<TOptions = unknown> {
     public duplicateName2(options?: TOptions): Promise<void> {
         return this.executor.request<void>(DuplicateOptions.duplicateName2(), options);
     }
+
+    public duplicateName2Raw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(DuplicateOptions.duplicateName2(), options);
+    }
     /**
      * @throws ApiError
      */
     public duplicateName3(options?: TOptions): Promise<void> {
         return this.executor.request<void>(DuplicateOptions.duplicateName3(), options);
+    }
+
+    public duplicateName3Raw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(DuplicateOptions.duplicateName3(), options);
     }
 }

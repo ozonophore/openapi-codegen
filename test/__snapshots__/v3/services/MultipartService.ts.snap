@@ -4,6 +4,7 @@
 
 import type { IModelWithString } from '../models/ModelWithString';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const multipartResponse = (): RequestConfig => ({
     method: 'GET',
@@ -50,6 +51,24 @@ export class MultipartService<TOptions = unknown> {
             };
         }>(MultipartOptions.multipartResponse(), options);
     }
+
+    public multipartResponseRaw(options?: TOptions): Promise<
+        ApiResult<{
+            file?: string;
+            metadata?: {
+                foo?: string;
+                bar?: string;
+            };
+        }>
+    > {
+        return this.executor.requestRaw<{
+            file?: string;
+            metadata?: {
+                foo?: string;
+                bar?: string;
+            };
+        }>(MultipartOptions.multipartResponse(), options);
+    }
     /**
      * @param formData
      * @throws ApiError
@@ -62,5 +81,15 @@ export class MultipartService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<void> {
         return this.executor.request<void>(MultipartOptions.multipartRequest(formData), options);
+    }
+
+    public multipartRequestRaw(
+        formData?: {
+            content?: string;
+            data?: IModelWithString | null;
+        },
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(MultipartOptions.multipartRequest(formData), options);
     }
 }

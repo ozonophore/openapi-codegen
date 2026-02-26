@@ -1,4 +1,6 @@
+import { APP_LOGGER } from '../../../common/Consts';
 import { EMigrationMode } from '../../../common/Enums';
+import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
 import { convertArrayToObject } from '../../../common/utils/convertArrayToObject';
 import { multiOptionsMigrationPlan } from '../../../common/VersionedSchema/MultiOptionsVersioned/MultiOptionsMigrationPlan';
 import { multiOptionsVersionedSchema } from '../../../common/VersionedSchema/MultiOptionsVersioned/MultiOptionsVersionedSchemas';
@@ -23,10 +25,12 @@ import { removeDefaultConfigValues } from './removeDefaultConfigValues';
  *   console.warn('Configuration version is outdated');
  * }
  */
-export function validateAndMigrateConfigData(
-    configData: Record<string, any> | Record<string, any>[]
-): IConfigValidationResult {
+export function validateAndMigrateConfigData(configData: Record<string, any> | Record<string, any>[]): IConfigValidationResult {
     const isArrayFormat = Array.isArray(configData);
+    if (isArrayFormat) {
+        APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.ARRAY_DEPRECATED);
+    }
+
     const normalizedData = convertArrayToObject(configData);
     const isMultiOptions = isInstanceOfMultioptions(normalizedData);
 

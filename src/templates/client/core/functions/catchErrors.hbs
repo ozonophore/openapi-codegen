@@ -1,4 +1,4 @@
-function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
+function catchErrors(options: ApiRequestOptions, result: ApiResult<unknown>): void {
     const errors: Record<string, string> = {
         [EHTTP_STATUS_CODES.BAD_GATEWAY]: EHTTP_STATUS_NAME.BAD_GATEWAY,
         [EHTTP_STATUS_CODES.BAD_REQUEST]: EHTTP_STATUS_NAME.BAD_REQUEST,

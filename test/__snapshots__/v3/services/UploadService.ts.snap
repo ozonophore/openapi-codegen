@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
 
 const uploadFile = (file: Blob): RequestConfig => ({
     method: 'POST',
@@ -36,5 +37,13 @@ export class UploadService<TOptions = unknown> {
         options?: TOptions,
     ): Promise<boolean> {
         return this.executor.request<boolean>(UploadOptions.uploadFile(file), options);
+    }
+
+    public uploadFileRaw(
+        file: Blob,
+
+        options?: TOptions,
+    ): Promise<ApiResult<boolean>> {
+        return this.executor.requestRaw<boolean>(UploadOptions.uploadFile(file), options);
     }
 }
