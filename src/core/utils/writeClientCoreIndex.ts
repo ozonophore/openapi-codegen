@@ -8,10 +8,11 @@ interface IOptionsProps {
     outputCorePath: string;
     useCancelableRequest?: boolean;
     useSeparatedIndexes?: boolean;
+    modelsMode?: import('../types/enums/ModelsMode.enum').ModelsMode;
 }
 
 export async function writeClientCoreIndex(this: WriteClient, options: IOptionsProps) {
-    const { templates, outputCorePath, useCancelableRequest, useSeparatedIndexes } = options;
+    const { templates, outputCorePath, useCancelableRequest, useSeparatedIndexes, modelsMode } = options;
 
     if (!useSeparatedIndexes) {
         return;
@@ -20,7 +21,7 @@ export async function writeClientCoreIndex(this: WriteClient, options: IOptionsP
 
     this.logger.info(`Data has been written to a file: ${filePath}`);
 
-    const content = templates.indexes.core({ useCancelableRequest});
+    const content = templates.indexes.core({ useCancelableRequest, modelsMode });
     await appendUniqueLinesToFile(filePath, content);
 
     this.logger.info(`Writing to the file is completed: ${filePath}`);

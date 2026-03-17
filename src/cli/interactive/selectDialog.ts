@@ -1,7 +1,7 @@
 import { prompt } from 'enquirer';
 
 import { APP_LOGGER } from '../../common/Consts';
-import { DIALOG_MESSAGES } from './constants';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { EnquirerSelectOptions } from './types';
 
 /**
@@ -24,20 +24,25 @@ export async function selectDialog<T = string>(options: EnquirerSelectOptions<T>
             type: 'select',
             name: 'choice',
             message: options.message,
-            choices: options.choices.map(choice => ({
-                name: choice.name,
+            choices: options.choices.map((choice, index) => ({
+                // Enquirer возвращает `name` выбранного пункта.
+                // Храним в `name` технический id, а в `message` - текст для пользователя.
+                name: String(index),
+                message: choice.name,
                 value: choice.value,
                 hint: choice.hint,
             })),
             initial: options.initial,
-            result(value: any) {
-                return value.value;
+            result(this: any, selectedName: string) {
+                const selectedChoice = this.choices.find((choice: { name: string; value: T }) => choice.name === selectedName);
+                return selectedChoice?.value;
             },
         });
 
         return response.choice;
     } catch {
-        APP_LOGGER.error(`\n${DIALOG_MESSAGES.SELECTION_CANCELLED}`);
+        APP_LOGGER.error(LOGGER_MESSAGES.DIALOG.SELECTION_CANCELLED);
+        await APP_LOGGER.shutdownLoggerAsync();
         process.exit(0);
     }
 }

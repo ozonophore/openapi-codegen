@@ -1,11 +1,14 @@
 import { z } from 'zod'
 
-import { specialParametersSchemasV4 } from '../CommonSchemas'
+import { analyzeConfigSchema, miraclesConfigSchema, modelsConfigSchema, specialParametersSchemasV4 } from '../CommonSchemas'
 import { unifiedOptionsSchemaV3 } from './UnifiedOptionsSchemaV3'
 
 export const unifiedOptionsSchemaV4 = unifiedOptionsSchemaV3.extend({
     ...specialParametersSchemasV4.shape,
     customExecutorPath: z.string().optional(),
+    models: modelsConfigSchema.optional(),
+    analyze: analyzeConfigSchema.optional(),
+    miracles: miraclesConfigSchema.optional(),
 })
 
 /*

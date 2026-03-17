@@ -6,6 +6,12 @@ export { createExecutorAdapter } from './executor/createExecutorAdapter';
 export { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './interceptors/interceptors';
 export { apiErrorInterceptor } from './interceptors/apiErrorInterceptor';
 export { withInterceptors } from './interceptors/withInterceptors';
+{{#if @root.modelsMode}}
+{{#equals @root.modelsMode 'classes'}}
+export { BaseDto } from './BaseDto';
+export { fromArray } from './dtoUtils';
+{{/equals}}
+{{/if}}
 {{#if @root.useCancelableRequest}}
 export { CancelablePromise } from './CancelablePromise';
 {{/if}}

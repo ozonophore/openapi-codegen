@@ -1,6 +1,8 @@
 const TYPE_MAPPINGS = new Map<string, string>([
+    ['Blob', 'Blob'],
     ['File', 'File'],
     ['file', 'File'],
+    ['binary', 'Blob'],
     ['any', 'any'],
     ['object', 'any'],
     ['array', 'any[]'],

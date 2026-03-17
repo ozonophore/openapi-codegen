@@ -31,7 +31,22 @@ export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOptio
             useOptions: COMMON_DEFAULT_OPTIONS_VALUES.useOptions,
             useSeparatedIndexes: COMMON_DEFAULT_OPTIONS_VALUES.useSeparatedIndexes,
             useUnionTypes: COMMON_DEFAULT_OPTIONS_VALUES.useUnionTypes,
+            modelsMode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+            useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
+            diffReport: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
             ...(!perSpecRequest && customRequest ? { request: customRequest } : {}),
+            models: {
+                mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+            },
+            analyze: {
+                useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
+                reportPath: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
+            },
+            miracles: {
+                enabled: true,
+                confidence: 1,
+                types: ['RENAME', 'TYPE_COERCION'],
+            },
         };
     } else {
         if (validatedSpecs.length === 0) {
@@ -54,7 +69,22 @@ export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOptio
             useOptions: COMMON_DEFAULT_OPTIONS_VALUES.useOptions,
             useSeparatedIndexes: COMMON_DEFAULT_OPTIONS_VALUES.useSeparatedIndexes,
             useUnionTypes: COMMON_DEFAULT_OPTIONS_VALUES.useUnionTypes,
+            modelsMode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+            useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
+            diffReport: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
             ...(customRequest ? { request: customRequest } : {}),
+            models: {
+                mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+            },
+            analyze: {
+                useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
+                reportPath: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
+            },
+            miracles: {
+                enabled: true,
+                confidence: 1,
+                types: ['RENAME', 'TYPE_COERCION'],
+            },
         };
     }
 }
@@ -86,7 +116,22 @@ export function buildExampleConfig(useMultiOption: boolean, customRequest?: stri
             useOptions: COMMON_DEFAULT_OPTIONS_VALUES.useOptions,
             useSeparatedIndexes: COMMON_DEFAULT_OPTIONS_VALUES.useSeparatedIndexes,
             useUnionTypes: COMMON_DEFAULT_OPTIONS_VALUES.useUnionTypes,
+            modelsMode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+            useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
+            diffReport: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
             ...(!perSpecRequest && customRequest ? { request: customRequest } : {}),
+            models: {
+                mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+            },
+            analyze: {
+                useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
+                reportPath: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
+            },
+            miracles: {
+                enabled: true,
+                confidence: 1,
+                types: ['RENAME', 'TYPE_COERCION'],
+            },
         };
     } else {
         return {
@@ -102,7 +147,22 @@ export function buildExampleConfig(useMultiOption: boolean, customRequest?: stri
             useOptions: COMMON_DEFAULT_OPTIONS_VALUES.useOptions,
             useSeparatedIndexes: COMMON_DEFAULT_OPTIONS_VALUES.useSeparatedIndexes,
             useUnionTypes: COMMON_DEFAULT_OPTIONS_VALUES.useUnionTypes,
+            modelsMode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+            useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
+            diffReport: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
             ...(customRequest ? { request: customRequest } : {}),
+            models: {
+                mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+            },
+            analyze: {
+                useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
+                reportPath: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
+            },
+            miracles: {
+                enabled: true,
+                confidence: 1,
+                types: ['RENAME', 'TYPE_COERCION'],
+            },
         };
     }
 }

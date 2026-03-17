@@ -163,8 +163,11 @@ function getResponseHeader(response: Response, responseHeader?: string): string 
 }
 
 
-async function getResponseBody(response: Response): Promise<any> {
+async function getResponseBody(response: Response, options: ApiRequestOptions): Promise<any> {
     try {
+        if (options.responseType === 'blob') {
+            return await response.blob();
+        }
         const contentType = response.headers.get('Content-Type');
         if (contentType) {
             const isJSON = contentType.toLowerCase().startsWith('application/json');
@@ -229,7 +232,7 @@ export async function requestRaw<T>(options: ApiRequestOptions, config: TOpenAPI
         try {
             const url = getUrl(options, config);
             const response = await sendRequest(options, url, config);
-            const responseBody = await getResponseBody(response);
+            const responseBody = await getResponseBody(response, options);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 
             const result: ApiResult<T> = {

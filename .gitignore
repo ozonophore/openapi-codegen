@@ -7,6 +7,8 @@ junit.xml
 .tmp
 .idea
 .vscode
+.cursorignore
+.cursor
 *.iml
 dist
 coverage
@@ -19,3 +21,4 @@ generated
 yarn.lock
 __logs__
 .ts-openapi-codegen-diff-changes
+AGENTS.md

@@ -1,6 +1,7 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 
 import { APP_LOGGER } from '../../../common/Consts';
+import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
 
 /**
  * Валидирует файл спецификации через SwaggerParser
@@ -12,7 +13,7 @@ export async function validateSpecFile(filePath: string): Promise<boolean> {
         await SwaggerParser.validate(filePath);
         return true;
     } catch {
-        APP_LOGGER.warn(`Skipping invalid spec file: ${filePath}`);
+        APP_LOGGER.warn(LOGGER_MESSAGES.SPEC_VALIDATION.SKIP_INVALID_FILE(filePath));
         return false;
     }
 }

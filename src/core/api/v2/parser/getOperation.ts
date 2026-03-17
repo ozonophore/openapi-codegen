@@ -38,6 +38,7 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
         errors: [],
         results: [],
         responseHeader: null,
+        responseType: null,
     };
 
     // Parse the operation parameters (path, query, body, etc).
@@ -59,6 +60,7 @@ export function getOperation(this: Parser, openApi: OpenApi, url: string, method
         const operationResults = getOperationResults(operationResponses);
         operation.errors = getOperationErrors(operationResponses);
         operation.responseHeader = getOperationResponseHeader(operationResults);
+        operation.responseType = operationResults.some(operationResult => operationResult.base === 'Blob' || operationResult.base === 'File') ? 'blob' : null;
 
         operationResults.forEach(operationResult => {
             operation.results.push(operationResult);

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { EmptySchemaStrategy } from '../../core/types/enums/EmptySchemaStrategy.enum';
+import { ModelsMode } from '../../core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../../core/types/enums/ValidationLibrary.enum';
 
 /** Output paths */
@@ -53,6 +54,33 @@ export const additionalParametersSchema = z.object({
     interfacePrefix: z.string().optional(),
     enumPrefix: z.string().optional(),
     typePrefix: z.string().optional(),
+    useHistory: z.boolean().optional(),
+    diffReport: z.string().optional(),
+    modelsMode: z.enum(ModelsMode).optional(),
+});
+
+export const modelsConfigSchema = z.object({
+    mode: z.enum(ModelsMode).optional(),
+    corePath: z.string().optional(),
+    modelsPath: z.string().optional(),
+});
+
+export const analyzeConfigSchema = z.object({
+    reportPath: z.string().optional(),
+    useHistory: z.boolean().optional(),
+    ignore: z.array(z.object({
+        path: z.string().optional(),
+        pattern: z.string().optional(),
+        reason: z.string().optional(),
+        until: z.string().optional(),
+    })).optional(),
+    failOnBreaking: z.boolean().optional(),
+});
+
+export const miraclesConfigSchema = z.object({
+    enabled: z.boolean().optional(),
+    confidence: z.number().min(0).max(1).optional(),
+    types: z.array(z.enum(['RENAME', 'TYPE_COERCION'])).optional(),
 });
 
 export const additionalParametersSchemaV2 = additionalParametersSchema.omit({

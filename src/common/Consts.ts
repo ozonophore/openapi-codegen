@@ -1,11 +1,13 @@
 import { EmptySchemaStrategy } from '../core/types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
+import { ModelsMode } from '../core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 import { ELogLevel, ELogOutput } from './Enums';
 import { Logger } from './Logger';
 import { TStrictFlatOptions } from './TRawOptions';
 
 export const DEFAULT_OPENAPI_CONFIG_FILENAME = 'openapi.config.json';
+export const DEFAULT_ANALYZE_DIFF_REPORT_PATH = './openapi-diff-report.json';
 
 export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     input: '',
@@ -31,6 +33,12 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     useSeparatedIndexes: false,
     validationLibrary: ValidationLibrary.NONE,
     emptySchemaStrategy: EmptySchemaStrategy.KEEP,
+    useHistory: false,
+    diffReport: DEFAULT_ANALYZE_DIFF_REPORT_PATH,
+    modelsMode: ModelsMode.INTERFACES,
+    models: {},
+    analyze: {},
+    miracles: {}
 };
 
 export const APP_LOGGER = new Logger({

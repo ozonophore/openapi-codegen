@@ -33,6 +33,9 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
             'useSeparatedIndexes',
             'validationLibrary',
             'emptySchemaStrategy',
+            'modelsMode',
+            'useHistory',
+            'diffReport',
         ];
 
         const getNormalizedFieldValue = (item: Record<string, any>, field: string): any => {

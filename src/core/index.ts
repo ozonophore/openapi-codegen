@@ -5,7 +5,7 @@ import { validateRawOptions } from './utils/validateRawOptions';
 export { HttpClient } from './types/enums/HttpClient.enum';
 
 export async function generate(rawOptions: TRawOptions): Promise<void> {
-    validateRawOptions(rawOptions);
+    await validateRawOptions(rawOptions);
 
     const openApiClient = new OpenApiClient();
     await openApiClient.generate(rawOptions);

@@ -2,6 +2,7 @@ import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
+import { ModelsMode } from '../types/enums/ModelsMode.enum';
 import type { Client } from '../types/shared/Client.model';
 import { WriteClient } from '../WriteClient';
 
@@ -21,6 +22,7 @@ interface IWriteClientCore {
     request?: string;
     useCancelableRequest?: boolean;
     useSeparatedIndexes?: boolean;
+    modelsMode?: ModelsMode;
 }
 
 /**
@@ -33,7 +35,7 @@ interface IWriteClientCore {
  * @param useCancelableRequest Use cancelable request type
  */
 export async function writeClientCore(this: WriteClient, options: IWriteClientCore): Promise<void> {
-    const { client, templates, outputCorePath, httpClient, request, useCancelableRequest, useSeparatedIndexes } = options;
+    const { client, templates, outputCorePath, httpClient, request, useCancelableRequest, useSeparatedIndexes, modelsMode } = options;
     const context = {
         httpClient,
         server: client.server,
@@ -50,6 +52,10 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
     await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'ApiResult.ts'), templates.core.apiResult({}));
+    if (modelsMode === ModelsMode.CLASSES) {
+        await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'BaseDto.ts'), templates.core.baseDto({}));
+        await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'dtoUtils.ts'), templates.core.dtoUtils({}));
+    }
     if (useCancelableRequest) {
         await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
     }

@@ -38,7 +38,11 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
         });
 
         if (!validationResult.success) {
-            APP_LOGGER.error(validationResult.errors.join('\n'));
+            APP_LOGGER.errorWithHint({
+                code: 'NO_OPTIONS_PROVIDED',
+                message: LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')),
+            });
+            await APP_LOGGER.shutdownLoggerAsync();
             process.exit(1);
         }
 
@@ -54,19 +58,26 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
             });
 
             if (!directOptionsValidationResult.success) {
-                APP_LOGGER.error(directOptionsValidationResult.errors.join('\n'));
+                APP_LOGGER.errorWithHint({
+                    code: 'NO_OPTIONS_PROVIDED',
+                    message: LOGGER_MESSAGES.ERROR.GENERIC(directOptionsValidationResult.errors.join('\n')),
+                });
+                await APP_LOGGER.shutdownLoggerAsync();
                 process.exit(1);
             }
 
             await OpenAPI.generate(directOptionsValidationResult.data as TRawOptions);
+            await APP_LOGGER.shutdownLoggerAsync();
             process.exit(0);
         }
 
         const configData = loadConfigIfExists(validatedOptions.openapiConfig);
         if (!configData) {
-            APP_LOGGER.error(
-                `${LOGGER_MESSAGES.CONFIG.FILE_MISSING}\nProvide non-empty "--input" and "--output" options, or a valid "--openapi-config" file path.`
-            );
+            APP_LOGGER.errorWithHint({
+                code: validatedOptions.openapiConfig ? 'CONFIG_FILE_NOT_FOUND_AT' : 'CONFIG_FILE_MISSING',
+                message: `${LOGGER_MESSAGES.CONFIG.FILE_MISSING}\n${LOGGER_MESSAGES.CONFIG.FILE_MISSING_HINT}`,
+            });
+            await APP_LOGGER.shutdownLoggerAsync();
             process.exit(1);
         }
 
@@ -85,15 +96,26 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
         });
 
         if (!migratedOptions) {
-            APP_LOGGER.error(LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED);
+            APP_LOGGER.errorWithHint({
+                code: 'NO_VALID_SPEC_FILES_FOUND',
+                message: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED,
+            });
+            await APP_LOGGER.shutdownLoggerAsync();
             process.exit(1);
         }
 
         const { value } = migratedOptions;
         await OpenAPI.generate(value as TRawOptions);
+        await APP_LOGGER.shutdownLoggerAsync();
         process.exit(0);
-    } catch (error: any) {
-        APP_LOGGER.error(error.message);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        APP_LOGGER.errorWithHint({
+            code: 'SPEC_FILES_FIND_ERROR',
+            message: LOGGER_MESSAGES.ERROR.GENERIC(message),
+            error,
+        });
+        await APP_LOGGER.shutdownLoggerAsync();
         process.exit(1);
     }
 }

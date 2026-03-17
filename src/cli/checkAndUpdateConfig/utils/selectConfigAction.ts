@@ -1,4 +1,5 @@
 import { APP_LOGGER } from '../../../common/Consts';
+import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
 import { selectDialog } from '../../interactive/selectDialog';
 import { EnquirerSelectChoice } from '../../interactive/types';
 import { EActionForConfigData } from '../types';
@@ -31,7 +32,7 @@ interface ISelectConfigActionOptions {
  * });
  */
 export async function selectConfigAction(options: ISelectConfigActionOptions): Promise<void> {
-    APP_LOGGER.warn(`\n${options.warningMessage}\n`);
+    APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.USER_WARNING(options.warningMessage));
 
     const selectedAction = await selectDialog<EActionForConfigData>({
         message: 'Choose an action:',
@@ -59,10 +60,12 @@ async function handleConfigAction(
             break;
 
         case EActionForConfigData.SKIP:
-            APP_LOGGER.info('Action skipped.');
+            APP_LOGGER.info(LOGGER_MESSAGES.CONFIG.ACTION_SKIPPED);
             break;
 
         default:
-            APP_LOGGER.error(`Unknown action: ${action}`);
+            APP_LOGGER.error(LOGGER_MESSAGES.CONFIG.UNKNOWN_ACTION(action));
+            await APP_LOGGER.shutdownLoggerAsync();
+            process.exit(1);
     }
 }

@@ -1,10 +1,10 @@
 import { OptionValues } from 'commander';
 
 import { APP_LOGGER } from '../../common/Consts';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { validateZodOptions } from '../../common/Validation/validateZodOptions';
 import { UpdateConfigOptions, updateConfigOptionsSchema,  } from '../schemas';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from './constants';
 import { validateAndMigrateConfigData } from './utils/validateAndMigrateConfigData';
 import { writeConfigFile } from './utils/writeConfigFile';
 
@@ -22,7 +22,8 @@ export async function updateConfig(options: OptionValues): Promise<void> {
     const validationResult = validateZodOptions(updateConfigOptionsSchema, options);
 
     if (!validationResult.success) {
-        APP_LOGGER.error(validationResult.errors.join('\n'));
+        APP_LOGGER.error(LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')));
+        await APP_LOGGER.shutdownLoggerAsync();
         process.exit(1);
     }
 
@@ -31,15 +32,16 @@ export async function updateConfig(options: OptionValues): Promise<void> {
     const configData = loadConfigIfExists(validatedOptions.openapiConfig);
 
     if (!configData) {
-        APP_LOGGER.error(`${ERROR_MESSAGES.FILE_NOT_FOUND} ${validatedOptions.openapiConfig}`);
-        return;
+        APP_LOGGER.error(LOGGER_MESSAGES.CONFIG.FILE_NOT_FOUND(validatedOptions.openapiConfig || ''));
+        await APP_LOGGER.shutdownLoggerAsync();
+        process.exit(1);
     }
 
     try {
         const { isActualConfigVersion, migratedData } = validateAndMigrateConfigData(configData);
 
         if (isActualConfigVersion) {
-            APP_LOGGER.info(SUCCESS_MESSAGES.CONFIG_UP_TO_DATE(validatedOptions.openapiConfig || ''));
+            APP_LOGGER.info(LOGGER_MESSAGES.CONFIG.CONFIG_UP_TO_DATE(validatedOptions.openapiConfig || ''));
         } else {
             await writeConfigFile({
                 data: migratedData,
@@ -48,7 +50,9 @@ export async function updateConfig(options: OptionValues): Promise<void> {
             });
         }
     } catch (error) {
-        handleUpdateError(ERROR_MESSAGES.UPDATING_FAILED, error);
+        handleUpdateError(LOGGER_MESSAGES.CONFIG.UPDATING_FAILED, error);
+        await APP_LOGGER.shutdownLoggerAsync();
+        process.exit(1);
     }
 }
 
@@ -58,7 +62,7 @@ export async function updateConfig(options: OptionValues): Promise<void> {
  */
 function handleUpdateError(baseMessage: string, error: unknown): void {
     if (error instanceof Error && error.message) {
-        APP_LOGGER.error(`${baseMessage}: ${error.message}`);
+        APP_LOGGER.error(LOGGER_MESSAGES.ERROR.WITH_DETAILS(baseMessage, error.message));
     } else if (error) {
         APP_LOGGER.error(baseMessage, error);
     } else {

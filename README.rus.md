@@ -28,6 +28,7 @@
 - Поддерживает tsc и @babel/plugin-transform-typescript
 - Поддерживает кастомизацию имен моделей
 - Поддерживает внешние ссылки с помощью [`swagger-parser`](https://github.com/APIDevTools/swagger-parser/)
+- Поддерживает генерацию бинарных request/response (`format: binary` -> `Blob`)
 
 ## Установка
 
@@ -37,7 +38,7 @@ npm install ts-openapi-codegen --save-dev
 
 ## Использование
 
-CLI инструмент поддерживает пять команд: `generate`, `check-config`, `update-config`, `init` и `preview-changes`.
+CLI инструмент поддерживает шесть команд: `generate`, `check-config`, `update-config`, `init`, `preview-changes` и `analyze-diff`.
 
 ### Команда: `generate`
 
@@ -75,6 +76,9 @@ openapi generate --input ./spec.json --output ./dist
 | `--logTarget` | `-t` | string | `console` | Цель логирования: `console` или `file` |
 | `--validationLibrary` | - | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
 | `--emptySchemaStrategy` | - | string | `keep` | Стратегия для пустых схем: `keep`, `semantic`, или `skip` |
+| `--modelsMode` | - | string | `interfaces` | Режим генерации моделей: `interfaces` или `classes` |
+| `--useHistory` | - | boolean | `false` | Применять diff-отчёт при генерации |
+| `--diffReport` | - | string | `./openapi-diff-report.json` | Путь к diff-отчёту |
 
 **Примеры:**
 ```bash
@@ -162,6 +166,46 @@ openapi preview-changes --openapi-config ./custom-config.json
 - `--preview-dir` / `-pd` - Временная директория для preview-генерации (по умолчанию: `./.ts-openapi-codegen-preview-changes`)
 - `--diff-dir` / `-dd` - Директория для diff-отчетов (по умолчанию: `./.ts-openapi-codegen-diff-changes`)
 
+### Команда: `analyze-diff`
+
+Анализирует изменения между двумя версиями OpenAPI и формирует JSON‑отчет.
+
+**Использование:**
+```bash
+openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml --output-report ./openapi-diff-report.json
+openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
+```
+
+**Опции:**
+- `--input` / `-i` - Путь к текущей спецификации OpenAPI (обязательно)
+- `--compare-with` - Путь к предыдущей спецификации
+- `--git` - Git ref для чтения предыдущей версии спецификации (например, `HEAD~1`)
+- `--output-report` - Путь для сохранения diff‑отчёта (по умолчанию: `./openapi-diff-report.json`)
+
+#### Miracles и подтверждение
+
+В diff‑отчёте может быть раздел `miracles` с обнаруженными переименованиями/коэрсингом типов. В генерации применяются только подтверждённые записи.
+
+**Как подтверждать чудеса:**
+1. Запустите `analyze-diff` и откройте отчёт (по умолчанию: `./openapi-diff-report.json`).
+2. Найдите нужную запись в `miracles`.
+3. Измените `"status": "auto-generated"` на `"status": "confirmed"` и закоммитьте отчёт.
+
+Пример (фрагмент):
+```json
+{
+  "miracles": [
+    {
+      "oldPath": "$.components.schemas.User.properties.user_name",
+      "newPath": "$.components.schemas.User.properties.userName",
+      "type": "RENAME",
+      "confidence": 0.85,
+      "status": "confirmed"
+    }
+  ]
+}
+```
+
 ### Файл конфигурации
 
 Вместо передачи всех опций через CLI, вы можете использовать файл конфигурации. Создайте `openapi.config.json` в корне вашего проекта:
@@ -182,7 +226,22 @@ openapi preview-changes --openapi-config ./custom-config.json
     "sortByRequired": false,
     "useSeparatedIndexes": false,
     "request": "./custom-request.ts",
-    "customExecutorPath": "./custom/createExecutorAdapter.ts"
+    "customExecutorPath": "./custom/createExecutorAdapter.ts",
+    "modelsMode": "interfaces",
+    "useHistory": false,
+    "diffReport": "./openapi-diff-report.json",
+    "models": {
+        "mode": "interfaces"
+    },
+    "analyze": {
+        "useHistory": false,
+        "reportPath": "./openapi-diff-report.json"
+    },
+    "miracles": {
+        "enabled": true,
+        "confidence": 1,
+        "types": ["RENAME", "TYPE_COERCION"]
+    }
 }
 ```
 
@@ -243,6 +302,12 @@ openapi preview-changes --openapi-config ./custom-config.json
 | `items` | array | - | Массив конфигураций (для формата multi-options) |
 | `validationLibrary` | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Стратегия для пустых схем: `keep`, `semantic`, или `skip` |
+| `modelsMode` | string | `interfaces` | Режим генерации моделей: `interfaces` или `classes` |
+| `useHistory` | boolean | `false` | Применять diff‑отчёт при генерации |
+| `diffReport` | string | `./openapi-diff-report.json` | Путь к diff‑отчёту |
+| `models` | object | - | Секция конфигурации моделей (например, `mode`) |
+| `analyze` | object | - | Секция анализа (например, reportPath, useHistory, ignore) |
+| `miracles` | object | - | Секция чудес (enabled, confidence, types) |
 
 **Примечание:** Вы можете использовать команду `init` для генерации шаблона файла конфигурации.
 
@@ -262,6 +327,16 @@ openapi init
 
 # Затем выполните генерацию
 openapi generate
+```
+
+**С DTO моделями (режим classes):**
+```bash
+openapi generate --input ./spec.json --output ./dist --modelsMode classes
+```
+
+**Сгенерировать diff‑отчёт:**
+```bash
+openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml --output-report ./openapi-diff-report.json
 ```
 
 **Проверка конфигурации:**
@@ -421,6 +496,20 @@ const order: Order = {
 - **joi** - Генерация схем валидации Joi
 - **yup** - Генерация схем валидации Yup
 - **jsonschema** - Генерация схем валидации JSON Schema
+
+Если включен `--useHistory` и в diff‑отчёте есть смена типа, валидаторы будут пытаться выполнять коэрсинг:
+- **Zod** использует `z.coerce.*`
+- **Joi** использует `Joi.alternatives().try(...)`
+- **Yup** использует `.transform(...)`
+- **JSON Schema (AJV)** включает `coerceTypes`
+
+### Режим моделей `--modelsMode`
+
+По умолчанию модели генерируются как интерфейсы/типы. При `--modelsMode classes` генератор создаёт:
+- `*Raw` интерфейсы (JSON‑формат API)
+- `*Dto` классы с геттерами, дефолтами, рекурсивными конструкторами и `toJSON()`
+
+Вывод консолидируется в один файл `models.ts`, а `BaseDto`/`dtoUtils` добавляются в `core`.
 
 Допустим, у нас есть следующая модель:
 

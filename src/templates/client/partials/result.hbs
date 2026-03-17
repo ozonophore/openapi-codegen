@@ -1,4 +1,6 @@
-{{~#if results~}}
+{{~#if isGhost~}}
+never
+{{~else if results~}}
 {{#each results}}{{>type}}{{#unless @last}} | {{/unless}}{{/each}}
 {{~else~}}
 void

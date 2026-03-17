@@ -5,6 +5,7 @@ import { format } from '../../common/utils/format';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
+import { ModelsMode } from '../types/enums/ModelsMode.enum';
 import type { Model } from '../types/shared/Model.model';
 import { WriteClient } from '../WriteClient';
 
@@ -21,6 +22,9 @@ interface IWriteClientModels {
     outputModelsPath: string;
     httpClient: HttpClient;
     useUnionTypes: boolean;
+    useOptions?: boolean;
+    modelsMode?: ModelsMode;
+    outputCorePath?: string;
 }
 
 /**
@@ -32,15 +36,32 @@ interface IWriteClientModels {
  * @param useUnionTypes Use union types instead of enums
  */
 export async function writeClientModels(this: WriteClient, options: IWriteClientModels): Promise<void> {
-    const { models, templates, outputModelsPath, httpClient, useUnionTypes } = options;
+    const { models, templates, outputModelsPath, httpClient, useUnionTypes, modelsMode, outputCorePath, useOptions } = options;
 
     this.logger.info('Recording of model files begins');
+
+    if (modelsMode === ModelsMode.CLASSES) {
+        const file = resolveHelper(outputModelsPath, 'models.ts');
+        const templateResult = templates.exports.models({
+            models,
+            httpClient,
+            useUnionTypes,
+            useOptions,
+            outputCore: outputCorePath || '../core',
+            modelsMode,
+        });
+        const formattedValue = await format(templateResult);
+        await fileSystemHelpers.writeFile(file, formattedValue);
+        this.logger.info(`File recording completed: ${file}`);
+        this.logger.info('Model file recording completed successfully');
+        return;
+    }
 
     for (const model of models) {
         const modelFolderPath = model?.path;
 
         if (!modelFolderPath) {
-            return;
+            continue;
         }
 
         const dir = dirNameHelper(modelFolderPath);

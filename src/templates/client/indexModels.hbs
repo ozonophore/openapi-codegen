@@ -1,7 +1,9 @@
 {{>header}}
 
 {{#if models}}
-
+{{#equals @root.modelsMode 'classes'}}
+export * from './models';
+{{else}}
 {{#each models}}
 {{#if enum}}
 export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{path}}}';
@@ -13,4 +15,5 @@ export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{path}}}';
 export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{path}}}';
 {{/if}}
 {{/each}}
+{{/equals}}
 {{/if}}

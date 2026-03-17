@@ -8,10 +8,31 @@ export interface {{{name}}} {
     {{#if description}}
     /**
      * {{{description}}}
+     {{#if diff}}
+     {{#if diff.previousType}}
+     * @info previous type: {{{diff.previousType}}}
+     {{/if}}
+     {{/if}}
      */
+    {{else}}
+    {{#if diff}}
+    {{#if diff.previousType}}
+    /**
+     * @info previous type: {{{diff.previousType}}}
+     */
+    {{/if}}
+    {{/if}}
     {{/if}}
     {{>isReadOnly}}{{{name}}}{{>isRequired}}: {{>type parent=../name}};
     {{/each}}
+    {{#if ghostProperties}}
+    {{#each ghostProperties}}
+    /**
+     * @deprecated Removed from API
+     */
+    {{{name}}}?: unknown;
+    {{/each}}
+    {{/if}}
 }
 {{#if enums}}
 {{#unless @root.useUnionTypes}}

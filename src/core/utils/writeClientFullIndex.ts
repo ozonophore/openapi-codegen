@@ -9,7 +9,7 @@ import { WriteClient } from '../WriteClient';
  * library. But yuo can also import individual models and services directly.
  */
 export async function writeClientFullIndex(this: WriteClient, options: ClientArtifacts): Promise<void> {
-    const { templates, outputPath, core, models, schemas, services } = options;
+    const { templates, outputPath, core, models, schemas, services, modelsMode, modelsPackage } = options;
     const resolvePathIndex = resolveHelper(outputPath, 'index.ts');
 
     this.logger.info(`Data has been written to a file: ${resolvePathIndex}`);
@@ -21,6 +21,8 @@ export async function writeClientFullIndex(this: WriteClient, options: ClientArt
             models,
             schemas,
             services,
+            modelsMode,
+            modelsPackage,
         })
     );
 

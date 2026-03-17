@@ -4,12 +4,16 @@ export function getOperationResponseCode(value: string | 'default'): number | nu
         return 200;
     }
 
-    // Check if we can parse the code and return of successful.
-    if (/[0-9]+/g.test(value)) {
-        const code = parseInt(value);
-        if (Number.isInteger(code)) {
-            return Math.abs(code);
-        }
+    const normalizedValue = value.trim();
+
+    // OpenAPI supports exact response codes (e.g. "200")
+    if (/^\d{3}$/.test(normalizedValue)) {
+        return Number(normalizedValue);
+    }
+
+    // OpenAPI supports response code ranges (e.g. "2XX")
+    if (/^[1-5]XX$/i.test(normalizedValue)) {
+        return Number(normalizedValue[0]) * 100;
     }
 
     return null;

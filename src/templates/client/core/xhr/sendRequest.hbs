@@ -7,6 +7,9 @@ async function sendRequest(options: ApiRequestOptions, url: string, config: TOpe
     const xhr = new XMLHttpRequest();
     xhr.open(options.method, url, true);
     xhr.withCredentials = config.WITH_CREDENTIALS;
+    if (options.responseType === 'blob') {
+        xhr.responseType = 'blob';
+    }
 
     const headers = await getHeaders(options, config);
     headers.forEach((value: string, key: string) => {

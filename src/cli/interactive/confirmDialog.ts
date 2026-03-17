@@ -1,7 +1,7 @@
 import { prompt } from 'enquirer';
 
 import { APP_LOGGER } from '../../common/Consts';
-import { DIALOG_MESSAGES } from './constants';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { EnquirerConfirmOptions } from './types';
 
 /**
@@ -30,7 +30,8 @@ export async function confirmDialog(options: EnquirerConfirmOptions): Promise<bo
         return response.answer;
     } catch {
         // Пользователь прервал процесс (Ctrl+C)
-        APP_LOGGER.error(`\n${DIALOG_MESSAGES.OPERATION_CANCELLED}`);
+        APP_LOGGER.error(LOGGER_MESSAGES.DIALOG.OPERATION_CANCELLED);
+        await APP_LOGGER.shutdownLoggerAsync();
         process.exit(0);
     }
 }

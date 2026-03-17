@@ -1,0 +1,16 @@
+{{>header}}
+
+export abstract class BaseDto<Raw> {
+    protected readonly _raw: Raw;
+
+    protected constructor(data: Raw) {
+        this._raw = data;
+    }
+
+    public abstract toJSON(): Raw;
+
+    public clone(): this {
+        const ctor = this.constructor as new (data: Raw) => this;
+        return new ctor(this.toJSON());
+    }
+}

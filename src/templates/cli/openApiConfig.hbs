@@ -1,6 +1,14 @@
-{{#if @root.useMultyOptions}}
+{{#if @root.items}}
 {
-    "items": {{@root.items}},
+    "items": [
+{{#each @root.items}}
+        {
+            "input": "{{input}}",
+            "output": "{{output}}"{{#if request}},
+            "request": "{{request}}"{{/if}}
+        }{{#unless @last}},{{/unless}}
+{{/each}}
+    ],
     "httpClient": "{{@root.httpClient}}",
     "sortByRequired": {{@root.sortByRequired}},
     "enumPrefix": "{{@root.enumPrefix}}",
@@ -11,7 +19,22 @@
     "useOptions": {{@root.useOptions}},
     "useSeparatedIndexes": {{@root.useSeparatedIndexes}},
     "useUnionTypes": {{@root.useUnionTypes}},
-    {{#if @root.request}}"request": "{{@root.request}}"{{/if}}
+    "modelsMode": "{{@root.modelsMode}}",
+    "useHistory": {{@root.useHistory}},
+    "diffReport": "{{@root.diffReport}}"{{#if @root.request}},
+    "request": "{{@root.request}}"{{/if}},
+    "models": {
+        "mode": "{{@root.modelsMode}}"
+    },
+    "analyze": {
+        "useHistory": {{@root.useHistory}},
+        "reportPath": "{{@root.diffReport}}"
+    },
+    "miracles": {
+        "enabled": true,
+        "confidence": 1,
+        "types": ["RENAME", "TYPE_COERCION"]
+    }
 }
 {{else}}
 {
@@ -27,6 +50,21 @@
     "useOptions": {{@root.useOptions}},
     "useSeparatedIndexes": {{@root.useSeparatedIndexes}},
     "useUnionTypes": {{@root.useUnionTypes}},
-    {{#if @root.request}}"request": "{{@root.request}}"{{/if}}
+    "modelsMode": "{{@root.modelsMode}}",
+    "useHistory": {{@root.useHistory}},
+    "diffReport": "{{@root.diffReport}}"{{#if @root.request}},
+    "request": "{{@root.request}}"{{/if}},
+    "models": {
+        "mode": "{{@root.modelsMode}}"
+    },
+    "analyze": {
+        "useHistory": {{@root.useHistory}},
+        "reportPath": "{{@root.diffReport}}"
+    },
+    "miracles": {
+        "enabled": true,
+        "confidence": 1,
+        "types": ["RENAME", "TYPE_COERCION"]
+    }
 }
 {{/if}}

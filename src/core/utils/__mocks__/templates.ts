@@ -12,6 +12,12 @@ export const templates: Templates = {
     exports: {
         client: () => 'client',
         model: () => 'model',
+        models: (params?: { models?: Array<{ rawName?: string; dtoName?: string; dtoGetters?: unknown[] }> }) => {
+            const models = params?.models ?? [];
+            const first = models[0];
+            if (!first) return 'models';
+            return `// models:${first.rawName ?? ''}:${first.dtoName ?? ''}:${first.dtoGetters?.length ?? 0}`;
+        },
         schema: () => 'schema',
         service: () => 'service',
     },
@@ -28,5 +34,7 @@ export const templates: Templates = {
         apiErrorInterceptor: () => 'apiErrorInterceptor',
         interceptors: () => 'interceptors',
         withInterceptors: () => 'withInterceptors',
+        baseDto: () => 'BaseDto',
+        dtoUtils: () => 'dtoUtils',
     },
 };

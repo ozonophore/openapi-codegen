@@ -11,14 +11,18 @@ import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
+import { ModelsMode } from './types/enums/ModelsMode.enum';
 import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
+import type { Client } from './types/shared/Client.model';
+import { applyDiffReportToClient } from './utils/applyDiffReportToClient';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
+import { DiffReport, loadDiffReport } from './utils/loadDiffReport';
 import { postProcessClient } from './utils/postProcessClient';
+import { prepareDtoModels } from './utils/prepareDtoModels';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { WriteClient } from './WriteClient';
-
 
 export class OpenApiClient {
     private _writeClient: WriteClient | null = null;
@@ -31,6 +35,9 @@ export class OpenApiClient {
     }
 
     private normalizeOptions(rawOptions: TRawOptions): TFlatOptions[] {
+        const modelsMode = rawOptions.modelsMode ?? rawOptions.models?.mode;
+        const useHistory = rawOptions.useHistory ?? rawOptions.analyze?.useHistory;
+        const diffReport = rawOptions.diffReport ?? rawOptions.analyze?.reportPath;
         if (rawOptions.items && rawOptions.items.length > 0) {
             // Для items: Наследуем глобальный request, если не переопределён
             return rawOptions.items.map(item => ({
@@ -52,6 +59,9 @@ export class OpenApiClient {
                 useSeparatedIndexes: rawOptions.useSeparatedIndexes,
                 validationLibrary: rawOptions.validationLibrary,
                 emptySchemaStrategy: rawOptions.emptySchemaStrategy,
+                useHistory: item.useHistory ?? useHistory,
+                diffReport: item.diffReport ?? diffReport,
+                modelsMode: item.modelsMode ?? modelsMode,
             }));
         } else {
             // Плоский формат (из CLI или старого конфига): Один item с глобальным request
@@ -80,6 +90,9 @@ export class OpenApiClient {
                     useSeparatedIndexes: rawOptions.useSeparatedIndexes,
                     validationLibrary: rawOptions.validationLibrary,
                     emptySchemaStrategy: rawOptions.emptySchemaStrategy,
+                    useHistory,
+                    diffReport,
+                    modelsMode,
                 },
             ];
         }
@@ -110,6 +123,12 @@ export class OpenApiClient {
             useSeparatedIndexes: item.useSeparatedIndexes ?? COMMON_DEFAULT_OPTIONS_VALUES.useSeparatedIndexes,
             validationLibrary: item.validationLibrary ?? COMMON_DEFAULT_OPTIONS_VALUES.validationLibrary,
             emptySchemaStrategy: item.emptySchemaStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.emptySchemaStrategy,
+            useHistory: item.useHistory ?? COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
+            diffReport: item.diffReport || COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
+            modelsMode: item.modelsMode ?? COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+            models: item.models || COMMON_DEFAULT_OPTIONS_VALUES.models,
+            analyze: item.analyze || COMMON_DEFAULT_OPTIONS_VALUES.analyze,
+            miracles: item.miracles || COMMON_DEFAULT_OPTIONS_VALUES.miracles,
         };
     }
 
@@ -180,6 +199,9 @@ export class OpenApiClient {
             useSeparatedIndexes,
             validationLibrary = ValidationLibrary.NONE,
             emptySchemaStrategy = EmptySchemaStrategy.KEEP,
+            useHistory,
+            diffReport,
+            modelsMode = ModelsMode.INTERFACES,
         } = item;
         const outputPaths: OutputPaths = getOutputPaths({
             output,
@@ -189,7 +211,12 @@ export class OpenApiClient {
             outputSchemas,
         });
         const absoluteInput = resolveHelper(process.cwd(), input);
-        const context = new Context({ input: absoluteInput, output: outputPaths, prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix }, sortByRequired });
+        const context = new Context({
+            input: absoluteInput,
+            output: outputPaths,
+            prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix },
+            sortByRequired,
+        });
         const openApi = await getOpenApiSpec(context, absoluteInput);
         const openApiVersion = getOpenApiVersion(openApi);
         const templates = registerHandlebarTemplates({
@@ -198,14 +225,29 @@ export class OpenApiClient {
             useOptions,
             validationLibrary,
         });
+        const diffReportData = await this.loadDiffReportIfNeeded({
+            useHistory,
+            diffReport,
+            inputPath: absoluteInput,
+        });
         this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.DEFINING_VERSION);
         switch (openApiVersion) {
             case OpenApiVersion.V2: {
                 const client = new ParserV2(context).parse(openApi as OpenApiV2);
-                const clientFinal = postProcessClient(client);
+                const clientWithDiff = this.applyDiffReportIfNeeded({
+                    client,
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    openApi,
+                    openApiVersion,
+                    diffReport: diffReportData,
+                    context,
+                });
+                const clientFinal = postProcessClient(clientWithDiff);
+                const clientPrepared = modelsMode === ModelsMode.CLASSES ? prepareDtoModels(clientFinal) : clientFinal;
                 this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V2);
                 await this.writeClient.writeClient({
-                    client: clientFinal,
+                    client: clientPrepared,
                     templates,
                     outputPaths,
                     httpClient,
@@ -218,16 +260,27 @@ export class OpenApiClient {
                     useSeparatedIndexes,
                     validationLibrary,
                     emptySchemaStrategy,
+                    modelsMode,
                 });
                 break;
             }
 
             case OpenApiVersion.V3: {
                 const client = new ParserV3(context).parse(openApi as OpenApiV3);
-                const clientFinal = postProcessClient(client);
+                const clientWithDiff = this.applyDiffReportIfNeeded({
+                    client,
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    openApi,
+                    openApiVersion,
+                    diffReport: diffReportData,
+                    context,
+                });
+                const clientFinal = postProcessClient(clientWithDiff);
+                const clientPrepared = modelsMode === ModelsMode.CLASSES ? prepareDtoModels(clientFinal) : clientFinal;
                 this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V3);
                 await this.writeClient.writeClient({
-                    client: clientFinal,
+                    client: clientPrepared,
                     templates,
                     outputPaths,
                     httpClient,
@@ -240,10 +293,34 @@ export class OpenApiClient {
                     useSeparatedIndexes,
                     validationLibrary,
                     emptySchemaStrategy,
+                    modelsMode,
                 });
                 break;
             }
         }
+    }
+
+    private async loadDiffReportIfNeeded(params: { useHistory?: boolean; diffReport?: string; inputPath?: string }): Promise<DiffReport | null> {
+        return loadDiffReport({
+            useHistory: params.useHistory,
+            diffReport: params.diffReport,
+            inputPath: params.inputPath,
+            logger: this.writeClient.logger,
+        });
+    }
+
+    private applyDiffReportIfNeeded(params: { client: Client; openApi: Record<string, unknown>; openApiVersion: OpenApiVersion; diffReport: DiffReport | null; context: Context }): Client {
+        if (!params.diffReport) {
+            return params.client;
+        }
+
+        return applyDiffReportToClient({
+            client: params.client,
+            openApi: params.openApi,
+            openApiVersion: params.openApiVersion,
+            diffReport: params.diffReport,
+            prefix: params.context.prefix,
+        });
     }
 
     async generate(rawOptions: TRawOptions) {

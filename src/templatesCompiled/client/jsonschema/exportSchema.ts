@@ -34,8 +34,10 @@ export default {"1":function(container,depth0,helpers,partials,data) {
   return " as "
     + ((stack1 = container.lambda(container.strict(depth0, "alias", {"start":{"line":5,"column":45},"end":{"line":5,"column":50}} ), depth0)) != null ? stack1 : "")
     + "Schema";
+},"5":function(container,depth0,helpers,partials,data) {
+    return ", coerceTypes: true";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    var stack1, alias1=container.strict, alias2=container.lambda, lookupProperty = container.lookupProperty || function(parent, propertyName) {
+    var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.strict, alias3=container.lambda, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
         }
@@ -44,28 +46,30 @@ export default {"1":function(container,depth0,helpers,partials,data) {
 
   return ((stack1 = container.invokePartial(lookupProperty(partials,"header"),depth0,{"name":"header","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
     + "\n"
-    + ((stack1 = lookupProperty(helpers,"if").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(depth0,"imports"),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":3,"column":0},"end":{"line":7,"column":7}}})) != null ? stack1 : "")
-    + "\nimport Ajv, { ErrorObject } from 'ajv';\nimport addFormats from 'ajv-formats';\n\nconst ajv = new Ajv({ allErrors: true });\naddFormats(ajv);\n\nexport const "
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":15,"column":16},"end":{"line":15,"column":20}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"imports"),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":3,"column":0},"end":{"line":7,"column":7}}})) != null ? stack1 : "")
+    + "\nimport Ajv, { ErrorObject } from 'ajv';\nimport addFormats from 'ajv-formats';\n\nconst ajv = new Ajv({ allErrors: true"
+    + ((stack1 = lookupProperty(helpers,"if").call(alias1,lookupProperty(depth0,"hasCoercion"),{"name":"if","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":12,"column":37},"end":{"line":12,"column":82}}})) != null ? stack1 : "")
+    + " });\naddFormats(ajv);\n\nexport const "
+    + ((stack1 = alias3(alias2(depth0, "name", {"start":{"line":15,"column":16},"end":{"line":15,"column":20}} ), depth0)) != null ? stack1 : "")
     + "Schema = "
     + ((stack1 = container.invokePartial(lookupProperty(partials,"jsonschema/jsonschemaSchema"),depth0,{"name":"jsonschema/jsonschemaSchema","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
     + ";\n\nexport type "
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":17,"column":15},"end":{"line":17,"column":19}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = alias3(alias2(depth0, "name", {"start":{"line":17,"column":15},"end":{"line":17,"column":19}} ), depth0)) != null ? stack1 : "")
     + " = any; // JSON Schema doesn't provide type inference\n\nexport function validate"
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":19,"column":27},"end":{"line":19,"column":31}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = alias3(alias2(depth0, "name", {"start":{"line":19,"column":27},"end":{"line":19,"column":31}} ), depth0)) != null ? stack1 : "")
     + "(data: unknown): { valid: true; data: "
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":19,"column":75},"end":{"line":19,"column":79}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = alias3(alias2(depth0, "name", {"start":{"line":19,"column":75},"end":{"line":19,"column":79}} ), depth0)) != null ? stack1 : "")
     + " } | { valid: false; errors: ErrorObject[] } {\n    const validate = ajv.compile("
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":20,"column":36},"end":{"line":20,"column":40}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = alias3(alias2(depth0, "name", {"start":{"line":20,"column":36},"end":{"line":20,"column":40}} ), depth0)) != null ? stack1 : "")
     + "Schema);\n    const valid = validate(data);\n    if (valid) {\n        return { valid: true, data: data as "
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":23,"column":47},"end":{"line":23,"column":51}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = alias3(alias2(depth0, "name", {"start":{"line":23,"column":47},"end":{"line":23,"column":51}} ), depth0)) != null ? stack1 : "")
     + " };\n    }\n    return { valid: false, errors: validate.errors || [] };\n}\n\nexport function validate"
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":28,"column":27},"end":{"line":28,"column":31}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = alias3(alias2(depth0, "name", {"start":{"line":28,"column":27},"end":{"line":28,"column":31}} ), depth0)) != null ? stack1 : "")
     + "Sync(data: unknown): "
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":28,"column":58},"end":{"line":28,"column":62}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = alias3(alias2(depth0, "name", {"start":{"line":28,"column":58},"end":{"line":28,"column":62}} ), depth0)) != null ? stack1 : "")
     + " {\n    const validate = ajv.compile("
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":29,"column":36},"end":{"line":29,"column":40}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = alias3(alias2(depth0, "name", {"start":{"line":29,"column":36},"end":{"line":29,"column":40}} ), depth0)) != null ? stack1 : "")
     + "Schema);\n    const valid = validate(data);\n    if (!valid) {\n        throw new Error(ajv.errorsText(validate.errors));\n    }\n    return data as "
-    + ((stack1 = alias2(alias1(depth0, "name", {"start":{"line":34,"column":22},"end":{"line":34,"column":26}} ), depth0)) != null ? stack1 : "")
+    + ((stack1 = alias3(alias2(depth0, "name", {"start":{"line":34,"column":22},"end":{"line":34,"column":26}} ), depth0)) != null ? stack1 : "")
     + ";\n}\n";
 },"usePartial":true,"useData":true}

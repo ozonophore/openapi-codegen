@@ -1,6 +1,7 @@
 import { OptionValues } from 'commander';
 
 import { APP_LOGGER } from '../../common/Consts';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { validateZodOptions } from '../../common/Validation/validateZodOptions';
 import { confirmDialog } from '../interactive/confirmDialog';
 import { InitOptions, initOptionsSchema } from '../schemas';
@@ -15,7 +16,8 @@ export async function init(options: OptionValues) {
     const validationResult = validateZodOptions(initOptionsSchema, options);
 
     if (!validationResult.success) {
-        APP_LOGGER.error(validationResult.errors.join('\n'));
+        APP_LOGGER.error(LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')));
+        await APP_LOGGER.shutdownLoggerAsync();
         process.exit(1);
     }
 
@@ -25,26 +27,31 @@ export async function init(options: OptionValues) {
 
     if (validatedOptions.useInteractiveMode) {
         const shouldInitConfig = await confirmDialog({
-            message: 'Желаете сформировать конфигурационный файл для быстрого запуска генератора?',
+            message: 'Would you like to create a configuration file for quick start of the generator?',
             initial: false,
         });
         if (shouldInitConfig) {
-            // TODO: генерация по шаблону!
             await initConfig({
                 openapiConfig: validatedOptions.openapiConfig,
                 request: validatedOptions.request,
                 specsDir: validatedOptions.specsDir,
                 templates,
+                useInteractiveMode: validatedOptions.useInteractiveMode,
             });
         }
 
         const shouldInitCustomRequest = await confirmDialog({
-            message: 'Желаете сформировать файл с пользовательским вариантом обработки запросов?',
+            message: 'Would you like to create a file with a custom request processing option?',
             initial: false,
         });
 
         if (shouldInitCustomRequest) {
-            await initCustomRequest(templates, validatedOptions?.useCancelableRequest);
+            await initCustomRequest({
+                templates,
+                useCancelableRequest: validatedOptions?.useCancelableRequest,
+                customRequestPath: validatedOptions.request,
+                useInteractiveMode: validatedOptions.useInteractiveMode,
+            });
         }
     } else {
         await initConfig({
@@ -52,7 +59,13 @@ export async function init(options: OptionValues) {
             request: validatedOptions.request,
             specsDir: validatedOptions.specsDir,
             templates,
+            useInteractiveMode: validatedOptions.useInteractiveMode,
         });
-        await initCustomRequest(templates, validatedOptions?.useCancelableRequest);
+        await initCustomRequest({
+            templates,
+            useCancelableRequest: validatedOptions?.useCancelableRequest,
+            customRequestPath: validatedOptions.request,
+            useInteractiveMode: validatedOptions.useInteractiveMode,
+        });
     }
 }

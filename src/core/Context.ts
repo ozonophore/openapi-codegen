@@ -226,9 +226,13 @@ export class Context {
 
         // Обходим каждый файл чтобы найти $ref с фрагментами (#)
         for (const [sourceFile] of this.virtualFiles) {
-            const schema = this._refs?.get(sourceFile);
-            if (schema && typeof schema === 'object') {
-                this.walkSchemaForFragments(schema, sourceFile);
+            try {
+                const schema = this._refs?.get(sourceFile);
+                if (schema && typeof schema === 'object') {
+                    this.walkSchemaForFragments(schema, sourceFile);
+                }
+            } catch {
+                // Skip unresolved entries from refs.paths().
             }
         }
     }

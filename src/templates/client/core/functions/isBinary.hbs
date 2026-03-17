@@ -1,6 +1,7 @@
-function isBinary(value: any): value is Buffer | ArrayBuffer | ArrayBufferView {
+function isBinary(value: any): value is Buffer | ArrayBuffer | ArrayBufferView | Blob {
     const isBuffer = Buffer.isBuffer(value);
     const isArrayBuffer = types.isArrayBuffer(value);
     const isArrayBufferView = types.isArrayBufferView(value);
-    return isBuffer || isArrayBuffer || isArrayBufferView;
+    const isBlob = typeof Blob !== 'undefined' && value instanceof Blob;
+    return isBuffer || isArrayBuffer || isArrayBufferView || isBlob;
 }

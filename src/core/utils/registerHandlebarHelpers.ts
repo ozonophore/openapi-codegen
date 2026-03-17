@@ -102,7 +102,7 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
         // Если есть path и это не базовый тип, это схема
         if (link.path && link.path !== link.base?.toLowerCase()) return false;
         // Проверяем, является ли base базовым типом
-        const basicTypes = ['string', 'number', 'integer', 'int', 'boolean', 'file', 'File', 'any', 'null'];
+        const basicTypes = ['string', 'number', 'integer', 'int', 'boolean', 'file', 'File', 'blob', 'Blob', 'any', 'null'];
         return basicTypes.includes(link.base);
     });
 
@@ -122,6 +122,7 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
             case 'boolean':
                 return 'yup.boolean()';
             case 'file':
+            case 'blob':
                 return 'yup.mixed()';
             default:
                 return 'yup.mixed()';
@@ -144,6 +145,7 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
             case 'boolean':
                 return 'Joi.boolean()';
             case 'file':
+            case 'blob':
                 return 'Joi.any()';
             default:
                 return 'Joi.any()';
@@ -170,6 +172,7 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
             case 'uuid':
                 return 'z.uuid()';
             case 'file':
+            case 'blob':
             case 'any':
                 return 'z.any()';
             default:

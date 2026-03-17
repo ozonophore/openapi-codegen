@@ -39,6 +39,7 @@ export { TypesService } from '././services/TypesService';
 export { UploadService } from '././services/UploadService';
 export { ComplexService } from '././services/ComplexService';
 export { MultipartService } from '././services/MultipartService';
+export { BlobService } from '././services/BlobService';
 export { HeaderService } from '././services/HeaderService';
 export { CircularService } from '././services/CircularService';
 export { EnumsService } from '././services/EnumsService';
