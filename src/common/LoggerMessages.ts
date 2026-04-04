@@ -11,6 +11,8 @@ export const LOGGER_ERROR_CODES = {
     PREVIEW_DIR_EMPTY: 'PREVIEW_DIR_EMPTY',
     PREVIEW_CLEANUP_FAILED: 'PREVIEW_CLEANUP_FAILED',
     SPEC_FILES_FIND_ERROR: 'SPEC_FILES_FIND_ERROR',
+    PRETTIER_FORMAT_FAILED: 'PRETTIER_FORMAT_FAILED',
+    ESLINT_FIX_FAILED: 'ESLINT_FIX_FAILED',
 } as const;
 
 export type TLoggerErrorCode = keyof typeof LOGGER_ERROR_CODES;
@@ -35,6 +37,10 @@ export const LOGGER_ERROR_RECOMMENDATIONS: Record<TLoggerErrorCode, string> = {
         'Проверьте права доступа к директории превью и отсутствует ли блокировка файлов сторонними процессами. При необходимости очистите каталог вручную и повторите команду.',
     SPEC_FILES_FIND_ERROR:
         'Проверьте корректность маски поиска и доступ к файловой системе. Убедитесь, что у вас есть права чтения для директории со спецификациями.',
+    PRETTIER_FORMAT_FAILED:
+        'Проверьте синтаксис сгенерированного фрагмента и настройки Prettier (включая опцию useProjectPrettier). При необходимости отключите useProjectPrettier или поправьте .prettierrc.',
+    ESLINT_FIX_FAILED:
+        'Проверьте, что путь к файлу корректен, ESLint и конфигурация проекта в порядке, и что файл доступен для чтения/записи. При необходимости отключите useEslintFix.',
 };
 
 export const LOGGER_MESSAGES = {
@@ -131,5 +137,15 @@ export const LOGGER_MESSAGES = {
     // ========== Migration Messages ==========
     MIGRATION: {
         OPENAPI_SCHEMA_MIGRATED: 'To perform OpenAPI generation, it was necessary to migrate the schema of your data to the current one. To update the configuration in the file, use the command `npm openapi-codegen-cli update-config`',
+    },
+
+    // ========== Formatting Messages ==========
+    FORMATTING: {
+        PRETTIER_PROJECT_CONFIG_RESOLVED: (filePath: string) => `Prettier config resolved from: ${filePath}`,
+        PRETTIER_PROJECT_CONFIG_NOT_FOUND: 'No project Prettier config found, falling back to built-in options',
+        PRETTIER_FORMAT_FAILED: (file: string, error: string) => `Prettier formatting failed for "${file}": ${error}`,
+        ESLINT_NOT_INSTALLED: 'ESLint is not installed in this project. Skipping --useEslintFix.',
+        ESLINT_FIX_FAILED: (file: string, error: string) => `ESLint fix failed for "${file}": ${error}`,
+        ESLINT_FIX_APPLIED: (file: string) => `ESLint fix applied: ${file}`,
     },
 } as const;

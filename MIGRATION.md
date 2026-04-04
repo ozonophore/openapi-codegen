@@ -232,8 +232,17 @@ When `useHistory` is enabled and a property changes type, validation schemas att
 - Yup uses `.transform(...)`
 - JSON Schema enables AJV `coerceTypes`
 
+### 4) Project Prettier / ESLint for generated output
+
+New CLI/config options (default `false`):
+- `useProjectPrettier`: resolve the repo’s Prettier config (from the current working directory) and format generated files with it; if no config is found, built-in defaults are used.
+- `useEslintFix`: after each file is written, run ESLint with fix enabled using the project’s installed `eslint` package and config. If `eslint` is not installed, the step is skipped and a warning is logged.
+
+Config schema note: `update-config` migrates unified options to `UNIFIED_OPTIONS_v5`, adding these keys with `false` when missing.
+
 ## Recommended Actions
 
 - [ ] Decide whether to enable `modelsMode: "classes"`.
 - [ ] Add `analyze`/`miracles`/`models` sections to your config if you want history-aware generation.
 - [ ] Generate and review a diff report before enabling `useHistory`.
+- [ ] Optionally enable `useProjectPrettier` / `useEslintFix` if you want generated files to match repo formatting and lint rules.

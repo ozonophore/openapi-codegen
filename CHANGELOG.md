@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.3] — 2026-04-09
+
+### Added
+- Added optional post-generation formatting controls:
+  - `--useProjectPrettier` / `useProjectPrettier`: format generated files with the project’s Prettier config (via `prettier.resolveConfig`); falls back to built-in defaults when no config is found.
+  - `--useEslintFix` / `useEslintFix`: run ESLint with `--fix` on each generated file after write, using the project’s ESLint installation and config; skipped with a warning when `eslint` is not installed.
+- Added unified options schema `UNIFIED_OPTIONS_v5` with migration from `v4` (new keys default to `false`).
+
+### Changed
+- Extended `format(...)` to support project Prettier resolution and clearer Prettier failure messages.
+
+### Tests
+- Added unit tests for `format` and `eslintFix` utilities.
+
 ## [2.1.0-beta.2] — 2026-04-04
 
 ### Added

@@ -70,6 +70,8 @@ program
     .option('--report-file <value>', 'Path to strict OpenAPI diagnostics report JSON file', './openapi-report.json')
     .addOption(new Option('--validationLibrary <value>', 'Validation library to use for schema validation').choices([...Object.values(ValidationLibrary)]).default(ValidationLibrary.NONE))
     .addOption(new Option('--emptySchemaStrategy <value>', 'How to handle empty generated schemas').choices([...Object.values(EmptySchemaStrategy)]).default(EmptySchemaStrategy.KEEP))
+    .option('--useProjectPrettier', 'Use project Prettier config for formatting generated code (default: false)')
+    .option('--useEslintFix', 'Run ESLint --fix on generated files after writing (default: false)')
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })

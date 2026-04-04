@@ -57,6 +57,8 @@ type TWriteClientProps = {
     validationLibrary?: ValidationLibrary;
     emptySchemaStrategy: EmptySchemaStrategy;
     modelsMode?: ModelsMode;
+    useProjectPrettier?: boolean;
+    useEslintFix?: boolean;
 };
 
 type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOptions' | 'request' | 'useCancelableRequest' | 'useSeparatedIndexes'> & {
@@ -99,6 +101,8 @@ export class WriteClient {
             validationLibrary = ValidationLibrary.NONE,
             emptySchemaStrategy,
             modelsMode,
+            useProjectPrettier = false,
+            useEslintFix = false,
         } = options;
 
         if (!excludeCoreServiceFiles) {
@@ -130,6 +134,8 @@ export class WriteClient {
                 useUnionTypes,
                 useOptions,
                 useCancelableRequest,
+                useProjectPrettier,
+                useEslintFix,
             });
             await this.writeClientServicesIndex({
                 services: client.services,
@@ -144,6 +150,8 @@ export class WriteClient {
                 templates,
                 request,
                 customExecutorPath,
+                useProjectPrettier,
+                useEslintFix,
             });
         }
 
@@ -161,6 +169,8 @@ export class WriteClient {
                 useUnionTypes,
                 validationLibrary,
                 emptySchemaStrategy,
+                useProjectPrettier,
+                useEslintFix,
             });
             await this.writeClientSchemasIndex({
                 models: schemaModels,
@@ -184,6 +194,8 @@ export class WriteClient {
                 emptySchemaStrategy,
                 modelsMode,
                 schemaModels,
+                useProjectPrettier,
+                useEslintFix,
             });
             return;
         }
@@ -203,11 +215,28 @@ export class WriteClient {
             emptySchemaStrategy,
             modelsMode,
             schemaModels: [],
+            useProjectPrettier,
+            useEslintFix,
         });
     }
 
     private async writeModelsAndFinalize(config: TWriteClientProps & { schemaModels: Model[] }) {
-        const { client, templates, outputPaths, httpClient, useUnionTypes, useOptions, useSeparatedIndexes, excludeCoreServiceFiles, validationLibrary, emptySchemaStrategy, schemaModels, modelsMode } = config;
+        const {
+            client,
+            templates,
+            outputPaths,
+            httpClient,
+            useUnionTypes,
+            useOptions,
+            useSeparatedIndexes,
+            excludeCoreServiceFiles,
+            validationLibrary,
+            emptySchemaStrategy,
+            modelsMode,
+            schemaModels,
+            useProjectPrettier,
+            useEslintFix,
+        } = config;
 
         await fileSystemHelpers.mkdir(outputPaths.outputModels);
         const shouldInlineDtoCore = modelsMode === ModelsMode.CLASSES && excludeCoreServiceFiles;
@@ -224,6 +253,8 @@ export class WriteClient {
             useOptions,
             modelsMode,
             outputCorePath: shouldInlineDtoCore ? './' : relativeHelper(outputPaths.outputModels, outputPaths.outputCore),
+            useProjectPrettier,
+            useEslintFix,
         });
         await this.writeClientModelsIndex({
             models: client.models,

@@ -1,3 +1,4 @@
+import { eslintFix } from '../../common/utils/eslintFix';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { resolveHelper } from '../../common/utils/pathHelpers';
@@ -12,6 +13,8 @@ interface WriteClientExecutor {
     customExecutorPath?: string;
     services: Service[];
     templates: Templates;
+    useProjectPrettier?: boolean;
+    useEslintFix?: boolean;
 }
 
 function deduplicateServicesByName(services: Service[]): Service[] {
@@ -26,7 +29,7 @@ function deduplicateServicesByName(services: Service[]): Service[] {
 }
 
 export async function writeClientExecutor(this: WriteClient, options: WriteClientExecutor): Promise<void> {
-    const { outputPath, outputCorePath, templates, services, request, customExecutorPath } = options;
+    const { outputPath, outputCorePath, templates, services, request, customExecutorPath, useProjectPrettier, useEslintFix } = options;
     const file = resolveHelper(outputPath, 'createClient.ts');
     const uniqueServices = deduplicateServicesByName(services);
     const hasCustomRequest = !!request;
@@ -38,8 +41,11 @@ export async function writeClientExecutor(this: WriteClient, options: WriteClien
         customExecutorPath,
         services: uniqueServices,
     });
-    const formattedValue = await format(templateResult);
+    const formattedValue = await format(templateResult, undefined, useProjectPrettier);
     await fileSystemHelpers.writeFile(file, formattedValue);
+    if (useEslintFix) {
+        await eslintFix(file);
+    }
     this.logger.info(`File recording completed: ${file}`);
 }
 
