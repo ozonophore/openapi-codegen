@@ -75,7 +75,7 @@ test('@unit: migrateDataToLatestSchemaVersion (unified schemas)', () => {
 
     assert.ok(result);
     assert.strictEqual(result?.schemaType, EVersionedSchemaType.UNIFIED_OPTIONS);
-    assert.strictEqual(result?.schemaVersion, 'UNIFIED_OPTIONS_v4');
+    assert.strictEqual(result?.schemaVersion, 'UNIFIED_OPTIONS_v5');
     assert.strictEqual(result?.value.httpClient, 'fetch');
     assert.strictEqual(result?.value.validationLibrary, ValidationLibrary.NONE);
 });
@@ -97,6 +97,6 @@ test('@unit: migrateDataToLatestSchemaVersion (all schemas: chooses old options 
 
     assert.ok(result);
     assert.strictEqual(result?.schemaType, EVersionedSchemaType.UNIFIED_OPTIONS);
-    assert.strictEqual(result?.schemaVersion, 'UNIFIED_OPTIONS_v4');
+    assert.strictEqual(result?.schemaVersion, 'UNIFIED_OPTIONS_v5');
     assert.ok(result?.guessedVersion.latestVersion.startsWith('OPTIONS_'));
 });

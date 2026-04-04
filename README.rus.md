@@ -72,6 +72,8 @@ openapi generate --input ./spec.json --output ./dist
 | `--useCancelableRequest` | - | boolean | `false` | Использовать отменяемый promise как тип возврата |
 | `--sortByRequired` | `-s` | boolean | `false` | Использовать расширенную стратегию сортировки для аргументов функций |
 | `--useSeparatedIndexes` | - | boolean | `false` | Использовать отдельные index файлы для core, models, schemas и services |
+| `--strict-openapi` | - | boolean | `false` | Включить строгую диагностику OpenAPI и завершать генерацию при strict-ошибках |
+| `--report-file` | - | string | `./openapi-report.json` | Путь к JSON-файлу strict-отчета по диагностике OpenAPI |
 | `--logLevel` | `-l` | string | `error` | Уровень логирования: `info`, `warn`, или `error` |
 | `--logTarget` | `-t` | string | `console` | Цель логирования: `console` или `file` |
 | `--validationLibrary` | - | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
@@ -299,6 +301,8 @@ openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 | `useCancelableRequest` | boolean | `false` | Использовать отменяемый promise как тип возврата |
 | `sortByRequired` | boolean | `false` | Расширенная стратегия сортировки для аргументов |
 | `useSeparatedIndexes` | boolean | `false` | Использовать отдельные index файлы |
+| `strictOpenapi` | boolean | `false` | Включить строгую диагностику OpenAPI и падать на strict-ошибках |
+| `reportFile` | string | `./openapi-report.json` | Путь к JSON-файлу strict-отчета по диагностике OpenAPI |
 | `items` | array | - | Массив конфигураций (для формата multi-options) |
 | `validationLibrary` | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Стратегия для пустых схем: `keep`, `semantic`, или `skip` |

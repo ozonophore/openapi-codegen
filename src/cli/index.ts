@@ -66,6 +66,8 @@ program
     .addOption(new Option('-t, --logTarget <target>', 'Target of logging').choices([...Object.values(ELogOutput)]).default(ELogOutput.CONSOLE))
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
     .option('--useSeparatedIndexes', 'Use separate index files for the core, models, schemas, and services.')
+    .option('--strict-openapi', 'Enable strict OpenAPI diagnostics report and fail generation when strict errors are found')
+    .option('--report-file <value>', 'Path to strict OpenAPI diagnostics report JSON file', './openapi-report.json')
     .addOption(new Option('--validationLibrary <value>', 'Validation library to use for schema validation').choices([...Object.values(ValidationLibrary)]).default(ValidationLibrary.NONE))
     .addOption(new Option('--emptySchemaStrategy <value>', 'How to handle empty generated schemas').choices([...Object.values(EmptySchemaStrategy)]).default(EmptySchemaStrategy.KEEP))
     .hook('preAction', async () => {

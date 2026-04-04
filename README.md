@@ -73,6 +73,8 @@ openapi generate --input ./spec.json --output ./dist
 | `--useCancelableRequest` | - | boolean | `false` | Use cancelable promise as return type |
 | `--sortByRequired` | `-s` | boolean | `false` | Use extended sorting strategy for function arguments |
 | `--useSeparatedIndexes` | - | boolean | `false` | Use separate index files for core, models, schemas, and services |
+| `--strict-openapi` | - | boolean | `false` | Enable strict OpenAPI diagnostics and fail generation when strict errors are found |
+| `--report-file` | - | string | `./openapi-report.json` | Path to strict OpenAPI diagnostics report JSON file |
 | `--logLevel` | `-l` | string | `error` | Logging level: `info`, `warn`, or `error` |
 | `--logTarget` | `-t` | string | `console` | Logging target: `console` or `file` |
 | `--validationLibrary` | - | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
@@ -300,6 +302,8 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `useCancelableRequest` | boolean | `false` | Use cancelable promise as return type |
 | `sortByRequired` | boolean | `false` | Extended sorting strategy for arguments |
 | `useSeparatedIndexes` | boolean | `false` | Use separate index files |
+| `strictOpenapi` | boolean | `false` | Enable strict OpenAPI diagnostics and fail generation on strict errors |
+| `reportFile` | string | `./openapi-report.json` | Path to strict OpenAPI diagnostics report JSON file |
 | `items` | array | - | Array of configurations (for multi-options format) |
 | `validationLibrary` | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Strategy for empty schemas: `keep`, `semantic`, or `skip` |

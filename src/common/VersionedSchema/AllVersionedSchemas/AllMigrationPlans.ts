@@ -67,5 +67,13 @@ export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<
         {
             emptySchemaStrategy: EmptySchemaStrategy.KEEP
         }
-    )
+    ),
+    createDefaultFieldsMigration(
+        'UNIFIED_OPTIONS_v4',
+        'UNIFIED_OPTIONS_v5',
+        {
+            strictOpenapi: false,
+            reportFile: '',
+        }
+    ),
 ];

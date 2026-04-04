@@ -99,7 +99,10 @@ export const compatibilityCases: CompatibilityCase[] = [
         type: EVersionedSchemaType.UNIFIED_OPTIONS,
         from: 'v2',
         to: 'v3',
-        expect: [{ type: 'added', key: 'logLevel' }, { type: 'added', key: 'logTarget' }],
+        expect: [
+            { type: 'added', key: 'logLevel' },
+            { type: 'added', key: 'logTarget' },
+        ],
     },
     {
         type: EVersionedSchemaType.UNIFIED_OPTIONS,
@@ -111,6 +114,15 @@ export const compatibilityCases: CompatibilityCase[] = [
             { type: 'added', key: 'models' },
             { type: 'added', key: 'analyze' },
             { type: 'added', key: 'miracles' },
-        ]
-    }
+        ],
+    },
+    {
+        type: EVersionedSchemaType.UNIFIED_OPTIONS,
+        from: 'v4',
+        to: 'v5',
+        expect: [
+            { type: 'added', key: 'strictOpenapi' },
+            { type: 'added', key: 'reportFile' },
+        ],
+    },
 ];

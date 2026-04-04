@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.2] — 2026-04-04
+
+### Added
+- Added optional strict OpenAPI diagnostics for `generate`:
+  - CLI flags `--strict-openapi` and `--report-file` (default `./openapi-report.json`);
+  - config keys `strictOpenapi` and `reportFile` (Zod `generate` schema and unified options).
+- Added `validateOpenApiStrict` pipeline: writes a JSON report (summary + issues) and fails generation when strict **errors** are present.
+- Strict checks include:
+  - SwaggerParser `validate` failures (`OPENAPI_PARSER_VALIDATION_FAILED`);
+  - unresolved `$ref` (`UNRESOLVED_REF`);
+  - fallback media type when `application/json` is missing (`CONTENT_MEDIA_TYPE_FALLBACK`);
+  - `default` response without an explicit 2xx success response (`SUSPICIOUS_DEFAULT_RESPONSE`);
+  - missing `operationId` (`MISSING_OPERATION_ID`, info severity).
+- Added unified configuration schema `UNIFIED_OPTIONS_v5` with migration from `v4` supplying defaults for the new fields.
+
+### Changed
+- `OpenApiClient`: after logging a generation error, the error is rethrown so programmatic callers and CI can observe failure reliably.
+
+### Tests
+- Added unit tests for `validateOpenApiStrict` (strict issues, clean spec, and `preIssues` from parser validation).
+- Updated `migrateDataToLatestSchemaVersion` expectations for latest unified schema version `UNIFIED_OPTIONS_v5`.
+
 ## [2.1.0-beta.1] — 2026-03-02
 
 ### Added
@@ -31,20 +53,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - response code parsing and operation results;
   - media type selection and Blob mappings.
 - Updated snapshot suites for generated core/runtime/service outputs across v2/v3 fixtures.
-
-## [Unreleased]
-
-### Added
-- Added `analyze-diff` command to generate diff reports between OpenAPI versions.
-- Added history-aware generation options: `useHistory` and `diffReport`.
-- Added `modelsMode` (`interfaces` | `classes`) to generate `Raw/Dto` models in a single `models.ts`.
-- Added `BaseDto` and `dtoUtils` to generated core when `modelsMode=classes`.
-- Added `miracles` section support in diff reports and DTO deprecated getters for confirmed renames.
-- Added auto-coercion in validation schemas when a type change is detected (Zod/Joi/Yup/AJV).
-
-### Changed
-- Added config sections `models`, `analyze`, and `miracles` to unified schema and init templates.
-- Updated README (EN/RU) and migration docs with history/DTO features.
 
 ## [2.0.0] — 2026-02-23
 
