@@ -37,6 +37,10 @@ export class {{{name}}}<TOptions = unknown> {
     /**
     {{#if deprecated}}
      * @deprecated
+    {{else if diff}}
+    {{#equals diff.action 'removed'}}
+     * @deprecated Removed from API
+    {{/equals}}
     {{/if}}
     {{#if summary}}
      * {{{summary}}}

@@ -1,5 +1,8 @@
-function getResponseBody(response: AxiosResponse): any {
+function getResponseBody(response: AxiosResponse, options: ApiRequestOptions): any {
   try {
+    if (options.responseType === 'blob') {
+      return response.data;
+    }
     const contentType = response.headers['content-type'];
     if (contentType) {
       const isJSON = typeof contentType === 'string' && contentType.toLowerCase().startsWith('application/json');

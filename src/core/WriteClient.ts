@@ -10,6 +10,7 @@ import { SimpleClientArtifacts } from './types/base/SimpleClientArtifacts.model'
 import { Templates } from './types/base/Templates.model';
 import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from './types/enums/HttpClient.enum';
+import { ModelsMode } from './types/enums/ModelsMode.enum';
 import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import type { Client } from './types/shared/Client.model';
 import type { Model } from './types/shared/Model.model';
@@ -55,6 +56,7 @@ type TWriteClientProps = {
     useSeparatedIndexes?: boolean;
     validationLibrary?: ValidationLibrary;
     emptySchemaStrategy: EmptySchemaStrategy;
+    modelsMode?: ModelsMode;
 };
 
 type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOptions' | 'request' | 'useCancelableRequest' | 'useSeparatedIndexes'> & {
@@ -96,6 +98,7 @@ export class WriteClient {
             useSeparatedIndexes = false,
             validationLibrary = ValidationLibrary.NONE,
             emptySchemaStrategy,
+            modelsMode,
         } = options;
 
         if (!excludeCoreServiceFiles) {
@@ -104,12 +107,13 @@ export class WriteClient {
             await fileSystemHelpers.mkdir(outputPaths.outputCore);
             await fileSystemHelpers.mkdir(executorPath);
             await fileSystemHelpers.mkdir(interceptorsPath);
-            await this.writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest });
+            await this.writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest, modelsMode });
             await this.writeClientCoreIndex({
                 templates,
                 outputCorePath: outputPaths.outputCore,
                 useCancelableRequest,
                 useSeparatedIndexes,
+                modelsMode,
             });
 
             const { outputCore, outputServices, outputModels } = outputPaths;
@@ -178,6 +182,7 @@ export class WriteClient {
                 useSeparatedIndexes,
                 validationLibrary,
                 emptySchemaStrategy,
+                modelsMode,
                 schemaModels,
             });
             return;
@@ -196,26 +201,36 @@ export class WriteClient {
             useSeparatedIndexes,
             validationLibrary,
             emptySchemaStrategy,
+            modelsMode,
             schemaModels: [],
         });
     }
 
     private async writeModelsAndFinalize(config: TWriteClientProps & { schemaModels: Model[] }) {
-        const { client, templates, outputPaths, httpClient, useUnionTypes, useSeparatedIndexes, excludeCoreServiceFiles, validationLibrary, emptySchemaStrategy, schemaModels } = config;
+        const { client, templates, outputPaths, httpClient, useUnionTypes, useOptions, useSeparatedIndexes, excludeCoreServiceFiles, validationLibrary, emptySchemaStrategy, schemaModels, modelsMode } = config;
 
         await fileSystemHelpers.mkdir(outputPaths.outputModels);
+        const shouldInlineDtoCore = modelsMode === ModelsMode.CLASSES && excludeCoreServiceFiles;
+        if (shouldInlineDtoCore) {
+            await fileSystemHelpers.writeFile(resolveHelper(outputPaths.outputModels, 'BaseDto.ts'), templates.core.baseDto({}));
+            await fileSystemHelpers.writeFile(resolveHelper(outputPaths.outputModels, 'dtoUtils.ts'), templates.core.dtoUtils({}));
+        }
         await this.writeClientModels({
             models: client.models,
             templates,
             outputModelsPath: outputPaths.outputModels,
             httpClient,
             useUnionTypes,
+            useOptions,
+            modelsMode,
+            outputCorePath: shouldInlineDtoCore ? './' : relativeHelper(outputPaths.outputModels, outputPaths.outputCore),
         });
         await this.writeClientModelsIndex({
             models: client.models,
             templates,
             outputModelsPath: outputPaths.outputModels,
             useSeparatedIndexes,
+            modelsMode,
         });
 
         await fileSystemHelpers.mkdir(outputPaths.output);
@@ -228,6 +243,7 @@ export class WriteClient {
             validationLibrary,
             emptySchemaStrategy,
             schemaModels,
+            modelsMode,
         });
     }
 
@@ -304,13 +320,16 @@ export class WriteClient {
         const result: Map<string, ClientArtifacts> = new Map<string, ClientArtifacts>();
         for (const [key, value] of this.config.entries()) {
             for (const item of value) {
-                const { outputPaths, client, templates, useUnionTypes, excludeCoreServiceFiles, validationLibrary, schemaModels } = item;
+                const { outputPaths, client, templates, useUnionTypes, excludeCoreServiceFiles, validationLibrary, schemaModels, modelsMode } = item;
                 const outputCore = this.getOutputPath(outputPaths?.outputCore, key, 'core');
                 const outputModels = this.getOutputPath(outputPaths?.outputModels, key, 'models');
                 const outputSchemas = this.getOutputPath(outputPaths?.outputSchemas, key, 'schemas');
                 const outputServices = this.getOutputPath(outputPaths?.outputServices, key, 'services');
 
                 const clientIndex = this.ensureClientIndex(result, key, templates);
+                if (!clientIndex.modelsMode) {
+                    clientIndex.modelsMode = modelsMode;
+                }
 
                 if (!excludeCoreServiceFiles) {
                     const rel = relativeHelper(key, outputCore);
@@ -330,6 +349,9 @@ export class WriteClient {
                 }
 
                 const relativePathModel = `${relativeHelper(key, outputModels)}`;
+                if (!clientIndex.modelsPackage) {
+                    clientIndex.modelsPackage = relativePathModel;
+                }
                 const relativePathSchema = `${relativeHelper(key, outputSchemas)}`;
                 for (const model of client.models) {
                     const modelFinal = {
@@ -389,6 +411,8 @@ export class WriteClient {
                 models: [],
                 schemas: [],
                 services: [],
+                modelsMode: undefined,
+                modelsPackage: undefined,
             });
         }
 

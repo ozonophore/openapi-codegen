@@ -1,8 +1,9 @@
+import chalk from 'chalk';
 import { createLogger, format, Logger as WinstonLogger, transports } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
 import { ELogLevel, ELogOutput } from './Enums';
-import { LOGGER_MESSAGES } from './LoggerMessages';
+import { LOGGER_ERROR_RECOMMENDATIONS, LOGGER_MESSAGES, TLoggerErrorCode } from './LoggerMessages';
 import { joinHelper } from './utils/pathHelpers';
 
 interface LoggerOptions {
@@ -22,28 +23,76 @@ interface LoggerOptions {
         /** Do not store files for longer, for example '14d' */
         maxFiles?: string;
     };
+    /** Disable ANSI colors for console output (for CI / plain logs) */
+    disableColors?: boolean;
+}
+
+interface ErrorWithHintOptions {
+    code: TLoggerErrorCode;
+    /** Краткое описание контекста или дополнительное сообщение для пользователя */
+    message?: string;
+    /** Оригинальная ошибка, если доступна (будет выведена на детальных уровнях логирования) */
+    error?: unknown;
 }
 
 export class Logger {
     private _logger: WinstonLogger;
     private _currentLevel: ELogLevel;
     private _instanceId: string;
+    private _disableColors: boolean;
 
     constructor(options: LoggerOptions) {
-        const { instanceId, level, logOutput, rotate = { datePattern: 'YYYY-MM-DD', maxSize: '20m', maxFiles: '14d' } } = options;
+        const {
+            instanceId,
+            level,
+            logOutput,
+            rotate = { datePattern: 'YYYY-MM-DD', maxSize: '20m', maxFiles: '14d' },
+            disableColors = false,
+        } = options;
         this._currentLevel = level;
         this._instanceId = instanceId;
+        this._disableColors = disableColors;
+
+        const baseLevelStyles: Record<
+            ELogLevel | 'success',
+            {
+                icon: string;
+                colorize: (text: string) => string;
+            }
+        > = {
+            [ELogLevel.INFO]: {
+                icon: 'ℹ',
+                colorize: (text: string) => (this._disableColors ? text : chalk.gray(text)),
+            },
+            [ELogLevel.WARN]: {
+                icon: '⚠',
+                colorize: (text: string) => (this._disableColors ? text : chalk.hex('#F59E0B')(text)),
+            },
+            [ELogLevel.ERROR]: {
+                icon: '✗',
+                colorize: (text: string) => (this._disableColors ? text : chalk.red(text)),
+            },
+            success: {
+                icon: '✓',
+                colorize: (text: string) => (this._disableColors ? text : chalk.green(text)),
+            },
+        };
 
         const chosenTransports = [];
         if (logOutput === ELogOutput.CONSOLE) {
             chosenTransports.push(
                 new transports.Console({
                     format: format.combine(
-                        format.colorize(),
                         format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
                         format.printf(({ level, message, timestamp, label }) => {
-                            return `[${level}] [${label}] ${timestamp}: ${message}`;
-                        })
+                            const style = baseLevelStyles[(level as ELogLevel) || ELogLevel.INFO] ?? baseLevelStyles.info;
+                            const icon = style.icon;
+                            const coloredMessage = style.colorize(String(message));
+                            const timePart = this._disableColors ? timestamp : chalk.gray(timestamp);
+                            const labelPart = this._disableColors ? label : chalk.bold(label);
+
+                            return `${icon} [${labelPart}] ${timePart}: ${coloredMessage}`;
+                        }),
                     ),
                 })
             );
@@ -60,7 +109,7 @@ export class Logger {
                         format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
                         format.printf(({ level, message, timestamp, label }) => {
                             return `[${level}] [${label}] ${timestamp}: ${message}`;
-                        })
+                        }),
                     ),
                 })
             );
@@ -68,7 +117,7 @@ export class Logger {
 
         this._logger = createLogger({
             level: this._currentLevel,
-            levels: { error: 0, warn: 1, info: 2 },
+            levels: { error: 0, warn: 1, info: 2, success: 3 },
             format: format.label({ label: this._instanceId }),
             transports: chosenTransports,
         });
@@ -79,9 +128,23 @@ export class Logger {
         this._logger.level = level;
     }
 
-    public error(message: string, error?: any) {
+    public error(message: string, error?: unknown): void {
         this._logger.error(`${LOGGER_MESSAGES.ERROR.PREFIX} ${message}`, error);
-        process.exit(1);
+    }
+
+    public errorWithHint(options: ErrorWithHintOptions): void {
+        const { code, message, error } = options;
+
+        const baseMessage = LOGGER_MESSAGES.ERROR.GENERIC(message ?? LOGGER_ERROR_RECOMMENDATIONS[code]);
+        const recommendation = LOGGER_ERROR_RECOMMENDATIONS[code];
+
+        this._logger.error(`${LOGGER_MESSAGES.ERROR.PREFIX} ${baseMessage}`);
+        this._logger.info(LOGGER_MESSAGES.SEPARATOR);
+        this._logger.info(`What you can do next: ${recommendation}`);
+
+        if (this._currentLevel === ELogLevel.INFO && error) {
+            this._logger.warn(`Technical details: ${String(error)}`);
+        }
     }
 
     public warn(message: string) {
@@ -95,6 +158,10 @@ export class Logger {
         }
     }
 
+    public success(message: string) {
+        this._logger.log('success', message);
+    }
+
     public forceInfo(message: string) {
         const originalLevel = this._logger.level;
         this._logger.level = 'info';
@@ -106,13 +173,40 @@ export class Logger {
         if (this._logger) {
             this._logger.close();
             this._logger.transports.forEach(transport => {
-                if (typeof (transport as any).close === 'function') {
-                    (transport as any).close();
+                const t = transport as { close?: () => void; end?: () => void };
+                if (typeof t.close === 'function') {
+                    t.close();
                 }
-                if (typeof (transport as any).end === 'function') {
-                    (transport as any).end();
+                if (typeof t.end === 'function') {
+                    t.end();
                 }
             });
         }
+    }
+
+    /**
+     * Flushes and closes all transports (including file) so that all log messages
+     * are written before the process exits. Use this before process.exit() when
+     * logging to file to avoid losing the last messages.
+     */
+    public async shutdownLoggerAsync(): Promise<void> {
+        if (!this._logger) {
+            return;
+        }
+        const transportList = [...this._logger.transports];
+        await Promise.all(
+            transportList.map(
+                (transport): Promise<void> =>
+                    new Promise(resolve => {
+                        const t = transport as { close?: (cb?: () => void) => void };
+                        if (typeof t.close === 'function') {
+                            t.close(resolve);
+                        } else {
+                            resolve();
+                        }
+                    })
+            )
+        );
+        this._logger.close();
     }
 }

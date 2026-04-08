@@ -76,7 +76,7 @@ Impact:
 - Legacy CLI validation path replaced with Zod-based validation layer.
 - Some internal legacy helpers and old request executor artifacts removed/refactored.
 
-### 6) Direct `generate` validation behavior was tightened in `2.0.0-beta.14`
+### 6) Direct `generate` validation behavior was tightened in `2.0.0`
 
 For direct CLI mode (`--input` + `--output`):
 - validation is now done via current Zod schema (`flatOptionsSchema`);
@@ -176,3 +176,64 @@ After (`2.x` style):
 - [ ] Ran `check-config` and `update-config`.
 - [ ] Ran `preview-changes` and reviewed diffs.
 - [ ] Updated snapshots/tests.
+
+---
+
+# Migration Notes: 2.x Additions (History & DTO Modes)
+
+This section documents incremental changes introduced after `2.0.0`.
+
+## New Features
+
+### 1) History-aware generation (diff report)
+
+New CLI/config options:
+- `useHistory` (boolean)
+- `diffReport` (path, default: `./openapi-diff-report.json`)
+
+Also available in config sections:
+- `analyze.useHistory`
+- `analyze.reportPath`
+
+The `analyze-diff` command generates the report:
+```bash
+openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml
+```
+
+Manual confirmation example (edit the report before generation):
+```json
+{
+  "miracles": [
+    {
+      "oldPath": "$.components.schemas.User.properties.user_name",
+      "newPath": "$.components.schemas.User.properties.userName",
+      "type": "RENAME",
+      "confidence": 0.85,
+      "status": "confirmed"
+    }
+  ]
+}
+```
+
+### 2) Models mode: interfaces vs classes (DTO/Raw)
+
+New option: `modelsMode` (`interfaces` | `classes`).
+
+When `classes` is enabled:
+- generates `*Raw` + `*Dto` in a single `models.ts`;
+- emits `BaseDto` and `dtoUtils` in `core`;
+- confirmed miracles produce deprecated getters in DTOs.
+
+### 3) Coercion in validation schemas
+
+When `useHistory` is enabled and a property changes type, validation schemas attempt coercion:
+- Zod uses `z.coerce.*`
+- Joi uses `Joi.alternatives().try(...)`
+- Yup uses `.transform(...)`
+- JSON Schema enables AJV `coerceTypes`
+
+## Recommended Actions
+
+- [ ] Decide whether to enable `modelsMode: "classes"`.
+- [ ] Add `analyze`/`miracles`/`models` sections to your config if you want history-aware generation.
+- [ ] Generate and review a diff report before enabling `useHistory`.

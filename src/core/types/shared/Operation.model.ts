@@ -1,6 +1,7 @@
 import type { OperationError } from './OperationError.model';
 import type { OperationParameters } from './OperationParameters.model';
 import type { OperationResponse } from './OperationResponse.model';
+import type { DiffInfo } from './DiffInfo.model';
 
 export interface Operation extends OperationParameters {
     service: string;
@@ -13,4 +14,8 @@ export interface Operation extends OperationParameters {
     errors: OperationError[];
     results: OperationResponse[];
     responseHeader: string | null;
+    responseType: 'blob' | null;
+    diff?: DiffInfo;
+    structuralDiff?: DiffInfo[];
+    isGhost?: boolean;
 }

@@ -22,6 +22,7 @@ import { TypesService } from './services/TypesService';
 import { UploadService } from './services/UploadService';
 import { ComplexService } from './services/ComplexService';
 import { MultipartService } from './services/MultipartService';
+import { BlobService } from './services/BlobService';
 import { HeaderService } from './services/HeaderService';
 import { EnumsService } from './services/EnumsService';
 
@@ -71,6 +72,7 @@ export function createClient<TExecutorOptions extends Record<string, any>>(optio
         UploadService: new UploadService(executor),
         ComplexService: new ComplexService(executor),
         MultipartService: new MultipartService(executor),
+        BlobService: new BlobService(executor),
         HeaderService: new HeaderService(executor),
         EnumsService: new EnumsService(executor),
     };

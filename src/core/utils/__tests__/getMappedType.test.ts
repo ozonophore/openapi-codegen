@@ -7,6 +7,8 @@ describe('@unit: getMappedType', () => {
     test('should map types to the basics', () => {
         assert.strictEqual(getMappedType('File'), 'File');
         assert.strictEqual(getMappedType('file'), 'File');
+        assert.strictEqual(getMappedType('Blob'), 'Blob');
+        assert.strictEqual(getMappedType('binary'), 'Blob');
         assert.strictEqual(getMappedType('string'), 'string');
         assert.strictEqual(getMappedType('date'), 'string');
         assert.strictEqual(getMappedType('date-time'), 'string');

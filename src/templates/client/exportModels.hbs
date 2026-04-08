@@ -1,0 +1,94 @@
+{{>header}}
+
+import { BaseDto } from '{{{joinPath @root.outputCore 'BaseDto'}}}';
+import { fromArray } from '{{{joinPath @root.outputCore 'dtoUtils'}}}';
+
+{{#each models}}
+{{#if isDefinition}}
+{{#if rawName}}
+{{#equals export 'interface'}}
+{{#if description}}
+/**
+ * {{{description}}}
+ */
+{{/if}}
+export interface {{{rawName}}} {
+    {{#each properties}}
+    {{#if description}}
+    /**
+     * {{{description}}}
+     {{#if diff}}
+     {{#if diff.previousType}}
+     * @info previous type: {{{diff.previousType}}}
+     {{/if}}
+     {{/if}}
+     */
+    {{else}}
+    {{#if diff}}
+    {{#if diff.previousType}}
+    /**
+     * @info previous type: {{{diff.previousType}}}
+     */
+    {{/if}}
+    {{/if}}
+    {{/if}}
+    {{{name}}}{{>isRequired}}: {{{rawType}}}{{>isNullable}};
+    {{/each}}
+}
+{{else}}
+export type {{{rawName}}} = {{{rawType}}}{{>isNullable}};
+{{/equals}}
+
+{{/if}}
+{{/if}}
+{{/each}}
+
+{{#each models}}
+{{#if isDefinition}}
+{{#if dtoName}}
+{{#equals dtoKind 'class'}}
+export class {{{dtoName}}} extends BaseDto<{{{rawName}}}> {
+    {{#each properties}}
+    public readonly {{{name}}}: {{{dtoType}}}{{>isNullable}};
+    {{/each}}
+
+    {{#if dtoGetters}}
+    {{#each dtoGetters}}
+    /**
+     * @miracle: {{{oldName}}} -> {{{newName}}}{{#if confidence}} (confidence: {{{confidence}}}){{/if}}
+     * @deprecated
+     */
+    public get {{{oldName}}}() {
+        return {{{target}}};
+    }
+
+    {{/each}}
+    {{/if}}
+
+    public constructor(data: {{{rawName}}}) {
+        super(data);
+        {{#each properties}}
+        this{{{dtoTarget}}} = {{{dtoInit}}};
+        {{/each}}
+    }
+
+    public toJSON(): {{{rawName}}} {
+        return {
+            ...this._raw,
+            {{#each properties}}
+            {{#if dtoToJSON}}
+            {{{name}}}: {{{dtoToJSON}}},
+            {{else}}
+            {{{name}}}: this{{{dtoTarget}}},
+            {{/if}}
+            {{/each}}
+        };
+    }
+}
+{{else}}
+export type {{{dtoName}}} = {{{rawName}}};
+{{/equals}}
+
+{{/if}}
+{{/if}}
+{{/each}}

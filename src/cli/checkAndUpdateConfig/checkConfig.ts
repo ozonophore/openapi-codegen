@@ -1,10 +1,11 @@
 import { OptionValues } from 'commander';
 
 import { APP_LOGGER } from '../../common/Consts';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { validateZodOptions } from '../../common/Validation/validateZodOptions';
 import { CheckConfigOptions, checkConfigOptionsSchema } from '../schemas';
-import { ACTION_FOR_CONFIG_DATA_OPTIONS, ERROR_MESSAGES, SUCCESS_MESSAGES } from './constants';
+import { ACTION_FOR_CONFIG_DATA_OPTIONS } from './constants';
 import { selectConfigAction } from './utils/selectConfigAction';
 import { validateAndMigrateConfigData } from './utils/validateAndMigrateConfigData';
 
@@ -22,7 +23,8 @@ export async function checkConfig(options: OptionValues): Promise<void> {
     const validationResult = validateZodOptions(checkConfigOptionsSchema, options);
 
     if (!validationResult.success) {
-        APP_LOGGER.error(validationResult.errors.join('\n'));
+        APP_LOGGER.error(LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')));
+        await APP_LOGGER.shutdownLoggerAsync();
         process.exit(1);
     }
 
@@ -30,21 +32,22 @@ export async function checkConfig(options: OptionValues): Promise<void> {
     const configData = loadConfigIfExists(validatedOptions.openapiConfig);
 
     if (!configData) {
-        APP_LOGGER.error(`${ERROR_MESSAGES.FILE_NOT_FOUND} ${validatedOptions.openapiConfig || ''}`);
-        return;
+        APP_LOGGER.error(LOGGER_MESSAGES.CONFIG.FILE_NOT_FOUND(validatedOptions.openapiConfig || ''));
+        await APP_LOGGER.shutdownLoggerAsync();
+        process.exit(1);
     }
 
     try {
         const { isActualConfigVersion, hasDefaultValues, migratedData } = validateAndMigrateConfigData(configData);
 
-        APP_LOGGER.info(SUCCESS_MESSAGES.CONFIG_VALID(validatedOptions.openapiConfig || ''));
+        APP_LOGGER.info(LOGGER_MESSAGES.CONFIG.CONFIG_VALID(validatedOptions.openapiConfig || ''));
 
         // Если версия не актуальна, предложить обновление
         if (!isActualConfigVersion) {
             await selectConfigAction({
                 migratedData,
                 configPath: validatedOptions.openapiConfig || '',
-                warningMessage: 'Ваша версия конфигурации устарела и нуждается в обновлении.',
+                warningMessage: LOGGER_MESSAGES.CONFIG.WARNING_OUTDATED_CONFIG,
                 actionChoices: ACTION_FOR_CONFIG_DATA_OPTIONS,
             });
             return;
@@ -55,12 +58,14 @@ export async function checkConfig(options: OptionValues): Promise<void> {
             await selectConfigAction({
                 migratedData,
                 configPath: validatedOptions.openapiConfig || '',
-                warningMessage: 'В вашей конфигурации есть значения по умолчанию, которые можно удалить.',
+                warningMessage: LOGGER_MESSAGES.CONFIG.WARNING_DEFAULT_VALUES,
                 actionChoices: ACTION_FOR_CONFIG_DATA_OPTIONS,
             });
         }
     } catch (error) {
-        handleConfigError(ERROR_MESSAGES.CHECKING_FAILED, error);
+        handleConfigError(LOGGER_MESSAGES.CONFIG.CHECKING_FAILED, error);
+        await APP_LOGGER.shutdownLoggerAsync();
+        process.exit(1);
     }
 }
 
@@ -70,7 +75,7 @@ export async function checkConfig(options: OptionValues): Promise<void> {
  */
 function handleConfigError(baseMessage: string, error: unknown): void {
     if (error instanceof Error && error.message) {
-        APP_LOGGER.error(`${baseMessage}: ${error.message}`);
+        APP_LOGGER.error(LOGGER_MESSAGES.ERROR.WITH_DETAILS(baseMessage, error.message));
     } else if (error) {
         APP_LOGGER.error(baseMessage, error);
     } else {

@@ -12,6 +12,7 @@ export interface Templates {
     exports: {
         client: Handlebars.TemplateDelegate;
         model: Handlebars.TemplateDelegate;
+        models: Handlebars.TemplateDelegate;
         schema: Handlebars.TemplateDelegate;
         service: Handlebars.TemplateDelegate;
     };
@@ -20,6 +21,8 @@ export interface Templates {
         apiError: Handlebars.TemplateDelegate;
         apiRequestOptions: Handlebars.TemplateDelegate;
         apiResult: Handlebars.TemplateDelegate;
+        baseDto: Handlebars.TemplateDelegate;
+        dtoUtils: Handlebars.TemplateDelegate;
         request: Handlebars.TemplateDelegate;
         cancelablePromise: Handlebars.TemplateDelegate;
         httpStatusCode: Handlebars.TemplateDelegate;

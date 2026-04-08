@@ -75,6 +75,9 @@ describe('@unit: convertArrayToObject', () => {
             useSeparatedIndexes: undefined,
             validationLibrary: undefined,
             emptySchemaStrategy: undefined,
+            modelsMode: undefined,
+            useHistory: undefined,
+            diffReport: undefined,
             request: undefined,
             customExecutorPath: undefined,
             items: [

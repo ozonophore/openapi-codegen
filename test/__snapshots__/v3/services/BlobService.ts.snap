@@ -1,0 +1,65 @@
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+
+import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
+import type { ApiResult } from '../core/ApiResult';
+
+const blobResponse = (): RequestConfig => ({
+    method: 'GET',
+    path: `/api/v{api-version}/blob`,
+});
+
+const blobRequest = (requestBody: string): RequestConfig => ({
+    method: 'POST',
+    path: `/api/v{api-version}/blob`,
+
+    body: requestBody,
+    requestMediaType: 'application/octet-stream',
+});
+
+export type TBlobOptions = {
+    blobResponse: () => RequestConfig;
+    blobRequest: (requestBody: string) => RequestConfig;
+};
+
+export const BlobOptions: TBlobOptions = {
+    blobResponse: blobResponse,
+    blobRequest: blobRequest,
+};
+
+export class BlobService<TOptions = unknown> {
+    constructor(private readonly executor: RequestExecutor<TOptions>) {}
+
+    /**
+     * @returns string Binary blob response
+     * @throws ApiError
+     */
+    public blobResponse(options?: TOptions): Promise<string> {
+        return this.executor.request<string>(BlobOptions.blobResponse(), options);
+    }
+
+    public blobResponseRaw(options?: TOptions): Promise<ApiResult<string>> {
+        return this.executor.requestRaw<string>(BlobOptions.blobResponse(), options);
+    }
+    /**
+     * @param requestBody
+     * @returns void
+     * @throws ApiError
+     */
+    public blobRequest(
+        requestBody: string,
+
+        options?: TOptions,
+    ): Promise<void> {
+        return this.executor.request<void>(BlobOptions.blobRequest(requestBody), options);
+    }
+
+    public blobRequestRaw(
+        requestBody: string,
+
+        options?: TOptions,
+    ): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(BlobOptions.blobRequest(requestBody), options);
+    }
+}

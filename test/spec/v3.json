@@ -1129,6 +1129,49 @@
                 }
             }
         },
+        "/api/v{api-version}/blob": {
+            "get": {
+                "tags": [
+                    "Blob"
+                ],
+                "operationId": "BlobResponse",
+                "responses": {
+                    "200": {
+                        "description": "Binary blob response",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Blob"
+                ],
+                "operationId": "BlobRequest",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/octet-stream": {
+                            "schema": {
+                                "type": "string",
+                                "format": "binary"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Blob accepted"
+                    }
+                }
+            }
+        },
         "/api/v{api-version}/complex/{id}": {
             "put": {
                 "tags": [

@@ -11,6 +11,7 @@ async function sendRequest<T>(options: ApiRequestOptions, url: string, config: T
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     data: getRequestBody(options),
     url,
+    responseType: options.responseType === 'blob' ? 'blob' : undefined,
     {{#if @root.useCancelableRequest}}
     cancelToken: source.token,
     {{/if}}

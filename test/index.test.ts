@@ -1,3 +1,4 @@
+import assert from 'node:assert';
 import { describe, test } from 'node:test';
 
 import { readFileSync } from 'fs';
@@ -5,6 +6,7 @@ import { sync } from 'glob';
 import path from 'path';
 
 import { generate, HttpClient } from '../src';
+import { ModelsMode } from '../src/core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../src/core/types/enums/ValidationLibrary.enum';
 import { toMatchSnapshot } from './utils/toMatchSnapshot';
 
@@ -70,6 +72,38 @@ describe('@unit: generate', () => {
             const content = readFileSync(file, 'utf8').toString();
             toMatchSnapshot(content, snapPath);
         });
+    });
+
+    test('v3: modelsMode=classes generates models.ts and BaseDto', async () => {
+        const input = path.join(__dirname, 'spec', 'v3.json');
+        const output = './test/generated/v3-classes/';
+
+        await generate({
+            input,
+            output,
+            httpClient: HttpClient.FETCH,
+            useOptions: false,
+            useUnionTypes: false,
+            validationLibrary: ValidationLibrary.NONE,
+            enumPrefix: "E",
+            excludeCoreServiceFiles: false,
+            interfacePrefix: "I",
+            sortByRequired: true,
+            typePrefix: "T",
+            useCancelableRequest: false,
+            useSeparatedIndexes: false,
+            modelsMode: ModelsMode.CLASSES,
+        });
+
+        const modelsFile = path.join(process.cwd(), 'test', 'generated', 'v3-classes', 'models', 'models.ts');
+        const coreBaseDto = path.join(process.cwd(), 'test', 'generated', 'v3-classes', 'core', 'BaseDto.ts');
+
+        const modelsContent = readFileSync(modelsFile, 'utf8');
+        const baseDtoContent = readFileSync(coreBaseDto, 'utf8');
+
+        assert.ok(modelsContent.includes('export class'), 'Expected models.ts to contain class exports');
+        assert.ok(modelsContent.includes('Raw'), 'Expected models.ts to contain Raw interfaces');
+        assert.ok(baseDtoContent.includes('abstract class BaseDto'), 'Expected BaseDto.ts to be generated');
     });
 
     test('v3withAlias: generated files match snapshots', async () => {

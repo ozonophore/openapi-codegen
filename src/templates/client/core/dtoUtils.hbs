@@ -1,0 +1,9 @@
+{{>header}}
+
+export const fromArray = <T, R>(dtoClass: new (data: R) => T, data?: R[]): T[] => {
+    if (!data || data.length === 0) {
+        return [];
+    }
+
+    return data.map(item => new dtoClass(item));
+};

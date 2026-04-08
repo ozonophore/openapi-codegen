@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { ModelsMode } from '../../core/types/enums/ModelsMode.enum';
 import { baseCLIOptionsSchema, emptyStringToUndefined } from './base';
 
 export const generateOptionsSchema = z
@@ -7,6 +8,9 @@ export const generateOptionsSchema = z
         ...baseCLIOptionsSchema.shape,
         input: emptyStringToUndefined,
         output: emptyStringToUndefined,
+        useHistory: z.boolean().optional(),
+        diffReport: emptyStringToUndefined,
+        modelsMode: z.enum(ModelsMode).optional(),
     })
     .superRefine((data, ctx) => {
         const hasInput = !!data.input;

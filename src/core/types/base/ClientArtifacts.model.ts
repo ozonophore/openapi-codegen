@@ -9,4 +9,6 @@ export type ClientArtifacts = {
     models: ExportedModel[];
     schemas: ExportedModel[];
     services: ExportedService[];
+    modelsMode?: import('../enums/ModelsMode.enum').ModelsMode;
+    modelsPackage?: string;
 }

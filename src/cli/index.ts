@@ -4,11 +4,14 @@ import fs from 'fs';
 
 import { APP_LOGGER, DEFAULT_DIFF_CHANGES_DIR, DEFAULT_OPENAPI_CONFIG_FILENAME, DEFAULT_OUTPUT_API_DIR, DEFAULT_PREVIEW_CHANGES_DIR } from '../common/Consts';
 import { ELogLevel, ELogOutput } from '../common/Enums';
+import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import { UpdateNotifier } from '../common/UpdateNotifier';
 import { joinHelper } from '../common/utils/pathHelpers';
 import { EmptySchemaStrategy } from '../core/types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
+import { ModelsMode } from '../core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
+import { analyzeDiff } from './analyzeDiff/analyzeDiff';
 import { checkConfig } from './checkAndUpdateConfig/checkConfig';
 import { updateConfig } from './checkAndUpdateConfig/updateConfig';
 import { generateOpenApiClient } from './generateOpenApiClient/generateOpenApiClient';
@@ -49,6 +52,9 @@ program
     .addOption(new Option('-c, --httpClient <value>', 'HTTP client to generate').choices([...Object.values(HttpClient)]).default(HttpClient.FETCH))
     .option('--useOptions', 'Use options instead of arguments (default: false)')
     .option('--useUnionTypes', 'Use union types instead of enums (default: false)')
+    .option('--useHistory', 'Apply diff report annotations during generation (default: false)')
+    .option('--diffReport <value>', 'Path to a diff report JSON file')
+    .addOption(new Option('--modelsMode <value>', 'Models generation mode').choices([...Object.values(ModelsMode)]).default(ModelsMode.INTERFACES))
     .option('--excludeCoreServiceFiles', 'The generation of the core and services is excluded (default: false)')
     .option('--request <value>', 'Path to custom request file')
     .option('--customExecutorPath <value>', 'Path to custom createExecutorAdapter module')
@@ -136,17 +142,53 @@ program
         await previewChanges(options);
     });
 
+/**
+ * analyze-diff - Команда для анализа изменений между двумя версиями OpenAPI спецификации
+ * 
+ * @example Как использовать сейчас
+ * Сравнение с явным старым файлом:
+ * openapi-codegen-cli analyze-diff \
+ * --input ./openapi/current.yaml \
+ * --compare-with ./openapi/previous.yaml \
+ * --output-report ./openapi-diff-report.json
+ * 
+ * Сравнение с версией из Git:
+ * openapi-codegen-cli analyze-diff \
+ * --input openapi/spec.yaml \
+ * --git HEAD~1
+ */
+program
+    .command('analyze-diff')
+    .description('Analyzes differences between two OpenAPI specifications and produces a JSON report')
+    .addHelpText('before', getCLIName(APP_NAME))
+    .option('-i, --input <value>', 'Path to current OpenAPI specification file (required)')
+    .option('--compare-with <value>', 'Path to previous OpenAPI specification file')
+    .option('--git <ref>', 'Git ref to read previous specification version from (e.g. HEAD~1)')
+    .option('--output-report <value>', 'Path to save JSON diff report')
+    .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options (default: "openapi.config.json")', DEFAULT_OPENAPI_CONFIG_FILENAME)
+    .hook('preAction', async () => {
+        await updateNotifier.checkAndNotify();
+    })
+    .action(async (options: OptionValues) => {
+        const result = await analyzeDiff(options);
+        if (!result || !result.success) {
+            process.exit(1);
+        }
+        process.exit(0);
+    });
+
 program.exitOverride();
 program.showSuggestionAfterError(false);
 
 // Парсирование аргументов с обработкой ошибок
 try {
     program.parse(process.argv);
-} catch (error: any) {
-    if (error.code === 'commander.unknownOption') {
-        const errorMessage = error?.message ?? '';
+} catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === 'commander.unknownOption') {
+        const errorMessage = (error as { message?: string })?.message ?? '';
         if (errorMessage) {
-            APP_LOGGER.error(errorMessage);
+            APP_LOGGER.error(LOGGER_MESSAGES.ERROR.GENERIC(errorMessage));
+            void APP_LOGGER.shutdownLoggerAsync().then(() => process.exit(1));
         }
     }
 }

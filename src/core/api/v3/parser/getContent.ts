@@ -8,21 +8,37 @@ type TContent = {
     schema: OpenApiSchema;
 };
 
-const CONTENT_MEDIA_TYPES = ['application/json-patch+json', 'application/json', 'text/json', 'text/plain', 'multipart/mixed', 'multipart/related', 'multipart/batch', 'multipart/form-data'];
+type MediaTypeEntry = [mediaType: string, mediaTypeObject: OpenApiMediaType];
+
+function normalizeMediaType(mediaType: string): string {
+    return mediaType.split(';')[0].trim().toLowerCase();
+}
 
 export function getContent(content: Dictionary<OpenApiMediaType>): TContent | null {
-    const mediaTypesWithSchema = Object.keys(content).find(mediaType => {
-        const cleanMediaType = mediaType.split(';')[0].trim();
+    const entriesWithSchema: MediaTypeEntry[] = Object.entries(content).filter(([, mediaTypeObject]) => isDefined(mediaTypeObject?.schema));
 
-        return CONTENT_MEDIA_TYPES.includes(cleanMediaType) && isDefined(content[mediaType]?.schema);
-    });
-
-    if (mediaTypesWithSchema) {
-        return {
-            mediaType: mediaTypesWithSchema,
-            schema: content[mediaTypesWithSchema].schema as OpenApiSchema,
-        };
+    if (entriesWithSchema.length === 0) {
+        return null;
     }
 
-    return null;
+    const getByPredicate = (predicate: (normalizedMediaType: string) => boolean): MediaTypeEntry | undefined => {
+        return entriesWithSchema.find(([mediaType]) => predicate(normalizeMediaType(mediaType)));
+    };
+
+    const selectedEntry =
+        getByPredicate(mediaType => mediaType === 'application/json') ??
+        getByPredicate(mediaType => mediaType.startsWith('application/') && mediaType.endsWith('+json')) ??
+        getByPredicate(mediaType => mediaType === '*/*') ??
+        entriesWithSchema[0];
+
+    if (!selectedEntry) {
+        return null;
+    }
+
+    const [mediaType, mediaTypeObject] = selectedEntry;
+
+    return {
+        mediaType,
+        schema: mediaTypeObject.schema as OpenApiSchema,
+    };
 }

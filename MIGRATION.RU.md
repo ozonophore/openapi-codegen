@@ -76,7 +76,7 @@
 - legacy-валидация CLI заменена на Zod;
 - часть устаревших внутренних helper-утилит и legacy request executor удалена/переработана.
 
-### 6) Ужесточено поведение direct-валидации `generate` в `2.0.0-beta.14`
+### 6) Ужесточено поведение direct-валидации `generate` в `2.0.0`
 
 Для direct-режима CLI (`--input` + `--output`):
 - валидация теперь выполняется через актуальную Zod-схему (`flatOptionsSchema`);
@@ -176,3 +176,64 @@ openapi-codegen-cli preview-changes --openapi-config ./openapi.config.json
 - [ ] Выполнены `check-config` и `update-config`.
 - [ ] Выполнен `preview-changes`, diff проверен.
 - [ ] Обновлены тесты/снапшоты.
+
+---
+
+# Примечания по миграции: изменения 2.x (History & DTO)
+
+Этот раздел фиксирует инкрементальные изменения после `2.0.0`.
+
+## Новые возможности
+
+### 1) History‑aware генерация (diff‑отчёт)
+
+Новые опции CLI/конфига:
+- `useHistory` (boolean)
+- `diffReport` (путь, по умолчанию: `./openapi-diff-report.json`)
+
+Также доступны в секциях конфига:
+- `analyze.useHistory`
+- `analyze.reportPath`
+
+Команда для генерации отчёта:
+```bash
+openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml
+```
+
+Пример ручного подтверждения (отредактируйте отчёт перед генерацией):
+```json
+{
+  "miracles": [
+    {
+      "oldPath": "$.components.schemas.User.properties.user_name",
+      "newPath": "$.components.schemas.User.properties.userName",
+      "type": "RENAME",
+      "confidence": 0.85,
+      "status": "confirmed"
+    }
+  ]
+}
+```
+
+### 2) Режим моделей: интерфейсы vs классы (DTO/Raw)
+
+Новая опция: `modelsMode` (`interfaces` | `classes`).
+
+Если включить `classes`:
+- генерируются `*Raw` + `*Dto` в едином `models.ts`;
+- добавляются `BaseDto` и `dtoUtils` в `core`;
+- подтверждённые чудеса формируют deprecated‑геттеры в DTO.
+
+### 3) Коэрсинг в схемах валидации
+
+При `useHistory` и смене типа свойства валидаторы пытаются коэрсить значения:
+- Zod использует `z.coerce.*`
+- Joi использует `Joi.alternatives().try(...)`
+- Yup использует `.transform(...)`
+- JSON Schema включает `coerceTypes` в AJV
+
+## Рекомендованные действия
+
+- [ ] Решите, нужен ли `modelsMode: "classes"`.
+- [ ] Добавьте секции `analyze`/`miracles`/`models` в конфиг, если нужна history‑генерация.
+- [ ] Сгенерируйте и проверьте diff‑отчёт перед включением `useHistory`.

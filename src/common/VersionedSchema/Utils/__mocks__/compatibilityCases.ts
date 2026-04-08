@@ -105,6 +105,12 @@ export const compatibilityCases: CompatibilityCase[] = [
         type: EVersionedSchemaType.UNIFIED_OPTIONS,
         from: 'v3',
         to: 'v4',
-        expect: [{ type: 'added', key: 'emptySchemaStrategy' }, { type: 'added', key: 'customExecutorPath' }]
+        expect: [
+            { type: 'added', key: 'emptySchemaStrategy' },
+            { type: 'added', key: 'customExecutorPath' },
+            { type: 'added', key: 'models' },
+            { type: 'added', key: 'analyze' },
+            { type: 'added', key: 'miracles' },
+        ]
     }
 ];

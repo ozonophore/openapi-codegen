@@ -23,6 +23,7 @@ export function createExecutorAdapter<TRequestOptions extends Record<string, any
                 body: config.body,
                 cookies: config.cookies,
                 mediaType: config.requestMediaType,
+                responseType: config.responseType,
             };
 
             const mergedOptions: ApiRequestOptions = {
@@ -41,6 +42,7 @@ export function createExecutorAdapter<TRequestOptions extends Record<string, any
                 body: config.body,
                 cookies: config.cookies,
                 mediaType: config.requestMediaType,
+                responseType: config.responseType,
             };
 
             const mergedOptions: ApiRequestOptions = {

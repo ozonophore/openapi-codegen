@@ -14,6 +14,9 @@ export type { TOpenAPIConfig{{#notEquals ../core.length 1}} as TOpenAPIConfig${{
 {{/if}}
 {{#if models}}
 
+{{#equals @root.modelsMode 'classes'}}
+export * from './{{{joinPath @root.modelsPackage 'models'}}}';
+{{else}}
 {{#each models}}
 {{#if enum}}
 export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{joinPath package path}}}';
@@ -25,6 +28,7 @@ export { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{joinPath pa
 export type { {{{name}}}{{#if alias }} as {{{alias}}}{{/if}} } from './{{{joinPath package path}}}';
 {{/if}}
 {{/each}}
+{{/equals}}
 {{/if}}
 {{#if schemas}}
 

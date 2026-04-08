@@ -1,4 +1,5 @@
 import { APP_LOGGER } from "../../../common/Consts";
+import { LOGGER_MESSAGES } from "../../../common/LoggerMessages";
 import { fileSystemHelpers } from "../../../common/utils/fileSystemHelpers";
 
 /**
@@ -12,8 +13,5 @@ export async function writeExampleConfigFile(configPath: string, data: string): 
     const examplePath = [...pathParts, exampleFileName].join('/');
 
     await fileSystemHelpers.writeFile(examplePath, data);
-    APP_LOGGER.forceInfo(
-        `Example configuration generated and written to: ${examplePath}\n` +
-        `You can use it as a template for your actual configuration.`
-    );
+    APP_LOGGER.forceInfo(LOGGER_MESSAGES.CONFIG.EXAMPLE_CONFIG_CREATED(examplePath));
 }

@@ -74,7 +74,7 @@ import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
             
             if (!onCancel.isCancelled) {
                 const response = await sendRequest<T>(options, url, config, onCancel);
-                const responseBody = getResponseBody(response);
+                const responseBody = getResponseBody(response, options);
                 const responseHeader = getResponseHeader(response, options.responseHeader);
                 const result: ApiResult<T> = {
                     url,
@@ -100,7 +100,7 @@ export function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): 
            
            if (!onCancel.isCancelled) {
                const response = await sendRequest<T>(options, url, config, onCancel);
-               const responseBody = getResponseBody(response);
+               const responseBody = getResponseBody(response, options);
                const responseHeader = getResponseHeader(response, options.responseHeader);
                const result: ApiResult<T> = {
                    url,
@@ -129,7 +129,7 @@ export async function requestRaw<T>(options: ApiRequestOptions, config: TOpenAPI
         try {
             const url = getUrl(options, config);
             const response = await sendRequest(options, url, config);
-            const responseBody = getResponseBody(response);
+            const responseBody = getResponseBody(response, options);
             const responseHeader = getResponseHeader(response, options.responseHeader);
 
             const result: ApiResult<T> = {

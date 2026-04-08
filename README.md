@@ -28,6 +28,7 @@
 - Supports tsc and @babel/plugin-transform-typescript
 - Supports customization names of models
 - Supports external references using [`swagger-parser`](https://github.com/APIDevTools/swagger-parser/)
+- Supports binary request/response generation (`format: binary` -> `Blob`)
 
 ## Install
 
@@ -38,7 +39,7 @@ npm install ts-openapi-codegen --save-dev
 
 ## Usage
 
-The CLI tool supports five commands: `generate`, `check-config`, `update-config`, `init`, and `preview-changes`.
+The CLI tool supports six commands: `generate`, `check-config`, `update-config`, `init`, `preview-changes`, and `analyze-diff`.
 
 ### Command: `generate`
 
@@ -76,6 +77,9 @@ openapi generate --input ./spec.json --output ./dist
 | `--logTarget` | `-t` | string | `console` | Logging target: `console` or `file` |
 | `--validationLibrary` | - | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
 | `--emptySchemaStrategy` | - | string | `keep` | Strategy for empty schemas: `keep`, `semantic`, or `skip` |
+| `--modelsMode` | - | string | `interfaces` | Models generation mode: `interfaces` or `classes` |
+| `--useHistory` | - | boolean | `false` | Apply diff report annotations during generation |
+| `--diffReport` | - | string | `./openapi-diff-report.json` | Path to diff report JSON |
 
 **Examples:**
 ```bash
@@ -163,6 +167,46 @@ openapi preview-changes --openapi-config ./custom-config.json
 - `--preview-dir` / `-pd` - Temporary preview generation directory (default: `./.ts-openapi-codegen-preview-changes`)
 - `--diff-dir` / `-dd` - Directory for diff reports (default: `./.ts-openapi-codegen-diff-changes`)
 
+### Command: `analyze-diff`
+
+Analyzes differences between two OpenAPI specifications and produces a JSON report.
+
+**Usage:**
+```bash
+openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml --output-report ./openapi-diff-report.json
+openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
+```
+
+**Options:**
+- `--input` / `-i` - Path to current OpenAPI specification file (required)
+- `--compare-with` - Path to previous OpenAPI specification file
+- `--git` - Git ref to read previous specification version from (e.g. `HEAD~1`)
+- `--output-report` - Path to save JSON diff report (default: `./openapi-diff-report.json`)
+
+#### Miracles and confirmation
+
+The diff report can contain a `miracles` section with detected renames/type-coercions. Only confirmed miracles are applied in generation.
+
+**How to confirm miracles:**
+1. Run `analyze-diff` and open the generated report (default: `./openapi-diff-report.json`).
+2. Find the entry in `miracles` you want to accept.
+3. Change `"status": "auto-generated"` to `"status": "confirmed"` and commit the report.
+
+Example (excerpt):
+```json
+{
+  "miracles": [
+    {
+      "oldPath": "$.components.schemas.User.properties.user_name",
+      "newPath": "$.components.schemas.User.properties.userName",
+      "type": "RENAME",
+      "confidence": 0.85,
+      "status": "confirmed"
+    }
+  ]
+}
+```
+
 ### Configuration File
 
 Instead of passing all options via CLI, you can use a configuration file. Create `openapi.config.json` in your project root:
@@ -183,7 +227,22 @@ Instead of passing all options via CLI, you can use a configuration file. Create
     "sortByRequired": false,
     "useSeparatedIndexes": false,
     "request": "./custom-request.ts",
-    "customExecutorPath": "./custom/createExecutorAdapter.ts"
+    "customExecutorPath": "./custom/createExecutorAdapter.ts",
+    "modelsMode": "interfaces",
+    "useHistory": false,
+    "diffReport": "./openapi-diff-report.json",
+    "models": {
+        "mode": "interfaces"
+    },
+    "analyze": {
+        "useHistory": false,
+        "reportPath": "./openapi-diff-report.json"
+    },
+    "miracles": {
+        "enabled": true,
+        "confidence": 1,
+        "types": ["RENAME", "TYPE_COERCION"]
+    }
 }
 ```
 
@@ -244,6 +303,12 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `items` | array | - | Array of configurations (for multi-options format) |
 | `validationLibrary` | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Strategy for empty schemas: `keep`, `semantic`, or `skip` |
+| `modelsMode` | string | `interfaces` | Models generation mode: `interfaces` or `classes` |
+| `useHistory` | boolean | `false` | Apply diff report annotations during generation |
+| `diffReport` | string | `./openapi-diff-report.json` | Path to diff report JSON |
+| `models` | object | - | Models config section (e.g. `mode`) |
+| `analyze` | object | - | Analyze config section (e.g. reportPath, useHistory, ignore) |
+| `miracles` | object | - | Miracles config section (enabled, confidence, types) |
 
 **Note:** You can use the `init` command to generate a template configuration file.
 
@@ -263,6 +328,16 @@ openapi init
 
 # Then generate
 openapi generate
+```
+
+**With DTO models (classes mode):**
+```bash
+openapi generate --input ./spec.json --output ./dist --modelsMode classes
+```
+
+**Generate diff report:**
+```bash
+openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml --output-report ./openapi-diff-report.json
 ```
 
 **Check configuration:**
@@ -422,6 +497,20 @@ The `--validationLibrary` parameter allows you to generate runtime validation sc
 - **joi** - Generate Joi validation schemas
 - **yup** - Generate Yup validation schemas
 - **jsonschema** - Generate JSON Schema validation schemas
+
+When `--useHistory` is enabled and a diff report marks a type change, validators will attempt to coerce values:
+- **Zod** uses `z.coerce.*`
+- **Joi** uses `Joi.alternatives().try(...)`
+- **Yup** uses `.transform(...)`
+- **JSON Schema (AJV)** enables `coerceTypes`
+
+### Models mode `--modelsMode`
+
+By default, models are generated as TypeScript interfaces/types. When `--modelsMode classes` is used, the generator produces:
+- `*Raw` interfaces matching the API JSON
+- `*Dto` classes with getters, defaults, recursive constructors, and `toJSON()`
+
+The output is consolidated into a single `models.ts` file, and `BaseDto`/`dtoUtils` are emitted in `core`.
 
 Let's say we have the following model:
 

@@ -1,6 +1,7 @@
 import path from 'path';
 
 import { APP_LOGGER } from '../../../common/Consts';
+import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
 import { TRawOptions } from '../../../common/TRawOptions';
 import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 import { format } from '../../../common/utils/format';
@@ -28,5 +29,5 @@ export async function writeConfigFile(configPath: string, config: TRawOptions, t
     const formattedValue = await format(templateResult, 'json');
     
     await fileSystemHelpers.writeFile(resolvedPath, formattedValue);
-    APP_LOGGER.info(`Configuration file created: ${resolvedPath}`);
+    APP_LOGGER.info(LOGGER_MESSAGES.CONFIG.CONFIG_CREATED(resolvedPath));
 }

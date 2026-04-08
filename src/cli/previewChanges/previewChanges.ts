@@ -128,9 +128,12 @@ export async function previewChanges(options: OptionValues): Promise<void> {
         const validationResult = validateZodOptions(previewChangesSchema, options);
 
         if (!validationResult.success) {
-            APP_LOGGER.error(validationResult.errors.join('\n'));
-            exitCode = 1;
-            return;
+            APP_LOGGER.errorWithHint({
+                code: 'NO_OPTIONS_PROVIDED',
+                message: LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')),
+            });
+            await APP_LOGGER.shutdownLoggerAsync();
+            process.exit(1);
         }
 
         const { openapiConfig, generatedDir, previewDir, diffDir } = validationResult.data as TPreviewChangesOptions;
@@ -140,14 +143,23 @@ export async function previewChanges(options: OptionValues): Promise<void> {
 
         // 1. Проверка директории со сгенерированным кодом
         if (await isDirectoryEmpty(resolvedGeneratedDir)) {
-            APP_LOGGER.info(`Directory "${generatedDir}" is empty or does not exist. Nothing to compare.`);
-            return;
+            APP_LOGGER.errorWithHint({
+                code: 'PREVIEW_DIR_EMPTY',
+                message: LOGGER_MESSAGES.PREVIEW.GENERATED_DIR_EMPTY(generatedDir || ''),
+            });
+            await APP_LOGGER.shutdownLoggerAsync();
+            process.exit(1);
         }
 
         // 2. Загрузка конфигурации
         const configData = loadConfigIfExists(openapiConfig);
         if (!configData) {
-            throw new Error('The configuration file is missing');
+            APP_LOGGER.errorWithHint({
+                code: openapiConfig ? 'CONFIG_FILE_NOT_FOUND_AT' : 'CONFIG_FILE_MISSING',
+                message: LOGGER_MESSAGES.CONFIG.FILE_MISSING,
+            });
+            await APP_LOGGER.shutdownLoggerAsync();
+            process.exit(1);
         }
 
         if (Array.isArray(configData)) {
@@ -165,7 +177,12 @@ export async function previewChanges(options: OptionValues): Promise<void> {
         });
 
         if (!migratedOptions) {
-            throw new Error("Couldn't convert the set of options to the current version");
+            APP_LOGGER.errorWithHint({
+                code: 'NO_VALID_SPEC_FILES_FOUND',
+                message: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED,
+            });
+            await APP_LOGGER.shutdownLoggerAsync();
+            process.exit(1);
         }
 
         // 3. Подготовка и создание временной директории preview
@@ -178,11 +195,11 @@ export async function previewChanges(options: OptionValues): Promise<void> {
         const previewOptions = updateOutputPaths(migratedValue, previewDir || '', generatedDir || '') as TRawOptions;
 
         // 5. Генерация кода в preview директорию
-        APP_LOGGER.info(`Generating code to preview directory: ${previewDir}`);
+        APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.GENERATING_PREVIEW(previewDir || ''));
         await OpenAPI.generate(previewOptions);
 
         // 6. Сравнение файлов
-        APP_LOGGER.info('Comparing files...');
+        APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.COMPARING_FILES);
         const oldFiles = await readDirectoryRecursive(resolvedGeneratedDir);
         const newFiles = await readDirectoryRecursive(resolvedPreviewDir);
 
@@ -207,7 +224,7 @@ export async function previewChanges(options: OptionValues): Promise<void> {
                         diff: fileDiff,
                     });
                 } else {
-                    APP_LOGGER.info(`File "${file}" has no changes`);
+                    APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.FILE_NO_CHANGES(file));
                 }
             } else if (!oldExists && newExists) {
                 // Новый файл
@@ -244,7 +261,7 @@ export async function previewChanges(options: OptionValues): Promise<void> {
                 }
 
                 await fileSystemHelpers.writeFile(diffFilePath, diffContent, 'utf-8');
-                APP_LOGGER.info(`Diff saved: ${diffFilePath}`);
+                APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.DIFF_SAVED(diffFilePath));
             }
 
             const summary = buildSummary(changes);
@@ -274,30 +291,41 @@ export async function previewChanges(options: OptionValues): Promise<void> {
                 'utf-8',
             );
 
-            APP_LOGGER.info(`\nTotal changes: ${changes.length}`);
-            APP_LOGGER.info(`Diff files saved to: ${diffDir}`);
+            APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.TOTAL_CHANGES(changes.length));
+            APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.DIFF_FILES_SAVED_TO(diffDir || ''));
         } else {
             await fileSystemHelpers.rmdir(resolvedDiffDir);
-            APP_LOGGER.info('No changes detected. All files are identical.');
+            APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.NO_CHANGES_DETECTED);
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         exitCode = 1;
-        APP_LOGGER.error(error.message);
+        const message = error instanceof Error ? error.message : String(error);
+        APP_LOGGER.errorWithHint({
+            code: 'SPEC_FILES_FIND_ERROR',
+            message: LOGGER_MESSAGES.ERROR.GENERIC(message),
+            error,
+        });
     } finally {
         if (previewDirCreated || resolvedPreviewDir) {
             try {
                 if (resolvedPreviewDir) {
-                    APP_LOGGER.info(`Cleaning up preview directory: ${resolvedPreviewDir}`);
+                    APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.CLEANUP_PREVIEW_DIR(resolvedPreviewDir));
                     await fileSystemHelpers.rmdir(resolvedPreviewDir);
                 }
-            } catch (cleanupError: any) {
-                APP_LOGGER.error(`Failed to cleanup preview directory: ${cleanupError.message}`);
+            } catch (cleanupError: unknown) {
+                const msg = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
+                APP_LOGGER.errorWithHint({
+                    code: 'PREVIEW_CLEANUP_FAILED',
+                    message: LOGGER_MESSAGES.PREVIEW.CLEANUP_PREVIEW_FAILED(msg),
+                    error: cleanupError,
+                });
                 exitCode = 1;
             }
         }
     }
 
+    await APP_LOGGER.shutdownLoggerAsync();
     if (exitCode !== 0) {
         process.exit(1);
     }

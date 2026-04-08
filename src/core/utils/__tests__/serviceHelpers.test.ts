@@ -103,6 +103,7 @@ describe('@unit: serviceHelpers', () => {
             errors: [],
             results: [resultFooB],
             responseHeader: null,
+            responseType: null,
         };
 
         const service: Service = {

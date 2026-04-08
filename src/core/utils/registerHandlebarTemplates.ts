@@ -4,6 +4,8 @@ import * as Handlebars from 'handlebars/runtime';
 import templateCoreApiError from '../../templatesCompiled/client/core/ApiError';
 import templateCoreApiRequestOptions from '../../templatesCompiled/client/core/ApiRequestOptions';
 import templateCoreApiResult from '../../templatesCompiled/client/core/ApiResult';
+import templateCoreBaseDto from '../../templatesCompiled/client/core/BaseDto';
+import templateCoreDtoUtils from '../../templatesCompiled/client/core/dtoUtils';
 import templateHttpStatuses from '../../templatesCompiled/client/core/HttpStatusCode';
 // axios START
 import axiosGetHeaders from '../../templatesCompiled/client/core/axios/getHeaders';
@@ -53,6 +55,7 @@ import xhrSendRequest from '../../templatesCompiled/client/core/xhr/sendRequest'
 import templateClient from '../../templatesCompiled/client/exportClient';
 import templateExportSchemas from '../../templatesCompiled/client/exportSchema';
 import templateExportModel from '../../templatesCompiled/client/exportModel';
+import templateExportModels from '../../templatesCompiled/client/exportModels';
 import templateExportService from '../../templatesCompiled/client/exportService';
 import templateFullIndex from '../../templatesCompiled/client/indexFull';
 import templateSimpeIndex from '../../templatesCompiled/client/indexSimple';
@@ -158,6 +161,7 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
         exports: {
             client: Handlebars.template(templateClient),
             model: Handlebars.template(templateExportModel),
+            models: Handlebars.template(templateExportModels),
             schema: Handlebars.template(templateExportSchemas),
             service: Handlebars.template(templateExportService),
         },
@@ -166,6 +170,8 @@ export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOp
             apiError: Handlebars.template(templateCoreApiError),
             apiRequestOptions: Handlebars.template(templateCoreApiRequestOptions),
             apiResult: Handlebars.template(templateCoreApiResult),
+            baseDto: Handlebars.template(templateCoreBaseDto),
+            dtoUtils: Handlebars.template(templateCoreDtoUtils),
             request: Handlebars.template(templateCoreRequest),
             cancelablePromise: Handlebars.template(templateCancellablePromise),
             httpStatusCode: Handlebars.template(templateHttpStatuses),

@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.1] — 2026-03-02
+
+### Added
+- Added binary/Blob support improvements in generated clients:
+  - binary schemas (`format: binary`) map to `Blob`;
+  - request/response option `responseType: 'blob'`;
+  - runtime response handling for `fetch`, `xhr`, `node`, and `axios`.
+- Added Blob snapshot scenarios in test specs and snapshots (`v3`, `v3_withDifferentRefs`).
+
+### Changed
+- Improved response parsing and reference resolution:
+  - response `$ref` parent context is normalized before nested reference resolution;
+  - media type content selection and response code parsing behavior were hardened.
+- Updated OpenAPI spec loading flow to resolve by absolute input path without global `process.chdir(...)` side effects.
+- Updated READMEs (EN/RU) for strict diagnostics options.
+
+### Fixed
+- Fixed unresolved nested `$ref` cases inside referenced responses.
+- Fixed operation response code parsing for exact codes and range forms (e.g. `2XX`).
+- Fixed model generation edge case where model writing could stop prematurely.
+
+### Tests
+- Added/updated unit coverage for:
+  - response code parsing and operation results;
+  - media type selection and Blob mappings.
+- Updated snapshot suites for generated core/runtime/service outputs across v2/v3 fixtures.
+
+## [Unreleased]
+
+### Added
+- Added `analyze-diff` command to generate diff reports between OpenAPI versions.
+- Added history-aware generation options: `useHistory` and `diffReport`.
+- Added `modelsMode` (`interfaces` | `classes`) to generate `Raw/Dto` models in a single `models.ts`.
+- Added `BaseDto` and `dtoUtils` to generated core when `modelsMode=classes`.
+- Added `miracles` section support in diff reports and DTO deprecated getters for confirmed renames.
+- Added auto-coercion in validation schemas when a type change is detected (Zod/Joi/Yup/AJV).
+
+### Changed
+- Added config sections `models`, `analyze`, and `miracles` to unified schema and init templates.
+- Updated README (EN/RU) and migration docs with history/DTO features.
+
 ## [2.0.0] — 2026-02-23
 
 ### Added

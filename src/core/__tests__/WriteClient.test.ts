@@ -50,6 +50,7 @@ describe('@unit: writeClient', () => {
                 model: () => 'model',
                 schema: () => 'schema',
                 service: () => 'service',
+                models: () => 'models',
             },
             core: {
                 settings: () => 'settings',
@@ -63,7 +64,9 @@ describe('@unit: writeClient', () => {
                 requestExecutor: () => 'requestExecutor',
                 apiErrorInterceptor: () => 'apiErrorInterceptor',
                 interceptors: () => 'interceptors',
-                withInterceptors: () => 'withInterceptors'
+                withInterceptors: () => 'withInterceptors',
+                baseDto: () => 'baseDto',
+                dtoUtils: () => 'dtoUtils'
             },
         };
 

@@ -1,5 +1,8 @@
-async function getResponseBody(response: Response): Promise<any> {
+async function getResponseBody(response: Response, options: ApiRequestOptions): Promise<any> {
     try {
+        if (options.responseType === 'blob') {
+            return await response.blob();
+        }
         const contentType = response.headers.get('Content-Type');
         if (contentType) {
             const isJSON = contentType.toLowerCase().startsWith('application/json');

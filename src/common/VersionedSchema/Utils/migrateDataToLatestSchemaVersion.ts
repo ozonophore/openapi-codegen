@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { APP_LOGGER } from '../../Consts';
+import { LOGGER_MESSAGES } from '../../LoggerMessages';
 import { EMigrationMode } from '../../Enums';
 import { validateZodOptions, validateZodOptionsRaw } from '../../Validation/validateZodOptions';
 import { EVersionedSchemaType } from '../Enums';
@@ -109,9 +110,7 @@ export function migrateDataToLatestSchemaVersion({ rawInput, migrationPlans, ver
         visitedVersions.add(currentVersion);
 
         if (currentVersion === actualSchema.version && migrationMode === EMigrationMode.GENERATE_OPENAPI) {
-            APP_LOGGER.warn(
-                'To perform OpenAPI generation, it was necessary to migrate the schema of your data to the current one. To update the configuration in the file, use the command `npm openapi-codegen-cli update-config`'
-            );
+            APP_LOGGER.warn(LOGGER_MESSAGES.MIGRATION.OPENAPI_SCHEMA_MIGRATED);
         }
     }
 
