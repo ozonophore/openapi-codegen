@@ -32,20 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - media type selection and Blob mappings.
 - Updated snapshot suites for generated core/runtime/service outputs across v2/v3 fixtures.
 
-## [Unreleased]
-
-### Added
-- Added `analyze-diff` command to generate diff reports between OpenAPI versions.
-- Added history-aware generation options: `useHistory` and `diffReport`.
-- Added `modelsMode` (`interfaces` | `classes`) to generate `Raw/Dto` models in a single `models.ts`.
-- Added `BaseDto` and `dtoUtils` to generated core when `modelsMode=classes`.
-- Added `miracles` section support in diff reports and DTO deprecated getters for confirmed renames.
-- Added auto-coercion in validation schemas when a type change is detected (Zod/Joi/Yup/AJV).
-
-### Changed
-- Added config sections `models`, `analyze`, and `miracles` to unified schema and init templates.
-- Updated README (EN/RU) and migration docs with history/DTO features.
-
 ## [2.0.0] — 2026-02-23
 
 ### Added
