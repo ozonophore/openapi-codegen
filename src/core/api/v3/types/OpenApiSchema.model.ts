@@ -44,4 +44,6 @@ export interface OpenApiSchema extends OpenApiReference, WithEnumExtension {
     externalDocs?: OpenApiExternalDocs;
     example?: any;
     deprecated?: boolean;
+    /** Other vendor extensions (`x-*`) on the schema object. */
+    [extension: `x-${string}`]: unknown;
 }

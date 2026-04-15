@@ -150,7 +150,12 @@ export function getModel(this: Parser, config: ModelConfig): Model {
 
     // If the schema has a type than it can be a basic or generic type.
     if (definition.type) {
-        const definitionType = this.getType(definition.type, parentRef);
+        const pluginType = this.context.resolveSchemaTypeOverride(definition as Record<string, any>, {
+            openApiVersion: 'v2',
+            parentRef,
+        });
+        const primitiveType = pluginType || (definition.format === 'binary' ? 'Blob' : definition.type);
+        const definitionType = this.getType(primitiveType, parentRef);
         model.export = 'generic';
         model.type = definitionType.type;
         model.base = definitionType.base;

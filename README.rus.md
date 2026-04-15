@@ -28,6 +28,8 @@
 - Поддерживает tsc и @babel/plugin-transform-typescript
 - Поддерживает кастомизацию имен моделей
 - Поддерживает внешние ссылки с помощью [`swagger-parser`](https://github.com/APIDevTools/swagger-parser/)
+- Поддерживает strict-диагностику OpenAPI с JSON-отчетом (`--strict-openapi`, `--report-file`)
+- Поддерживает плагины генератора (`plugins`), включая встроенный `x-typescript-type`
 - Поддерживает генерацию бинарных request/response (`format: binary` -> `Blob`)
 
 ## Установка
@@ -245,7 +247,9 @@ openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
         "enabled": true,
         "confidence": 1,
         "types": ["RENAME", "TYPE_COERCION"]
-    }
+    },
+    "plugins": ["./plugins/custom-type.plugin.cjs"],
+    "customExecutorPath": "./custom/createExecutorAdapter.ts"
 }
 ```
 
@@ -296,6 +300,7 @@ openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 | `useUnionTypes` | boolean | `false` | Использовать union типы вместо enums |
 | `excludeCoreServiceFiles` | boolean | `false` | Исключить генерацию core и сервисных файлов |
 | `request` | string | - | Путь к пользовательскому файлу запросов |
+| `plugins` | string[] | `[]` | Пути к плагинам генератора |
 | `customExecutorPath` | string | - | Путь к пользовательскому модулю `createExecutorAdapter` |
 | `interfacePrefix` | string | `I` | Префикс для интерфейсов моделей |
 | `enumPrefix` | string | `E` | Префикс для enum моделей |
@@ -316,6 +321,14 @@ openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 | `miracles` | object | - | Секция чудес (enabled, confidence, types) |
 
 **Примечание:** Вы можете использовать команду `init` для генерации шаблона файла конфигурации.
+
+### Плагины
+
+Плагины генератора позволяют переопределять маппинг типов схем (например через `x-typescript-type`) и расширять поведение генерации.
+
+- Ключ конфигурации: `plugins` (массив путей к модулям)
+- Поддерживаемые форматы модулей: CJS, ESM и TS (если рантайм поддерживает импорт TS)
+- Подробная документация: [docs/plugins.md](./docs/plugins.md)
 
 ## Примеры
 

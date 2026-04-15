@@ -22,6 +22,7 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     includeSchemasFiles: false,
     excludeCoreServiceFiles: false,
     request: '',
+    plugins: [],
     customExecutorPath: '',
     interfacePrefix: 'I',
     enumPrefix: 'E',

@@ -1,22 +1,22 @@
+import { parseJsonPath } from '../../common/utils/jsonPath';
 import type { PrefixArtifacts } from '../types/base/PrefixArtifacts.model';
 import type { Client } from '../types/shared/Client.model';
 import type { DiffInfo } from '../types/shared/DiffInfo.model';
+import type { MiracleEntry } from '../types/shared/Miracle.model';
 import type { Model } from '../types/shared/Model.model';
 import type { Operation } from '../types/shared/Operation.model';
 import type { Service } from '../types/shared/Service.model';
-import type { MiracleEntry } from '../types/shared/Miracle.model';
 import { encode } from './encode';
 import { escapeName } from './escapeName';
 import { getClassName } from './getClassName';
 import { getComment } from './getComment';
 import { getModelNameWithPrefix } from './getModelNameWithPrefix';
+import { OpenApiVersion } from './getOpenApiVersion';
 import { getOperationName } from './getOperationName';
 import { getOperationPath } from './getOperationPath';
 import { getServiceClassName } from './getServiceClassName';
-import { ensureService } from './serviceHelpers';
-import { OpenApiVersion } from './getOpenApiVersion';
 import type { DiffReport, DiffReportEntry } from './loadDiffReport';
-import { parseJsonPath } from '../../common/utils/jsonPath';
+import { ensureService } from './serviceHelpers';
 
 type ApplyDiffParams = {
     client: Client;

@@ -9,6 +9,7 @@ import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
+import { loadGeneratorPlugins } from './plugins/loadGeneratorPlugins';
 import { validateOpenApiStrict, validateWithSwaggerParser, writeOpenApiStrictReport } from './strict/validateOpenApiStrict';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
@@ -45,6 +46,7 @@ export class OpenApiClient {
                 ...item,
                 httpClient: rawOptions.httpClient,
                 request: item.request ?? rawOptions.request, // ?? для fallback на глобальный
+                plugins: item.plugins ?? rawOptions.plugins,
                 customExecutorPath: rawOptions.customExecutorPath,
                 useOptions: rawOptions.useOptions,
                 useUnionTypes: rawOptions.useUnionTypes,
@@ -82,6 +84,7 @@ export class OpenApiClient {
                     includeSchemasFiles: rawOptions.includeSchemasFiles,
                     excludeCoreServiceFiles: rawOptions.excludeCoreServiceFiles,
                     request: rawOptions.request,
+                    plugins: rawOptions.plugins,
                     customExecutorPath: rawOptions.customExecutorPath,
                     interfacePrefix: rawOptions.interfacePrefix,
                     enumPrefix: rawOptions.enumPrefix,
@@ -117,6 +120,7 @@ export class OpenApiClient {
             includeSchemasFiles: item.includeSchemasFiles ?? COMMON_DEFAULT_OPTIONS_VALUES.includeSchemasFiles,
             excludeCoreServiceFiles: item.excludeCoreServiceFiles ?? COMMON_DEFAULT_OPTIONS_VALUES.excludeCoreServiceFiles,
             request: item.request || COMMON_DEFAULT_OPTIONS_VALUES.request,
+            plugins: item.plugins || COMMON_DEFAULT_OPTIONS_VALUES.plugins,
             customExecutorPath: item.customExecutorPath || COMMON_DEFAULT_OPTIONS_VALUES.customExecutorPath,
             interfacePrefix: item.interfacePrefix || COMMON_DEFAULT_OPTIONS_VALUES.interfacePrefix,
             enumPrefix: item.enumPrefix || COMMON_DEFAULT_OPTIONS_VALUES.enumPrefix,
@@ -200,6 +204,7 @@ export class OpenApiClient {
             useUnionTypes,
             excludeCoreServiceFiles,
             request,
+            plugins,
             customExecutorPath,
             interfacePrefix,
             enumPrefix,
@@ -225,11 +230,13 @@ export class OpenApiClient {
             outputSchemas,
         });
         const absoluteInput = resolveHelper(process.cwd(), input);
+        const generatorPlugins = await loadGeneratorPlugins(plugins);
         const context = new Context({
             input: absoluteInput,
             output: outputPaths,
             prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix },
             sortByRequired,
+            plugins: generatorPlugins,
         });
         const openApi = await getOpenApiSpec(context, absoluteInput);
 
