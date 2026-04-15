@@ -30,20 +30,6 @@
   - выбора media type и Blob-маппингов.
 - Обновлены snapshot-наборы для core/runtime/service генерации по v2/v3 фикстурам.
 
-## [Unreleased]
-
-### Добавлено
-- Добавлена команда `analyze-diff` для формирования diff‑отчетов между версиями OpenAPI.
-- Добавлены опции history‑генерации: `useHistory` и `diffReport`.
-- Добавлен `modelsMode` (`interfaces` | `classes`) для генерации `Raw/Dto` моделей в одном `models.ts`.
-- Добавлены `BaseDto` и `dtoUtils` в сгенерированный `core` при `modelsMode=classes`.
-- Добавлена поддержка раздела `miracles` в diff‑отчете и deprecated‑геттеров в DTO при подтвержденных rename.
-- Добавлен авто‑коэрсинг в схемах валидации при смене типа (Zod/Joi/Yup/AJV).
-
-### Изменено
-- Добавлены секции конфигурации `models`, `analyze` и `miracles` в unified‑схему и шаблоны `init`.
-- Обновлены README (EN/RU) и MIGRATION с описанием history/DTO‑возможностей.
-
 ## [2.0.0] — 2026-02-23
 
 ### Добавлено
