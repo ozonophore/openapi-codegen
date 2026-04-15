@@ -9,6 +9,7 @@ import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
+import { validateOpenApiStrict, validateWithSwaggerParser, writeOpenApiStrictReport } from './strict/validateOpenApiStrict';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
 import { ModelsMode } from './types/enums/ModelsMode.enum';
@@ -62,6 +63,8 @@ export class OpenApiClient {
                 useHistory: item.useHistory ?? useHistory,
                 diffReport: item.diffReport ?? diffReport,
                 modelsMode: item.modelsMode ?? modelsMode,
+                strictOpenapi: rawOptions.strictOpenapi,
+                reportFile: rawOptions.reportFile,
             }));
         } else {
             // Плоский формат (из CLI или старого конфига): Один item с глобальным request
@@ -93,6 +96,8 @@ export class OpenApiClient {
                     useHistory,
                     diffReport,
                     modelsMode,
+                    strictOpenapi: rawOptions.strictOpenapi,
+                    reportFile: rawOptions.reportFile,
                 },
             ];
         }
@@ -129,6 +134,8 @@ export class OpenApiClient {
             models: item.models || COMMON_DEFAULT_OPTIONS_VALUES.models,
             analyze: item.analyze || COMMON_DEFAULT_OPTIONS_VALUES.analyze,
             miracles: item.miracles || COMMON_DEFAULT_OPTIONS_VALUES.miracles,
+            strictOpenapi: item.strictOpenapi ?? COMMON_DEFAULT_OPTIONS_VALUES.strictOpenapi,
+            reportFile: item.reportFile || COMMON_DEFAULT_OPTIONS_VALUES.reportFile,
         };
     }
 
@@ -172,6 +179,7 @@ export class OpenApiClient {
             this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.FINISHED_WITH_DURATION(durationInSeconds.toFixed(3)));
         } catch (error: any) {
             this.writeClient.logger.error(LOGGER_MESSAGES.ERROR.GENERIC(error.message));
+            throw error;
         }
 
         this.writeClient.logger.shutdownLogger();
@@ -202,6 +210,8 @@ export class OpenApiClient {
             useHistory,
             diffReport,
             modelsMode = ModelsMode.INTERFACES,
+            strictOpenapi,
+            reportFile,
         } = item;
         const outputPaths: OutputPaths = getOutputPaths({
             output,
@@ -218,6 +228,20 @@ export class OpenApiClient {
             sortByRequired,
         });
         const openApi = await getOpenApiSpec(context, absoluteInput);
+
+        if (strictOpenapi) {
+            const parserValidationIssues = await validateWithSwaggerParser(absoluteInput);
+            const strictReport = validateOpenApiStrict({ openApi, context, preIssues: parserValidationIssues });
+            const reportPath = await writeOpenApiStrictReport(strictReport, reportFile);
+            this.writeClient.logger.forceInfo(`Strict OpenAPI report created: ${reportPath}`);
+
+            if (strictReport.summary.errors > 0) {
+                throw new Error(
+                    `Strict OpenAPI validation failed with ${strictReport.summary.errors} error(s). Report: ${reportPath}`
+                );
+            }
+        }
+
         const openApiVersion = getOpenApiVersion(openApi);
         const templates = registerHandlebarTemplates({
             httpClient,

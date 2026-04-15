@@ -38,7 +38,9 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     modelsMode: ModelsMode.INTERFACES,
     models: {},
     analyze: {},
-    miracles: {}
+    miracles: {},
+    strictOpenapi: false,
+    reportFile: './openapi-report.json',
 };
 
 export const APP_LOGGER = new Logger({

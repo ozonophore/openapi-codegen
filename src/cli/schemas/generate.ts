@@ -11,6 +11,8 @@ export const generateOptionsSchema = z
         useHistory: z.boolean().optional(),
         diffReport: emptyStringToUndefined,
         modelsMode: z.enum(ModelsMode).optional(),
+        strictOpenapi: z.boolean().optional(),
+        reportFile: emptyStringToUndefined,
     })
     .superRefine((data, ctx) => {
         const hasInput = !!data.input;

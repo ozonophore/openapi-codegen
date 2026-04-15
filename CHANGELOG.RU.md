@@ -4,6 +4,28 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.1.0-beta.2] — 2026-04-04
+
+### Добавлено
+- Добавлена опциональная строгая диагностика OpenAPI для `generate`:
+  - флаги CLI `--strict-openapi` и `--report-file` (по умолчанию `./openapi-report.json`);
+  - ключи конфигурации `strictOpenapi` и `reportFile` (Zod-схема `generate` и unified options).
+- Добавлен пайплайн `validateOpenApiStrict`: пишет JSON-отчёт (summary + issues) и прерывает генерацию при наличии strict **ошибок**.
+- Проверки strict-режима включают:
+  - сбои `SwaggerParser.validate` (`OPENAPI_PARSER_VALIDATION_FAILED`);
+  - неразрешённые `$ref` (`UNRESOLVED_REF`);
+  - fallback media type при отсутствии `application/json` (`CONTENT_MEDIA_TYPE_FALLBACK`);
+  - ответ `default` без явного 2xx успешного ответа (`SUSPICIOUS_DEFAULT_RESPONSE`);
+  - отсутствие `operationId` (`MISSING_OPERATION_ID`, уровень info).
+- Добавлена unified-схема конфигурации `UNIFIED_OPTIONS_v5` с миграцией с `v4` и значениями по умолчанию для новых полей.
+
+### Изменено
+- `OpenApiClient`: после логирования ошибки генерации ошибка пробрасывается дальше, чтобы программные вызовы и CI корректно фиксировали сбой.
+
+### Тесты
+- Добавлены unit-тесты для `validateOpenApiStrict` (strict-issues, «чистая» спецификация и `preIssues` из валидации парсера).
+- Обновлены ожидания `migrateDataToLatestSchemaVersion` для последней unified-схемы `UNIFIED_OPTIONS_v5`.
+
 ## [2.1.0-beta.1] — 2026-03-02
 
 ### Добавлено

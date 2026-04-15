@@ -46,6 +46,11 @@ export const specialParametersSchemasV4 = z.object({
     emptySchemaStrategy: z.enum(EmptySchemaStrategy).optional(),
 });
 
+export const strictModeParametersSchema = z.object({
+    strictOpenapi: z.boolean().optional(),
+    reportFile: z.string().optional(),
+})
+
 /** Additional parameters */
 
 export const additionalParametersSchema = z.object({
