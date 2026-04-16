@@ -1,4 +1,5 @@
 import { APP_LOGGER } from '../../common/Consts';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import type { DiffEntry, IgnoreRule } from './types';
 
@@ -23,21 +24,22 @@ export const isRuleActive = (rule: IgnoreRule): boolean => {
  */
 export const matchesIgnoreRule = (entry: DiffEntry, rule: IgnoreRule): boolean => {
     if (!isRuleActive(rule)) return false;
-        if (rule.path) {
-            if (entry.path === rule.path) return true;
-            if (entry.path.startsWith(`${rule.path}.`)) return true;
-            if (entry.path.startsWith(`${rule.path}[`)) return true;
+    if (rule.path) {
+        if (entry.path === rule.path) return true;
+        if (entry.path.startsWith(`${rule.path}.`)) return true;
+        if (entry.path.startsWith(`${rule.path}[`)) return true;
+        if (entry.path.startsWith(`${rule.path}/`)) return true;
+    }
+    if (rule.pattern) {
+        try {
+            const regex = new RegExp(rule.pattern);
+            return regex.test(entry.path);
+        } catch (err) {
+            APP_LOGGER.warn(LOGGER_MESSAGES.ANALYZE_DIFF.INVALID_IGNORE_PATTERN(rule.pattern, String(err)));
+            return false;
         }
-        if (rule.pattern) {
-            try {
-                const regex = new RegExp(rule.pattern);
-                return regex.test(entry.path);
-            } catch (err) {
-                APP_LOGGER.warn(`[openapi-codegen] Invalid ignore pattern: ${rule.pattern} — ${String(err)}`);
-                return false;
-            }
-        }
-        return false;
+    }
+    return false;
 };
 
 /**
