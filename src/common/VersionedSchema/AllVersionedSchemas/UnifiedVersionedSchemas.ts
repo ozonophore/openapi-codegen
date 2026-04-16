@@ -17,7 +17,7 @@ const unifiedSchemaDefinitions = [
     { version: 'v2', base: unifiedOptionsSchemaV2 },
     { version: 'v3', base: unifiedOptionsSchemaV3 },
     { version: 'v4', base: unifiedOptionsSchemaV4 },
-    { version: 'v5', base: unifiedOptionsSchemaV5 }
+    { version: 'v5', base: unifiedOptionsSchemaV5 },
 ] as const;
 
 type UnifiedSchemaDefinitions = typeof unifiedSchemaDefinitions;

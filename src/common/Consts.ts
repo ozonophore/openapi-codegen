@@ -41,6 +41,8 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     miracles: {},
     strictOpenapi: false,
     reportFile: './openapi-report.json',
+    useProjectPrettier: false,
+    useEslintFix: false,
 };
 
 export const APP_LOGGER = new Logger({

@@ -136,6 +136,8 @@ export class OpenApiClient {
             miracles: item.miracles || COMMON_DEFAULT_OPTIONS_VALUES.miracles,
             strictOpenapi: item.strictOpenapi ?? COMMON_DEFAULT_OPTIONS_VALUES.strictOpenapi,
             reportFile: item.reportFile || COMMON_DEFAULT_OPTIONS_VALUES.reportFile,
+            useProjectPrettier: item.useProjectPrettier ?? COMMON_DEFAULT_OPTIONS_VALUES.useProjectPrettier,
+            useEslintFix: item.useEslintFix ?? COMMON_DEFAULT_OPTIONS_VALUES.useEslintFix,
         };
     }
 
@@ -212,6 +214,8 @@ export class OpenApiClient {
             modelsMode = ModelsMode.INTERFACES,
             strictOpenapi,
             reportFile,
+            useProjectPrettier = false,
+            useEslintFix = false,
         } = item;
         const outputPaths: OutputPaths = getOutputPaths({
             output,
@@ -285,6 +289,8 @@ export class OpenApiClient {
                     validationLibrary,
                     emptySchemaStrategy,
                     modelsMode,
+                    useProjectPrettier,
+                    useEslintFix,
                 });
                 break;
             }
@@ -318,6 +324,8 @@ export class OpenApiClient {
                     validationLibrary,
                     emptySchemaStrategy,
                     modelsMode,
+                    useProjectPrettier,
+                    useEslintFix,
                 });
                 break;
             }

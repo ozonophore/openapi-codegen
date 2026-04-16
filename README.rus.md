@@ -81,6 +81,8 @@ openapi generate --input ./spec.json --output ./dist
 | `--modelsMode` | - | string | `interfaces` | Режим генерации моделей: `interfaces` или `classes` |
 | `--useHistory` | - | boolean | `false` | Применять diff-отчёт при генерации |
 | `--diffReport` | - | string | `./openapi-diff-report.json` | Путь к diff-отчёту |
+| `--useProjectPrettier` | - | boolean | `false` | Форматировать сгенерированный код конфигом Prettier проекта |
+| `--useEslintFix` | - | boolean | `false` | Запускать ESLint `--fix` для сгенерированных файлов после записи (нужен `eslint` в проекте) |
 
 **Примеры:**
 ```bash

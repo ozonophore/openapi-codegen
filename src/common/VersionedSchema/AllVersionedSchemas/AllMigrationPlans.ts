@@ -74,6 +74,8 @@ export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<
         {
             strictOpenapi: false,
             reportFile: '',
+            useProjectPrettier: false,
+            useEslintFix: false,
         }
     ),
 ];

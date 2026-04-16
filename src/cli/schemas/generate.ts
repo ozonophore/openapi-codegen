@@ -13,6 +13,8 @@ export const generateOptionsSchema = z
         modelsMode: z.enum(ModelsMode).optional(),
         strictOpenapi: z.boolean().optional(),
         reportFile: emptyStringToUndefined,
+        useProjectPrettier: z.boolean().optional(),
+        useEslintFix: z.boolean().optional(),
     })
     .superRefine((data, ctx) => {
         const hasInput = !!data.input;

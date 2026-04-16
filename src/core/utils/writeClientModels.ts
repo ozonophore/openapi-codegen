@@ -1,5 +1,6 @@
 import { mkdirSync } from 'fs';
 
+import { eslintFix } from '../../common/utils/eslintFix';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
@@ -25,6 +26,8 @@ interface IWriteClientModels {
     useOptions?: boolean;
     modelsMode?: ModelsMode;
     outputCorePath?: string;
+    useProjectPrettier?: boolean;
+    useEslintFix?: boolean;
 }
 
 /**
@@ -36,7 +39,7 @@ interface IWriteClientModels {
  * @param useUnionTypes Use union types instead of enums
  */
 export async function writeClientModels(this: WriteClient, options: IWriteClientModels): Promise<void> {
-    const { models, templates, outputModelsPath, httpClient, useUnionTypes, modelsMode, outputCorePath, useOptions } = options;
+    const { models, templates, outputModelsPath, httpClient, useUnionTypes, modelsMode, outputCorePath, useOptions, useProjectPrettier, useEslintFix } = options;
 
     this.logger.info('Recording of model files begins');
 
@@ -81,8 +84,11 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             httpClient,
             useUnionTypes,
         });
-        const formattedValue = await format(templateResult);
+        const formattedValue = await format(templateResult, undefined, useProjectPrettier);
         await fileSystemHelpers.writeFile(file, formattedValue);
+        if (useEslintFix) {
+            await eslintFix(file);
+        }
 
         this.logger.info(`File recording completed: ${file}`);
     }
