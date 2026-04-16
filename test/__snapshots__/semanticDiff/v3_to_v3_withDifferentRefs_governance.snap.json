@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "1.1.0",
+  "summary": {
+    "breaking": 40,
+    "nonBreaking": 2,
+    "informational": 0
+  },
+  "recommendation": {
+    "semver": "major",
+    "confidence": "high",
+    "reason": "Breaking changes detected.",
+    "reasons": [
+      "HAS_BREAKING_CHANGES"
+    ]
+  },
+  "governanceSummary": {
+    "errors": 0,
+    "warnings": 3,
+    "info": 0
+  },
+  "governanceRuleIds": [
+    "NO_DEFAULT_WITHOUT_2XX",
+    "REQUIRE_OPERATION_ID"
+  ],
+  "changesCount": 42,
+  "topChanges": [
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/CompositionWithAllOfAndNullable"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/CompositionWithAnyOf"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/CompositionWithAnyOfAndNullable"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/CompositionWithAnyOfAnonymous"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/CompositionWithOneOf"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/CompositionWithOneOfAndNullable"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/CompositionWithOneOfAnonymous"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/DictionaryWithArray"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/DictionaryWithDictionary"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/DictionaryWithProperties"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/EnumWithStringsWithType"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelThatExtends"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelThatExtendsExtends"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithArray"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithBoolean"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithCircularReference"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithDictionary"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithDuplicateImports"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithDuplicateProperties"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithEnum"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithEnumFromDescription"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithInteger"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithNestedEnums"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithNestedProperties"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithOrderedProperties"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithPattern"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithProperties"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithReference"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithString"
+    },
+    {
+      "type": "model.added",
+      "severity": "non-breaking",
+      "path": "#/components/schemas/ModelWithStringLocal"
+    }
+  ]
+}

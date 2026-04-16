@@ -2,10 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IDictionaryWithReference } from '../models/DictionaryWithReference';
-import type { IModelWithArray } from '../models/ModelWithArray';
-import type { IModelWithDictionary } from '../models/ModelWithDictionary';
-import type { IModelWithEnumInteger } from '../models/ModelWithEnumInteger';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 import type { ApiResult } from '../core/ApiResult';
 
@@ -47,55 +43,47 @@ export class V2Service<TOptions = unknown> {
     constructor(private readonly executor: RequestExecutor<TOptions>) {}
 
     /**
-     * @returns IDictionaryWithReference Message for default response
+     * @returns void
      * @throws ApiError
      */
-    public getCallWithModelWithDictionaryReference(options?: TOptions): Promise<IDictionaryWithReference> {
-        return this.executor.request<IDictionaryWithReference>(
-            V2Options.getCallWithModelWithDictionaryReference(),
-            options,
-        );
+    public getCallWithModelWithDictionaryReference(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(V2Options.getCallWithModelWithDictionaryReference(), options);
     }
 
-    public getCallWithModelWithDictionaryReferenceRaw(
-        options?: TOptions,
-    ): Promise<ApiResult<IDictionaryWithReference>> {
-        return this.executor.requestRaw<IDictionaryWithReference>(
-            V2Options.getCallWithModelWithDictionaryReference(),
-            options,
-        );
+    public getCallWithModelWithDictionaryReferenceRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(V2Options.getCallWithModelWithDictionaryReference(), options);
     }
     /**
-     * @returns IModelWithDictionary Message for default response
+     * @returns void
      * @throws ApiError
      */
-    public getCallWithModelWithDictionary(options?: TOptions): Promise<IModelWithDictionary> {
-        return this.executor.request<IModelWithDictionary>(V2Options.getCallWithModelWithDictionary(), options);
+    public getCallWithModelWithDictionary(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(V2Options.getCallWithModelWithDictionary(), options);
     }
 
-    public getCallWithModelWithDictionaryRaw(options?: TOptions): Promise<ApiResult<IModelWithDictionary>> {
-        return this.executor.requestRaw<IModelWithDictionary>(V2Options.getCallWithModelWithDictionary(), options);
+    public getCallWithModelWithDictionaryRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(V2Options.getCallWithModelWithDictionary(), options);
     }
     /**
-     * @returns IModelWithEnumInteger Message for default response
+     * @returns void
      * @throws ApiError
      */
-    public getCallWithSimpleInteger(options?: TOptions): Promise<IModelWithEnumInteger> {
-        return this.executor.request<IModelWithEnumInteger>(V2Options.getCallWithSimpleInteger(), options);
+    public getCallWithSimpleInteger(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(V2Options.getCallWithSimpleInteger(), options);
     }
 
-    public getCallWithSimpleIntegerRaw(options?: TOptions): Promise<ApiResult<IModelWithEnumInteger>> {
-        return this.executor.requestRaw<IModelWithEnumInteger>(V2Options.getCallWithSimpleInteger(), options);
+    public getCallWithSimpleIntegerRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(V2Options.getCallWithSimpleInteger(), options);
     }
     /**
-     * @returns IModelWithArray Message for default response
+     * @returns void
      * @throws ApiError
      */
-    public getCallWithModelArray(options?: TOptions): Promise<IModelWithArray> {
-        return this.executor.request<IModelWithArray>(V2Options.getCallWithModelArray(), options);
+    public getCallWithModelArray(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(V2Options.getCallWithModelArray(), options);
     }
 
-    public getCallWithModelArrayRaw(options?: TOptions): Promise<ApiResult<IModelWithArray>> {
-        return this.executor.requestRaw<IModelWithArray>(V2Options.getCallWithModelArray(), options);
+    public getCallWithModelArrayRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(V2Options.getCallWithModelArray(), options);
     }
 }
