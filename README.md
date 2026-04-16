@@ -28,6 +28,8 @@
 - Supports tsc and @babel/plugin-transform-typescript
 - Supports customization names of models
 - Supports external references using [`swagger-parser`](https://github.com/APIDevTools/swagger-parser/)
+- Supports strict OpenAPI diagnostics with JSON reports (`--strict-openapi`, `--report-file`)
+- Supports generator plugins (`plugins`) including built-in `x-typescript-type`
 - Supports binary request/response generation (`format: binary` -> `Blob`)
 
 ## Install
@@ -246,7 +248,9 @@ Instead of passing all options via CLI, you can use a configuration file. Create
         "enabled": true,
         "confidence": 1,
         "types": ["RENAME", "TYPE_COERCION"]
-    }
+    },
+    "plugins": ["./plugins/custom-type.plugin.cjs"],
+    "customExecutorPath": "./custom/createExecutorAdapter.ts"
 }
 ```
 
@@ -297,6 +301,7 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `useUnionTypes` | boolean | `false` | Use union types instead of enums |
 | `excludeCoreServiceFiles` | boolean | `false` | Exclude core and service files generation |
 | `request` | string | - | Path to custom request file |
+| `plugins` | string[] | `[]` | Paths to generator plugins |
 | `customExecutorPath` | string | - | Path to custom `createExecutorAdapter` module |
 | `interfacePrefix` | string | `I` | Prefix for interface models |
 | `enumPrefix` | string | `E` | Prefix for enum models |
@@ -317,6 +322,14 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `miracles` | object | - | Miracles config section (enabled, confidence, types) |
 
 **Note:** You can use the `init` command to generate a template configuration file.
+
+### Plugins
+
+Generator plugins can override schema type mapping (for example via `x-typescript-type`) and extend generation behavior.
+
+- Configuration key: `plugins` (array of module paths)
+- Supported module formats: CJS, ESM, and TS (when runtime supports TS imports)
+- Full guide: [docs/plugins.md](./docs/plugins.md)
 
 ## Examples
 

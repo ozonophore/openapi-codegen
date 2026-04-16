@@ -11,7 +11,7 @@ const multipartResponse = (): RequestConfig => ({
     path: `/api/v{api-version}/multipart`,
 });
 
-const multipartRequest = (formData?: { content?: string; data?: IModelWithString | null }): RequestConfig => ({
+const multipartRequest = (formData?: { content?: Blob; data?: IModelWithString | null }): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/multipart`,
 
@@ -21,7 +21,7 @@ const multipartRequest = (formData?: { content?: string; data?: IModelWithString
 
 export type TMultipartOptions = {
     multipartResponse: () => RequestConfig;
-    multipartRequest: (formData?: { content?: string; data?: IModelWithString | null }) => RequestConfig;
+    multipartRequest: (formData?: { content?: Blob; data?: IModelWithString | null }) => RequestConfig;
 };
 
 export const MultipartOptions: TMultipartOptions = {
@@ -37,14 +37,14 @@ export class MultipartService<TOptions = unknown> {
      * @throws ApiError
      */
     public multipartResponse(options?: TOptions): Promise<{
-        file?: string;
+        file?: Blob;
         metadata?: {
             foo?: string;
             bar?: string;
         };
     }> {
         return this.executor.request<{
-            file?: string;
+            file?: Blob;
             metadata?: {
                 foo?: string;
                 bar?: string;
@@ -54,7 +54,7 @@ export class MultipartService<TOptions = unknown> {
 
     public multipartResponseRaw(options?: TOptions): Promise<
         ApiResult<{
-            file?: string;
+            file?: Blob;
             metadata?: {
                 foo?: string;
                 bar?: string;
@@ -62,7 +62,7 @@ export class MultipartService<TOptions = unknown> {
         }>
     > {
         return this.executor.requestRaw<{
-            file?: string;
+            file?: Blob;
             metadata?: {
                 foo?: string;
                 bar?: string;
@@ -75,7 +75,7 @@ export class MultipartService<TOptions = unknown> {
      */
     public multipartRequest(
         formData?: {
-            content?: string;
+            content?: Blob;
             data?: IModelWithString | null;
         },
         options?: TOptions,
@@ -85,7 +85,7 @@ export class MultipartService<TOptions = unknown> {
 
     public multipartRequestRaw(
         formData?: {
-            content?: string;
+            content?: Blob;
             data?: IModelWithString | null;
         },
         options?: TOptions,

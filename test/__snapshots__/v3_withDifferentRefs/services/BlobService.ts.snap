@@ -10,7 +10,7 @@ const blobResponse = (): RequestConfig => ({
     path: `/api/v{api-version}/blob`,
 });
 
-const blobRequest = (requestBody: string): RequestConfig => ({
+const blobRequest = (requestBody: Blob): RequestConfig => ({
     method: 'POST',
     path: `/api/v{api-version}/blob`,
 
@@ -20,7 +20,7 @@ const blobRequest = (requestBody: string): RequestConfig => ({
 
 export type TBlobOptions = {
     blobResponse: () => RequestConfig;
-    blobRequest: (requestBody: string) => RequestConfig;
+    blobRequest: (requestBody: Blob) => RequestConfig;
 };
 
 export const BlobOptions: TBlobOptions = {
@@ -32,15 +32,15 @@ export class BlobService<TOptions = unknown> {
     constructor(private readonly executor: RequestExecutor<TOptions>) {}
 
     /**
-     * @returns string Binary blob response
+     * @returns Blob Binary blob response
      * @throws ApiError
      */
-    public blobResponse(options?: TOptions): Promise<string> {
-        return this.executor.request<string>(BlobOptions.blobResponse(), options);
+    public blobResponse(options?: TOptions): Promise<Blob> {
+        return this.executor.request<Blob>(BlobOptions.blobResponse(), options);
     }
 
-    public blobResponseRaw(options?: TOptions): Promise<ApiResult<string>> {
-        return this.executor.requestRaw<string>(BlobOptions.blobResponse(), options);
+    public blobResponseRaw(options?: TOptions): Promise<ApiResult<Blob>> {
+        return this.executor.requestRaw<Blob>(BlobOptions.blobResponse(), options);
     }
     /**
      * @param requestBody
@@ -48,7 +48,7 @@ export class BlobService<TOptions = unknown> {
      * @throws ApiError
      */
     public blobRequest(
-        requestBody: string,
+        requestBody: Blob,
 
         options?: TOptions,
     ): Promise<void> {
@@ -56,7 +56,7 @@ export class BlobService<TOptions = unknown> {
     }
 
     public blobRequestRaw(
-        requestBody: string,
+        requestBody: Blob,
 
         options?: TOptions,
     ): Promise<ApiResult<void>> {

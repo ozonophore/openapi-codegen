@@ -56,6 +56,7 @@ export const strictModeParametersSchema = z.object({
 export const additionalParametersSchema = z.object({
     clean: z.boolean().optional(),
     request: z.string().optional(),
+    plugins: z.array(z.string()).optional(),
     interfacePrefix: z.string().optional(),
     enumPrefix: z.string().optional(),
     typePrefix: z.string().optional(),

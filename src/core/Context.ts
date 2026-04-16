@@ -3,6 +3,7 @@ import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import { basename, isAbsolute } from 'path';
 
 import { dirNameHelper, normalizeHelper, relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
+import { OpenApiGeneratorPlugin, SchemaTypeOverrideContext } from './plugins/GeneratorPlugin.model';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
 import { $Root } from './types/base/Root.model';
@@ -16,6 +17,7 @@ type TContextProps = {
     output: OutputPaths;
     prefix?: PrefixArtifacts;
     sortByRequired?: boolean;
+    plugins?: OpenApiGeneratorPlugin[];
 };
 
 type RefsLike = {
@@ -52,12 +54,13 @@ export class Context {
     };
 
     private _sortByRequired: boolean = false;
+    private _plugins: OpenApiGeneratorPlugin[] = [];
 
     private specRoot!: string;
     private entryFile?: string;
     private virtualFiles: VirtualFileMap = new Map();
 
-    constructor({ input, output, prefix, sortByRequired }: TContextProps) {
+    constructor({ input, output, prefix, sortByRequired, plugins }: TContextProps) {
         this._output = output;
         this._refs = {} as RefsLike;
         if (isString(input)) {
@@ -72,6 +75,8 @@ export class Context {
         if (sortByRequired !== undefined && sortByRequired !== null) {
             this._sortByRequired = sortByRequired;
         }
+
+        this._plugins = plugins || [];
 
         return this;
     }
@@ -131,6 +136,19 @@ export class Context {
 
     public get root(): $Root | undefined {
         return this._root;
+    }
+
+    /**
+     * Resolves custom type override for schema via registered plugins.
+     */
+    public resolveSchemaTypeOverride(schema: Record<string, any>, context: SchemaTypeOverrideContext): string | undefined {
+        for (const plugin of this._plugins) {
+            const override = plugin.resolveSchemaTypeOverride?.({ schema, context });
+            if (typeof override === 'string' && override.trim()) {
+                return override.trim();
+            }
+        }
+        return undefined;
     }
 
     private canonicalizeRef(ref: string, parentSourceFile: string): { sourceFile: string; fragment?: string } {
