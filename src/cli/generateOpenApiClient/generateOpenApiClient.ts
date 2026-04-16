@@ -25,10 +25,10 @@ const generateCliFlatSchema = flatOptionsSchema.strict().superRefine((data, ctx)
 });
 
 /**
- * Запускает генерацию OpenAPI клиента
- * Поддерживает как конфиг-файл, так и параметры из CLI
+ * Runs OpenAPI client generation and returns a process exit code.
+ * Does not call `process.exit` — safe for in-process unit tests.
  */
-export async function generateOpenApiClient(options: OptionValues): Promise<void> {
+export async function runGenerateOpenApiClient(options: OptionValues): Promise<number> {
     const { openapiConfig, ...clientOptions } = options;
 
     try {
@@ -43,12 +43,11 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
                 message: LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')),
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(1);
+            return 1;
         }
 
         const validatedOptions = validationResult.data as GenerateOptions;
 
-        // Если есть минимальные опции (input и output), используем их
         const hasMinimumRequiredOptions = !!validatedOptions.input && !!validatedOptions.output;
         if (hasMinimumRequiredOptions) {
             const directOptionsValidationResult = validateZodOptions(generateCliFlatSchema, {
@@ -63,12 +62,12 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
                     message: LOGGER_MESSAGES.ERROR.GENERIC(directOptionsValidationResult.errors.join('\n')),
                 });
                 await APP_LOGGER.shutdownLoggerAsync();
-                process.exit(1);
+                return 1;
             }
 
             await OpenAPI.generate(directOptionsValidationResult.data as TRawOptions);
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(0);
+            return 0;
         }
 
         const configData = loadConfigIfExists(validatedOptions.openapiConfig);
@@ -78,7 +77,7 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
                 message: `${LOGGER_MESSAGES.CONFIG.FILE_MISSING}\n${LOGGER_MESSAGES.CONFIG.FILE_MISSING_HINT}`,
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(1);
+            return 1;
         }
 
         if (Array.isArray(configData)) {
@@ -87,7 +86,6 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
 
         const preparedOptions = convertArrayToObject(configData);
 
-        // Use unified migration system for all schema types
         const migratedOptions = migrateDataToLatestSchemaVersion({
             rawInput: preparedOptions,
             migrationPlans: allMigrationPlans,
@@ -101,13 +99,20 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
                 message: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED,
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(1);
+            return 1;
         }
 
         const { value } = migratedOptions;
-        await OpenAPI.generate(value as TRawOptions);
+        const mergedOptions: TRawOptions = {
+            ...(value as TRawOptions),
+            strictOpenapi: validatedOptions.strictOpenapi ?? (value as TRawOptions).strictOpenapi,
+            reportFile: validatedOptions.reportFile ?? (value as TRawOptions).reportFile,
+            governanceConfig: validatedOptions.governanceConfig ?? (value as TRawOptions).governanceConfig,
+        };
+
+        await OpenAPI.generate(mergedOptions);
         await APP_LOGGER.shutdownLoggerAsync();
-        process.exit(0);
+        return 0;
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
         APP_LOGGER.errorWithHint({
@@ -116,6 +121,14 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
             error,
         });
         await APP_LOGGER.shutdownLoggerAsync();
-        process.exit(1);
+        return 1;
     }
+}
+
+/**
+ * CLI entry: runs generation and terminates the process with the resulting exit code.
+ */
+export async function generateOpenApiClient(options: OptionValues): Promise<void> {
+    const exitCode = await runGenerateOpenApiClient(options);
+    process.exit(exitCode);
 }

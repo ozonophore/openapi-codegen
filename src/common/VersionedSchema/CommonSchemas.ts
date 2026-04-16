@@ -44,6 +44,9 @@ export const specialParametersSchemasV3 = z.object({
 export const specialParametersSchemasV4 = z.object({
     ...specialParametersSchemasV3.shape,
     emptySchemaStrategy: z.enum(EmptySchemaStrategy).optional(),
+    strictOpenapi: z.boolean().optional(),
+    reportFile: z.string().optional(),
+    governanceConfig: z.string().optional(),
 });
 
 export const strictModeParametersSchema = z.object({

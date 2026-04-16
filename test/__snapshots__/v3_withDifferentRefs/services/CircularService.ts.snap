@@ -2,7 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithCircularReference } from '../models/schemas/base/ModelWithCircularReference';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 import type { ApiResult } from '../core/ApiResult';
 
@@ -23,14 +22,14 @@ export class CircularService<TOptions = unknown> {
     constructor(private readonly executor: RequestExecutor<TOptions>) {}
 
     /**
-     * @returns IModelWithCircularReference
+     * @returns void
      * @throws ApiError
      */
-    public callWithCircularModel(options?: TOptions): Promise<IModelWithCircularReference> {
-        return this.executor.request<IModelWithCircularReference>(CircularOptions.callWithCircularModel(), options);
+    public callWithCircularModel(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(CircularOptions.callWithCircularModel(), options);
     }
 
-    public callWithCircularModelRaw(options?: TOptions): Promise<ApiResult<IModelWithCircularReference>> {
-        return this.executor.requestRaw<IModelWithCircularReference>(CircularOptions.callWithCircularModel(), options);
+    public callWithCircularModelRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(CircularOptions.callWithCircularModel(), options);
     }
 }

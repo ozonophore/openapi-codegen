@@ -3,9 +3,10 @@ import path from 'path';
 
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
-import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { getContent } from '../api/v3/parser/getContent';
 import { Context } from '../Context';
+import { evaluateGovernanceRules,GovernancePolicyConfig, GovernanceReport } from '../governance/evaluateGovernanceRules';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 
 type StrictIssueSeverity = 'error' | 'warning' | 'info';
@@ -25,6 +26,7 @@ type StrictSummary = {
 
 export type StrictOpenApiReport = {
     summary: StrictSummary;
+    governance: GovernanceReport;
     issues: StrictIssue[];
 };
 
@@ -35,6 +37,7 @@ type ValidateOpenApiStrictParams = {
     openApi: CommonOpenApi;
     context: StrictValidationContext;
     preIssues?: StrictIssue[];
+    governanceConfig?: GovernancePolicyConfig;
 };
 
 const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const;
@@ -254,15 +257,10 @@ function collectOperationIssues(openApi: CommonOpenApi): StrictIssue[] {
  */
 export async function validateWithSwaggerParser(inputPath: string): Promise<StrictIssue[]> {
     const parser = new SwaggerParser();
-    const previousCwd = process.cwd();
-    const inputDir = dirNameHelper(inputPath);
-
-    if (previousCwd !== inputDir) {
-        process.chdir(inputDir);
-    }
+    const absoluteInputPath = resolveHelper(inputPath);
 
     try {
-        await parser.validate(inputPath);
+        await parser.validate(absoluteInputPath);
         return [];
     } catch (error) {
         return [
@@ -270,13 +268,9 @@ export async function validateWithSwaggerParser(inputPath: string): Promise<Stri
                 severity: 'error',
                 code: 'OPENAPI_PARSER_VALIDATION_FAILED',
                 message: error instanceof Error ? error.message : String(error),
-                path: inputPath,
+                path: absoluteInputPath,
             },
         ];
-    } finally {
-        if (process.cwd() !== previousCwd) {
-            process.chdir(previousCwd);
-        }
     }
 }
 
@@ -284,12 +278,18 @@ export async function validateWithSwaggerParser(inputPath: string): Promise<Stri
  * Runs strict OpenAPI diagnostics and returns a structured report.
  */
 export function validateOpenApiStrict(params: ValidateOpenApiStrictParams): StrictOpenApiReport {
-    const { openApi, context, preIssues = [] } = params;
+    const { openApi, context, preIssues = [], governanceConfig } = params;
 
     const issues = [...preIssues, ...collectUnresolvedRefIssues(context), ...collectOperationIssues(openApi)];
+    const governance = evaluateGovernanceRules({
+        openApi,
+        allowBreaking: true,
+        governanceConfig,
+    });
 
     return {
         summary: createSummary(issues),
+        governance,
         issues,
     };
 }
