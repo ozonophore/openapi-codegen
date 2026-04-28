@@ -4,6 +4,46 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.1.0-beta.5] — 2026-04-28
+
+### Добавлено
+- Добавлен semantic diff движок для `analyze-diff` с машиночитаемым отчетом `schemaVersion: 1.1.0`:
+  - классификация semantic-изменений моделей и операций (`breaking`, `non-breaking`, `informational`);
+  - рекомендация semver (`major`/`minor`/`patch`) с confidence и reason-codes;
+  - валидатор JSON-контракта отчета (`semanticDiffReportSchema`).
+- Добавлен слой governance-policy и поддержка governance-конфига:
+  - правила: `NO_BREAKING_WITHOUT_FLAG`, `REQUIRE_OPERATION_ID`, `NO_DEFAULT_WITHOUT_2XX`;
+  - загрузка/валидация governance JSON (`--governance-config`);
+  - summary/violations governance включаются в semantic diff и strict-отчеты.
+- Добавлены точки расширения Plugin API v2 для semantic diff потока:
+  - хуки: `afterSemanticDiff`, `mapRecommendation`, `beforeReportWrite`;
+  - диагностика хуков и строгий режим ошибок плагинов (`--strict-plugin-mode`);
+  - draft-документация: `docs/plugin-api-v2.md`.
+- Добавлен CI-ориентированный вывод analyze-diff:
+  - markdown summary в логах при `--ci`;
+  - fail в CI при governance error-нарушениях.
+- Добавлен пример policy-конфига `example/governance.json`.
+
+### Изменено
+- Переработан runtime `analyze-diff` на semantic pipeline с явной логикой выбора источника:
+  - `--compare-with` имеет приоритет над `--git`;
+  - при отсутствии обоих источников команда завершается успешно со skip-сообщением.
+- Расширены CLI/Zod схемы и unified options полями governance:
+  - `governanceConfig` добавлен в `generate` и общие опции;
+  - схема `analyze-diff` дополнена semantic/governance/plugin-флагами.
+- Обновлен формат strict OpenAPI отчета: добавлен блок `governance` и policy-aware проверки.
+- Обновлена логика merge опций в CLI-генерации: прямые CLI-флаги (`strictOpenapi`, `reportFile`, `governanceConfig`) теперь приоритетнее мигрированных значений конфига.
+- Legacy-утилиты report сохранены как отдельные модули, но основной путь `analyze-diff` теперь semantic.
+
+### Исправлено
+- Исправлен `getOperationResponseCode('default')`: `default` больше не приводится к HTTP `200` и теперь возвращает `null`.
+- Исправлена обработка путей в `analyze-diff --git` для абсолютных путей спецификаций: перед `git show` путь нормализуется к относительному для репозитория.
+
+### Тесты
+- Добавлено широкое unit/CLI покрытие для semantic diff, governance-policy, plugin hooks и интеграции governance в strict-openapi.
+- Добавлены тесты схемы `analyze-diff` для skip/prioritization-сценариев и тесты валидации схемы semantic-отчета.
+- Добавлены/обновлены snapshot-наборы для semantic diff фикстур и затронутых сервисных output-файлов.
+
 ## [2.1.0-beta.4] — 2026-04-12
 
 ### Добавлено

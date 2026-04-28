@@ -1,7 +1,7 @@
+import type { DiffInfo } from './DiffInfo.model';
 import type { OperationError } from './OperationError.model';
 import type { OperationParameters } from './OperationParameters.model';
 import type { OperationResponse } from './OperationResponse.model';
-import type { DiffInfo } from './DiffInfo.model';
 
 export interface Operation extends OperationParameters {
     service: string;

@@ -6,7 +6,7 @@ import { getOperationResponseCode } from '../getOperationResponseCode';
 describe('@unit: getOperationResponseCode', () => {
     test('should produce correct result', () => {
         assert.strictEqual(getOperationResponseCode(''), null);
-        assert.strictEqual(getOperationResponseCode('default'), 200);
+        assert.strictEqual(getOperationResponseCode('default'), null);
         assert.strictEqual(getOperationResponseCode('200'), 200);
         assert.strictEqual(getOperationResponseCode('201'), 201);
         assert.strictEqual(getOperationResponseCode('2XX'), 200);
