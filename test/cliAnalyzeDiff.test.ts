@@ -1,9 +1,8 @@
 import assert from 'node:assert';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import os from 'node:os';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, test } from 'node:test';
+import { describe, test, type TestContext } from 'node:test';
 
 import { validateSemanticDiffReportSchema } from '../src/core/semanticDiff/semanticDiffReportSchema';
 
@@ -47,7 +46,25 @@ if (process.cwd() !== repoRoot) {
 }
 
 function createTempDir(prefix: string): string {
-    return mkdtempSync(path.join(os.tmpdir(), prefix));
+    const generatedRoot = path.join(repoRoot, 'test', 'generated', 'cliAnalyzeDiff');
+    mkdirSync(generatedRoot, { recursive: true });
+    return mkdtempSync(path.join(generatedRoot, prefix));
+}
+
+function createTempDirWithCleanup(t: TestContext, prefix: string): string {
+    const tempDir = createTempDir(prefix);
+    t.after(() => {
+        rmSync(tempDir, { recursive: true, force: true });
+        const generatedRoot = path.join(repoRoot, 'test', 'generated', 'cliAnalyzeDiff');
+        try {
+            if (readdirSync(generatedRoot).length === 0) {
+                rmSync(generatedRoot, { recursive: true, force: true });
+            }
+        } catch {
+            // Ignore: directory may already be removed by another test cleanup.
+        }
+    });
+    return tempDir;
 }
 
 /**
@@ -92,8 +109,8 @@ function runAnalyzeDiff(
 }
 
 describe('@unit: cli analyze-diff', () => {
-    test('returns exit code 0 and skipped output for --input without base-source', () => {
-        const tempDir = createTempDir('openapi-cli-analyze-skip-');
+    test('returns exit code 0 and skipped output for --input without base-source', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-analyze-skip-');
         const reportPath = path.join(tempDir, 'report.json');
         const inputSpecPath = path.join(repoRoot, 'test', 'spec', 'v3.json');
         const analyzeResult = runAnalyzeDiff(inputSpecPath, reportPath, undefined, undefined, false);
@@ -101,16 +118,16 @@ describe('@unit: cli analyze-diff', () => {
         assert.ok(analyzeResult.stdout.includes('History analysis skipped'));
     });
 
-    test('returns exit code 0 for --input + --git', () => {
-        const tempDir = createTempDir('openapi-cli-analyze-git-');
+    test('returns exit code 0 for --input + --git', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-analyze-git-');
         const reportPath = path.join(tempDir, 'report.json');
         const inputSpecPath = path.join(repoRoot, 'test', 'spec', 'v3.json');
         const analyzeResult = runAnalyzeDiff(inputSpecPath, reportPath, undefined, 'HEAD', true);
         assert.strictEqual(analyzeResult.exitCode, 0);
     });
 
-    test('returns exit code 0 for non-breaking diff in ci mode', () => {
-        const tempDir = createTempDir('openapi-cli-analyze-ok-');
+    test('returns exit code 0 for non-breaking diff in ci mode', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-analyze-ok-');
         const oldSpecPath = path.join(tempDir, 'old.json');
         const newSpecPath = path.join(tempDir, 'new.json');
         const reportPath = path.join(tempDir, 'report.json');
@@ -172,8 +189,8 @@ describe('@unit: cli analyze-diff', () => {
         assert.ok(analyzeResult.stdout.includes('HAS_BACKWARD_COMPATIBLE_CHANGES'));
     });
 
-    test('returns exit code 1 for breaking diff in ci mode', () => {
-        const tempDir = createTempDir('openapi-cli-analyze-breaking-');
+    test('returns exit code 1 for breaking diff in ci mode', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-analyze-breaking-');
         const oldSpecPath = path.join(tempDir, 'old.json');
         const newSpecPath = path.join(tempDir, 'new.json');
         const reportPath = path.join(tempDir, 'report.json');
@@ -220,8 +237,8 @@ describe('@unit: cli analyze-diff', () => {
         assert.ok(analyzeResult.stdout.includes('HAS_BREAKING_CHANGES'));
     });
 
-    test('returns exit code 0 for breaking diff in ci mode when allow-breaking is enabled', () => {
-        const tempDir = createTempDir('openapi-cli-analyze-breaking-allowed-');
+    test('returns exit code 0 for breaking diff in ci mode when allow-breaking is enabled', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-analyze-breaking-allowed-');
         const oldSpecPath = path.join(tempDir, 'old.json');
         const newSpecPath = path.join(tempDir, 'new.json');
         const reportPath = path.join(tempDir, 'report.json');
@@ -265,8 +282,8 @@ describe('@unit: cli analyze-diff', () => {
         assert.ok(analyzeResult.stdout.includes('### OpenAPI Semantic Diff'));
     });
 
-    test('returns exit code 0 for breaking diff in ci mode when governance config disables no-breaking rule', () => {
-        const tempDir = createTempDir('openapi-cli-analyze-breaking-policy-');
+    test('returns exit code 0 for breaking diff in ci mode when governance config disables no-breaking rule', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-analyze-breaking-policy-');
         const oldSpecPath = path.join(tempDir, 'old.json');
         const newSpecPath = path.join(tempDir, 'new.json');
         const reportPath = path.join(tempDir, 'report.json');
@@ -322,8 +339,8 @@ describe('@unit: cli analyze-diff', () => {
         assert.ok(analyzeResult.stdout.includes('### OpenAPI Semantic Diff'));
     });
 
-    test('uses --compare-with over --git when both flags are provided', () => {
-        const tempDir = createTempDir('openapi-cli-analyze-priority-');
+    test('uses --compare-with over --git when both flags are provided', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-analyze-priority-');
         const oldSpecPath = path.join(tempDir, 'old.json');
         const newSpecPath = path.join(tempDir, 'new.json');
         const reportPath = path.join(tempDir, 'report.json');
@@ -367,8 +384,8 @@ describe('@unit: cli analyze-diff', () => {
         assert.ok(analyzeResult.stdout.includes('Ignoring git ref'));
     });
 
-    test('filters semantic changes with analyze.ignore and recalculates summary', () => {
-        const tempDir = createTempDir('openapi-cli-analyze-ignore-');
+    test('filters semantic changes with analyze.ignore and recalculates summary', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-analyze-ignore-');
         const oldSpecPath = path.join(tempDir, 'old.json');
         const newSpecPath = path.join(tempDir, 'new.json');
         const reportPath = path.join(tempDir, 'report.json');

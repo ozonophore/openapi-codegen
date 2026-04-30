@@ -1,9 +1,8 @@
 import assert from 'node:assert';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import os from 'node:os';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, test } from 'node:test';
+import { describe, test, type TestContext } from 'node:test';
 
 type StrictReport = {
     summary: {
@@ -38,7 +37,25 @@ if (process.cwd() !== repoRoot) {
 }
 
 function createTempDir(prefix: string): string {
-    return mkdtempSync(path.join(os.tmpdir(), prefix));
+    const generatedRoot = path.join(repoRoot, 'test', 'generated', 'cliStrictOpenapi');
+    mkdirSync(generatedRoot, { recursive: true });
+    return mkdtempSync(path.join(generatedRoot, prefix));
+}
+
+function createTempDirWithCleanup(t: TestContext, prefix: string): string {
+    const tempDir = createTempDir(prefix);
+    t.after(() => {
+        rmSync(tempDir, { recursive: true, force: true });
+        const generatedRoot = path.join(repoRoot, 'test', 'generated', 'cliStrictOpenapi');
+        try {
+            if (readdirSync(generatedRoot).length === 0) {
+                rmSync(generatedRoot, { recursive: true, force: true });
+            }
+        } catch {
+            // Ignore: directory may already be removed by another test cleanup.
+        }
+    });
+    return tempDir;
 }
 
 function runGenerateOpenApiClientInChild(options: Record<string, unknown>): number {
@@ -84,8 +101,8 @@ function runGenerateOpenApiClientInChild(options: Record<string, unknown>): numb
 }
 
 describe('@unit: cli strict-openapi', () => {
-    test('returns exit code 0 and writes report file when strict has no errors', () => {
-        const tempDir = createTempDir('openapi-cli-strict-ok-');
+    test('returns exit code 0 and writes report file when strict has no errors', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-strict-ok-');
         const reportFile = path.join(tempDir, 'strict-report.json');
         const outputDir = path.join(tempDir, 'generated');
 
@@ -106,8 +123,8 @@ describe('@unit: cli strict-openapi', () => {
         assert.strictEqual(typeof report.summary.info, 'number');
     });
 
-    test('returns exit code 1 and writes report file when strict finds errors', () => {
-        const tempDir = createTempDir('openapi-cli-strict-error-');
+    test('returns exit code 1 and writes report file when strict finds errors', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-strict-error-');
         const inputSpec = path.join(tempDir, 'broken-openapi.json');
         const reportFile = path.join(tempDir, 'strict-report.json');
         const outputDir = path.join(tempDir, 'generated');
@@ -158,8 +175,8 @@ describe('@unit: cli strict-openapi', () => {
         assert.ok(report.issues.some(issue => issue.severity === 'error'));
     });
 
-    test('applies governance config file in strict report', () => {
-        const tempDir = createTempDir('openapi-cli-strict-governance-');
+    test('applies governance config file in strict report', t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-cli-strict-governance-');
         const inputSpec = path.join(tempDir, 'policy-openapi.json');
         const reportFile = path.join(tempDir, 'strict-report.json');
         const governanceConfig = path.join(tempDir, 'governance.json');

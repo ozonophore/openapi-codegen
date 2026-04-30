@@ -1,13 +1,14 @@
 import assert from 'node:assert';
-import { mkdtempSync, writeFileSync } from 'node:fs';
-import os from 'node:os';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, test } from 'node:test';
+import { describe, test, type TestContext } from 'node:test';
 
 import { loadGovernanceConfig } from '../loadGovernanceConfig';
 
 function createTempDir(prefix: string): string {
-    return mkdtempSync(path.join(os.tmpdir(), prefix));
+    const generatedRoot = path.join(__dirname, 'generated');
+    mkdirSync(generatedRoot, { recursive: true });
+    return mkdtempSync(path.join(generatedRoot, prefix));
 }
 
 describe('@unit: loadGovernanceConfig', () => {
@@ -16,8 +17,8 @@ describe('@unit: loadGovernanceConfig', () => {
         assert.strictEqual(config, undefined);
     });
 
-    test('loads valid governance config', async () => {
-        const tempDir = createTempDir('openapi-governance-config-valid-');
+    test('loads valid governance config', async t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-governance-config-valid-');
         const configPath = path.join(tempDir, 'governance.json');
 
         writeFileSync(
@@ -41,8 +42,8 @@ describe('@unit: loadGovernanceConfig', () => {
         assert.strictEqual(config?.rules?.REQUIRE_OPERATION_ID?.allowList?.[0]?.operation, '/users GET');
     });
 
-    test('throws with path details for invalid severity', async () => {
-        const tempDir = createTempDir('openapi-governance-config-invalid-severity-');
+    test('throws with path details for invalid severity', async t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-governance-config-invalid-severity-');
         const configPath = path.join(tempDir, 'governance.json');
 
         writeFileSync(
@@ -62,8 +63,8 @@ describe('@unit: loadGovernanceConfig', () => {
         );
     });
 
-    test('throws with path details for invalid allowList item', async () => {
-        const tempDir = createTempDir('openapi-governance-config-invalid-allowlist-');
+    test('throws with path details for invalid allowList item', async t => {
+        const tempDir = createTempDirWithCleanup(t, 'openapi-governance-config-invalid-allowlist-');
         const configPath = path.join(tempDir, 'governance.json');
 
         writeFileSync(
@@ -83,3 +84,11 @@ describe('@unit: loadGovernanceConfig', () => {
         );
     });
 });
+
+function createTempDirWithCleanup(t: TestContext, prefix: string): string {
+    const tempDir = createTempDir(prefix);
+    t.after(() => {
+        rmSync(tempDir, { recursive: true, force: true });
+    });
+    return tempDir;
+}

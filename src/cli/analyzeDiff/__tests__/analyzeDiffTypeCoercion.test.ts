@@ -1,8 +1,7 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
-import { describe, test } from 'node:test';
+import { describe, test, type TestContext } from 'node:test';
 
 import { analyzeDiff } from '../analyzeDiff';
 
@@ -12,9 +11,20 @@ const writeSpec = (dir: string, filename: string, payload: unknown): string => {
     return filePath;
 };
 
+const generatedRoot = path.join(__dirname, 'generated');
+
+const createTempDir = (t: TestContext, prefix: string): string => {
+    fs.mkdirSync(generatedRoot, { recursive: true });
+    const tempDir = fs.mkdtempSync(path.join(generatedRoot, prefix));
+    t.after(() => {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+    });
+    return tempDir;
+};
+
 describe('@unit: analyzeDiff TYPE_COERCION miracles', () => {
-    test('detects semantic type change for scalar property transition', async () => {
-        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-diff-test-'));
+    test('detects semantic type change for scalar property transition', async t => {
+        const tmpDir = createTempDir(t, 'openapi-diff-test-');
         const reportPath = path.join(tmpDir, 'report.json');
 
         const previousSpec = {
@@ -73,8 +83,8 @@ describe('@unit: analyzeDiff TYPE_COERCION miracles', () => {
         assert.ok(report.summary.breaking > 0);
     });
 
-    test('filters semantic type-change entry when rule matches path', async () => {
-        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-diff-test-'));
+    test('filters semantic type-change entry when rule matches path', async t => {
+        const tmpDir = createTempDir(t, 'openapi-diff-test-');
         const reportPath = path.join(tmpDir, 'report.json');
 
         const previousSpec = {

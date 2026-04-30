@@ -1,7 +1,7 @@
 import assert from 'node:assert';
-import { describe, test } from 'node:test';
+import { describe, test, type TestContext } from 'node:test';
 
-import { readFileSync } from 'fs';
+import { readFileSync, rmSync } from 'fs';
 import path from 'path';
 
 import { generate, HttpClient } from '../src';
@@ -13,13 +13,16 @@ if (process.cwd() !== repoRoot) {
 }
 
 describe('@unit: custom request + requestRaw smoke', () => {
-    test('generates requestRaw methods with custom request implementation', async () => {
+    test('generates requestRaw methods with custom request implementation', async (t: TestContext) => {
         const input = path.join(__dirname, 'spec', 'v3.json');
-        const output = './test/generated/custom_request_raw/';
+        const outputDir = path.join(process.cwd(), 'test', 'generated', 'custom_request_raw');
+        t.after(() => {
+            rmSync(outputDir, { recursive: true, force: true });
+        });
 
         await generate({
             input,
-            output,
+            output: outputDir,
             request: './test/custom/request.ts',
             httpClient: HttpClient.FETCH,
             useOptions: false,
@@ -34,7 +37,6 @@ describe('@unit: custom request + requestRaw smoke', () => {
             useSeparatedIndexes: false,
         });
 
-        const outputDir = path.join(process.cwd(), 'test', 'generated', 'custom_request_raw');
         const createClient = readFileSync(path.join(outputDir, 'createClient.ts'), 'utf8');
         const responseService = readFileSync(path.join(outputDir, 'services', 'ResponseService.ts'), 'utf8');
         const createExecutorAdapter = readFileSync(path.join(outputDir, 'core', 'executor', 'createExecutorAdapter.ts'), 'utf8');

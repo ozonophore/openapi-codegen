@@ -1,8 +1,7 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
-import { describe, test } from 'node:test';
+import { describe, test, type TestContext } from 'node:test';
 
 import { analyzeDiff } from '../analyzeDiff';
 
@@ -12,9 +11,20 @@ const writeSpec = (dir: string, filename: string, payload: unknown): string => {
     return filePath;
 };
 
+const generatedRoot = path.join(__dirname, 'generated');
+
+const createTempDir = (t: TestContext, prefix: string): string => {
+    fs.mkdirSync(generatedRoot, { recursive: true });
+    const tempDir = fs.mkdtempSync(path.join(generatedRoot, prefix));
+    t.after(() => {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+    });
+    return tempDir;
+};
+
 describe('@unit: analyzeDiff RENAME and invalid-regex handling', () => {
-    test('detects semantic remove/add entries for property rename-like change', async () => {
-        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-diff-rename-'));
+    test('detects semantic remove/add entries for property rename-like change', async t => {
+        const tmpDir = createTempDir(t, 'openapi-diff-rename-');
         const reportPath = path.join(tmpDir, 'report.json');
 
         const previousSpec = {
@@ -74,8 +84,8 @@ describe('@unit: analyzeDiff RENAME and invalid-regex handling', () => {
         assert.strictEqual(added?.severity, 'non-breaking');
     });
 
-    test('invalid regex in config does not crash and valid rules still apply', async () => {
-        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-diff-invalidregex-'));
+    test('invalid regex in config does not crash and valid rules still apply', async t => {
+        const tmpDir = createTempDir(t, 'openapi-diff-invalidregex-');
         const reportPath = path.join(tmpDir, 'report.json');
 
         const previousSpec = {

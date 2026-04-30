@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, test } from 'node:test';
 
@@ -98,23 +98,27 @@ function assertSemanticDiffFixtureSnapshot(
     const oldSpecPath = path.join(repoRoot, oldSpecRelativePath);
     const newSpecPath = path.join(repoRoot, newSpecRelativePath);
 
-    if (governanceConfigRaw) {
-        writeFileSync(governanceConfigPath, JSON.stringify(governanceConfigRaw, null, 2), 'utf8');
+    try {
+        if (governanceConfigRaw) {
+            writeFileSync(governanceConfigPath, JSON.stringify(governanceConfigRaw, null, 2), 'utf8');
+        }
+
+        const exitCode = runAnalyzeDiff(oldSpecPath, newSpecPath, reportPath, governanceConfigRaw ? governanceConfigPath : undefined);
+        assert.ok(exitCode === 0 || exitCode === 1, `Unexpected analyze-diff exit code: ${exitCode}`);
+
+        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as SemanticDiffReport;
+        const schemaValidation = validateSemanticDiffReportSchema(report);
+        assert.strictEqual(schemaValidation.valid, true, schemaValidation.errors.join('\n'));
+        assert.strictEqual(report.schemaVersion, '1.1.0');
+        const projectedReport = buildSnapshotProjection(report);
+
+        const snapshotFile = path.join(repoRoot, 'test', '__snapshots__', 'semanticDiff', `${snapshotName}.snap.json`);
+        toMatchSnapshot(JSON.stringify(projectedReport, null, 2), snapshotFile);
+
+        return report;
+    } finally {
+        rmSync(tempDir, { recursive: true, force: true });
     }
-
-    const exitCode = runAnalyzeDiff(oldSpecPath, newSpecPath, reportPath, governanceConfigRaw ? governanceConfigPath : undefined);
-    assert.ok(exitCode === 0 || exitCode === 1, `Unexpected analyze-diff exit code: ${exitCode}`);
-
-    const report = JSON.parse(readFileSync(reportPath, 'utf8')) as SemanticDiffReport;
-    const schemaValidation = validateSemanticDiffReportSchema(report);
-    assert.strictEqual(schemaValidation.valid, true, schemaValidation.errors.join('\n'));
-    assert.strictEqual(report.schemaVersion, '1.1.0');
-    const projectedReport = buildSnapshotProjection(report);
-
-    const snapshotFile = path.join(repoRoot, 'test', '__snapshots__', 'semanticDiff', `${snapshotName}.snap.json`);
-    toMatchSnapshot(JSON.stringify(projectedReport, null, 2), snapshotFile);
-
-    return report;
 }
 
 describe('@unit: semantic diff fixtures', () => {
