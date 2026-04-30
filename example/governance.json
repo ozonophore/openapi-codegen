@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "NO_BREAKING_WITHOUT_FLAG": { "enabled": true, "severity": "error" },
+    "REQUIRE_OPERATION_ID": { "enabled": true, "severity": "warning", "allowList": [{ "operation": "/users GET" }] },
+    "NO_DEFAULT_WITHOUT_2XX": { "enabled": true, "severity": "warning", "allowList": [{ "path": "/health GET responses.default" }] }
+  }
+}

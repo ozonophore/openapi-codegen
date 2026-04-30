@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.5] — 2026-04-28
+
+### Added
+- Added semantic diff engine for `analyze-diff` with machine-readable report `schemaVersion: 1.1.0`:
+  - semantic change classification for models/operations (`breaking`, `non-breaking`, `informational`);
+  - semver recommendation (`major`/`minor`/`patch`) with confidence and reason codes;
+  - JSON report contract validator (`semanticDiffReportSchema`).
+- Added governance policy layer and config support:
+  - rules: `NO_BREAKING_WITHOUT_FLAG`, `REQUIRE_OPERATION_ID`, `NO_DEFAULT_WITHOUT_2XX`;
+  - JSON governance config loader/validator (`--governance-config`);
+  - governance summary/violations embedded into semantic diff and strict reports.
+- Added Plugin API v2 extension points for semantic diff flow:
+  - hooks: `afterSemanticDiff`, `mapRecommendation`, `beforeReportWrite`;
+  - plugin diagnostics and strict plugin failure mode (`--strict-plugin-mode`);
+  - draft docs: `docs/plugin-api-v2.md`.
+- Added CI-oriented analyze-diff output:
+  - markdown summary in logs when `--ci` is enabled;
+  - CI failure when governance errors are present.
+- Added `example/governance.json`.
+
+### Changed
+- Reworked CLI `analyze-diff` runtime to semantic pipeline with explicit source handling:
+  - `--compare-with` has priority over `--git`;
+  - when neither is provided, command exits successfully with skip message.
+- Extended CLI/Zod schemas and unified options with governance fields:
+  - `governanceConfig` added to `generate` and common options;
+  - `analyze-diff` schema now includes semantic/governance/plugin-related flags.
+- Updated strict OpenAPI report shape to include `governance` block and policy-aware evaluation.
+- Updated generation CLI merge logic so direct CLI flags (`strictOpenapi`, `reportFile`, `governanceConfig`) override migrated config values.
+- Kept legacy report utilities as isolated modules while semantic diff is now the active analyze-diff path.
+
+### Fixed
+- Fixed `getOperationResponseCode('default')`: default response is no longer coerced to HTTP `200` and now returns `null`.
+- Fixed `analyze-diff --git` path handling for absolute spec paths by normalizing to a repository-relative path before `git show`.
+
+### Tests
+- Added broad unit/CLI coverage for semantic diff, governance policy, plugin hooks, and strict-openapi governance integration.
+- Added analyze-diff schema tests for skip/prioritization scenarios and report schema validation tests.
+- Added/updated snapshot suites for semantic diff fixtures and affected service outputs.
+
 ## [2.1.0-beta.4] — 2026-04-12
 
 ### Added

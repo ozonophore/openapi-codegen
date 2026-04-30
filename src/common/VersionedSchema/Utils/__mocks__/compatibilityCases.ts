@@ -110,21 +110,21 @@ export const compatibilityCases: CompatibilityCase[] = [
         to: 'v4',
         expect: [
             { type: 'added', key: 'emptySchemaStrategy' },
+            { type: 'added', key: 'strictOpenapi' },
+            { type: 'added', key: 'reportFile' },
+            { type: 'added', key: 'governanceConfig' },
             { type: 'added', key: 'customExecutorPath' },
             { type: 'added', key: 'models' },
             { type: 'added', key: 'analyze' },
             { type: 'added', key: 'miracles' },
-        ]
+        ],
     },
     {
         type: EVersionedSchemaType.UNIFIED_OPTIONS,
         from: 'v4',
         to: 'v5',
         expect: [
-            { type: 'added', key: 'strictOpenapi' },
-            { type: 'added', key: 'reportFile' },
-            { type: 'added', key: 'useProjectPrettier' },
-            { type: 'added', key: 'useEslintFix' },
+            { type: 'added', key: 'useProjectPrettier' }, { type: 'added', key: 'useEslintFix' } ,
         ],
     },
 ];
