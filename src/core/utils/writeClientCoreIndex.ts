@@ -1,7 +1,7 @@
 import { resolveHelper } from '../../common/utils/pathHelpers';
+import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { Templates } from '../types/base/Templates.model';
 import { WriteClient } from '../WriteClient';
-import { appendUniqueLinesToFile } from './appendUniqueLinesToFile';
 
 interface IOptionsProps {
     templates: Templates;
@@ -22,7 +22,16 @@ export async function writeClientCoreIndex(this: WriteClient, options: IOptionsP
     this.logger.info(`Data has been written to a file: ${filePath}`);
 
     const content = templates.indexes.core({ useCancelableRequest, modelsMode });
-    await appendUniqueLinesToFile(filePath, content);
+    let existingContent = '';
+    const fileExists = await fileSystemHelpers.exists(filePath);
+    if (fileExists) {
+        existingContent = await fileSystemHelpers.readFile(filePath, 'utf8');
+    }
+    const existingLines = existingContent.split(/\r?\n/).filter(Boolean);
+    const dataLines = content.split(/\r?\n/).filter(Boolean);
+    const linesToAdd = dataLines.filter(line => !existingLines.includes(line.trim()));
+    const updatedContent = linesToAdd.length > 0 ? existingContent + linesToAdd.join('\n') + '\n' : existingContent;
+    await this.writeOutputFile(filePath, updatedContent);
 
     this.logger.info(`Writing to the file is completed: ${filePath}`);
 }

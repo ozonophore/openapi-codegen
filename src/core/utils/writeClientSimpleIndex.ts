@@ -1,4 +1,3 @@
-import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { SimpleClientArtifacts } from '../types/base/SimpleClientArtifacts.model';
 import { WriteClient } from '../WriteClient';
@@ -14,7 +13,7 @@ export async function writeClientSimpleIndex(this: WriteClient, options: SimpleC
 
     this.logger.info(`The recording of the file data begins: ${resolvePathIndex}`);
 
-    await fileSystemHelpers.writeFile(
+    await this.writeOutputFile(
         resolvePathIndex,
         templates.indexes.simple({
             core,

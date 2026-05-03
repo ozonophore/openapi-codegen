@@ -1,4 +1,3 @@
-import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { ClientArtifacts } from '../types/base/ClientArtifacts.model';
 import { WriteClient } from '../WriteClient';
@@ -14,7 +13,7 @@ export async function writeClientFullIndex(this: WriteClient, options: ClientArt
 
     this.logger.info(`Data has been written to a file: ${resolvePathIndex}`);
 
-    await fileSystemHelpers.writeFile(
+    await this.writeOutputFile(
         resolvePathIndex,
         templates.indexes.full({
             core,
