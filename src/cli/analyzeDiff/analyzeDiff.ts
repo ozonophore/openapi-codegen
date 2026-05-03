@@ -28,20 +28,20 @@ export const analyzeDiff = async (options: OptionValues): Promise<AnalyzeDiffRes
     const reportPath = validatedOptions.outputReport || DEFAULT_ANALYZE_DIFF_REPORT_PATH;
 
     if (!inputPath) {
-        const msg = '"--input" option is required for analyze-diff command';
+        const msg = LOGGER_MESSAGES.ANALYZE_DIFF.INPUT_REQUIRED;
         APP_LOGGER.error(LOGGER_MESSAGES.ERROR.GENERIC(msg));
         await APP_LOGGER.shutdownLoggerAsync();
         return { success: false, error: msg };
     }
 
     if (!compareWith && !gitRef) {
-        APP_LOGGER.info('History analysis skipped: no base spec provided (use --compare-with or --git)');
+        APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.HISTORY_SKIPPED);
         await APP_LOGGER.shutdownLoggerAsync();
         return { success: true, skipped: true };
     }
 
     try {
-        APP_LOGGER.info('\n[openapi-codegen] Analyzing OpenAPI changes...');
+        APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.ANALYZING);
 
         const targetSpec = await parseSpecFile(inputPath);
 

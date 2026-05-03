@@ -71,30 +71,28 @@ export const writeReportToFile = (report: DiffReport, reportPath: string = DEFAU
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf-8');
 
     APP_LOGGER.info(LOGGER_MESSAGES.SEPARATOR);
-    APP_LOGGER.info('[openapi-codegen] Analyze-diff summary');
-    APP_LOGGER.info(`Base: ${report.metadata.base}`);
-    APP_LOGGER.info(`Target: ${report.metadata.target}`);
+    APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.SUMMARY_TITLE);
+    APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.BASE(report.metadata.base));
+    APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.TARGET(report.metadata.target));
 
     if (report.stats.stabilityScore !== undefined) {
-        APP_LOGGER.info(`Stability score: ${report.stats.stabilityScore}%`);
+        APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.STABILITY_SCORE(report.stats.stabilityScore));
     }
 
-    APP_LOGGER.info(
-        `Changes: total=${report.stats.totalChanges}, added=${report.stats.added}, removed=${report.stats.removed}, changed=${report.stats.changed}`
-    );
+    APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.CHANGES(report.stats.totalChanges, report.stats.added, report.stats.removed, report.stats.changed));
 
     if (report.diff.breaking.length > 0) {
-        APP_LOGGER.error(`[openapi-codegen] BREAKING: ${report.diff.breaking.length} item(s)`);
+        APP_LOGGER.error(LOGGER_MESSAGES.ANALYZE_DIFF.BREAKING_COUNT(report.diff.breaking.length));
     }
 
     if (report.diff.warnings.length > 0) {
-        APP_LOGGER.warn(`[openapi-codegen] WARNINGS: ${report.diff.warnings.length} item(s)`);
+        APP_LOGGER.warn(LOGGER_MESSAGES.ANALYZE_DIFF.WARNING_COUNT(report.diff.warnings.length));
     }
 
     const ignored = report.stats.ignored ?? 0;
     if (ignored > 0) {
-        APP_LOGGER.info(`[openapi-codegen] IGNORED: ${ignored} item(s) by config rules`);
+        APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.IGNORED_COUNT(ignored));
     }
 
-    APP_LOGGER.info(`[openapi-codegen] Report written to: ${reportPath}`);
+    APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.REPORT_WRITTEN(reportPath));
 };

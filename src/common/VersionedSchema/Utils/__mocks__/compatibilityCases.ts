@@ -114,7 +114,7 @@ export const compatibilityCases: CompatibilityCase[] = [
             { type: 'added', key: 'models' },
             { type: 'added', key: 'analyze' },
             { type: 'added', key: 'miracles' },
-        ]
+        ],
     },
     {
         type: EVersionedSchemaType.UNIFIED_OPTIONS,
@@ -125,6 +125,10 @@ export const compatibilityCases: CompatibilityCase[] = [
             { type: 'added', key: 'reportFile' },
             { type: 'added', key: 'useProjectPrettier' },
             { type: 'added', key: 'useEslintFix' },
+            { type: 'added', key: 'cache' },
+            { type: 'added', key: 'cachePath' },
+            { type: 'added', key: 'cacheStrategy' },
+            { type: 'added', key: 'cacheDebug' },
         ],
     },
 ];

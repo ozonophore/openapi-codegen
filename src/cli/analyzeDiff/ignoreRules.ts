@@ -1,4 +1,5 @@
 import { APP_LOGGER } from '../../common/Consts';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import type { DiffEntry, IgnoreRule } from './types';
 
@@ -33,7 +34,7 @@ export const matchesIgnoreRule = (entry: DiffEntry, rule: IgnoreRule): boolean =
                 const regex = new RegExp(rule.pattern);
                 return regex.test(entry.path);
             } catch (err) {
-                APP_LOGGER.warn(`[openapi-codegen] Invalid ignore pattern: ${rule.pattern} — ${String(err)}`);
+                APP_LOGGER.warn(LOGGER_MESSAGES.ANALYZE_DIFF.INVALID_IGNORE_PATTERN(rule.pattern, String(err)));
                 return false;
             }
         }

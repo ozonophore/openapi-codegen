@@ -2,6 +2,7 @@ import fs from 'fs';
 
 import { DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../../common/Consts';
 import type { Logger } from '../../common/Logger';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import type { DiffInfo } from '../types/shared/DiffInfo.model';
 import type { MiracleEntry } from '../types/shared/Miracle.model';
 
@@ -58,12 +59,12 @@ export const loadDiffReport = ({ useHistory, diffReport, inputPath, logger }: Lo
 
     const reportPath = diffReport || DEFAULT_ANALYZE_DIFF_REPORT_PATH;
     if (!fs.existsSync(reportPath)) {
-        logger.info(`[openapi-codegen] Diff report not found at "${reportPath}". Skipping history annotations.`);
+        logger.info(LOGGER_MESSAGES.DIFF_REPORT.NOT_FOUND(reportPath));
         return null;
     }
 
     if (!isFreshEnough(reportPath, inputPath)) {
-        logger.warn(`[openapi-codegen] Diff report "${reportPath}" is older than the input spec. Skipping history annotations.`);
+        logger.warn(LOGGER_MESSAGES.DIFF_REPORT.STALE(reportPath));
         return null;
     }
 
@@ -73,13 +74,13 @@ export const loadDiffReport = ({ useHistory, diffReport, inputPath, logger }: Lo
         const hasDiffEntries = !!parsed?.diff?.all?.length;
         const hasMiracles = !!parsed?.miracles?.length;
         if (!hasDiffEntries && !hasMiracles) {
-            logger.info(`[openapi-codegen] Diff report "${reportPath}" has no entries. Skipping history annotations.`);
+            logger.info(LOGGER_MESSAGES.DIFF_REPORT.EMPTY(reportPath));
             return null;
         }
         return parsed;
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        logger.warn(`[openapi-codegen] Failed to read diff report "${reportPath}": ${message}`);
+        logger.warn(LOGGER_MESSAGES.DIFF_REPORT.READ_FAILED(reportPath, message));
         return null;
     }
 };

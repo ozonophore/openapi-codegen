@@ -51,6 +51,13 @@ export const LOGGER_MESSAGES = {
         FINISHED_WITH_DURATION: (duration: string) => `Generation completed in ${duration} sec`,
         DURATION_FOR_FILE: (file: string, duration: string) => `Duration for "${file}": ${duration} sec`,
         NO_OPTIONS: 'No options provided for generation',
+        WRITE_STATS: (written: number, unchanged: number) => `[openapi-codegen] Write stats: written=${written}, unchanged=${unchanged}`,
+        CACHE_SHARED_OUTPUT_WARNING: (outputs: string) =>
+            `[openapi-codegen] Cache is disabled and multiple items write to the same output directories:\n${outputs}\n` +
+            'This can overwrite previously generated files in the final output. Consider enabling cache via "cache: true" or "--cache".',
+        CACHE_HIT: (input: string) => `[openapi-codegen] Cache hit: ${input}`,
+        CACHE_MISS: (input: string) => `[openapi-codegen] Cache miss: ${input}`,
+        STRICT_REPORT_CREATED: (reportPath: string) => `Strict OpenAPI report created: ${reportPath}`,
     },
 
     // ========== OpenAPI Specification Messages ==========
@@ -96,6 +103,7 @@ export const LOGGER_MESSAGES = {
         PREFIX: 'Error:',
         GENERIC: (message: string) => message,
         WITH_DETAILS: (message: string, details: string) => `${message}: ${details}`,
+        TECHNICAL_DETAILS: (error: string) => `Technical details: ${error}`,
     },
 
     // ========== Separator ==========
@@ -132,6 +140,56 @@ export const LOGGER_MESSAGES = {
         NO_CHANGES_DETECTED: 'No changes detected. All files are identical.',
         CLEANUP_PREVIEW_DIR: (dir: string) => `Cleaning up preview directory: ${dir}`,
         CLEANUP_PREVIEW_FAILED: (error: string) => `Failed to cleanup preview directory: ${error}`,
+    },
+
+    ANALYZE_DIFF: {
+        INPUT_REQUIRED: '"--input" option is required for analyze-diff command',
+        HISTORY_SKIPPED: 'History analysis skipped: no base spec provided (use --compare-with or --git)',
+        ANALYZING: '\n[openapi-codegen] Analyzing OpenAPI changes...',
+        SUMMARY_TITLE: '[openapi-codegen] Analyze-diff summary',
+        BASE: (base: string) => `Base: ${base}`,
+        TARGET: (target: string) => `Target: ${target}`,
+        STABILITY_SCORE: (score: number) => `Stability score: ${score}%`,
+        CHANGES: (total: number, added: number, removed: number, changed: number) =>
+            `Changes: total=${total}, added=${added}, removed=${removed}, changed=${changed}`,
+        BREAKING_COUNT: (count: number) => `[openapi-codegen] BREAKING: ${count} item(s)`,
+        WARNING_COUNT: (count: number) => `[openapi-codegen] WARNINGS: ${count} item(s)`,
+        IGNORED_COUNT: (count: number) => `[openapi-codegen] IGNORED: ${count} item(s) by config rules`,
+        REPORT_WRITTEN: (reportPath: string) => `[openapi-codegen] Report written to: ${reportPath}`,
+        INVALID_IGNORE_PATTERN: (pattern: string, error: string) => `[openapi-codegen] Invalid ignore pattern: ${pattern} — ${error}`,
+    },
+
+    DIFF_REPORT: {
+        NOT_FOUND: (reportPath: string) => `[openapi-codegen] Diff report not found at "${reportPath}". Skipping history annotations.`,
+        STALE: (reportPath: string) => `[openapi-codegen] Diff report "${reportPath}" is older than the input spec. Skipping history annotations.`,
+        EMPTY: (reportPath: string) => `[openapi-codegen] Diff report "${reportPath}" has no entries. Skipping history annotations.`,
+        READ_FAILED: (reportPath: string, message: string) => `[openapi-codegen] Failed to read diff report "${reportPath}": ${message}`,
+    },
+
+    TEMPLATES: {
+        PRECOMPILE_SUCCESS: 'The templates have been successfully precompiled and saved!',
+        PRECOMPILE_ERROR: (message: string) => `Error during pre-compilation of templates: ${message}`,
+    },
+
+    WRITE_CLIENT: {
+        DATA_WRITE_START: (filePath: string) => `The recording of the file data begins: ${filePath}`,
+        FILE_RECORDED: (filePath: string) => `File recording completed: ${filePath}`,
+        INDEX_DATA_WRITTEN: (filePath: string) => `Data has been written to a file: ${filePath}`,
+        INDEX_WRITE_COMPLETED: (filePath: string) => `Writing to the file is completed: ${filePath}`,
+        CORE_START: 'The recording of the kernel files begins',
+        CORE_FINISH: 'The writing of the kernel files has been completed successfully',
+        MODELS_START: 'Recording of model files begins',
+        MODELS_FINISH: 'Model file recording completed successfully',
+        SERVICES_START: 'Recording of service files begins',
+        SERVICES_FINISH: 'Service file recording completed successfully',
+        SCHEMAS_START: 'The recording of model validation schema files begins.',
+        SCHEMAS_FINISH: 'The recording of model validation schema files has been completed successfully',
+        DIRECTORY_CREATING: (directory: string) => `A directory is being created: ${directory}`,
+        EXECUTOR_START: (filePath: string) => `The recording of the file data begins: ${filePath}`,
+    },
+
+    LOGGER: {
+        NEXT_STEPS: (recommendation: string) => `What you can do next: ${recommendation}`,
     },
 
     // ========== Migration Messages ==========

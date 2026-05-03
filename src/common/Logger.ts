@@ -140,10 +140,10 @@ export class Logger {
 
         this._logger.error(`${LOGGER_MESSAGES.ERROR.PREFIX} ${baseMessage}`);
         this._logger.info(LOGGER_MESSAGES.SEPARATOR);
-        this._logger.info(`What you can do next: ${recommendation}`);
+        this._logger.info(LOGGER_MESSAGES.LOGGER.NEXT_STEPS(recommendation));
 
         if (this._currentLevel === ELogLevel.INFO && error) {
-            this._logger.warn(`Technical details: ${String(error)}`);
+            this._logger.warn(LOGGER_MESSAGES.ERROR.TECHNICAL_DETAILS(String(error)));
         }
     }
 
