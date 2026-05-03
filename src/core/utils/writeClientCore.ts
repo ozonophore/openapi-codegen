@@ -48,24 +48,24 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
 
     const hasCustomRequest = !!request;
 
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'OpenAPI.ts'), templates.core.settings(context));
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'ApiResult.ts'), templates.core.apiResult({}));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'OpenAPI.ts'), templates.core.settings(context));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'ApiRequestOptions.ts'), templates.core.apiRequestOptions({}));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'ApiResult.ts'), templates.core.apiResult({}));
     if (modelsMode === ModelsMode.CLASSES) {
-        await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'BaseDto.ts'), templates.core.baseDto({}));
-        await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'dtoUtils.ts'), templates.core.dtoUtils({}));
+        await this.writeOutputFile(resolveHelper(outputCorePath, 'BaseDto.ts'), templates.core.baseDto({}));
+        await this.writeOutputFile(resolveHelper(outputCorePath, 'dtoUtils.ts'), templates.core.dtoUtils({}));
     }
     if (useCancelableRequest) {
-        await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
+        await this.writeOutputFile(resolveHelper(outputCorePath, 'CancelablePromise.ts'), templates.core.cancelablePromise({}));
     }
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'request.ts'), templates.core.request(context));
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'executor/requestExecutor.ts'), templates.core.requestExecutor({}));
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'executor/createExecutorAdapter.ts'), templates.core.createExecutorAdapter({ useCustomRequest: hasCustomRequest }));
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'interceptors/interceptors.ts'), templates.core.interceptors({}));
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'interceptors/apiErrorInterceptor.ts'), templates.core.apiErrorInterceptor({}));
-    await fileSystemHelpers.writeFile(resolveHelper(outputCorePath, 'interceptors/withInterceptors.ts'), templates.core.withInterceptors({}));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'request.ts'), templates.core.request(context));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'executor/requestExecutor.ts'), templates.core.requestExecutor({}));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'executor/createExecutorAdapter.ts'), templates.core.createExecutorAdapter({ useCustomRequest: hasCustomRequest }));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'interceptors/interceptors.ts'), templates.core.interceptors({}));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'interceptors/apiErrorInterceptor.ts'), templates.core.apiErrorInterceptor({}));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'interceptors/withInterceptors.ts'), templates.core.withInterceptors({}));
 
     if (hasCustomRequest) {
         const requestFile = resolveHelper(process.cwd(), request);
@@ -74,6 +74,7 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
             throw new Error(`Custom request file "${requestFile}" does not exists`);
         }
         await fileSystemHelpers.copyFile(requestFile, resolveHelper(outputCorePath, 'request.ts'));
+        this.registerOutputFile(resolveHelper(outputCorePath, 'request.ts'));
     }
 
     this.logger.info("The writing of the kernel files has been completed successfully");

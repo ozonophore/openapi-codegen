@@ -1,3 +1,5 @@
+import { promises as fsPromises } from 'fs';
+
 import { COMMON_DEFAULT_OPTIONS_VALUES } from '../common/Consts';
 import { Logger } from '../common/Logger';
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
@@ -17,6 +19,7 @@ import { ModelsMode } from './types/enums/ModelsMode.enum';
 import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import type { Client } from './types/shared/Client.model';
 import { applyDiffReportToClient } from './utils/applyDiffReportToClient';
+import { GenerationCache } from './utils/GenerationCache';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
@@ -27,6 +30,7 @@ import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { WriteClient } from './WriteClient';
 
 export class OpenApiClient {
+    private static readonly CACHE_FINGERPRINT_VERSION = 1;
     private _writeClient: WriteClient | null = null;
 
     public get writeClient() {
@@ -67,6 +71,10 @@ export class OpenApiClient {
                 modelsMode: item.modelsMode ?? modelsMode,
                 strictOpenapi: rawOptions.strictOpenapi,
                 reportFile: rawOptions.reportFile,
+                cache: rawOptions.cache,
+                cachePath: rawOptions.cachePath,
+                cacheStrategy: rawOptions.cacheStrategy,
+                cacheDebug: rawOptions.cacheDebug,
             }));
         } else {
             // Плоский формат (из CLI или старого конфига): Один item с глобальным request
@@ -101,6 +109,10 @@ export class OpenApiClient {
                     modelsMode,
                     strictOpenapi: rawOptions.strictOpenapi,
                     reportFile: rawOptions.reportFile,
+                    cache: rawOptions.cache,
+                    cachePath: rawOptions.cachePath,
+                    cacheStrategy: rawOptions.cacheStrategy,
+                    cacheDebug: rawOptions.cacheDebug,
                 },
             ];
         }
@@ -142,17 +154,64 @@ export class OpenApiClient {
             reportFile: item.reportFile || COMMON_DEFAULT_OPTIONS_VALUES.reportFile,
             useProjectPrettier: item.useProjectPrettier ?? COMMON_DEFAULT_OPTIONS_VALUES.useProjectPrettier,
             useEslintFix: item.useEslintFix ?? COMMON_DEFAULT_OPTIONS_VALUES.useEslintFix,
+            cache: item.cache ?? COMMON_DEFAULT_OPTIONS_VALUES.cache,
+            cachePath: item.cachePath || COMMON_DEFAULT_OPTIONS_VALUES.cachePath,
+            cacheStrategy: item.cacheStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheStrategy,
+            cacheDebug: item.cacheDebug ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheDebug,
         };
     }
 
-    private async cleanOutputDirectories(option: TFlatOptions): Promise<void> {
-        const outputDirs = [option.output, option.outputCore, option.outputSchemas, option.outputModels, option.outputServices];
-
-        for (const dir of outputDirs) {
-            if (dir) {
-                await fileSystemHelpers.rmdir(dir);
+    private getOutputRoots(items: TStrictFlatOptions[]): string[] {
+        const roots = new Set<string>();
+        for (const item of items) {
+            const outputDirs = [item.output, item.outputCore, item.outputSchemas, item.outputModels, item.outputServices];
+            for (const dir of outputDirs) {
+                if (dir) {
+                    roots.add(resolveHelper(process.cwd(), dir));
+                }
             }
         }
+        return Array.from(roots);
+    }
+
+    private async cleanupStaleOutputs(items: TStrictFlatOptions[]): Promise<void> {
+        const outputRoots = this.getOutputRoots(items);
+        const expectedFiles = this.writeClient.getExpectedOutputFiles();
+
+        for (const root of outputRoots) {
+            await this.removeStaleFilesInDirectory(root, expectedFiles);
+        }
+    }
+
+    private async removeStaleFilesInDirectory(path: string, expectedFiles: Set<string>): Promise<boolean> {
+        const stats = await fsPromises.stat(path).catch(() => null);
+        if (!stats) {
+            return false;
+        }
+
+        if (stats.isFile()) {
+            if (!expectedFiles.has(path)) {
+                await fileSystemHelpers.rmdir(path);
+                return false;
+            }
+            return true;
+        }
+
+        const entries = await fsPromises.readdir(path);
+        let hasAnyFile = false;
+
+        for (const entry of entries) {
+            const childPath = resolveHelper(path, entry);
+            const childHasFiles = await this.removeStaleFilesInDirectory(childPath, expectedFiles);
+            hasAnyFile = hasAnyFile || childHasFiles;
+        }
+
+        if (!hasAnyFile) {
+            await fileSystemHelpers.rmdir(path);
+            return false;
+        }
+
+        return true;
     }
 
     private async generateCodeForItems(items: TStrictFlatOptions[]): Promise<void> {
@@ -163,13 +222,14 @@ export class OpenApiClient {
 
         try {
             const start = process.hrtime.bigint();
-            for (const option of items) {
-                await this.cleanOutputDirectories(option);
+            const generationCache = new GenerationCache(items[0]?.cachePath || '.openapi-codegen-cache.json');
+            if (items[0]?.cache) {
+                await generationCache.load();
             }
 
             for (const option of items) {
                 const fileStart = process.hrtime.bigint();
-                await this.generateSingle(option);
+                await this.generateSingle(option, generationCache);
                 const fileEnd = process.hrtime.bigint();
                 const fileDurationInSeconds = Number(fileEnd - fileStart) / 1e9;
                 this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.DURATION_FOR_FILE(option.input, fileDurationInSeconds.toFixed(3)));
@@ -179,6 +239,12 @@ export class OpenApiClient {
             } else {
                 await this.writeClient.combineAndWrite();
             }
+            await this.cleanupStaleOutputs(items);
+            if (items[0]?.cache) {
+                await generationCache.save();
+            }
+            const writeStats = this.writeClient.getWriteStats();
+            this.writeClient.logger.info(`[openapi-codegen] Write stats: written=${writeStats.written}, unchanged=${writeStats.unchanged}`);
             this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.FINISHED);
             const end = process.hrtime.bigint();
             const durationInSeconds = Number(end - start) / 1e9;
@@ -191,7 +257,7 @@ export class OpenApiClient {
         this.writeClient.logger.shutdownLogger();
     }
 
-    private async generateSingle(item: TStrictFlatOptions): Promise<void> {
+    private async generateSingle(item: TStrictFlatOptions, generationCache: GenerationCache): Promise<void> {
         const {
             input,
             output,
@@ -230,6 +296,28 @@ export class OpenApiClient {
             outputSchemas,
         });
         const absoluteInput = resolveHelper(process.cwd(), input);
+        const cacheKey = this.getCacheKey(item, absoluteInput);
+        const cacheFingerprint = await this.getCacheFingerprint(item, absoluteInput);
+        const useEntityCache = item.cache && item.cacheStrategy === 'entity';
+        if (useEntityCache) {
+            const cachedEntry = generationCache.get(cacheKey);
+            if (cachedEntry && cachedEntry.fingerprint === cacheFingerprint) {
+                const allFilesExist = await this.filesExist(cachedEntry.files);
+                if (allFilesExist) {
+                    for (const filePath of cachedEntry.files) {
+                        this.writeClient.registerOutputFile(filePath);
+                    }
+                    if (item.cacheDebug) {
+                        this.writeClient.logger.info(`[openapi-codegen] Cache hit: ${input}`);
+                    }
+                    return;
+                }
+            }
+            if (item.cacheDebug) {
+                this.writeClient.logger.info(`[openapi-codegen] Cache miss: ${input}`);
+            }
+        }
+        const knownFilesBefore = new Set(this.writeClient.getExpectedOutputFilesArray());
         const generatorPlugins = await loadGeneratorPlugins(plugins);
         const context = new Context({
             input: absoluteInput,
@@ -337,6 +425,71 @@ export class OpenApiClient {
                 break;
             }
         }
+        const generatedFiles = this.writeClient.getExpectedOutputFilesArray().filter(filePath => !knownFilesBefore.has(filePath));
+        if (item.cache) {
+            generationCache.set({
+                key: cacheKey,
+                fingerprint: cacheFingerprint,
+                files: generatedFiles,
+                updatedAt: Date.now(),
+            });
+        }
+    }
+
+    private getCacheKey(item: TStrictFlatOptions, absoluteInput: string): string {
+        return GenerationCache.hash(
+            JSON.stringify({
+                input: absoluteInput,
+                output: item.output,
+                outputCore: item.outputCore,
+                outputServices: item.outputServices,
+                outputModels: item.outputModels,
+                outputSchemas: item.outputSchemas,
+            })
+        );
+    }
+
+    private async getCacheFingerprint(item: TStrictFlatOptions, absoluteInput: string): Promise<string> {
+        const specContent = await fileSystemHelpers.readFile(absoluteInput, 'utf8');
+        const fingerprint = {
+            cacheFingerprintVersion: OpenApiClient.CACHE_FINGERPRINT_VERSION,
+            generatorVersion: process.env.npm_package_version || 'dev',
+            specHash: GenerationCache.hash(specContent),
+            options: {
+                httpClient: item.httpClient,
+                useOptions: item.useOptions,
+                useUnionTypes: item.useUnionTypes,
+                includeSchemasFiles: item.includeSchemasFiles,
+                excludeCoreServiceFiles: item.excludeCoreServiceFiles,
+                request: item.request,
+                plugins: item.plugins,
+                customExecutorPath: item.customExecutorPath,
+                interfacePrefix: item.interfacePrefix,
+                enumPrefix: item.enumPrefix,
+                typePrefix: item.typePrefix,
+                useCancelableRequest: item.useCancelableRequest,
+                sortByRequired: item.sortByRequired,
+                useSeparatedIndexes: item.useSeparatedIndexes,
+                validationLibrary: item.validationLibrary,
+                emptySchemaStrategy: item.emptySchemaStrategy,
+                useHistory: item.useHistory,
+                diffReport: item.diffReport,
+                modelsMode: item.modelsMode,
+                strictOpenapi: item.strictOpenapi,
+            },
+        };
+
+        return GenerationCache.hash(JSON.stringify(fingerprint));
+    }
+
+    private async filesExist(paths: string[]): Promise<boolean> {
+        for (const filePath of paths) {
+            const exists = await fileSystemHelpers.exists(filePath);
+            if (!exists) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private async loadDiffReportIfNeeded(params: { useHistory?: boolean; diffReport?: string; inputPath?: string }): Promise<DiffReport | null> {

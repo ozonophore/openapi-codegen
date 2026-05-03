@@ -71,7 +71,7 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
                 emptySchemaStrategy,
             });
             const formattedValue = await format(templateResult, undefined, useProjectPrettier);
-            await fileSystemHelpers.writeFile(file, formattedValue);
+            await this.writeOutputFile(file, formattedValue);
             if (useEslintFix) {
                 await eslintFix(file);
             }

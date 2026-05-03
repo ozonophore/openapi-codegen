@@ -54,7 +54,7 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             modelsMode,
         });
         const formattedValue = await format(templateResult);
-        await fileSystemHelpers.writeFile(file, formattedValue);
+        await this.writeOutputFile(file, formattedValue);
         this.logger.info(`File recording completed: ${file}`);
         this.logger.info('Model file recording completed successfully');
         return;
@@ -85,7 +85,7 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             useUnionTypes,
         });
         const formattedValue = await format(templateResult, undefined, useProjectPrettier);
-        await fileSystemHelpers.writeFile(file, formattedValue);
+        await this.writeOutputFile(file, formattedValue);
         if (useEslintFix) {
             await eslintFix(file);
         }

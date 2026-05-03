@@ -44,6 +44,10 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     reportFile: './openapi-report.json',
     useProjectPrettier: false,
     useEslintFix: false,
+    cache: true,
+    cachePath: '.openapi-codegen-cache.json',
+    cacheStrategy: 'entity',
+    cacheDebug: false,
 };
 
 export const APP_LOGGER = new Logger({

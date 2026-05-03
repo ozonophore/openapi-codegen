@@ -60,7 +60,7 @@ export async function writeClientServices(this: WriteClient, options: IWriteClie
             useCancelableRequest,
         });
         const formattedValue = await format(templateResult, undefined, useProjectPrettier);
-        await fileSystemHelpers.writeFile(file, formattedValue);
+        await this.writeOutputFile(file, formattedValue);
         if (useEslintFix) {
             await eslintFix(file);
         }

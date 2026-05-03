@@ -42,7 +42,7 @@ export async function writeClientExecutor(this: WriteClient, options: WriteClien
         services: uniqueServices,
     });
     const formattedValue = await format(templateResult, undefined, useProjectPrettier);
-    await fileSystemHelpers.writeFile(file, formattedValue);
+    await this.writeOutputFile(file, formattedValue);
     if (useEslintFix) {
         await eslintFix(file);
     }
