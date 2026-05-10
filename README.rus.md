@@ -40,7 +40,7 @@ npm install ts-openapi-codegen --save-dev
 
 ## Использование
 
-CLI инструмент поддерживает шесть команд: `generate`, `check-config`, `update-config`, `init`, `preview-changes` и `analyze-diff`.
+CLI инструмент поддерживает семь команд: `generate`, `check-config`, `update-config`, `init`, `preview-changes`, `analyze-diff` и `analyze-usage`.
 
 ### Команда: `generate`
 
@@ -210,6 +210,34 @@ openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
     }
   ]
 }
+```
+
+### Команда: `analyze-usage`
+
+Анализирует, как TypeScript consumer-проект использует экспорты generated API, и формирует JSON-отчет плюс опциональный Markdown-summary.
+
+**Использование:**
+```bash
+openapi analyze-usage --api-root ./generated --project-root . --tsconfig ./tsconfig.json
+openapi analyze-usage --api-root ./generated --generated-entry ./generated/index.ts --md-report ./openapi-usage-report.md
+```
+
+**Опции:**
+- `--api-root` - Директория с generated API кодом (по умолчанию: `./generated`)
+- `--project-root` - Корень consumer-проекта (по умолчанию: текущая директория)
+- `--tsconfig` - Путь к consumer `tsconfig.json`
+- `--report-file` - Путь для JSON-отчета (по умолчанию: `./openapi-usage-report.json`)
+- `--md-report` - Путь для Markdown-summary
+- `--generated-entry` - Barrel-entry generated API, например `./generated/index.ts`
+- `--fail-on` - Категории, при наличии которых команда должна завершиться с кодом `1`. Поддерживаются: `unusedExports`, `unresolvedImports`, `structuralChanges`, `typingIssues`; используйте `none`, чтобы команда всегда завершалась успешно.
+
+Отчет содержит разделы `summary`, `unusedExports`, `unresolvedImports`, `structuralChanges`, `typingIssues` и `recommendations`.
+
+Рекомендуемая CI-цепочка:
+```bash
+openapi generate --input ./openapi/spec.yaml --output ./generated
+openapi analyze-usage --api-root ./generated --fail-on unresolvedImports,typingIssues
+tsc --noEmit
 ```
 
 ### Файл конфигурации

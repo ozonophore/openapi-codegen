@@ -41,7 +41,7 @@ npm install ts-openapi-codegen --save-dev
 
 ## Usage
 
-The CLI tool supports six commands: `generate`, `check-config`, `update-config`, `init`, `preview-changes`, and `analyze-diff`.
+The CLI tool supports seven commands: `generate`, `check-config`, `update-config`, `init`, `preview-changes`, `analyze-diff`, and `analyze-usage`.
 
 ### Command: `generate`
 
@@ -211,6 +211,34 @@ Example (excerpt):
     }
   ]
 }
+```
+
+### Command: `analyze-usage`
+
+Analyzes how a TypeScript consumer project uses generated API exports and writes JSON and optional Markdown reports.
+
+**Usage:**
+```bash
+openapi analyze-usage --api-root ./generated --project-root . --tsconfig ./tsconfig.json
+openapi analyze-usage --api-root ./generated --generated-entry ./generated/index.ts --md-report ./openapi-usage-report.md
+```
+
+**Options:**
+- `--api-root` - Directory with generated API code (default: `./generated`)
+- `--project-root` - Consumer project root (default: current working directory)
+- `--tsconfig` - Path to consumer `tsconfig.json`
+- `--report-file` - Path to save JSON usage report (default: `./openapi-usage-report.json`)
+- `--md-report` - Path to save Markdown usage summary
+- `--generated-entry` - Generated API barrel entry file, for example `./generated/index.ts`
+- `--fail-on` - Comma-separated categories that should fail the command. Supported values: `unusedExports`, `unresolvedImports`, `structuralChanges`, `typingIssues`; use `none` to always exit successfully.
+
+The report includes `summary`, `unusedExports`, `unresolvedImports`, `structuralChanges`, `typingIssues`, and `recommendations`.
+
+Recommended CI chain:
+```bash
+openapi generate --input ./openapi/spec.yaml --output ./generated
+openapi analyze-usage --api-root ./generated --fail-on unresolvedImports,typingIssues
+tsc --noEmit
 ```
 
 ### Configuration File
