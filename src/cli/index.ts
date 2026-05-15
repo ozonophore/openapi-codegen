@@ -18,6 +18,7 @@ import { updateConfig } from './checkAndUpdateConfig/updateConfig';
 import { generateOpenApiClient } from './generateOpenApiClient/generateOpenApiClient';
 import { init } from './initOpenApiConfig/init';
 import { previewChanges } from './previewChanges/previewChanges';
+import { CLICommandResult } from './types';
 import { getCLIName } from './utils';
 
 const packageDetails = JSON.parse(fs.readFileSync(joinHelper(__dirname, '../../package.json'), 'utf-8'));
@@ -32,6 +33,13 @@ const updateNotifier = new UpdateNotifier({
 });
 
 const program = new Command();
+
+const finishCommand = (result?: CLICommandResult): never => {
+    if (!result || !result.success) {
+        process.exit(1);
+    }
+    process.exit(0);
+};
 
 program.version(APP_VERSION).name(APP_NAME).description(APP_DESCRIPTION).addHelpText('before', getCLIName(APP_NAME));
 
@@ -77,7 +85,8 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await generateOpenApiClient(options);
+        const result = await generateOpenApiClient(options);
+        finishCommand(result);
     });
 
 /**
@@ -92,7 +101,8 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await checkConfig(options);
+        const result = await checkConfig(options);
+        finishCommand(result);
     });
 
 /**
@@ -107,7 +117,8 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await updateConfig(options);
+        const result = await updateConfig(options);
+        finishCommand(result);
     });
 
 /**
@@ -126,7 +137,8 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await init(options);
+        const result = await init(options);
+        finishCommand(result);
     });
 
 /**
@@ -144,7 +156,8 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await previewChanges(options);
+        const result = await previewChanges(options);
+        finishCommand(result);
     });
 
 /**
@@ -176,10 +189,7 @@ program
     })
     .action(async (options: OptionValues) => {
         const result = await analyzeDiff(options);
-        if (!result || !result.success) {
-            process.exit(1);
-        }
-        process.exit(0);
+        finishCommand(result);
     });
 
 /**
@@ -198,7 +208,8 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await analyzeUsage(options);
+        const result = await analyzeUsage(options);
+        finishCommand(result);
     });
 
 program.exitOverride();

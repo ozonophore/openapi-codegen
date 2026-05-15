@@ -215,29 +215,27 @@ Example (excerpt):
 
 ### Command: `analyze-usage`
 
-Analyzes how a TypeScript consumer project uses generated API exports and writes JSON and optional Markdown reports.
+Analyzes how a TypeScript consumer project uses generated API exports and writes a JSON report.
 
 **Usage:**
 ```bash
-openapi analyze-usage --api-root ./generated --project-root . --tsconfig ./tsconfig.json
-openapi analyze-usage --api-root ./generated --generated-entry ./generated/index.ts --md-report ./openapi-usage-report.md
+openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --tsconfigPath ./tsconfig.json
+openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --output ./api-report.json --check
 ```
 
 **Options:**
-- `--api-root` - Directory with generated API code (default: `./generated`)
-- `--project-root` - Consumer project root (default: current working directory)
-- `--tsconfig` - Path to consumer `tsconfig.json`
-- `--report-file` - Path to save JSON usage report (default: `./openapi-usage-report.json`)
-- `--md-report` - Path to save Markdown usage summary
-- `--generated-entry` - Generated API barrel entry file, for example `./generated/index.ts`
-- `--fail-on` - Comma-separated categories that should fail the command. Supported values: `unusedExports`, `unresolvedImports`, `structuralChanges`, `typingIssues`; use `none` to always exit successfully.
+- `--sourcePath` / `-s` - Path to generated API entry file (required)
+- `--projectPath` / `-p` - Root path of consumer TypeScript project (required)
+- `--tsconfigPath` / `-t` - Optional path to `tsconfig.json`
+- `--output` / `-o` - Output JSON report file path (default: `api-report.json`)
+- `--check` / `-c` - CI mode: exits with code `1` when ERROR-level mismatches are found
 
-The report includes `summary`, `unusedExports`, `unresolvedImports`, `structuralChanges`, `typingIssues`, and `recommendations`.
+The command prints a usage summary to console and writes a JSON report with findings and coverage details.
 
 Recommended CI chain:
 ```bash
 openapi generate --input ./openapi/spec.yaml --output ./generated
-openapi analyze-usage --api-root ./generated --fail-on unresolvedImports,typingIssues
+openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --check
 tsc --noEmit
 ```
 

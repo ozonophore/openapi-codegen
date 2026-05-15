@@ -15,6 +15,7 @@ import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSc
 import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
 import { previewChangesSchema, TPreviewChangesOptions } from '../schemas';
+import { CLICommandResult } from '../types';
 import { compareFiles } from './utils/compareFiles';
 import { formatDiff } from './utils/formatDiff';
 import { isDirectoryEmpty } from './utils/isDirectoryEmpty';
@@ -119,7 +120,7 @@ function toSummaryMarkdown(summary: ChangesSummary): string {
  *
  * TODO: Добавить проверку опций команды перед выполнением
  */
-export async function previewChanges(options: OptionValues): Promise<void> {
+export async function previewChanges(options: OptionValues): Promise<CLICommandResult> {
     let exitCode = 0;
     let resolvedPreviewDir = '';
     let previewDirCreated = false;
@@ -133,7 +134,7 @@ export async function previewChanges(options: OptionValues): Promise<void> {
                 message: LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')),
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(1);
+            return { success: false, error: validationResult.errors.join('\n') };
         }
 
         const { openapiConfig, generatedDir, previewDir, diffDir } = validationResult.data as TPreviewChangesOptions;
@@ -148,7 +149,7 @@ export async function previewChanges(options: OptionValues): Promise<void> {
                 message: LOGGER_MESSAGES.PREVIEW.GENERATED_DIR_EMPTY(generatedDir || ''),
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(1);
+            return { success: false, error: LOGGER_MESSAGES.PREVIEW.GENERATED_DIR_EMPTY(generatedDir || '') };
         }
 
         // 2. Загрузка конфигурации
@@ -159,7 +160,7 @@ export async function previewChanges(options: OptionValues): Promise<void> {
                 message: LOGGER_MESSAGES.CONFIG.FILE_MISSING,
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(1);
+            return { success: false, error: LOGGER_MESSAGES.CONFIG.FILE_MISSING };
         }
 
         if (Array.isArray(configData)) {
@@ -182,7 +183,7 @@ export async function previewChanges(options: OptionValues): Promise<void> {
                 message: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED,
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(1);
+            return { success: false, error: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED };
         }
 
         // 3. Подготовка и создание временной директории preview
@@ -327,8 +328,8 @@ export async function previewChanges(options: OptionValues): Promise<void> {
 
     await APP_LOGGER.shutdownLoggerAsync();
     if (exitCode !== 0) {
-        process.exit(1);
+        return { success: false };
     }
 
-    process.exit(0);
+    return { success: true };
 }

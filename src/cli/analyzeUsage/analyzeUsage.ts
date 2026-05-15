@@ -4,17 +4,18 @@ import path from "path";
 import { Analyzer } from "./core/Analyzer";
 import { ProjectContext } from "./core/ProjectContext";
 import { Scanner } from "./core/Scanner";
-import { Stats } from "./types";
+import { Finding, Stats } from "./types";
+import { CLICommandResult } from "../types";
 import { Reporter } from "./utils/report";
 
-export const analyzeUsage = async (options: OptionValues): Promise<void> => {
+export const analyzeUsage = async (options: OptionValues): Promise<CLICommandResult> => {
     try {
       // Валидация входных данных
       if (!options.sourcePath || !options.projectPath) {
         console.error(
           "❌ Error: --sourcePath (-s) and --projectPath (-p) are required.",
         );
-        process.exit(1);
+        return { success: false, error: "--sourcePath (-s) and --projectPath (-p) are required." };
       }
       const projectPath = path.resolve(options.projectPath);
       const sourcePath = path.resolve(options.sourcePath);
@@ -59,14 +60,14 @@ export const analyzeUsage = async (options: OptionValues): Promise<void> => {
           console.error(
             "\n🛑 CI check failed: critical API contract mismatches were found.",
           );
-          process.exit(1);
+          return { success: false, error: "CI check failed: critical API contract mismatches were found." };
         }
       }
 
       console.log("\n✅ Done!");
-      process.exit(0);
+      return { success: true };
     } catch (error: any) {
       console.error(`\n💥 Fatal error: ${error.message}`);
-      process.exit(1);
+      return { success: false, error: error?.message ?? String(error) };
     }
 }
