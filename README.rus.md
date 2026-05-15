@@ -40,7 +40,7 @@ npm install ts-openapi-codegen --save-dev
 
 ## Использование
 
-CLI инструмент поддерживает шесть команд: `generate`, `check-config`, `update-config`, `init`, `preview-changes` и `analyze-diff`.
+CLI инструмент поддерживает семь команд: `generate`, `check-config`, `update-config`, `init`, `preview-changes`, `analyze-diff` и `analyze-usage`.
 
 ### Команда: `generate`
 
@@ -210,6 +210,32 @@ openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
     }
   ]
 }
+```
+
+### Команда: `analyze-usage`
+
+Анализирует, как TypeScript consumer-проект использует экспорты generated API, и формирует JSON-отчёт.
+
+**Использование:**
+```bash
+openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --tsconfigPath ./tsconfig.json
+openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --output ./api-report.json --check
+```
+
+**Опции:**
+- `--sourcePath` / `-s` - Путь к entry-файлу сгенерированного API (обязательно)
+- `--projectPath` / `-p` - Корневая директория consumer TypeScript-проекта (обязательно)
+- `--tsconfigPath` / `-t` - Опциональный путь к `tsconfig.json`
+- `--output` / `-o` - Путь к выходному JSON-отчету (по умолчанию: `api-report.json`)
+- `--check` / `-c` - CI-режим: завершает команду с кодом `1`, если найдены несоответствия уровня ERROR
+
+Команда выводит сводку в консоль и сохраняет JSON-отчёт с найденными проблемами и метрикой покрытия.
+
+Рекомендуемая CI-цепочка:
+```bash
+openapi generate --input ./openapi/spec.yaml --output ./generated
+openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --check
+tsc --noEmit
 ```
 
 ### Файл конфигурации

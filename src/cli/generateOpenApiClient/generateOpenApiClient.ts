@@ -13,6 +13,7 @@ import { flatOptionsSchema } from '../../common/VersionedSchema/AllVersionedSche
 import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
 import { GenerateOptions, generateOptionsSchema } from '../schemas';
+import { CLICommandResult } from '../types';
 
 const generateCliFlatSchema = flatOptionsSchema.strict().superRefine((data, ctx) => {
     if (data.excludeCoreServiceFiles === true && data.request) {
@@ -28,7 +29,7 @@ const generateCliFlatSchema = flatOptionsSchema.strict().superRefine((data, ctx)
  * Запускает генерацию OpenAPI клиента
  * Поддерживает как конфиг-файл, так и параметры из CLI
  */
-export async function generateOpenApiClient(options: OptionValues): Promise<void> {
+export async function generateOpenApiClient(options: OptionValues): Promise<CLICommandResult> {
     const { openapiConfig, ...clientOptions } = options;
 
     try {
@@ -43,7 +44,7 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
                 message: LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')),
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(1);
+            return { success: false, error: validationResult.errors.join('\n') };
         }
 
         const validatedOptions = validationResult.data as GenerateOptions;
@@ -63,12 +64,12 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
                     message: LOGGER_MESSAGES.ERROR.GENERIC(directOptionsValidationResult.errors.join('\n')),
                 });
                 await APP_LOGGER.shutdownLoggerAsync();
-                process.exit(1);
+                return { success: false, error: directOptionsValidationResult.errors.join('\n') };
             }
 
             await OpenAPI.generate(directOptionsValidationResult.data as TRawOptions);
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(0);
+            return { success: true };
         }
 
         const configData = loadConfigIfExists(validatedOptions.openapiConfig);
@@ -78,7 +79,7 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
                 message: `${LOGGER_MESSAGES.CONFIG.FILE_MISSING}\n${LOGGER_MESSAGES.CONFIG.FILE_MISSING_HINT}`,
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(1);
+            return { success: false, error: LOGGER_MESSAGES.CONFIG.FILE_MISSING };
         }
 
         if (Array.isArray(configData)) {
@@ -101,13 +102,13 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
                 message: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED,
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            process.exit(1);
+            return { success: false, error: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED };
         }
 
         const { value } = migratedOptions;
         await OpenAPI.generate(value as TRawOptions);
         await APP_LOGGER.shutdownLoggerAsync();
-        process.exit(0);
+        return { success: true };
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
         APP_LOGGER.errorWithHint({
@@ -116,6 +117,6 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
             error,
         });
         await APP_LOGGER.shutdownLoggerAsync();
-        process.exit(1);
+        return { success: false, error: message };
     }
 }

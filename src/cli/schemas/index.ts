@@ -5,6 +5,7 @@ export * from './init';
 export * from './previewChanges';
 export * from './updateConfig';
 export * from './analyzeDiff';
+export * from './analyzeUsage';
 
 // Тип для всех возможных CLI опций (для union type)
 export type CLIOptions =
@@ -13,4 +14,5 @@ export type CLIOptions =
     | import('./updateConfig').UpdateConfigOptions
     | import('./init').InitOptions
     | import('./previewChanges').TPreviewChangesOptions
-    | import('./analyzeDiff').AnalyzeDiffOptions;
+    | import('./analyzeDiff').AnalyzeDiffOptions
+    | import('./analyzeUsage').AnalyzeUsageOptions;
