@@ -1,5 +1,6 @@
 import { mkdirSync } from 'fs';
 
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { eslintFix } from '../../common/utils/eslintFix';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
@@ -41,7 +42,7 @@ interface IWriteClientModels {
 export async function writeClientModels(this: WriteClient, options: IWriteClientModels): Promise<void> {
     const { models, templates, outputModelsPath, httpClient, useUnionTypes, modelsMode, outputCorePath, useOptions, useProjectPrettier, useEslintFix } = options;
 
-    this.logger.info('Recording of model files begins');
+    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_START);
 
     if (modelsMode === ModelsMode.CLASSES) {
         const file = resolveHelper(outputModelsPath, 'models.ts');
@@ -54,9 +55,9 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             modelsMode,
         });
         const formattedValue = await format(templateResult);
-        await fileSystemHelpers.writeFile(file, formattedValue);
-        this.logger.info(`File recording completed: ${file}`);
-        this.logger.info('Model file recording completed successfully');
+        await this.writeOutputFile(file, formattedValue);
+        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
+        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_FINISH);
         return;
     }
 
@@ -71,13 +72,13 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
         if (dir) {
             const directory = resolveHelper(outputModelsPath, dir);
 
-            this.logger.info(`A directory is being created: ${directory}`);
+            this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DIRECTORY_CREATING(directory));
 
             mkdirSync(directory, { recursive: true });
         }
         const file = resolveHelper(outputModelsPath, `${modelFolderPath}.ts`);
 
-        this.logger.info(`The recording of the file data begins: ${file}`);
+        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
 
         const templateResult = templates.exports.model({
             ...model,
@@ -85,13 +86,13 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             useUnionTypes,
         });
         const formattedValue = await format(templateResult, undefined, useProjectPrettier);
-        await fileSystemHelpers.writeFile(file, formattedValue);
+        await this.writeOutputFile(file, formattedValue);
         if (useEslintFix) {
             await eslintFix(file);
         }
 
-        this.logger.info(`File recording completed: ${file}`);
+        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
     }
 
-    this.logger.info('Model file recording completed successfully');
+    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_FINISH);
 }

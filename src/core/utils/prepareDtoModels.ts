@@ -1,8 +1,8 @@
 import type { Client } from '../types/shared/Client.model';
-import type { Model } from '../types/shared/Model.model';
 import type { MiracleEntry } from '../types/shared/Miracle.model';
-import { unique } from './unique';
+import type { Model } from '../types/shared/Model.model';
 import { escapeName } from './escapeName';
+import { unique } from './unique';
 
 type NameMapEntry = {
     rawName: string;

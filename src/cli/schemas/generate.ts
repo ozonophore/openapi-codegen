@@ -15,6 +15,11 @@ export const generateOptionsSchema = z
         reportFile: emptyStringToUndefined,
         useProjectPrettier: z.boolean().optional(),
         useEslintFix: z.boolean().optional(),
+        governanceConfig: emptyStringToUndefined,
+        cache: z.boolean().optional(),
+        cachePath: emptyStringToUndefined,
+        cacheStrategy: z.enum(['content', 'entity']).optional(),
+        cacheDebug: z.boolean().optional(),
     })
     .superRefine((data, ctx) => {
         const hasInput = !!data.input;

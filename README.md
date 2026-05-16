@@ -31,6 +31,7 @@
 - Supports strict OpenAPI diagnostics with JSON reports (`--strict-openapi`, `--report-file`)
 - Supports generator plugins (`plugins`) including built-in `x-typescript-type`
 - Supports binary request/response generation (`format: binary` -> `Blob`)
+- Supports opt-in generation cache and incremental writes (`--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`)
 
 ## Install
 
@@ -86,6 +87,10 @@ openapi generate --input ./spec.json --output ./dist
 | `--diffReport` | - | string | `./openapi-diff-report.json` | Path to diff report JSON |
 | `--useProjectPrettier` | - | boolean | `false` | Use the project’s Prettier config to format generated code |
 | `--useEslintFix` | - | boolean | `false` | Run ESLint `--fix` on generated files after write (requires `eslint` in the project) |
+| `--cache` | - | boolean | `false` | Enable generation cache (disabled by default) |
+| `--cachePath` | - | string | `.openapi-codegen-cache.json` | Path to generation cache file relative to output directory |
+| `--cacheStrategy` | - | string | `entity` | Cache strategy: `entity` (skip full item generation on cache hit) or `content` (always generate, but only write changed files) |
+| `--cacheDebug` | - | boolean | `false` | Show cache hit/miss debug logs |
 
 **Examples:**
 ```bash

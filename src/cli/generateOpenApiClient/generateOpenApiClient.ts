@@ -105,7 +105,17 @@ export async function generateOpenApiClient(options: OptionValues): Promise<void
         }
 
         const { value } = migratedOptions;
-        await OpenAPI.generate(value as TRawOptions);
+        const mergedOptions: TRawOptions = {
+            ...(value as TRawOptions),
+            strictOpenapi: validatedOptions.strictOpenapi ?? (value as TRawOptions).strictOpenapi,
+            reportFile: validatedOptions.reportFile ?? (value as TRawOptions).reportFile,
+            cache: validatedOptions.cache ?? (value as TRawOptions).cache,
+            cachePath: validatedOptions.cachePath ?? (value as TRawOptions).cachePath,
+            cacheStrategy: validatedOptions.cacheStrategy ?? (value as TRawOptions).cacheStrategy,
+            cacheDebug: validatedOptions.cacheDebug ?? (value as TRawOptions).cacheDebug,
+        };
+
+        await OpenAPI.generate(mergedOptions);
         await APP_LOGGER.shutdownLoggerAsync();
         process.exit(0);
     } catch (error: unknown) {

@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.5] — 2026-05-16
+
+### Added
+- Added generation cache controls:
+  - CLI flags `--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`;
+  - config keys `cache`, `cachePath`, `cacheStrategy`, `cacheDebug` in generation schemas.
+- Added file-level content-aware writing (`writeFileIfChanged`) to avoid rewriting unchanged generated files.
+- Added `GenerationCache` with persisted cache entries (fingerprint + generated files list).
+
+### Changed
+- Generation flow now supports cache-aware warm runs (`entity` strategy) and logs write statistics (`written`, `unchanged`).
+- Cache path resolution now uses output context:
+  - default cache file path is `<output>/.openapi-codegen-cache.json`;
+  - for relative `cachePath`, final path is resolved inside each output directory.
+- When cache is disabled and multiple items share one output, a grouped warning is now emitted with a recommendation to enable cache.
+- Output cleanup was redesigned:
+  - removed full output directory cleanup before each item generation;
+  - added selective stale-file cleanup after generation based on expected output files.
+- CLI direct generation now preserves cache-related values when merging validated options into migrated config.
+- Default generation options updated:
+  - `cache: false`;
+  - `cachePath: .openapi-codegen-cache.json`;
+  - `cacheStrategy: entity`;
+  - `cacheDebug: false`.
+
+### Removed
+- Removed unused dev dependency `ts-prune`.
+
+### Tests
+- Added unit tests for generation cache scenarios in `test/cacheGeneration.test.ts`:
+  - warm run does not rewrite unchanged files;
+  - spec change invalidates cache and rewrites outputs;
+  - content strategy keeps unchanged mtimes;
+  - multi-item shared output keeps files and cache entries stable.
+
 ## [2.1.0-beta.4] — 2026-04-12
 
 ### Added

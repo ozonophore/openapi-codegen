@@ -31,6 +31,7 @@
 - Поддерживает strict-диагностику OpenAPI с JSON-отчетом (`--strict-openapi`, `--report-file`)
 - Поддерживает плагины генератора (`plugins`), включая встроенный `x-typescript-type`
 - Поддерживает генерацию бинарных request/response (`format: binary` -> `Blob`)
+- Поддерживает opt-in кэш генерации и инкрементальную запись (`--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`)
 
 ## Установка
 
@@ -85,6 +86,10 @@ openapi generate --input ./spec.json --output ./dist
 | `--diffReport` | - | string | `./openapi-diff-report.json` | Путь к diff-отчёту |
 | `--useProjectPrettier` | - | boolean | `false` | Форматировать сгенерированный код конфигом Prettier проекта |
 | `--useEslintFix` | - | boolean | `false` | Запускать ESLint `--fix` для сгенерированных файлов после записи (нужен `eslint` в проекте) |
+| `--cache` | - | boolean | `false` | Включить кэш генерации (по умолчанию кэш выключен) |
+| `--cachePath` | - | string | `.openapi-codegen-cache.json` | Путь к файлу кэша генерации относительно output-директории |
+| `--cacheStrategy` | - | string | `entity` | Стратегия кэша: `entity` (пропуск полной генерации item при cache hit) или `content` (генерация выполняется, но записываются только измененные файлы) |
+| `--cacheDebug` | - | boolean | `false` | Показывать debug-логи cache hit/miss |
 
 **Примеры:**
 ```bash
