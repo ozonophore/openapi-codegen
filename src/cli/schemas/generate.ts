@@ -15,6 +15,7 @@ export const generateOptionsSchema = z
         reportFile: emptyStringToUndefined,
         useProjectPrettier: z.boolean().optional(),
         useEslintFix: z.boolean().optional(),
+        governanceConfig: emptyStringToUndefined,
     })
     .superRefine((data, ctx) => {
         const hasInput = !!data.input;
