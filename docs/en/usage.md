@@ -45,6 +45,10 @@ openapi generate --input ./spec.json --output ./dist
 | `--diffReport` | - | string | `./openapi-diff-report.json` | Path to diff report JSON |
 | `--useProjectPrettier` | - | boolean | `false` | Use the project’s Prettier config to format generated code |
 | `--useEslintFix` | - | boolean | `false` | Run ESLint `--fix` on generated files after write (requires `eslint` in the project) |
+| `--cache` | - | boolean | `false` | Enable generation cache (disabled by default) |
+| `--cachePath` | - | string | `.openapi-codegen-cache.json` | Path to generation cache file relative to output directory |
+| `--cacheStrategy` | - | string | `entity` | Cache strategy: `entity` (skip full item generation on cache hit) or `content` (always generate, but only write changed files) |
+| `--cacheDebug` | - | boolean | `false` | Show cache hit/miss debug logs |
 
 **Examples:**
 ```bash
@@ -144,9 +148,16 @@ openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 
 **Options:**
 - `--input` / `-i` - Path to current OpenAPI specification file (required)
-- `--compare-with` - Path to previous OpenAPI specification file
+- `--compare-with` - Path to previous OpenAPI specification file (has priority over `--git` when both are set)
 - `--git` - Git ref to read previous specification version from (e.g. `HEAD~1`)
 - `--output-report` - Path to save JSON diff report (default: `./openapi-diff-report.json`)
+- `--openapi-config` / `-ocn` - Path to configuration file (default: `openapi.config.json`); v2 plugin hooks load `plugins` from this file
+- `--governance-config` - Path to governance rules JSON config file
+- `--strict-plugin-mode` - Fail when a plugin hook throws (default: log and continue)
+- `--ci` - Exit with code 1 when governance errors are found
+- `--allow-breaking` - Allow breaking changes in governance checks
+
+**Plugin hooks (v2):** register plugin module paths in `plugins` inside `openapi.config.json`. See [Plugin API v2 (RFC)](plugin-api-v2.md).
 
 #### Miracles and confirmation
 

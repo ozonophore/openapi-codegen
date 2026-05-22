@@ -6,6 +6,7 @@ import path from 'path';
 
 import { generate, HttpClient } from '../src';
 import { ValidationLibrary } from '../src/core/types/enums/ValidationLibrary.enum';
+import { silenceLoggers } from '../src/test/helpers/silenceLoggers';
 
 const repoRoot = path.join(__dirname, '..');
 if (process.cwd() !== repoRoot) {
@@ -14,6 +15,8 @@ if (process.cwd() !== repoRoot) {
 
 describe('@unit: custom request + requestRaw smoke', () => {
     test('generates requestRaw methods with custom request implementation', async (t: TestContext) => {
+        silenceLoggers(t);
+
         const input = path.join(__dirname, 'spec', 'v3.json');
         const outputDir = path.join(process.cwd(), 'test', 'generated', 'custom_request_raw');
         t.after(() => {

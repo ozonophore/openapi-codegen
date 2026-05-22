@@ -5,7 +5,6 @@ export * from './generate';
 export * from './init';
 export * from './previewChanges';
 export * from './updateConfig';
-export * from './analyzeDiff';
 
 // Тип для всех возможных CLI опций (для union type)
 export type CLIOptions =

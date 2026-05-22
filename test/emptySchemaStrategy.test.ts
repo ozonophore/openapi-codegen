@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'fs';
 import path from 'path';
@@ -7,6 +7,7 @@ import path from 'path';
 import { generate, HttpClient } from '../src';
 import { EmptySchemaStrategy } from '../src/core/types/enums/EmptySchemaStrategy.enum';
 import { ValidationLibrary } from '../src/core/types/enums/ValidationLibrary.enum';
+import { installSilenceLoggers } from '../src/test/helpers/silenceLoggers';
 
 // Focused behavioral tests for emptySchemaStrategy across validation libraries.
 // Assertions are targeted to stable snippets/files instead of full snapshots.
@@ -76,6 +77,17 @@ function getRootIndexPath(outputPath: string): string {
 }
 
 describe('@unit: emptySchemaStrategy', () => {
+    let restoreLoggers: (() => void) | undefined;
+
+    beforeEach(() => {
+        restoreLoggers = installSilenceLoggers();
+    });
+
+    afterEach(() => {
+        restoreLoggers?.();
+        restoreLoggers = undefined;
+    });
+
     for (const testCase of cases) {
         test(`${testCase.label}: keep`, async (t: TestContext) => {
             const output = createOutputPath(t, testCase.label, EmptySchemaStrategy.KEEP);

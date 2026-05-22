@@ -1,8 +1,9 @@
 import assert from 'node:assert';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
+import { installSilenceLoggers } from '../../../test/helpers/silenceLoggers';
 import { runGenerateOpenApiClient } from '../generateOpenApiClient';
 
 type StrictReport = {
@@ -69,6 +70,17 @@ function runStrictGenerate(options: Record<string, unknown>): Promise<number> {
 }
 
 describe('@unit: generateOpenApiClient strict-openapi', () => {
+    let restoreLoggers: (() => void) | undefined;
+
+    beforeEach(() => {
+        restoreLoggers = installSilenceLoggers();
+    });
+
+    afterEach(() => {
+        restoreLoggers?.();
+        restoreLoggers = undefined;
+    });
+
     test('returns exit code 0 and writes report file when strict has no errors', async t => {
         const tempDir = createTempDir(t, 'openapi-cli-strict-ok-');
         const reportFile = path.join(tempDir, 'strict-report.json');

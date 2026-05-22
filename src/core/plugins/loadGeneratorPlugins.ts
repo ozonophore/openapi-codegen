@@ -1,7 +1,8 @@
+import { pathToFileURL } from 'node:url';
+
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { OpenApiGeneratorPlugin } from './GeneratorPlugin.model';
 import { getBuiltinPlugins } from './getBuiltinPlugins';
-import { pathToFileURL } from 'node:url';
 
 /**
  * Type guard for runtime plugin objects.

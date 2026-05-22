@@ -108,6 +108,10 @@ export async function runGenerateOpenApiClient(options: OptionValues): Promise<n
             strictOpenapi: validatedOptions.strictOpenapi ?? (value as TRawOptions).strictOpenapi,
             reportFile: validatedOptions.reportFile ?? (value as TRawOptions).reportFile,
             governanceConfig: validatedOptions.governanceConfig ?? (value as TRawOptions).governanceConfig,
+            cache: validatedOptions.cache ?? (value as TRawOptions).cache,
+            cachePath: validatedOptions.cachePath ?? (value as TRawOptions).cachePath,
+            cacheStrategy: validatedOptions.cacheStrategy ?? (value as TRawOptions).cacheStrategy,
+            cacheDebug: validatedOptions.cacheDebug ?? (value as TRawOptions).cacheDebug,
         };
 
         await OpenAPI.generate(mergedOptions);

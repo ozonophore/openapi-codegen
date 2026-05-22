@@ -1,8 +1,9 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
+import { installSilenceAppLogger } from '../../../test/helpers/silenceLoggers';
 import { analyzeDiff } from '../analyzeDiff';
 
 const writeSpec = (dir: string, filename: string, payload: unknown): string => {
@@ -23,6 +24,17 @@ const createTempDir = (t: TestContext, prefix: string): string => {
 };
 
 describe('@unit: analyzeDiff TYPE_COERCION miracles', () => {
+    let restoreAppLogger: (() => void) | undefined;
+
+    beforeEach(() => {
+        restoreAppLogger = installSilenceAppLogger();
+    });
+
+    afterEach(() => {
+        restoreAppLogger?.();
+        restoreAppLogger = undefined;
+    });
+
     test('detects semantic type change for scalar property transition', async t => {
         const tmpDir = createTempDir(t, 'openapi-diff-test-');
         const reportPath = path.join(tmpDir, 'report.json');

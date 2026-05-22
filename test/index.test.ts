@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { describe, test } from 'node:test';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import { readFileSync } from 'fs';
 import { sync } from 'glob';
@@ -8,6 +8,7 @@ import path from 'path';
 import { generate, HttpClient } from '../src';
 import { ModelsMode } from '../src/core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../src/core/types/enums/ValidationLibrary.enum';
+import { installSilenceLoggers } from '../src/test/helpers/silenceLoggers';
 import { toMatchSnapshot } from './utils/toMatchSnapshot';
 
 // Snapshot regression tests for core generation fixtures.
@@ -18,6 +19,17 @@ if (process.cwd() !== repoRoot) {
 }
 
 describe('@unit: generate', () => {
+    let restoreLoggers: (() => void) | undefined;
+
+    beforeEach(() => {
+        restoreLoggers = installSilenceLoggers();
+    });
+
+    afterEach(() => {
+        restoreLoggers?.();
+        restoreLoggers = undefined;
+    });
+
     test('v2: generated files match snapshots', async () => {
         const input = path.join(__dirname, 'spec', 'v2.json');
         await generate({
