@@ -4,6 +4,51 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.1.0-beta.6] — 2026-05-23
+
+### Добавлено
+- Добавлены параметры управления кэшем генерации:
+  - CLI-флаги `--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`;
+  - ключи конфига `cache`, `cachePath`, `cacheStrategy`, `cacheDebug` в схемах генерации.
+- Добавлена запись файлов с проверкой изменений (`writeFileIfChanged`), чтобы не переписывать неизмененные сгенерированные файлы.
+- Добавлен `GenerationCache` с сохранением cache-entries (fingerprint + список сгенерированных файлов).
+
+### Изменено
+- Поток генерации теперь поддерживает cache-aware warm run (стратегия `entity`) и пишет статистику записи (`written`, `unchanged`).
+- Разрешение пути кэша переведено в output-контекст:
+  - путь по умолчанию — `<output>/.openapi-codegen-cache.json`;
+  - относительный `cachePath` резолвится внутри соответствующей output-директории.
+- При отключенном кэше и нескольких items с общим output теперь выводится одно агрегированное предупреждение с рекомендацией включить кэш.
+- Переработана очистка output:
+  - убрана полная очистка output-директорий перед генерацией каждого item;
+  - добавлена селективная очистка stale-файлов после генерации на основе expected output files.
+- В direct CLI-генерации сохранены cache-параметры при merge validated options в мигрированный конфиг.
+- Обновлены значения по умолчанию:
+  - `cache: false`;
+  - `cachePath: .openapi-codegen-cache.json`;
+  - `cacheStrategy: entity`;
+  - `cacheDebug: false`.
+
+### Удалено
+- Удалена неиспользуемая dev-зависимость `ts-prune`.
+
+### Исправлено
+- `validateAndMigrateConfigData`: удаление полей `undefined` после `convertArrayToObject` перед миграцией схемы (legacy array-конфиги).
+
+### Тесты
+- Добавлены unit-тесты кеширования генерации в `test/cacheGeneration.test.ts`:
+  - warm run не переписывает неизмененные файлы;
+  - изменение спецификации инвалидирует кэш и обновляет output;
+  - стратегия `content` сохраняет mtime для неизмененных файлов;
+  - multi-item сценарий с общим output сохраняет файлы и устойчивые cache entries.
+- Добавлены unit-тесты production-кода в `src/**/__tests__/` (префикс `@unit`, импорт из `src/`). Покрытие линий **88.41%** (было 87.42%):
+  - `checkAndUpdateConfig`: utils и entrypoints `checkConfig` / `updateConfig`;
+  - `initOpenApiConfig`: `init`, `initConfig`, utils (`buildConfig`, `findSpecFiles`, `validateSpecFiles`);
+  - `previewChanges` utils (`compareFiles`, `updateOutputPaths`, …);
+  - Zod-схемы CLI, в т.ч. `generateOptionsSchema`;
+  - `templatesCompiled` через `templateRendering.test.ts`;
+  - core: `loadDiffReport`, расширены `prepareDtoModels`.
+
 ## [2.1.0-beta.5] — 2026-04-28
 
 ### Добавлено
