@@ -13,6 +13,7 @@ import { flatOptionsSchema } from '../../common/VersionedSchema/AllVersionedSche
 import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
 import { GenerateOptions, generateOptionsSchema } from '../schemas';
+import { CLICommandResult } from '../types';
 
 const generateCliFlatSchema = flatOptionsSchema.strict().superRefine((data, ctx) => {
     if (data.excludeCoreServiceFiles === true && data.request) {
@@ -28,7 +29,7 @@ const generateCliFlatSchema = flatOptionsSchema.strict().superRefine((data, ctx)
  * Runs OpenAPI client generation and returns a process exit code.
  * Does not call `process.exit` — safe for in-process unit tests.
  */
-export async function runGenerateOpenApiClient(options: OptionValues): Promise<number> {
+export async function generateOpenApiClient(options: OptionValues): Promise<CLICommandResult> {
     const { openapiConfig, ...clientOptions } = options;
 
     try {
@@ -43,7 +44,7 @@ export async function runGenerateOpenApiClient(options: OptionValues): Promise<n
                 message: LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')),
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            return 1;
+            return { success: false, error: validationResult.errors.join('\n') };
         }
 
         const validatedOptions = validationResult.data as GenerateOptions;
@@ -62,12 +63,12 @@ export async function runGenerateOpenApiClient(options: OptionValues): Promise<n
                     message: LOGGER_MESSAGES.ERROR.GENERIC(directOptionsValidationResult.errors.join('\n')),
                 });
                 await APP_LOGGER.shutdownLoggerAsync();
-                return 1;
+                return { success: false, error: directOptionsValidationResult.errors.join('\n') };
             }
 
             await OpenAPI.generate(directOptionsValidationResult.data as TRawOptions);
             await APP_LOGGER.shutdownLoggerAsync();
-            return 0;
+            return { success: true };
         }
 
         const configData = loadConfigIfExists(validatedOptions.openapiConfig);
@@ -77,7 +78,7 @@ export async function runGenerateOpenApiClient(options: OptionValues): Promise<n
                 message: `${LOGGER_MESSAGES.CONFIG.FILE_MISSING}\n${LOGGER_MESSAGES.CONFIG.FILE_MISSING_HINT}`,
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            return 1;
+            return { success: false, error: LOGGER_MESSAGES.CONFIG.FILE_MISSING };
         }
 
         if (Array.isArray(configData)) {
@@ -99,7 +100,7 @@ export async function runGenerateOpenApiClient(options: OptionValues): Promise<n
                 message: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED,
             });
             await APP_LOGGER.shutdownLoggerAsync();
-            return 1;
+            return { success: false, error: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED };
         }
 
         const { value } = migratedOptions;
@@ -116,7 +117,7 @@ export async function runGenerateOpenApiClient(options: OptionValues): Promise<n
 
         await OpenAPI.generate(mergedOptions);
         await APP_LOGGER.shutdownLoggerAsync();
-        return 0;
+        return { success: true };
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
         APP_LOGGER.errorWithHint({
@@ -125,14 +126,6 @@ export async function runGenerateOpenApiClient(options: OptionValues): Promise<n
             error,
         });
         await APP_LOGGER.shutdownLoggerAsync();
-        return 1;
+        return { success: false, error: message };
     }
-}
-
-/**
- * CLI entry: runs generation and terminates the process with the resulting exit code.
- */
-export async function generateOpenApiClient(options: OptionValues): Promise<void> {
-    const exitCode = await runGenerateOpenApiClient(options);
-    process.exit(exitCode);
 }

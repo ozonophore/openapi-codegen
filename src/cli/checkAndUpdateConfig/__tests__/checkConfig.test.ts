@@ -8,24 +8,12 @@ import { APP_LOGGER } from '../../../common/Consts';
 import { HttpClient } from '../../../core/types/enums/HttpClient.enum';
 import { checkConfig } from '../checkConfig';
 
-class ProcessExitError extends Error {
-    constructor(public readonly exitCode: number) {
-        super(`process.exit(${exitCode})`);
-        this.name = 'ProcessExitError';
-    }
-}
-
 /** Config without schema-default fields so checkConfig does not open enquirer. */
 const flatConfig = {
     input: './test/spec/v3.json',
     output: './test/generated',
     httpClient: HttpClient.AXIOS,
 };
-
-const mockProcessExit = () =>
-    mock.method(process, 'exit', (code?: string | number | null | undefined) => {
-        throw new ProcessExitError(Number(code ?? 0));
-    });
 
 async function writeConfig(dir: string, content: unknown): Promise<string> {
     const configPath = join(dir, 'openapi.config.json');
@@ -34,33 +22,29 @@ async function writeConfig(dir: string, content: unknown): Promise<string> {
 }
 
 describe('@unit: checkConfig', () => {
-    test('exits when options fail schema validation', async () => {
-        const exitMock = mockProcessExit();
+    test('returns failure when options fail schema validation', async () => {
         const shutdownMock = mock.method(APP_LOGGER, 'shutdownLoggerAsync', async () => undefined);
         const errorMock = mock.method(APP_LOGGER, 'error', () => undefined);
 
-        await assert.rejects(
-            () => checkConfig({ openapiConfig: 123 }),
-            ProcessExitError,
-        );
+        const result = await checkConfig({ openapiConfig: 123 });
 
-        exitMock.mock.restore();
+        assert.strictEqual(result.success, false);
+        assert.ok(result.error);
+
         shutdownMock.mock.restore();
         errorMock.mock.restore();
     });
 
-    test('exits when config file is missing', async () => {
+    test('returns failure when config file is missing', async () => {
         const dir = await mkdtemp(join(tmpdir(), 'check-config-'));
         const configPath = join(dir, 'missing.json');
-        const exitMock = mockProcessExit();
         const shutdownMock = mock.method(APP_LOGGER, 'shutdownLoggerAsync', async () => undefined);
 
-        await assert.rejects(
-            () => checkConfig({ openapiConfig: configPath }),
-            ProcessExitError,
-        );
+        const result = await checkConfig({ openapiConfig: configPath });
 
-        exitMock.mock.restore();
+        assert.strictEqual(result.success, false);
+        assert.ok(result.error);
+
         shutdownMock.mock.restore();
     });
 
@@ -69,8 +53,9 @@ describe('@unit: checkConfig', () => {
         const configPath = await writeConfig(dir, flatConfig);
         const infoMock = mock.method(APP_LOGGER, 'info', () => undefined);
 
-        await checkConfig({ openapiConfig: configPath });
+        const result = await checkConfig({ openapiConfig: configPath });
 
+        assert.strictEqual(result.success, true);
         assert.strictEqual(infoMock.mock.callCount(), 1);
 
         infoMock.mock.restore();

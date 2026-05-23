@@ -1,6 +1,6 @@
 ## Usage
 
-The CLI tool supports six commands: `generate`, `check-config`, `update-config`, `init`, `preview-changes`, and `analyze-diff`.
+The CLI tool supports seven commands: `generate`, `check-config`, `update-config`, `init`, `preview-changes`, `analyze-diff`, and `analyze-usage`.
 
 ### Command: `generate`
 
@@ -181,4 +181,30 @@ Example (excerpt):
     }
   ]
 }
+```
+
+### Command: `analyze-usage`
+
+Analyzes how a TypeScript consumer project uses generated API exports and writes a JSON report.
+
+**Usage:**
+```bash
+openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --tsconfigPath ./tsconfig.json
+openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --output ./api-report.json --check
+```
+
+**Options:**
+- `--sourcePath` / `-s` - Path to generated API entry file (required)
+- `--projectPath` / `-p` - Root path of consumer TypeScript project (required)
+- `--tsconfigPath` / `-t` - Optional path to `tsconfig.json`
+- `--output` / `-o` - Output JSON report file path (default: `api-report.json`)
+- `--check` / `-c` - CI mode: exits with code `1` when ERROR-level mismatches are found
+
+The command prints a usage summary to console and writes a JSON report with findings and coverage details.
+
+Recommended CI chain:
+```bash
+openapi generate --input ./openapi/spec.yaml --output ./generated
+openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --check
+tsc --noEmit
 ```

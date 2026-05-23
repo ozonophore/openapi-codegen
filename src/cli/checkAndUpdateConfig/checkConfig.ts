@@ -5,6 +5,7 @@ import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { validateZodOptions } from '../../common/Validation/validateZodOptions';
 import { CheckConfigOptions, checkConfigOptionsSchema } from '../schemas';
+import { CLICommandResult } from '../types';
 import { ACTION_FOR_CONFIG_DATA_OPTIONS } from './constants';
 import { selectConfigAction } from './utils/selectConfigAction';
 import { validateAndMigrateConfigData } from './utils/validateAndMigrateConfigData';
@@ -19,13 +20,13 @@ import { validateAndMigrateConfigData } from './utils/validateAndMigrateConfigDa
  * @example
  * await checkConfig('./openapi-config.json');
  */
-export async function checkConfig(options: OptionValues): Promise<void> {
+export async function checkConfig(options: OptionValues): Promise<CLICommandResult> {
     const validationResult = validateZodOptions(checkConfigOptionsSchema, options);
 
     if (!validationResult.success) {
         APP_LOGGER.error(LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')));
         await APP_LOGGER.shutdownLoggerAsync();
-        process.exit(1);
+        return { success: false, error: validationResult.errors.join('\n') };
     }
 
     const validatedOptions = validationResult.data as CheckConfigOptions;
@@ -34,7 +35,7 @@ export async function checkConfig(options: OptionValues): Promise<void> {
     if (!configData) {
         APP_LOGGER.error(LOGGER_MESSAGES.CONFIG.FILE_NOT_FOUND(validatedOptions.openapiConfig || ''));
         await APP_LOGGER.shutdownLoggerAsync();
-        process.exit(1);
+        return { success: false, error: LOGGER_MESSAGES.CONFIG.FILE_NOT_FOUND(validatedOptions.openapiConfig || '') };
     }
 
     try {
@@ -50,7 +51,8 @@ export async function checkConfig(options: OptionValues): Promise<void> {
                 warningMessage: LOGGER_MESSAGES.CONFIG.WARNING_OUTDATED_CONFIG,
                 actionChoices: ACTION_FOR_CONFIG_DATA_OPTIONS,
             });
-            return;
+            await APP_LOGGER.shutdownLoggerAsync();
+            return { success: true };
         }
 
         // Если есть значения по умолчанию, предложить их удаление
@@ -62,10 +64,13 @@ export async function checkConfig(options: OptionValues): Promise<void> {
                 actionChoices: ACTION_FOR_CONFIG_DATA_OPTIONS,
             });
         }
+        await APP_LOGGER.shutdownLoggerAsync();
+        return { success: true };
     } catch (error) {
         handleConfigError(LOGGER_MESSAGES.CONFIG.CHECKING_FAILED, error);
         await APP_LOGGER.shutdownLoggerAsync();
-        process.exit(1);
+        const message = error instanceof Error ? error.message : String(error);
+        return { success: false, error: message };
     }
 }
 

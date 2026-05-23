@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.7] — 2026-05-27
+
+### Added
+- Added `analyze-usage` CLI command to analyze generated API usage in TypeScript consumer projects and produce usage reports.
+  - New command options: `--sourcePath`, `--projectPath`, `--tsconfigPath`, `--output`, `--check`
+  - Includes semantic analysis for services, models, schemas, imports, diagnostics, and coverage
+  - Saves JSON report for CI and local analysis workflows
+
+### Changed
+- Unified command completion flow: CLI commands now return a structured result object with `success` status, and process exit codes are finalized in `src/cli/index.ts`.
+
 ## [2.1.0-beta.6] — 2026-05-23
 
 ### Added
