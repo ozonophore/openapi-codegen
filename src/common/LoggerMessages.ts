@@ -148,4 +148,43 @@ export const LOGGER_MESSAGES = {
         ESLINT_FIX_FAILED: (file: string, error: string) => `ESLint fix failed for "${file}": ${error}`,
         ESLINT_FIX_APPLIED: (file: string) => `ESLint fix applied: ${file}`,
     },
+
+    // ========== Analyze Diff Messages ==========
+    ANALYZE_DIFF: {
+        STARTED: (newSpec: string, baseSource: string) => `Starting analyze-diff: input=${newSpec}, base=${baseSource}`,
+        SKIPPED_NO_BASE: 'History analysis skipped: no base spec provided (use --compare-with or --git).',
+        VALIDATION_ERROR: (message: string) => `Analyze-diff options validation failed: ${message}`,
+        COMPARE_WITH_OVERRIDES_GIT: (gitRef: string) =>
+            `Option "--compare-with" has priority over "--git". Ignoring git ref "${gitRef}".`,
+        PLUGIN_DIAGNOSTIC: (diagnostic: { pluginName: string; hook: string; status: string; durationMs: number; message?: string }) => {
+            const messageSuffix = diagnostic.message ? `: ${diagnostic.message}` : '';
+            return `[plugin:${diagnostic.pluginName}] hook=${diagnostic.hook} status=${diagnostic.status} duration=${diagnostic.durationMs}ms${messageSuffix}`;
+        },
+        REPORT_CREATED: (reportPath: string) => `Semantic diff report created: ${reportPath}`,
+        SUMMARY: (
+            report: {
+                summary: { breaking: number; nonBreaking: number; informational: number };
+                governance: { summary: { errors: number; warnings: number; info: number } };
+            },
+            reportPath: string
+        ) =>
+            `Summary: report=${reportPath}, breaking=${report.summary.breaking}, nonBreaking=${report.summary.nonBreaking}, informational=${report.summary.informational}, governanceErrors=${report.governance.summary.errors}, governanceWarnings=${report.governance.summary.warnings}, governanceInfo=${report.governance.summary.info}`,
+        RECOMMENDATION: (report: { recommendation: { semver: string; reason: string; confidence: string; reasons: string[] } }) =>
+            `Recommended version bump: ${report.recommendation.semver} (${report.recommendation.reason}, confidence=${report.recommendation.confidence}, reasons=${report.recommendation.reasons.join(',')})`,
+        GOVERNANCE: (report: { governance: { summary: { errors: number; warnings: number; info: number } } }) =>
+            `Governance: errors=${report.governance.summary.errors}, warnings=${report.governance.summary.warnings}, info=${report.governance.summary.info}`,
+        CI_MARKDOWN_SUMMARY: (markdown: string) => markdown,
+        CI_FAILURE: 'CI mode failed because governance errors were found.',
+        IGNORED_CHANGES: (count: number) => `[openapi-codegen] IGNORED: ${count} semantic change(s) filtered by analyze.ignore`,
+        EXECUTION_ERROR: (message: string) => `Analyze-diff execution failed: ${message}`,
+        INVALID_IGNORE_PATTERN: (pattern: string, error: string) => `[openapi-codegen] Invalid ignore pattern: ${pattern} — ${error}`,
+        LEGACY_BASE: (base: string) => `Base: ${base}`,
+        LEGACY_TARGET: (target: string) => `Target: ${target}`,
+        LEGACY_STABILITY_SCORE: (score: number) => `Stability score: ${score}%`,
+        LEGACY_CHANGES: (stats: { totalChanges: number; added: number; removed: number; changed: number }) =>
+            `Changes: total=${stats.totalChanges}, added=${stats.added}, removed=${stats.removed}, changed=${stats.changed}`,
+        LEGACY_BREAKING: (count: number) => `[openapi-codegen] BREAKING: ${count} item(s)`,
+        LEGACY_WARNINGS: (count: number) => `[openapi-codegen] WARNINGS: ${count} item(s)`,
+        LEGACY_IGNORED: (count: number) => `[openapi-codegen] IGNORED: ${count} item(s) by config rules`,
+    },
 } as const;

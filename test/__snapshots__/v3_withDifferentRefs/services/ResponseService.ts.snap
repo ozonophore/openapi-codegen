@@ -6,7 +6,6 @@ import type { IModelWithStringLocal } from '../models/ModelWithStringLocal';
 import type { IModelWithString } from '../models/schemas/base/ModelWithString';
 import type { TModelThatExtends } from '../models/schemas/compositions/ModelThatExtends';
 import type { INested } from '../models/schemas/compositions/Nested';
-import type { TPropExtendsA } from '../models/schemas/compositions/PropExtendsA';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 import type { ApiResult } from '../core/ApiResult';
 
@@ -41,37 +40,29 @@ export class ResponseService<TOptions = unknown> {
     constructor(private readonly executor: RequestExecutor<TOptions>) {}
 
     /**
-     * @returns IModelWithStringLocal
+     * @returns void
      * @throws ApiError
      */
-    public callWithResponse(options?: TOptions): Promise<IModelWithStringLocal> {
-        return this.executor.request<IModelWithStringLocal>(ResponseOptions.callWithResponse(), options);
+    public callWithResponse(options?: TOptions): Promise<void> {
+        return this.executor.request<void>(ResponseOptions.callWithResponse(), options);
     }
 
-    public callWithResponseRaw(options?: TOptions): Promise<ApiResult<IModelWithStringLocal>> {
-        return this.executor.requestRaw<IModelWithStringLocal>(ResponseOptions.callWithResponse(), options);
+    public callWithResponseRaw(options?: TOptions): Promise<ApiResult<void>> {
+        return this.executor.requestRaw<void>(ResponseOptions.callWithResponse(), options);
     }
     /**
-     * @returns TPropExtendsA Message for default response
      * @returns IModelWithString Message for 201 response
      * @throws ApiError
      */
-    public callWithDuplicateResponses(options?: TOptions): Promise<TPropExtendsA | IModelWithString> {
-        return this.executor.request<TPropExtendsA | IModelWithString>(
-            ResponseOptions.callWithDuplicateResponses(),
-            options,
-        );
+    public callWithDuplicateResponses(options?: TOptions): Promise<IModelWithString> {
+        return this.executor.request<IModelWithString>(ResponseOptions.callWithDuplicateResponses(), options);
     }
 
-    public callWithDuplicateResponsesRaw(options?: TOptions): Promise<ApiResult<TPropExtendsA | IModelWithString>> {
-        return this.executor.requestRaw<TPropExtendsA | IModelWithString>(
-            ResponseOptions.callWithDuplicateResponses(),
-            options,
-        );
+    public callWithDuplicateResponsesRaw(options?: TOptions): Promise<ApiResult<IModelWithString>> {
+        return this.executor.requestRaw<IModelWithString>(ResponseOptions.callWithDuplicateResponses(), options);
     }
     /**
      * @returns any Successful response
-     * @returns IModelWithString Message for default response
      * @returns TModelThatExtends Message for 201 response
      * @returns INested Message for 202 response
      * @throws ApiError
@@ -82,7 +73,6 @@ export class ResponseService<TOptions = unknown> {
               readonly '@namespace.integer'?: number;
               readonly value?: Array<IModelWithStringLocal>;
           }
-        | IModelWithString
         | TModelThatExtends
         | INested
     > {
@@ -92,7 +82,6 @@ export class ResponseService<TOptions = unknown> {
                   readonly '@namespace.integer'?: number;
                   readonly value?: Array<IModelWithStringLocal>;
               }
-            | IModelWithString
             | TModelThatExtends
             | INested
         >(ResponseOptions.callWithResponses(), options);
@@ -105,7 +94,6 @@ export class ResponseService<TOptions = unknown> {
                   readonly '@namespace.integer'?: number;
                   readonly value?: Array<IModelWithStringLocal>;
               }
-            | IModelWithString
             | TModelThatExtends
             | INested
         >
@@ -116,7 +104,6 @@ export class ResponseService<TOptions = unknown> {
                   readonly '@namespace.integer'?: number;
                   readonly value?: Array<IModelWithStringLocal>;
               }
-            | IModelWithString
             | TModelThatExtends
             | INested
         >(ResponseOptions.callWithResponses(), options);

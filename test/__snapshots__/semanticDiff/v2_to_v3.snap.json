@@ -1,0 +1,179 @@
+{
+  "schemaVersion": "1.1.0",
+  "summary": {
+    "breaking": 32,
+    "nonBreaking": 23,
+    "informational": 0
+  },
+  "recommendation": {
+    "semver": "major",
+    "confidence": "high",
+    "reason": "Breaking changes detected.",
+    "reasons": [
+      "HAS_BREAKING_CHANGES"
+    ]
+  },
+  "governanceSummary": {
+    "errors": 1,
+    "warnings": 2,
+    "info": 0
+  },
+  "governanceRuleIds": [
+    "NO_BREAKING_WITHOUT_FLAG",
+    "NO_DEFAULT_WITHOUT_2XX",
+    "REQUIRE_OPERATION_ID"
+  ],
+  "changesCount": 55,
+  "topChanges": [
+    {
+      "type": "model.added",
+      "severity": "non-breaking",
+      "path": "#/components/schemas/CompositionWithAllOfAndNullable"
+    },
+    {
+      "type": "model.added",
+      "severity": "non-breaking",
+      "path": "#/components/schemas/CompositionWithAnyOf"
+    },
+    {
+      "type": "model.added",
+      "severity": "non-breaking",
+      "path": "#/components/schemas/CompositionWithAnyOfAndNullable"
+    },
+    {
+      "type": "model.added",
+      "severity": "non-breaking",
+      "path": "#/components/schemas/CompositionWithAnyOfAnonymous"
+    },
+    {
+      "type": "model.added",
+      "severity": "non-breaking",
+      "path": "#/components/schemas/CompositionWithOneOf"
+    },
+    {
+      "type": "model.added",
+      "severity": "non-breaking",
+      "path": "#/components/schemas/CompositionWithOneOfAndNullable"
+    },
+    {
+      "type": "model.added",
+      "severity": "non-breaking",
+      "path": "#/components/schemas/CompositionWithOneOfAnonymous"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/Date"
+    },
+    {
+      "type": "model.added",
+      "severity": "non-breaking",
+      "path": "#/components/schemas/EnumWithStringsWithType"
+    },
+    {
+      "type": "model.property.type.changed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithArray/properties/prop"
+    },
+    {
+      "type": "model.property.type.changed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithArray/properties/propWithFile"
+    },
+    {
+      "type": "model.property.type.changed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithCircularReference/properties/prop"
+    },
+    {
+      "type": "model.property.type.changed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithDuplicateImports/properties/propA"
+    },
+    {
+      "type": "model.property.type.changed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithDuplicateImports/properties/propB"
+    },
+    {
+      "type": "model.property.type.changed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithDuplicateImports/properties/propC"
+    },
+    {
+      "type": "model.property.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithDuplicateImports/properties/propD"
+    },
+    {
+      "type": "model.property.type.changed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithDuplicateProperties/properties/prop"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithEnumInteger"
+    },
+    {
+      "type": "model.removed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithNullableString"
+    },
+    {
+      "type": "model.property.type.changed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithProperties/properties/reference"
+    },
+    {
+      "type": "model.property.added",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithProperties/properties/requiredAndNullable"
+    },
+    {
+      "type": "model.property.type.changed",
+      "severity": "breaking",
+      "path": "#/components/schemas/ModelWithReference/properties/prop"
+    },
+    {
+      "type": "operation.added",
+      "severity": "non-breaking",
+      "path": "#/paths/GET /api/v{api-version}/blob"
+    },
+    {
+      "type": "operation.parameter.type.changed",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/complex/parameters/query:parameterReference/schema"
+    },
+    {
+      "type": "operation.response.success.type.changed",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/complex/responses/200/content"
+    },
+    {
+      "type": "operation.parameter.required.changed",
+      "severity": "non-breaking",
+      "path": "#/paths/GET /api/v{api-version}/defaults/parameters/query:parameterBoolean/required"
+    },
+    {
+      "type": "operation.parameter.required.changed",
+      "severity": "non-breaking",
+      "path": "#/paths/GET /api/v{api-version}/defaults/parameters/query:parameterEnum/required"
+    },
+    {
+      "type": "operation.parameter.required.changed",
+      "severity": "non-breaking",
+      "path": "#/paths/GET /api/v{api-version}/defaults/parameters/query:parameterModel/required"
+    },
+    {
+      "type": "operation.parameter.type.changed",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/defaults/parameters/query:parameterModel/schema"
+    },
+    {
+      "type": "operation.parameter.required.changed",
+      "severity": "non-breaking",
+      "path": "#/paths/GET /api/v{api-version}/defaults/parameters/query:parameterNumber/required"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
-import { describe, test } from 'node:test';
+import { describe, test, type TestContext } from 'node:test';
 
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'fs';
 import path from 'path';
 
 import { generate, HttpClient } from '../src';
@@ -49,22 +49,36 @@ const cases: StrategyCase[] = [
     },
 ];
 
-function buildOutputPath(label: string, strategy: EmptySchemaStrategy): string {
-    return `./test/generated/empty_schema_strategy/${label}/${strategy}/`;
+function createOutputPath(t: TestContext, label: string, strategy: EmptySchemaStrategy): string {
+    const generatedRoot = path.join(process.cwd(), 'test', 'generated', 'empty_schema_strategy');
+    mkdirSync(generatedRoot, { recursive: true });
+    const baseDir = path.join(generatedRoot, `${label}-${strategy}-`);
+    const outputDir = mkdtempSync(baseDir);
+    t.after(() => {
+        rmSync(outputDir, { recursive: true, force: true });
+        try {
+            if (readdirSync(generatedRoot).length === 0) {
+                rmSync(generatedRoot, { recursive: true, force: true });
+            }
+        } catch {
+            // Ignore: directory may already be removed by another test cleanup.
+        }
+    });
+    return outputDir;
 }
 
 function getLomSchemaPath(outputPath: string): string {
-    return path.join(process.cwd(), outputPath, 'schemas', 'LomApiSchema.ts');
+    return path.join(outputPath, 'schemas', 'LomApiSchema.ts');
 }
 
 function getRootIndexPath(outputPath: string): string {
-    return path.join(process.cwd(), outputPath, 'index.ts');
+    return path.join(outputPath, 'index.ts');
 }
 
 describe('@unit: emptySchemaStrategy', () => {
     for (const testCase of cases) {
-        test(`${testCase.label}: keep`, async () => {
-            const output = buildOutputPath(testCase.label, EmptySchemaStrategy.KEEP);
+        test(`${testCase.label}: keep`, async (t: TestContext) => {
+            const output = createOutputPath(t, testCase.label, EmptySchemaStrategy.KEEP);
             await generate({
                 input: path.join(__dirname, 'spec', 'lom', 'lom_api.yaml'),
                 output,
@@ -86,8 +100,8 @@ describe('@unit: emptySchemaStrategy', () => {
             assert.ok(content.includes(testCase.keepNeedle));
         });
 
-        test(`${testCase.label}: semantic`, async () => {
-            const output = buildOutputPath(testCase.label, EmptySchemaStrategy.SEMANTIC);
+        test(`${testCase.label}: semantic`, async (t: TestContext) => {
+            const output = createOutputPath(t, testCase.label, EmptySchemaStrategy.SEMANTIC);
             await generate({
                 input: path.join(__dirname, 'spec', 'lom', 'lom_api.yaml'),
                 output,
@@ -109,8 +123,8 @@ describe('@unit: emptySchemaStrategy', () => {
             assert.ok(content.includes(testCase.semanticNeedle));
         });
 
-        test(`${testCase.label}: skip`, async () => {
-            const output = buildOutputPath(testCase.label, EmptySchemaStrategy.SKIP);
+        test(`${testCase.label}: skip`, async (t: TestContext) => {
+            const output = createOutputPath(t, testCase.label, EmptySchemaStrategy.SKIP);
             await generate({
                 input: path.join(__dirname, 'spec', 'lom', 'lom_api.yaml'),
                 output,
