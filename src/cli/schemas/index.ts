@@ -1,4 +1,3 @@
-export * from './analyzeDiff';
 export * from './base';
 export * from './checkConfig';
 export * from './generate';
@@ -9,7 +8,6 @@ export * from './analyzeDiff';
 
 // Тип для всех возможных CLI опций (для union type)
 export type CLIOptions =
-    | import('./analyzeDiff').AnalyzeDiffOptions
     | import('./generate').GenerateOptions
     | import('./checkConfig').CheckConfigOptions
     | import('./updateConfig').UpdateConfigOptions

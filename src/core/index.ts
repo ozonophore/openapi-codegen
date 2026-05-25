@@ -2,10 +2,8 @@ import { TRawOptions } from '../common/TRawOptions';
 import { OpenApiClient } from './OpenApiClient';
 import { validateRawOptions } from './utils/validateRawOptions';
 
-export type { OpenApiGeneratorPlugin, SchemaTypeOverrideContext, SchemaTypeOverrideInput, TOpenApiVersion } from './plugins';
-export type { ApplySemanticDiffPluginHooksResult, PluginHookDiagnostic, PluginHookName } from './plugins';
-export { applySemanticDiffPluginHooks } from './plugins';
 export { HttpClient } from './types/enums/HttpClient.enum';
+export type { OpenApiGeneratorPlugin, SchemaTypeOverrideContext, SchemaTypeOverrideInput, TOpenApiVersion } from './plugins';
 
 export async function generate(rawOptions: TRawOptions): Promise<void> {
     await validateRawOptions(rawOptions);
