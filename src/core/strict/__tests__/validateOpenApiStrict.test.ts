@@ -55,8 +55,6 @@ describe('@unit: validateOpenApiStrict', () => {
         assert.ok(report.issues.some(issue => issue.code === 'CONTENT_MEDIA_TYPE_FALLBACK'));
         assert.ok(report.issues.some(issue => issue.code === 'SUSPICIOUS_DEFAULT_RESPONSE'));
         assert.ok(report.issues.some(issue => issue.code === 'MISSING_OPERATION_ID'));
-        assert.ok(report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
-        assert.ok(report.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX'));
     });
 
     test('returns clean report when no strict issues found', () => {
@@ -95,7 +93,6 @@ describe('@unit: validateOpenApiStrict', () => {
             info: 0,
         });
         assert.deepStrictEqual(report.issues, []);
-        assert.deepStrictEqual(report.governance.violations, []);
     });
 
     test('includes preIssues from parser validation into final report', () => {
@@ -121,46 +118,5 @@ describe('@unit: validateOpenApiStrict', () => {
         assert.strictEqual(report.summary.info, 0);
         assert.strictEqual(report.issues.length, 1);
         assert.strictEqual(report.issues[0].code, 'OPENAPI_PARSER_VALIDATION_FAILED');
-        assert.deepStrictEqual(report.governance.violations, []);
-    });
-
-    test('applies governance config overrides in strict mode', () => {
-        const report = validateOpenApiStrict({
-            openApi: {
-                paths: {
-                    '/pets': {
-                        get: {
-                            responses: {
-                                default: {
-                                    description: 'fallback',
-                                },
-                            },
-                        },
-                    },
-                },
-            } as any,
-            context: {
-                paths: () => [],
-                get: () => ({}),
-                exists: () => true,
-            },
-            governanceConfig: {
-                rules: {
-                    REQUIRE_OPERATION_ID: {
-                        enabled: false,
-                    },
-                    NO_DEFAULT_WITHOUT_2XX: {
-                        severity: 'error',
-                    },
-                },
-            },
-        });
-
-        assert.ok(!report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
-        assert.ok(
-            report.governance.violations.some(
-                violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'
-            )
-        );
     });
 });

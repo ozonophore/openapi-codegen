@@ -9,7 +9,6 @@ import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
-import { loadGovernanceConfig } from './governance/loadGovernanceConfig';
 import { loadGeneratorPlugins } from './plugins/loadGeneratorPlugins';
 import { validateOpenApiStrict, validateWithSwaggerParser, writeOpenApiStrictReport } from './strict/validateOpenApiStrict';
 import { OutputPaths } from './types/base/OutputPaths.model';
@@ -68,7 +67,6 @@ export class OpenApiClient {
                 modelsMode: item.modelsMode ?? modelsMode,
                 strictOpenapi: rawOptions.strictOpenapi,
                 reportFile: rawOptions.reportFile,
-                governanceConfig: rawOptions.governanceConfig,
             }));
         } else {
             // Плоский формат (из CLI или старого конфига): Один item с глобальным request
@@ -103,7 +101,6 @@ export class OpenApiClient {
                     modelsMode,
                     strictOpenapi: rawOptions.strictOpenapi,
                     reportFile: rawOptions.reportFile,
-                    governanceConfig: rawOptions.governanceConfig,
                 },
             ];
         }
@@ -145,7 +142,6 @@ export class OpenApiClient {
             reportFile: item.reportFile || COMMON_DEFAULT_OPTIONS_VALUES.reportFile,
             useProjectPrettier: item.useProjectPrettier ?? COMMON_DEFAULT_OPTIONS_VALUES.useProjectPrettier,
             useEslintFix: item.useEslintFix ?? COMMON_DEFAULT_OPTIONS_VALUES.useEslintFix,
-            governanceConfig: item.governanceConfig || COMMON_DEFAULT_OPTIONS_VALUES.governanceConfig,
         };
     }
 
@@ -225,7 +221,6 @@ export class OpenApiClient {
             reportFile,
             useProjectPrettier = false,
             useEslintFix = false,
-            governanceConfig,
         } = item;
         const outputPaths: OutputPaths = getOutputPaths({
             output,
@@ -247,13 +242,7 @@ export class OpenApiClient {
 
         if (strictOpenapi) {
             const parserValidationIssues = await validateWithSwaggerParser(absoluteInput);
-            const governancePolicy = await loadGovernanceConfig(governanceConfig);
-            const strictReport = validateOpenApiStrict({
-                openApi,
-                context,
-                preIssues: parserValidationIssues,
-                governanceConfig: governancePolicy,
-            });
+            const strictReport = validateOpenApiStrict({ openApi, context, preIssues: parserValidationIssues });
             const reportPath = await writeOpenApiStrictReport(strictReport, reportFile);
             this.writeClient.logger.forceInfo(`Strict OpenAPI report created: ${reportPath}`);
 
