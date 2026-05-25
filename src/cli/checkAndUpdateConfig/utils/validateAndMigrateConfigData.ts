@@ -11,32 +11,6 @@ import { isInstanceOfMultioptions } from '../../../core/utils/isInstanceOfMultiO
 import { IConfigValidationResult } from '../types';
 import { removeDefaultConfigValues } from './removeDefaultConfigValues';
 
-const omitUndefinedValues = (data: Record<string, any>): Record<string, any> => {
-    const result: Record<string, any> = {};
-
-    for (const [key, value] of Object.entries(data)) {
-        if (value === undefined) {
-            continue;
-        }
-
-        if (Array.isArray(value)) {
-            result[key] = value.map(item =>
-                item && typeof item === 'object' && !Array.isArray(item) ? omitUndefinedValues(item) : item,
-            );
-            continue;
-        }
-
-        if (value && typeof value === 'object') {
-            result[key] = omitUndefinedValues(value);
-            continue;
-        }
-
-        result[key] = value;
-    }
-
-    return result;
-};
-
 /**
  * Валидирует и мигрирует данные конфигурации до последней версии схемы.
  * Определяет тип конфигурации (одиночная или множественная опция) и применяет соответствующий план миграции.
@@ -57,7 +31,7 @@ export function validateAndMigrateConfigData(configData: Record<string, any> | R
         APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.ARRAY_DEPRECATED);
     }
 
-    const normalizedData = omitUndefinedValues(convertArrayToObject(configData));
+    const normalizedData = convertArrayToObject(configData);
     const isMultiOptions = isInstanceOfMultioptions(normalizedData);
 
     // Выбрать соответствующие схемы и планы миграции

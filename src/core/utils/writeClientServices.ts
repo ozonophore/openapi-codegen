@@ -1,4 +1,3 @@
-import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { eslintFix } from '../../common/utils/eslintFix';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
@@ -44,12 +43,12 @@ interface IWriteClientServices {
 export async function writeClientServices(this: WriteClient, options: IWriteClientServices): Promise<void> {
     const { services, templates, outputPaths, httpClient, useUnionTypes, useOptions, useCancelableRequest, useProjectPrettier, useEslintFix } = options;
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SERVICES_START);
+    this.logger.info('Recording of service files begins');
 
     for (const service of services) {
         const file = resolveHelper(outputPaths.outputServices, `${service.name}.ts`);
 
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
+        this.logger.info(`The recording of the file data begins: ${file}`);
 
         const templateResult = templates.exports.service({
             ...service,
@@ -61,13 +60,13 @@ export async function writeClientServices(this: WriteClient, options: IWriteClie
             useCancelableRequest,
         });
         const formattedValue = await format(templateResult, undefined, useProjectPrettier);
-        await this.writeOutputFile(file, formattedValue);
+        await fileSystemHelpers.writeFile(file, formattedValue);
         if (useEslintFix) {
             await eslintFix(file);
         }
 
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
+        this.logger.info(`File recording completed: ${file}`);
     }
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SERVICES_FINISH);
+    this.logger.info('Service file recording completed successfully');
 }

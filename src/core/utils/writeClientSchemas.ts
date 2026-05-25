@@ -1,6 +1,5 @@
 import { mkdirSync } from 'fs';
 
-import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { eslintFix } from '../../common/utils/eslintFix';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
@@ -46,7 +45,7 @@ export function isEmptySchemaModel(model: Model): boolean {
 export async function writeClientSchemas(this: WriteClient, options: IWriteClientSchemas): Promise<Model[]> {
     const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary, emptySchemaStrategy, useProjectPrettier, useEslintFix } = options;
     if (templates.exports.schema) {
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SCHEMAS_START);
+        this.logger.info('The recording of model validation schema files begins.');
 
         const modelsToWrite = emptySchemaStrategy === EmptySchemaStrategy.SKIP ? models.filter(model => !isEmptySchemaModel(model)) : models;
 
@@ -56,13 +55,13 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
             if (dir) {
                 const directory = resolveHelper(outputSchemasPath, dir);
 
-                this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DIRECTORY_CREATING(directory));
+                this.logger.info(`A directory is being created: ${directory}`);
 
                 mkdirSync(directory, { recursive: true });
             }
             const file = resolveHelper(outputSchemasPath, `${modelFolderPath}Schema.ts`);
 
-            this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
+            this.logger.info(`The recording of the file data begins: ${file}`);
 
             const templateResult = templates.exports.schema({
                 ...model,
@@ -72,15 +71,15 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
                 emptySchemaStrategy,
             });
             const formattedValue = await format(templateResult, undefined, useProjectPrettier);
-            await this.writeOutputFile(file, formattedValue);
+            await fileSystemHelpers.writeFile(file, formattedValue);
             if (useEslintFix) {
                 await eslintFix(file);
             }
 
-            this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
+            this.logger.info(`File recording completed: ${file}`);
         }
 
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SCHEMAS_FINISH);
+        this.logger.info('The recording of model validation schema files has been completed successfully');
 
         return modelsToWrite;
     }

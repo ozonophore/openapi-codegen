@@ -28,7 +28,6 @@ import { writeClientSchemasIndex } from './utils/writeClientSchemasIndex';
 import { writeClientServices } from './utils/writeClientServices';
 import { writeClientServicesIndex } from './utils/writeClientServicesIndex';
 import { writeClientSimpleIndex } from './utils/writeClientSimpleIndex';
-import { writeFileIfChanged, WriteFileIfChangedResult } from './utils/writeFileIfChanged';
 
 /**
  * @param client Client object with all the models, services, etc.
@@ -71,8 +70,6 @@ type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOpti
  */
 export class WriteClient {
     private config: Map<string, TAPIClientGeneratorConfig[]> = new Map();
-    private expectedOutputFiles: Set<string> = new Set();
-    private writeStats = { written: 0, unchanged: 0 };
     private _logger: Logger;
 
     constructor(logger?: Logger) {
@@ -244,8 +241,8 @@ export class WriteClient {
         await fileSystemHelpers.mkdir(outputPaths.outputModels);
         const shouldInlineDtoCore = modelsMode === ModelsMode.CLASSES && excludeCoreServiceFiles;
         if (shouldInlineDtoCore) {
-            await this.writeOutputFile(resolveHelper(outputPaths.outputModels, 'BaseDto.ts'), templates.core.baseDto({}));
-            await this.writeOutputFile(resolveHelper(outputPaths.outputModels, 'dtoUtils.ts'), templates.core.dtoUtils({}));
+            await fileSystemHelpers.writeFile(resolveHelper(outputPaths.outputModels, 'BaseDto.ts'), templates.core.baseDto({}));
+            await fileSystemHelpers.writeFile(resolveHelper(outputPaths.outputModels, 'dtoUtils.ts'), templates.core.dtoUtils({}));
         }
         await this.writeClientModels({
             models: client.models,
@@ -307,29 +304,6 @@ export class WriteClient {
 
     public get logger() {
         return this._logger;
-    }
-
-    public async writeOutputFile(filePath: string, content: string): Promise<WriteFileIfChangedResult> {
-        this.expectedOutputFiles.add(resolveHelper(process.cwd(), filePath));
-        const result = await writeFileIfChanged(filePath, content);
-        this.writeStats[result] += 1;
-        return result;
-    }
-
-    public registerOutputFile(filePath: string): void {
-        this.expectedOutputFiles.add(resolveHelper(process.cwd(), filePath));
-    }
-
-    public getExpectedOutputFiles(): Set<string> {
-        return this.expectedOutputFiles;
-    }
-
-    public getExpectedOutputFilesArray(): string[] {
-        return Array.from(this.expectedOutputFiles);
-    }
-
-    public getWriteStats(): { written: number; unchanged: number } {
-        return { ...this.writeStats };
     }
 
     private buildSimpleClientIndexMap(): Map<string, SimpleClientArtifacts> {

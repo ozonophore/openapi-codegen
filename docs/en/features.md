@@ -10,24 +10,6 @@ The generator supports multiple HTTP clients:
 
 Select the client using the `--httpClient` option or `client` property in config file.
 
-### Generation cache `--cache`
-
-Generation cache is **opt-in** (disabled by default). Enable it with `--cache` or `"cache": true` in the config file.
-
-**Options:**
-
-- `cache` (default: `false`)
-- `cachePath` (default: `.openapi-codegen-cache.json`, relative to output directory)
-- `cacheStrategy` — `entity` (default) or `content`
-- `cacheDebug` (default: `false`)
-
-**Strategies:**
-
-- **`entity`** — on cache hit, item generation is skipped; fastest for unchanged inputs and options.
-- **`content`** — generation still runs; only changed files are written (content-aware writes).
-
-The cache stores a fingerprint (spec content, generator version, key options) and the list of generated files. Unchanged outputs keep stable mtimes, which helps local and CI incremental workflows.
-
 ### Argument style vs. Object style `--useOptions`
 There's no [named parameter](https://en.wikipedia.org/wiki/Named_parameter) in JavaScript or TypeScript, because of
 that, we offer the flag `--useOptions` to generate code in two different styles.
@@ -600,3 +582,4 @@ in your `tsconfig.json` file.
     "allowSyntheticDefaultImports": true
 }
 ```
+

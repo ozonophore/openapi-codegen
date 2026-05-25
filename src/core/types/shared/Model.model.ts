@@ -1,5 +1,5 @@
-import type { DiffInfo } from './DiffInfo.model';
 import type { Enum } from './Enum.model';
+import type { DiffInfo } from './DiffInfo.model';
 import { Import } from './Import.model';
 import type { Schema } from './Schema.model';
 
