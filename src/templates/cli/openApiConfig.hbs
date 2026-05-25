@@ -18,7 +18,8 @@
     "useCancelableRequest": {{@root.useCancelableRequest}},
     "useOptions": {{@root.useOptions}},
     "useSeparatedIndexes": {{@root.useSeparatedIndexes}},
-    "useUnionTypes": {{@root.useUnionTypes}},
+    "useUnionTypes": {{@root.useUnionTypes}},{{#if @root.request}},
+    "request": "{{@root.request}}"{{/if}}
     "modelsMode": "{{@root.modelsMode}}",
     "useHistory": {{@root.useHistory}},
     "diffReport": "{{@root.diffReport}}"{{#if @root.request}},
@@ -49,7 +50,8 @@
     "useCancelableRequest": {{@root.useCancelableRequest}},
     "useOptions": {{@root.useOptions}},
     "useSeparatedIndexes": {{@root.useSeparatedIndexes}},
-    "useUnionTypes": {{@root.useUnionTypes}},
+    "useUnionTypes": {{@root.useUnionTypes}},{{#if @root.request}},
+    "request": "{{@root.request}}"{{/if}}
     "modelsMode": "{{@root.modelsMode}}",
     "useHistory": {{@root.useHistory}},
     "diffReport": "{{@root.diffReport}}"{{#if @root.request}},

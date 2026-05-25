@@ -68,6 +68,7 @@ program
     .option('--useSeparatedIndexes', 'Use separate index files for the core, models, schemas, and services.')
     .option('--strict-openapi', 'Enable strict OpenAPI diagnostics report and fail generation when strict errors are found')
     .option('--report-file <value>', 'Path to strict OpenAPI diagnostics report JSON file', './openapi-report.json')
+    .option('--governance-config <value>', 'Path to governance rules JSON config file')
     .addOption(new Option('--validationLibrary <value>', 'Validation library to use for schema validation').choices([...Object.values(ValidationLibrary)]).default(ValidationLibrary.NONE))
     .addOption(new Option('--emptySchemaStrategy <value>', 'How to handle empty generated schemas').choices([...Object.values(EmptySchemaStrategy)]).default(EmptySchemaStrategy.KEEP))
     .option('--useProjectPrettier', 'Use project Prettier config for formatting generated code (default: false)')
@@ -165,20 +166,32 @@ program
     .command('analyze-diff')
     .description('Analyzes differences between two OpenAPI specifications and produces a JSON report')
     .addHelpText('before', getCLIName(APP_NAME))
+    .addHelpText(
+        'after',
+        [
+            '',
+            'Base source resolution:',
+            '  1) --compare-with has priority over --git when both are provided.',
+            '  2) --git is used only when --compare-with is not provided.',
+            '  3) when neither is provided, analyze-diff is skipped with exit code 0.',
+        ].join('\n')
+    )
     .option('-i, --input <value>', 'Path to current OpenAPI specification file (required)')
-    .option('--compare-with <value>', 'Path to previous OpenAPI specification file')
-    .option('--git <ref>', 'Git ref to read previous specification version from (e.g. HEAD~1)')
+    .option('--compare-with <value>', 'Path to previous OpenAPI specification file (overrides --git when both are provided)')
+    .option('--git <ref>', 'Git ref to read previous specification version from (used when --compare-with is not set)')
     .option('--output-report <value>', 'Path to save JSON diff report')
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options (default: "openapi.config.json")', DEFAULT_OPENAPI_CONFIG_FILENAME)
+    .option('--governance-config <value>', 'Path to governance rules JSON config file')
+    .option('--strict-plugin-mode', 'Fail when plugin hook execution throws')
+    .option('--ci', 'Exit with code 1 when governance errors are found')
+    .option('--allow-breaking', 'Allow breaking changes in governance checks')
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
         const result = await analyzeDiff(options);
-        if (!result || !result.success) {
-            process.exit(1);
-        }
-        process.exit(0);
+        await APP_LOGGER.shutdownLoggerAsync();
+        process.exit(result.success ? 0 : 1);
     });
 
 program.exitOverride();

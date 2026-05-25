@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.1.0",
+  "summary": {
+    "breaking": 0,
+    "nonBreaking": 0,
+    "informational": 0
+  },
+  "recommendation": {
+    "semver": "patch",
+    "confidence": "high",
+    "reason": "No breaking or feature-level changes detected.",
+    "reasons": [
+      "NO_API_SURFACE_CHANGES"
+    ]
+  },
+  "governanceSummary": {
+    "errors": 0,
+    "warnings": 2,
+    "info": 0
+  },
+  "governanceRuleIds": [
+    "NO_DEFAULT_WITHOUT_2XX",
+    "REQUIRE_OPERATION_ID"
+  ],
+  "changesCount": 0,
+  "topChanges": []
+}
