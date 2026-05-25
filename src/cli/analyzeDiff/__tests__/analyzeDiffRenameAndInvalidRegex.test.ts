@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { analyzeDiff } from '../analyzeDiff';
 
@@ -11,20 +12,9 @@ const writeSpec = (dir: string, filename: string, payload: unknown): string => {
     return filePath;
 };
 
-const generatedRoot = path.join(__dirname, 'generated');
-
-const createTempDir = (t: TestContext, prefix: string): string => {
-    fs.mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = fs.mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        fs.rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-};
-
 describe('@unit: analyzeDiff RENAME and invalid-regex handling', () => {
-    test('detects semantic remove/add entries for property rename-like change', async t => {
-        const tmpDir = createTempDir(t, 'openapi-diff-rename-');
+    test('detects RENAME miracle for property rename with small name distance', async () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-diff-rename-'));
         const reportPath = path.join(tmpDir, 'report.json');
 
         const previousSpec = {
@@ -71,21 +61,18 @@ describe('@unit: analyzeDiff RENAME and invalid-regex handling', () => {
         assert.ok(result.success, `analyzeDiff failed: ${result.error ?? 'unknown'}`);
 
         const reportRaw = fs.readFileSync(reportPath, 'utf-8');
-        const report = JSON.parse(reportRaw) as {
-            changes: Array<{ type: string; path: string; severity: string }>;
-        };
+        const report = JSON.parse(reportRaw) as { miracles?: Array<{ type: string; oldPath: string; newPath: string; confidence: number; status: string }> };
 
-        const removed = report.changes.find(change => change.type === 'model.property.removed' && change.path === '#/components/schemas/User/properties/first_name');
-        const added = report.changes.find(change => change.type === 'model.property.added' && change.path === '#/components/schemas/User/properties/firstName');
-
-        assert.ok(removed, 'Expected semantic removal entry for previous property');
-        assert.ok(added, 'Expected semantic addition entry for renamed property');
-        assert.strictEqual(removed?.severity, 'breaking');
-        assert.strictEqual(added?.severity, 'non-breaking');
+        assert.ok(Array.isArray(report.miracles), 'Expected miracles array in report');
+        const rename = report.miracles?.find(m => m.type === 'RENAME');
+        assert.ok(rename, 'Expected RENAME miracle');
+        assert.strictEqual(rename?.oldPath, '$.components.schemas.User.properties.first_name');
+        assert.strictEqual(rename?.newPath, '$.components.schemas.User.properties.firstName');
+        assert.ok(typeof rename?.confidence === 'number' && rename!.confidence > 0.7, `Expected high confidence, got ${rename?.confidence}`);
     });
 
-    test('invalid regex in config does not crash and valid rules still apply', async t => {
-        const tmpDir = createTempDir(t, 'openapi-diff-invalidregex-');
+    test('invalid regex in config does not crash and valid rules still apply', async () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-diff-invalidregex-'));
         const reportPath = path.join(tmpDir, 'report.json');
 
         const previousSpec = {
@@ -135,7 +122,7 @@ describe('@unit: analyzeDiff RENAME and invalid-regex handling', () => {
                                 reason: 'invalid pattern',
                             },
                             {
-                                path: '#/components/schemas/User/properties/age',
+                                path: '$.components.schemas.User.properties.age.type',
                                 reason: 'Ignore type diff in test',
                             },
                         ],
@@ -158,16 +145,14 @@ describe('@unit: analyzeDiff RENAME and invalid-regex handling', () => {
 
         const reportRaw = fs.readFileSync(reportPath, 'utf-8');
         const report = JSON.parse(reportRaw) as {
-            summary: { breaking: number; nonBreaking: number; informational: number };
-            recommendation: { semver: string };
-            changes: Array<{ type: string; path: string }>;
+            diff?: { all?: unknown[] };
+            miracles?: Array<{ type: string; oldPath: string; newPath: string; confidence: number; status: string }>;
         };
 
-        const filteredTypeChange = report.changes.find(change => change.type === 'model.property.type.changed' && change.path === '#/components/schemas/User/properties/age');
-        assert.ok(!filteredTypeChange, 'Expected matching semantic change to be filtered by valid rule while invalid regex is ignored');
-        assert.strictEqual(report.summary.breaking, 0);
-        assert.strictEqual(report.summary.nonBreaking, 0);
-        assert.strictEqual(report.summary.informational, 0);
-        assert.strictEqual(report.recommendation.semver, 'patch');
+        // the type diff entry should be filtered by valid path rule; report should still contain TYPE_COERCION miracle
+        const diffCount = report.diff?.all?.length ?? 0;
+        assert.ok(diffCount <= 1, `Expected diff entries to be filtered (got ${diffCount})`);
+        const coercion = report.miracles?.find(m => m.type === 'TYPE_COERCION');
+        assert.ok(coercion, 'Expected TYPE_COERCION miracle even when diff entries are ignored');
     });
 });

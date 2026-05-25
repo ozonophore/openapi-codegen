@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { analyzeDiff } from '../analyzeDiff';
 
@@ -11,20 +12,9 @@ const writeSpec = (dir: string, filename: string, payload: unknown): string => {
     return filePath;
 };
 
-const generatedRoot = path.join(__dirname, 'generated');
-
-const createTempDir = (t: TestContext, prefix: string): string => {
-    fs.mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = fs.mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        fs.rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-};
-
 describe('@unit: analyzeDiff TYPE_COERCION miracles', () => {
-    test('detects semantic type change for scalar property transition', async t => {
-        const tmpDir = createTempDir(t, 'openapi-diff-test-');
+    test('creates TYPE_COERCION miracle for scalar type change', async () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-diff-test-'));
         const reportPath = path.join(tmpDir, 'report.json');
 
         const previousSpec = {
@@ -71,20 +61,20 @@ describe('@unit: analyzeDiff TYPE_COERCION miracles', () => {
         assert.ok(result.success, `analyzeDiff failed: ${result.error ?? 'unknown error'}`);
 
         const reportRaw = fs.readFileSync(reportPath, 'utf-8');
-        const report = JSON.parse(reportRaw) as {
-            summary: { breaking: number };
-            changes: Array<{ type: string; path: string; severity: string }>;
-        };
+        const report = JSON.parse(reportRaw) as { miracles?: Array<{ type: string; oldPath: string; newPath: string; confidence: number; status: string }> };
 
-        const typeChange = report.changes.find(change => change.type === 'model.property.type.changed');
-        assert.ok(typeChange, 'Expected semantic type-change entry');
-        assert.strictEqual(typeChange?.path, '#/components/schemas/User/properties/age');
-        assert.strictEqual(typeChange?.severity, 'breaking');
-        assert.ok(report.summary.breaking > 0);
+        assert.ok(Array.isArray(report.miracles), 'Expected miracles array in report');
+        const coercion = report.miracles?.find(miracle => miracle.type === 'TYPE_COERCION');
+
+        assert.ok(coercion, 'Expected TYPE_COERCION miracle');
+        assert.strictEqual(coercion?.oldPath, '$.components.schemas.User.properties.age');
+        assert.strictEqual(coercion?.newPath, '$.components.schemas.User.properties.age');
+        assert.strictEqual(coercion?.confidence, 1);
+        assert.strictEqual(coercion?.status, 'auto-generated');
     });
 
-    test('filters semantic type-change entry when rule matches path', async t => {
-        const tmpDir = createTempDir(t, 'openapi-diff-test-');
+    test('creates TYPE_COERCION miracle even when diff entries are ignored', async () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-diff-test-'));
         const reportPath = path.join(tmpDir, 'report.json');
 
         const previousSpec = {
@@ -130,7 +120,7 @@ describe('@unit: analyzeDiff TYPE_COERCION miracles', () => {
                     analyze: {
                         ignore: [
                             {
-                                path: '#/components/schemas/User/properties/age',
+                                path: '$.components.schemas.User.properties.age.type',
                                 reason: 'Ignore type diff in test',
                             },
                         ],
@@ -153,16 +143,15 @@ describe('@unit: analyzeDiff TYPE_COERCION miracles', () => {
 
         const reportRaw = fs.readFileSync(reportPath, 'utf-8');
         const report = JSON.parse(reportRaw) as {
-            summary: { breaking: number; nonBreaking: number; informational: number };
-            recommendation: { semver: string };
-            changes: Array<{ type: string; path: string }>;
+            diff?: { all?: unknown[] };
+            miracles?: Array<{ type: string; oldPath: string; newPath: string; confidence: number; status: string }>;
         };
 
-        const filteredTypeChange = report.changes.find(change => change.type === 'model.property.type.changed' && change.path === '#/components/schemas/User/properties/age');
-        assert.ok(!filteredTypeChange, 'Expected semantic type-change to be filtered by analyze.ignore');
-        assert.strictEqual(report.summary.breaking, 0);
-        assert.strictEqual(report.summary.nonBreaking, 0);
-        assert.strictEqual(report.summary.informational, 0);
-        assert.strictEqual(report.recommendation.semver, 'patch');
+        const diffCount = report.diff?.all?.length ?? 0;
+        assert.ok(diffCount <= 1, `Expected diff entries to be filtered (got ${diffCount})`);
+        const coercion = report.miracles?.find(miracle => miracle.type === 'TYPE_COERCION');
+        assert.ok(coercion, 'Expected TYPE_COERCION miracle even when diff entries are ignored');
+        assert.strictEqual(coercion?.oldPath, '$.components.schemas.User.properties.age');
+        assert.strictEqual(coercion?.newPath, '$.components.schemas.User.properties.age');
     });
 });

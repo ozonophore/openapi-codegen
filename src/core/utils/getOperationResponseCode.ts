@@ -1,7 +1,7 @@
 export function getOperationResponseCode(value: string | 'default'): number | null {
-    // "default" is not an explicit HTTP status code and should not be coerced.
+    // You can specify a "default" response, this is treated as HTTP code 200
     if (value === 'default') {
-        return null;
+        return 200;
     }
 
     const normalizedValue = value.trim();
