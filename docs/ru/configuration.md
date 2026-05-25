@@ -1,4 +1,3 @@
-### Файл конфигурации
 
 Вместо передачи всех опций через CLI, вы можете использовать файл конфигурации. Создайте `openapi.config.json` в корне вашего проекта:
 
@@ -35,11 +34,7 @@
         "types": ["RENAME", "TYPE_COERCION"]
     },
     "plugins": ["./plugins/custom-type.plugin.cjs"],
-    "customExecutorPath": "./custom/createExecutorAdapter.ts",
-    "cache": false,
-    "cachePath": ".openapi-codegen-cache.json",
-    "cacheStrategy": "entity",
-    "cacheDebug": false
+    "customExecutorPath": "./custom/createExecutorAdapter.ts"
 }
 ```
 
@@ -109,10 +104,6 @@
 | `models` | object | - | Секция конфигурации моделей (например, `mode`) |
 | `analyze` | object | - | Секция анализа (например, reportPath, useHistory, ignore) |
 | `miracles` | object | - | Секция чудес (enabled, confidence, types) |
-| `cache` | boolean | `false` | Включить кэш генерации |
-| `cachePath` | string | `.openapi-codegen-cache.json` | Путь к файлу кэша относительно output-директории |
-| `cacheStrategy` | string | `entity` | Стратегия кэша: `entity` или `content` |
-| `cacheDebug` | boolean | `false` | Показывать debug-логи cache hit/miss |
 
 **Примечание:** Вы можете использовать команду `init` для генерации шаблона файла конфигурации.
 
@@ -122,6 +113,6 @@
 
 - Ключ конфигурации: `plugins` (массив путей к модулям)
 - Поддерживаемые форматы модулей: CJS, ESM и TS (если рантайм поддерживает импорт TS)
-- Подробное руководство: [Плагины](plugins.md)
-- Plugin API v2 (RFC, хуки `analyze-diff`): [Plugin API v2](plugin-api-v2.md)
+- Подробная документация: [docs/plugins.md](./docs/plugins.md)
 
+## Примеры

@@ -45,10 +45,6 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     useProjectPrettier: false,
     useEslintFix: false,
     governanceConfig: '',
-    cache: false,
-    cachePath: '.openapi-codegen-cache.json',
-    cacheStrategy: 'entity',
-    cacheDebug: false,
 };
 
 export const APP_LOGGER = new Logger({

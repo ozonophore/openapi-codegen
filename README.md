@@ -30,7 +30,6 @@
 - Supports strict OpenAPI diagnostics with JSON reports (`--strict-openapi`, `--report-file`)
 - Supports generator plugins (`plugins`) including built-in `x-typescript-type`
 - Supports binary request/response generation (`format: binary` -> `Blob`)
-- Supports opt-in generation cache and incremental writes (`--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`)
 
 ## Install
 
@@ -44,8 +43,6 @@ npm install ts-openapi-codegen --save-dev
 - [Configuration file](docs/en/configuration.md)
 - [Examples](docs/en/examples.md)
 - [Features](docs/en/features.md)
-- [Plugins](docs/en/plugins.md)
-- [Plugin API v2 (RFC)](docs/en/plugin-api-v2.md)
 - [Русская версия README](README.rus.md)
 - [Русская документация](docs/ru/usage.md)
 

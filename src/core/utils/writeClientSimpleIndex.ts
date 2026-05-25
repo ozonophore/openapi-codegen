@@ -1,4 +1,4 @@
-import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
+import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { SimpleClientArtifacts } from '../types/base/SimpleClientArtifacts.model';
 import { WriteClient } from '../WriteClient';
@@ -12,9 +12,9 @@ export async function writeClientSimpleIndex(this: WriteClient, options: SimpleC
     const { templates, outputPath, core, models, schemas, services } = options;
     const resolvePathIndex = resolveHelper(outputPath, 'index.ts');
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(resolvePathIndex));
+    this.logger.info(`The recording of the file data begins: ${resolvePathIndex}`);
 
-    await this.writeOutputFile(
+    await fileSystemHelpers.writeFile(
         resolvePathIndex,
         templates.indexes.simple({
             core,
@@ -24,5 +24,5 @@ export async function writeClientSimpleIndex(this: WriteClient, options: SimpleC
         })
     );
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(resolvePathIndex));
+    this.logger.info(`File recording completed: ${resolvePathIndex}`);
 }

@@ -35,11 +35,7 @@ Instead of passing all options via CLI, you can use a configuration file. Create
         "types": ["RENAME", "TYPE_COERCION"]
     },
     "plugins": ["./plugins/custom-type.plugin.cjs"],
-    "customExecutorPath": "./custom/createExecutorAdapter.ts",
-    "cache": false,
-    "cachePath": ".openapi-codegen-cache.json",
-    "cacheStrategy": "entity",
-    "cacheDebug": false
+    "customExecutorPath": "./custom/createExecutorAdapter.ts"
 }
 ```
 
@@ -109,10 +105,6 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `models` | object | - | Models config section (e.g. `mode`) |
 | `analyze` | object | - | Analyze config section (e.g. reportPath, useHistory, ignore) |
 | `miracles` | object | - | Miracles config section (enabled, confidence, types) |
-| `cache` | boolean | `false` | Enable generation cache |
-| `cachePath` | string | `.openapi-codegen-cache.json` | Path to cache file relative to output directory |
-| `cacheStrategy` | string | `entity` | Cache strategy: `entity` or `content` |
-| `cacheDebug` | boolean | `false` | Show cache hit/miss debug logs |
 
 **Note:** You can use the `init` command to generate a template configuration file.
 
@@ -122,5 +114,5 @@ Generator plugins can override schema type mapping (for example via `x-typescrip
 
 - Configuration key: `plugins` (array of module paths)
 - Supported module formats: CJS, ESM, and TS (when runtime supports TS imports)
-- Full guide: [Plugins](plugins.md)
-- Plugin API v2 (RFC, `analyze-diff` hooks): [Plugin API v2](plugin-api-v2.md)
+- Full guide: [docs/plugins.md](./docs/plugins.md)
+
