@@ -1,3 +1,4 @@
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { eslintFix } from '../../common/utils/eslintFix';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
@@ -34,7 +35,7 @@ export async function writeClientExecutor(this: WriteClient, options: WriteClien
     const uniqueServices = deduplicateServicesByName(services);
     const hasCustomRequest = !!request;
 
-    this.logger.info(`Началась запись файла ${file}`);
+    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.EXECUTOR_START(file));
     const templateResult = templates.exports.client({
         outputCore: outputCorePath,
         useCustomRequest: hasCustomRequest,
@@ -42,11 +43,11 @@ export async function writeClientExecutor(this: WriteClient, options: WriteClien
         services: uniqueServices,
     });
     const formattedValue = await format(templateResult, undefined, useProjectPrettier);
-    await fileSystemHelpers.writeFile(file, formattedValue);
+    await this.writeOutputFile(file, formattedValue);
     if (useEslintFix) {
         await eslintFix(file);
     }
-    this.logger.info(`File recording completed: ${file}`);
+    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
 }
 
 export { deduplicateServicesByName };
