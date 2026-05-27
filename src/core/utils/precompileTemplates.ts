@@ -4,6 +4,7 @@ import { extname } from 'path';
 
 import { ELogLevel, ELogOutput } from '../../common/Enums';
 import { Logger } from '../../common/Logger';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { dirNameHelper, joinHelper, relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { REGEX_BACKSLASH } from '../../core/types/Consts';
 
@@ -85,9 +86,9 @@ const precompileTemplates = () => {
         };
         walk(templatesDir);
 
-        logger.info('The templates have been successfully precompiled and saved!');
+        logger.info(LOGGER_MESSAGES.TEMPLATES.PRECOMPILE_SUCCESS);
     } catch (error: any) {
-        logger.error(`Error during pre-compilation of templates: ${error.message}`);
+        logger.error(LOGGER_MESSAGES.TEMPLATES.PRECOMPILE_ERROR(error.message));
     }
 };
 

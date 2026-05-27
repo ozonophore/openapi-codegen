@@ -75,5 +75,3 @@ OpenAPI.generate({
     output: './dist'
 });
 ```
-
-

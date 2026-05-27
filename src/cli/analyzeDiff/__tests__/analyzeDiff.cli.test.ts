@@ -1,11 +1,12 @@
 import assert from 'node:assert';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
 import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
 import type { SemanticDiffReport } from '../../../core/semanticDiff/analyzeOpenApiDiff';
 import { validateSemanticDiffReportSchema } from '../../../core/semanticDiff/semanticDiffReportSchema';
+import { installSilenceAppLogger } from '../../../test/helpers/silenceLoggers';
 import { analyzeDiff, type AnalyzeDiffResult, toAnalyzeDiffExitCode } from '../analyzeDiff';
 import { formatCiMarkdownSummary } from '../ciSummary';
 
@@ -39,6 +40,17 @@ async function runAnalyzeDiffCli(options: {
 }
 
 describe('@unit: analyzeDiff cli', () => {
+    let restoreAppLogger: (() => void) | undefined;
+
+    beforeEach(() => {
+        restoreAppLogger = installSilenceAppLogger();
+    });
+
+    afterEach(() => {
+        restoreAppLogger?.();
+        restoreAppLogger = undefined;
+    });
+
     test('returns exit code 0 and skips when --input has no base source', async t => {
         const tempDir = createTempDir(t, 'openapi-cli-analyze-skip-');
         const reportPath = path.join(tempDir, 'report.json');

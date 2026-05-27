@@ -45,6 +45,10 @@ openapi generate --input ./spec.json --output ./dist
 | `--diffReport` | - | string | `./openapi-diff-report.json` | Путь к diff-отчёту |
 | `--useProjectPrettier` | - | boolean | `false` | Форматировать сгенерированный код конфигом Prettier проекта |
 | `--useEslintFix` | - | boolean | `false` | Запускать ESLint `--fix` для сгенерированных файлов после записи (нужен `eslint` в проекте) |
+| `--cache` | - | boolean | `false` | Включить кэш генерации (по умолчанию кэш выключен) |
+| `--cachePath` | - | string | `.openapi-codegen-cache.json` | Путь к файлу кэша генерации относительно output-директории |
+| `--cacheStrategy` | - | string | `entity` | Стратегия кэша: `entity` (пропуск полной генерации item при cache hit) или `content` (генерация выполняется, но записываются только измененные файлы) |
+| `--cacheDebug` | - | boolean | `false` | Показывать debug-логи cache hit/miss |
 
 **Примеры:**
 ```bash
@@ -144,9 +148,16 @@ openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 
 **Опции:**
 - `--input` / `-i` - Путь к текущей спецификации OpenAPI (обязательно)
-- `--compare-with` - Путь к предыдущей спецификации
+- `--compare-with` - Путь к предыдущей спецификации (приоритетнее `--git`, если указаны оба)
 - `--git` - Git ref для чтения предыдущей версии спецификации (например, `HEAD~1`)
 - `--output-report` - Путь для сохранения diff‑отчёта (по умолчанию: `./openapi-diff-report.json`)
+- `--openapi-config` / `-ocn` - Путь к файлу конфигурации (по умолчанию: `openapi.config.json`); v2-хуки плагинов читают `plugins` из этого файла
+- `--governance-config` - Путь к JSON-файлу правил governance
+- `--strict-plugin-mode` - Завершать с ошибкой при исключении в хуке плагина (по умолчанию: лог и продолжение)
+- `--ci` - Код выхода 1 при ошибках governance
+- `--allow-breaking` - Разрешить breaking changes в проверках governance
+
+**Хуки плагинов (v2):** укажите пути к модулям в `plugins` внутри `openapi.config.json`. См. [Plugin API v2 (RFC)](plugin-api-v2.md).
 
 #### Miracles и подтверждение
 

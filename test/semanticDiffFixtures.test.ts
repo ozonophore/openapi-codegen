@@ -1,11 +1,12 @@
 import assert from 'node:assert';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, test } from 'node:test';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import { analyzeDiff, toAnalyzeDiffExitCode } from '../src/cli/analyzeDiff/analyzeDiff';
 import type { SemanticDiffReport } from '../src/core/semanticDiff/analyzeOpenApiDiff';
 import { validateSemanticDiffReportSchema } from '../src/core/semanticDiff/semanticDiffReportSchema';
+import { installSilenceAppLogger } from '../src/test/helpers/silenceLoggers';
 import { toMatchSnapshot } from './utils/toMatchSnapshot';
 
 const repoRoot = path.join(__dirname, '..');
@@ -77,6 +78,17 @@ async function assertSemanticDiffFixtureSnapshot(
 }
 
 describe('@unit: semantic diff fixtures', () => {
+    let restoreAppLogger: (() => void) | undefined;
+
+    beforeEach(() => {
+        restoreAppLogger = installSilenceAppLogger();
+    });
+
+    afterEach(() => {
+        restoreAppLogger?.();
+        restoreAppLogger = undefined;
+    });
+
     test('matches snapshot for large v3 -> v3.withDifferentRefs diff', async () => {
         await assertSemanticDiffFixtureSnapshot('test/spec/v3.json', 'test/spec/v3.withDifferentRefs.yml', 'v3_to_v3_withDifferentRefs');
     });

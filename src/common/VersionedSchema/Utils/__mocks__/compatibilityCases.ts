@@ -124,7 +124,12 @@ export const compatibilityCases: CompatibilityCase[] = [
         from: 'v4',
         to: 'v5',
         expect: [
-            { type: 'added', key: 'useProjectPrettier' }, { type: 'added', key: 'useEslintFix' } ,
+            { type: 'added', key: 'useProjectPrettier' },
+            { type: 'added', key: 'useEslintFix' },
+            { type: 'added', key: 'cache' },
+            { type: 'added', key: 'cachePath' },
+            { type: 'added', key: 'cacheStrategy' },
+            { type: 'added', key: 'cacheDebug' },
         ],
     },
 ];
