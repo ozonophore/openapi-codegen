@@ -1,4 +1,5 @@
 export * from './analyzeDiff';
+export * from './analyzeUsage';
 export * from './base';
 export * from './checkConfig';
 export * from './generate';
@@ -14,4 +15,5 @@ export type CLIOptions =
     | import('./updateConfig').UpdateConfigOptions
     | import('./init').InitOptions
     | import('./previewChanges').TPreviewChangesOptions
-    | import('./analyzeDiff').AnalyzeDiffOptions;
+    | import('./analyzeDiff').AnalyzeDiffOptions
+    | import('./analyzeUsage').AnalyzeUsageOptions;

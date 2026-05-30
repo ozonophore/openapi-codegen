@@ -8,6 +8,7 @@ import { TStrictFlatOptions } from './TRawOptions';
 
 export const DEFAULT_OPENAPI_CONFIG_FILENAME = 'openapi.config.json';
 export const DEFAULT_ANALYZE_DIFF_REPORT_PATH = './openapi-diff-report.json';
+export const DEFAULT_ANALYZE_USAGE_REPORT_PATH = './openapi-usage-report.json';
 
 export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     input: '',

@@ -4,7 +4,8 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
 import { installSilenceLoggers } from '../../../test/helpers/silenceLoggers';
-import { runGenerateOpenApiClient } from '../generateOpenApiClient';
+import type { CLICommandResult } from '../../types';
+import { generateOpenApiClient } from '../generateOpenApiClient';
 
 type StrictReport = {
     summary: {
@@ -62,8 +63,8 @@ function createTempDir(t: TestContext, prefix: string): string {
     return tempDir;
 }
 
-function runStrictGenerate(options: Record<string, unknown>): Promise<number> {
-    return runGenerateOpenApiClient({
+function runStrictGenerate(options: Record<string, unknown>): Promise<CLICommandResult> {
+    return generateOpenApiClient({
         ...cliDefaults,
         ...options,
     });
@@ -81,19 +82,19 @@ describe('@unit: generateOpenApiClient strict-openapi', () => {
         restoreLoggers = undefined;
     });
 
-    test('returns exit code 0 and writes report file when strict has no errors', async t => {
+    test('returns success and writes report file when strict has no errors', async t => {
         const tempDir = createTempDir(t, 'openapi-cli-strict-ok-');
         const reportFile = path.join(tempDir, 'strict-report.json');
         const outputDir = path.join(tempDir, 'generated');
 
-        const exitCode = await runStrictGenerate({
+        const result = await runStrictGenerate({
             input: path.join(repoRoot, 'test/spec/lom/lom_api.yaml'),
             output: outputDir,
             strictOpenapi: true,
             reportFile,
         });
 
-        assert.strictEqual(exitCode, 0);
+        assert.strictEqual(result.success, true);
 
         const report = JSON.parse(readFileSync(reportFile, 'utf8')) as StrictReport;
         assert.ok(Array.isArray(report.issues));
@@ -103,7 +104,7 @@ describe('@unit: generateOpenApiClient strict-openapi', () => {
         assert.strictEqual(typeof report.summary.info, 'number');
     });
 
-    test('returns exit code 1 and writes report file when strict finds errors', async t => {
+    test('returns failure and writes report file when strict finds errors', async t => {
         const tempDir = createTempDir(t, 'openapi-cli-strict-error-');
         const inputSpec = path.join(tempDir, 'broken-openapi.json');
         const reportFile = path.join(tempDir, 'strict-report.json');
@@ -141,14 +142,14 @@ describe('@unit: generateOpenApiClient strict-openapi', () => {
             })
         );
 
-        const exitCode = await runStrictGenerate({
+        const result = await runStrictGenerate({
             input: inputSpec,
             output: outputDir,
             strictOpenapi: true,
             reportFile,
         });
 
-        assert.strictEqual(exitCode, 1);
+        assert.strictEqual(result.success, false);
 
         const report = JSON.parse(readFileSync(reportFile, 'utf8')) as StrictReport;
         assert.ok(report.summary.errors > 0);
@@ -198,7 +199,7 @@ describe('@unit: generateOpenApiClient strict-openapi', () => {
             })
         );
 
-        const exitCode = await runStrictGenerate({
+        const result = await runStrictGenerate({
             input: inputSpec,
             output: outputDir,
             strictOpenapi: true,
@@ -206,7 +207,7 @@ describe('@unit: generateOpenApiClient strict-openapi', () => {
             governanceConfig,
         });
 
-        assert.strictEqual(exitCode, 0);
+        assert.strictEqual(result.success, true);
 
         const report = JSON.parse(readFileSync(reportFile, 'utf8')) as StrictReport;
         assert.ok(!report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));

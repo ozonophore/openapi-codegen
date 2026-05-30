@@ -5,6 +5,7 @@ import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { validateZodOptions } from '../../common/Validation/validateZodOptions';
 import { confirmDialog } from '../interactive/confirmDialog';
 import { InitOptions, initOptionsSchema } from '../schemas';
+import { CLICommandResult } from '../types';
 import { initConfig } from './initConfig';
 import { initCustomRequest } from './initCustomRequest';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
@@ -12,13 +13,13 @@ import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 /**
  * Фнукция изначальной настройки файлов конфигурации для последующего запуска генератора
  */
-export async function init(options: OptionValues) {
+export async function init(options: OptionValues): Promise<CLICommandResult> {
     const validationResult = validateZodOptions(initOptionsSchema, options);
 
     if (!validationResult.success) {
         APP_LOGGER.error(LOGGER_MESSAGES.ERROR.GENERIC(validationResult.errors.join('\n')));
         await APP_LOGGER.shutdownLoggerAsync();
-        process.exit(1);
+        return { success: false, error: validationResult.errors.join('\n') };
     }
 
     const validatedOptions = validationResult.data as InitOptions;
@@ -68,4 +69,7 @@ export async function init(options: OptionValues) {
             useInteractiveMode: validatedOptions.useInteractiveMode,
         });
     }
+
+    await APP_LOGGER.shutdownLoggerAsync();
+    return { success: true };
 }

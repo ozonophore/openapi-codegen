@@ -11,12 +11,14 @@ import { EmptySchemaStrategy } from '../core/types/enums/EmptySchemaStrategy.enu
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
 import { ModelsMode } from '../core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
-import { analyzeDiff, toAnalyzeDiffExitCode } from './analyzeDiff/analyzeDiff';
+import { analyzeDiff } from './analyzeDiff/analyzeDiff';
+import { analyzeUsage } from './analyzeUsage/analyzeUsage';
 import { checkConfig } from './checkAndUpdateConfig/checkConfig';
 import { updateConfig } from './checkAndUpdateConfig/updateConfig';
 import { generateOpenApiClient } from './generateOpenApiClient/generateOpenApiClient';
 import { init } from './initOpenApiConfig/init';
 import { previewChanges } from './previewChanges/previewChanges';
+import { CLICommandResult } from './types';
 import { getCLIName } from './utils';
 
 const packageDetails = JSON.parse(fs.readFileSync(joinHelper(__dirname, '../../package.json'), 'utf-8'));
@@ -31,6 +33,13 @@ const updateNotifier = new UpdateNotifier({
 });
 
 const program = new Command();
+
+const finishCommand = (result?: CLICommandResult): never => {
+    if (!result || !result.success) {
+        process.exit(1);
+    }
+    process.exit(0);
+};
 
 program.version(APP_VERSION).name(APP_NAME).description(APP_DESCRIPTION).addHelpText('before', getCLIName(APP_NAME));
 
@@ -81,7 +90,8 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await generateOpenApiClient(options);
+        const result = await generateOpenApiClient(options);
+        finishCommand(result);
     });
 
 /**
@@ -96,7 +106,8 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await checkConfig(options);
+        const result = await checkConfig(options);
+        finishCommand(result);
     });
 
 /**
@@ -111,7 +122,8 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await updateConfig(options);
+        const result = await updateConfig(options);
+        finishCommand(result);
     });
 
 /**
@@ -130,7 +142,8 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await init(options);
+        const result = await init(options);
+        finishCommand(result);
     });
 
 /**
@@ -148,19 +161,20 @@ program
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        await previewChanges(options);
+        const result = await previewChanges(options);
+        finishCommand(result);
     });
 
 /**
  * analyze-diff - Команда для анализа изменений между двумя версиями OpenAPI спецификации
- * 
+ *
  * @example Как использовать сейчас
  * Сравнение с явным старым файлом:
  * openapi-codegen-cli analyze-diff \
  * --input ./openapi/current.yaml \
  * --compare-with ./openapi/previous.yaml \
  * --output-report ./openapi-diff-report.json
- * 
+ *
  * Сравнение с версией из Git:
  * openapi-codegen-cli analyze-diff \
  * --input openapi/spec.yaml \
@@ -194,8 +208,27 @@ program
     })
     .action(async (options: OptionValues) => {
         const result = await analyzeDiff(options);
-        await APP_LOGGER.shutdownLoggerAsync();
-        process.exit(toAnalyzeDiffExitCode(result));
+        finishCommand(result);
+    });
+
+/**
+ * analyze-usage - Команда для анализа использования generated API в consumer-проекте
+ */
+program
+    .command('analyze-usage')
+    .description('Analyzes generated API usage in a TypeScript consumer project and produces usage reports')
+    .addHelpText('before', getCLIName(APP_NAME))
+    .option('-s, --sourcePath <value>', 'Path to generated API file')
+    .option('-p, --projectPath <value>', 'Root of your React/TS project')
+    .option('-t, --tsconfigPath <value>', 'Optional path to tsconfig.json')
+    .option('-o, --output <value>', 'Output report filename', 'api-report.json')
+    .option('-c, --check', 'CI mode (exit code 1 when errors are found)')
+    .hook('preAction', async () => {
+        await updateNotifier.checkAndNotify();
+    })
+    .action(async (options: OptionValues) => {
+        const result = await analyzeUsage(options);
+        finishCommand(result);
     });
 
 program.exitOverride();
