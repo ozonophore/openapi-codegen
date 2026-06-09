@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import { HttpClient } from "../../../core";
-import { optionsSchemaV1 } from "./OptionsSchemaV1";
+import { HttpClient } from '../../../core';
+import { optionsSchemaV1 } from './OptionsSchemaV1';
 
 export const optionsSchemaV2 = optionsSchemaV1.omit({ client: true }).extend({
     httpClient: z.enum(HttpClient),

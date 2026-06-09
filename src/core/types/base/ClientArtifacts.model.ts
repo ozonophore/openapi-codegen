@@ -1,6 +1,6 @@
-import { Templates } from "../../types/base/Templates.model";
-import { ExportedModel } from "./ExportedModel.model";
-import { ExportedService } from "./ExportedService.model";
+import { Templates } from '../../types/base/Templates.model';
+import { ExportedModel } from './ExportedModel.model';
+import { ExportedService } from './ExportedService.model';
 
 export type ClientArtifacts = {
     templates: Templates;
@@ -11,4 +11,4 @@ export type ClientArtifacts = {
     services: ExportedService[];
     modelsMode?: import('../enums/ModelsMode.enum').ModelsMode;
     modelsPackage?: string;
-}
+};

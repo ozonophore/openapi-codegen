@@ -3,11 +3,7 @@ import * as diff from 'diff';
 /**
  * Форматирует diff для сохранения в markdown файл
  */
-export function formatDiff(
-    filePath: string,
-    status: 'added' | 'modified' | 'removed',
-    fileDiff?: diff.Change[]
-): string {
+export function formatDiff(filePath: string, status: 'added' | 'modified' | 'removed', fileDiff?: diff.Change[]): string {
     const lines: string[] = [`# ${filePath}`, '', `**Status:** ${status.toUpperCase()}`, ''];
 
     if (status === 'added') {

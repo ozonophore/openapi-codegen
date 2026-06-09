@@ -1,7 +1,7 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
-import { analyzeConfigSchema, miraclesConfigSchema, modelsConfigSchema, specialParametersSchemasV4 } from '../CommonSchemas'
-import { unifiedOptionsSchemaV3 } from './UnifiedOptionsSchemaV3'
+import { analyzeConfigSchema, miraclesConfigSchema, modelsConfigSchema, specialParametersSchemasV4 } from '../CommonSchemas';
+import { unifiedOptionsSchemaV3 } from './UnifiedOptionsSchemaV3';
 
 export const unifiedOptionsSchemaV4 = unifiedOptionsSchemaV3.extend({
     ...specialParametersSchemasV4.shape,
@@ -9,7 +9,7 @@ export const unifiedOptionsSchemaV4 = unifiedOptionsSchemaV3.extend({
     models: modelsConfigSchema.optional(),
     analyze: analyzeConfigSchema.optional(),
     miracles: miraclesConfigSchema.optional(),
-})
+});
 
 /*
 type TUnified = {

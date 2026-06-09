@@ -1,4 +1,4 @@
-import figlet from "figlet";
+import figlet from 'figlet';
 
 export function isValidJson(value: any) {
     try {

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 import { HttpClient } from '../../../core';
 import { additionalParametersSchemaV2, experimentalParametersSchemaV2, outputPathsSchema, specialParametersSchemasV2 } from '../CommonSchemas';

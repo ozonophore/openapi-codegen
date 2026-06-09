@@ -1,7 +1,7 @@
-import {z} from "zod";
+import { z } from 'zod';
 
-import { HttpClient } from "../../../core";
-import { additionalParametersSchema, outputPathsSchema, specialParametersSchemas } from "../CommonSchemas";
+import { HttpClient } from '../../../core';
+import { additionalParametersSchema, outputPathsSchema, specialParametersSchemas } from '../CommonSchemas';
 
 export const optionsSchemaV1 = z.object({
     ...outputPathsSchema.shape,

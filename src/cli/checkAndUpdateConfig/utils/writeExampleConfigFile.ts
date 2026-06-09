@@ -1,6 +1,6 @@
-import { APP_LOGGER } from "../../../common/Consts";
-import { LOGGER_MESSAGES } from "../../../common/LoggerMessages";
-import { fileSystemHelpers } from "../../../common/utils/fileSystemHelpers";
+import { APP_LOGGER } from '../../../common/Consts';
+import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
+import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 
 /**
  * Создает файл с примером конфигурации

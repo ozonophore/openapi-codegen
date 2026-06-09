@@ -37,10 +37,6 @@ export interface OpenApiGeneratorPlugin {
     apiVersion?: OpenApiCodegenPluginApiVersion;
     resolveSchemaTypeOverride?: (input: SchemaTypeOverrideInput) => string | undefined;
     afterSemanticDiff?: (ctx: SemanticDiffPluginContext) => SemanticDiffReport | void | Promise<SemanticDiffReport | void>;
-    mapRecommendation?: (
-        ctx: RecommendationPluginContext
-    ) => SemanticDiffReport['recommendation'] | void | Promise<SemanticDiffReport['recommendation'] | void>;
-    beforeReportWrite?: (
-        ctx: BeforeReportWritePluginContext
-    ) => { report?: SemanticDiffReport; reportPath?: string } | void | Promise<{ report?: SemanticDiffReport; reportPath?: string } | void>;
+    mapRecommendation?: (ctx: RecommendationPluginContext) => SemanticDiffReport['recommendation'] | void | Promise<SemanticDiffReport['recommendation'] | void>;
+    beforeReportWrite?: (ctx: BeforeReportWritePluginContext) => { report?: SemanticDiffReport; reportPath?: string } | void | Promise<{ report?: SemanticDiffReport; reportPath?: string } | void>;
 }

@@ -39,7 +39,10 @@ Instead of passing all options via CLI, you can use a configuration file. Create
     "cache": false,
     "cachePath": ".openapi-codegen-cache.json",
     "cacheStrategy": "entity",
-    "cacheDebug": false
+    "cacheDebug": false,
+    "prettierConfigPath": "./.prettierrc",
+    "tsconfigPath": "./tsconfig.json",
+    "eslintConfigPath": "./eslint.config.mjs"
 }
 ```
 
@@ -113,6 +116,9 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 | `cachePath` | string | `.openapi-codegen-cache.json` | Path to cache file relative to output directory |
 | `cacheStrategy` | string | `entity` | Cache strategy: `entity` or `content` |
 | `cacheDebug` | boolean | `false` | Show cache hit/miss debug logs |
+| `prettierConfigPath` | string | - | Path to a Prettier config file for formatting generated output |
+| `tsconfigPath` | string | - | Path to `tsconfig.json` for batch ESLint fix (used together with `eslintConfigPath`) |
+| `eslintConfigPath` | string | - | Path to ESLint config for batch ESLint fix (used together with `tsconfigPath`) |
 
 **Note:** You can use the `init` command to generate a template configuration file.
 

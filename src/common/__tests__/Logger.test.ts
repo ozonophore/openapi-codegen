@@ -36,21 +36,18 @@ describe('@unit: Logger', () => {
         logger.errorWithHint({ code });
 
         assert.strictEqual(loggerErrorMock.mock.callCount(), 1);
-        assert.ok(
-            String(loggerErrorMock.mock.calls[0].arguments[0]).includes('Error:'),
-            'error message should contain "Error:" prefix',
-        );
+        assert.ok(String(loggerErrorMock.mock.calls[0].arguments[0]).includes('Error:'), 'error message should contain "Error:" prefix');
 
         assert.ok(loggerInfoMock.mock.callCount() >= 2);
         const infoMessages = loggerInfoMock.mock.calls.map(call => String(call.arguments[0]));
 
         assert.ok(
             infoMessages.some(msg => msg.includes('What you can do next')),
-            'info should contain recommendation title',
+            'info should contain recommendation title'
         );
         assert.ok(
             infoMessages.some(msg => msg.includes(recommendation)),
-            'info should contain concrete recommendation text',
+            'info should contain concrete recommendation text'
         );
 
         // Logger no longer calls process.exit; caller is responsible for flush and exit
@@ -126,4 +123,3 @@ describe('@unit: Logger', () => {
         assert.strictEqual(closeCalled, true);
     });
 });
-

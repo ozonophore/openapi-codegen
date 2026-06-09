@@ -135,9 +135,6 @@ describe('@unit: convertArrayToObject', () => {
             { input: 'url2', output: 'res2', useOptions: false },
         ];
 
-        assert.throws(
-            () => convertArrayToObject(input),
-            /conflicting "useOptions" values/
-        );
+        assert.throws(() => convertArrayToObject(input), /conflicting "useOptions" values/);
     });
 });

@@ -58,9 +58,38 @@ Example:
 
 Service generation moved to `RequestExecutor`-based runtime.
 
+**Before:** services often called a shared `request()` helper directly.
+
+**After:** each generated service receives a `RequestExecutor` in its constructor and calls `executor.request()` or `executor.requestRaw()`.
+
+#### RequestExecutor contract
+
+- `request<T>(config, options?)` — returns the parsed response body.
+- `requestRaw<T>(config, options?)` — returns `ApiResult<T>` (`url`, `ok`, `status`, `statusText`, `body`).
+- `RequestConfig` describes method, path, headers, query, body, media types, and optional `responseType: 'blob'`.
+
+#### Custom HTTP layer
+
+- `request` in config still points at your transport module.
+- `customExecutorPath` can point at `createExecutorAdapter` (or your own adapter) to wrap that transport in a `RequestExecutor`.
+
+#### Interceptor pipeline
+
+```mermaid
+flowchart TD
+  A[RequestConfig] --> B[Request interceptors]
+  B --> C[HTTP via executor]
+  C --> D[Response interceptors]
+  D --> E[Parsed result]
+  C -->|error| F[Error interceptors]
+  F --> G[Throw or recover]
+```
+
+Order: request interceptors → HTTP → response interceptors; on failure, error interceptors run before the error is re-thrown.
+
 Impact:
-- If you had custom runtime integration around old request flow, update it to executor-based flow.
-- New/updated generated core artifacts include executor/interceptor pieces (`core/executor`, interceptors-related files).
+- If you had custom runtime integration around the old request flow, update it to executor-based flow.
+- New/updated generated core artifacts include executor and interceptor pieces under `core/`.
 
 ### 4) Config schema model unified
 
@@ -90,6 +119,10 @@ For CLI/config:
 - `validationLibrary`
 - `emptySchemaStrategy`
 - `customExecutorPath`
+- `useHistory`, `diffReport` (or `analyze.useHistory` / `analyze.reportPath`)
+- `modelsMode` (`interfaces` | `classes`)
+- `prettierConfigPath` (optional path to a Prettier config file for generated output)
+- `tsconfigPath` + `eslintConfigPath` (optional pair to enable batch ESLint fix after generation)
 - `previewChanges` command and its folders:
   - `.ts-openapi-codegen-preview-changes`
   - `.ts-openapi-codegen-diff-changes`
@@ -167,40 +200,23 @@ After (`2.x` style):
 - Direct `generate()` usage remains available, but internals changed significantly in `2.x`.
 - If you depended on removed internal utilities, refactor to current public flow.
 
-## Migration Checklist
+## History-aware generation (diff report)
 
-- [ ] Replaced `includeSchemasFiles` in all configs.
-- [ ] Selected and set `validationLibrary` explicitly.
-- [ ] Selected and set `emptySchemaStrategy` explicitly.
-- [ ] Reviewed custom request/executor integration.
-- [ ] Ran `check-config` and `update-config`.
-- [ ] Ran `preview-changes` and reviewed diffs.
-- [ ] Updated snapshots/tests.
+**Before:** regenerating after an API change could break consumers silently.
 
----
+**After:** you can generate a diff report, confirm renames in `miracles`, and regenerate with `useHistory`.
 
-# Migration Notes: 2.x Additions (History & DTO Modes)
-
-This section documents incremental changes introduced after `2.0.0`.
-
-## New Features
-
-### 1) History-aware generation (diff report)
-
-New CLI/config options:
+CLI/config:
 - `useHistory` (boolean)
 - `diffReport` (path, default: `./openapi-diff-report.json`)
+- or `analyze.useHistory` / `analyze.reportPath` in config
 
-Also available in config sections:
-- `analyze.useHistory`
-- `analyze.reportPath`
-
-The `analyze-diff` command generates the report:
+Generate the report:
 ```bash
 openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml
 ```
 
-Manual confirmation example (edit the report before generation):
+Example confirmed rename in the report:
 ```json
 {
   "miracles": [
@@ -215,34 +231,41 @@ Manual confirmation example (edit the report before generation):
 }
 ```
 
-### 2) Models mode: interfaces vs classes (DTO/Raw)
+## Models mode: interfaces vs classes (DTO/Raw)
 
-New option: `modelsMode` (`interfaces` | `classes`).
+**Before:** models were TypeScript interfaces only.
 
-When `classes` is enabled:
-- generates `*Raw` + `*Dto` in a single `models.ts`;
-- emits `BaseDto` and `dtoUtils` in `core`;
-- confirmed miracles produce deprecated getters in DTOs.
+**After:** `modelsMode: "classes"` generates `*Raw` + `*Dto`, plus `BaseDto` and `dtoUtils` in core; confirmed miracles can add deprecated getters on DTOs.
 
-### 3) Coercion in validation schemas
+## Coercion in validation schemas
 
-When `useHistory` is enabled and a property changes type, validation schemas attempt coercion:
-- Zod uses `z.coerce.*`
-- Joi uses `Joi.alternatives().try(...)`
-- Yup uses `.transform(...)`
-- JSON Schema enables AJV `coerceTypes`
+When `useHistory` is on and a property type changes, validation schemas may coerce values:
+- Zod: `z.coerce.*`
+- Joi: `Joi.alternatives().try(...)`
+- Yup: `.transform(...)`
+- JSON Schema: AJV `coerceTypes`
 
-### 4) Project Prettier / ESLint for generated output
+## Formatting generated output
 
-New CLI/config options (default `false`):
-- `useProjectPrettier`: resolve the repo’s Prettier config (from the current working directory) and format generated files with it; if no config is found, built-in defaults are used.
-- `useEslintFix`: after each file is written, run ESLint with fix enabled using the project’s installed `eslint` package and config. If `eslint` is not installed, the step is skipped and a warning is logged.
+**Before:** `useProjectPrettier: true` resolved Prettier from the current working directory.
 
-Config schema note: `update-config` migrates unified options to `UNIFIED_OPTIONS_v5`, adding these keys with `false` when missing.
+**After:** set `prettierConfigPath` (CLI `--prettierConfigPath` or in `openapi.config.json`). If the file exists, generated TypeScript is formatted with it; if not, built-in defaults are used.
 
-## Recommended Actions
+## Batch ESLint fix after generation
 
-- [ ] Decide whether to enable `modelsMode: "classes"`.
-- [ ] Add `analyze`/`miracles`/`models` sections to your config if you want history-aware generation.
-- [ ] Generate and review a diff report before enabling `useHistory`.
-- [ ] Optionally enable `useProjectPrettier` / `useEslintFix` if you want generated files to match repo formatting and lint rules.
+**Before:** `useEslintFix: true` plus `tsconfigPath` and `eslintConfigPath`.
+
+**After:** set **both** `tsconfigPath` and `eslintConfigPath` (CLI or config). No separate enable flag. If only one path is set, batch ESLint is skipped with a warning.
+
+## Migration Checklist
+
+- [ ] Replaced `includeSchemasFiles` in all configs.
+- [ ] Selected and set `validationLibrary` explicitly.
+- [ ] Selected and set `emptySchemaStrategy` explicitly.
+- [ ] Reviewed custom request/executor integration (`RequestExecutor`, interceptors, `customExecutorPath`).
+- [ ] Replaced `useProjectPrettier` with `prettierConfigPath` where you still want Prettier formatting.
+- [ ] Replaced `useEslintFix: true` with `tsconfigPath` + `eslintConfigPath` where you still want batch ESLint fix.
+- [ ] Decided on `modelsMode` and optional `useHistory` / diff report workflow.
+- [ ] Ran `check-config` and `update-config`.
+- [ ] Ran `preview-changes` and reviewed diffs.
+- [ ] Updated snapshots/tests.

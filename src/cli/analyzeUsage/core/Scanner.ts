@@ -1,5 +1,5 @@
 import type { ExportedDeclarations } from 'ts-morph';
-import { Node,SourceFile, SyntaxKind } from 'ts-morph';
+import { Node, SourceFile, SyntaxKind } from 'ts-morph';
 
 import type { Contract, MethodMetadata } from '../types';
 

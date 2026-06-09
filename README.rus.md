@@ -31,6 +31,9 @@
 - Поддерживает плагины генератора (`plugins`), включая встроенный `x-typescript-type`
 - Поддерживает генерацию бинарных request/response (`format: binary` -> `Blob`)
 - Поддерживает opt-in кэш генерации и инкрементальную запись (`--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`)
+- Сгенерированные сервисы принимают `RequestExecutor` в конструкторе (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`)
+- Опциональное форматирование вывода через `prettierConfigPath` (явный путь к конфигу Prettier)
+- Опциональный пакетный ESLint `--fix` после генерации при указании `tsconfigPath` и `eslintConfigPath`
 
 ## Установка
 

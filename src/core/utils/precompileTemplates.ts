@@ -70,6 +70,7 @@ const precompileTemplates = () => {
                             getRequiredFields: true,
                             getEnumType: true,
                             camelCase: true,
+                            useBatchEslintFix: true,
                         },
                     });
 

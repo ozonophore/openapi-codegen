@@ -52,7 +52,7 @@ export const specialParametersSchemasV4 = z.object({
 export const strictModeParametersSchema = z.object({
     strictOpenapi: z.boolean().optional(),
     reportFile: z.string().optional(),
-})
+});
 
 /** Additional parameters */
 
@@ -77,12 +77,16 @@ export const modelsConfigSchema = z.object({
 export const analyzeConfigSchema = z.object({
     reportPath: z.string().optional(),
     useHistory: z.boolean().optional(),
-    ignore: z.array(z.object({
-        path: z.string().optional(),
-        pattern: z.string().optional(),
-        reason: z.string().optional(),
-        until: z.string().optional(),
-    })).optional(),
+    ignore: z
+        .array(
+            z.object({
+                path: z.string().optional(),
+                pattern: z.string().optional(),
+                reason: z.string().optional(),
+                until: z.string().optional(),
+            })
+        )
+        .optional(),
     failOnBreaking: z.boolean().optional(),
 });
 

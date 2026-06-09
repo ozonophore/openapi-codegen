@@ -1,7 +1,6 @@
-import { OperationError } from "../types/shared/OperationError.model";
-import { OperationResponse } from "../types/shared/OperationResponse.model";
-import { escapeDescription } from "./escapeDescription";
-
+import { OperationError } from '../types/shared/OperationError.model';
+import { OperationResponse } from '../types/shared/OperationResponse.model';
+import { escapeDescription } from './escapeDescription';
 
 export function getOperationErrors(operationResponses: OperationResponse[]): OperationError[] {
     return operationResponses

@@ -3,12 +3,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 junit.xml
+
 .DS_Store
 .tmp
 .idea
 .vscode
 .cursorignore
 .cursor
+.ts-openapi-codegen-diff-changes
+
 *.iml
 dist
 coverage
@@ -20,5 +23,6 @@ samples/swagger-codegen-cli-v3.jar
 generated
 yarn.lock
 __logs__
-.ts-openapi-codegen-diff-changes
+
 AGENTS.md
+eslint-fix-report.json

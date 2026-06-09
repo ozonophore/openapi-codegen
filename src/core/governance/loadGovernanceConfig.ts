@@ -31,9 +31,7 @@ function formatGovernanceConfigValidationError(error: ZodError): string {
         return 'Unknown governance config validation error';
     }
 
-    return error.issues
-        .map(issue => `${formatGovernanceConfigPath(issue.path as Array<string | number>)}: ${issue.message}`)
-        .join('\n');
+    return error.issues.map(issue => `${formatGovernanceConfigPath(issue.path as Array<string | number>)}: ${issue.message}`).join('\n');
 }
 
 /**
@@ -51,21 +49,17 @@ export async function loadGovernanceConfig(governanceConfigPath?: string): Promi
         throw new Error(`Governance config file does not exist: ${resolvedPath}`);
     }
 
-    const rawContent = await fileSystemHelpers.readFile(resolvedPath, "utf8");
+    const rawContent = await fileSystemHelpers.readFile(resolvedPath, 'utf8');
     let parsed: unknown;
     try {
         parsed = JSON.parse(rawContent);
     } catch (error) {
-        throw new Error(
-            `Failed to parse governance config JSON at "${resolvedPath}": ${error instanceof Error ? error.message : String(error)}`
-        );
+        throw new Error(`Failed to parse governance config JSON at "${resolvedPath}": ${error instanceof Error ? error.message : String(error)}`);
     }
 
     const validationResult = governancePolicyConfigSchema.safeParse(parsed);
     if (!validationResult.success) {
-        throw new Error(
-            `Invalid governance config at "${resolvedPath}":\n${formatGovernanceConfigValidationError(validationResult.error)}`
-        );
+        throw new Error(`Invalid governance config at "${resolvedPath}":\n${formatGovernanceConfigValidationError(validationResult.error)}`);
     }
 
     return validationResult.data as GovernancePolicyConfig;

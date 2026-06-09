@@ -18,7 +18,7 @@ import { CLITemplates } from '../Types';
 export async function writeConfigFile(configPath: string, config: TRawOptions, templates: CLITemplates): Promise<void> {
     const resolvedPath = resolveHelper(process.cwd(), configPath);
     const configDir = path.dirname(resolvedPath);
-    
+
     // Создаем директорию, если она не существует
     const dirExists = await fileSystemHelpers.exists(configDir);
     if (!dirExists) {
@@ -27,7 +27,7 @@ export async function writeConfigFile(configPath: string, config: TRawOptions, t
 
     const templateResult = templates.config(config);
     const formattedValue = await format(templateResult, 'json');
-    
+
     await fileSystemHelpers.writeFile(resolvedPath, formattedValue);
     APP_LOGGER.info(LOGGER_MESSAGES.CONFIG.CONFIG_CREATED(resolvedPath));
 }

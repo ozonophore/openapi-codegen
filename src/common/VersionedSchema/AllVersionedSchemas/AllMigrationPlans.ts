@@ -30,21 +30,13 @@ export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<
     ...addVersionPrefixToMigrationPlans(optionsMigrationPlans, 'OPTIONS'),
 
     // Migration from OPTIONS latest version to UNIFIED v1
-    createTrivialMigration(
-        `OPTIONS_${getLatestVersionFromMigrationPlans(optionsMigrationPlans)}`,
-        'UNIFIED_OPTIONS_v1',
-        'Migrate from OPTIONS to UNIFIED schema'
-    ),
+    createTrivialMigration(`OPTIONS_${getLatestVersionFromMigrationPlans(optionsMigrationPlans)}`, 'UNIFIED_OPTIONS_v1', 'Migrate from OPTIONS to UNIFIED schema'),
 
     // ===== MULTI_OPTIONS migrations (with prefix) =====
     ...addVersionPrefixToMigrationPlans(multiOptionsMigrationPlan, 'MULTI_OPTIONS'),
 
     // Migration from MULTI_OPTIONS latest version to UNIFIED v1
-    createTrivialMigration(
-        `MULTI_OPTIONS_${getLatestVersionFromMigrationPlans(multiOptionsMigrationPlan)}`,
-        'UNIFIED_OPTIONS_v1',
-        'Migrate from MULTI_OPTIONS to UNIFIED schema'
-    ),
+    createTrivialMigration(`MULTI_OPTIONS_${getLatestVersionFromMigrationPlans(multiOptionsMigrationPlan)}`, 'UNIFIED_OPTIONS_v1', 'Migrate from MULTI_OPTIONS to UNIFIED schema'),
     createFieldTransformationMigration(
         'UNIFIED_OPTIONS_v1',
         'UNIFIED_OPTIONS_v2',
@@ -53,29 +45,15 @@ export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<
         },
         'Transforms includeSchemasFiles to validationLibrary: if includeSchemasFiles is false, sets validationLibrary to NONE'
     ),
-    createDefaultFieldsMigration(
-        'UNIFIED_OPTIONS_v2',
-        'UNIFIED_OPTIONS_v3',
-        {
-            logLevel: ELogLevel.ERROR,
-            logTarget: ELogOutput.CONSOLE
-        }
-    ),
-    createDefaultFieldsMigration(
-        'UNIFIED_OPTIONS_v3',
-        'UNIFIED_OPTIONS_v4',
-        {
-            emptySchemaStrategy: EmptySchemaStrategy.KEEP
-        }
-    ),
-    createDefaultFieldsMigration(
-        'UNIFIED_OPTIONS_v4',
-        'UNIFIED_OPTIONS_v5',
-        {
-            strictOpenapi: false,
-            reportFile: '',
-            useProjectPrettier: false,
-            useEslintFix: false,
-        }
-    ),
+    createDefaultFieldsMigration('UNIFIED_OPTIONS_v2', 'UNIFIED_OPTIONS_v3', {
+        logLevel: ELogLevel.ERROR,
+        logTarget: ELogOutput.CONSOLE,
+    }),
+    createDefaultFieldsMigration('UNIFIED_OPTIONS_v3', 'UNIFIED_OPTIONS_v4', {
+        emptySchemaStrategy: EmptySchemaStrategy.KEEP,
+    }),
+    createDefaultFieldsMigration('UNIFIED_OPTIONS_v4', 'UNIFIED_OPTIONS_v5', {
+        strictOpenapi: false,
+        reportFile: '',
+    }),
 ];

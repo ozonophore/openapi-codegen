@@ -1,4 +1,4 @@
-import { REGEX_BACKSLASH } from "../types/Consts";
+import { REGEX_BACKSLASH } from '../types/Consts';
 
 export function replaceString(value?: string): string | null | undefined {
     if (!value) {

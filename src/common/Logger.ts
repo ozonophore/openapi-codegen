@@ -42,13 +42,7 @@ export class Logger {
     private _disableColors: boolean;
 
     constructor(options: LoggerOptions) {
-        const {
-            instanceId,
-            level,
-            logOutput,
-            rotate = { datePattern: 'YYYY-MM-DD', maxSize: '20m', maxFiles: '14d' },
-            disableColors = false,
-        } = options;
+        const { instanceId, level, logOutput, rotate = { datePattern: 'YYYY-MM-DD', maxSize: '20m', maxFiles: '14d' }, disableColors = false } = options;
         this._currentLevel = level;
         this._instanceId = instanceId;
         this._disableColors = disableColors;
@@ -92,7 +86,7 @@ export class Logger {
                             const labelPart = this._disableColors ? label : chalk.bold(label);
 
                             return `${icon} [${labelPart}] ${timePart}: ${coloredMessage}`;
-                        }),
+                        })
                     ),
                 })
             );
@@ -109,7 +103,7 @@ export class Logger {
                         format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
                         format.printf(({ level, message, timestamp, label }) => {
                             return `[${level}] [${label}] ${timestamp}: ${message}`;
-                        }),
+                        })
                     ),
                 })
             );

@@ -1,4 +1,4 @@
-import { fileSystemHelpers } from "../../../common/utils/fileSystemHelpers";
+import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 
 /**
  * Проверяет, пуста ли директория

@@ -1,4 +1,4 @@
-import { Model } from "../types/shared/Model.model";
+import { Model } from '../types/shared/Model.model';
 
 export function areEqual(a: Model, b: Model): boolean {
     const equal = a.type === b.type && a.base === b.base && a.template === b.template;

@@ -11,4 +11,4 @@ export type OutputPaths = {
     outputServices: string;
     outputModels: string;
     outputSchemas: string;
-}
+};

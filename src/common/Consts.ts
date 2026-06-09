@@ -43,13 +43,12 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     miracles: {},
     strictOpenapi: false,
     reportFile: './openapi-report.json',
-    useProjectPrettier: false,
-    useEslintFix: false,
     governanceConfig: '',
     cache: false,
     cachePath: '.openapi-codegen-cache.json',
     cacheStrategy: 'entity',
     cacheDebug: false,
+    prettierConfigPath: '',
 };
 
 export const APP_LOGGER = new Logger({
@@ -60,7 +59,7 @@ export const APP_LOGGER = new Logger({
 
 export const DEFAULT_SPECS_DIR = 'openapi/';
 
-export const DEFAULT_CUSTOM_REQUEST_PATH = './src/custom/request.ts'
+export const DEFAULT_CUSTOM_REQUEST_PATH = './src/custom/request.ts';
 
 export const DEFAULT_OUTPUT_API_DIR = './generated';
 

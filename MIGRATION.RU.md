@@ -58,6 +58,35 @@
 
 Генерация сервисов перешла на модель `RequestExecutor`.
 
+**Было:** сервисы часто вызывали общий `request()` напрямую.
+
+**Стало:** каждый сгенерированный сервис получает `RequestExecutor` в конструкторе и вызывает `executor.request()` или `executor.requestRaw()`.
+
+#### Контракт RequestExecutor
+
+- `request<T>(config, options?)` — возвращает распарсенное тело ответа.
+- `requestRaw<T>(config, options?)` — возвращает `ApiResult<T>` (`url`, `ok`, `status`, `statusText`, `body`).
+- `RequestConfig` описывает method, path, headers, query, body, media types и опционально `responseType: 'blob'`.
+
+#### Кастомный HTTP-слой
+
+- `request` в конфиге по-прежнему указывает на ваш транспортный модуль.
+- `customExecutorPath` может указывать на `createExecutorAdapter` (или свой адаптер), оборачивающий транспорт в `RequestExecutor`.
+
+#### Цепочка interceptors
+
+```mermaid
+flowchart TD
+  A[RequestConfig] --> B[Request interceptors]
+  B --> C[HTTP через executor]
+  C --> D[Response interceptors]
+  D --> E[Результат]
+  C -->|ошибка| F[Error interceptors]
+  F --> G[Повторный throw или обработка]
+```
+
+Порядок: request interceptors → HTTP → response interceptors; при ошибке сначала error interceptors, затем исключение.
+
 Влияние:
 - если у вас была кастомная интеграция со старым request-потоком, ее нужно адаптировать под executor-подход;
 - в generated core появились/обновились артефакты для executor/interceptors (`core/executor`, interceptor-файлы).
@@ -90,6 +119,10 @@
 - `validationLibrary`
 - `emptySchemaStrategy`
 - `customExecutorPath`
+- `useHistory`, `diffReport` (или `analyze.useHistory` / `analyze.reportPath`)
+- `modelsMode` (`interfaces` | `classes`)
+- `prettierConfigPath` (опциональный путь к файлу конфигурации Prettier для вывода)
+- `tsconfigPath` + `eslintConfigPath` (опциональная пара для пакетного ESLint fix после генерации)
 - команда `preview-changes` и ее рабочие директории:
   - `.ts-openapi-codegen-preview-changes`
   - `.ts-openapi-codegen-diff-changes`
@@ -167,40 +200,23 @@ openapi-codegen-cli preview-changes --openapi-config ./openapi.config.json
 - Вызов `generate()` напрямую остается доступным, но внутренняя реализация в `2.x` существенно изменилась.
 - Если вы использовали удаленные внутренние утилиты, переходите на актуальный публичный поток.
 
-## Чеклист миграции
+## History‑aware генерация (diff‑отчёт)
 
-- [ ] Во всех конфигах удален `includeSchemasFiles`.
-- [ ] Везде явно задан `validationLibrary`.
-- [ ] Везде явно задан `emptySchemaStrategy`.
-- [ ] Проверена кастомная интеграция request/executor.
-- [ ] Выполнены `check-config` и `update-config`.
-- [ ] Выполнен `preview-changes`, diff проверен.
-- [ ] Обновлены тесты/снапшоты.
+**Было:** после изменения API перегенерация могла сломать потребителей незаметно.
 
----
+**Стало:** можно сгенерировать diff‑отчёт, подтвердить переименования в `miracles` и перегенерировать с `useHistory`.
 
-# Примечания по миграции: изменения 2.x (History & DTO)
-
-Этот раздел фиксирует инкрементальные изменения после `2.0.0`.
-
-## Новые возможности
-
-### 1) History‑aware генерация (diff‑отчёт)
-
-Новые опции CLI/конфига:
+CLI/конфиг:
 - `useHistory` (boolean)
-- `diffReport` (путь, по умолчанию: `./openapi-diff-report.json`)
+- `diffReport` (путь, по умолчанию `./openapi-diff-report.json`)
+- или `analyze.useHistory` / `analyze.reportPath`
 
-Также доступны в секциях конфига:
-- `analyze.useHistory`
-- `analyze.reportPath`
-
-Команда для генерации отчёта:
+Генерация отчёта:
 ```bash
 openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml
 ```
 
-Пример ручного подтверждения (отредактируйте отчёт перед генерацией):
+Пример подтверждённого переименования:
 ```json
 {
   "miracles": [
@@ -215,34 +231,41 @@ openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/pre
 }
 ```
 
-### 2) Режим моделей: интерфейсы vs классы (DTO/Raw)
+## Режим моделей: интерфейсы vs классы (DTO/Raw)
 
-Новая опция: `modelsMode` (`interfaces` | `classes`).
+**Было:** модели только как TypeScript interfaces.
 
-Если включить `classes`:
-- генерируются `*Raw` + `*Dto` в едином `models.ts`;
-- добавляются `BaseDto` и `dtoUtils` в `core`;
-- подтверждённые чудеса формируют deprecated‑геттеры в DTO.
+**Стало:** при `modelsMode: "classes"` генерируются `*Raw` + `*Dto`, а также `BaseDto` и `dtoUtils` в core; подтверждённые miracles могут добавить deprecated‑геттеры в DTO.
 
-### 3) Коэрсинг в схемах валидации
+## Коэрсинг в схемах валидации
 
-При `useHistory` и смене типа свойства валидаторы пытаются коэрсить значения:
-- Zod использует `z.coerce.*`
-- Joi использует `Joi.alternatives().try(...)`
-- Yup использует `.transform(...)`
-- JSON Schema включает `coerceTypes` в AJV
+При включённом `useHistory` и смене типа свойства валидаторы могут коэрсить значения:
+- Zod: `z.coerce.*`
+- Joi: `Joi.alternatives().try(...)`
+- Yup: `.transform(...)`
+- JSON Schema: AJV `coerceTypes`
 
-### 4) Prettier / ESLint для сгенерированного кода
+## Форматирование сгенерированного кода
 
-Новые опции CLI/конфига (по умолчанию `false`):
-- `useProjectPrettier`: резолв конфига Prettier репозитория (от текущей рабочей директории) и форматирование сгенерированных файлов по нему; если конфиг не найден, используются встроенные значения по умолчанию.
-- `useEslintFix`: после записи каждого файла запуск ESLint с автофиксом через установленный в проекте пакет `eslint` и его конфиг. Если `eslint` не установлен, шаг пропускается с предупреждением в логе.
+**Было:** `useProjectPrettier: true` — резолв Prettier из текущей рабочей директории.
 
-Замечание по схеме: `update-config` мигрирует unified-опции к `UNIFIED_OPTIONS_v5`, добавляя эти ключи со значением `false`, если их не было.
+**Стало:** укажите `prettierConfigPath` (CLI `--prettierConfigPath` или в `openapi.config.json`). Если файл существует, TypeScript форматируется по нему; иначе — встроенные настройки.
 
-## Рекомендованные действия
+## Пакетный ESLint после генерации
 
-- [ ] Решите, нужен ли `modelsMode: "classes"`.
-- [ ] Добавьте секции `analyze`/`miracles`/`models` в конфиг, если нужна history‑генерация.
-- [ ] Сгенерируйте и проверьте diff‑отчёт перед включением `useHistory`.
-- [ ] При необходимости включите `useProjectPrettier` / `useEslintFix`, чтобы вывод совпадал с форматированием и правилами линтера репозитория.
+**Было:** `useEslintFix: true` и пути `tsconfigPath` / `eslintConfigPath`.
+
+**Стало:** укажите **оба** пути `tsconfigPath` и `eslintConfigPath` (CLI или конфиг). Отдельного флага включения нет. Если задан только один путь — batch ESLint пропускается с предупреждением.
+
+## Чеклист миграции
+
+- [ ] Во всех конфигах удален `includeSchemasFiles`.
+- [ ] Везде явно задан `validationLibrary`.
+- [ ] Везде явно задан `emptySchemaStrategy`.
+- [ ] Проверена интеграция request/executor (`RequestExecutor`, interceptors, `customExecutorPath`).
+- [ ] `useProjectPrettier` заменён на `prettierConfigPath`, если нужно форматирование Prettier.
+- [ ] `useEslintFix: true` заменён на пару `tsconfigPath` + `eslintConfigPath`, если нужен пакетный ESLint fix.
+- [ ] Выбран `modelsMode` и при необходимости workflow `useHistory` / diff‑отчёта.
+- [ ] Выполнены `check-config` и `update-config`.
+- [ ] Выполнен `preview-changes`, diff проверен.
+- [ ] Обновлены тесты/снапшоты.

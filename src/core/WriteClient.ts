@@ -58,8 +58,7 @@ type TWriteClientProps = {
     validationLibrary?: ValidationLibrary;
     emptySchemaStrategy: EmptySchemaStrategy;
     modelsMode?: ModelsMode;
-    useProjectPrettier?: boolean;
-    useEslintFix?: boolean;
+    prettierConfigPath?: string;
 };
 
 type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOptions' | 'request' | 'useCancelableRequest' | 'useSeparatedIndexes'> & {
@@ -73,6 +72,10 @@ export class WriteClient {
     private config: Map<string, TAPIClientGeneratorConfig[]> = new Map();
     private expectedOutputFiles: Set<string> = new Set();
     private writeStats = { written: 0, unchanged: 0 };
+    /** Absolute paths of generated model/service files for batch ESLint. */
+    private lintTargetFiles = new Set<string>();
+    /** Output directory globs for the temporary tsconfig include. */
+    private lintIncludeGlobs = new Set<string>();
     private _logger: Logger;
 
     constructor(logger?: Logger) {
@@ -104,8 +107,7 @@ export class WriteClient {
             validationLibrary = ValidationLibrary.NONE,
             emptySchemaStrategy,
             modelsMode,
-            useProjectPrettier = false,
-            useEslintFix = false,
+            prettierConfigPath,
         } = options;
 
         if (!excludeCoreServiceFiles) {
@@ -137,8 +139,7 @@ export class WriteClient {
                 useUnionTypes,
                 useOptions,
                 useCancelableRequest,
-                useProjectPrettier,
-                useEslintFix,
+                prettierConfigPath,
             });
             await this.writeClientServicesIndex({
                 services: client.services,
@@ -153,8 +154,7 @@ export class WriteClient {
                 templates,
                 request,
                 customExecutorPath,
-                useProjectPrettier,
-                useEslintFix,
+                prettierConfigPath,
             });
         }
 
@@ -172,8 +172,7 @@ export class WriteClient {
                 useUnionTypes,
                 validationLibrary,
                 emptySchemaStrategy,
-                useProjectPrettier,
-                useEslintFix,
+                prettierConfigPath,
             });
             await this.writeClientSchemasIndex({
                 models: schemaModels,
@@ -197,8 +196,7 @@ export class WriteClient {
                 emptySchemaStrategy,
                 modelsMode,
                 schemaModels,
-                useProjectPrettier,
-                useEslintFix,
+                prettierConfigPath,
             });
             return;
         }
@@ -218,8 +216,7 @@ export class WriteClient {
             emptySchemaStrategy,
             modelsMode,
             schemaModels: [],
-            useProjectPrettier,
-            useEslintFix,
+            prettierConfigPath,
         });
     }
 
@@ -237,8 +234,7 @@ export class WriteClient {
             emptySchemaStrategy,
             modelsMode,
             schemaModels,
-            useProjectPrettier,
-            useEslintFix,
+            prettierConfigPath,
         } = config;
 
         await fileSystemHelpers.mkdir(outputPaths.outputModels);
@@ -256,8 +252,7 @@ export class WriteClient {
             useOptions,
             modelsMode,
             outputCorePath: shouldInlineDtoCore ? './' : relativeHelper(outputPaths.outputModels, outputPaths.outputCore),
-            useProjectPrettier,
-            useEslintFix,
+            prettierConfigPath,
         });
         await this.writeClientModelsIndex({
             models: client.models,
@@ -330,6 +325,33 @@ export class WriteClient {
 
     public getWriteStats(): { written: number; unchanged: number } {
         return { ...this.writeStats };
+    }
+
+    /**
+     * Registers a generated file for the post-generation batch ESLint pass.
+     *
+     * @param filePath - Written file path (absolute or relative to cwd).
+     * @param outputRoot - Models or services output directory used to build a narrow tsconfig glob.
+     */
+    public registerLintTarget(filePath: string, outputRoot: string): void {
+        this.lintTargetFiles.add(resolveHelper(process.cwd(), filePath));
+        this.lintIncludeGlobs.add(`${outputRoot.replace(/\\/g, '/')}/**/*.ts`);
+    }
+
+    /**
+     * Returns collected lint targets after all writeClient* calls.
+     */
+    public getLintTargets(): { files: string[]; includeGlobs: string[] } {
+        return {
+            files: [...this.lintTargetFiles],
+            includeGlobs: [...this.lintIncludeGlobs],
+        };
+    }
+
+    /** Clears the lint registry after batch ESLint finishes or is skipped. */
+    public clearLintTargets(): void {
+        this.lintTargetFiles.clear();
+        this.lintIncludeGlobs.clear();
     }
 
     private buildSimpleClientIndexMap(): Map<string, SimpleClientArtifacts> {

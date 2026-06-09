@@ -1,4 +1,4 @@
-import { REGEX_BACKSLASH } from "../types/Consts";
+import { REGEX_BACKSLASH } from '../types/Consts';
 
 /**
  * The spec generates a pattern like this '^\d{3}-\d{2}-\d{4}$'

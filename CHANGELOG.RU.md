@@ -4,6 +4,38 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.1.0-beta.8] — 2026-06-08
+
+### Удалено
+- Удалены `--useProjectPrettier` / `useProjectPrettier` и неявный резолв конфига Prettier из текущей рабочей директории.
+- Удалён boolean-флаг `--useEslintFix` / `useEslintFix` и покфайловый ESLint `--fix` при записи.
+- Удалены поля `useProjectPrettier` / `useEslintFix` из миграции конфига v4→v5.
+- Удалены legacy e2e browser-тесты на Babel, `.babelrc.js` и связанные dev-зависимости `@babel/*`.
+
+### Добавлено
+- Добавлены `--prettierConfigPath` / `prettierConfigPath` — явный путь к файлу конфигурации Prettier для форматирования вывода.
+- Добавлены CLI-флаги `--tsconfigPath` и `--eslintConfigPath` (ключи конфига на корневом уровне) для пакетного ESLint после генерации.
+- Добавлен постгенерационный `eslintFixBatch`: временные tsconfig/ESLint-обёртки в `.openapi-codegen/`, chunked `lintFiles` и `eslint-fix-report.json` в корне проекта.
+- Добавлена переменная окружения `ESLINT_FIX_BATCH_SIZE` для настройки размера чанка (по умолчанию: 50).
+- Добавлен `example/eslint.example.mjs` — пример ESLint flat config для host-проекта.
+- Добавлен стандартный комментарий-заголовок «автоматически сгенерированный файл» в вывод клиента (partial `header.hbs`).
+- Добавлен Handlebars-хелпер `useBatchEslintFix`: при указании обоих ESLint-путей из сгенерированных файлов убираются inline `eslint-disable` / `tslint-disable`, чтобы host ESLint мог их исправить.
+- Добавлен `WriteClient.registerLintTarget()` для сбора сгенерированных файлов перед пакетным lint.
+- Добавлен pre-commit hook Husky и пайплайн lint-staged (`checkTypes`, `eslint:fix`, `find-deadcode:dev`).
+
+### Изменено
+- `format()` загружает настройки Prettier из `prettierConfigPath`, если файл существует; иначе — встроенные defaults (без неявного поиска в cwd).
+- Пакетный ESLint `--fix` запускается один раз после завершения всех items при указании **обоих** `tsconfigPath` и `eslintConfigPath` (CLI или конфиг); если указан только один путь — шаг пропускается с предупреждением.
+- `tsconfigPath` / `eslintConfigPath` доступны только на корневом уровне (исключены из per-item `flatOptionsSchema`).
+- Direct CLI `generate` пробрасывает `prettierConfigPath`, `tsconfigPath` и `eslintConfigPath` из аргументов CLI.
+- `UNIFIED_OPTIONS_v5` обновлён без отдельной v6: `prettierConfigPath`, `tsconfigPath` и `eslintConfigPath` заменяют `useProjectPrettier` / `useEslintFix`.
+- Конфиг Prettier перенесён из `.prettierrc.json` в `.prettierrc.js`; `src/templatesCompiled` исключён через `.prettierignore`.
+- Обновлены README (EN/RU), MIGRATION (EN/RU) и документация configuration/usage под новые опции форматирования и lint.
+
+### Тесты
+- Добавлены/обновлены unit-тесты для `eslintFixBatch`, `format` (`prettierConfigPath`), `extractEslintFixOptions`, хелперов временных конфигов (`prepareTempTsConfig`, `prepareTempEslintConfig`) и рендеринга заголовка через `useBatchEslintFix`.
+- Обновлены snapshot-наборы под новый заголовок в client/core/service output.
+
 ## [2.1.0-beta.7] — 2026-05-27
 
 ### Добавлено
@@ -156,12 +188,20 @@
   - опция запроса/ответа `responseType: 'blob'`;
   - runtime-обработка бинарных ответов для `fetch`, `xhr`, `node`, `axios`.
 - Добавлены Blob-сценарии в тестовых спецификациях и snapshot’ах (`v3`, `v3_withDifferentRefs`).
+- Добавлена команда `analyze-diff` для формирования diff‑отчетов между версиями OpenAPI.
+- Добавлены опции history‑генерации: `useHistory` и `diffReport`.
+- Добавлен `modelsMode` (`interfaces` | `classes`) для генерации `Raw/Dto` моделей в одном `models.ts`.
+- Добавлены `BaseDto` и `dtoUtils` в сгенерированный `core` при `modelsMode=classes`.
+- Добавлена поддержка раздела `miracles` в diff‑отчете и deprecated‑геттеров в DTO при подтвержденных rename.
+- Добавлен авто‑коэрсинг в схемах валидации при смене типа (Zod/Joi/Yup/AJV).
 
 ### Изменено
 - Улучшен парсинг ответов и разрешение ссылок:
   - для response `$ref` нормализуется контекст родительского файла перед разрешением вложенных ссылок;
   - усилена логика выбора content media type и парсинга кодов ответов.
 - Обновлен поток загрузки OpenAPI-спецификаций: резолв идет по абсолютному пути без глобального `process.chdir(...)`.
+- Добавлены секции конфигурации `models`, `analyze` и `miracles` в unified‑схему и шаблоны `init`.
+- Обновлены README (EN/RU) и MIGRATION с описанием history/DTO‑возможностей.
 
 ### Исправлено
 - Исправлены кейсы с неразрешимыми вложенными `$ref` внутри reference-ответов.

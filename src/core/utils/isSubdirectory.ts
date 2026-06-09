@@ -1,7 +1,6 @@
-import path from "path";
+import path from 'path';
 
-import { relativeHelper, resolveHelper } from "../../common/utils/pathHelpers";
-
+import { relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
 
 /**
  * Checks whether `child` is a subdirectory of `parent`

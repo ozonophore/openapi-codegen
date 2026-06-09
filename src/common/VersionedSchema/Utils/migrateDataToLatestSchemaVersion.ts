@@ -75,19 +75,13 @@ export function migrateDataToLatestSchemaVersion({ rawInput, migrationPlans, ver
 
         if (!migrationPlan) {
             const availableVersions = Array.from(migrationPlanByFromVersion.keys()).join(', ');
-            throw new Error(
-                `No migration plan from ${currentVersion}. ` +
-                `Available migration plans: ${availableVersions}. ` +
-                `This usually means the migration chain is incomplete.`
-            );
+            throw new Error(`No migration plan from ${currentVersion}. ` + `Available migration plans: ${availableVersions}. ` + `This usually means the migration chain is incomplete.`);
         }
 
         const nextVersion = migrationPlan.toVersion;
         const nextSchema = schemasByVersion.get(nextVersion);
         if (!nextSchema) {
-            throw new Error(
-                `Migration plan from ${migrationPlan.fromVersion} points to unknown schema version ${nextVersion}.`
-            );
+            throw new Error(`Migration plan from ${migrationPlan.fromVersion} points to unknown schema version ${nextVersion}.`);
         }
 
         const migratedRaw = migrationPlan.migrate(currentData);
@@ -96,8 +90,8 @@ export function migrateDataToLatestSchemaVersion({ rawInput, migrationPlans, ver
         if (!validationResult.success) {
             throw new Error(
                 `Migration from ${currentVersion} to ${nextVersion} failed validation. ` +
-                `Error: ${validationResult.errors.join('\n')}. ` +
-                `Migration description: ${migrationPlan.description || 'No description provided'}.`
+                    `Error: ${validationResult.errors.join('\n')}. ` +
+                    `Migration description: ${migrationPlan.description || 'No description provided'}.`
             );
         }
 

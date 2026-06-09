@@ -6,7 +6,7 @@ import { format } from '../../common/utils/format';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { getContent } from '../api/v3/parser/getContent';
 import { Context } from '../Context';
-import { evaluateGovernanceRules,GovernancePolicyConfig, GovernanceReport } from '../governance/evaluateGovernanceRules';
+import { evaluateGovernanceRules, GovernancePolicyConfig, GovernanceReport } from '../governance/evaluateGovernanceRules';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 
 type StrictIssueSeverity = 'error' | 'warning' | 'info';
@@ -30,8 +30,7 @@ export type StrictOpenApiReport = {
     issues: StrictIssue[];
 };
 
-type StrictValidationContext = Pick<Context, 'paths' | 'get' | 'exists'> &
-    Partial<Pick<Context, 'getAllCanonicalRefs'>>;
+type StrictValidationContext = Pick<Context, 'paths' | 'get' | 'exists'> & Partial<Pick<Context, 'getAllCanonicalRefs'>>;
 
 type ValidateOpenApiStrictParams = {
     openApi: CommonOpenApi;

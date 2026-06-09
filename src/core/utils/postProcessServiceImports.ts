@@ -8,7 +8,5 @@ import { unique } from './unique';
  * @param service
  */
 export function postProcessServiceImports(service: Service): Import[] {
-    return service.imports
-        .filter(unique)
-        .sort(sort);
+    return service.imports.filter(unique).sort(sort);
 }

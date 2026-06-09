@@ -1,4 +1,4 @@
-import { ExportedModel } from "../types/base/ExportedModel.model";
+import { ExportedModel } from '../types/base/ExportedModel.model';
 
 export function sortModelByName(a: ExportedModel, b: ExportedModel): number {
     if (a.name > b.name) {

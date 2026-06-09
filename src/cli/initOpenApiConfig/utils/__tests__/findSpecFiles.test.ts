@@ -30,10 +30,7 @@ describe('@unit: findSpecFiles', () => {
     });
 
     test('throws when directory does not exist', async () => {
-        await assert.rejects(
-            () => findSpecFiles(path.join(__dirname, 'missing-dir-never-exists')),
-            /Directory does not exist/
-        );
+        await assert.rejects(() => findSpecFiles(path.join(__dirname, 'missing-dir-never-exists')), /Directory does not exist/);
     });
 
     test('throws when path is not a directory', async t => {

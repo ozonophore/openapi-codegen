@@ -1,4 +1,4 @@
-import { Templates } from "../../types/base/Templates.model";
+import { Templates } from '../../types/base/Templates.model';
 
 export type SimpleClientArtifacts = {
     templates: Templates;
@@ -7,4 +7,4 @@ export type SimpleClientArtifacts = {
     models: string[];
     schemas: string[];
     services: string[];
-}
+};

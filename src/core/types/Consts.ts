@@ -16,6 +16,6 @@ export const GROUP_PRIORITY_EXTENDED = {
 } as const;
 
 export const GROUP_PRIORITY_SIMPLE = {
-  'requires-value': 0,
-  'other': 1
+    'requires-value': 0,
+    other: 1,
 } as const;

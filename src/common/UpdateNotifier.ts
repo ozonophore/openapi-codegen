@@ -208,11 +208,11 @@ export class UpdateNotifier {
         try {
             // First, check if we have cached update info
             const cachedInfo = this._configStore.get('package_store_info') as TPackageStoreInfo | null;
-            
+
             if (cachedInfo) {
                 // Update current version in cache
                 cachedInfo.currentVersion = this._packageVersion;
-                
+
                 // Check if we need to show notification
                 if (semver.gt(cachedInfo.latestVersion, cachedInfo.currentVersion)) {
                     this._notificationService.notify(cachedInfo);

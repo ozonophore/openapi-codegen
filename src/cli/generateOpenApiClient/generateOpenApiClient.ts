@@ -66,7 +66,12 @@ export async function generateOpenApiClient(options: OptionValues): Promise<CLIC
                 return { success: false, error: directOptionsValidationResult.errors.join('\n') };
             }
 
-            await OpenAPI.generate(directOptionsValidationResult.data as TRawOptions);
+            await OpenAPI.generate({
+                ...(directOptionsValidationResult.data as TRawOptions),
+                prettierConfigPath: validatedOptions.prettierConfigPath,
+                tsconfigPath: validatedOptions.tsconfigPath,
+                eslintConfigPath: validatedOptions.eslintConfigPath,
+            });
             await APP_LOGGER.shutdownLoggerAsync();
             return { success: true };
         }
@@ -113,6 +118,9 @@ export async function generateOpenApiClient(options: OptionValues): Promise<CLIC
             cachePath: validatedOptions.cachePath ?? (value as TRawOptions).cachePath,
             cacheStrategy: validatedOptions.cacheStrategy ?? (value as TRawOptions).cacheStrategy,
             cacheDebug: validatedOptions.cacheDebug ?? (value as TRawOptions).cacheDebug,
+            prettierConfigPath: validatedOptions.prettierConfigPath ?? (value as TRawOptions).prettierConfigPath,
+            tsconfigPath: validatedOptions.tsconfigPath ?? (value as TRawOptions).tsconfigPath,
+            eslintConfigPath: validatedOptions.eslintConfigPath ?? (value as TRawOptions).eslintConfigPath,
         };
 
         await OpenAPI.generate(mergedOptions);

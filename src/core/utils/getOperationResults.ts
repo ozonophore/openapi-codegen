@@ -1,5 +1,5 @@
-import { OperationResponse } from "../types/shared/OperationResponse.model";
-import { areEqual } from "./areEqual";
+import { OperationResponse } from '../types/shared/OperationResponse.model';
+import { areEqual } from './areEqual';
 
 export function getOperationResults(operationResponses: OperationResponse[]): OperationResponse[] {
     const operationResults: OperationResponse[] = [];

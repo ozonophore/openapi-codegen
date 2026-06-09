@@ -1,4 +1,4 @@
-import { encode } from "./encode";
+import { encode } from './encode';
 
 export function getTypeName(value: string): string {
     const index = value.lastIndexOf('/');

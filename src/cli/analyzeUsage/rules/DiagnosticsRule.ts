@@ -43,7 +43,11 @@ export class DiagnosticsRule implements Rule {
                 } else if (typeof messageText === 'object') {
                     // For multiline messages, concatenate the text parts.
                     const mainMessage = messageText.getMessageText();
-                    const details = messageText.getNext()?.map(part => part.getMessageText()).join(' ') ?? '';
+                    const details =
+                        messageText
+                            .getNext()
+                            ?.map(part => part.getMessageText())
+                            .join(' ') ?? '';
                     findings.push({
                         id: `TS_DIAGNOSTIC_${diagnostic.getCode()}`,
                         category: 'TYPE_MISMATCH',

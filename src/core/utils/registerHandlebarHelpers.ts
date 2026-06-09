@@ -7,7 +7,7 @@ import { Enum } from '../types/shared/Enum.model';
 import { Model } from '../types/shared/Model.model';
 import { unique } from './unique';
 
-export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOptions: boolean; useUnionTypes: boolean }): void {
+export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOptions: boolean; useUnionTypes: boolean; useBatchEslintFix?: boolean }): void {
     Handlebars.registerHelper('equals', function (this: any, a: string, b: string, options: Handlebars.HelperOptions): string {
         return a === b ? options.fn(this) : options.inverse(this);
     });
@@ -201,5 +201,9 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
             return `${name}Service`;
         }
         return name;
+    });
+
+    Handlebars.registerHelper('useBatchEslintFix', function () {
+        return Boolean(root.useBatchEslintFix);
     });
 }

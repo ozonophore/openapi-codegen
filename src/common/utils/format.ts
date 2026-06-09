@@ -2,6 +2,8 @@ import { BuiltInParserName, format as prettierFormat, LiteralUnion, Options as P
 
 import { APP_LOGGER } from '../Consts';
 import { LOGGER_ERROR_CODES, LOGGER_MESSAGES } from '../LoggerMessages';
+import { fileSystemHelpers } from './fileSystemHelpers';
+import { resolveHelper } from './pathHelpers';
 
 const BUILTIN_PRETTIER_OPTIONS: PrettierOptions = {
     tabWidth: 4,
@@ -15,24 +17,29 @@ const BUILTIN_PRETTIER_OPTIONS: PrettierOptions = {
     endOfLine: 'auto',
 };
 
-export async function format(
-    input: string,
-    parser?: LiteralUnion<BuiltInParserName>,
-    useProjectConfig?: boolean,
-): Promise<string> {
+export async function format(input: string, parser?: LiteralUnion<BuiltInParserName>, prettierConfigPath?: string): Promise<string> {
     let options: PrettierOptions = { ...BUILTIN_PRETTIER_OPTIONS, parser: parser ?? 'typescript' };
 
-    if (useProjectConfig) {
-        try {
-            const resolved = await resolveConfig(process.cwd(), { useCache: false });
-            if (resolved) {
-                APP_LOGGER.info(LOGGER_MESSAGES.FORMATTING.PRETTIER_PROJECT_CONFIG_RESOLVED(process.cwd()));
-                options = { ...resolved, parser: parser ?? (resolved.parser as LiteralUnion<BuiltInParserName>) ?? 'typescript' };
-            } else {
-                APP_LOGGER.warn(LOGGER_MESSAGES.FORMATTING.PRETTIER_PROJECT_CONFIG_NOT_FOUND);
+    if (prettierConfigPath) {
+        const absoluteConfigPath = resolveHelper(process.cwd(), prettierConfigPath);
+        const configExists = await fileSystemHelpers.exists(absoluteConfigPath);
+        if (configExists) {
+            try {
+                const resolved = await resolveConfig(absoluteConfigPath, { config: absoluteConfigPath, useCache: false });
+                if (resolved) {
+                    APP_LOGGER.info(LOGGER_MESSAGES.FORMATTING.PRETTIER_CONFIG_RESOLVED(absoluteConfigPath));
+                    options = {
+                        ...resolved,
+                        parser: parser ?? (resolved.parser as LiteralUnion<BuiltInParserName>) ?? 'typescript',
+                    };
+                } else {
+                    APP_LOGGER.warn(LOGGER_MESSAGES.FORMATTING.PRETTIER_CONFIG_NOT_FOUND(prettierConfigPath));
+                }
+            } catch {
+                APP_LOGGER.warn(LOGGER_MESSAGES.FORMATTING.PRETTIER_CONFIG_NOT_FOUND(prettierConfigPath));
             }
-        } catch {
-            APP_LOGGER.warn(LOGGER_MESSAGES.FORMATTING.PRETTIER_PROJECT_CONFIG_NOT_FOUND);
+        } else {
+            APP_LOGGER.warn(LOGGER_MESSAGES.FORMATTING.PRETTIER_CONFIG_NOT_FOUND(prettierConfigPath));
         }
     }
 

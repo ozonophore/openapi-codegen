@@ -101,9 +101,9 @@ export function resolveModelImports(models: Model[], outputModelsDir: string): M
                 if (relativePath === '') {
                     importPath = `./${file}`;
                 } else if (relativePath.startsWith('./')) {
-                    importPath = `${relativePath}/${file}`
+                    importPath = `${relativePath}/${file}`;
                 } else {
-                    importPath =  `${relativePath}/${file}`;
+                    importPath = `${relativePath}/${file}`;
                 }
             }
             const mappedImport = Object.assign(imprt, {
@@ -117,10 +117,7 @@ export function resolveModelImports(models: Model[], outputModelsDir: string): M
 
         importsWithSourcePath.forEach(item => {
             applyAliasToModel(model, item.mappedImport);
-            applyAliasToModel(
-                model,
-                Object.assign({}, item.mappedImport, { path: item.sourcePath }),
-            );
+            applyAliasToModel(model, Object.assign({}, item.mappedImport, { path: item.sourcePath }));
         });
     });
     return models;

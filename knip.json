@@ -6,21 +6,33 @@
         "type": true
     },
     "ignore": ["src/cli/schemas/**", "src/templatesCompiled/**", "src/templates/**", "test/custom/**", "test/e2e/assets/**", "tools/jestSetup.ts"],
+    "ignoreFiles": [
+        "example/eslint.example.mjs",
+        "src/cli/analyzeDiff/buildLegacyReport.ts",
+        "src/cli/analyzeDiff/diffEngine.ts",
+        "src/cli/analyzeDiff/logLegacyReport.ts",
+        "src/cli/analyzeDiff/miracles.ts",
+        "src/cli/analyzeDiff/report.ts",
+        "src/cli/analyzeDiff/writeLegacyReport.ts",
+        "src/common/utils/normalizeObject.ts",
+        "src/common/Validation/index.ts",
+        "src/common/VersionedSchema/refinements/singleOrMultiRefinement.ts",
+        "src/core/utils/appendUniqueLinesToFile.ts",
+        "src/cli/analyzeDiff/ignoreRules.ts",
+        "src/cli/analyzeDiff/types.ts"
+    ],
     "ignoreDependencies": [
-        "@babel/cli",
-        "@types/axios",
-        "@types/node-fetch",
-        "@types/qs",
-        "@types/winston",
         "abort-controller",
         "axios",
         "eslint-config-prettier",
         "eslint-plugin-lodash",
-        "eslint-plugin-prettier",
         "form-data",
         "node-fetch",
         "qs",
-        "ts-prune"
+        "@types/axios",
+        "@types/node-fetch",
+        "@types/qs",
+        "@types/winston"
     ],
     "tags": ["-lintignore"]
 }

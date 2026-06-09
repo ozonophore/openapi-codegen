@@ -10,9 +10,7 @@ type BuildVersionedSchemaParams<TBase extends z.ZodObject<any>> = {
     type: EVersionedSchemaType;
 };
 
-export function buildVersionedSchema<TBase extends z.ZodObject<any>>(
-    params: BuildVersionedSchemaParams<TBase>
-): VersionedSchema<z.ZodTypeAny> {
+export function buildVersionedSchema<TBase extends z.ZodObject<any>>(params: BuildVersionedSchemaParams<TBase>): VersionedSchema<z.ZodTypeAny> {
     const { base, refine, version, type } = params;
 
     const schema = refine ? base.superRefine(refine) : base;

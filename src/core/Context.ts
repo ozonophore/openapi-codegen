@@ -229,10 +229,10 @@ export class Context {
         // 🔴 Вместо ручного обхода, использовать resolved.paths() от SwaggerParser
         // это даст нам все файлы, которые парсер разрешил
         const allPaths = this._refs?.paths() || [];
-        
+
         for (const refPath of allPaths) {
             const normalizedPath = normalizeHelper(refPath);
-            
+
             if (!this.virtualFiles.has(normalizedPath)) {
                 this.virtualFiles.set(normalizedPath, {
                     sourceFile: normalizedPath,
@@ -275,7 +275,10 @@ export class Context {
         return result;
     }
 
-    public resolveCanonicalRef(canonicalRef: string, parentSourceFile?: string):
+    public resolveCanonicalRef(
+        canonicalRef: string,
+        parentSourceFile?: string
+    ):
         | {
               outputFile: string;
               fragment?: string;
@@ -300,20 +303,14 @@ export class Context {
 
         // Prefer explicit parent if provided
         if (parentSourceFile) {
-            const normalizedParent = isAbsolute(parentSourceFile)
-                ? parentSourceFile
-                : resolveHelper(this.specRoot, parentSourceFile);
+            const normalizedParent = isAbsolute(parentSourceFile) ? parentSourceFile : resolveHelper(this.specRoot, parentSourceFile);
             return normalizeRef(ref, normalizedParent);
         }
 
         // If we can fall back to entry file, normalize relative refs against it
         if (this.entryFile) {
             const parsed = parseRef(ref);
-            if (
-                parsed.type === RefType.LOCAL_FRAGMENT ||
-                parsed.type === RefType.EXTERNAL_FILE ||
-                parsed.type === RefType.EXTERNAL_FILE_FRAGMENT
-            ) {
+            if (parsed.type === RefType.LOCAL_FRAGMENT || parsed.type === RefType.EXTERNAL_FILE || parsed.type === RefType.EXTERNAL_FILE_FRAGMENT) {
                 return normalizeRef(ref, this.entryFile);
             }
         }

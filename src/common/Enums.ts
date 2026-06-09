@@ -11,5 +11,5 @@ export enum ELogOutput {
 
 export enum EMigrationMode {
     GENERATE_OPENAPI = 'GENERATE_OPENAPI',
-    VALIDATE_CONFIG = 'VALIDATE_CONFIG'
+    VALIDATE_CONFIG = 'VALIDATE_CONFIG',
 }

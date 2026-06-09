@@ -23,24 +23,18 @@ export type TLoggerErrorCode = keyof typeof LOGGER_ERROR_CODES;
 export const LOGGER_ERROR_RECOMMENDATIONS: Record<TLoggerErrorCode, string> = {
     CONFIG_FILE_MISSING:
         'Создайте конфигурационный файл (по умолчанию openapi.config.json) или укажите путь к нему через опцию --openapi-config. В качестве альтернативы можно передать обязательные параметры --input и --output напрямую в команду.',
-    CONFIG_FILE_NOT_FOUND_AT:
-        'Проверьте правильность пути к конфигурационному файлу (--openapi-config) и наличие файла на диске. Обновите путь или создайте файл с нужными параметрами.',
+    CONFIG_FILE_NOT_FOUND_AT: 'Проверьте правильность пути к конфигурационному файлу (--openapi-config) и наличие файла на диске. Обновите путь или создайте файл с нужными параметрами.',
     NO_OPTIONS_PROVIDED:
         'Укажите входные и выходные параметры генерации: как минимум --input (путь к спецификации или директории со спецификациями) и --output (директория для сгенерированного клиента).',
-    NO_SPEC_FILES_FOUND:
-        'Убедитесь, что в указанной директории действительно есть OpenAPI-файлы (.yaml/.yml/.json). При необходимости скорректируйте путь к каталогу со спецификациями.',
-    NO_VALID_SPEC_FILES_FOUND:
-        'Проверьте формат и структуру файлов спецификаций. Убедитесь, что они соответствуют стандарту OpenAPI v2/v3 и не содержат критических ошибок валидации.',
+    NO_SPEC_FILES_FOUND: 'Убедитесь, что в указанной директории действительно есть OpenAPI-файлы (.yaml/.yml/.json). При необходимости скорректируйте путь к каталогу со спецификациями.',
+    NO_VALID_SPEC_FILES_FOUND: 'Проверьте формат и структуру файлов спецификаций. Убедитесь, что они соответствуют стандарту OpenAPI v2/v3 и не содержат критических ошибок валидации.',
     PREVIEW_DIR_EMPTY:
         'Сначала выполните генерацию клиента, чтобы появились файлы для сравнения, или укажите другую директорию для превью. Если каталог должен существовать, проверьте правильность пути.',
-    PREVIEW_CLEANUP_FAILED:
-        'Проверьте права доступа к директории превью и отсутствует ли блокировка файлов сторонними процессами. При необходимости очистите каталог вручную и повторите команду.',
-    SPEC_FILES_FIND_ERROR:
-        'Проверьте корректность маски поиска и доступ к файловой системе. Убедитесь, что у вас есть права чтения для директории со спецификациями.',
+    PREVIEW_CLEANUP_FAILED: 'Проверьте права доступа к директории превью и отсутствует ли блокировка файлов сторонними процессами. При необходимости очистите каталог вручную и повторите команду.',
+    SPEC_FILES_FIND_ERROR: 'Проверьте корректность маски поиска и доступ к файловой системе. Убедитесь, что у вас есть права чтения для директории со спецификациями.',
     PRETTIER_FORMAT_FAILED:
-        'Проверьте синтаксис сгенерированного фрагмента и настройки Prettier (включая опцию useProjectPrettier). При необходимости отключите useProjectPrettier или поправьте .prettierrc.',
-    ESLINT_FIX_FAILED:
-        'Проверьте, что путь к файлу корректен, ESLint и конфигурация проекта в порядке, и что файл доступен для чтения/записи. При необходимости отключите useEslintFix.',
+        'Проверьте синтаксис сгенерированного фрагмента и настройки Prettier (включая опцию prettierConfigPath). При необходимости укажите корректный путь к конфигу или поправьте файл конфигурации.',
+    ESLINT_FIX_FAILED: 'Проверьте, что пути tsconfigPath и eslintConfigPath корректны, ESLint установлен в проекте, и что сгенерированные файлы доступны для чтения и записи.',
 };
 
 export const LOGGER_MESSAGES = {
@@ -85,9 +79,7 @@ export const LOGGER_MESSAGES = {
         CONFIG_EXISTS_INTERACTIVE_DISABLED: (path: string) => `Configuration file already exists and interactive mode is disabled: ${path}`,
         CONFIG_LEFT_UNCHANGED: 'Configuration file left unchanged.',
         CONFIG_CREATED: (path: string) => `Configuration file created: ${path}`,
-        EXAMPLE_CONFIG_CREATED: (path: string) =>
-            `Example configuration generated and written to: ${path}\n` +
-            'You can use it as a template for your actual configuration.',
+        EXAMPLE_CONFIG_CREATED: (path: string) => `Example configuration generated and written to: ${path}\n` + 'You can use it as a template for your actual configuration.',
         CONFIG_GENERATION_CANCELLED: 'Configuration file generation cancelled.',
         SPEC_FILES_FIND_ERROR: (error: string) => `Error finding spec files: ${error}`,
         NO_SPEC_FILES_FOUND: (directory: string) => `No spec files found in directory: ${directory}`,
@@ -142,6 +134,7 @@ export const LOGGER_MESSAGES = {
         CLEANUP_PREVIEW_FAILED: (error: string) => `Failed to cleanup preview directory: ${error}`,
     },
 
+    // ========== Analyze Diff Messages ==========
     ANALYZE_DIFF: {
         INPUT_REQUIRED: '"--input" option is required for analyze-diff command',
         HISTORY_SKIPPED: 'History analysis skipped: no base spec provided (use --compare-with or --git)',
@@ -150,8 +143,7 @@ export const LOGGER_MESSAGES = {
         BASE: (base: string) => `Base: ${base}`,
         TARGET: (target: string) => `Target: ${target}`,
         STABILITY_SCORE: (score: number) => `Stability score: ${score}%`,
-        CHANGES: (total: number, added: number, removed: number, changed: number) =>
-            `Changes: total=${total}, added=${added}, removed=${removed}, changed=${changed}`,
+        CHANGES: (total: number, added: number, removed: number, changed: number) => `Changes: total=${total}, added=${added}, removed=${removed}, changed=${changed}`,
         BREAKING_COUNT: (count: number) => `[openapi-codegen] BREAKING: ${count} item(s)`,
         WARNING_COUNT: (count: number) => `[openapi-codegen] WARNINGS: ${count} item(s)`,
         IGNORED_COUNT: (count: number) => `[openapi-codegen] IGNORED: ${count} item(s) by config rules`,
@@ -160,8 +152,7 @@ export const LOGGER_MESSAGES = {
         STARTED: (newSpec: string, baseSource: string) => `Starting analyze-diff: input=${newSpec}, base=${baseSource}`,
         SKIPPED_NO_BASE: 'History analysis skipped: no base spec provided (use --compare-with or --git).',
         VALIDATION_ERROR: (message: string) => `Analyze-diff options validation failed: ${message}`,
-        COMPARE_WITH_OVERRIDES_GIT: (gitRef: string) =>
-            `Option "--compare-with" has priority over "--git". Ignoring git ref "${gitRef}".`,
+        COMPARE_WITH_OVERRIDES_GIT: (gitRef: string) => `Option "--compare-with" has priority over "--git". Ignoring git ref "${gitRef}".`,
         PLUGIN_DIAGNOSTIC: (diagnostic: { pluginName: string; hook: string; status: string; durationMs: number; message?: string }) => {
             const messageSuffix = diagnostic.message ? `: ${diagnostic.message}` : '';
             return `[plugin:${diagnostic.pluginName}] hook=${diagnostic.hook} status=${diagnostic.status} duration=${diagnostic.durationMs}ms${messageSuffix}`;
@@ -228,16 +219,25 @@ export const LOGGER_MESSAGES = {
 
     // ========== Migration Messages ==========
     MIGRATION: {
-        OPENAPI_SCHEMA_MIGRATED: 'To perform OpenAPI generation, it was necessary to migrate the schema of your data to the current one. To update the configuration in the file, use the command `npm openapi-codegen-cli update-config`',
+        OPENAPI_SCHEMA_MIGRATED:
+            'To perform OpenAPI generation, it was necessary to migrate the schema of your data to the current one. To update the configuration in the file, use the command `npm openapi-codegen-cli update-config`',
     },
 
     // ========== Formatting Messages ==========
     FORMATTING: {
-        PRETTIER_PROJECT_CONFIG_RESOLVED: (filePath: string) => `Prettier config resolved from: ${filePath}`,
-        PRETTIER_PROJECT_CONFIG_NOT_FOUND: 'No project Prettier config found, falling back to built-in options',
+        PRETTIER_CONFIG_RESOLVED: (filePath: string) => `Prettier config resolved from: ${filePath}`,
+        PRETTIER_CONFIG_NOT_FOUND: (configPath: string) => `Prettier config not found at "${configPath}", falling back to built-in options`,
         PRETTIER_FORMAT_FAILED: (file: string, error: string) => `Prettier formatting failed for "${file}": ${error}`,
-        ESLINT_NOT_INSTALLED: 'ESLint is not installed in this project. Skipping --useEslintFix.',
+        ESLINT_NOT_INSTALLED: 'ESLint is not installed in this project. Skipping batch ESLint fix.',
         ESLINT_FIX_FAILED: (file: string, error: string) => `ESLint fix failed for "${file}": ${error}`,
         ESLINT_FIX_APPLIED: (file: string) => `ESLint fix applied: ${file}`,
+        ESLINT_PATHS_MISSING: 'Batch ESLint fix requires both tsconfigPath and eslintConfigPath. Skipping batch ESLint fix.',
+        ESLINT_BATCH_STARTED: 'Batch ESLint fix started for generated models and services',
+        ESLINT_BATCH_FINISHED: (durationSec: string) => `Batch ESLint fix completed in ${durationSec} sec`,
+        ESLINT_BATCH_COMPLETED: (reportPath: string) => `Batch ESLint fix completed. Report: ${reportPath}`,
+        ESLINT_BATCH_COMPLETED_WITH_ISSUES: (errors: number, warnings: number, reportPath: string) =>
+            `Batch ESLint fix completed with ${errors} error(s) and ${warnings} warning(s). Report: ${reportPath}`,
+        ESLINT_BATCH_FAILED: (error: string) => `Batch ESLint fix failed: ${error}`,
+        ESLINT_BATCH_CHUNK_FAILED: (error: string) => `Batch ESLint fix chunk failed: ${error}`,
     },
 } as const;

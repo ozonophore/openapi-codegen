@@ -25,9 +25,9 @@ export async function initCustomRequest(params: InitCustomRequestParams): Promis
 
     const shouldRequestExecutor = useInteractiveMode
         ? await confirmDialog({
-            message: 'Generate custom request file in executor format?',
-            initial: false,
-        })
+              message: 'Generate custom request file in executor format?',
+              initial: false,
+          })
         : false;
 
     const artifacts = {

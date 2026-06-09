@@ -46,10 +46,7 @@ export async function selectConfigAction(options: ISelectConfigActionOptions): P
  * Обрабатывает выбранное пользователем действие
  * @internal
  */
-async function handleConfigAction(
-    action: EActionForConfigData,
-    options: ISelectConfigActionOptions
-): Promise<void> {
+async function handleConfigAction(action: EActionForConfigData, options: ISelectConfigActionOptions): Promise<void> {
     switch (action) {
         case EActionForConfigData.GET_EXAMPLE:
             await generateConfigExample(options.migratedData, options.configPath);

@@ -2,8 +2,8 @@ import fs from 'fs';
 
 import { APP_LOGGER } from '../../../common/Consts';
 import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
-import { fileSystemHelpers } from "../../../common/utils/fileSystemHelpers";
-import { resolveHelper } from "../../../common/utils/pathHelpers";
+import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
+import { resolveHelper } from '../../../common/utils/pathHelpers';
 
 /**
  * Обновляет существующий файл конфигурации

@@ -6,9 +6,7 @@ import { allVersionedSchemas } from '../../../VersionedSchema/AllVersionedSchema
 import { compatibilityCases } from '../__mocks__/compatibilityCases';
 
 test('@unit: schema versions compatibility cases must cover all adjacent transitions', () => {
-    const cases = new Set(
-        compatibilityCases.map(testCase => `${testCase.type}:${testCase.from}->${testCase.to}`)
-    );
+    const cases = new Set(compatibilityCases.map(testCase => `${testCase.type}:${testCase.from}->${testCase.to}`));
 
     const transitions = new Set<string>();
 
@@ -28,11 +26,7 @@ test('@unit: schema versions compatibility cases must cover all adjacent transit
         transitions.add(`${current.type}:${from}->${to}`);
     }
 
-    assert.deepStrictEqual(
-        [...cases].sort(),
-        [...transitions].sort(),
-        'compatibilityCases must include all adjacent schema transitions'
-    );
+    assert.deepStrictEqual([...cases].sort(), [...transitions].sort(), 'compatibilityCases must include all adjacent schema transitions');
 });
 
 test('@unit: schema versions compatibility', () => {

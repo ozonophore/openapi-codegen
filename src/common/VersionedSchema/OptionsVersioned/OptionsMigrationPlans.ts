@@ -6,12 +6,7 @@ import { createFieldTransformationMigration } from '../Utils/createFieldTransfor
  * Migration plan for option models.
  */
 export const optionsMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<string, any>>[] = [
-    createFieldTransformationMigration(
-        'v1',
-        'v2',
-        ({ client, ...otherProps }) => ({ ...otherProps, httpClient: client }),
-        'Renames client field to httpClient'
-    ),
+    createFieldTransformationMigration('v1', 'v2', ({ client, ...otherProps }) => ({ ...otherProps, httpClient: client }), 'Renames client field to httpClient'),
     createDefaultFieldsMigration('v2', 'v3', {
         useCancelableRequest: false,
     }),

@@ -43,8 +43,9 @@ openapi generate --input ./spec.json --output ./dist
 | `--modelsMode` | - | string | `interfaces` | Режим генерации моделей: `interfaces` или `classes` |
 | `--useHistory` | - | boolean | `false` | Применять diff-отчёт при генерации |
 | `--diffReport` | - | string | `./openapi-diff-report.json` | Путь к diff-отчёту |
-| `--useProjectPrettier` | - | boolean | `false` | Форматировать сгенерированный код конфигом Prettier проекта |
-| `--useEslintFix` | - | boolean | `false` | Запускать ESLint `--fix` для сгенерированных файлов после записи (нужен `eslint` в проекте) |
+| `--prettierConfigPath` | - | string | - | Путь к файлу конфигурации Prettier; если файл существует, сгенерированный код форматируется по нему, иначе используются встроенные настройки |
+| `--tsconfigPath` | - | string | - | Путь к `tsconfig.json` для пакетного ESLint `--fix` после генерации (нужен `--eslintConfigPath`) |
+| `--eslintConfigPath` | - | string | - | Путь к конфигу ESLint для пакетного `--fix` после генерации (нужен `--tsconfigPath`) |
 | `--cache` | - | boolean | `false` | Включить кэш генерации (по умолчанию кэш выключен) |
 | `--cachePath` | - | string | `.openapi-codegen-cache.json` | Путь к файлу кэша генерации относительно output-директории |
 | `--cacheStrategy` | - | string | `entity` | Стратегия кэша: `entity` (пропуск полной генерации item при cache hit) или `content` (генерация выполняется, но записываются только измененные файлы) |

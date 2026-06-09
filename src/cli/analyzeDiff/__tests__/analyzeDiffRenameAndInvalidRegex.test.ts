@@ -154,9 +154,9 @@ describe('@unit: analyzeDiff RENAME and invalid-regex handling', () => {
                     },
                 },
                 null,
-                2,
+                2
             ),
-            'utf-8',
+            'utf-8'
         );
 
         const result = await analyzeDiff({

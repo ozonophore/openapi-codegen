@@ -1,4 +1,4 @@
-import { dirNameHelper,  resolveHelper } from '../../common/utils/pathHelpers';
+import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { ParsedRef, RefType } from './parseRef';
 
 /**

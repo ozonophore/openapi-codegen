@@ -20,9 +20,7 @@ const omitUndefinedValues = (data: Record<string, any>): Record<string, any> => 
         }
 
         if (Array.isArray(value)) {
-            result[key] = value.map(item =>
-                item && typeof item === 'object' && !Array.isArray(item) ? omitUndefinedValues(item) : item,
-            );
+            result[key] = value.map(item => (item && typeof item === 'object' && !Array.isArray(item) ? omitUndefinedValues(item) : item));
             continue;
         }
 

@@ -58,9 +58,9 @@ const buildSchemaNameMap = (openApi: Record<string, unknown>, version: OpenApiVe
 
 const getSchemaNameFromSegments = (segments: string[], version: OpenApiVersion): string | null => {
     if (version === OpenApiVersion.V3) {
-        return segments[0] === 'components' && segments[1] === 'schemas' ? segments[2] ?? null : null;
+        return segments[0] === 'components' && segments[1] === 'schemas' ? (segments[2] ?? null) : null;
     }
-    return segments[0] === 'definitions' ? segments[1] ?? null : null;
+    return segments[0] === 'definitions' ? (segments[1] ?? null) : null;
 };
 
 const describeSchemaType = (value: unknown): string | undefined => {
@@ -334,11 +334,7 @@ const applyModelDiffs = (client: Client, entries: DiffReportEntry[], openApi: Re
     });
 };
 
-const applyMiracleTypeCoercions = (
-    client: Client,
-    confirmedMiracles: MiracleEntry[],
-    entries: DiffReportEntry[],
-): void => {
+const applyMiracleTypeCoercions = (client: Client, confirmedMiracles: MiracleEntry[], entries: DiffReportEntry[]): void => {
     if (!confirmedMiracles.length) return;
 
     const modelsByName = new Map<string, Model>(client.models.map(model => [model.name, model]));

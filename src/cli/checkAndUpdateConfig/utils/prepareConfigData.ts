@@ -1,4 +1,4 @@
-import { format } from "../../../common/utils/format";
+import { format } from '../../../common/utils/format';
 
 /**
  * Подготавливает данные конфигурационного файла к записи.

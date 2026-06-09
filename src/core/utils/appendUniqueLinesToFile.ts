@@ -1,11 +1,11 @@
-import { fileSystemHelpers } from "../../common/utils/fileSystemHelpers";
+import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 
 export async function appendUniqueLinesToFile(filePath: string, data: string) {
     try {
         let existingContent = '';
         const fileExists = await fileSystemHelpers.exists(filePath);
         if (fileExists) {
-            existingContent = await fileSystemHelpers.readFile(filePath, "utf8");
+            existingContent = await fileSystemHelpers.readFile(filePath, 'utf8');
         }
 
         const existingLines = existingContent.split(/\r?\n/).filter(Boolean);
