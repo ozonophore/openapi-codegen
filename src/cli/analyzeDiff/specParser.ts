@@ -6,35 +6,12 @@ import path from 'path';
 import type { JsonValue } from './types';
 
 /**
- * Читает и парсит спецификацию из файла. Поддерживает JSON и YAML через SwaggerParser.
- * @param specPath путь к файлу спецификации
- * @returns распарсенная спецификация
- */
-export const parseSpecFile = async (specPath: string): Promise<JsonValue> => {
-    const content = fs.readFileSync(specPath, 'utf-8');
-    const trimmed = content.trim();
-
-    if (!trimmed) {
-        throw new Error(`Specification file is empty: ${specPath}`);
-    }
-
-    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-        return JSON.parse(trimmed);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const SwaggerParser = require('@apidevtools/swagger-parser') as typeof import('@apidevtools/swagger-parser');
-    const parser = new SwaggerParser();
-    return parser.parse(specPath);
-};
-
-/**
  * Парсит содержимое спецификации, переданное как строка. При YAML создаёт временный файл для парсинга.
  * @param content строковое содержимое спецификации
  * @param sourcePath исходный путь/идентификатор (используется для расширения временного файла)
  * @returns распарсенная спецификация
  */
-export const parseSpecContent = async (content: string, sourcePath: string): Promise<JsonValue> => {
+const parseSpecContent = async (content: string, sourcePath: string): Promise<JsonValue> => {
     const trimmed = content.trim();
     if (!trimmed) {
         throw new Error(`Specification content is empty: ${sourcePath}`);

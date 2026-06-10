@@ -10,17 +10,17 @@ import type { IIngredient } from '../models/components/schemas/Ingredient';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 import type { ApiResult } from '../core/ApiResult';
 
-const getIngredientsService = (sequenceId: string): RequestConfig => ({
+const listSequenceIngredients = (sequenceId: string): RequestConfig => ({
     method: 'GET',
     path: `/sequences/${sequenceId}/ingredients`,
 });
 
 export type TIngredientsOptions = {
-    getIngredientsService: (sequenceId: string) => RequestConfig;
+    listSequenceIngredients: (sequenceId: string) => RequestConfig;
 };
 
 export const IngredientsOptions: TIngredientsOptions = {
-    getIngredientsService: getIngredientsService,
+    listSequenceIngredients: listSequenceIngredients,
 };
 
 export class IngredientsService<TOptions = unknown> {
@@ -32,21 +32,24 @@ export class IngredientsService<TOptions = unknown> {
      * @returns IIngredient Список ингредиентов
      * @throws ApiError
      */
-    public getIngredientsService(
+    public listSequenceIngredients(
         sequenceId: string,
 
         options?: TOptions,
     ): Promise<Array<IIngredient>> {
-        return this.executor.request<Array<IIngredient>>(IngredientsOptions.getIngredientsService(sequenceId), options);
+        return this.executor.request<Array<IIngredient>>(
+            IngredientsOptions.listSequenceIngredients(sequenceId),
+            options,
+        );
     }
 
-    public getIngredientsServiceRaw(
+    public listSequenceIngredientsRaw(
         sequenceId: string,
 
         options?: TOptions,
     ): Promise<ApiResult<Array<IIngredient>>> {
         return this.executor.requestRaw<Array<IIngredient>>(
-            IngredientsOptions.getIngredientsService(sequenceId),
+            IngredientsOptions.listSequenceIngredients(sequenceId),
             options,
         );
     }

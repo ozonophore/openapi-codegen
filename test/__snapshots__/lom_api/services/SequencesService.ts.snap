@@ -10,24 +10,24 @@ import type { ISequence } from '../models/components/schemas/Sequence';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 import type { ApiResult } from '../core/ApiResult';
 
-const getSequencesService = (pathwayId: string): RequestConfig => ({
+const listPathwaySequences = (pathwayId: string): RequestConfig => ({
     method: 'GET',
     path: `/pathways/${pathwayId}/sequences`,
 });
 
-const getSequencesService1 = (sequenceId: string): RequestConfig => ({
+const getSequence = (sequenceId: string): RequestConfig => ({
     method: 'GET',
     path: `/sequences/${sequenceId}`,
 });
 
 export type TSequencesOptions = {
-    getSequencesService: (pathwayId: string) => RequestConfig;
-    getSequencesService1: (sequenceId: string) => RequestConfig;
+    listPathwaySequences: (pathwayId: string) => RequestConfig;
+    getSequence: (sequenceId: string) => RequestConfig;
 };
 
 export const SequencesOptions: TSequencesOptions = {
-    getSequencesService: getSequencesService,
-    getSequencesService1: getSequencesService1,
+    listPathwaySequences: listPathwaySequences,
+    getSequence: getSequence,
 };
 
 export class SequencesService<TOptions = unknown> {
@@ -39,20 +39,20 @@ export class SequencesService<TOptions = unknown> {
      * @returns ISequence Список последовательностей
      * @throws ApiError
      */
-    public getSequencesService(
+    public listPathwaySequences(
         pathwayId: string,
 
         options?: TOptions,
     ): Promise<Array<ISequence>> {
-        return this.executor.request<Array<ISequence>>(SequencesOptions.getSequencesService(pathwayId), options);
+        return this.executor.request<Array<ISequence>>(SequencesOptions.listPathwaySequences(pathwayId), options);
     }
 
-    public getSequencesServiceRaw(
+    public listPathwaySequencesRaw(
         pathwayId: string,
 
         options?: TOptions,
     ): Promise<ApiResult<Array<ISequence>>> {
-        return this.executor.requestRaw<Array<ISequence>>(SequencesOptions.getSequencesService(pathwayId), options);
+        return this.executor.requestRaw<Array<ISequence>>(SequencesOptions.listPathwaySequences(pathwayId), options);
     }
     /**
      * Получить информацию о последовательности
@@ -60,19 +60,19 @@ export class SequencesService<TOptions = unknown> {
      * @returns ISequence Информация о последовательности
      * @throws ApiError
      */
-    public getSequencesService1(
+    public getSequence(
         sequenceId: string,
 
         options?: TOptions,
     ): Promise<ISequence> {
-        return this.executor.request<ISequence>(SequencesOptions.getSequencesService1(sequenceId), options);
+        return this.executor.request<ISequence>(SequencesOptions.getSequence(sequenceId), options);
     }
 
-    public getSequencesService1Raw(
+    public getSequenceRaw(
         sequenceId: string,
 
         options?: TOptions,
     ): Promise<ApiResult<ISequence>> {
-        return this.executor.requestRaw<ISequence>(SequencesOptions.getSequencesService1(sequenceId), options);
+        return this.executor.requestRaw<ISequence>(SequencesOptions.getSequence(sequenceId), options);
     }
 }

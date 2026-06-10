@@ -1,12 +1,14 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 
+import { UNIFIED_DIFF_REPORT_SCHEMA_VERSION, type UnifiedDiffReport } from '../../types/DiffReport.model';
+import { adaptSemanticToStructural } from '../../utils/adapters';
 import { analyzeOpenApiDiff } from '../analyzeOpenApiDiff';
 import { validateSemanticDiffReportSchema } from '../semanticDiffReportSchema';
 
 describe('@unit: semanticDiffReportSchema', () => {
     test('validates report produced by analyzeOpenApiDiff', () => {
-        const report = analyzeOpenApiDiff(
+        const semanticReport = analyzeOpenApiDiff(
             {
                 openapi: '3.0.0',
                 paths: {
@@ -35,6 +37,23 @@ describe('@unit: semanticDiffReportSchema', () => {
                 components: { schemas: {} },
             } as any
         );
+        const report: UnifiedDiffReport = {
+            schemaVersion: UNIFIED_DIFF_REPORT_SCHEMA_VERSION,
+            timestamp: '2026-01-01T00:00:00.000Z',
+            metadata: {
+                base: 'old',
+                target: 'new',
+                baseHash: 'old-hash',
+                targetHash: 'new-hash',
+            },
+            semantic: {
+                changes: semanticReport.changes,
+                governance: semanticReport.governance,
+                recommendation: semanticReport.recommendation,
+                summary: semanticReport.summary,
+            },
+            structural: adaptSemanticToStructural(semanticReport),
+        };
 
         const validation = validateSemanticDiffReportSchema(report);
         assert.strictEqual(validation.valid, true, validation.errors.join('\n'));

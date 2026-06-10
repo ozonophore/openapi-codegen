@@ -4,35 +4,48 @@ import { dirNameHelper, relativeHelper, resolveHelper } from '../../common/utils
 import type { Import } from '../types/shared/Import.model';
 import type { Model } from '../types/shared/Model.model';
 
+type AliasAssignable = {
+    name: string;
+    alias: string;
+};
+
+/**
+ * Назначает различающие алиасы, когда несколько элементов имеют одно имя.
+ * Первое вхождение сохраняет имя без алиаса; следующие получают $2, $3 и т.д.
+ * @param items массив элементов с полями name и alias
+ * @returns тот же массив с обновлёнными алиасами
+ */
+export const assignDuplicateAliases = <T extends AliasAssignable>(items: T[]): T[] => {
+    const nameCounts = new Map<string, number>();
+    items.forEach(item => {
+        nameCounts.set(item.name, (nameCounts.get(item.name) ?? 0) + 1);
+    });
+
+    const nameIndex = new Map<string, number>();
+    items.forEach(item => {
+        const count = nameCounts.get(item.name) ?? 1;
+        if (count <= 1) {
+            item.alias = '';
+            return;
+        }
+
+        const index = (nameIndex.get(item.name) ?? 0) + 1;
+        nameIndex.set(item.name, index);
+        item.alias = index === 1 ? '' : `${item.name}$${index}`;
+    });
+
+    return items;
+};
+
 /**
  * Assigns alias to models with the same name.
- * Modifies objects of in-place models and returns an array.
- *
- * Example: if there are two models with name="Pet", the following will be assigned:
- * - first: alias="Pet$1"
- * - second: alias="Pet$2"
+ * Modifies objects in-place and returns the same array.
  *
  * @param models - an array of models sorted by name
  * @returns the same array of models (modified)
  */
 export function setDuplicateModelAliases(models: Model[]): Model[] {
-    let previous: Model | undefined;
-    let index = 1;
-    models.forEach(model => {
-        if (previous && previous.name === model.name) {
-            if (index === 1) {
-                previous.alias = `${model.name}$${index}`;
-                index++;
-            }
-            model.alias = `${model.name}$${index}`;
-            index++;
-        } else {
-            model.alias = '';
-            index = 1;
-        }
-        previous = model;
-    });
-    return models;
+    return assignDuplicateAliases(models);
 }
 
 /**

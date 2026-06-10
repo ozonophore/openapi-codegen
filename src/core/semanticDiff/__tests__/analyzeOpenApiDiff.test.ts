@@ -45,6 +45,86 @@ describe('@unit: analyzeOpenApiDiff', () => {
         assert.ok(report.changes.some(change => change.type === 'operation.removed'));
     });
 
+    test('includes from/to on property type and enum value changes', () => {
+        const oldSpec = {
+            openapi: '3.0.0',
+            paths: {},
+            components: {
+                schemas: {
+                    User: {
+                        type: 'object',
+                        properties: {
+                            age: { type: 'number' },
+                            role: { enum: ['user', 'admin'] },
+                        },
+                    },
+                },
+            },
+        } as any;
+
+        const newSpec = {
+            openapi: '3.0.0',
+            paths: {},
+            components: {
+                schemas: {
+                    User: {
+                        type: 'object',
+                        properties: {
+                            age: { type: 'integer' },
+                            role: { enum: ['admin'] },
+                        },
+                    },
+                },
+            },
+        } as any;
+
+        const report = analyzeOpenApiDiff(oldSpec, newSpec);
+        const typeChange = report.changes.find(change => change.type === 'model.property.type.changed' && change.path.includes('/age'));
+        const roleTypeChange = report.changes.find(change => change.type === 'model.property.type.changed' && change.path.includes('/role'));
+
+        assert.strictEqual(typeChange?.from, 'number');
+        assert.strictEqual(typeChange?.to, 'integer');
+        assert.strictEqual(roleTypeChange?.from, 'enum(admin|user)');
+        assert.strictEqual(roleTypeChange?.to, 'enum(admin)');
+    });
+
+    test('includes operation metadata on operation.removed', () => {
+        const oldSpec = {
+            openapi: '3.0.0',
+            paths: {
+                '/pets': {
+                    get: {
+                        operationId: 'listPets',
+                        summary: 'List pets',
+                        description: 'Returns pets',
+                        tags: ['pets'],
+                        responses: {
+                            '200': { description: 'ok' },
+                        },
+                    },
+                },
+            },
+            components: { schemas: {} },
+        } as any;
+
+        const newSpec = {
+            openapi: '3.0.0',
+            paths: {},
+            components: { schemas: {} },
+        } as any;
+
+        const report = analyzeOpenApiDiff(oldSpec, newSpec);
+        const removed = report.changes.find(change => change.type === 'operation.removed');
+
+        assert.ok(removed);
+        assert.deepStrictEqual(removed?.from, {
+            operationId: 'listPets',
+            summary: 'List pets',
+            description: 'Returns pets',
+            tags: ['pets'],
+        });
+    });
+
     test('detects property required/type changes and enum changes', () => {
         const oldSpec = {
             openapi: '3.0.0',

@@ -1,4 +1,5 @@
 get:
+  operationId: listPathways
   tags: [Pathways]
   summary: Получить список путей
   responses:

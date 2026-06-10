@@ -40,7 +40,8 @@
     "exclude": [
         "node_modules",
         "**/__mocks__",
-        "./dist"
+        "./dist",
+        "src/cli/analyzeDiff/diffEngine.ts"
     ]
 }
 

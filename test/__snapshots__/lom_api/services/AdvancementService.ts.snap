@@ -11,7 +11,7 @@ import type { IAdvancementResult } from '../models/components/schemas/Advancemen
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 import type { ApiResult } from '../core/ApiResult';
 
-const postAdvancementService = (requestBody: IAdvancementRequest): RequestConfig => ({
+const advanceSequence = (requestBody: IAdvancementRequest): RequestConfig => ({
     method: 'POST',
     path: `/advancements`,
 
@@ -20,11 +20,11 @@ const postAdvancementService = (requestBody: IAdvancementRequest): RequestConfig
 });
 
 export type TAdvancementOptions = {
-    postAdvancementService: (requestBody: IAdvancementRequest) => RequestConfig;
+    advanceSequence: (requestBody: IAdvancementRequest) => RequestConfig;
 };
 
 export const AdvancementOptions: TAdvancementOptions = {
-    postAdvancementService: postAdvancementService,
+    advanceSequence: advanceSequence,
 };
 
 export class AdvancementService<TOptions = unknown> {
@@ -38,25 +38,19 @@ export class AdvancementService<TOptions = unknown> {
      * @returns IAdvancementResult Продвижение успешно
      * @throws ApiError
      */
-    public postAdvancementService(
+    public advanceSequence(
         requestBody: IAdvancementRequest,
 
         options?: TOptions,
     ): Promise<IAdvancementResult> {
-        return this.executor.request<IAdvancementResult>(
-            AdvancementOptions.postAdvancementService(requestBody),
-            options,
-        );
+        return this.executor.request<IAdvancementResult>(AdvancementOptions.advanceSequence(requestBody), options);
     }
 
-    public postAdvancementServiceRaw(
+    public advanceSequenceRaw(
         requestBody: IAdvancementRequest,
 
         options?: TOptions,
     ): Promise<ApiResult<IAdvancementResult>> {
-        return this.executor.requestRaw<IAdvancementResult>(
-            AdvancementOptions.postAdvancementService(requestBody),
-            options,
-        );
+        return this.executor.requestRaw<IAdvancementResult>(AdvancementOptions.advanceSequence(requestBody), options);
     }
 }

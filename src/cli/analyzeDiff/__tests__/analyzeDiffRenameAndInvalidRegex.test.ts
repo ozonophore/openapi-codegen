@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
+import type { UnifiedDiffReport } from '../../../core/types/DiffReport.model';
 import { installSilenceAppLogger } from '../../../test/helpers/silenceLoggers';
 import { analyzeDiff } from '../analyzeDiff';
 
@@ -83,17 +84,16 @@ describe('@unit: analyzeDiff RENAME and invalid-regex handling', () => {
         assert.ok(result.success, `analyzeDiff failed: ${result.error ?? 'unknown'}`);
 
         const reportRaw = fs.readFileSync(reportPath, 'utf-8');
-        const report = JSON.parse(reportRaw) as {
-            changes: Array<{ type: string; path: string; severity: string }>;
-        };
+        const report = JSON.parse(reportRaw) as UnifiedDiffReport;
 
-        const removed = report.changes.find(change => change.type === 'model.property.removed' && change.path === '#/components/schemas/User/properties/first_name');
-        const added = report.changes.find(change => change.type === 'model.property.added' && change.path === '#/components/schemas/User/properties/firstName');
+        const removed = report.semantic.changes.find(change => change.type === 'model.property.removed' && change.path === '#/components/schemas/User/properties/first_name');
+        const added = report.semantic.changes.find(change => change.type === 'model.property.added' && change.path === '#/components/schemas/User/properties/firstName');
 
         assert.ok(removed, 'Expected semantic removal entry for previous property');
         assert.ok(added, 'Expected semantic addition entry for renamed property');
         assert.strictEqual(removed?.severity, 'breaking');
         assert.strictEqual(added?.severity, 'non-breaking');
+        assert.ok(report.structural.miracles.some(miracle => miracle.type === 'RENAME'));
     });
 
     test('invalid regex in config does not crash and valid rules still apply', async t => {
@@ -169,17 +169,13 @@ describe('@unit: analyzeDiff RENAME and invalid-regex handling', () => {
         assert.ok(result.success, `analyzeDiff failed: ${result.error ?? 'unknown'}`);
 
         const reportRaw = fs.readFileSync(reportPath, 'utf-8');
-        const report = JSON.parse(reportRaw) as {
-            summary: { breaking: number; nonBreaking: number; informational: number };
-            recommendation: { semver: string };
-            changes: Array<{ type: string; path: string }>;
-        };
+        const report = JSON.parse(reportRaw) as UnifiedDiffReport;
 
-        const filteredTypeChange = report.changes.find(change => change.type === 'model.property.type.changed' && change.path === '#/components/schemas/User/properties/age');
+        const filteredTypeChange = report.semantic.changes.find(change => change.type === 'model.property.type.changed' && change.path === '#/components/schemas/User/properties/age');
         assert.ok(!filteredTypeChange, 'Expected matching semantic change to be filtered by valid rule while invalid regex is ignored');
-        assert.strictEqual(report.summary.breaking, 0);
-        assert.strictEqual(report.summary.nonBreaking, 0);
-        assert.strictEqual(report.summary.informational, 0);
-        assert.strictEqual(report.recommendation.semver, 'patch');
+        assert.strictEqual(report.semantic.summary.breaking, 0);
+        assert.strictEqual(report.semantic.summary.nonBreaking, 0);
+        assert.strictEqual(report.semantic.summary.informational, 0);
+        assert.strictEqual(report.semantic.recommendation.semver, 'patch');
     });
 });

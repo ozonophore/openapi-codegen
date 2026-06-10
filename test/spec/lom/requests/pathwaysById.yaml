@@ -1,4 +1,5 @@
 get:
+  operationId: getPathway
   tags: [Pathways]
   summary: Получить информацию о пути
   parameters:

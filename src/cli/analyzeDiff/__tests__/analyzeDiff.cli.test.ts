@@ -4,8 +4,8 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
 import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
-import type { SemanticDiffReport } from '../../../core/semanticDiff/analyzeOpenApiDiff';
 import { validateSemanticDiffReportSchema } from '../../../core/semanticDiff/semanticDiffReportSchema';
+import type { UnifiedDiffReport } from '../../../core/types/DiffReport.model';
 import { installSilenceAppLogger } from '../../../test/helpers/silenceLoggers';
 import { analyzeDiff, type AnalyzeDiffResult, toAnalyzeDiffExitCode } from '../analyzeDiff';
 import { formatCiMarkdownSummary } from '../ciSummary';
@@ -135,15 +135,16 @@ describe('@unit: analyzeDiff cli', () => {
         });
         assert.strictEqual(exitCode, 0);
 
-        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as SemanticDiffReport;
+        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as UnifiedDiffReport;
         const schemaValidation = validateSemanticDiffReportSchema(report);
         assert.strictEqual(schemaValidation.valid, true, schemaValidation.errors.join('\n'));
-        assert.strictEqual(report.schemaVersion, '1.1.0');
-        assert.strictEqual(report.summary.breaking, 0);
-        assert.ok(report.summary.nonBreaking > 0);
-        assert.strictEqual(report.recommendation.semver, 'minor');
-        assert.ok(report.recommendation.reasons.includes('HAS_BACKWARD_COMPATIBLE_CHANGES'));
-        assert.strictEqual(report.governance.summary.errors, 0);
+        assert.strictEqual(report.schemaVersion, '2.0.0');
+        assert.strictEqual(report.semantic.summary.breaking, 0);
+        assert.ok(report.semantic.summary.nonBreaking > 0);
+        assert.strictEqual(report.semantic.recommendation.semver, 'minor');
+        assert.ok(report.semantic.recommendation.reasons.includes('HAS_BACKWARD_COMPATIBLE_CHANGES'));
+        assert.strictEqual(report.semantic.governance.summary.errors, 0);
+        assert.strictEqual(report.structural.diff.all.length, report.semantic.changes.length);
 
         const ciSummary = formatCiMarkdownSummary(report, reportPath);
         assert.ok(ciSummary.includes('### OpenAPI Semantic Diff'));
@@ -190,15 +191,15 @@ describe('@unit: analyzeDiff cli', () => {
         });
         assert.strictEqual(exitCode, 1);
 
-        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as SemanticDiffReport;
+        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as UnifiedDiffReport;
         const schemaValidation = validateSemanticDiffReportSchema(report);
         assert.strictEqual(schemaValidation.valid, true, schemaValidation.errors.join('\n'));
-        assert.strictEqual(report.schemaVersion, '1.1.0');
-        assert.ok(report.summary.breaking > 0);
-        assert.ok(report.changes.some(change => change.severity === 'breaking'));
-        assert.strictEqual(report.recommendation.semver, 'major');
-        assert.ok(report.recommendation.reasons.includes('HAS_BREAKING_CHANGES'));
-        assert.ok(report.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG'));
+        assert.strictEqual(report.schemaVersion, '2.0.0');
+        assert.ok(report.semantic.summary.breaking > 0);
+        assert.ok(report.semantic.changes.some(change => change.severity === 'breaking'));
+        assert.strictEqual(report.semantic.recommendation.semver, 'major');
+        assert.ok(report.semantic.recommendation.reasons.includes('HAS_BREAKING_CHANGES'));
+        assert.ok(report.semantic.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG'));
 
         const ciSummary = formatCiMarkdownSummary(report, reportPath);
         assert.ok(ciSummary.includes('### OpenAPI Semantic Diff'));
@@ -247,12 +248,12 @@ describe('@unit: analyzeDiff cli', () => {
         });
         assert.strictEqual(exitCode, 0);
 
-        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as SemanticDiffReport;
+        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as UnifiedDiffReport;
         const schemaValidation = validateSemanticDiffReportSchema(report);
         assert.strictEqual(schemaValidation.valid, true, schemaValidation.errors.join('\n'));
-        assert.strictEqual(report.schemaVersion, '1.1.0');
-        assert.ok(report.summary.breaking > 0);
-        assert.ok(!report.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG'));
+        assert.strictEqual(report.schemaVersion, '2.0.0');
+        assert.ok(report.semantic.summary.breaking > 0);
+        assert.ok(!report.semantic.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG'));
         assert.ok(formatCiMarkdownSummary(report, reportPath).includes('### OpenAPI Semantic Diff'));
     });
 
@@ -310,12 +311,12 @@ describe('@unit: analyzeDiff cli', () => {
         });
         assert.strictEqual(exitCode, 0);
 
-        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as SemanticDiffReport;
+        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as UnifiedDiffReport;
         const schemaValidation = validateSemanticDiffReportSchema(report);
         assert.strictEqual(schemaValidation.valid, true, schemaValidation.errors.join('\n'));
-        assert.strictEqual(report.schemaVersion, '1.1.0');
-        assert.ok(report.summary.breaking > 0);
-        assert.ok(!report.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG'));
+        assert.strictEqual(report.schemaVersion, '2.0.0');
+        assert.ok(report.semantic.summary.breaking > 0);
+        assert.ok(!report.semantic.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG'));
         assert.ok(formatCiMarkdownSummary(report, reportPath).includes('### OpenAPI Semantic Diff'));
     });
 
@@ -369,9 +370,9 @@ describe('@unit: analyzeDiff cli', () => {
         assert.strictEqual(exitCode, 0);
         assert.strictEqual(result.success, true);
 
-        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as SemanticDiffReport;
-        assert.strictEqual(report.summary.breaking, 0);
-        assert.strictEqual(report.recommendation.semver, 'patch');
+        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as UnifiedDiffReport;
+        assert.strictEqual(report.semantic.summary.breaking, 0);
+        assert.strictEqual(report.semantic.recommendation.semver, 'patch');
         assert.ok(LOGGER_MESSAGES.ANALYZE_DIFF.COMPARE_WITH_OVERRIDES_GIT('HEAD~9999').includes('Ignoring git ref'));
     });
 
@@ -451,11 +452,11 @@ describe('@unit: analyzeDiff cli', () => {
         assert.strictEqual(exitCode, 0);
         assert.strictEqual(result.ignored, 1);
 
-        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as SemanticDiffReport;
-        assert.strictEqual(report.summary.breaking, 0);
-        assert.strictEqual(report.summary.nonBreaking, 0);
-        assert.strictEqual(report.summary.informational, 0);
-        assert.strictEqual(report.recommendation.semver, 'patch');
+        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as UnifiedDiffReport;
+        assert.strictEqual(report.semantic.summary.breaking, 0);
+        assert.strictEqual(report.semantic.summary.nonBreaking, 0);
+        assert.strictEqual(report.semantic.summary.informational, 0);
+        assert.strictEqual(report.semantic.recommendation.semver, 'patch');
         assert.ok(LOGGER_MESSAGES.ANALYZE_DIFF.IGNORED_CHANGES(1).includes('IGNORED: 1 semantic change'));
     });
 
@@ -469,5 +470,13 @@ describe('@unit: analyzeDiff cli', () => {
         const result = await analyzeDiff({});
         assert.strictEqual(toAnalyzeDiffExitCode(result), 1);
         assert.ok(result.error?.includes('"--input" is required for analyze-diff command'));
+    });
+
+    test('uses semantic ref expansion instead of full dereference in the analyze hot path', () => {
+        const source = readFileSync(path.join(__dirname, '..', 'analyzeDiff.ts'), 'utf8');
+
+        assert.ok(source.includes('loadSemanticOpenApiSpec'));
+        assert.ok(!source.includes('dereferenceOpenApiSpec'));
+        assert.ok(!source.includes('dereferenceOpenApiObject'));
     });
 });

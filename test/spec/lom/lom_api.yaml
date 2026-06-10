@@ -41,3 +41,23 @@ paths:
 
   /advancements:
     $ref: 'requests/advancements.yaml'
+
+components:
+  schemas:
+    Pathway:
+      $ref: './components/schemas/Pathway.yaml'
+    Sequence:
+      $ref: './components/schemas/Sequence.yaml'
+    Ingredient:
+      $ref: './components/schemas/Ingredient.yaml'
+    AdvancementRequest:
+      $ref: './components/schemas/AdvancementRequest.yaml'
+    AdvancementResult:
+      $ref: './components/schemas/AdvancementResult.yaml'
+    ProblemDetails:
+      $ref: './components/schemas/ProblemDetails.yaml'
+  responses:
+    BadRequest:
+      $ref: './components/responses/BadRequest.yaml'
+    NotFound:
+      $ref: './components/responses/NotFound.yaml'

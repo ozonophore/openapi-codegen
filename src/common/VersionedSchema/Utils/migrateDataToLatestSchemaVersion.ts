@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { APP_LOGGER } from '../../Consts';
 import { EMigrationMode } from '../../Enums';
 import { LOGGER_MESSAGES } from '../../LoggerMessages';
-import { validateZodOptions, validateZodOptionsRaw } from '../../Validation/validateZodOptions';
+import { validateZodOptions, validateZodOptionsRaw } from '../../Validation';
 import { EVersionedSchemaType } from '../Enums';
 import { SchemaMigrationPlan, VersionedSchema, VersionMatchResult } from '../Types';
 import { determineBestMatchingSchemaVersion } from './determineBestMatchingSchemaVersion';

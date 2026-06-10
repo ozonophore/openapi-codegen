@@ -1,4 +1,5 @@
 get:
+  operationId: getSequence
   tags: [Sequences]
   summary: Получить информацию о последовательности
   parameters:

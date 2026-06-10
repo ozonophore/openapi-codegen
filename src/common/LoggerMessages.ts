@@ -2,6 +2,7 @@
  * Константы с текстовыми сообщениями для Logger
  * Все тексты для логирования должны быть вынесены сюда для централизованного управления
  */
+/** Коды ошибок CLI для централизованного логирования. */
 export const LOGGER_ERROR_CODES = {
     CONFIG_FILE_MISSING: 'CONFIG_FILE_MISSING',
     CONFIG_FILE_NOT_FOUND_AT: 'CONFIG_FILE_NOT_FOUND_AT',
@@ -15,6 +16,7 @@ export const LOGGER_ERROR_CODES = {
     ESLINT_FIX_FAILED: 'ESLINT_FIX_FAILED',
 } as const;
 
+/** Тип кода ошибки CLI. */
 export type TLoggerErrorCode = keyof typeof LOGGER_ERROR_CODES;
 
 /**
@@ -37,6 +39,7 @@ export const LOGGER_ERROR_RECOMMENDATIONS: Record<TLoggerErrorCode, string> = {
     ESLINT_FIX_FAILED: 'Проверьте, что пути tsconfigPath и eslintConfigPath корректны, ESLint установлен в проекте, и что сгенерированные файлы доступны для чтения и записи.',
 };
 
+/** Централизованные текстовые сообщения для Logger. */
 export const LOGGER_MESSAGES = {
     // ========== Generation Messages (OpenApiClient) ==========
     GENERATION: {
@@ -188,6 +191,8 @@ export const LOGGER_MESSAGES = {
         NOT_FOUND: (reportPath: string) => `[openapi-codegen] Diff report not found at "${reportPath}". Skipping history annotations.`,
         STALE: (reportPath: string) => `[openapi-codegen] Diff report "${reportPath}" is older than the input spec. Skipping history annotations.`,
         EMPTY: (reportPath: string) => `[openapi-codegen] Diff report "${reportPath}" has no entries. Skipping history annotations.`,
+        LOADED: (reportPath: string, diffCount: number, miracleCount: number) => `[openapi-codegen] Loaded diff report "${reportPath}" (${diffCount} change(s), ${miracleCount} miracle(s)).`,
+        USE_HISTORY_NO_REPORT: (reportPath: string) => `[openapi-codegen] useHistory is enabled but no diff report was loaded from "${reportPath}". Skipping history annotations.`,
         READ_FAILED: (reportPath: string, message: string) => `[openapi-codegen] Failed to read diff report "${reportPath}": ${message}`,
     },
 

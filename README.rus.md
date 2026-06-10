@@ -34,6 +34,10 @@
 - Сгенерированные сервисы принимают `RequestExecutor` в конструкторе (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`)
 - Опциональное форматирование вывода через `prettierConfigPath` (явный путь к конфигу Prettier)
 - Опциональный пакетный ESLint `--fix` после генерации при указании `tsconfigPath` и `eslintConfigPath`
+- Поддерживает унифицированный отчёт `analyze-diff` (`schemaVersion: 2.0.0`) с отдельными секциями `semantic` (CI/governance) и `structural` (генерация)
+- Восстанавливает совместимость `generate --useHistory` с semantic diff-отчётами (ghost operations/properties, coercion, rename miracles)
+- Использует селективное раскрытие OpenAPI `$ref` в analyze-diff для более быстрого и безопасного сравнения
+- Автоматическое обнаружение RENAME / TYPE_COERCION miracles из semantic-изменений свойств
 
 ## Установка
 

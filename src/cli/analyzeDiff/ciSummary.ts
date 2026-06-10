@@ -1,20 +1,24 @@
-import { SemanticDiffReport } from '../../core/semanticDiff/analyzeOpenApiDiff';
+import type { UnifiedDiffReport } from '../../core/types/DiffReport.model';
 
 /**
- * Builds markdown summary for CI logs.
+ * Формирует markdown-сводку семантического diff для CI-логов.
+ * @param report унифицированный diff-отчёт
+ * @param reportPath путь к сохранённому отчёту
+ * @returns markdown-текст для вывода в CI
  */
-export function formatCiMarkdownSummary(report: SemanticDiffReport, reportPath: string): string {
-    const reasons = report.recommendation.reasons.map(reason => `- \`${reason}\``).join('\n');
+export function formatCiMarkdownSummary(report: UnifiedDiffReport, reportPath: string): string {
+    const semantic = report.semantic;
+    const reasons = semantic.recommendation.reasons.map(reason => `- \`${reason}\``).join('\n');
 
     return [
         '### OpenAPI Semantic Diff',
         `- Report: \`${reportPath}\``,
         `- Schema Version: \`${report.schemaVersion}\``,
-        `- Recommendation: \`${report.recommendation.semver}\` (confidence: \`${report.recommendation.confidence}\`)`,
-        `- Reason: ${report.recommendation.reason}`,
+        `- Recommendation: \`${semantic.recommendation.semver}\` (confidence: \`${semantic.recommendation.confidence}\`)`,
+        `- Reason: ${semantic.recommendation.reason}`,
         '- Reason Codes:',
         reasons,
-        `- Summary: breaking=\`${report.summary.breaking}\`, nonBreaking=\`${report.summary.nonBreaking}\`, informational=\`${report.summary.informational}\``,
-        `- Governance: errors=\`${report.governance.summary.errors}\`, warnings=\`${report.governance.summary.warnings}\`, info=\`${report.governance.summary.info}\``,
+        `- Summary: breaking=\`${semantic.summary.breaking}\`, nonBreaking=\`${semantic.summary.nonBreaking}\`, informational=\`${semantic.summary.informational}\``,
+        `- Governance: errors=\`${semantic.governance.summary.errors}\`, warnings=\`${semantic.governance.summary.warnings}\`, info=\`${semantic.governance.summary.info}\``,
     ].join('\n');
 }

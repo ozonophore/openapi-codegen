@@ -108,6 +108,81 @@ describe('@unit: templateRendering', () => {
         assert.match(modelsOutput, /BaseDto|fromArray/);
     });
 
+    test('renders exportModels with ghost properties and type aliases', () => {
+        const modelWithGhost: Model = {
+            ...schemaModel,
+            name: 'IUser',
+            type: 'IUser',
+            base: 'IUser',
+            rawName: 'IUserRaw',
+            dtoName: 'IUserDto',
+            exportName: 'IUser',
+            dtoKind: 'class' as const,
+            ghostProperties: [
+                {
+                    name: 'legacyField',
+                    alias: '',
+                    path: 'models',
+                    export: 'generic',
+                    type: 'unknown',
+                    base: 'unknown',
+                    template: null,
+                    link: null,
+                    description: null,
+                    isDefinition: false,
+                    isReadOnly: false,
+                    isRequired: false,
+                    isNullable: false,
+                    imports: [],
+                    enum: [],
+                    enums: [],
+                    properties: [],
+                    isGhost: true,
+                },
+            ],
+            properties: [
+                {
+                    name: 'id',
+                    alias: '',
+                    path: 'models',
+                    export: 'generic',
+                    type: 'string',
+                    base: 'string',
+                    template: null,
+                    link: null,
+                    description: null,
+                    isDefinition: false,
+                    isReadOnly: false,
+                    isRequired: true,
+                    isNullable: false,
+                    imports: [],
+                    enum: [],
+                    enums: [],
+                    properties: [],
+                    rawType: 'string',
+                    dtoType: 'string',
+                    dtoInit: 'data.id',
+                    dtoTarget: '.id',
+                },
+            ],
+        };
+
+        const templates = registerHandlebarTemplates({
+            httpClient: HttpClient.FETCH,
+            useOptions: false,
+            useUnionTypes: false,
+            validationLibrary: ValidationLibrary.NONE,
+        });
+
+        const output = templates.exports.models({
+            ...exportModelsContext,
+            models: [modelWithGhost],
+        });
+
+        assert.match(output, /legacyField\?: unknown/);
+        assert.match(output, /export type IUser = IUserRaw/);
+    });
+
     test('renders schema export with validation library context', () => {
         const templates = registerHandlebarTemplates({
             httpClient: HttpClient.FETCH,

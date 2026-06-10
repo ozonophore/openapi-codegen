@@ -4,11 +4,19 @@ import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { evaluateGovernanceRules, GovernancePolicyConfig, GovernanceReport } from '../governance/evaluateGovernanceRules';
+import type { UnifiedDiffReport } from '../types/DiffReport.model';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
+import type { MiracleEntry } from '../types/shared/Miracle.model';
 
 type ChangeSeverity = 'breaking' | 'non-breaking' | 'informational';
 
-type SemanticDiffSummary = {
+/**
+ * Сводка семантических изменений по уровню серьёзности.
+ * @property breaking количество breaking-изменений
+ * @property nonBreaking количество обратно совместимых изменений
+ * @property informational количество информационных изменений
+ */
+export type SemanticDiffSummary = {
     breaking: number;
     nonBreaking: number;
     informational: number;
@@ -18,28 +26,67 @@ type SemanticDiffSemverRecommendation = 'major' | 'minor' | 'patch';
 type SemanticDiffConfidence = 'high' | 'medium' | 'low';
 type SemanticDiffRecommendationReason = 'HAS_BREAKING_CHANGES' | 'HAS_BACKWARD_COMPATIBLE_CHANGES' | 'HAS_INFORMATIONAL_ONLY_CHANGES' | 'NO_API_SURFACE_CHANGES';
 
-type SemanticDiffRecommendation = {
+/**
+ * Рекомендация по semver-версии на основе семантического diff.
+ * @property semver рекомендуемый уровень версии
+ * @property confidence уверенность в рекомендации
+ * @property reason человекочитаемое объяснение
+ * @property reasons машиночитаемые коды причин
+ */
+export type SemanticDiffRecommendation = {
     semver: SemanticDiffSemverRecommendation;
     confidence: SemanticDiffConfidence;
     reason: string;
     reasons: SemanticDiffRecommendationReason[];
 };
 
-type SemanticDiffChange = {
+/**
+ * Одно семантическое изменение OpenAPI.
+ * @property type тип изменения
+ * @property severity уровень серьёзности
+ * @property message описание изменения
+ * @property path JSON Pointer путь к изменённому элементу
+ * @property [from] значение до изменения
+ * @property [to] значение после изменения
+ * @property [fromRequired] обязательность до изменения
+ * @property [toRequired] обязательность после изменения
+ * @property [fromNullable] nullable до изменения
+ * @property [toNullable] nullable после изменения
+ */
+export type SemanticDiffChange = {
     type: string;
     severity: ChangeSeverity;
     message: string;
     path: string;
+    from?: unknown;
+    to?: unknown;
+    fromRequired?: boolean;
+    toRequired?: boolean;
+    fromNullable?: boolean;
+    toNullable?: boolean;
 };
 
+type SemanticDiffChangeExtras = Pick<SemanticDiffChange, 'from' | 'to' | 'fromRequired' | 'toRequired' | 'fromNullable' | 'toNullable'>;
+
+/** Версия схемы семантического diff-отчёта. */
 export const SEMANTIC_DIFF_REPORT_SCHEMA_VERSION = '1.1.0';
 
+/**
+ * Семантический diff-отчёт OpenAPI.
+ * @property schemaVersion версия схемы отчёта
+ * @property summary сводка изменений по серьёзности
+ * @property recommendation рекомендация по semver
+ * @property governance результат проверки governance-правил
+ * @property changes список семантических изменений
+ * @property [miracles] кандидаты на переименование и приведение типов
+ */
 export type SemanticDiffReport = {
     schemaVersion: string;
     summary: SemanticDiffSummary;
     recommendation: SemanticDiffRecommendation;
     governance: GovernanceReport;
     changes: SemanticDiffChange[];
+    miracles?: MiracleEntry[];
 };
 
 type AnalyzeOpenApiDiffOptions = {
@@ -65,6 +112,10 @@ type CanonicalOperation = {
     parameters: Map<string, CanonicalParameter>;
     requestBodyRequired: boolean;
     successResponses: Map<string, string>;
+    operationId?: string;
+    summary?: string;
+    description?: string;
+    tags?: string[];
 };
 
 const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const;
@@ -502,10 +553,20 @@ function buildCanonicalOperations(spec: CommonOpenApi): Map<string, CanonicalOpe
                 }
             }
 
+            const operationId = typeof operation.operationId === 'string' ? operation.operationId : undefined;
+            const summary = typeof operation.summary === 'string' ? operation.summary : undefined;
+            const description = typeof operation.description === 'string' ? operation.description : undefined;
+            const tagsRaw = operation.tags;
+            const tags = Array.isArray(tagsRaw) ? tagsRaw.map(tag => String(tag)) : undefined;
+
             operations.set(operationKey, {
                 parameters,
                 requestBodyRequired,
                 successResponses,
+                operationId,
+                summary,
+                description,
+                tags,
             });
         }
     }
@@ -516,8 +577,8 @@ function buildCanonicalOperations(spec: CommonOpenApi): Map<string, CanonicalOpe
 /**
  * Pushes change entry to report collection.
  */
-function pushChange(changes: SemanticDiffChange[], severity: ChangeSeverity, type: string, path: string, message: string): void {
-    changes.push({ severity, type, path, message });
+function pushChange(changes: SemanticDiffChange[], severity: ChangeSeverity, type: string, path: string, message: string, extras?: SemanticDiffChangeExtras): void {
+    changes.push({ severity, type, path, message, ...extras });
 }
 
 /**
@@ -585,12 +646,13 @@ function diffModels(oldModels: Map<string, CanonicalModel>, newModels: Map<strin
                     'breaking',
                     'model.property.removed',
                     `#/components/schemas/${modelName}/properties/${oldPropertyName}`,
-                    `Property "${oldPropertyName}" was removed from model "${modelName}".`
+                    `Property "${oldPropertyName}" was removed from model "${modelName}".`,
+                    { from: { type: oldModel.properties.get(oldPropertyName) } }
                 );
             }
         }
 
-        for (const [newPropertyName] of newModel.properties.entries()) {
+        for (const [newPropertyName, newPropertyType] of newModel.properties.entries()) {
             if (!oldModel.properties.has(newPropertyName)) {
                 const isRequired = newModel.required.has(newPropertyName);
                 pushChange(
@@ -598,7 +660,8 @@ function diffModels(oldModels: Map<string, CanonicalModel>, newModels: Map<strin
                     isRequired ? 'breaking' : 'non-breaking',
                     'model.property.added',
                     `#/components/schemas/${modelName}/properties/${newPropertyName}`,
-                    `Property "${newPropertyName}" was added to model "${modelName}".`
+                    `Property "${newPropertyName}" was added to model "${modelName}".`,
+                    { to: { type: newPropertyType } }
                 );
             }
         }
@@ -616,7 +679,8 @@ function diffModels(oldModels: Map<string, CanonicalModel>, newModels: Map<strin
                     severity,
                     'model.property.type.changed',
                     `#/components/schemas/${modelName}/properties/${propertyName}`,
-                    `Property "${propertyName}" type changed in model "${modelName}" from "${oldPropertyType}" to "${newPropertyType}".`
+                    `Property "${propertyName}" type changed in model "${modelName}" from "${oldPropertyType}" to "${newPropertyType}".`,
+                    { from: oldPropertyType, to: newPropertyType }
                 );
             }
 
@@ -628,20 +692,25 @@ function diffModels(oldModels: Map<string, CanonicalModel>, newModels: Map<strin
                     isRequired ? 'breaking' : 'non-breaking',
                     'model.property.required.changed',
                     `#/components/schemas/${modelName}/required/${propertyName}`,
-                    `Property "${propertyName}" required flag changed in model "${modelName}" from "${wasRequired}" to "${isRequired}".`
+                    `Property "${propertyName}" required flag changed in model "${modelName}" from "${wasRequired}" to "${isRequired}".`,
+                    { fromRequired: wasRequired, toRequired: isRequired }
                 );
             }
         }
 
         for (const oldEnumValue of oldModel.enumValues) {
             if (!newModel.enumValues.has(oldEnumValue)) {
-                pushChange(changes, 'breaking', 'model.enum.value.removed', `#/components/schemas/${modelName}/enum`, `Enum value "${oldEnumValue}" was removed from model "${modelName}".`);
+                pushChange(changes, 'breaking', 'model.enum.value.removed', `#/components/schemas/${modelName}/enum`, `Enum value "${oldEnumValue}" was removed from model "${modelName}".`, {
+                    from: oldEnumValue,
+                });
             }
         }
 
         for (const newEnumValue of newModel.enumValues) {
             if (!oldModel.enumValues.has(newEnumValue)) {
-                pushChange(changes, 'non-breaking', 'model.enum.value.added', `#/components/schemas/${modelName}/enum`, `Enum value "${newEnumValue}" was added to model "${modelName}".`);
+                pushChange(changes, 'non-breaking', 'model.enum.value.added', `#/components/schemas/${modelName}/enum`, `Enum value "${newEnumValue}" was added to model "${modelName}".`, {
+                    to: newEnumValue,
+                });
             }
         }
     }
@@ -651,9 +720,16 @@ function diffModels(oldModels: Map<string, CanonicalModel>, newModels: Map<strin
  * Diffs canonical operations and appends semantic changes.
  */
 function diffOperations(oldOperations: Map<string, CanonicalOperation>, newOperations: Map<string, CanonicalOperation>, changes: SemanticDiffChange[]): void {
-    for (const oldOperationKey of oldOperations.keys()) {
+    for (const [oldOperationKey, oldOperation] of oldOperations.entries()) {
         if (!newOperations.has(oldOperationKey)) {
-            pushChange(changes, 'breaking', 'operation.removed', `#/paths/${oldOperationKey}`, `Operation "${oldOperationKey}" was removed.`);
+            pushChange(changes, 'breaking', 'operation.removed', `#/paths/${oldOperationKey}`, `Operation "${oldOperationKey}" was removed.`, {
+                from: {
+                    operationId: oldOperation.operationId,
+                    summary: oldOperation.summary,
+                    description: oldOperation.description,
+                    tags: oldOperation.tags,
+                },
+            });
         }
     }
 
@@ -676,7 +752,8 @@ function diffOperations(oldOperations: Map<string, CanonicalOperation>, newOpera
                     'breaking',
                     'operation.parameter.removed',
                     `#/paths/${operationKey}/parameters/${oldParameterName}`,
-                    `Parameter "${oldParameterName}" was removed from operation "${operationKey}".`
+                    `Parameter "${oldParameterName}" was removed from operation "${operationKey}".`,
+                    { from: { type: oldOperation.parameters.get(oldParameterName)?.type } }
                 );
             }
         }
@@ -688,7 +765,8 @@ function diffOperations(oldOperations: Map<string, CanonicalOperation>, newOpera
                     newParameter.required ? 'breaking' : 'non-breaking',
                     'operation.parameter.added',
                     `#/paths/${operationKey}/parameters/${newParameterName}`,
-                    `Parameter "${newParameterName}" was added to operation "${operationKey}".`
+                    `Parameter "${newParameterName}" was added to operation "${operationKey}".`,
+                    { to: { type: newParameter.type, required: newParameter.required } }
                 );
             }
         }
@@ -705,7 +783,8 @@ function diffOperations(oldOperations: Map<string, CanonicalOperation>, newOpera
                     newParameter.required ? 'breaking' : 'non-breaking',
                     'operation.parameter.required.changed',
                     `#/paths/${operationKey}/parameters/${parameterName}/required`,
-                    `Required flag for parameter "${parameterName}" changed in operation "${operationKey}".`
+                    `Required flag for parameter "${parameterName}" changed in operation "${operationKey}".`,
+                    { fromRequired: oldParameter.required, toRequired: newParameter.required }
                 );
             }
 
@@ -716,7 +795,8 @@ function diffOperations(oldOperations: Map<string, CanonicalOperation>, newOpera
                     severity,
                     'operation.parameter.type.changed',
                     `#/paths/${operationKey}/parameters/${parameterName}/schema`,
-                    `Type for parameter "${parameterName}" changed in operation "${operationKey}" from "${oldParameter.type}" to "${newParameter.type}".`
+                    `Type for parameter "${parameterName}" changed in operation "${operationKey}" from "${oldParameter.type}" to "${newParameter.type}".`,
+                    { from: oldParameter.type, to: newParameter.type }
                 );
             }
         }
@@ -727,7 +807,8 @@ function diffOperations(oldOperations: Map<string, CanonicalOperation>, newOpera
                 newOperation.requestBodyRequired ? 'breaking' : 'non-breaking',
                 'operation.requestBody.required.changed',
                 `#/paths/${operationKey}/requestBody/required`,
-                `requestBody.required changed in operation "${operationKey}" from "${oldOperation.requestBodyRequired}" to "${newOperation.requestBodyRequired}".`
+                `requestBody.required changed in operation "${operationKey}" from "${oldOperation.requestBodyRequired}" to "${newOperation.requestBodyRequired}".`,
+                { from: oldOperation.requestBodyRequired, to: newOperation.requestBodyRequired }
             );
         }
 
@@ -767,7 +848,8 @@ function diffOperations(oldOperations: Map<string, CanonicalOperation>, newOpera
                 severity,
                 'operation.response.success.type.changed',
                 `#/paths/${operationKey}/responses/${responseCode}/content`,
-                `Successful response "${responseCode}" payload type changed in operation "${operationKey}" from "${oldResponseType}" to "${newResponseType}".`
+                `Successful response "${responseCode}" payload type changed in operation "${operationKey}" from "${oldResponseType}" to "${newResponseType}".`,
+                { from: oldResponseType, to: newResponseType }
             );
         }
     }
@@ -837,7 +919,11 @@ function buildSemverRecommendation(summary: SemanticDiffSummary): SemanticDiffRe
 }
 
 /**
- * Creates semantic diff report between two OpenAPI specs.
+ * Формирует семантический diff-отчёт между двумя OpenAPI-спецификациями.
+ * @param oldSpec базовая спецификация
+ * @param newSpec целевая спецификация
+ * @param [options] опции анализа, включая governance и разрешение breaking-изменений
+ * @returns семантический diff-отчёт
  */
 export function analyzeOpenApiDiff(oldSpec: CommonOpenApi, newSpec: CommonOpenApi, options: AnalyzeOpenApiDiffOptions = {}): SemanticDiffReport {
     const oldModels = buildCanonicalModels(oldSpec);
@@ -869,9 +955,12 @@ export function analyzeOpenApiDiff(oldSpec: CommonOpenApi, newSpec: CommonOpenAp
 }
 
 /**
- * Writes semantic diff report to JSON file and returns absolute path.
+ * Записывает семантический или унифицированный diff-отчёт в JSON-файл.
+ * @param report отчёт для сохранения
+ * @param reportFilePath путь к файлу отчёта
+ * @returns абсолютный путь к сохранённому файлу
  */
-export async function writeSemanticDiffReport(report: SemanticDiffReport, reportFilePath: string): Promise<string> {
+export async function writeSemanticDiffReport(report: SemanticDiffReport | UnifiedDiffReport, reportFilePath: string): Promise<string> {
     const resolvedPath = resolveHelper(process.cwd(), reportFilePath);
     const directory = path.dirname(resolvedPath);
 

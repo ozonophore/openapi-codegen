@@ -1,7 +1,7 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "2.0.0",
   "summary": {
-    "breaking": 32,
+    "breaking": 16,
     "nonBreaking": 23,
     "informational": 0
   },
@@ -23,7 +23,8 @@
     "NO_DEFAULT_WITHOUT_2XX",
     "REQUIRE_OPERATION_ID"
   ],
-  "changesCount": 55,
+  "changesCount": 39,
+  "structuralChangesCount": 39,
   "topChanges": [
     {
       "type": "model.added",
@@ -73,42 +74,12 @@
     {
       "type": "model.property.type.changed",
       "severity": "breaking",
-      "path": "#/components/schemas/ModelWithArray/properties/prop"
-    },
-    {
-      "type": "model.property.type.changed",
-      "severity": "breaking",
       "path": "#/components/schemas/ModelWithArray/properties/propWithFile"
-    },
-    {
-      "type": "model.property.type.changed",
-      "severity": "breaking",
-      "path": "#/components/schemas/ModelWithCircularReference/properties/prop"
-    },
-    {
-      "type": "model.property.type.changed",
-      "severity": "breaking",
-      "path": "#/components/schemas/ModelWithDuplicateImports/properties/propA"
-    },
-    {
-      "type": "model.property.type.changed",
-      "severity": "breaking",
-      "path": "#/components/schemas/ModelWithDuplicateImports/properties/propB"
-    },
-    {
-      "type": "model.property.type.changed",
-      "severity": "breaking",
-      "path": "#/components/schemas/ModelWithDuplicateImports/properties/propC"
     },
     {
       "type": "model.property.removed",
       "severity": "breaking",
       "path": "#/components/schemas/ModelWithDuplicateImports/properties/propD"
-    },
-    {
-      "type": "model.property.type.changed",
-      "severity": "breaking",
-      "path": "#/components/schemas/ModelWithDuplicateProperties/properties/prop"
     },
     {
       "type": "model.removed",
@@ -121,34 +92,14 @@
       "path": "#/components/schemas/ModelWithNullableString"
     },
     {
-      "type": "model.property.type.changed",
-      "severity": "breaking",
-      "path": "#/components/schemas/ModelWithProperties/properties/reference"
-    },
-    {
       "type": "model.property.added",
       "severity": "breaking",
       "path": "#/components/schemas/ModelWithProperties/properties/requiredAndNullable"
     },
     {
-      "type": "model.property.type.changed",
-      "severity": "breaking",
-      "path": "#/components/schemas/ModelWithReference/properties/prop"
-    },
-    {
       "type": "operation.added",
       "severity": "non-breaking",
       "path": "#/paths/GET /api/v{api-version}/blob"
-    },
-    {
-      "type": "operation.parameter.type.changed",
-      "severity": "breaking",
-      "path": "#/paths/GET /api/v{api-version}/complex/parameters/query:parameterReference/schema"
-    },
-    {
-      "type": "operation.response.success.type.changed",
-      "severity": "breaking",
-      "path": "#/paths/GET /api/v{api-version}/complex/responses/200/content"
     },
     {
       "type": "operation.parameter.required.changed",
@@ -166,14 +117,64 @@
       "path": "#/paths/GET /api/v{api-version}/defaults/parameters/query:parameterModel/required"
     },
     {
-      "type": "operation.parameter.type.changed",
-      "severity": "breaking",
-      "path": "#/paths/GET /api/v{api-version}/defaults/parameters/query:parameterModel/schema"
+      "type": "operation.parameter.required.changed",
+      "severity": "non-breaking",
+      "path": "#/paths/GET /api/v{api-version}/defaults/parameters/query:parameterNumber/required"
     },
     {
       "type": "operation.parameter.required.changed",
       "severity": "non-breaking",
-      "path": "#/paths/GET /api/v{api-version}/defaults/parameters/query:parameterNumber/required"
+      "path": "#/paths/GET /api/v{api-version}/defaults/parameters/query:parameterString/required"
+    },
+    {
+      "type": "operation.removed",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/getModelWithArray"
+    },
+    {
+      "type": "operation.removed",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/getModelWithDictionary"
+    },
+    {
+      "type": "operation.removed",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/getModelWithDictionaryReference"
+    },
+    {
+      "type": "operation.added",
+      "severity": "non-breaking",
+      "path": "#/paths/GET /api/v{api-version}/multipart"
+    },
+    {
+      "type": "operation.added",
+      "severity": "non-breaking",
+      "path": "#/paths/GET /api/v{api-version}/parameters/"
+    },
+    {
+      "type": "operation.parameter.removed",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/parameters/{parameter.path.1}/{parameter-path-2}/{PARAMETER-PATH-3}/parameters/body:PARAMETER-BODY"
+    },
+    {
+      "type": "operation.parameter.added",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/parameters/{parameter.path.1}/{parameter-path-2}/{PARAMETER-PATH-3}/parameters/cookie:PARAMETER-COOKIE"
+    },
+    {
+      "type": "operation.requestBody.required.changed",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/parameters/{parameter.path.1}/{parameter-path-2}/{PARAMETER-PATH-3}/requestBody/required"
+    },
+    {
+      "type": "operation.parameter.removed",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/parameters/{parameterPath}/parameters/body:parameterBody"
+    },
+    {
+      "type": "operation.parameter.added",
+      "severity": "breaking",
+      "path": "#/paths/GET /api/v{api-version}/parameters/{parameterPath}/parameters/cookie:parameterCookie"
     }
   ]
 }

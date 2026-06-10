@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { validateZodOptionsRaw } from '../../Validation/validateZodOptions';
+import { validateZodOptionsRaw } from '../../Validation';
 import { EVersionedSchemaType } from '../Enums';
 import { VersionedSchema, VersionMatchResult } from '../Types';
 import { getUniqueKeysFromSchemas } from './getUniqueKeysFromSchemas';

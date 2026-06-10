@@ -7,7 +7,7 @@
 /* eslint-disable */
 
 import type { IModelWithStringLocal } from '../models/ModelWithStringLocal';
-import type { IModelWithString as IModelWithString$1 } from '../models/schemas/base/ModelWithString';
+import type { IModelWithString } from '../models/schemas/base/ModelWithString';
 import type { IModelWithArray } from '../models/schemas/collections/ModelWithArray';
 import type { IModelWithDictionary } from '../models/schemas/compositions/ModelWithDictionary';
 import type { EEnumWithNumbers } from '../models/schemas/enums/EnumWithNumbers';
@@ -45,7 +45,7 @@ const complexParams = (
         type: EEnumWithNumbers;
         listOfModels?: Array<IModelWithString$2> | null;
         listOfStrings?: Array<string> | null;
-        parameters: IModelWithString$1 | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+        parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
         readonly user?: {
             readonly id?: number;
             readonly name?: string | null;
@@ -80,7 +80,7 @@ export type TComplexOptions = {
             type: EEnumWithNumbers;
             listOfModels?: Array<IModelWithString$2> | null;
             listOfStrings?: Array<string> | null;
-            parameters: IModelWithString$1 | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
                 readonly id?: number;
                 readonly name?: string | null;
@@ -100,7 +100,7 @@ export class ComplexService<TOptions = unknown> {
     /**
      * @param parameterObject Parameter containing object
      * @param parameterReference Parameter containing reference
-     * @returns IModelWithString$1 Successful response
+     * @returns IModelWithString Successful response
      * @throws ApiError
      */
     public complexTypes(
@@ -114,8 +114,8 @@ export class ComplexService<TOptions = unknown> {
         parameterReference: IModelWithStringLocal,
 
         options?: TOptions,
-    ): Promise<Array<IModelWithString$1>> {
-        return this.executor.request<Array<IModelWithString$1>>(
+    ): Promise<Array<IModelWithString>> {
+        return this.executor.request<Array<IModelWithString>>(
             ComplexOptions.complexTypes(parameterObject, parameterReference),
             options,
         );
@@ -132,8 +132,8 @@ export class ComplexService<TOptions = unknown> {
         parameterReference: IModelWithStringLocal,
 
         options?: TOptions,
-    ): Promise<ApiResult<Array<IModelWithString$1>>> {
-        return this.executor.requestRaw<Array<IModelWithString$1>>(
+    ): Promise<ApiResult<Array<IModelWithString>>> {
+        return this.executor.requestRaw<Array<IModelWithString>>(
             ComplexOptions.complexTypes(parameterObject, parameterReference),
             options,
         );
@@ -141,7 +141,7 @@ export class ComplexService<TOptions = unknown> {
     /**
      * @param id
      * @param requestBody
-     * @returns IModelWithString$1 Success
+     * @returns IModelWithString Success
      * @throws ApiError
      */
     public complexParams(
@@ -154,15 +154,15 @@ export class ComplexService<TOptions = unknown> {
             type: EEnumWithNumbers;
             listOfModels?: Array<IModelWithString$2> | null;
             listOfStrings?: Array<string> | null;
-            parameters: IModelWithString$1 | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
                 readonly id?: number;
                 readonly name?: string | null;
             };
         },
         options?: TOptions,
-    ): Promise<IModelWithString$1> {
-        return this.executor.request<IModelWithString$1>(ComplexOptions.complexParams(id, requestBody), options);
+    ): Promise<IModelWithString> {
+        return this.executor.request<IModelWithString>(ComplexOptions.complexParams(id, requestBody), options);
     }
 
     public complexParamsRaw(
@@ -175,14 +175,14 @@ export class ComplexService<TOptions = unknown> {
             type: EEnumWithNumbers;
             listOfModels?: Array<IModelWithString$2> | null;
             listOfStrings?: Array<string> | null;
-            parameters: IModelWithString$1 | IModelWithEnum | IModelWithArray | IModelWithDictionary;
+            parameters: IModelWithString | IModelWithEnum | IModelWithArray | IModelWithDictionary;
             readonly user?: {
                 readonly id?: number;
                 readonly name?: string | null;
             };
         },
         options?: TOptions,
-    ): Promise<ApiResult<IModelWithString$1>> {
-        return this.executor.requestRaw<IModelWithString$1>(ComplexOptions.complexParams(id, requestBody), options);
+    ): Promise<ApiResult<IModelWithString>> {
+        return this.executor.requestRaw<IModelWithString>(ComplexOptions.complexParams(id, requestBody), options);
     }
 }

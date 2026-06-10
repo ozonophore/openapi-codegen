@@ -90,7 +90,7 @@ describe('@unit: prepareDtoModels', () => {
 
         const profilesProperty = preparedUser?.properties.find(prop => prop.name === 'profiles');
         assert.ok(profilesProperty);
-        assert.strictEqual(profilesProperty?.dtoType, 'IProfileDto[]');
+        assert.strictEqual(profilesProperty?.dtoType, 'IProfileDto[] | undefined');
         assert.strictEqual(profilesProperty?.rawType, 'IProfileRaw[]');
         assert.strictEqual(profilesProperty?.dtoInit, 'data.profiles ? fromArray(IProfileDto, data.profiles) : undefined');
         assert.strictEqual(profilesProperty?.dtoToJSON, 'this.profiles ? this.profiles.map(item => item.toJSON()) : undefined');
@@ -219,6 +219,92 @@ describe('@unit: prepareDtoModels', () => {
         assert.match(property?.dtoToJSON ?? '', /\? this.profile.toJSON/);
     });
 
+    test('assigns unique raw/dto names for duplicate models with aliases', () => {
+        const ingredient1 = createInterfaceModel('IIngredient', [createPrimitiveModel('id', 'string')]);
+        ingredient1.path = 'components/schemas-v2/Ingredient';
+        const ingredient2 = createInterfaceModel('IIngredient', [createPrimitiveModel('pathwayId', 'string')]);
+        ingredient2.alias = 'IIngredient$2';
+        ingredient2.path = 'components/schemas/Ingredient';
+
+        const ref: Model = {
+            ...createPrimitiveModel('items', 'IIngredient'),
+            export: 'reference',
+            type: 'IIngredient$2',
+            isRequired: true,
+        };
+        const container = createInterfaceModel('IContainer', [ref]);
+
+        const client: Client = {
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [container, ingredient1, ingredient2],
+            services: [],
+        };
+
+        const prepared = prepareDtoModels(client);
+        const prepared1 = prepared.models.find(model => model.name === 'IIngredient' && !model.alias);
+        const prepared2 = prepared.models.find(model => model.alias === 'IIngredient$2');
+
+        assert.strictEqual(prepared1?.rawName, 'IIngredientRaw');
+        assert.strictEqual(prepared1?.dtoName, 'IIngredientDto');
+        assert.strictEqual(prepared2?.rawName, 'IIngredient$2Raw');
+        assert.strictEqual(prepared2?.dtoName, 'IIngredient$2Dto');
+
+        const itemsProperty = prepared.models.find(model => model.name === 'IContainer')?.properties[0];
+        assert.strictEqual(itemsProperty?.rawType, 'IIngredient$2Raw');
+        assert.strictEqual(itemsProperty?.dtoType, 'IIngredient$2Dto');
+    });
+
+    test('adds undefined fallback for optional dto fields without defaults', () => {
+        const optionalProp = createPrimitiveModel('detail', 'string');
+        optionalProp.isRequired = false;
+        const model = createInterfaceModel('IProblem', [optionalProp]);
+
+        const client: Client = {
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [model],
+            services: [],
+        };
+
+        const prepared = prepareDtoModels(client);
+        const property = prepared.models[0]?.properties[0];
+
+        assert.match(property?.dtoType ?? '', /undefined/);
+        assert.strictEqual(property?.dtoInit, 'data.detail ?? undefined');
+    });
+
+    test('attaches dto getters for aliased duplicate models', () => {
+        const sequence = createInterfaceModel('ISequence', [createPrimitiveModel('pathwayId', 'string')]);
+        sequence.alias = 'ISequence$2';
+
+        const client: Client = {
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [sequence],
+            services: [],
+            miracles: [
+                {
+                    type: 'RENAME',
+                    oldPath: '$.components.schemas.Sequence.properties.pathway_id',
+                    newPath: '$.components.schemas.Sequence.properties.pathwayId',
+                    confidence: 1,
+                    status: 'confirmed',
+                    modelName: 'ISequence$2',
+                    oldProperty: 'pathway_id',
+                    newProperty: 'pathwayId',
+                },
+            ],
+        };
+
+        const prepared = prepareDtoModels(client);
+        const preparedSequence = prepared.models.find(model => model.alias === 'ISequence$2');
+
+        assert.ok(preparedSequence?.dtoGetters);
+        assert.strictEqual(preparedSequence?.dtoGetters?.[0].oldName, 'pathway_id');
+        assert.strictEqual(preparedSequence?.dtoGetters?.[0].newName, 'pathwayId');
+    });
+
     test('uses bracket accessor for quoted property names', () => {
         const quotedProp = createPrimitiveModel("'weird-name'", 'string');
         const model = createInterfaceModel('IQuoted', [quotedProp]);
@@ -233,7 +319,7 @@ describe('@unit: prepareDtoModels', () => {
         const prepared = prepareDtoModels(client);
         const property = prepared.models[0]?.properties[0];
 
-        assert.strictEqual(property?.dtoInit, "data['weird-name']");
+        assert.strictEqual(property?.dtoInit, "data['weird-name'] ?? undefined");
         assert.strictEqual(property?.dtoTarget, "['weird-name']");
     });
 });

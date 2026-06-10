@@ -2,7 +2,7 @@ import { OptionValues } from 'commander';
 
 import { APP_LOGGER } from '../../common/Consts';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
-import { validateZodOptions } from '../../common/Validation/validateZodOptions';
+import { validateZodOptions } from '../../common/Validation';
 import { confirmDialog } from '../interactive/confirmDialog';
 import { InitOptions, initOptionsSchema } from '../schemas';
 import { CLICommandResult } from '../types';

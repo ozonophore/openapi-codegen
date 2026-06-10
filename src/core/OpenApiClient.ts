@@ -1,6 +1,6 @@
 import { promises as fsPromises } from 'fs';
 
-import { COMMON_DEFAULT_OPTIONS_VALUES } from '../common/Consts';
+import { COMMON_DEFAULT_OPTIONS_VALUES, DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../common/Consts';
 import { Logger } from '../common/Logger';
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import { extractEslintFixOptions, TEslintFixOptions } from '../common/TEslintFixOptions';
@@ -30,8 +30,12 @@ import { DiffReport, loadDiffReport } from './utils/loadDiffReport';
 import { postProcessClient } from './utils/postProcessClient';
 import { prepareDtoModels } from './utils/prepareDtoModels';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
+import { resolveClassesModeTypes } from './utils/resolveClassesModeTypes';
 import { WriteClient } from './WriteClient';
 
+/**
+ * Оркестратор генерации OpenAPI-клиента: парсинг спецификации, применение diff-отчёта и запись артефактов.
+ */
 export class OpenApiClient {
     private static readonly CACHE_FINGERPRINT_VERSION = 1;
     private static readonly DEFAULT_CACHE_FILENAME = '.openapi-codegen-cache.json';
@@ -39,6 +43,7 @@ export class OpenApiClient {
     /** ESLint paths from top-level rawOptions (not per items[] entry). */
     private eslintFixOptions: TEslintFixOptions = {};
 
+    /** Экземпляр WriteClient для записи сгенерированных файлов. */
     public get writeClient() {
         if (!this._writeClient) {
             throw new Error('WriteClient must be initialized');
@@ -419,6 +424,10 @@ export class OpenApiClient {
             diffReport,
             inputPath: absoluteInput,
         });
+        if (useHistory && !diffReportData) {
+            const reportPath = diffReport || DEFAULT_ANALYZE_DIFF_REPORT_PATH;
+            this.writeClient.logger.warn(LOGGER_MESSAGES.DIFF_REPORT.USE_HISTORY_NO_REPORT(reportPath));
+        }
         this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.DEFINING_VERSION);
         switch (openApiVersion) {
             case OpenApiVersion.V2: {
@@ -433,7 +442,7 @@ export class OpenApiClient {
                     context,
                 });
                 const clientFinal = postProcessClient(clientWithDiff);
-                const clientPrepared = modelsMode === ModelsMode.CLASSES ? prepareDtoModels(clientFinal) : clientFinal;
+                const clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
                 this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V2);
                 await this.writeClient.writeClient({
                     client: clientPrepared,
@@ -467,7 +476,7 @@ export class OpenApiClient {
                     context,
                 });
                 const clientFinal = postProcessClient(clientWithDiff);
-                const clientPrepared = modelsMode === ModelsMode.CLASSES ? prepareDtoModels(clientFinal) : clientFinal;
+                const clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
                 this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V3);
                 await this.writeClient.writeClient({
                     client: clientPrepared,
@@ -620,9 +629,14 @@ export class OpenApiClient {
             openApiVersion: params.openApiVersion,
             diffReport: params.diffReport,
             prefix: params.context.prefix,
+            context: params.context,
         });
     }
 
+    /**
+     * Запускает генерацию клиента по опциям CLI или конфигурации.
+     * @param rawOptions сырые опции генерации
+     */
     async generate(rawOptions: TRawOptions) {
         const logger = new Logger({
             level: rawOptions.logLevel ?? COMMON_DEFAULT_OPTIONS_VALUES.logLevel!,

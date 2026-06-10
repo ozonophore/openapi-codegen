@@ -101,6 +101,143 @@ describe('@unit: loadDiffReport', () => {
         assert.strictEqual(loaded, null);
     });
 
+    test('loads semantic report (schemaVersion 1.1.0) and converts to legacy diff', async t => {
+        const dir = createTempDir(t, 'semantic-report-');
+        const reportPath = path.join(dir, 'semantic-report.json');
+        const semanticReport = {
+            schemaVersion: '1.1.0',
+            summary: { breaking: 1, nonBreaking: 0, informational: 0 },
+            recommendation: {
+                semver: 'major',
+                confidence: 'high',
+                reason: 'Breaking changes detected.',
+                reasons: ['HAS_BREAKING_CHANGES'],
+            },
+            governance: {
+                summary: { errors: 0, warnings: 0, info: 0 },
+                violations: [],
+            },
+            changes: [
+                {
+                    type: 'model.property.type.changed',
+                    severity: 'breaking',
+                    path: '#/components/schemas/User/properties/age',
+                    message: 'type changed',
+                    from: 'string',
+                    to: 'integer',
+                },
+                {
+                    type: 'model.property.removed',
+                    severity: 'breaking',
+                    path: '#/components/schemas/User/properties/first_name',
+                    message: 'removed',
+                    from: { type: 'string' },
+                },
+                {
+                    type: 'model.property.added',
+                    severity: 'non-breaking',
+                    path: '#/components/schemas/User/properties/firstName',
+                    message: 'added',
+                    to: { type: 'string' },
+                },
+            ],
+            miracles: [
+                {
+                    oldPath: '$.components.schemas.User.properties.age',
+                    newPath: '$.components.schemas.User.properties.age',
+                    type: 'TYPE_COERCION',
+                    confidence: 1,
+                    status: 'auto-generated',
+                },
+                {
+                    oldPath: '$.components.schemas.User.properties.first_name',
+                    newPath: '$.components.schemas.User.properties.firstName',
+                    type: 'RENAME',
+                    confidence: 1,
+                    status: 'auto-generated',
+                },
+            ],
+        };
+        fs.writeFileSync(reportPath, JSON.stringify(semanticReport), 'utf-8');
+
+        const loaded = loadDiffReport({
+            diffReport: reportPath,
+            logger: createLogger(),
+        });
+
+        assert.ok(loaded);
+        assert.strictEqual(loaded?.version, '1.1.0');
+        assert.strictEqual(loaded?.diff?.all?.length, 3);
+        assert.ok(loaded?.diff?.all?.some(entry => entry.path.endsWith('.type') && entry.action === 'changed'));
+        assert.strictEqual(loaded?.miracles?.length, 2);
+        assert.ok(loaded?.miracles?.some(miracle => miracle.type === 'RENAME'));
+        assert.ok(loaded?.miracles?.some(miracle => miracle.type === 'TYPE_COERCION'));
+    });
+
+    test('loads unified report (schemaVersion 2.0.0) and returns structural legacy diff', async t => {
+        const dir = createTempDir(t, 'unified-report-');
+        const reportPath = path.join(dir, 'unified-report.json');
+        const unifiedReport = {
+            schemaVersion: '2.0.0',
+            timestamp: '2026-01-01T00:00:00.000Z',
+            metadata: {
+                base: 'old.json',
+                target: 'new.json',
+                baseHash: 'old-hash',
+                targetHash: 'new-hash',
+            },
+            semantic: {
+                summary: { breaking: 1, nonBreaking: 0, informational: 0 },
+                recommendation: {
+                    semver: 'major',
+                    confidence: 'high',
+                    reason: 'Breaking changes detected.',
+                    reasons: ['HAS_BREAKING_CHANGES'],
+                },
+                governance: {
+                    summary: { errors: 0, warnings: 0, info: 0 },
+                    violations: [],
+                },
+                changes: [
+                    {
+                        type: 'model.property.removed',
+                        severity: 'breaking',
+                        path: '#/components/schemas/User/properties/name',
+                        message: 'removed',
+                    },
+                ],
+            },
+            structural: {
+                diff: {
+                    breaking: [{ action: 'removed', path: '$.components.schemas.User.properties.name', severity: 'breaking' }],
+                    warnings: [],
+                    info: [],
+                    all: [{ action: 'removed', path: '$.components.schemas.User.properties.name', severity: 'breaking' }],
+                },
+                miracles: [],
+                stats: {
+                    totalChanges: 1,
+                    added: 0,
+                    removed: 1,
+                    changed: 0,
+                    stabilityScore: 0,
+                },
+            },
+        };
+        fs.writeFileSync(reportPath, JSON.stringify(unifiedReport), 'utf-8');
+
+        const loaded = loadDiffReport({
+            diffReport: reportPath,
+            logger: createLogger(),
+        });
+
+        assert.ok(loaded);
+        assert.strictEqual(loaded?.version, '2.0.0');
+        assert.strictEqual(loaded?.metadata?.base, 'old.json');
+        assert.strictEqual(loaded?.diff?.all?.length, 1);
+        assert.strictEqual(loaded?.stats?.stabilityScore, 0);
+    });
+
     test('returns null when report JSON is invalid', async t => {
         const dir = createTempDir(t, 'diff-report-broken-');
         const reportPath = path.join(dir, 'broken.json');

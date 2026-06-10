@@ -2,6 +2,7 @@ import { safeHasOwn } from '../../common/utils/safeHasOwn';
 import type { Import } from '../types/shared/Import.model';
 import type { Model } from '../types/shared/Model.model';
 import type { Service } from '../types/shared/Service.model';
+import { assignDuplicateAliases } from './modelHelpers';
 import { unique } from './unique';
 
 const SUPPORTED_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'] as const;
@@ -22,12 +23,11 @@ export function forEachOperationInPath(pathObj: Record<string, any>, cb: (method
 }
 
 /**
- * Ensure service exists in the services map or create a new one.
- *
- * @param services - Map of services
- * @param name - service name
- * @param originName - originName (optional) used when creating a new service
- * @returns existing or newly created Service
+ * Возвращает существующий сервис из map или создаёт новый.
+ * @param services map сервисов
+ * @param name имя сервиса
+ * @param [originName] исходное имя сервиса при создании
+ * @returns существующий или новый сервис
  */
 export function ensureService(services: Map<string, Service>, name: string, originName?: string): Service {
     const existing = services.get(name);
@@ -108,7 +108,7 @@ function fillModelsByAlias(items: Model[] = [], value: Import) {
 /**
  * Finalize imports for a service:
  * - Deduplicate and sort imports
- * - Assign aliases for duplicate import names (name, name$1, name$2, ...)
+ * - Assign aliases for duplicate import names (first keeps plain name, then name$2, name$3, ...)
  * - Propagate assigned aliases to models referenced in operations (results, parameters)
  *
  * Modifies service in-place and returns it.
@@ -123,23 +123,7 @@ export function finalizeServiceImports(service: Service): Service {
         return nameA.localeCompare(nameB, 'en');
     });
 
-    let previous: Import | undefined;
-    let index = 1;
-    service.imports = service.imports.map(value => {
-        if (previous && previous.name === value.name) {
-            if (index === 1) {
-                previous.alias = `${value.name}$${index}`;
-                index++;
-            }
-            value.alias = `${value.name}$${index}`;
-            index++;
-        } else {
-            value.alias = '';
-            index = 1;
-        }
-        previous = value;
-        return value;
-    });
+    assignDuplicateAliases(service.imports);
 
     for (const item of service.imports) {
         for (const operation of service.operations) {

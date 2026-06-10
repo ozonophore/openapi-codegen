@@ -3,7 +3,7 @@ import { describe, test } from 'node:test';
 
 import type { Import } from '../../types/shared/Import.model';
 import type { Model } from '../../types/shared/Model.model';
-import { resolveModelImports, setDuplicateModelAliases } from '../modelHelpers';
+import { assignDuplicateAliases, resolveModelImports, setDuplicateModelAliases } from '../modelHelpers';
 
 function createModel(overrides: Partial<Model> = {}): Model {
     return {
@@ -29,6 +29,24 @@ function createModel(overrides: Partial<Model> = {}): Model {
 }
 
 describe('@unit: modelHelpers', () => {
+    test('assignDuplicateAliases keeps plain name for a single item and for the first duplicate', () => {
+        const single = [{ name: 'Pet', alias: 'old' }];
+        assignDuplicateAliases(single);
+        assert.deepStrictEqual(single, [{ name: 'Pet', alias: '' }]);
+
+        const duplicates = [
+            { name: 'Pet', alias: 'old' },
+            { name: 'Pet', alias: 'old' },
+            { name: 'Pet', alias: 'old' },
+        ];
+        assignDuplicateAliases(duplicates);
+        assert.deepStrictEqual(duplicates, [
+            { name: 'Pet', alias: '' },
+            { name: 'Pet', alias: 'Pet$2' },
+            { name: 'Pet', alias: 'Pet$3' },
+        ]);
+    });
+
     test('resolveModelImports should propagate duplicate aliases to nested model types', () => {
         const importFooA: Import = { name: 'Foo', alias: '', path: './a/Foo' };
         const importFooB: Import = { name: 'Foo', alias: '', path: './b/Foo' };
@@ -90,17 +108,19 @@ describe('@unit: modelHelpers', () => {
         setDuplicateModelAliases(models);
         resolveModelImports(models, '/tmp/generated/models');
 
-        const wrapperImportAliases = wrapper.imports.map(item => item.alias).filter(Boolean);
-        assert.deepStrictEqual(wrapperImportAliases, ['Foo$1', 'Foo$2']);
+        const wrapperImportAliases = wrapper.imports.map(item => item.alias);
+        assert.deepStrictEqual(wrapperImportAliases, ['', 'Foo$2']);
 
-        assert.equal(propertyFooA.base, 'Foo$1');
-        assert.equal(propertyFooA.type, 'Foo$1');
+        assert.equal(propertyFooA.base, 'Foo');
+        assert.equal(propertyFooA.type, 'Foo');
         assert.equal(propertyFooBArray.base, 'Foo$2');
         assert.equal(propertyFooBArray.type, 'Foo$2');
         assert.equal(propertyFooBArray.link?.base, 'Foo$2');
         assert.equal(propertyFooBArray.link?.type, 'Foo$2');
-        assert.equal(enumRefFooA.base, 'Foo$1');
-        assert.equal(enumRefFooA.type, 'Foo$1');
+        assert.equal(enumRefFooA.base, 'Foo');
+        assert.equal(enumRefFooA.type, 'Foo');
+        assert.equal(fooModelA.alias, '');
+        assert.equal(fooModelB.alias, 'Foo$2');
 
         assert.equal(wrapper.alias, '');
     });
@@ -156,8 +176,8 @@ describe('@unit: modelHelpers', () => {
         resolveModelImports(models, '/tmp/generated/models');
 
         assert.equal(wrapper.imports[0].path, '../a/Foo');
-        assert.equal(wrapper.imports[0].alias, 'Foo$1');
-        assert.equal(nestedRef.base, 'Foo$1');
-        assert.equal(nestedRef.type, 'Foo$1');
+        assert.equal(wrapper.imports[0].alias, '');
+        assert.equal(nestedRef.base, 'Foo');
+        assert.equal(nestedRef.type, 'Foo');
     });
 });
