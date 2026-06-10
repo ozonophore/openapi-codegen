@@ -3,7 +3,6 @@ import { describe, test } from 'node:test';
 
 import { validateAndSuggestKeyCorrections } from '../../VersionedSchema/Utils/validateAndSuggestKeyCorrections';
 
-
 describe('@unit: validateAndSuggestKeyCorrections', () => {
     test('should throw an error for unknown keys with a suggestion for correction', async () => {
         const inputKeys = ['nmae'];

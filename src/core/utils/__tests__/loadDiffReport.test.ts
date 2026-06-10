@@ -80,9 +80,13 @@ describe('@unit: loadDiffReport', () => {
         const reportPath = path.join(dir, 'report.json');
         const inputPath = path.join(dir, 'spec.json');
 
-        fs.writeFileSync(reportPath, JSON.stringify({
-            diff: { all: [{ action: 'changed', path: '$.info.version', severity: 'info' }] },
-        }), 'utf-8');
+        fs.writeFileSync(
+            reportPath,
+            JSON.stringify({
+                diff: { all: [{ action: 'changed', path: '$.info.version', severity: 'info' }] },
+            }),
+            'utf-8'
+        );
 
         const past = Date.now() - 60_000;
         fs.utimesSync(reportPath, past / 1000, past / 1000);

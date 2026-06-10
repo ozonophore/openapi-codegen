@@ -5,9 +5,5 @@ export function normalizeString(value?: string): string | null | undefined {
         return value;
     }
 
-    return value
-        .replace(REGEX_BACKSLASH, '/')
-        .replace(REGEX_MULTIPLE_SLASHES, '/')
-        .replace(REGEX_DOT_SLASH, '/')
-        .replace(REGEX_LEADING_DOT_SLASH, './');
+    return value.replace(REGEX_BACKSLASH, '/').replace(REGEX_MULTIPLE_SLASHES, '/').replace(REGEX_DOT_SLASH, '/').replace(REGEX_LEADING_DOT_SLASH, './');
 }

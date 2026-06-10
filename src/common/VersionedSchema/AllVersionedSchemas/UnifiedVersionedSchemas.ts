@@ -35,7 +35,13 @@ const latestUnifiedDefinition = unifiedSchemaDefinitions[unifiedSchemaDefinition
 
 export const rawOptionsSchema: LatestUnifiedDefinition['base'] = latestUnifiedDefinition.base;
 
-export const flatOptionsSchema = rawOptionsSchema.omit({ items: true }).extend({
-    input: z.string().min(1, 'Input is required'),
-    output: z.string().min(1, 'Output is required'),
-});
+export const flatOptionsSchema = rawOptionsSchema
+    .omit({
+        items: true,
+        tsconfigPath: true,
+        eslintConfigPath: true,
+    })
+    .extend({
+        input: z.string().min(1, 'Input is required'),
+        output: z.string().min(1, 'Output is required'),
+    });

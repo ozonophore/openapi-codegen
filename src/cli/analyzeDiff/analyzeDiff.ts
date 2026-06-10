@@ -64,7 +64,7 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
         const newSpec = await getOpenApiSpec(newContext, newSpecInput);
         const oldSpec: CommonOpenApi = oldSpecInput
             ? await getOpenApiSpec(createSemanticDiffContext(oldSpecInput), oldSpecInput)
-            : (await readSpecFromGit(gitRef as string, newSpecInput)) as CommonOpenApi;
+            : ((await readSpecFromGit(gitRef as string, newSpecInput)) as CommonOpenApi);
 
         if (oldSpecInput && validatedOptions.git) {
             APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.COMPARE_WITH_OVERRIDES_GIT(validatedOptions.git));

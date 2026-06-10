@@ -12,10 +12,7 @@ const createMockSpec = (relativePath: string = './test/spec.yml'): ValidatedSpec
 
 describe('@unit: buildConfig', () => {
     test('creates items array for multiple specs in multi-option mode', async () => {
-        const validatedSpecs: ValidatedSpec[] = [
-            createMockSpec('./api/v1.yml'),
-            createMockSpec('./api/v2.yml'),
-        ];
+        const validatedSpecs: ValidatedSpec[] = [createMockSpec('./api/v1.yml'), createMockSpec('./api/v2.yml')];
 
         const result = await buildConfig(validatedSpecs, true);
 
@@ -65,10 +62,7 @@ describe('@unit: buildConfig', () => {
     });
 
     test('uses first spec for flat config', async () => {
-        const validatedSpecs: ValidatedSpec[] = [
-            createMockSpec('./api/v1.yml'),
-            createMockSpec('./api/v2.yml'),
-        ];
+        const validatedSpecs: ValidatedSpec[] = [createMockSpec('./api/v1.yml'), createMockSpec('./api/v2.yml')];
 
         const result = await buildConfig(validatedSpecs, false);
 

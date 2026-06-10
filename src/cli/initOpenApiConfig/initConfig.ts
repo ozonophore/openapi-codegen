@@ -77,9 +77,9 @@ export async function initConfig(params: InitConfigParams): Promise<void> {
         // В неинтерактивном режиме признак кастомного request определяется наличием --request
         const hasCustomRequest = useInteractiveMode
             ? await confirmDialog({
-                message: 'Do you want to use a custom request implementation?',
-                initial: false,
-            })
+                  message: 'Do you want to use a custom request implementation?',
+                  initial: false,
+              })
             : hasCustomRequestPath;
 
         if (hasCustomRequest) {
@@ -104,10 +104,10 @@ export async function initConfig(params: InitConfigParams): Promise<void> {
 
         const action = useInteractiveMode
             ? await selectDialog({
-                message: 'What would you like to do?',
-                choices: OPEN_API_CONFIG_SELECT_OPTIONS,
-                initial: 0,
-            })
+                  message: 'What would you like to do?',
+                  choices: OPEN_API_CONFIG_SELECT_OPTIONS,
+                  initial: 0,
+              })
             : EConfigType.FLAT;
 
         if (action === EConfigType.NONE) {
@@ -119,9 +119,9 @@ export async function initConfig(params: InitConfigParams): Promise<void> {
 
         const hasCustomRequest = useInteractiveMode
             ? await confirmDialog({
-                message: 'Do you want to use a custom request implementation?',
-                initial: false,
-            })
+                  message: 'Do you want to use a custom request implementation?',
+                  initial: false,
+              })
             : hasCustomRequestPath;
 
         if (hasCustomRequest) {

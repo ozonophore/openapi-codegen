@@ -6,7 +6,6 @@ import templateConfig from '../../../templatesCompiled/cli/openApiConfig';
 import partialHeader from '../../../templatesCompiled/client/partials/header';
 import { CLITemplates } from '../Types';
 
-
 export function registerHandlebarTemplates(): CLITemplates {
     const templates: CLITemplates = {
         config: Handlebars.template(templateConfig),

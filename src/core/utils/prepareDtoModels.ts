@@ -68,7 +68,12 @@ const resolveTypeFactory = (nameMap: Map<string, NameMapEntry>, kind: 'raw' | 'd
         }
 
         if (model.export === 'enum' && model.enum?.length) {
-            return joinUnique(model.enum.map(en => en.value), ' | ') || model.type;
+            return (
+                joinUnique(
+                    model.enum.map(en => en.value),
+                    ' | '
+                ) || model.type
+            );
         }
 
         if (model.export === 'interface') {

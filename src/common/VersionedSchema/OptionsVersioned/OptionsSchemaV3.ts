@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-import { experimentalParametersSchema } from "../CommonSchemas";
-import { optionsSchemaV2 } from "./OptionsSchemaV2";
+import { experimentalParametersSchema } from '../CommonSchemas';
+import { optionsSchemaV2 } from './OptionsSchemaV2';
 
 /**
  * The scheme of a set of generator options (Версия 3).

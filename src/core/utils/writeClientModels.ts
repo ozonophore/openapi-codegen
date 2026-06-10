@@ -1,8 +1,6 @@
 import { mkdirSync } from 'fs';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
-import { eslintFix } from '../../common/utils/eslintFix';
-import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { Templates } from '../types/base/Templates.model';
@@ -27,8 +25,7 @@ interface IWriteClientModels {
     useOptions?: boolean;
     modelsMode?: ModelsMode;
     outputCorePath?: string;
-    useProjectPrettier?: boolean;
-    useEslintFix?: boolean;
+    prettierConfigPath?: string;
 }
 
 /**
@@ -40,7 +37,7 @@ interface IWriteClientModels {
  * @param useUnionTypes Use union types instead of enums
  */
 export async function writeClientModels(this: WriteClient, options: IWriteClientModels): Promise<void> {
-    const { models, templates, outputModelsPath, httpClient, useUnionTypes, modelsMode, outputCorePath, useOptions, useProjectPrettier, useEslintFix } = options;
+    const { models, templates, outputModelsPath, httpClient, useUnionTypes, modelsMode, outputCorePath, useOptions, prettierConfigPath } = options;
 
     this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_START);
 
@@ -56,6 +53,7 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
         });
         const formattedValue = await format(templateResult);
         await this.writeOutputFile(file, formattedValue);
+        this.registerLintTarget(file, outputModelsPath);
         this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
         this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_FINISH);
         return;
@@ -85,11 +83,9 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             httpClient,
             useUnionTypes,
         });
-        const formattedValue = await format(templateResult, undefined, useProjectPrettier);
+        const formattedValue = await format(templateResult, undefined, prettierConfigPath);
         await this.writeOutputFile(file, formattedValue);
-        if (useEslintFix) {
-            await eslintFix(file);
-        }
+        this.registerLintTarget(file, outputModelsPath);
 
         this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
     }

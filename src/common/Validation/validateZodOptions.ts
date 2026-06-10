@@ -22,7 +22,7 @@ export function validateZodOptions<T>(schema: ZodSchema<T>, data: unknown): Vali
             };
         }
 
-        throw new Error(error instanceof Error ? error.message : 'Unknown validation error')
+        throw new Error(error instanceof Error ? error.message : 'Unknown validation error');
     }
 }
 

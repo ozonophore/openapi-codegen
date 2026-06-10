@@ -29,9 +29,7 @@ export type ApplySemanticDiffPluginHooksResult = {
 /**
  * Safely applies semantic diff plugin hooks in deterministic order.
  */
-export async function applySemanticDiffPluginHooks(
-    input: ApplySemanticDiffPluginHooksInput
-): Promise<ApplySemanticDiffPluginHooksResult> {
+export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPluginHooksInput): Promise<ApplySemanticDiffPluginHooksResult> {
     const diagnostics: PluginHookDiagnostic[] = [];
     const strictPluginMode = input.strictPluginMode ?? false;
 

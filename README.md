@@ -31,6 +31,9 @@
 - Supports generator plugins (`plugins`) including built-in `x-typescript-type`
 - Supports binary request/response generation (`format: binary` -> `Blob`)
 - Supports opt-in generation cache and incremental writes (`--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`)
+- Generated services accept a `RequestExecutor` in the constructor (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`)
+- Optional output formatting via `prettierConfigPath` (explicit Prettier config file)
+- Optional batch ESLint `--fix` after generation when both `tsconfigPath` and `eslintConfigPath` are set
 
 ## Install
 

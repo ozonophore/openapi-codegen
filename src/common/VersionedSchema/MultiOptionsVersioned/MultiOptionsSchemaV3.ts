@@ -1,4 +1,4 @@
-import {z} from 'zod';
+import { z } from 'zod';
 
 import { experimentalParametersSchema } from '../CommonSchemas';
 import { multiOptionsSchemaV2 } from './MultiOptionsSchemaV2';

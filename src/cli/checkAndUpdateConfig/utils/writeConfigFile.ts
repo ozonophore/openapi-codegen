@@ -1,6 +1,6 @@
-import { prepareConfigData } from "./prepareConfigData";
-import { updateExistingConfigFile } from "./updateExistingConfigFile";
-import { writeExampleConfigFile } from "./writeExampleConfigFile";
+import { prepareConfigData } from './prepareConfigData';
+import { updateExistingConfigFile } from './updateExistingConfigFile';
+import { writeExampleConfigFile } from './writeExampleConfigFile';
 
 interface IWriteConfigFileOptions {
     /** Данные для записи */
@@ -34,11 +34,7 @@ interface IWriteConfigFileOptions {
  *   isUpdating: false,
  * });
  */
-export async function writeConfigFile({
-    data,
-    configPath,
-    isUpdating,
-}: IWriteConfigFileOptions): Promise<void> {
+export async function writeConfigFile({ data, configPath, isUpdating }: IWriteConfigFileOptions): Promise<void> {
     const preparedData = await prepareConfigData(data);
 
     if (!preparedData) {

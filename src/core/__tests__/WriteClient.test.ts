@@ -66,7 +66,7 @@ describe('@unit: writeClient', () => {
                 interceptors: () => 'interceptors',
                 withInterceptors: () => 'withInterceptors',
                 baseDto: () => 'baseDto',
-                dtoUtils: () => 'dtoUtils'
+                dtoUtils: () => 'dtoUtils',
             },
         };
 

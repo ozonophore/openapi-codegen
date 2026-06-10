@@ -6,15 +6,11 @@ import { joinHelper, relativeHelper, resolveHelper } from '../../../common/utils
 /**
  * Обновляет пути output в опциях для генерации в preview директорию
  * Удаляет generatedDir из путей и заменяет на previewDir
- * 
+ *
  * Пример: generatedDir = "./test/generated", output = "./test/generated/api"
  * Результат: output = "./generated-preview/api"
  */
-export function updateOutputPaths(
-    options: TRawOptions,
-    previewDir: string,
-    generatedDir: string
-): TRawOptions {
+export function updateOutputPaths(options: TRawOptions, previewDir: string, generatedDir: string): TRawOptions {
     const resolvedGeneratedDir = resolveHelper(process.cwd(), generatedDir);
     // const resolvedPreviewDir = resolveHelper(process.cwd(), previewDir);
 
@@ -25,7 +21,7 @@ export function updateOutputPaths(
     const replacePath = (oldPath: string): string => {
         const resolvedOldPath = resolveHelper(process.cwd(), oldPath);
         let relativePath = relativeHelper(resolvedGeneratedDir, resolvedOldPath);
-        
+
         // Убираем префикс ./ если он есть
         if (relativePath.startsWith('./')) {
             relativePath = relativePath.substring(2);
@@ -36,12 +32,12 @@ export function updateOutputPaths(
             const outputBaseName = basename(resolvedOldPath);
             return joinHelper(previewDir, outputBaseName);
         }
-        
+
         // Если путь пустой или равен текущей директории, возвращаем previewDir
         if (!relativePath || relativePath === '' || relativePath === './') {
             return previewDir;
         }
-        
+
         // Используем previewDir (относительный путь) вместо resolvedPreviewDir
         return joinHelper(previewDir, relativePath);
     };
@@ -50,17 +46,10 @@ export function updateOutputPaths(
      * Обновляет output* пути относительно нового output
      * Если output* был указан явно, сохраняем его относительную структуру от старого output
      */
-    const updateRelativePaths = (
-        newOutput: string,
-        oldOutput: string,
-        oldOutputCore?: string,
-        oldOutputServices?: string,
-        oldOutputModels?: string,
-        oldOutputSchemas?: string
-    ) => {
+    const updateRelativePaths = (newOutput: string, oldOutput: string, oldOutputCore?: string, oldOutputServices?: string, oldOutputModels?: string, oldOutputSchemas?: string) => {
         const resolvedOldOutput = resolveHelper(process.cwd(), oldOutput);
         const resolvedNewOutput = resolveHelper(process.cwd(), newOutput);
-        
+
         const result: {
             outputCore?: string;
             outputServices?: string;
@@ -76,9 +65,7 @@ export function updateOutputPaths(
                 relativeCore = relativeCore.substring(2);
             }
             // Если относительный путь пустой, используем стандартное имя 'core'
-            result.outputCore = relativeCore && relativeCore !== '' && relativeCore !== './'
-                ? joinHelper(resolvedNewOutput, relativeCore)
-                : joinHelper(resolvedNewOutput, 'core');
+            result.outputCore = relativeCore && relativeCore !== '' && relativeCore !== './' ? joinHelper(resolvedNewOutput, relativeCore) : joinHelper(resolvedNewOutput, 'core');
         }
 
         if (oldOutputServices) {
@@ -87,9 +74,8 @@ export function updateOutputPaths(
             if (relativeServices.startsWith('./')) {
                 relativeServices = relativeServices.substring(2);
             }
-            result.outputServices = relativeServices && relativeServices !== '' && relativeServices !== './'
-                ? joinHelper(resolvedNewOutput, relativeServices)
-                : joinHelper(resolvedNewOutput, 'services');
+            result.outputServices =
+                relativeServices && relativeServices !== '' && relativeServices !== './' ? joinHelper(resolvedNewOutput, relativeServices) : joinHelper(resolvedNewOutput, 'services');
         }
 
         if (oldOutputModels) {
@@ -98,9 +84,7 @@ export function updateOutputPaths(
             if (relativeModels.startsWith('./')) {
                 relativeModels = relativeModels.substring(2);
             }
-            result.outputModels = relativeModels && relativeModels !== '' && relativeModels !== './'
-                ? joinHelper(resolvedNewOutput, relativeModels)
-                : joinHelper(resolvedNewOutput, 'models');
+            result.outputModels = relativeModels && relativeModels !== '' && relativeModels !== './' ? joinHelper(resolvedNewOutput, relativeModels) : joinHelper(resolvedNewOutput, 'models');
         }
 
         if (oldOutputSchemas) {
@@ -109,9 +93,7 @@ export function updateOutputPaths(
             if (relativeSchemas.startsWith('./')) {
                 relativeSchemas = relativeSchemas.substring(2);
             }
-            result.outputSchemas = relativeSchemas && relativeSchemas !== '' && relativeSchemas !== './'
-                ? joinHelper(resolvedNewOutput, relativeSchemas)
-                : joinHelper(resolvedNewOutput, 'schemas');
+            result.outputSchemas = relativeSchemas && relativeSchemas !== '' && relativeSchemas !== './' ? joinHelper(resolvedNewOutput, relativeSchemas) : joinHelper(resolvedNewOutput, 'schemas');
         }
 
         return result;
@@ -122,15 +104,8 @@ export function updateOutputPaths(
             ...options,
             items: options.items.map(item => {
                 const newOutput = replacePath(item.output);
-                const relativePaths = updateRelativePaths(
-                    newOutput,
-                    item.output,
-                    item.outputCore,
-                    item.outputServices,
-                    item.outputModels,
-                    item.outputSchemas
-                );
-                
+                const relativePaths = updateRelativePaths(newOutput, item.output, item.outputCore, item.outputServices, item.outputModels, item.outputSchemas);
+
                 return {
                     ...item,
                     output: newOutput,
@@ -141,14 +116,7 @@ export function updateOutputPaths(
     }
 
     const newOutput = replacePath(options.output || '');
-    const relativePaths = updateRelativePaths(
-        newOutput,
-        options.output || '',
-        options.outputCore,
-        options.outputServices,
-        options.outputModels,
-        options.outputSchemas
-    );
+    const relativePaths = updateRelativePaths(newOutput, options.output || '', options.outputCore, options.outputServices, options.outputModels, options.outputSchemas);
 
     return {
         ...options,

@@ -8,7 +8,7 @@ export type SemanticDiffReportSchemaValidationResult = {
     errors: string[];
 };
 
-export const semanticDiffReportJsonSchema: JSONSchema7 = {
+const semanticDiffReportJsonSchema: JSONSchema7 = {
     type: 'object',
     additionalProperties: false,
     properties: {
@@ -53,12 +53,7 @@ export const semanticDiffReportJsonSchema: JSONSchema7 = {
                     required: true as never,
                     items: {
                         type: 'string',
-                        enum: [
-                            'HAS_BREAKING_CHANGES',
-                            'HAS_BACKWARD_COMPATIBLE_CHANGES',
-                            'HAS_INFORMATIONAL_ONLY_CHANGES',
-                            'NO_API_SURFACE_CHANGES',
-                        ],
+                        enum: ['HAS_BREAKING_CHANGES', 'HAS_BACKWARD_COMPATIBLE_CHANGES', 'HAS_INFORMATIONAL_ONLY_CHANGES', 'NO_API_SURFACE_CHANGES'],
                     },
                 },
             },

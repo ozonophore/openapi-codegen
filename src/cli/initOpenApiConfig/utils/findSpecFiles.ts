@@ -14,7 +14,7 @@ const SPEC_EXTENSIONS = ['.json', '.yaml', '.yml'];
 export async function findSpecFiles(specsDir: string): Promise<string[]> {
     const resolvedDir = resolveHelper(process.cwd(), specsDir);
     const dirExists = await fileSystemHelpers.exists(resolvedDir);
-    
+
     if (!dirExists) {
         throw new Error(`Directory does not exist: ${specsDir}`);
     }
@@ -30,7 +30,7 @@ export async function findSpecFiles(specsDir: string): Promise<string[]> {
     for (const file of files) {
         const filePath = joinHelper(resolvedDir, file);
         const isFile = fileSystemHelpers.isPathToFile(filePath);
-        
+
         if (isFile) {
             const ext = path.extname(file).toLowerCase();
             if (SPEC_EXTENSIONS.includes(ext)) {

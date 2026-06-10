@@ -33,5 +33,4 @@ describe('@unit: checkConfig and updateConfig schemas', () => {
         });
         assert.strictEqual(parsed.success, true);
     });
-
 });

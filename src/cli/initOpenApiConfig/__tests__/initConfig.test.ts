@@ -51,5 +51,4 @@ describe('@unit: initConfig', () => {
         assert.match(written, /"input"/);
         assert.match(written, /"output"/);
     });
-
 });

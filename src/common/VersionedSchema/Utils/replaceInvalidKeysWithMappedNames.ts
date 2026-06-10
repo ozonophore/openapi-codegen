@@ -1,11 +1,7 @@
-
 // Replacing incorrect keys
-export function replaceInvalidKeysWithMappedNames(
-    input: Record<string, any> | Record<string, any>[],
-    keyMap: Map<string, string>
-): Record<string, any> | Record<string, any>[] {
+export function replaceInvalidKeysWithMappedNames(input: Record<string, any> | Record<string, any>[], keyMap: Map<string, string>): Record<string, any> | Record<string, any>[] {
     if (!input) {
-        throw new Error("The input data cannot be null or undefined.");
+        throw new Error('The input data cannot be null or undefined.');
     }
     if (Array.isArray(input)) {
         return input.map(item => replaceInvalidKeysWithMappedNames(item, keyMap));

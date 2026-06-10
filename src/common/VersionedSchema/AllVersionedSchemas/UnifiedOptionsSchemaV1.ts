@@ -1,4 +1,4 @@
-import {z} from 'zod';
+import { z } from 'zod';
 
 import { additionalParametersSchemaV2, experimentalParametersSchemaV2, outputPathsSchema, specialParametersSchemasV2 } from '../CommonSchemas';
 import { unifiedOptionsShape } from './UnifiedBase';

@@ -70,10 +70,7 @@ function toFileLink(filePath: string): string {
     return `./${filePath}.md`;
 }
 
-function toCategoryMarkdown(
-    title: string,
-    files: string[],
-): string {
+function toCategoryMarkdown(title: string, files: string[]): string {
     const lines = [`# ${title}`, ''];
 
     if (files.length === 0) {
@@ -266,31 +263,11 @@ export async function previewChanges(options: OptionValues): Promise<CLICommandR
             }
 
             const summary = buildSummary(changes);
-            await fileSystemHelpers.writeFile(
-                joinHelper(resolvedDiffDir, 'added-files.md'),
-                toCategoryMarkdown('Added Files', summary.added),
-                'utf-8',
-            );
-            await fileSystemHelpers.writeFile(
-                joinHelper(resolvedDiffDir, 'removed-files.md'),
-                toCategoryMarkdown('Removed Files', summary.removed),
-                'utf-8',
-            );
-            await fileSystemHelpers.writeFile(
-                joinHelper(resolvedDiffDir, 'modified-files.md'),
-                toCategoryMarkdown('Modified Files', summary.modified),
-                'utf-8',
-            );
-            await fileSystemHelpers.writeFile(
-                joinHelper(resolvedDiffDir, 'summary.json'),
-                JSON.stringify(summary, null, 2),
-                'utf-8',
-            );
-            await fileSystemHelpers.writeFile(
-                joinHelper(resolvedDiffDir, 'summary.md'),
-                toSummaryMarkdown(summary),
-                'utf-8',
-            );
+            await fileSystemHelpers.writeFile(joinHelper(resolvedDiffDir, 'added-files.md'), toCategoryMarkdown('Added Files', summary.added), 'utf-8');
+            await fileSystemHelpers.writeFile(joinHelper(resolvedDiffDir, 'removed-files.md'), toCategoryMarkdown('Removed Files', summary.removed), 'utf-8');
+            await fileSystemHelpers.writeFile(joinHelper(resolvedDiffDir, 'modified-files.md'), toCategoryMarkdown('Modified Files', summary.modified), 'utf-8');
+            await fileSystemHelpers.writeFile(joinHelper(resolvedDiffDir, 'summary.json'), JSON.stringify(summary, null, 2), 'utf-8');
+            await fileSystemHelpers.writeFile(joinHelper(resolvedDiffDir, 'summary.md'), toSummaryMarkdown(summary), 'utf-8');
 
             APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.TOTAL_CHANGES(changes.length));
             APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.DIFF_FILES_SAVED_TO(diffDir || ''));
@@ -298,7 +275,6 @@ export async function previewChanges(options: OptionValues): Promise<CLICommandR
             await fileSystemHelpers.rmdir(resolvedDiffDir);
             APP_LOGGER.info(LOGGER_MESSAGES.PREVIEW.NO_CHANGES_DETECTED);
         }
-
     } catch (error: unknown) {
         exitCode = 1;
         const message = error instanceof Error ? error.message : String(error);

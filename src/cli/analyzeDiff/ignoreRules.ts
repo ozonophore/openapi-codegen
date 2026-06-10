@@ -8,7 +8,7 @@ import type { DiffEntry, IgnoreRule } from './types';
  * @param rule правило игнорирования
  * @returns true если правило активно или не содержит валидной даты
  */
-export const isRuleActive = (rule: IgnoreRule): boolean => {
+const isRuleActive = (rule: IgnoreRule): boolean => {
     if (!rule.until) return true;
     const timestamp = Date.parse(rule.until);
     if (Number.isNaN(timestamp)) return true;
@@ -68,9 +68,7 @@ export const applyIgnoreRules = (entries: DiffEntry[], rules: IgnoreRule[]): { f
  * @param configData загруженные данные конфигурации
  * @returns список правил ignore
  */
-export const getIgnoreRulesFromConfig = (
-    configData: Record<string, any> | Record<string, any>[] | null
-): IgnoreRule[] => {
+export const getIgnoreRulesFromConfig = (configData: Record<string, any> | Record<string, any>[] | null): IgnoreRule[] => {
     if (!configData) return [];
     if (Array.isArray(configData)) {
         const withAnalyze = configData.find(item => item?.analyze?.ignore);

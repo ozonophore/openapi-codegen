@@ -20,10 +20,7 @@ describe('@unit: postProcessServiceImports', () => {
 
         assert.deepStrictEqual(
             result.map(item => `${item.name}:${item.alias}:${item.path}`),
-            [
-                'UserService:UserService$1:../models/path/UserService',
-                'UserService::../models/UserService',
-            ],
+            ['UserService:UserService$1:../models/path/UserService', 'UserService::../models/UserService']
         );
     });
 });

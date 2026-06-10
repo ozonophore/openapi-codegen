@@ -41,10 +41,7 @@ describe('@unit: postProcessModelImports', () => {
 
         assert.deepStrictEqual(
             result.map(item => `${item.name}:${item.alias}:${item.path}`),
-            [
-                'ISimpleDto:ISimpleDto$1:./path/alias_response/SimpleDto',
-                'ISimpleDto:ISimpleDto$2:./path/common_request/SimpleDto',
-            ],
+            ['ISimpleDto:ISimpleDto$1:./path/alias_response/SimpleDto', 'ISimpleDto:ISimpleDto$2:./path/common_request/SimpleDto']
         );
     });
 
@@ -62,7 +59,7 @@ describe('@unit: postProcessModelImports', () => {
 
         assert.deepStrictEqual(
             result.map(item => `${item.name}:${item.path}`),
-            ['IAnotherModel:./AnotherModel'],
+            ['IAnotherModel:./AnotherModel']
         );
     });
 

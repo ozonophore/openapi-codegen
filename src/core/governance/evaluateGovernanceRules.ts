@@ -114,17 +114,10 @@ function getEffectiveRuleConfig(ruleId: GovernanceRuleId, governanceConfig?: Gov
 /**
  * Returns true when violation is allowed by operation/path allow list.
  */
-function isViolationAllowed(
-    allowList: GovernanceAllowListItem[],
-    operation: string | undefined,
-    violationPath: string
-): boolean {
+function isViolationAllowed(allowList: GovernanceAllowListItem[], operation: string | undefined, violationPath: string): boolean {
     return allowList.some(item => {
         const operationAllowed = typeof item.operation === 'string' && operation ? item.operation === operation : false;
-        const pathAllowed =
-            typeof item.path === 'string' && item.path.trim().length > 0
-                ? violationPath === item.path || violationPath.startsWith(item.path)
-                : false;
+        const pathAllowed = typeof item.path === 'string' && item.path.trim().length > 0 ? violationPath === item.path || violationPath.startsWith(item.path) : false;
 
         return operationAllowed || pathAllowed;
     });

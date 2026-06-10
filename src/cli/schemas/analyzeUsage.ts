@@ -26,7 +26,10 @@ export const analyzeUsageOptionsSchema = z
         }
 
         if (data.failOn && data.failOn !== 'none') {
-            for (const category of data.failOn.split(',').map(item => item.trim()).filter(Boolean)) {
+            for (const category of data.failOn
+                .split(',')
+                .map(item => item.trim())
+                .filter(Boolean)) {
                 if (!failOnCategorySchema.safeParse(category).success) {
                     ctx.addIssue({
                         code: 'custom',

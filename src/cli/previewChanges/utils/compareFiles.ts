@@ -1,6 +1,6 @@
 import * as diff from 'diff';
 
-import { fileSystemHelpers } from "../../../common/utils/fileSystemHelpers";
+import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 
 /**
  * Сравнивает два файла и возвращает diff

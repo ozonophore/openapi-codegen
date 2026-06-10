@@ -96,11 +96,7 @@ describe('@unit: evaluateGovernanceRules', () => {
 
         assert.ok(!report.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG'));
         assert.ok(!report.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
-        assert.ok(
-            report.violations.some(
-                violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'
-            )
-        );
+        assert.ok(report.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'));
         assert.strictEqual(report.summary.errors, 1);
     });
 });

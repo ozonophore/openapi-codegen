@@ -12,7 +12,7 @@ describe('@unit: getType', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const parser = new SwaggerParser();
-        const context = new Context({input: 'test/spec/v3.yml', output: getOutputPaths({ output: './generated' })});
+        const context = new Context({ input: 'test/spec/v3.yml', output: getOutputPaths({ output: './generated' }) });
         context.addRefs(await parser.resolve('test/spec/v3.yml'));
         const type = new Parser(context).getType('int', '');
         assert.strictEqual(type.type, 'number');
@@ -25,7 +25,7 @@ describe('@unit: getType', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const parser = new SwaggerParser();
-        const context = new Context({input: 'test/spec/v3.yml', output: getOutputPaths({ output: './generated' })});
+        const context = new Context({ input: 'test/spec/v3.yml', output: getOutputPaths({ output: './generated' }) });
         context.addRefs(await parser.resolve('test/spec/v3.yml'));
         const type = new Parser(context).getType('schemas/ModelWithString.yml', '');
         assert.strictEqual(type.type, 'ModelWithString');

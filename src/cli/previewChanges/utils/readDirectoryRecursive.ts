@@ -1,5 +1,5 @@
-import { fileSystemHelpers } from "../../../common/utils/fileSystemHelpers";
-import { joinHelper, relativeHelper } from "../../../common/utils/pathHelpers";
+import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
+import { joinHelper, relativeHelper } from '../../../common/utils/pathHelpers';
 
 /**
  * Рекурсивно читает все файлы в директории

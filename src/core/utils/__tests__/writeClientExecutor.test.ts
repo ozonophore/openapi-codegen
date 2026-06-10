@@ -14,7 +14,10 @@ describe('@unit: writeClientExecutor', () => {
 
         const result = deduplicateServicesByName(services);
 
-        assert.deepStrictEqual(result.map(item => item.name), ['V2Service', 'SimpleService']);
+        assert.deepStrictEqual(
+            result.map(item => item.name),
+            ['V2Service', 'SimpleService']
+        );
         assert.equal(result[0].originName, 'V2Service');
     });
 });

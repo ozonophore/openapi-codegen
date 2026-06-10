@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.8] — 2026-06-08
+
+### Removed
+- Removed `--useProjectPrettier` / `useProjectPrettier` and implicit Prettier config resolution from the current working directory.
+- Removed `--useEslintFix` / `useEslintFix` boolean flag and per-file ESLint `--fix` during write.
+- Removed `useProjectPrettier` / `useEslintFix` default fields from the v4→v5 config migration.
+- Removed legacy Babel-based e2e browser tests, `.babelrc.js`, and related `@babel/*` devDependencies.
+
+### Added
+- Added `--prettierConfigPath` / `prettierConfigPath` to point at an explicit Prettier config file for formatting generated output.
+- Added `--tsconfigPath` and `--eslintConfigPath` CLI flags (root-level config keys) for batch ESLint after generation.
+- Added post-generation `eslintFixBatch`: temporary `.openapi-codegen/` tsconfig/ESLint wrappers, chunked `lintFiles`, and `eslint-fix-report.json` in the project root.
+- Added `ESLINT_FIX_BATCH_SIZE` env var to tune batch chunk size (default: 50).
+- Added `example/eslint.example.mjs` as a reference ESLint flat config for host projects.
+- Added a standard auto-generated file header comment to generated client output (`header.hbs` partial).
+- Added Handlebars helper `useBatchEslintFix`: when both ESLint paths are configured, generated files omit inline `eslint-disable` / `tslint-disable` so host ESLint can fix them.
+- Added `WriteClient.registerLintTarget()` to collect generated output files for the post-generation batch lint step.
+- Added Husky pre-commit hook and lint-staged pipeline (`checkTypes`, `eslint:fix`, `find-deadcode:dev`).
+
+### Changed
+- `format()` loads Prettier options from `prettierConfigPath` when the file exists; otherwise built-in defaults are used (no implicit cwd lookup).
+- Batch ESLint `--fix` runs once after all items finish when **both** `tsconfigPath` and `eslintConfigPath` are set (CLI or config); if only one path is set, the step is skipped with a warning.
+- `tsconfigPath` / `eslintConfigPath` are root-level only (excluded from per-item `flatOptionsSchema`).
+- Direct CLI `generate` mode forwards `prettierConfigPath`, `tsconfigPath`, and `eslintConfigPath` from CLI args.
+- `UNIFIED_OPTIONS_v5` updated in place: `prettierConfigPath`, `tsconfigPath`, and `eslintConfigPath` replace `useProjectPrettier` / `useEslintFix`.
+- Prettier config moved from `.prettierrc.json` to `.prettierrc.js`; `src/templatesCompiled` is excluded via `.prettierignore`.
+- Updated README (EN/RU), MIGRATION (EN/RU), and configuration/usage docs for the new formatting and lint options.
+
+### Tests
+- Added/updated unit tests for `eslintFixBatch`, `format` (`prettierConfigPath`), `extractEslintFixOptions`, temp config helpers (`prepareTempTsConfig`, `prepareTempEslintConfig`), and `useBatchEslintFix` header rendering.
+- Updated snapshot suites for the new generated file header in client/core/service outputs.
+
 ## [2.1.0-beta.7] — 2026-05-27
 
 ### Added
@@ -157,6 +189,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - request/response option `responseType: 'blob'`;
   - runtime response handling for `fetch`, `xhr`, `node`, and `axios`.
 - Added Blob snapshot scenarios in test specs and snapshots (`v3`, `v3_withDifferentRefs`).
+- Added `analyze-diff` command to generate diff reports between OpenAPI versions.
+- Added history-aware generation options: `useHistory` and `diffReport`.
+- Added `modelsMode` (`interfaces` | `classes`) to generate `Raw/Dto` models in a single `models.ts`.
+- Added `BaseDto` and `dtoUtils` to generated core when `modelsMode=classes`.
+- Added `miracles` section support in diff reports and DTO deprecated getters for confirmed renames.
+- Added auto-coercion in validation schemas when a type change is detected (Zod/Joi/Yup/AJV).
 
 ### Changed
 - Improved response parsing and reference resolution:
@@ -164,6 +202,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - media type content selection and response code parsing behavior were hardened.
 - Updated OpenAPI spec loading flow to resolve by absolute input path without global `process.chdir(...)` side effects.
 - Updated READMEs (EN/RU) for strict diagnostics options.
+- Added config sections `models`, `analyze`, and `miracles` to unified schema and init templates.
+- Updated README (EN/RU) and migration docs with history/DTO features.
 
 ### Fixed
 - Fixed unresolved nested `$ref` cases inside referenced responses.

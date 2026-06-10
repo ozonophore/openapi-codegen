@@ -5,8 +5,7 @@ export const toJsonPath = (segments: JsonPathSegment[]): string => {
     // @ts-ignore
     return segments.reduce((path, seg) => {
         const segment = String(seg);
-        const needsBrackets =
-            segment.includes('.') || segment.includes('/') || segment.includes('-') || segment.includes('[') || segment.includes(']');
+        const needsBrackets = segment.includes('.') || segment.includes('/') || segment.includes('-') || segment.includes('[') || segment.includes(']');
 
         if (segment === '') {
             return path;

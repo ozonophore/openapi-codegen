@@ -1,8 +1,8 @@
-import leven from "leven";
+import leven from 'leven';
 
 /**
  * Optimized unknown key verification function using Levenshtein distance map.
- * 
+ *
  * @param rawInputKeys Array of raw input keys
  * @param allowedKeys Set of allowed (required) keys
  */
@@ -25,7 +25,6 @@ export function validateAndSuggestKeyCorrections(rawInputKeys: string[], allowed
             distanceMap.set(key, { bestMatch, bestDistance });
         }
     }
-
 
     // Generating error messages
     for (const [key, { bestMatch, bestDistance }] of distanceMap) {

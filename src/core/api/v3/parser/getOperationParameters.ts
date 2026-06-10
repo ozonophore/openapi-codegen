@@ -59,7 +59,6 @@ export function getOperationParameters(this: Parser, openApi: OpenApi, parameter
         }
     });
 
-
     const sortByRequired = this.context.sortByRequired ? sortByRequiredExtended : sortByRequiredSimple;
 
     operationParameters.parameters = operationParameters.parameters.sort(sortByRequired);

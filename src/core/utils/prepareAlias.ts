@@ -1,4 +1,4 @@
-import { ExportedModel } from "../types/base/ExportedModel.model";
+import { ExportedModel } from '../types/base/ExportedModel.model';
 
 export function prepareAlias(models: ExportedModel[]) {
     let modelPrevious: ExportedModel | undefined = undefined;

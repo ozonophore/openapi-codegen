@@ -65,12 +65,7 @@ describe('@unit: migration plan helpers', () => {
     });
 
     test('createFieldTransformationMigration keeps custom migrate and custom description', () => {
-        const plan = createFieldTransformationMigration(
-            'v1',
-            'v2',
-            ({ oldField, ...rest }: { oldField: string; other: number }) => ({ ...rest, newField: oldField }),
-            'rename oldField'
-        );
+        const plan = createFieldTransformationMigration('v1', 'v2', ({ oldField, ...rest }: { oldField: string; other: number }) => ({ ...rest, newField: oldField }), 'rename oldField');
 
         assert.strictEqual(plan.fromVersion, 'v1');
         assert.strictEqual(plan.toVersion, 'v2');
@@ -98,17 +93,11 @@ describe('@unit: determineBestMatchingSchemaVersion', () => {
     });
 
     test('throws on empty schema list', () => {
-        assert.throws(
-            () => determineBestMatchingSchemaVersion({}, []),
-            /cannot be empty/i
-        );
+        assert.throws(() => determineBestMatchingSchemaVersion({}, []), /cannot be empty/i);
     });
 
     test('returns latest from multiple valid matches', () => {
-        const versionedSchemas = [
-            mk(z.object({ a: z.string() }), 'v1'),
-            mk(z.object({ a: z.string(), b: z.string().optional() }), 'v2'),
-        ];
+        const versionedSchemas = [mk(z.object({ a: z.string() }), 'v1'), mk(z.object({ a: z.string(), b: z.string().optional() }), 'v2')];
 
         const result = determineBestMatchingSchemaVersion({ a: 'ok' }, versionedSchemas);
 
@@ -120,10 +109,7 @@ describe('@unit: determineBestMatchingSchemaVersion', () => {
     });
 
     test('falls back to the best key/error balance when no full match', () => {
-        const versionedSchemas = [
-            mk(z.object({ a: z.string() }), 'v1'),
-            mk(z.object({ b: z.string() }), 'v2'),
-        ];
+        const versionedSchemas = [mk(z.object({ a: z.string() }), 'v1'), mk(z.object({ b: z.string() }), 'v2')];
 
         const result = determineBestMatchingSchemaVersion({ a: 1 }, versionedSchemas);
 
@@ -137,19 +123,13 @@ describe('@unit: determineBestMatchingSchemaVersion', () => {
 
 describe('@unit: key mapping and validation helpers', () => {
     test('generateKeyMappingForInvalidKeys maps close invalid keys', () => {
-        const mapping = generateKeyMappingForInvalidKeys(
-            ['nmae', 'title', 'unknown'],
-            new Set(['name', 'title'])
-        );
+        const mapping = generateKeyMappingForInvalidKeys(['nmae', 'title', 'unknown'], new Set(['name', 'title']));
 
         assert.deepStrictEqual(Array.from(mapping.entries()), [['nmae', 'name']]);
     });
 
     test('validateAndSuggestKeyCorrections throws with suggestion', () => {
-        assert.throws(
-            () => validateAndSuggestKeyCorrections(['nmae'], new Set(['name'])),
-            /Perhaps you meant "name"/,
-        );
+        assert.throws(() => validateAndSuggestKeyCorrections(['nmae'], new Set(['name'])), /Perhaps you meant "name"/);
     });
 
     test('validateAndSuggestKeyCorrections does not throw for valid keys', () => {
@@ -178,19 +158,13 @@ describe('@unit: getCurrentErrorMessage and getKeyByMapValue', () => {
             ],
         } as any;
 
-        assert.throws(
-            () => getCurrentErrorMessage(error, new Map([['nmae', '--name']])),
-            /nmae is invalid/,
-        );
+        assert.throws(() => getCurrentErrorMessage(error, new Map([['nmae', '--name']])), /nmae is invalid/);
     });
 });
 
 describe('@unit: collection helpers', () => {
     test('getLatestVersionFromMigrationPlans returns toVersion of last plan', () => {
-        const version = getLatestVersionFromMigrationPlans([
-            createTrivialMigration('v1', 'v2'),
-            createTrivialMigration('v2', 'v3'),
-        ]);
+        const version = getLatestVersionFromMigrationPlans([createTrivialMigration('v1', 'v2'), createTrivialMigration('v2', 'v3')]);
 
         assert.strictEqual(version, 'v3');
     });
@@ -222,14 +196,8 @@ describe('@unit: collection helpers', () => {
     });
 
     test('replaceInvalidKeysWithMappedNames replaces keys recursively for arrays', () => {
-        const replaced = replaceInvalidKeysWithMappedNames(
-            [{ nmae: 'a' }, { nmae: 'b', extra: [{ nmae: 'c' }] }],
-            new Map([['nmae', 'name']])
-        );
+        const replaced = replaceInvalidKeysWithMappedNames([{ nmae: 'a' }, { nmae: 'b', extra: [{ nmae: 'c' }] }], new Map([['nmae', 'name']]));
 
-        assert.deepStrictEqual(replaced, [
-            { name: 'a' },
-            { name: 'b', extra: [{ name: 'c' }] },
-        ]);
+        assert.deepStrictEqual(replaced, [{ name: 'a' }, { name: 'b', extra: [{ name: 'c' }] }]);
     });
 });

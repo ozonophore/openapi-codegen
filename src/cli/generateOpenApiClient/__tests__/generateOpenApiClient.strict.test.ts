@@ -211,10 +211,6 @@ describe('@unit: generateOpenApiClient strict-openapi', () => {
 
         const report = JSON.parse(readFileSync(reportFile, 'utf8')) as StrictReport;
         assert.ok(!report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
-        assert.ok(
-            report.governance.violations.some(
-                violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'
-            )
-        );
+        assert.ok(report.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'));
     });
 });

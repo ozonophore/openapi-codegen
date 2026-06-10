@@ -13,30 +13,21 @@ describe('@unit: sortByRequiredExtended', () => {
             createOperationParameter('optional', { isRequired: false }),
             createOperationParameter('required', { isRequired: true }),
             createOperationParameter('optional-with-default', { isRequired: false, default: 'def' }),
-            createOperationParameter('required-with-default', { isRequired: true, default: 'def' })
+            createOperationParameter('required-with-default', { isRequired: true, default: 'def' }),
         ];
-        
+
         params.sort(sortByRequiredExtended);
-        
+
         const sortedNames = params.map(p => p.name);
-        assert.deepStrictEqual(sortedNames, [
-            'required',
-            'required-with-default',
-            'optional',
-            'optional-with-default'
-        ]);
+        assert.deepStrictEqual(sortedNames, ['required', 'required-with-default', 'optional', 'optional-with-default']);
     });
 
     // Comparison tests within groups
     test('must sort by name within the required group', () => {
-        const params = [
-            createOperationParameter('Beta', { isRequired: true }),
-            createOperationParameter('Alpha', { isRequired: true }),
-            createOperationParameter('Gamma', { isRequired: true })
-        ];
-        
+        const params = [createOperationParameter('Beta', { isRequired: true }), createOperationParameter('Alpha', { isRequired: true }), createOperationParameter('Gamma', { isRequired: true })];
+
         params.sort(sortByRequiredExtended);
-        
+
         const sortedNames = params.map(p => p.name);
         assert.deepStrictEqual(sortedNames, ['Alpha', 'Beta', 'Gamma']);
     });
@@ -45,24 +36,20 @@ describe('@unit: sortByRequiredExtended', () => {
         const params = [
             createOperationParameter('Zeta', { isRequired: true, default: 'def' }),
             createOperationParameter('Beta', { isRequired: true, default: 'def' }),
-            createOperationParameter('Alpha', { isRequired: true, default: 'def' })
+            createOperationParameter('Alpha', { isRequired: true, default: 'def' }),
         ];
-        
+
         params.sort(sortByRequiredExtended);
-        
+
         const sortedNames = params.map(p => p.name);
         assert.deepStrictEqual(sortedNames, ['Alpha', 'Beta', 'Zeta']);
     });
 
     test('it should sort by name within the optional group', () => {
-        const params = [
-            createOperationParameter('Second', { isRequired: false }),
-            createOperationParameter('First', { isRequired: false }),
-            createOperationParameter('Third', { isRequired: false })
-        ];
-        
+        const params = [createOperationParameter('Second', { isRequired: false }), createOperationParameter('First', { isRequired: false }), createOperationParameter('Third', { isRequired: false })];
+
         params.sort(sortByRequiredExtended);
-        
+
         const sortedNames = params.map(p => p.name);
         assert.deepStrictEqual(sortedNames, ['First', 'Second', 'Third']);
     });
@@ -71,11 +58,11 @@ describe('@unit: sortByRequiredExtended', () => {
         const params = [
             createOperationParameter('Dog', { isRequired: false, default: 'def' }),
             createOperationParameter('Cat', { isRequired: false, default: 'def' }),
-            createOperationParameter('Bird', { isRequired: false, default: 'def' })
+            createOperationParameter('Bird', { isRequired: false, default: 'def' }),
         ];
-        
+
         params.sort(sortByRequiredExtended);
-        
+
         const sortedNames = params.map(p => p.name);
         assert.deepStrictEqual(sortedNames, ['Bird', 'Cat', 'Dog']);
     });
@@ -87,14 +74,14 @@ describe('@unit: sortByRequiredExtended', () => {
         ['required', 'optional-with-default'],
         ['required-with-default', 'optional'],
         ['required-with-default', 'optional-with-default'],
-        ['optional', 'optional-with-default']
+        ['optional', 'optional-with-default'],
     ];
 
     for (const [groupA, groupB] of groupPairs) {
         test(`must place "${groupA}" before "${groupB}"`, () => {
             const paramA = createOperationParameter('A', createOptionsForGroup(groupA));
             const paramB = createOperationParameter('B', createOptionsForGroup(groupB));
-            
+
             // A should go before B
             assert.ok(sortByRequiredExtended(paramA, paramB) < 0);
             // B should come after A
@@ -105,13 +92,13 @@ describe('@unit: sortByRequiredExtended', () => {
     // Auxiliary function for creating parameters by group
     function createOptionsForGroup(group: PropertyGroupExtended): Partial<OperationParameter> {
         switch (group) {
-            case 'required': 
+            case 'required':
                 return { isRequired: true };
-            case 'required-with-default': 
+            case 'required-with-default':
                 return { isRequired: true, default: 'default' };
-            case 'optional': 
+            case 'optional':
                 return { isRequired: false };
-            case 'optional-with-default': 
+            case 'optional-with-default':
                 return { isRequired: false, default: 'default' };
         }
     }
@@ -120,7 +107,7 @@ describe('@unit: sortByRequiredExtended', () => {
     test('it should return 0 for identical parameters.', () => {
         const param1 = createOperationParameter('Test', { isRequired: true });
         const param2 = createOperationParameter('Test', { isRequired: true });
-        
+
         assert.strictEqual(sortByRequiredExtended(param1, param2), 0);
     });
 
@@ -128,44 +115,40 @@ describe('@unit: sortByRequiredExtended', () => {
     test('it should return 0 for parameters with the same name in the same group.', () => {
         const param1 = createOperationParameter('Same', { isRequired: false, default: 'def' });
         const param2 = createOperationParameter('Same', { isRequired: false, default: 'def' });
-        
+
         assert.strictEqual(sortByRequiredExtended(param1, param2), 0);
     });
 
     // A test for mixed groups with the same priorities
     test('It should sort only by name for identical groups.', () => {
         const params = [
-            createOperationParameter('Beta', { isRequired: false }),          // optional
-            createOperationParameter('Alpha', { isRequired: true }),           // required
-            createOperationParameter('Gamma', { isRequired: false }),          // optional
-            createOperationParameter('Delta', { isRequired: true, default: 'def' }),  // required-with-default
+            createOperationParameter('Beta', { isRequired: false }), // optional
+            createOperationParameter('Alpha', { isRequired: true }), // required
+            createOperationParameter('Gamma', { isRequired: false }), // optional
+            createOperationParameter('Delta', { isRequired: true, default: 'def' }), // required-with-default
             createOperationParameter('Epsilon', { isRequired: false, default: 'def' }), // optional-with-default
-            createOperationParameter('Alpha2', { isRequired: true })           // required
+            createOperationParameter('Alpha2', { isRequired: true }), // required
         ];
-        
+
         params.sort(sortByRequiredExtended);
-        
+
         const sortedNames = params.map(p => p.name);
         assert.deepStrictEqual(sortedNames, [
-            'Alpha',    // required
-            'Alpha2',   // required
-            'Delta',    // required-with-default
-            'Beta',     // optional
-            'Gamma',    // optional
-            'Epsilon'   // optional-with-default
+            'Alpha', // required
+            'Alpha2', // required
+            'Delta', // required-with-default
+            'Beta', // optional
+            'Gamma', // optional
+            'Epsilon', // optional-with-default
         ]);
     });
 
     // A test for borderline cases
     test('It must handle empty names correctly.', () => {
-        const params = [
-            createOperationParameter('', { isRequired: true }),
-            createOperationParameter('B', { isRequired: true }),
-            createOperationParameter('A', { isRequired: true })
-        ];
-        
+        const params = [createOperationParameter('', { isRequired: true }), createOperationParameter('B', { isRequired: true }), createOperationParameter('A', { isRequired: true })];
+
         params.sort(sortByRequiredExtended);
-        
+
         const sortedNames = params.map(p => p.name);
         assert.deepStrictEqual(sortedNames, ['', 'A', 'B']);
     });

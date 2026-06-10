@@ -3,7 +3,9 @@ import { promises as fsPromises } from 'fs';
 import { COMMON_DEFAULT_OPTIONS_VALUES } from '../common/Consts';
 import { Logger } from '../common/Logger';
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
+import { extractEslintFixOptions, TEslintFixOptions } from '../common/TEslintFixOptions';
 import { TFlatOptions, TRawOptions, TStrictFlatOptions } from '../common/TRawOptions';
+import { eslintFixBatch } from '../common/utils/eslintFix';
 import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../common/utils/pathHelpers';
 import { Parser as ParserV2 } from './api/v2/Parser';
@@ -34,6 +36,8 @@ export class OpenApiClient {
     private static readonly CACHE_FINGERPRINT_VERSION = 1;
     private static readonly DEFAULT_CACHE_FILENAME = '.openapi-codegen-cache.json';
     private _writeClient: WriteClient | null = null;
+    /** ESLint paths from top-level rawOptions (not per items[] entry). */
+    private eslintFixOptions: TEslintFixOptions = {};
 
     public get writeClient() {
         if (!this._writeClient) {
@@ -78,6 +82,7 @@ export class OpenApiClient {
                 cachePath: rawOptions.cachePath,
                 cacheStrategy: rawOptions.cacheStrategy,
                 cacheDebug: rawOptions.cacheDebug,
+                prettierConfigPath: rawOptions.prettierConfigPath,
             }));
         } else {
             // Плоский формат (из CLI или старого конфига): Один item с глобальным request
@@ -117,6 +122,7 @@ export class OpenApiClient {
                     cachePath: rawOptions.cachePath,
                     cacheStrategy: rawOptions.cacheStrategy,
                     cacheDebug: rawOptions.cacheDebug,
+                    prettierConfigPath: rawOptions.prettierConfigPath,
                 },
             ];
         }
@@ -156,8 +162,7 @@ export class OpenApiClient {
             miracles: item.miracles || COMMON_DEFAULT_OPTIONS_VALUES.miracles,
             strictOpenapi: item.strictOpenapi ?? COMMON_DEFAULT_OPTIONS_VALUES.strictOpenapi,
             reportFile: item.reportFile || COMMON_DEFAULT_OPTIONS_VALUES.reportFile,
-            useProjectPrettier: item.useProjectPrettier ?? COMMON_DEFAULT_OPTIONS_VALUES.useProjectPrettier,
-            useEslintFix: item.useEslintFix ?? COMMON_DEFAULT_OPTIONS_VALUES.useEslintFix,
+            prettierConfigPath: item.prettierConfigPath ?? COMMON_DEFAULT_OPTIONS_VALUES.prettierConfigPath,
             governanceConfig: item.governanceConfig || COMMON_DEFAULT_OPTIONS_VALUES.governanceConfig,
             cache: item.cache ?? COMMON_DEFAULT_OPTIONS_VALUES.cache,
             cachePath: item.cachePath || COMMON_DEFAULT_OPTIONS_VALUES.cachePath,
@@ -247,7 +252,7 @@ export class OpenApiClient {
 
             for (const option of items) {
                 const fileStart = process.hrtime.bigint();
-                const generationCache = cacheEnabled ? generationCaches.get(this.resolveOutputRoot(option.output)) ?? null : null;
+                const generationCache = cacheEnabled ? (generationCaches.get(this.resolveOutputRoot(option.output)) ?? null) : null;
                 await this.generateSingle(option, generationCache);
                 const fileEnd = process.hrtime.bigint();
                 const fileDurationInSeconds = Number(fileEnd - fileStart) / 1e9;
@@ -266,6 +271,9 @@ export class OpenApiClient {
             }
             const writeStats = this.writeClient.getWriteStats();
             this.writeClient.logger.info(LOGGER_MESSAGES.GENERATION.WRITE_STATS(writeStats.written, writeStats.unchanged));
+
+            await this.runBatchEslintFixIfEnabled();
+
             this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.FINISHED);
             const end = process.hrtime.bigint();
             const durationInSeconds = Number(end - start) / 1e9;
@@ -338,8 +346,7 @@ export class OpenApiClient {
             modelsMode = ModelsMode.INTERFACES,
             strictOpenapi,
             reportFile,
-            useProjectPrettier = false,
-            useEslintFix = false,
+            prettierConfigPath,
             governanceConfig,
         } = item;
         const outputPaths: OutputPaths = getOutputPaths({
@@ -395,9 +402,7 @@ export class OpenApiClient {
             this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.STRICT_REPORT_CREATED(reportPath));
 
             if (strictReport.summary.errors > 0) {
-                throw new Error(
-                    `Strict OpenAPI validation failed with ${strictReport.summary.errors} error(s). Report: ${reportPath}`
-                );
+                throw new Error(`Strict OpenAPI validation failed with ${strictReport.summary.errors} error(s). Report: ${reportPath}`);
             }
         }
 
@@ -407,6 +412,7 @@ export class OpenApiClient {
             useUnionTypes,
             useOptions,
             validationLibrary,
+            useBatchEslintFix: Boolean(this.eslintFixOptions.tsconfigPath && this.eslintFixOptions.eslintConfigPath),
         });
         const diffReportData = await this.loadDiffReportIfNeeded({
             useHistory,
@@ -444,8 +450,7 @@ export class OpenApiClient {
                     validationLibrary,
                     emptySchemaStrategy,
                     modelsMode,
-                    useProjectPrettier,
-                    useEslintFix,
+                    prettierConfigPath,
                 });
                 break;
             }
@@ -479,8 +484,7 @@ export class OpenApiClient {
                     validationLibrary,
                     emptySchemaStrategy,
                     modelsMode,
-                    useProjectPrettier,
-                    useEslintFix,
+                    prettierConfigPath,
                 });
                 break;
             }
@@ -552,6 +556,50 @@ export class OpenApiClient {
         return true;
     }
 
+    /**
+     * Runs batch ESLint fix after combineAndWrite / combineAndWrightSimple when both paths are set.
+     * Warns and skips when only one path is provided; always clears the WriteClient lint registry.
+     */
+    private async runBatchEslintFixIfEnabled(): Promise<void> {
+        const opts = this.eslintFixOptions;
+        const hasTsconfig = !!opts.tsconfigPath;
+        const hasEslintConfig = !!opts.eslintConfigPath;
+
+        if (!hasTsconfig && !hasEslintConfig) {
+            this.writeClient.clearLintTargets();
+            return;
+        }
+
+        if (!hasTsconfig || !hasEslintConfig) {
+            this.writeClient.logger.warn(LOGGER_MESSAGES.FORMATTING.ESLINT_PATHS_MISSING);
+            this.writeClient.clearLintTargets();
+            return;
+        }
+
+        try {
+            const { files, includeGlobs } = this.writeClient.getLintTargets();
+            if (files.length === 0) {
+                return;
+            }
+
+            const fixStart = process.hrtime.bigint();
+            this.writeClient.logger.forceInfo(LOGGER_MESSAGES.FORMATTING.ESLINT_BATCH_STARTED);
+
+            await eslintFixBatch({
+                files,
+                includeGlobs,
+                tsconfigPath: opts.tsconfigPath!,
+                eslintConfigPath: opts.eslintConfigPath!,
+            });
+
+            const fixEnd = process.hrtime.bigint();
+            const durationInSeconds = Number(fixEnd - fixStart) / 1e9;
+            this.writeClient.logger.forceInfo(LOGGER_MESSAGES.FORMATTING.ESLINT_BATCH_FINISHED(durationInSeconds.toFixed(3)));
+        } finally {
+            this.writeClient.clearLintTargets();
+        }
+    }
+
     private async loadDiffReportIfNeeded(params: { useHistory?: boolean; diffReport?: string; inputPath?: string }): Promise<DiffReport | null> {
         return loadDiffReport({
             useHistory: params.useHistory,
@@ -582,6 +630,7 @@ export class OpenApiClient {
             logOutput: rawOptions.logTarget ?? COMMON_DEFAULT_OPTIONS_VALUES.logTarget!,
         });
         this._writeClient = new WriteClient(logger);
+        this.eslintFixOptions = extractEslintFixOptions(rawOptions);
 
         const items = this.normalizeOptions(rawOptions).map(item => this.addDefaultValues(item));
         await this.generateCodeForItems(items);

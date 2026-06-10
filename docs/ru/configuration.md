@@ -39,7 +39,10 @@
     "cache": false,
     "cachePath": ".openapi-codegen-cache.json",
     "cacheStrategy": "entity",
-    "cacheDebug": false
+    "cacheDebug": false,
+    "prettierConfigPath": "./.prettierrc",
+    "tsconfigPath": "./tsconfig.json",
+    "eslintConfigPath": "./eslint.config.mjs"
 }
 ```
 
@@ -113,6 +116,9 @@
 | `cachePath` | string | `.openapi-codegen-cache.json` | Путь к файлу кэша относительно output-директории |
 | `cacheStrategy` | string | `entity` | Стратегия кэша: `entity` или `content` |
 | `cacheDebug` | boolean | `false` | Показывать debug-логи cache hit/miss |
+| `prettierConfigPath` | string | - | Путь к файлу конфигурации Prettier для форматирования сгенерированного кода |
+| `tsconfigPath` | string | - | Путь к `tsconfig.json` для пакетного ESLint fix (вместе с `eslintConfigPath`) |
+| `eslintConfigPath` | string | - | Путь к конфигу ESLint для пакетного ESLint fix (вместе с `tsconfigPath`) |
 
 **Примечание:** Вы можете использовать команду `init` для генерации шаблона файла конфигурации.
 

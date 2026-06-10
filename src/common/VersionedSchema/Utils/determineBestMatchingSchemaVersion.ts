@@ -85,9 +85,7 @@ export function determineBestMatchingSchemaVersion(inputData: Record<string, any
         const strictUnrecognizedKeyCount = getStrictUnrecognizedKeyCount(baseSchema, inputData);
 
         const validationResult = validateZodOptionsRaw(schema, inputData);
-        const structuralErrorCount = !validationResult.success
-            ? validationResult.error.issues.filter(issue => issue.code !== 'invalid_value').length
-            : 0;
+        const structuralErrorCount = !validationResult.success ? validationResult.error.issues.filter(issue => issue.code !== 'invalid_value').length : 0;
 
         return {
             index: idx,

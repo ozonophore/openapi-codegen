@@ -8,7 +8,6 @@ import pluginTypescriptEslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import { defineConfig } from "eslint/config";
 import pluginJsdoc from "eslint-plugin-jsdoc";
-// import pluginLodash from 'eslint-plugin-lodash'
 import pluginSimpleImportSort from "eslint-plugin-simple-import-sort"
 import globals from "globals";
 
@@ -31,7 +30,6 @@ export default defineConfig([
             'eslint:recommended',
             'plugin:@typescript-eslint/eslint-recommended',
             'plugin:@typescript-eslint/recommended',
-            // "plugin:lodash/recommended",
             'prettier',
         )
     ),

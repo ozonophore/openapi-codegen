@@ -46,9 +46,7 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
         };
 
         const getRootValueOrThrow = (field: string): any => {
-            const definedValues = optionsArr
-                .map(item => getNormalizedFieldValue(item, field))
-                .filter(value => value !== undefined);
+            const definedValues = optionsArr.map(item => getNormalizedFieldValue(item, field)).filter(value => value !== undefined);
 
             if (definedValues.length === 0) {
                 return undefined;
@@ -58,19 +56,14 @@ export function convertArrayToObject(optionsArr: Record<string, any> | Record<st
             const hasConflict = definedValues.some(value => value !== firstValue);
 
             if (hasConflict) {
-                throw new Error(
-                    `Legacy array config has conflicting "${field}" values. ` +
-                    `This option must have the same value for all array items.`
-                );
+                throw new Error(`Legacy array config has conflicting "${field}" values. ` + `This option must have the same value for all array items.`);
             }
 
             return firstValue;
         };
 
         const getCommonOptionalRootValue = (field: 'request' | 'customExecutorPath'): any => {
-            const definedValues = optionsArr
-                .map(item => item[field])
-                .filter(value => value !== undefined);
+            const definedValues = optionsArr.map(item => item[field]).filter(value => value !== undefined);
 
             if (definedValues.length === 0) {
                 return undefined;

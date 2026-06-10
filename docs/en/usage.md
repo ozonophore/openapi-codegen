@@ -43,8 +43,9 @@ openapi generate --input ./spec.json --output ./dist
 | `--modelsMode` | - | string | `interfaces` | Models generation mode: `interfaces` or `classes` |
 | `--useHistory` | - | boolean | `false` | Apply diff report annotations during generation |
 | `--diffReport` | - | string | `./openapi-diff-report.json` | Path to diff report JSON |
-| `--useProjectPrettier` | - | boolean | `false` | Use the project’s Prettier config to format generated code |
-| `--useEslintFix` | - | boolean | `false` | Run ESLint `--fix` on generated files after write (requires `eslint` in the project) |
+| `--prettierConfigPath` | - | string | - | Path to a Prettier config file; when the file exists, generated code is formatted with it, otherwise built-in defaults are used |
+| `--tsconfigPath` | - | string | - | Path to project `tsconfig.json` for batch ESLint `--fix` after generation (requires `--eslintConfigPath`) |
+| `--eslintConfigPath` | - | string | - | Path to project ESLint config for batch ESLint `--fix` after generation (requires `--tsconfigPath`) |
 | `--cache` | - | boolean | `false` | Enable generation cache (disabled by default) |
 | `--cachePath` | - | string | `.openapi-codegen-cache.json` | Path to generation cache file relative to output directory |
 | `--cacheStrategy` | - | string | `entity` | Cache strategy: `entity` (skip full item generation on cache hit) or `content` (always generate, but only write changed files) |

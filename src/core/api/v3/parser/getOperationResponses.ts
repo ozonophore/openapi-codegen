@@ -22,9 +22,7 @@ export function getOperationResponses(this: Parser, openApi: OpenApi, responses:
             const response = (responseOrReference.$ref ? (this.context.get(responseOrReference.$ref, parentRef) as Record<string, any>) : responseOrReference) as OpenApiResponse;
             const responseCode = getOperationResponseCode(code);
             const normalizedParentRef = isAbsolute(parentRef) ? parentRef : resolveHelper(this.context.root?.dirName || process.cwd(), parentRef);
-            const responseParentRef = responseOrReference.$ref
-                ? parseRef(normalizeRef(responseOrReference.$ref, normalizedParentRef)).filePath || normalizedParentRef
-                : parentRef;
+            const responseParentRef = responseOrReference.$ref ? parseRef(normalizeRef(responseOrReference.$ref, normalizedParentRef)).filePath || normalizedParentRef : parentRef;
 
             if (responseCode) {
                 const operationResponse = this.getOperationResponse(openApi, response, responseCode, responseParentRef);

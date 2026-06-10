@@ -1,4 +1,4 @@
-import { EConfigType,EnquirerSelectChoice } from './types';
+import { EConfigType, EnquirerSelectChoice } from './types';
 
 export const OPEN_API_CONFIG_SELECT_OPTIONS: EnquirerSelectChoice<EConfigType>[] = [
     {
@@ -17,8 +17,3 @@ export const OPEN_API_CONFIG_SELECT_OPTIONS: EnquirerSelectChoice<EConfigType>[]
         hint: 'Do not create a configuration file',
     },
 ];
-
-export const DIALOG_MESSAGES = {
-    OPERATION_CANCELLED: 'The operation was canceled by the user.',
-    SELECTION_CANCELLED: 'The choice is canceled.',
-} as const;

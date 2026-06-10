@@ -1,4 +1,4 @@
-import leven from "leven";
+import leven from 'leven';
 
 // Generating a key replacement card
 export function generateKeyMappingForInvalidKeys(rawInputKeys: string[], allowedKeys: Set<string>): Map<string, string> {

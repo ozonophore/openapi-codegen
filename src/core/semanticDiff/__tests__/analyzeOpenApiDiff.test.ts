@@ -194,30 +194,9 @@ describe('@unit: analyzeOpenApiDiff', () => {
 
         const report = analyzeOpenApiDiff(oldSpec, newSpec);
 
-        assert.ok(
-            report.changes.some(
-                change =>
-                    change.type === 'model.property.type.changed' &&
-                    change.path.includes('/tier') &&
-                    change.severity === 'non-breaking'
-            )
-        );
-        assert.ok(
-            report.changes.some(
-                change =>
-                    change.type === 'model.property.type.changed' &&
-                    change.path.includes('/score') &&
-                    change.severity === 'non-breaking'
-            )
-        );
-        assert.ok(
-            report.changes.some(
-                change =>
-                    change.type === 'model.property.type.changed' &&
-                    change.path.includes('/state') &&
-                    change.severity === 'breaking'
-            )
-        );
+        assert.ok(report.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/tier') && change.severity === 'non-breaking'));
+        assert.ok(report.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/score') && change.severity === 'non-breaking'));
+        assert.ok(report.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/state') && change.severity === 'breaking'));
     });
 
     test('treats different refs and narrowing formats as breaking, widening formats as non-breaking', () => {
@@ -281,30 +260,9 @@ describe('@unit: analyzeOpenApiDiff', () => {
 
         const wideningReport = analyzeOpenApiDiff(oldSpec, newSpec);
 
-        assert.ok(
-            wideningReport.changes.some(
-                change =>
-                    change.type === 'model.property.type.changed' &&
-                    change.path.includes('/profile') &&
-                    change.severity === 'breaking'
-            )
-        );
-        assert.ok(
-            wideningReport.changes.some(
-                change =>
-                    change.type === 'model.property.type.changed' &&
-                    change.path.includes('/count') &&
-                    change.severity === 'non-breaking'
-            )
-        );
-        assert.ok(
-            wideningReport.changes.some(
-                change =>
-                    change.type === 'model.property.type.changed' &&
-                    change.path.includes('/ratio') &&
-                    change.severity === 'non-breaking'
-            )
-        );
+        assert.ok(wideningReport.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/profile') && change.severity === 'breaking'));
+        assert.ok(wideningReport.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/count') && change.severity === 'non-breaking'));
+        assert.ok(wideningReport.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/ratio') && change.severity === 'non-breaking'));
 
         const narrowingReport = analyzeOpenApiDiff(
             {
@@ -337,14 +295,7 @@ describe('@unit: analyzeOpenApiDiff', () => {
             } as any
         );
 
-        assert.ok(
-            narrowingReport.changes.some(
-                change =>
-                    change.type === 'model.property.type.changed' &&
-                    change.path.includes('/count') &&
-                    change.severity === 'breaking'
-            )
-        );
+        assert.ok(narrowingReport.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/count') && change.severity === 'breaking'));
     });
 
     test('detects success response payload schema changes', () => {
@@ -404,11 +355,7 @@ describe('@unit: analyzeOpenApiDiff', () => {
 
         const report = analyzeOpenApiDiff(oldSpec, newSpec);
 
-        assert.ok(
-            report.changes.some(
-                change => change.type === 'operation.response.success.type.changed' && change.severity === 'non-breaking'
-            )
-        );
+        assert.ok(report.changes.some(change => change.type === 'operation.response.success.type.changed' && change.severity === 'non-breaking'));
         assert.ok(report.changes.some(change => change.type === 'operation.response.success.added'));
     });
 
@@ -569,21 +516,13 @@ describe('@unit: analyzeOpenApiDiff', () => {
         } as any;
 
         const strictGovernanceReport = analyzeOpenApiDiff(oldSpec, newSpec);
-        assert.ok(
-            strictGovernanceReport.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG')
-        );
-        assert.ok(
-            strictGovernanceReport.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID')
-        );
-        assert.ok(
-            strictGovernanceReport.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX')
-        );
+        assert.ok(strictGovernanceReport.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG'));
+        assert.ok(strictGovernanceReport.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
+        assert.ok(strictGovernanceReport.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX'));
         assert.ok(strictGovernanceReport.governance.summary.errors > 0);
 
         const allowedBreakingReport = analyzeOpenApiDiff(oldSpec, newSpec, { allowBreaking: true });
-        assert.ok(
-            !allowedBreakingReport.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG')
-        );
+        assert.ok(!allowedBreakingReport.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG'));
     });
 
     test('applies governance config overrides in semantic diff report', () => {
@@ -630,10 +569,6 @@ describe('@unit: analyzeOpenApiDiff', () => {
         );
 
         assert.ok(!report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
-        assert.ok(
-            report.governance.violations.some(
-                violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'
-            )
-        );
+        assert.ok(report.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'));
     });
 });

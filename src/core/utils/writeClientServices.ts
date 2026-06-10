@@ -1,6 +1,4 @@
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
-import { eslintFix } from '../../common/utils/eslintFix';
-import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { OutputPaths } from '../types/base/OutputPaths.model';
@@ -28,8 +26,7 @@ interface IWriteClientServices {
     useUnionTypes: boolean;
     useOptions: boolean;
     useCancelableRequest: boolean;
-    useProjectPrettier?: boolean;
-    useEslintFix?: boolean;
+    prettierConfigPath?: string;
 }
 
 /**
@@ -42,7 +39,7 @@ interface IWriteClientServices {
  * @param useOptions Use options or arguments functions
  */
 export async function writeClientServices(this: WriteClient, options: IWriteClientServices): Promise<void> {
-    const { services, templates, outputPaths, httpClient, useUnionTypes, useOptions, useCancelableRequest, useProjectPrettier, useEslintFix } = options;
+    const { services, templates, outputPaths, httpClient, useUnionTypes, useOptions, useCancelableRequest, prettierConfigPath } = options;
 
     this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SERVICES_START);
 
@@ -60,11 +57,9 @@ export async function writeClientServices(this: WriteClient, options: IWriteClie
             outputModels: outputPaths.outputModels,
             useCancelableRequest,
         });
-        const formattedValue = await format(templateResult, undefined, useProjectPrettier);
+        const formattedValue = await format(templateResult, undefined, prettierConfigPath);
         await this.writeOutputFile(file, formattedValue);
-        if (useEslintFix) {
-            await eslintFix(file);
-        }
+        this.registerLintTarget(file, outputPaths.outputServices);
 
         this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
     }

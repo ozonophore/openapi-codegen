@@ -13,7 +13,16 @@ import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiOperation } from '../types/OpenApiOperation.model';
 import type { OpenApiRequestBody } from '../types/OpenApiRequestBody.model';
 
-export function getOperation(this: Parser, openApi: OpenApi, url: string, method: string, op: OpenApiOperation, pathParams: OperationParameters, serviceClassName: string, parentFileRef: string): Operation {
+export function getOperation(
+    this: Parser,
+    openApi: OpenApi,
+    url: string,
+    method: string,
+    op: OpenApiOperation,
+    pathParams: OperationParameters,
+    serviceClassName: string,
+    parentFileRef: string
+): Operation {
     const operationNameFallback = `${method}${serviceClassName}`;
     const operationName = getOperationName(op.operationId || operationNameFallback);
     const operationPath = getOperationPath(url);

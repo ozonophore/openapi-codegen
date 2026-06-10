@@ -5,4 +5,4 @@
 export type ExportedService = {
     name: string;
     package: string;
-}
+};

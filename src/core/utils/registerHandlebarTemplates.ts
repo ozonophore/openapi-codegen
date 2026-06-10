@@ -138,14 +138,19 @@ import partialJsonSchemaSchemaGeneric from '../../templatesCompiled/client/jsons
 import partialJsonSchemaSchemaReference from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaReference';
 import partialJsonSchemaSchemaComposition from '../../templatesCompiled/client/jsonschema/partials/jsonschemaSchemaComposition';
 
-
 import { Templates } from '../types/base/Templates.model';
 
 /**
  * Read all the Handlebar templates that we need and return on wrapper object
  * so we can easily access the templates in out generator / write functions.
  */
-export function registerHandlebarTemplates(root: { httpClient: HttpClient; useOptions: boolean; useUnionTypes: boolean; validationLibrary?: ValidationLibrary }): Templates {
+export function registerHandlebarTemplates(root: {
+    httpClient: HttpClient;
+    useOptions: boolean;
+    useUnionTypes: boolean;
+    validationLibrary?: ValidationLibrary;
+    useBatchEslintFix?: boolean;
+}): Templates {
     registerHandlebarHelpers(root);
 
     // Main templates (entry points for the files we write to disk)

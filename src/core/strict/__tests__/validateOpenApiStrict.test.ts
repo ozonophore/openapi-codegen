@@ -157,10 +157,6 @@ describe('@unit: validateOpenApiStrict', () => {
         });
 
         assert.ok(!report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
-        assert.ok(
-            report.governance.violations.some(
-                violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'
-            )
-        );
+        assert.ok(report.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'));
     });
 });

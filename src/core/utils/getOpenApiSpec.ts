@@ -20,7 +20,7 @@ export async function getOpenApiSpec(context: Context, input: string): Promise<C
     const parser = new SwaggerParser();
     const resolved = await parser.resolve(absoluteInput);
     context.addRefs(resolved);
-    
+
     // Получить основную схему
     const raw = resolved.get(absoluteInput);
     if (!raw || typeof raw !== 'object') {

@@ -1,8 +1,6 @@
 import { mkdirSync } from 'fs';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
-import { eslintFix } from '../../common/utils/eslintFix';
-import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { Templates } from '../types/base/Templates.model';
@@ -27,11 +25,10 @@ interface IWriteClientSchemas {
     useUnionTypes: boolean;
     validationLibrary?: ValidationLibrary;
     emptySchemaStrategy: EmptySchemaStrategy;
-    useProjectPrettier?: boolean;
-    useEslintFix?: boolean;
+    prettierConfigPath?: string;
 }
 
-export function isEmptySchemaModel(model: Model): boolean {
+function isEmptySchemaModel(model: Model): boolean {
     return model.export === 'interface' && model.properties.length === 0;
 }
 
@@ -44,7 +41,7 @@ export function isEmptySchemaModel(model: Model): boolean {
  * @param useUnionTypes Use union types instead of enums
  */
 export async function writeClientSchemas(this: WriteClient, options: IWriteClientSchemas): Promise<Model[]> {
-    const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary, emptySchemaStrategy, useProjectPrettier, useEslintFix } = options;
+    const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary, emptySchemaStrategy, prettierConfigPath } = options;
     if (templates.exports.schema) {
         this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SCHEMAS_START);
 
@@ -71,11 +68,8 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
                 validationLibrary,
                 emptySchemaStrategy,
             });
-            const formattedValue = await format(templateResult, undefined, useProjectPrettier);
+            const formattedValue = await format(templateResult, undefined, prettierConfigPath);
             await this.writeOutputFile(file, formattedValue);
-            if (useEslintFix) {
-                await eslintFix(file);
-            }
 
             this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
         }

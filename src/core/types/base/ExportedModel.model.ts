@@ -1,4 +1,4 @@
-import { Model } from "../shared/Model.model";
+import { Model } from '../shared/Model.model';
 
 /**
  * @param name: The name of the model
@@ -9,12 +9,9 @@ import { Model } from "../shared/Model.model";
  * @param useUnionTypes: Use union types instead of enums
  * @param enums: Then flag for mark an enums
  */
-export type ExportedModel = Pick<
-  Model,
-  'name' | 'alias' | 'path'
-> & {
-  package: string;
-  enum: boolean;
-  enums: boolean;
-  useUnionTypes: boolean;
+export type ExportedModel = Pick<Model, 'name' | 'alias' | 'path'> & {
+    package: string;
+    enum: boolean;
+    enums: boolean;
+    useUnionTypes: boolean;
 };

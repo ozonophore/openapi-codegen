@@ -3,7 +3,7 @@ import path from 'path';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { resolveHelper } from '../../common/utils/pathHelpers';
-import { GovernancePolicyConfig, GovernanceReport, evaluateGovernanceRules } from '../governance/evaluateGovernanceRules';
+import { evaluateGovernanceRules, GovernancePolicyConfig, GovernanceReport } from '../governance/evaluateGovernanceRules';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 
 type ChangeSeverity = 'breaking' | 'non-breaking' | 'informational';
@@ -16,11 +16,7 @@ type SemanticDiffSummary = {
 
 type SemanticDiffSemverRecommendation = 'major' | 'minor' | 'patch';
 type SemanticDiffConfidence = 'high' | 'medium' | 'low';
-type SemanticDiffRecommendationReason =
-    | 'HAS_BREAKING_CHANGES'
-    | 'HAS_BACKWARD_COMPATIBLE_CHANGES'
-    | 'HAS_INFORMATIONAL_ONLY_CHANGES'
-    | 'NO_API_SURFACE_CHANGES';
+type SemanticDiffRecommendationReason = 'HAS_BREAKING_CHANGES' | 'HAS_BACKWARD_COMPATIBLE_CHANGES' | 'HAS_INFORMATIONAL_ONLY_CHANGES' | 'NO_API_SURFACE_CHANGES';
 
 type SemanticDiffRecommendation = {
     semver: SemanticDiffSemverRecommendation;
@@ -520,13 +516,7 @@ function buildCanonicalOperations(spec: CommonOpenApi): Map<string, CanonicalOpe
 /**
  * Pushes change entry to report collection.
  */
-function pushChange(
-    changes: SemanticDiffChange[],
-    severity: ChangeSeverity,
-    type: string,
-    path: string,
-    message: string
-): void {
+function pushChange(changes: SemanticDiffChange[], severity: ChangeSeverity, type: string, path: string, message: string): void {
     changes.push({ severity, type, path, message });
 }
 
@@ -645,25 +635,13 @@ function diffModels(oldModels: Map<string, CanonicalModel>, newModels: Map<strin
 
         for (const oldEnumValue of oldModel.enumValues) {
             if (!newModel.enumValues.has(oldEnumValue)) {
-                pushChange(
-                    changes,
-                    'breaking',
-                    'model.enum.value.removed',
-                    `#/components/schemas/${modelName}/enum`,
-                    `Enum value "${oldEnumValue}" was removed from model "${modelName}".`
-                );
+                pushChange(changes, 'breaking', 'model.enum.value.removed', `#/components/schemas/${modelName}/enum`, `Enum value "${oldEnumValue}" was removed from model "${modelName}".`);
             }
         }
 
         for (const newEnumValue of newModel.enumValues) {
             if (!oldModel.enumValues.has(newEnumValue)) {
-                pushChange(
-                    changes,
-                    'non-breaking',
-                    'model.enum.value.added',
-                    `#/components/schemas/${modelName}/enum`,
-                    `Enum value "${newEnumValue}" was added to model "${modelName}".`
-                );
+                pushChange(changes, 'non-breaking', 'model.enum.value.added', `#/components/schemas/${modelName}/enum`, `Enum value "${newEnumValue}" was added to model "${modelName}".`);
             }
         }
     }
@@ -672,11 +650,7 @@ function diffModels(oldModels: Map<string, CanonicalModel>, newModels: Map<strin
 /**
  * Diffs canonical operations and appends semantic changes.
  */
-function diffOperations(
-    oldOperations: Map<string, CanonicalOperation>,
-    newOperations: Map<string, CanonicalOperation>,
-    changes: SemanticDiffChange[]
-): void {
+function diffOperations(oldOperations: Map<string, CanonicalOperation>, newOperations: Map<string, CanonicalOperation>, changes: SemanticDiffChange[]): void {
     for (const oldOperationKey of oldOperations.keys()) {
         if (!newOperations.has(oldOperationKey)) {
             pushChange(changes, 'breaking', 'operation.removed', `#/paths/${oldOperationKey}`, `Operation "${oldOperationKey}" was removed.`);
