@@ -70,4 +70,81 @@ describe('@unit: loadGeneratorPlugins', () => {
             rmSync(tempDir, { recursive: true, force: true });
         }
     });
+
+    test('loads v3 factory plugin (module shape) and maps hooks', async () => {
+        const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-v3-module-'));
+        const pluginPath = join(tempDir, 'factory-plugin.cjs');
+
+        writeFileSync(
+            pluginPath,
+            `module.exports = {
+                meta: {
+                    name: 'factory-module',
+                    version: '1.0.0',
+                    apiVersion: '3'
+                },
+                createPlugin: (api) => {
+                    api.onSchemaTypeOverride(({ schema }) => schema['x-factory-type']);
+                    api.onMapRecommendation(({ recommendation }) => ({
+                        ...recommendation,
+                        confidence: 'high'
+                    }));
+                }
+            };`
+        );
+
+        try {
+            const plugins = await loadGeneratorPlugins([pluginPath]);
+            const plugin = plugins.find(item => item.name === 'factory-module');
+            assert.ok(plugin);
+            assert.strictEqual(plugin?.apiVersion, '3');
+            assert.strictEqual(
+                plugin?.resolveSchemaTypeOverride?.(
+                    {
+                        schema: { 'x-factory-type': 'MyType' },
+                        context: { openApiVersion: 'v3', parentRef: '#/components/schemas/User' },
+                    },
+                    { cwd: process.cwd(), executionMode: 'generate' }
+                ),
+                'MyType'
+            );
+        } finally {
+            rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    test('loads v3 factory plugin (function export with meta)', async () => {
+        const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-v3-function-'));
+        const pluginPath = join(tempDir, 'factory-fn-plugin.cjs');
+
+        writeFileSync(
+            pluginPath,
+            `const pluginFactory = (api) => {
+                api.onSchemaTypeOverride(({ schema }) => schema['x-factory-fn-type']);
+            };
+            pluginFactory.meta = {
+                name: 'factory-function',
+                apiVersion: '3'
+            };
+            module.exports = pluginFactory;`
+        );
+
+        try {
+            const plugins = await loadGeneratorPlugins([pluginPath]);
+            const plugin = plugins.find(item => item.name === 'factory-function');
+            assert.ok(plugin);
+            assert.strictEqual(
+                plugin?.resolveSchemaTypeOverride?.(
+                    {
+                        schema: { 'x-factory-fn-type': 'FactoryFnType' },
+                        context: { openApiVersion: 'v3', parentRef: '#/components/schemas/Factory' },
+                    },
+                    { cwd: process.cwd(), executionMode: 'generate' }
+                ),
+                'FactoryFnType'
+            );
+        } finally {
+            rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
 });

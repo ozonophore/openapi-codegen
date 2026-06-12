@@ -1,5 +1,5 @@
 import { SemanticDiffReport } from '../semanticDiff/analyzeOpenApiDiff';
-import { OpenApiGeneratorPlugin } from './GeneratorPlugin.model';
+import { OpenApiGeneratorPlugin, PluginRuntimeContext } from './GeneratorPlugin.model';
 
 export type PluginHookName = 'afterSemanticDiff' | 'mapRecommendation' | 'beforeReportWrite';
 
@@ -42,13 +42,26 @@ export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPlugi
         }
 
         const startedAt = Date.now();
+        const runtimeContext: PluginRuntimeContext = {
+            cwd: process.cwd(),
+            executionMode: 'analyze-diff',
+            emitDiagnostic: diagnostic => {
+                diagnostics.push({
+                    pluginName: plugin.name,
+                    hook: 'afterSemanticDiff',
+                    status: diagnostic.status,
+                    durationMs: 0,
+                    message: diagnostic.message,
+                });
+            },
+        };
         try {
             const maybeReport = await plugin.afterSemanticDiff({
                 report: currentReport,
                 options: {
                     allowBreaking: input.allowBreaking,
                 },
-            });
+            }, runtimeContext);
 
             if (maybeReport) {
                 currentReport = maybeReport;
@@ -94,12 +107,25 @@ export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPlugi
         }
 
         const startedAt = Date.now();
+        const runtimeContext: PluginRuntimeContext = {
+            cwd: process.cwd(),
+            executionMode: 'analyze-diff',
+            emitDiagnostic: diagnostic => {
+                diagnostics.push({
+                    pluginName: plugin.name,
+                    hook: 'mapRecommendation',
+                    status: diagnostic.status,
+                    durationMs: 0,
+                    message: diagnostic.message,
+                });
+            },
+        };
         try {
             const maybeRecommendation = await plugin.mapRecommendation({
                 recommendation: currentReport.recommendation,
                 summary: currentReport.summary,
                 governance: currentReport.governance,
-            });
+            }, runtimeContext);
 
             if (maybeRecommendation) {
                 currentReport = {
@@ -148,11 +174,24 @@ export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPlugi
         }
 
         const startedAt = Date.now();
+        const runtimeContext: PluginRuntimeContext = {
+            cwd: process.cwd(),
+            executionMode: 'analyze-diff',
+            emitDiagnostic: diagnostic => {
+                diagnostics.push({
+                    pluginName: plugin.name,
+                    hook: 'beforeReportWrite',
+                    status: diagnostic.status,
+                    durationMs: 0,
+                    message: diagnostic.message,
+                });
+            },
+        };
         try {
             const maybeResult = await plugin.beforeReportWrite({
                 report: currentReport,
                 reportPath: currentReportPath,
-            });
+            }, runtimeContext);
 
             if (maybeResult?.report) {
                 currentReport = maybeResult.report;

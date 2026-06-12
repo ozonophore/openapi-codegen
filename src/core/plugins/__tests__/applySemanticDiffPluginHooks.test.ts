@@ -123,4 +123,31 @@ describe('@unit: applySemanticDiffPluginHooks', () => {
             (error: unknown) => error instanceof Error && error.message.includes('faulty-plugin')
         );
     });
+
+    test('passes runtime context to semantic-diff hooks', async () => {
+        let receivedExecutionMode = '';
+
+        const runtimeAwarePlugin: OpenApiGeneratorPlugin = {
+            name: 'runtime-aware',
+            apiVersion: '3',
+            mapRecommendation: (ctx, runtime) => {
+                receivedExecutionMode = runtime?.executionMode ?? '';
+                return {
+                    ...ctx.recommendation,
+                    confidence: 'high',
+                };
+            },
+        };
+
+        const result = await applySemanticDiffPluginHooks({
+            report: createBaseReport(),
+            reportPath: './report.json',
+            plugins: [runtimeAwarePlugin],
+            allowBreaking: false,
+            strictPluginMode: false,
+        });
+
+        assert.strictEqual(receivedExecutionMode, 'analyze-diff');
+        assert.strictEqual(result.report.recommendation.confidence, 'high');
+    });
 });

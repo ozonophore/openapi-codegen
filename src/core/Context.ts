@@ -143,7 +143,13 @@ export class Context {
      */
     public resolveSchemaTypeOverride(schema: Record<string, any>, context: SchemaTypeOverrideContext): string | undefined {
         for (const plugin of this._plugins) {
-            const override = plugin.resolveSchemaTypeOverride?.({ schema, context });
+            const override = plugin.resolveSchemaTypeOverride?.(
+                { schema, context },
+                {
+                    cwd: process.cwd(),
+                    executionMode: 'generate',
+                }
+            );
             if (typeof override === 'string' && override.trim()) {
                 return override.trim();
             }
