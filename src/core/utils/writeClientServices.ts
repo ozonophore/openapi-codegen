@@ -4,19 +4,23 @@ import { resolveHelper } from '../../common/utils/pathHelpers';
 import { OutputPaths } from '../types/base/OutputPaths.model';
 import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
+import { ModelsMode } from '../types/enums/ModelsMode.enum';
 import type { Service } from '../types/shared/Service.model';
 import { WriteClient } from '../WriteClient';
 
 type TServeceOutputsPath = Omit<OutputPaths, 'output' | 'outputSchemas'>;
 
 /**
- * @param services Array of Services to write
- * @param templates The loaded handlebar templates
- * @param outputServicePath Folder options for generating the core, models, and service part
- * @param httpClient The selected httpClient (fetch, xhr or node)
- * @param useUnionTypes Use union types instead of enums
- * @param useOptions Use options or arguments functions
- * @param useCancelableRequest Use cancelable request type
+ * Параметры записи сервисов клиента.
+ * @property services список сервисов для записи
+ * @property templates загруженные Handlebars-шаблоны
+ * @property outputPaths пути выходных директорий сервисов
+ * @property httpClient выбранный HTTP-клиент
+ * @property useUnionTypes использовать union types вместо enum
+ * @property useOptions использовать options-функции вместо аргументов
+ * @property useCancelableRequest использовать cancelable request type
+ * @property [modelsMode] режим генерации моделей
+ * @property [prettierConfigPath] путь к конфигу Prettier
  */
 interface IWriteClientServices {
     services: Service[];
@@ -26,20 +30,16 @@ interface IWriteClientServices {
     useUnionTypes: boolean;
     useOptions: boolean;
     useCancelableRequest: boolean;
+    modelsMode?: ModelsMode;
     prettierConfigPath?: string;
 }
 
 /**
- * Generate Services using the Handlebar template and write to disk.
- * @param services Array of Services to write
- * @param templates The loaded handlebar templates
- * @param outputServicePath Folder options for generating the core, models, and service part
- * @param httpClient The selected httpClient (fetch, xhr or node)
- * @param useUnionTypes Use union types instead of enums
- * @param useOptions Use options or arguments functions
+ * Генерирует сервисы по Handlebars-шаблону и записывает их на диск.
+ * @param options параметры записи сервисов
  */
 export async function writeClientServices(this: WriteClient, options: IWriteClientServices): Promise<void> {
-    const { services, templates, outputPaths, httpClient, useUnionTypes, useOptions, useCancelableRequest, prettierConfigPath } = options;
+    const { services, templates, outputPaths, httpClient, useUnionTypes, useOptions, useCancelableRequest, modelsMode, prettierConfigPath } = options;
 
     this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SERVICES_START);
 
@@ -56,6 +56,7 @@ export async function writeClientServices(this: WriteClient, options: IWriteClie
             outputCore: outputPaths.outputCore,
             outputModels: outputPaths.outputModels,
             useCancelableRequest,
+            modelsMode,
         });
         const formattedValue = await format(templateResult, undefined, prettierConfigPath);
         await this.writeOutputFile(file, formattedValue);

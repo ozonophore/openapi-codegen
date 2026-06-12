@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
+import type { UnifiedDiffReport } from '../../../core/types/DiffReport.model';
 import { installSilenceAppLogger } from '../../../test/helpers/silenceLoggers';
 import { analyzeDiff } from '../analyzeDiff';
 
@@ -83,16 +84,14 @@ describe('@unit: analyzeDiff TYPE_COERCION miracles', () => {
         assert.ok(result.success, `analyzeDiff failed: ${result.error ?? 'unknown error'}`);
 
         const reportRaw = fs.readFileSync(reportPath, 'utf-8');
-        const report = JSON.parse(reportRaw) as {
-            summary: { breaking: number };
-            changes: Array<{ type: string; path: string; severity: string }>;
-        };
+        const report = JSON.parse(reportRaw) as UnifiedDiffReport;
 
-        const typeChange = report.changes.find(change => change.type === 'model.property.type.changed');
+        const typeChange = report.semantic.changes.find(change => change.type === 'model.property.type.changed');
         assert.ok(typeChange, 'Expected semantic type-change entry');
         assert.strictEqual(typeChange?.path, '#/components/schemas/User/properties/age');
         assert.strictEqual(typeChange?.severity, 'breaking');
-        assert.ok(report.summary.breaking > 0);
+        assert.ok(report.semantic.summary.breaking > 0);
+        assert.ok(report.structural.miracles.some(miracle => miracle.type === 'TYPE_COERCION'));
     });
 
     test('filters semantic type-change entry when rule matches path', async t => {
@@ -164,17 +163,13 @@ describe('@unit: analyzeDiff TYPE_COERCION miracles', () => {
         assert.ok(result.success, `analyzeDiff failed: ${result.error ?? 'unknown error'}`);
 
         const reportRaw = fs.readFileSync(reportPath, 'utf-8');
-        const report = JSON.parse(reportRaw) as {
-            summary: { breaking: number; nonBreaking: number; informational: number };
-            recommendation: { semver: string };
-            changes: Array<{ type: string; path: string }>;
-        };
+        const report = JSON.parse(reportRaw) as UnifiedDiffReport;
 
-        const filteredTypeChange = report.changes.find(change => change.type === 'model.property.type.changed' && change.path === '#/components/schemas/User/properties/age');
+        const filteredTypeChange = report.semantic.changes.find(change => change.type === 'model.property.type.changed' && change.path === '#/components/schemas/User/properties/age');
         assert.ok(!filteredTypeChange, 'Expected semantic type-change to be filtered by analyze.ignore');
-        assert.strictEqual(report.summary.breaking, 0);
-        assert.strictEqual(report.summary.nonBreaking, 0);
-        assert.strictEqual(report.summary.informational, 0);
-        assert.strictEqual(report.recommendation.semver, 'patch');
+        assert.strictEqual(report.semantic.summary.breaking, 0);
+        assert.strictEqual(report.semantic.summary.nonBreaking, 0);
+        assert.strictEqual(report.semantic.summary.informational, 0);
+        assert.strictEqual(report.semantic.recommendation.semver, 'patch');
     });
 });

@@ -4,6 +4,47 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.1.0-beta.9] — 2026-06-10
+
+### Добавлено
+- Добавлен унифицированный diff-отчёт `schemaVersion: "2.0.0"` с секциями `semantic` и `structural`, а также `metadata` (пути base/target, SHA-256 хеши, timestamp).
+- Добавлен слой адаптации semantic→structural (`adaptSemanticToStructural`, `semanticChangesToDiffEntries`, `semanticPointerToJsonPath`).
+- Добавлен `buildMiraclesFromSemanticChanges` — автоматическое обнаружение RENAME (эвристика Levenshtein) и TYPE_COERCION miracles из semantic-изменений свойств.
+- Добавлено селективное раскрытие `$ref` для analyze-diff (`expandOpenApiRefsForSemanticDiff`, `loadSemanticOpenApiSpec`) вместо полного dereference.
+- Расширены payload-ы `SemanticDiffChange`: `from`/`to`, `fromRequired`/`toRequired`, `fromNullable`/`toNullable`; `CanonicalOperation` теперь хранит метаданные для ghost operations.
+- Добавлен `resolveClassesModeTypes` и улучшены шаблоны сервисов/моделей в режиме `classes` (`exportService.hbs`, `exportModels.hbs`).
+- Добавлен `assignDuplicateAliases` — пересмотренная нумерация алиасов дублирующихся моделей/импортов (первое совпадение сохраняет имя без суффикса, следующие получают `$2`, `$3`, …).
+- Добавлены тестовые фикстуры LOM API v1/v2; example-конфиг обновлён с `useHistory` и `diffReport`.
+
+### Изменено
+- `analyze-diff` теперь пишет унифицированный отчёт 2.0.0; CI markdown summary читает `report.semantic.*`.
+- `loadDiffReport` принимает 2.0.0 (извлекает `structural`), 1.1.0 (адаптирует) и legacy flat-отчёты; предупреждает о устаревшем/отсутствующем отчёте при включённом `useHistory`.
+- `applyDiffReportToClient` / `prepareDtoModels` — ghost operations с path params, флаги coercion, обработка дублирующихся имён схем, нормализация ключей операций.
+- Удалён неиспользуемый модуль `buildLegacyReport.ts`.
+
+### Исправлено
+- `generate --useHistory` молча игнорировал semantic-отчёты 1.1.0 с beta.5 — восстановлено через цепочку адаптеров.
+- Ghost properties/operations, TYPE_COERCION, RENAME getters и JSDoc `@info` для history-aware генерации.
+- Сломанные импорты/типы в сгенерированных сервисах в режиме `classes`.
+- Устаревший diff-отчёт использовался без предупреждения (проверка mtime относительно input spec).
+
+### Удалено
+- Неиспользуемые зависимости: `deep-diff`, `joi`, `@types/deep-diff`.
+
+### Ломающие изменения
+- Корневая схема вывода `analyze-diff` изменилась с плоской `1.1.0` на вложенную `2.0.0`:
+  - `report.changes` → `report.semantic.changes`
+  - `report.summary` → `report.semantic.summary`
+  - `report.governance` → `report.semantic.governance`
+  - `report.recommendation` → `report.semantic.recommendation`
+  - `report.miracles` → `report.structural.miracles`
+- Изменение конвенции алиасов дубликатов может изменить имена импортов в сгенерированном коде при коллизиях схем.
+
+### Тесты
+- Добавлены: `buildMiraclesFromSemanticChanges.test.ts`, `semanticChangesToDiffEntries.test.ts`, `semanticToStructural.test.ts`, `expandOpenApiRefsForSemanticDiff.test.ts`, `resolveClassesModeTypes.test.ts`, `analyzeDiffLomMiracles.test.ts`.
+- Расширены: `loadDiffReport.test.ts`, `applyDiffReportToClient.test.ts`, `prepareDtoModels.test.ts`, `analyzeOpenApiDiff.test.ts`, `semanticDiffReportSchema.test.ts`, `analyzeDiff.cli.test.ts`.
+- Обновлены LOM service snapshots и semantic diff fixture snapshots.
+
 ## [2.1.0-beta.8] — 2026-06-08
 
 ### Удалено

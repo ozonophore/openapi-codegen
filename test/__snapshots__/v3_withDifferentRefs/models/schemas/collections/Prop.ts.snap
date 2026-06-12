@@ -6,9 +6,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString as IModelWithString$1 } from './../base/ModelWithString';
+import type { IModelWithString } from './../base/ModelWithString';
 
 /**
  * Array of models
  */
-export type TProp = Array<IModelWithString$1>;
+export type TProp = Array<IModelWithString>;

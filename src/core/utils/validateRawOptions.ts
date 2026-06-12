@@ -1,7 +1,7 @@
 import { APP_LOGGER } from '../../common/Consts';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { TRawOptions } from '../../common/TRawOptions';
-import { validateZodOptions } from '../../common/Validation/validateZodOptions';
+import { validateZodOptions } from '../../common/Validation';
 import { rawOptionsSchema } from '../../common/VersionedSchema/AllVersionedSchemas/UnifiedVersionedSchemas';
 import { dependentOptionsRefinement } from '../../common/VersionedSchema/refinements/dependentOptionsRefinement';
 

@@ -119,17 +119,16 @@ describe('@unit: serviceHelpers', () => {
         const aliasA = aliasByPath.get('models/a/Foo');
         const aliasB = aliasByPath.get('models/b/Foo');
 
-        assert.ok(aliasA);
-        assert.ok(aliasB);
-        assert.notEqual(aliasA, aliasB);
+        assert.strictEqual(aliasA, '');
+        assert.strictEqual(aliasB, 'Foo$2');
 
-        assert.equal(paramFooA.base, aliasA);
-        assert.equal(paramFooA.type, aliasA);
-        assert.equal(paramFooBArray.base, aliasB);
-        assert.equal(paramFooBArray.type, aliasB);
-        assert.equal(paramFooBArray.link?.base, aliasB);
-        assert.equal(paramFooBArray.link?.type, aliasB);
-        assert.equal(operation.results[0].base, aliasB);
-        assert.equal(operation.results[0].type, aliasB);
+        assert.equal(paramFooA.base, 'Foo');
+        assert.equal(paramFooA.type, 'Foo');
+        assert.equal(paramFooBArray.base, 'Foo$2');
+        assert.equal(paramFooBArray.type, 'Foo$2');
+        assert.equal(paramFooBArray.link?.base, 'Foo$2');
+        assert.equal(paramFooBArray.link?.type, 'Foo$2');
+        assert.equal(operation.results[0].base, 'Foo$2');
+        assert.equal(operation.results[0].type, 'Foo$2');
     });
 });

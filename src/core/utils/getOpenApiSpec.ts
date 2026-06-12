@@ -5,6 +5,12 @@ import { resolveHelper } from '../../common/utils/pathHelpers';
 import { Context } from '../Context';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 
+/**
+ * Загружает и резолвит OpenAPI-спецификацию для генерации клиента.
+ * @param context контекст генерации
+ * @param input путь к файлу спецификации
+ * @returns загруженная OpenAPI-спецификация
+ */
 export async function getOpenApiSpec(context: Context, input: string): Promise<CommonOpenApi> {
     const absoluteInput = resolveHelper(process.cwd(), input);
 

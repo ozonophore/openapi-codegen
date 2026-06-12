@@ -43,32 +43,11 @@ export const matchesIgnoreRule = (entry: DiffEntry, rule: IgnoreRule): boolean =
 };
 
 /**
- * Применяет набор правил игнорирования к массиву записей и возвращает отфильтрованные записи и число игнорированных.
- * @param entries список записей diff
- * @param rules список правил игнорирования
- * @returns объект с полем filtered и числом ignored
- */
-export const applyIgnoreRules = (entries: DiffEntry[], rules: IgnoreRule[]): { filtered: DiffEntry[]; ignored: number } => {
-    if (!rules.length) {
-        return { filtered: entries, ignored: 0 };
-    }
-
-    let ignored = 0;
-    const filtered = entries.filter(entry => {
-        const shouldIgnore = rules.some(rule => matchesIgnoreRule(entry, rule));
-        if (shouldIgnore) ignored += 1;
-        return !shouldIgnore;
-    });
-
-    return { filtered, ignored };
-};
-
-/**
  * Извлекает правила игнорирования из загруженной конфигурации openapi.
  * @param configData загруженные данные конфигурации
  * @returns список правил ignore
  */
-export const getIgnoreRulesFromConfig = (configData: Record<string, any> | Record<string, any>[] | null): IgnoreRule[] => {
+const getIgnoreRulesFromConfig = (configData: Record<string, any> | Record<string, any>[] | null): IgnoreRule[] => {
     if (!configData) return [];
     if (Array.isArray(configData)) {
         const withAnalyze = configData.find(item => item?.analyze?.ignore);

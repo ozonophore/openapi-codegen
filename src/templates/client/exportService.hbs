@@ -1,9 +1,15 @@
 {{>header}}
 
 {{#if imports}}
+{{#equals @root.modelsMode 'classes'}}
+{{#each imports}}
+import type { {{{name}}} } from '{{{joinPath @root.outputModels 'models'}}}';
+{{/each}}
+{{else}}
 {{#each imports}}
 import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{joinPath @root.outputModels path}}}';
 {{/each}}
+{{/equals}}
 {{/if}}
 {{#if @root.useCancelableRequest}}
 import type { CancelablePromise } from '{{{joinPath @root.outputCore 'CancelablePromise'}}}';

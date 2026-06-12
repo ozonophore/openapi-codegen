@@ -9,6 +9,8 @@ type NameMapEntry = {
     dtoName: string;
 };
 
+const getBaseName = (model: Model): string => model.alias || model.name;
+
 const buildPropertyTarget = (name: string, prefix: string): string => {
     if (name.startsWith("'") && name.endsWith("'")) {
         return `${prefix}[${name}]`;
@@ -86,17 +88,54 @@ const resolveTypeFactory = (nameMap: Map<string, NameMapEntry>, kind: 'raw' | 'd
     return resolveType;
 };
 
+const finalizeDtoType = (property: Model, dtoType: string): string => {
+    if (!property.isRequired && !property.default && !property.isNullable) {
+        return `${dtoType} | undefined`;
+    }
+    return dtoType;
+};
+
+const applyCoercion = (expr: string, property: Model, accessor: string): string => {
+    if (!property.needsCoercion || !property.coercionTo) {
+        return expr;
+    }
+
+    switch (property.coercionTo) {
+        case 'number':
+            return `typeof ${accessor} === 'string' ? Number(${accessor}) : (${expr})`;
+        case 'boolean':
+            return `typeof ${accessor} === 'string' ? ${accessor} === 'true' : (${expr})`;
+        default:
+            return expr;
+    }
+};
+
+const buildOptionalSuffix = (property: Model): string => {
+    if (property.default) {
+        return '';
+    }
+    if (!property.isRequired) {
+        return property.isNullable ? ' ?? null' : ' ?? undefined';
+    }
+    if (property.isNullable) {
+        return ' ?? null';
+    }
+    return '';
+};
+
 const buildDtoInit = (property: Model, nameMap: Map<string, NameMapEntry>): string => {
     const accessor = buildPropertyTarget(property.name, 'data');
-    const defaultSuffix = property.default ? ` ?? ${property.default}` : '';
+    const optionalSuffix = buildOptionalSuffix(property);
+    const defaultSuffix = property.default ? ` ?? ${property.default}` : optionalSuffix;
 
     const isReference = property.export === 'reference' && nameMap.has(property.type);
     if (isReference) {
         const dtoName = nameMap.get(property.type)!.dtoName;
         if (property.isRequired) {
-            return `new ${dtoName}(${accessor})`;
+            return applyCoercion(`new ${dtoName}(${accessor})`, property, accessor);
         }
-        return `${accessor} ? new ${dtoName}(${accessor}) : undefined`;
+        const expr = `${accessor} ? new ${dtoName}(${accessor}) : undefined`;
+        return applyCoercion(expr, property, accessor);
     }
 
     if (property.export === 'array') {
@@ -105,14 +144,15 @@ const buildDtoInit = (property: Model, nameMap: Map<string, NameMapEntry>): stri
         if (itemIsRef) {
             const dtoName = nameMap.get(itemModel.type)!.dtoName;
             if (property.isRequired) {
-                return `fromArray(${dtoName}, ${accessor})`;
+                return applyCoercion(`fromArray(${dtoName}, ${accessor})`, property, accessor);
             }
-            return `${accessor} ? fromArray(${dtoName}, ${accessor}) : undefined`;
+            const expr = `${accessor} ? fromArray(${dtoName}, ${accessor}) : undefined`;
+            return applyCoercion(expr, property, accessor);
         }
-        return `${accessor}${defaultSuffix}`;
+        return applyCoercion(`${accessor}${defaultSuffix}`, property, accessor);
     }
 
-    return `${accessor}${defaultSuffix}`;
+    return applyCoercion(`${accessor}${defaultSuffix}`, property, accessor);
 };
 
 const buildDtoToJson = (property: Model, nameMap: Map<string, NameMapEntry>): string | undefined => {
@@ -153,7 +193,8 @@ const attachDtoGetters = (client: Client): void => {
 
     client.models.forEach(model => {
         if (!model.isDefinition || model.export !== 'interface') return;
-        const entries = miraclesByModel.get(model.name);
+        const modelKey = getBaseName(model);
+        const entries = miraclesByModel.get(modelKey) ?? miraclesByModel.get(model.name);
         if (!entries || entries.length === 0) return;
 
         const getters = entries
@@ -181,16 +222,23 @@ const attachDtoGetters = (client: Client): void => {
     });
 };
 
+/**
+ * Подготавливает raw/DTO-модели и геттеры для режима classes.
+ * @param client сгенерированный клиент
+ * @returns клиент с заполненными DTO-полями моделей
+ */
 export const prepareDtoModels = (client: Client): Client => {
     const nameMap = new Map<string, NameMapEntry>();
 
     client.models.forEach(model => {
-        const rawName = `${model.name}Raw`;
-        const dtoName = `${model.name}Dto`;
+        const baseName = getBaseName(model);
+        const rawName = `${baseName}Raw`;
+        const dtoName = `${baseName}Dto`;
         model.rawName = rawName;
         model.dtoName = dtoName;
+        model.exportName = baseName;
         model.dtoKind = model.export === 'interface' ? 'class' : 'alias';
-        nameMap.set(model.name, { rawName, dtoName });
+        nameMap.set(baseName, { rawName, dtoName });
     });
 
     const resolveRaw = resolveTypeFactory(nameMap, 'raw');
@@ -209,7 +257,7 @@ export const prepareDtoModels = (client: Client): Client => {
 
         model.properties.forEach(property => {
             property.rawType = resolveRaw(property);
-            property.dtoType = resolveDto(property);
+            property.dtoType = finalizeDtoType(property, resolveDto(property));
             property.dtoInit = buildDtoInit(property, nameMap);
             property.dtoToJSON = buildDtoToJson(property, nameMap);
             property.dtoTarget = buildPropertyTarget(property.name, '');

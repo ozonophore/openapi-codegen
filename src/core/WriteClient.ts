@@ -31,17 +31,23 @@ import { writeClientSimpleIndex } from './utils/writeClientSimpleIndex';
 import { writeFileIfChanged, WriteFileIfChangedResult } from './utils/writeFileIfChanged';
 
 /**
- * @param client Client object with all the models, services, etc.
- * @param templates Templates wrapper with all loaded Handlebars templates
- * @param outputPaths The relative location of the output directory
- * @param httpClient The selected httpClient (fetch, xhr or node)
- * @param useOptions Use options or arguments functions
- * @param useUnionTypes Use union types instead of enums
- * @param excludeCoreServiceFiles The generation of the core and services is excluded
- * @param request: Path to custom request file
- * @param useCancelableRequest Use cancelable request type.
- * @param useSeparatedIndexes Use separate index files for the core, models, schemas, and services
- * @param validationLibrary Validation library to use for schema validation
+ * Параметры записи OpenAPI-клиента на диск.
+ * @property client клиент со всеми моделями и сервисами
+ * @property templates загруженные Handlebars-шаблоны
+ * @property outputPaths относительные пути выходных директорий
+ * @property httpClient выбранный HTTP-клиент
+ * @property useOptions использовать options-функции вместо аргументов
+ * @property useUnionTypes использовать union types вместо enum
+ * @property excludeCoreServiceFiles исключить генерацию core и services
+ * @property [request] путь к кастомному request-файлу
+ * @property [customExecutorPath] путь к кастомному executor
+ * @property [useCancelableRequest] использовать cancelable request type
+ * @property [useSeparatedIndexes] писать отдельные index-файлы для core, models, schemas и services
+ * @property [validationLibrary] библиотека валидации схем
+ * @property emptySchemaStrategy стратегия обработки пустых схем
+ * @property [modelsMode] режим генерации моделей
+ * @property [useProjectPrettier] форматировать через Prettier проекта
+ * @property [useEslintFix] применять ESLint fix к сгенерированным файлам
  */
 type TWriteClientProps = {
     client: Client;
@@ -66,7 +72,7 @@ type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOpti
 };
 
 /**
- * The client which is writing all items and keep the parameters to write index file
+ * Клиент записи сгенерированных артефактов и сборки index-файлов.
  */
 export class WriteClient {
     private config: Map<string, TAPIClientGeneratorConfig[]> = new Map();
@@ -78,6 +84,9 @@ export class WriteClient {
     private lintIncludeGlobs = new Set<string>();
     private _logger: Logger;
 
+    /**
+     * @param [logger] логгер записи клиента
+     */
     constructor(logger?: Logger) {
         this._logger =
             logger ||
@@ -89,7 +98,8 @@ export class WriteClient {
     }
 
     /**
-     * Write our OpenAPI client, using the given templates at the given output
+     * Записывает OpenAPI-клиент по шаблонам в выходные директории.
+     * @param options параметры записи клиента
      */
     async writeClient(options: TWriteClientProps): Promise<void> {
         const {
@@ -140,6 +150,7 @@ export class WriteClient {
                 useOptions,
                 useCancelableRequest,
                 prettierConfigPath,
+                modelsMode,
             });
             await this.writeClientServicesIndex({
                 services: client.services,
@@ -277,8 +288,8 @@ export class WriteClient {
     }
 
     /**
-     * Method keeps all options that is need to create index file
-     * @param config
+     * Сохраняет конфигурацию генератора для последующей сборки index-файла.
+     * @param config конфигурация генератора клиента
      */
     buildClientGeneratorConfigMap(config: TAPIClientGeneratorConfig) {
         const { outputPaths } = config;
@@ -290,20 +301,29 @@ export class WriteClient {
         }
     }
 
+    /** Собирает и записывает полный index клиента. */
     async combineAndWrite() {
         const result = this.buildClientIndexMap();
         await this.finalizeAndWrite(result);
     }
 
+    /** Собирает и записывает упрощённый index клиента. */
     async combineAndWrightSimple() {
         const result = this.buildSimpleClientIndexMap();
         await this.simpledFinalizeAndWrite(result);
     }
 
+    /** Логгер записи клиента. */
     public get logger() {
         return this._logger;
     }
 
+    /**
+     * Записывает выходной файл, если содержимое изменилось.
+     * @param filePath путь к файлу
+     * @param content содержимое файла
+     * @returns результат записи: written или unchanged
+     */
     public async writeOutputFile(filePath: string, content: string): Promise<WriteFileIfChangedResult> {
         this.expectedOutputFiles.add(resolveHelper(process.cwd(), filePath));
         const result = await writeFileIfChanged(filePath, content);
@@ -311,18 +331,25 @@ export class WriteClient {
         return result;
     }
 
+    /**
+     * Регистрирует ожидаемый выходной файл без записи содержимого.
+     * @param filePath путь к файлу
+     */
     public registerOutputFile(filePath: string): void {
         this.expectedOutputFiles.add(resolveHelper(process.cwd(), filePath));
     }
 
+    /** Возвращает множество ожидаемых выходных файлов. */
     public getExpectedOutputFiles(): Set<string> {
         return this.expectedOutputFiles;
     }
 
+    /** Возвращает список ожидаемых выходных файлов. */
     public getExpectedOutputFilesArray(): string[] {
         return Array.from(this.expectedOutputFiles);
     }
 
+    /** Возвращает статистику записи файлов. */
     public getWriteStats(): { written: number; unchanged: number } {
         return { ...this.writeStats };
     }
@@ -525,15 +552,26 @@ export class WriteClient {
         return a.name === name && a.package === pkg;
     }
 
+    /** Делегирует запись core-части клиента. */
     public writeClientCore = writeClientCore;
+    /** Делегирует запись index core-части. */
     public writeClientCoreIndex = writeClientCoreIndex;
+    /** Делегирует запись полного index клиента. */
     public writeClientFullIndex = writeClientFullIndex;
+    /** Делегирует запись моделей клиента. */
     public writeClientModels = writeClientModels;
+    /** Делегирует запись index моделей. */
     public writeClientModelsIndex = writeClientModelsIndex;
+    /** Делегирует запись схем клиента. */
     public writeClientSchemas = writeClientSchemas;
+    /** Делегирует запись index схем. */
     public writeClientSchemasIndex = writeClientSchemasIndex;
+    /** Делегирует запись сервисов клиента. */
     public writeClientServices = writeClientServices;
+    /** Делегирует запись index сервисов. */
     public writeClientServicesIndex = writeClientServicesIndex;
+    /** Делегирует запись упрощённого index клиента. */
     public writeClientSimpleIndex = writeClientSimpleIndex;
+    /** Делегирует запись executor клиента. */
     public writeClientExecutor = writeClientExecutor;
 }

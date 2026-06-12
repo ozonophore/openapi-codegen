@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "2.0.0",
   "summary": {
     "breaking": 0,
     "nonBreaking": 0,
@@ -23,5 +23,6 @@
     "REQUIRE_OPERATION_ID"
   ],
   "changesCount": 0,
+  "structuralChangesCount": 0,
   "topChanges": []
 }

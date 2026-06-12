@@ -4,7 +4,15 @@ import type { ProjectContext } from '../core/ProjectContext';
 import type { Contract, Finding, Rule, Stats } from '../types';
 import { findBestMatch } from '../utils/fuzzy';
 
+/** Правило проверки вызовов методов сгенерированных сервисов в потребителях API. */
 export class ServiceRule implements Rule {
+    /**
+     * Проверяет вызовы методов сервисов и соответствие их сигнатурам.
+     * @param context контекст проекта
+     * @param contract контракт сгенерированного API
+     * @param stats накопительная статистика использования
+     * @returns список найденных проблем
+     */
     async check(context: ProjectContext, contract: Contract, stats: Stats): Promise<Finding[]> {
         const findings: Finding[] = [];
         const checker = context.getTypeChecker();
@@ -66,6 +74,8 @@ export class ServiceRule implements Rule {
                     if (!expectedType) continue;
 
                     const providedType = checker.getTypeAtLocation(args[i]);
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
                     if (!providedType.isAssignableTo(expectedType)) {
                         findings.push({
                             id: 'SERVICE_ARGUMENT_TYPE_MISMATCH',

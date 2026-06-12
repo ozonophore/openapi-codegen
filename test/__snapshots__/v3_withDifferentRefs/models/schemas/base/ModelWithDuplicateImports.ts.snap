@@ -6,13 +6,13 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IModelWithString as IModelWithString$1 } from './ModelWithString';
+import type { IModelWithString } from './ModelWithString';
 
 /**
  * This is a model with duplicated imports
  */
 export interface IModelWithDuplicateImports {
-    propA?: IModelWithString$1;
-    propB?: IModelWithString$1;
-    propC?: IModelWithString$1;
+    propA?: IModelWithString;
+    propB?: IModelWithString;
+    propC?: IModelWithString;
 }

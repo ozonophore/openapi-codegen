@@ -34,6 +34,14 @@ export interface {{{rawName}}} {
     {{/if}}
     {{{name}}}{{>isRequired}}: {{{rawType}}}{{>isNullable}};
     {{/each}}
+    {{#if ghostProperties}}
+    {{#each ghostProperties}}
+    /**
+     * @deprecated Removed from API
+     */
+    {{{name}}}?: unknown;
+    {{/each}}
+    {{/if}}
 }
 {{else}}
 export type {{{rawName}}} = {{{rawType}}}{{>isNullable}};
@@ -89,6 +97,16 @@ export class {{{dtoName}}} extends BaseDto<{{{rawName}}}> {
 export type {{{dtoName}}} = {{{rawName}}};
 {{/equals}}
 
+{{/if}}
+{{/if}}
+{{/each}}
+
+{{#each models}}
+{{#if isDefinition}}
+{{#if exportName}}
+{{#if rawName}}
+export type {{{exportName}}} = {{{rawName}}};
+{{/if}}
 {{/if}}
 {{/if}}
 {{/each}}

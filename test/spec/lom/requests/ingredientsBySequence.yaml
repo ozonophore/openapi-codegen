@@ -1,4 +1,5 @@
 get:
+  operationId: listSequenceIngredients
   tags: [Ingredients]
   summary: Получить ингредиенты для последовательности
   parameters:

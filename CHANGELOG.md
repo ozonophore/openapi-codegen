@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.9] — 2026-06-10
+
+### Added
+- Added unified diff report `schemaVersion: "2.0.0"` with `semantic` and `structural` sections, plus `metadata` (base/target paths, SHA-256 hashes, timestamp).
+- Added semantic-to-structural adapter layer (`adaptSemanticToStructural`, `semanticChangesToDiffEntries`, `semanticPointerToJsonPath`).
+- Added `buildMiraclesFromSemanticChanges` — automatic RENAME (Levenshtein heuristic) and TYPE_COERCION miracles from semantic property changes.
+- Added selective `$ref` expansion for analyze-diff (`expandOpenApiRefsForSemanticDiff`, `loadSemanticOpenApiSpec`) instead of full dereference.
+- Enriched `SemanticDiffChange` payloads with `from`/`to`, `fromRequired`/`toRequired`, `fromNullable`/`toNullable`; `CanonicalOperation` now stores metadata for ghost operations.
+- Added `resolveClassesModeTypes` and improved `classes` mode service/model templates (`exportService.hbs`, `exportModels.hbs`).
+- Added `assignDuplicateAliases` — revised duplicate model/import alias numbering (first collision keeps plain name, subsequent get `$2`, `$3`, …).
+- Added LOM API v1/v2 test fixtures; example config updated with `useHistory` and `diffReport`.
+
+### Changed
+- `analyze-diff` now writes unified 2.0.0 report; CI markdown summary reads `report.semantic.*`.
+- `loadDiffReport` accepts 2.0.0 (extracts `structural`), 1.1.0 (adapts), and legacy flat reports; warns on stale/missing report when `useHistory` is enabled.
+- `applyDiffReportToClient` / `prepareDtoModels` — ghost operations with path params, coercion flags, duplicate schema name handling, operation key normalization.
+- Removed dead `buildLegacyReport.ts` module.
+
+### Fixed
+- `generate --useHistory` silently ignored semantic 1.1.0 reports since beta.5 — restored via adapter chain.
+- Ghost properties/operations, TYPE_COERCION, RENAME getters, and JSDoc `@info` for history-aware generation.
+- `classes` mode broken imports/types in generated services.
+- Stale diff report used without warning (mtime check vs input spec).
+
+### Removed
+- Unused dependencies: `deep-diff`, `joi`, `@types/deep-diff`.
+
+### Breaking Changes
+- `analyze-diff` output root schema changed from flat `1.1.0` to nested `2.0.0`:
+  - `report.changes` → `report.semantic.changes`
+  - `report.summary` → `report.semantic.summary`
+  - `report.governance` → `report.semantic.governance`
+  - `report.recommendation` → `report.semantic.recommendation`
+  - `report.miracles` → `report.structural.miracles`
+- Duplicate alias convention change may alter generated import names for colliding schemas.
+
+### Tests
+- Added: `buildMiraclesFromSemanticChanges.test.ts`, `semanticChangesToDiffEntries.test.ts`, `semanticToStructural.test.ts`, `expandOpenApiRefsForSemanticDiff.test.ts`, `resolveClassesModeTypes.test.ts`, `analyzeDiffLomMiracles.test.ts`.
+- Expanded: `loadDiffReport.test.ts`, `applyDiffReportToClient.test.ts`, `prepareDtoModels.test.ts`, `analyzeOpenApiDiff.test.ts`, `semanticDiffReportSchema.test.ts`, `analyzeDiff.cli.test.ts`.
+- Updated LOM service snapshots and semantic diff fixture snapshots.
+
 ## [2.1.0-beta.8] — 2026-06-08
 
 ### Removed

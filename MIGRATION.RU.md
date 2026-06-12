@@ -1,6 +1,6 @@
-# Руководство по миграции: 1.0.0 -> 2.0.0
+# Руководство по миграции: 1.0.0 -> 2.1.0
 
-Этот документ описывает переход с `1.0.0` на `2.0.0` на основе diff изменений в репозитории.
+Этот документ описывает переход с `1.0.0` на `2.1.0` на основе diff изменений в репозитории.
 
 ## Область миграции
 
@@ -113,6 +113,62 @@ flowchart TD
 
 Если direct-опции невалидны/пустые и config-файл отсутствует, CLI теперь возвращает более явную и прикладную ошибку.
 
+### 7) Унифицированный diff-отчёт (`2.1.0`)
+
+#### Что изменилось
+
+- Вывод `analyze-diff` по умолчанию теперь `schemaVersion: "2.0.0"` с вложенными блоками `semantic` и `structural`.
+- `generate --useHistory` снова работает; `loadDiffReport` автоматически адаптирует отчёты 2.0.0, 1.1.0 и legacy flat.
+
+#### Ломающее изменение для потребителей отчёта
+
+| Было (1.1.0) | Стало (2.0.0) |
+|---|---|
+| `report.changes` | `report.semantic.changes` |
+| `report.summary` | `report.semantic.summary` |
+| `report.governance` | `report.semantic.governance` |
+| `report.recommendation` | `report.semantic.recommendation` |
+| `report.miracles` | `report.structural.miracles` |
+
+Пример (фрагмент):
+```json
+{
+  "schemaVersion": "2.0.0",
+  "timestamp": "2026-06-06T12:00:00.000Z",
+  "metadata": {
+    "base": "compare-with:./openapi/previous.yaml",
+    "target": "./openapi/current.yaml",
+    "baseHash": "...",
+    "targetHash": "..."
+  },
+  "semantic": {
+    "changes": [],
+    "summary": { "breaking": 0, "nonBreaking": 0, "informational": 0 },
+    "governance": {},
+    "recommendation": {}
+  },
+  "structural": {
+    "diff": { "breaking": [], "warnings": [], "info": [], "all": [] },
+    "miracles": [],
+    "stats": {}
+  }
+}
+```
+
+#### Рекомендуемые шаги миграции
+
+1. Перезапустите `analyze-diff` перед включением или регенерацией с `useHistory`.
+2. Обновите CI-скрипты и дашборды, парсящие `openapi-diff-report.json`, на чтение `report.semantic.*`.
+3. Для structural-инструментов используйте `report.structural.diff.all` и `report.structural.miracles` напрямую.
+4. Перегенерируйте клиенты при `modelsMode: "classes"` или схемах с дублирующимися именами (изменилась нумерация алиасов).
+5. Подтверждайте miracles в `report.structural.miracles` — workflow не изменился, изменилось только расположение.
+
+#### Замечания по совместимости
+
+- Изменения CLI-флагов для `generate` и `analyze-diff` не требуются.
+- Старые отчёты 1.1.0 по-прежнему загружаются через адаптер; для полной `structural`-точности рекомендуется перегенерировать отчёт.
+- Workflow подтверждения miracles не изменился: установите `"status": "confirmed"` перед генерацией.
+
 ## Новые/обновленные параметры, которые стоит проверить
 
 Для CLI/config:
@@ -216,18 +272,20 @@ CLI/конфиг:
 openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml
 ```
 
-Пример подтверждённого переименования:
+Пример ручного подтверждения (отредактируйте отчёт перед генерацией). С `2.1.0` `miracles` находятся в `structural.miracles` унифицированного отчёта 2.0.0:
 ```json
 {
-  "miracles": [
-    {
-      "oldPath": "$.components.schemas.User.properties.user_name",
-      "newPath": "$.components.schemas.User.properties.userName",
-      "type": "RENAME",
-      "confidence": 0.85,
-      "status": "confirmed"
-    }
-  ]
+  "structural": {
+    "miracles": [
+      {
+        "oldPath": "$.components.schemas.User.properties.user_name",
+        "newPath": "$.components.schemas.User.properties.userName",
+        "type": "RENAME",
+        "confidence": 0.85,
+        "status": "confirmed"
+      }
+    ]
+  }
 }
 ```
 
@@ -257,6 +315,7 @@ openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/pre
 
 **Стало:** укажите **оба** пути `tsconfigPath` и `eslintConfigPath` (CLI или конфиг). Отдельного флага включения нет. Если задан только один путь — batch ESLint пропускается с предупреждением.
 
+
 ## Чеклист миграции
 
 - [ ] Во всех конфигах удален `includeSchemasFiles`.
@@ -266,6 +325,10 @@ openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/pre
 - [ ] `useProjectPrettier` заменён на `prettierConfigPath`, если нужно форматирование Prettier.
 - [ ] `useEslintFix: true` заменён на пару `tsconfigPath` + `eslintConfigPath`, если нужен пакетный ESLint fix.
 - [ ] Выбран `modelsMode` и при необходимости workflow `useHistory` / diff‑отчёта.
+- [ ] Перезапустили `analyze-diff` для получения отчёта 2.0.0.
+- [ ] Обновили парсеры отчётов на `report.semantic.*` / `report.structural.*`.
+- [ ] Проверили, что `generate --useHistory` подхватывает structural-данные.
+- [ ] Проверили изменения импортов duplicate-alias после регенерации.
 - [ ] Выполнены `check-config` и `update-config`.
 - [ ] Выполнен `preview-changes`, diff проверен.
 - [ ] Обновлены тесты/снапшоты.

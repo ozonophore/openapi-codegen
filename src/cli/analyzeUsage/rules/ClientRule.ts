@@ -3,7 +3,15 @@ import { Node, SyntaxKind } from 'ts-morph';
 import type { ProjectContext } from '../core/ProjectContext';
 import type { Contract, Finding, Rule, Stats } from '../types';
 
+/** Правило проверки использования createClient и ClientOptions в потребителях API. */
 export class ClientRule implements Rule {
+    /**
+     * Проверяет вызовы createClient и соответствие ClientOptions.
+     * @param context контекст проекта
+     * @param contract контракт сгенерированного API
+     * @param stats накопительная статистика использования
+     * @returns список найденных проблем
+     */
     async check(context: ProjectContext, contract: Contract, stats: Stats): Promise<Finding[]> {
         const findings: Finding[] = [];
         const checker = context.getTypeChecker();
@@ -51,6 +59,8 @@ export class ClientRule implements Rule {
 
                 if (expectedType) {
                     const providedType = checker.getTypeAtLocation(args[0]);
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
                     if (!providedType.isAssignableTo(expectedType)) {
                         findings.push({
                             id: 'CLIENT_OPTIONS_MISMATCH',

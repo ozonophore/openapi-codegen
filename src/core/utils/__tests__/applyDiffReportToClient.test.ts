@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 
+import type { Context } from '../../Context';
 import type { Client } from '../../types/shared/Client.model';
 import type { Model } from '../../types/shared/Model.model';
 import { applyDiffReportToClient } from '../applyDiffReportToClient';
@@ -111,5 +112,210 @@ describe('@unit: applyDiffReportToClient (TYPE_COERCION miracles)', () => {
         assert.strictEqual(property?.coercionFrom, 'string');
         assert.strictEqual(property?.coercionTo, 'number');
         assert.ok(updatedModel.hasCoercion, 'Expected model.hasCoercion to be true');
+    });
+
+    test('marks needsCoercion for $ref alias schema via Context resolver', () => {
+        const userBodyDef = {
+            type: 'object',
+            properties: {
+                age: { type: 'number' },
+            },
+        };
+
+        const mockContext = {
+            get: (ref: string) => {
+                if (ref === '#/components/schemas/User') {
+                    return userBodyDef;
+                }
+                return undefined;
+            },
+        } as unknown as Context;
+
+        const userModel = createObjectModel('IUser', [createPropertyModel('age', 'number')]);
+        const client: Client = {
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [userModel],
+            services: [],
+        };
+
+        const openApi = {
+            openapi: '3.0.0',
+            info: { title: 'Test', version: '1.0.0' },
+            paths: {},
+            components: {
+                schemas: {
+                    User: { $ref: '#/components/schemas/UserBody' },
+                    UserBody: userBodyDef,
+                },
+            },
+        };
+
+        const report: DiffReport = {
+            diff: {
+                all: [
+                    {
+                        action: 'changed',
+                        path: '$.components.schemas.User.properties.age.type',
+                        severity: 'warning',
+                        from: 'string',
+                        to: 'number',
+                    },
+                ],
+            },
+            miracles: [
+                {
+                    oldPath: '$.components.schemas.User.properties.age',
+                    newPath: '$.components.schemas.User.properties.age',
+                    type: 'TYPE_COERCION',
+                    confidence: 1,
+                    status: 'auto-generated',
+                },
+            ],
+        };
+
+        const result = applyDiffReportToClient({
+            client,
+            openApi,
+            openApiVersion: OpenApiVersion.V3,
+            diffReport: report,
+            prefix: { interface: 'I', enum: 'E', type: 'T' },
+            context: mockContext,
+        });
+
+        const updatedModel = result.models[0];
+        const property = updatedModel.properties.find(prop => prop.name === 'age');
+
+        assert.ok(property?.needsCoercion, 'Expected needsCoercion to be true for $ref schema');
+        assert.strictEqual(property?.coercionFrom, 'string');
+        assert.strictEqual(property?.coercionTo, 'number');
+        assert.ok(updatedModel.hasCoercion, 'Expected model.hasCoercion to be true');
+    });
+
+    test('marks needsCoercion on property via applyModelDiffs with $ref schema', () => {
+        const userBodyDef = {
+            type: 'object',
+            properties: {
+                age: { type: 'number' },
+            },
+        };
+
+        const mockContext = {
+            get: (ref: string) => {
+                if (ref === '#/components/schemas/User') {
+                    return userBodyDef;
+                }
+                return undefined;
+            },
+        } as unknown as Context;
+
+        const userModel = createObjectModel('IUser', [createPropertyModel('age', 'number')]);
+        const client: Client = {
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [userModel],
+            services: [],
+        };
+
+        const openApi = {
+            openapi: '3.0.0',
+            info: { title: 'Test', version: '1.0.0' },
+            paths: {},
+            components: {
+                schemas: {
+                    User: { $ref: '#/components/schemas/UserBody' },
+                    UserBody: userBodyDef,
+                },
+            },
+        };
+
+        const report: DiffReport = {
+            diff: {
+                all: [
+                    {
+                        action: 'changed',
+                        path: '$.components.schemas.User.properties.age.type',
+                        severity: 'warning',
+                        from: 'string',
+                        to: 'number',
+                    },
+                ],
+            },
+        };
+
+        const result = applyDiffReportToClient({
+            client,
+            openApi,
+            openApiVersion: OpenApiVersion.V3,
+            diffReport: report,
+            prefix: { interface: 'I', enum: 'E', type: 'T' },
+            context: mockContext,
+        });
+
+        const updatedModel = result.models[0];
+        const property = updatedModel.properties.find(prop => prop.name === 'age');
+
+        assert.ok(property?.needsCoercion, 'Expected needsCoercion from applyModelDiffs');
+        assert.strictEqual(property?.coercionFrom, 'string');
+        assert.strictEqual(property?.coercionTo, 'number');
+        assert.ok(updatedModel.hasCoercion, 'Expected model.hasCoercion to be true');
+    });
+
+    test('applies model diffs to all models with the same schema name', () => {
+        const sequence1 = createObjectModel('ISequence', [createPropertyModel('pathway_id', 'string')]);
+        const sequence2 = createObjectModel('ISequence', [createPropertyModel('pathwayId', 'string')]);
+        sequence2.alias = 'ISequence$2';
+
+        const client: Client = {
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [sequence1, sequence2],
+            services: [],
+        };
+
+        const openApi = {
+            openapi: '3.0.0',
+            info: { title: 'Test', version: '1.0.0' },
+            paths: {},
+            components: {
+                schemas: {
+                    Sequence: {
+                        type: 'object',
+                        properties: {
+                            pathway_id: { type: 'string' },
+                            pathwayId: { type: 'string' },
+                        },
+                    },
+                },
+            },
+        };
+
+        const report: DiffReport = {
+            diff: {
+                all: [
+                    {
+                        action: 'removed',
+                        path: '$.components.schemas.Sequence.properties.legacyField',
+                        severity: 'warning',
+                    },
+                ],
+            },
+        };
+
+        const result = applyDiffReportToClient({
+            client,
+            openApi,
+            openApiVersion: OpenApiVersion.V3,
+            diffReport: report,
+            prefix: { interface: 'I', enum: 'E', type: 'T' },
+        });
+
+        const updated1 = result.models.find(model => model.name === 'ISequence' && !model.alias);
+        const updated2 = result.models.find(model => model.alias === 'ISequence$2');
+
+        assert.strictEqual(updated1?.ghostProperties?.length, 1);
+        assert.strictEqual(updated1?.ghostProperties?.[0].name, 'legacyField');
+        assert.strictEqual(updated2?.ghostProperties?.length, 1);
+        assert.strictEqual(updated2?.ghostProperties?.[0].name, 'legacyField');
     });
 });

@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "2.0.0",
   "summary": {
-    "breaking": 40,
-    "nonBreaking": 2,
+    "breaking": 30,
+    "nonBreaking": 3,
     "informational": 0
   },
   "recommendation": {
@@ -23,7 +23,8 @@
     "NO_DEFAULT_WITHOUT_2XX",
     "REQUIRE_OPERATION_ID"
   ],
-  "changesCount": 42,
+  "changesCount": 33,
+  "structuralChangesCount": 33,
   "topChanges": [
     {
       "type": "model.removed",

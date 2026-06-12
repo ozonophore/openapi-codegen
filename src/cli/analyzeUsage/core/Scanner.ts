@@ -3,9 +3,17 @@ import { Node, SourceFile, SyntaxKind } from 'ts-morph';
 
 import type { Contract, MethodMetadata } from '../types';
 
+/** Сканер экспортов сгенерированного API-файла для построения контракта. */
 export class Scanner {
+    /**
+     * @param generatedFile сгенерированный исходный файл API
+     */
     constructor(private generatedFile: SourceFile) {}
 
+    /**
+     * Сканирует экспорты файла и собирает контракт сервисов, моделей и схем.
+     * @returns контракт сгенерированного API
+     */
     public scan(): Contract {
         const exports = this.generatedFile.getExportedDeclarations();
 
@@ -111,6 +119,8 @@ export class Scanner {
             params:
                 sig?.getParameters().map(p => ({
                     name: p.getName(),
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
                     isOptional: p.isOptional(),
                     type: p.getTypeAtLocation(node).getText(),
                 })) || [],

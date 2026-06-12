@@ -4,8 +4,8 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import { analyzeDiff, toAnalyzeDiffExitCode } from '../src/cli/analyzeDiff/analyzeDiff';
-import type { SemanticDiffReport } from '../src/core/semanticDiff/analyzeOpenApiDiff';
 import { validateSemanticDiffReportSchema } from '../src/core/semanticDiff/semanticDiffReportSchema';
+import type { UnifiedDiffReport } from '../src/core/types/DiffReport.model';
 import { installSilenceAppLogger } from '../src/test/helpers/silenceLoggers';
 import { toMatchSnapshot } from './utils/toMatchSnapshot';
 
@@ -14,15 +14,18 @@ const repoRoot = path.join(__dirname, '..');
 /**
  * Builds compact, stable projection for snapshot assertions.
  */
-function buildSnapshotProjection(report: SemanticDiffReport): Record<string, unknown> {
+function buildSnapshotProjection(report: UnifiedDiffReport): Record<string, unknown> {
+    const semantic = report.semantic;
+
     return {
         schemaVersion: report.schemaVersion,
-        summary: report.summary,
-        recommendation: report.recommendation,
-        governanceSummary: report.governance.summary,
-        governanceRuleIds: [...new Set(report.governance.violations.map(violation => violation.ruleId))].sort(),
-        changesCount: report.changes.length,
-        topChanges: report.changes.slice(0, 30).map(change => ({
+        summary: semantic.summary,
+        recommendation: semantic.recommendation,
+        governanceSummary: semantic.governance.summary,
+        governanceRuleIds: [...new Set(semantic.governance.violations.map(violation => violation.ruleId))].sort(),
+        changesCount: semantic.changes.length,
+        structuralChangesCount: report.structural.diff.all.length,
+        topChanges: semantic.changes.slice(0, 30).map(change => ({
             type: change.type,
             severity: change.severity,
             path: change.path,
@@ -38,7 +41,7 @@ async function assertSemanticDiffFixtureSnapshot(
     newSpecRelativePath: string,
     snapshotName: string,
     governanceConfigRaw?: Record<string, unknown>
-): Promise<SemanticDiffReport> {
+): Promise<UnifiedDiffReport> {
     const generatedRoot = path.join(repoRoot, 'test', 'generated');
     mkdirSync(generatedRoot, { recursive: true });
     const tempDir = mkdtempSync(path.join(generatedRoot, `semantic-diff-fixture-${snapshotName}-`));
@@ -62,10 +65,10 @@ async function assertSemanticDiffFixtureSnapshot(
         const exitCode = toAnalyzeDiffExitCode(result);
         assert.ok(exitCode === 0 || exitCode === 1, `Unexpected analyze-diff exit code: ${exitCode}`);
 
-        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as SemanticDiffReport;
+        const report = JSON.parse(readFileSync(reportPath, 'utf8')) as UnifiedDiffReport;
         const schemaValidation = validateSemanticDiffReportSchema(report);
         assert.strictEqual(schemaValidation.valid, true, schemaValidation.errors.join('\n'));
-        assert.strictEqual(report.schemaVersion, '1.1.0');
+        assert.strictEqual(report.schemaVersion, '2.0.0');
         const projectedReport = buildSnapshotProjection(report);
 
         const snapshotFile = path.join(repoRoot, 'test', '__snapshots__', 'semanticDiff', `${snapshotName}.snap.json`);
@@ -109,9 +112,9 @@ describe('@unit: semantic diff fixtures', () => {
 
     test('matches snapshot for large v3 -> v3 patch diff', async () => {
         const report = await assertSemanticDiffFixtureSnapshot('test/spec/v3.json', 'test/spec/v3.json', 'v3_to_v3_patch');
-        assert.strictEqual(report.recommendation.semver, 'patch');
-        assert.ok(report.recommendation.reasons.includes('NO_API_SURFACE_CHANGES'));
-        assert.strictEqual(report.summary.breaking, 0);
-        assert.strictEqual(report.summary.nonBreaking, 0);
+        assert.strictEqual(report.semantic.recommendation.semver, 'patch');
+        assert.ok(report.semantic.recommendation.reasons.includes('NO_API_SURFACE_CHANGES'));
+        assert.strictEqual(report.semantic.summary.breaking, 0);
+        assert.strictEqual(report.semantic.summary.nonBreaking, 0);
     });
 });

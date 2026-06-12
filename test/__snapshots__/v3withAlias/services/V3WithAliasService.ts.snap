@@ -9,7 +9,7 @@
 import type { ISimpleDto as ISimpleDto$3 } from '../models/path/alias_request/SimpleDto';
 import type { ISimpleDto as ISimpleDto$4 } from '../models/path/alias_response/SimpleDto';
 import type { ISimpleDto as ISimpleDto$2 } from '../models/path/common_request/SimpleDto';
-import type { ISimpleDto as ISimpleDto$1 } from '../models/path/common_response/SimpleDto';
+import type { ISimpleDto } from '../models/path/common_response/SimpleDto';
 import type { RequestExecutor, RequestConfig } from '../core/executor/requestExecutor';
 import type { ApiResult } from '../core/ApiResult';
 
@@ -50,35 +50,35 @@ export class V3WithAliasService<TOptions = unknown> {
     constructor(private readonly executor: RequestExecutor<TOptions>) {}
 
     /**
-     * @returns ISimpleDto$1 OK
+     * @returns ISimpleDto OK
      * @throws ApiError
      */
-    public getCallWithoutResponse(options?: TOptions): Promise<ISimpleDto$1> {
-        return this.executor.request<ISimpleDto$1>(V3WithAliasOptions.getCallWithoutResponse(), options);
+    public getCallWithoutResponse(options?: TOptions): Promise<ISimpleDto> {
+        return this.executor.request<ISimpleDto>(V3WithAliasOptions.getCallWithoutResponse(), options);
     }
 
-    public getCallWithoutResponseRaw(options?: TOptions): Promise<ApiResult<ISimpleDto$1>> {
-        return this.executor.requestRaw<ISimpleDto$1>(V3WithAliasOptions.getCallWithoutResponse(), options);
+    public getCallWithoutResponseRaw(options?: TOptions): Promise<ApiResult<ISimpleDto>> {
+        return this.executor.requestRaw<ISimpleDto>(V3WithAliasOptions.getCallWithoutResponse(), options);
     }
     /**
      * @param requestBody
-     * @returns ISimpleDto$1 OK
+     * @returns ISimpleDto OK
      * @throws ApiError
      */
     public postCallWithAlias(
         requestBody?: ISimpleDto$2,
 
         options?: TOptions,
-    ): Promise<ISimpleDto$1> {
-        return this.executor.request<ISimpleDto$1>(V3WithAliasOptions.postCallWithAlias(requestBody), options);
+    ): Promise<ISimpleDto> {
+        return this.executor.request<ISimpleDto>(V3WithAliasOptions.postCallWithAlias(requestBody), options);
     }
 
     public postCallWithAliasRaw(
         requestBody?: ISimpleDto$2,
 
         options?: TOptions,
-    ): Promise<ApiResult<ISimpleDto$1>> {
-        return this.executor.requestRaw<ISimpleDto$1>(V3WithAliasOptions.postCallWithAlias(requestBody), options);
+    ): Promise<ApiResult<ISimpleDto>> {
+        return this.executor.requestRaw<ISimpleDto>(V3WithAliasOptions.postCallWithAlias(requestBody), options);
     }
     /**
      * @param requestBody

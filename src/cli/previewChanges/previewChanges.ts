@@ -9,7 +9,7 @@ import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { dirNameHelper, joinHelper, resolveHelper } from '../../common/utils/pathHelpers';
-import { validateZodOptions } from '../../common/Validation/validateZodOptions';
+import { validateZodOptions } from '../../common/Validation';
 import { allMigrationPlans } from '../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
 import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
 import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';

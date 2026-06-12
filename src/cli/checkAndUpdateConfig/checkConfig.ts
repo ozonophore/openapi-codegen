@@ -3,7 +3,7 @@ import { OptionValues } from 'commander';
 import { APP_LOGGER } from '../../common/Consts';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
-import { validateZodOptions } from '../../common/Validation/validateZodOptions';
+import { validateZodOptions } from '../../common/Validation';
 import { CheckConfigOptions, checkConfigOptionsSchema } from '../schemas';
 import { CLICommandResult } from '../types';
 import { ACTION_FOR_CONFIG_DATA_OPTIONS } from './constants';

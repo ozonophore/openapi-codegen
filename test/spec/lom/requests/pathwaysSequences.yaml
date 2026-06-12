@@ -1,4 +1,5 @@
 get:
+  operationId: listPathwaySequences
   tags: [Sequences]
   summary: Получить последовательности пути
   parameters:
