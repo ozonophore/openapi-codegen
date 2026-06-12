@@ -111,7 +111,7 @@ export class Logger {
 
         this._logger = createLogger({
             level: this._currentLevel,
-            levels: { error: 0, warn: 1, info: 2, success: 3 },
+            levels: { error: 0, warn: 1, info: 2, success: 3, debug: 4 },
             format: format.label({ label: this._instanceId }),
             transports: chosenTransports,
         });
@@ -154,6 +154,10 @@ export class Logger {
 
     public success(message: string) {
         this._logger.log('success', message);
+    }
+
+    public debug(message: string): void {
+        this._logger.debug(message);
     }
 
     public forceInfo(message: string) {

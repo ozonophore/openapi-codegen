@@ -19,11 +19,19 @@ describe('@unit: generateOptionsSchema', () => {
         assert.strictEqual(parsed.success, true);
     });
 
-    test('rejects both openapiConfig and input/output', () => {
+    test('accepts direct mode even with default openapiConfig (Commander simulation)', () => {
         const parsed = generateOptionsSchema.safeParse({
-            openapiConfig: './openapi.config.json',
+            openapiConfig: 'openapi.config.json',
             input: './spec.json',
             output: './generated',
+        });
+        assert.strictEqual(parsed.success, true);
+    });
+
+    test('rejects input with default openapiConfig when output is missing', () => {
+        const parsed = generateOptionsSchema.safeParse({
+            openapiConfig: 'openapi.config.json',
+            input: './spec.json',
         });
         assert.strictEqual(parsed.success, false);
     });

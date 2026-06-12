@@ -27,10 +27,11 @@
 - Supports tsc and @babel/plugin-transform-typescript
 - Supports customization names of models
 - Supports external references using [`swagger-parser`](https://github.com/APIDevTools/swagger-parser/)
-- Supports strict OpenAPI diagnostics with JSON reports (`--strict-openapi`, `--report-file`)
+- Supports strict OpenAPI diagnostics with JSON reports (`--strict-openapi`, `--report-file`, `--fail-on-governance-errors`)
 - Supports generator plugins (`plugins`) including built-in `x-typescript-type`
 - Supports binary request/response generation (`format: binary` -> `Blob`)
-- Supports opt-in generation cache and incremental writes (`--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`)
+- CLI reports default to `./.openapi-codegen-reports/` (strict, diff, usage, anomaly, eslint-fix summaries)
+- Supports opt-in generation cache with three strategies: `entity` (per-output file), `reuse` (global store), `content` (`writeFileIfChanged` only) — `--cache`, `--cachePath`, `--cacheStrategy`, `--reuseOnConflict`, `--cacheDebug`
 - Generated services accept a `RequestExecutor` in the constructor (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`, `createLegacyRequestAdapter`)
 - CLI `init --requestFormat` scaffolds custom HTTP layers: legacy transport, `createExecutorAdapter`, or standalone `RequestExecutor`
 - `check-config` validates `request` / `customExecutorPath` file presence and `createExecutorAdapter` export
@@ -40,6 +41,12 @@
 - Restores `generate --useHistory` compatibility with semantic diff reports (ghost operations/properties, coercion, rename miracles)
 - Uses selective OpenAPI `$ref` expansion in analyze-diff for faster and safer comparison
 - Automatic RENAME / TYPE_COERCION miracle detection from semantic property changes
+- Supports project-aware auto-selection of the optimal HTTP client and validation library (`--auto-select`, config `autoSelect`; dot-notation flags supported) — *preview*
+- Supports OpenAPI spec quality analysis during generation (`--spec-analysis`, config `specAnalysis`; `--anomaly-detection` is a deprecated CLI alias) — *preview*
+- Supports cross-spec artifact reuse via global ReuseStore (`cacheStrategy: "reuse"`, `.openapi-codegen-store`) with unified `reports/latest.json` when cache or spec analysis is enabled — *preview*
+- Config schema V6 adds optional `autoSelect` and `specAnalysis` blocks (upgrade via `update-config`); `anomalyDetection` is a deprecated config alias for `specAnalysis`
+- `analyze-usage` validates consumer API imports (path-based resolution, aliases) and optionally cross-checks RENAME miracles via `--diff-report`
+- Seven CLI commands: `generate`, `check-config`, `update-config`, `init`, `preview-changes`, `analyze-diff`, `analyze-usage`
 
 ## Install
 
@@ -64,6 +71,7 @@ See [skills/README.md](skills/README.md) for agent paths (Cursor, Claude Code, C
 - [Examples](docs/en/examples.md)
 - [Features](docs/en/features.md)
 - [Migration guide](MIGRATION.md)
+- [Marauder user guide (preview)](docs/MARAUDER_USER_GUIDE.md)
 - [Plugins](docs/en/plugins.md)
 - [Plugin API v2 (RFC)](docs/en/plugin-api-v2.md)
 - [Русская версия README](README.rus.md)

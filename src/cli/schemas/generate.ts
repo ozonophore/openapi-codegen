@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
+import { anomalyDetectionConfigSchemaOrBoolean, autoSelectConfigSchemaOrBoolean, specAnalysisConfigSchemaOrBoolean } from '../../common/VersionedSchema/CommonSchemas';
 import { ModelsMode } from '../../core/types/enums/ModelsMode.enum';
 import { baseCLIOptionsSchema, emptyStringToUndefined } from './base';
 
-export const generateOptionsSchema = z
+const generateOptionsBaseSchema = z
     .object({
         ...baseCLIOptionsSchema.shape,
         input: emptyStringToUndefined,
@@ -13,20 +14,27 @@ export const generateOptionsSchema = z
         modelsMode: z.enum(ModelsMode).optional(),
         strictOpenapi: z.boolean().optional(),
         reportFile: emptyStringToUndefined,
+        failOnGovernanceErrors: z.boolean().optional(),
         prettierConfigPath: emptyStringToUndefined,
         tsconfigPath: emptyStringToUndefined,
         eslintConfigPath: emptyStringToUndefined,
         governanceConfig: emptyStringToUndefined,
         cache: z.boolean().optional(),
         cachePath: emptyStringToUndefined,
-        cacheStrategy: z.enum(['content', 'entity']).optional(),
+        cacheStrategy: z.enum(['content', 'entity', 'reuse']).optional(),
         cacheDebug: z.boolean().optional(),
+        reuseOnConflict: z.enum(['fail', 'namespace']).optional(),
+        autoSelect: autoSelectConfigSchemaOrBoolean.optional(),
+        specAnalysis: specAnalysisConfigSchemaOrBoolean.optional(),
+        /** @deprecated Use specAnalysis instead. */
+        anomalyDetection: anomalyDetectionConfigSchemaOrBoolean.optional(),
     })
     .superRefine((data, ctx) => {
-        const hasInput = !!data.input;
-        const hasCongigPath = !!data.openapiConfig;
+        const hasDirectMode = !!(data.input?.trim() && data.output?.trim());
+        const hasInput = !!data.input?.trim();
+        const hasConfigPath = !hasDirectMode && !!data.openapiConfig;
 
-        if (hasInput && hasCongigPath) {
+        if (hasInput && hasConfigPath) {
             ctx.addIssue({
                 code: 'custom',
                 message: 'Use either openapiConfig or input/output, but not both options.',
@@ -34,7 +42,7 @@ export const generateOptionsSchema = z
             });
         }
 
-        if (!hasInput && !hasCongigPath) {
+        if (!hasInput && !hasConfigPath) {
             ctx.addIssue({
                 code: 'custom',
                 message: 'You must specify either openapiConfig or input/output',
@@ -42,7 +50,7 @@ export const generateOptionsSchema = z
             });
         }
 
-        if (hasInput && !hasCongigPath) {
+        if (hasInput && !hasConfigPath) {
             if (!data.input || data.input.trim() === '') {
                 ctx.addIssue({
                     code: 'custom',
@@ -60,5 +68,7 @@ export const generateOptionsSchema = z
             }
         }
     });
+
+export const generateOptionsSchema = generateOptionsBaseSchema;
 
 export type GenerateOptions = z.infer<typeof generateOptionsSchema>;

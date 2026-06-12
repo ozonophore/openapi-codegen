@@ -7,8 +7,12 @@ import { Logger } from './Logger';
 import { TStrictFlatOptions } from './TRawOptions';
 
 export const DEFAULT_OPENAPI_CONFIG_FILENAME = 'openapi.config.json';
-export const DEFAULT_ANALYZE_DIFF_REPORT_PATH = './openapi-diff-report.json';
-export const DEFAULT_ANALYZE_USAGE_REPORT_PATH = './openapi-usage-report.json';
+export const DEFAULT_REPORTS_DIR = './.openapi-codegen-reports';
+
+export const buildDefaultReportPath = (fileName: string): string => `${DEFAULT_REPORTS_DIR}/${fileName}`;
+
+export const DEFAULT_ANALYZE_DIFF_REPORT_PATH = buildDefaultReportPath('openapi-diff-report.json');
+export const DEFAULT_ANALYZE_USAGE_REPORT_PATH = buildDefaultReportPath('openapi-usage-report.json');
 
 export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     input: '',
@@ -42,13 +46,38 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     analyze: {},
     miracles: {},
     strictOpenapi: false,
-    reportFile: './openapi-report.json',
+    reportFile: buildDefaultReportPath('openapi-report.json'),
+    failOnGovernanceErrors: false,
     governanceConfig: '',
     cache: false,
-    cachePath: '.openapi-codegen-cache.json',
-    cacheStrategy: 'entity',
+    cachePath: '.openapi-codegen-store',
+    cacheStrategy: 'reuse',
     cacheDebug: false,
+    reuseOnConflict: 'fail',
     prettierConfigPath: '',
+    autoSelect: {
+        enabled: false,
+        strict: false,
+        preferSmallBundles: false,
+        preferStandards: false,
+    },
+    specAnalysis: {
+        enabled: false,
+        severity: 'medium',
+        reportFormat: 'json',
+        reportPath: buildDefaultReportPath('anomaly-report.json'),
+        failOnHigh: false,
+        crossSpec: true,
+        maxNestingDepth: 5,
+    },
+    anomalyDetection: {
+        enabled: false,
+        severity: 'medium',
+        reportFormat: 'json',
+        reportPath: buildDefaultReportPath('anomaly-report.json'),
+        failOnAnomalies: false,
+        maxNestingDepth: 5,
+    },
 };
 
 export const APP_LOGGER = new Logger({

@@ -10,8 +10,9 @@ export const unifiedOptionsSchemaV5 = unifiedOptionsSchemaV4.extend({
     eslintConfigPath: z.string().optional(),
     cache: z.boolean().optional(),
     cachePath: z.string().optional(),
-    cacheStrategy: z.enum(['content', 'entity']).optional(),
+    cacheStrategy: z.enum(['content', 'entity', 'reuse']).optional(),
     cacheDebug: z.boolean().optional(),
+    reuseOnConflict: z.enum(['fail', 'namespace']).optional(),
 });
 
 /*

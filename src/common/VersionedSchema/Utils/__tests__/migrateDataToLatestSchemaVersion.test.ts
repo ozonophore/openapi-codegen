@@ -75,9 +75,30 @@ test('@unit: migrateDataToLatestSchemaVersion (unified schemas)', () => {
 
     assert.ok(result);
     assert.strictEqual(result?.schemaType, EVersionedSchemaType.UNIFIED_OPTIONS);
-    assert.strictEqual(result?.schemaVersion, 'UNIFIED_OPTIONS_v5');
+    assert.strictEqual(result?.schemaVersion, 'UNIFIED_OPTIONS_v6');
     assert.strictEqual(result?.value.httpClient, 'fetch');
     assert.strictEqual(result?.value.validationLibrary, ValidationLibrary.NONE);
+});
+
+test('@unit: migrateDataToLatestSchemaVersion (UNIFIED_OPTIONS v4 → v5 defaults)', () => {
+    const plan = allMigrationPlans.find(p => p.fromVersion === 'UNIFIED_OPTIONS_v4' && p.toVersion === 'UNIFIED_OPTIONS_v5');
+    assert.ok(plan);
+
+    const migrated = plan!.migrate({
+        input: './spec.json',
+        output: './dist',
+        httpClient: 'fetch',
+    });
+
+    assert.strictEqual(migrated.prettierConfigPath, '');
+    assert.strictEqual(migrated.cache, false);
+    assert.strictEqual(migrated.cachePath, '.openapi-codegen-cache.json');
+    assert.strictEqual(migrated.cacheStrategy, 'entity');
+    assert.strictEqual(migrated.cacheDebug, false);
+    assert.strictEqual('useProjectPrettier' in migrated, false);
+    assert.strictEqual('useEslintFix' in migrated, false);
+    assert.strictEqual('tsconfigPath' in migrated, false);
+    assert.strictEqual('eslintConfigPath' in migrated, false);
 });
 
 test('@unit: migrateDataToLatestSchemaVersion (all schemas: chooses old options branch before unified)', () => {
@@ -97,6 +118,74 @@ test('@unit: migrateDataToLatestSchemaVersion (all schemas: chooses old options 
 
     assert.ok(result);
     assert.strictEqual(result?.schemaType, EVersionedSchemaType.UNIFIED_OPTIONS);
-    assert.strictEqual(result?.schemaVersion, 'UNIFIED_OPTIONS_v5');
+    assert.strictEqual(result?.schemaVersion, 'UNIFIED_OPTIONS_v6');
     assert.ok(result?.guessedVersion.latestVersion.startsWith('OPTIONS_'));
+});
+
+test('@unit: migrateDataToLatestSchemaVersion (boolean Marauder shorthand → object blocks)', () => {
+    const rawInput = {
+        input: './spec.json',
+        output: './dist',
+        httpClient: 'fetch',
+        autoSelect: true,
+        specAnalysis: true,
+        anomalyDetection: true,
+    };
+
+    const result = migrateDataToLatestSchemaVersion({
+        rawInput,
+        migrationPlans: allMigrationPlans,
+        versionedSchemas: allVersionedSchemas,
+        migrationMode: EMigrationMode.VALIDATE_CONFIG,
+    });
+
+    assert.ok(result);
+    assert.strictEqual(result?.schemaVersion, 'UNIFIED_OPTIONS_v6');
+    assert.deepStrictEqual(result?.value.autoSelect, { enabled: true });
+    assert.deepStrictEqual(result?.value.specAnalysis, { enabled: true });
+    assert.deepStrictEqual(result?.value.anomalyDetection, { enabled: true });
+});
+
+test('@unit: migrateDataToLatestSchemaVersion (exploitAnomalies alias → specAnalysis)', () => {
+    const rawInput = {
+        input: './spec.json',
+        output: './dist',
+        httpClient: 'fetch',
+        exploitAnomalies: true,
+    };
+
+    const result = migrateDataToLatestSchemaVersion({
+        rawInput,
+        migrationPlans: allMigrationPlans,
+        versionedSchemas: allVersionedSchemas,
+        migrationMode: EMigrationMode.VALIDATE_CONFIG,
+    });
+
+    assert.ok(result);
+    assert.strictEqual('exploitAnomalies' in (result?.value ?? {}), false);
+    assert.deepStrictEqual(result?.value.specAnalysis, { enabled: true });
+});
+
+test('@unit: migrateDataToLatestSchemaVersion (invalid per-item Marauder fails fast)', () => {
+    const rawInput = {
+        httpClient: 'fetch',
+        items: [
+            {
+                input: './spec.json',
+                output: './out',
+                anomalyDetection: { severity: 'not-a-valid-level' },
+            },
+        ],
+    };
+
+    assert.throws(
+        () =>
+            migrateDataToLatestSchemaVersion({
+                rawInput,
+                migrationPlans: allMigrationPlans,
+                versionedSchemas: allVersionedSchemas,
+                migrationMode: EMigrationMode.VALIDATE_CONFIG,
+            }),
+        /severity|Invalid option|invalid/i
+    );
 });

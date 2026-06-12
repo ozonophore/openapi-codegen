@@ -89,7 +89,7 @@ openapi analyze-diff \
   --compare-with ./openapi/previous.yaml \
   --openapi-config ./openapi.config.json \
   --strict-plugin-mode \
-  --output-report ./openapi-diff-report.json \
+  --output-report ./.openapi-codegen-reports/openapi-diff-report.json \
   --ci
 ```
 

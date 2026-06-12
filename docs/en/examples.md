@@ -23,7 +23,26 @@ openapi generate --input ./spec.json --output ./dist --modelsMode classes
 
 **Generate diff report:**
 ```bash
-openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml --output-report ./openapi-diff-report.json
+openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml
+```
+
+**Generation cache with reuse store (preview):**
+```bash
+openapi generate --openapi-config ./openapi.config.json --cache --cacheStrategy reuse
+```
+
+**Marauder preview flags on generate:**
+```bash
+openapi generate --openapi-config ./openapi.config.json --auto-select --spec-analysis
+```
+
+**Consumer usage check with diff cross-validation:**
+```bash
+openapi analyze-usage \
+  --sourcePath ./generated/index.ts \
+  --projectPath . \
+  --check \
+  --diff-report ./.openapi-codegen-reports/openapi-diff-report.json
 ```
 
 **Check configuration:**

@@ -32,4 +32,53 @@ describe('@unit: removeDefaultConfigValues', () => {
         assert.strictEqual(cleaned.interfacePrefix, 'Api');
         assert.strictEqual(cleaned.input, './spec.json');
     });
+
+    test('removes nested Marauder defaults while keeping overrides', () => {
+        const cleaned = removeDefaultConfigValues({
+            input: './spec.json',
+            output: './generated',
+            autoSelect: { enabled: false, strict: false, preferSmallBundles: false, preferStandards: false },
+            specAnalysis: {
+                enabled: true,
+                severity: 'medium',
+                reportFormat: 'json',
+                reportPath: COMMON_DEFAULT_OPTIONS_VALUES.specAnalysis.reportPath,
+                failOnHigh: false,
+                crossSpec: false,
+                maxNestingDepth: 5,
+            },
+        });
+
+        assert.strictEqual(cleaned.autoSelect, undefined);
+        assert.deepStrictEqual(cleaned.specAnalysis, { enabled: true, crossSpec: false });
+    });
+
+    test('cleans per-item Marauder defaults inside items[]', () => {
+        const cleaned = removeDefaultConfigValues({
+            items: [
+                {
+                    input: './a.json',
+                    output: './generated/a',
+                    specAnalysis: {
+                        enabled: true,
+                        severity: 'medium',
+                        reportFormat: 'json',
+                        reportPath: COMMON_DEFAULT_OPTIONS_VALUES.specAnalysis.reportPath,
+                        failOnHigh: false,
+                        crossSpec: false,
+                        maxNestingDepth: 5,
+                    },
+                },
+                {
+                    input: './b.json',
+                    output: './generated/b',
+                },
+            ],
+            httpClient: HttpClient.FETCH,
+        });
+
+        assert.ok(Array.isArray(cleaned.items));
+        assert.deepStrictEqual(cleaned.items[0].specAnalysis, { enabled: true, crossSpec: false });
+        assert.strictEqual('specAnalysis' in cleaned.items[1], false);
+    });
 });

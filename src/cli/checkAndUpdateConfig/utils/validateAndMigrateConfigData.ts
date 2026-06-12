@@ -2,17 +2,14 @@ import { APP_LOGGER } from '../../../common/Consts';
 import { EMigrationMode } from '../../../common/Enums';
 import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
 import { convertArrayToObject } from '../../../common/utils/convertArrayToObject';
-import { multiOptionsMigrationPlan } from '../../../common/VersionedSchema/MultiOptionsVersioned/MultiOptionsMigrationPlan';
-import { multiOptionsVersionedSchema } from '../../../common/VersionedSchema/MultiOptionsVersioned/MultiOptionsVersionedSchemas';
-import { optionsMigrationPlans } from '../../../common/VersionedSchema/OptionsVersioned/OptionsMigrationPlans';
-import { optionsVersionedSchemas } from '../../../common/VersionedSchema/OptionsVersioned/OptionsVersionedSchemas';
+import { allMigrationPlans } from '../../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
+import { allVersionedSchemas } from '../../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
 import { migrateDataToLatestSchemaVersion } from '../../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
-import { isInstanceOfMultioptions } from '../../../core/utils/isInstanceOfMultiOptions';
 import { IConfigValidationResult } from '../types';
-import { removeDefaultConfigValues } from './removeDefaultConfigValues';
+import { isDeepEqual, removeDefaultConfigValues } from './removeDefaultConfigValues';
 
-const omitUndefinedValues = (data: Record<string, any>): Record<string, any> => {
-    const result: Record<string, any> = {};
+const omitUndefinedValues = (data: Record<string, unknown>): Record<string, unknown> => {
+    const result: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(data)) {
         if (value === undefined) {
@@ -20,12 +17,12 @@ const omitUndefinedValues = (data: Record<string, any>): Record<string, any> => 
         }
 
         if (Array.isArray(value)) {
-            result[key] = value.map(item => (item && typeof item === 'object' && !Array.isArray(item) ? omitUndefinedValues(item) : item));
+            result[key] = value.map(item => (item && typeof item === 'object' && !Array.isArray(item) ? omitUndefinedValues(item as Record<string, unknown>) : item));
             continue;
         }
 
         if (value && typeof value === 'object') {
-            result[key] = omitUndefinedValues(value);
+            result[key] = omitUndefinedValues(value as Record<string, unknown>);
             continue;
         }
 
@@ -36,12 +33,10 @@ const omitUndefinedValues = (data: Record<string, any>): Record<string, any> => 
 };
 
 /**
- * Валидирует и мигрирует данные конфигурации до последней версии схемы.
- * Определяет тип конфигурации (одиночная или множественная опция) и применяет соответствующий план миграции.
- *
- * @param configData - Данные конфигурации (объект или массив)
- * @returns Результат валидации с информацией о версии и наличии значений по умолчанию
- * @throws {Error} Если валидация или миграция не удалась
+ * Валидирует и мигрирует данные конфигурации до UNIFIED v6 через общую цепочку `allMigrationPlans`.
+ * @param configData данные конфигурации (объект или устаревший массив)
+ * @returns результат с флагом актуальности версии, очищенными данными и признаком дефолтных значений
+ * @throws Error если валидация или миграция не удалась
  *
  * @example
  * const result = validateAndMigrateConfigData(loadedConfig);
@@ -49,38 +44,32 @@ const omitUndefinedValues = (data: Record<string, any>): Record<string, any> => 
  *   console.warn('Configuration version is outdated');
  * }
  */
-export function validateAndMigrateConfigData(configData: Record<string, any> | Record<string, any>[]): IConfigValidationResult {
+export function validateAndMigrateConfigData(configData: Record<string, unknown> | Record<string, unknown>[]): IConfigValidationResult {
     const isArrayFormat = Array.isArray(configData);
     if (isArrayFormat) {
         APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.ARRAY_DEPRECATED);
     }
 
     const normalizedData = omitUndefinedValues(convertArrayToObject(configData));
-    const isMultiOptions = isInstanceOfMultioptions(normalizedData);
 
-    // Выбрать соответствующие схемы и планы миграции
-    const migrationPlans = isMultiOptions ? multiOptionsMigrationPlan : optionsMigrationPlans;
-    const versionedSchemas = isMultiOptions ? multiOptionsVersionedSchema : optionsVersionedSchemas;
-
-    // Выполнить миграцию
     const migrationResult = migrateDataToLatestSchemaVersion({
         rawInput: normalizedData,
-        migrationPlans,
-        versionedSchemas,
+        migrationPlans: allMigrationPlans,
+        versionedSchemas: allVersionedSchemas,
         migrationMode: EMigrationMode.VALIDATE_CONFIG,
     });
+    if (!migrationResult) {
+        throw new Error(LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED);
+    }
 
-    // Получить последнюю версию схемы
-    const latestSchema = versionedSchemas[versionedSchemas.length - 1];
-    const currentVersion = migrationResult?.guessedVersion?.latestVersion;
+    const latestSchema = allVersionedSchemas[allVersionedSchemas.length - 1];
 
-    // Проверить наличие значений по умолчанию
     const migratedData = migrationResult?.value ?? {};
     const dataWithoutDefaults = removeDefaultConfigValues(migratedData);
-    const hasDefaultValues = Object.keys(dataWithoutDefaults).length !== Object.keys(migratedData).length;
+    const hasDefaultValues = !isDeepEqual(migratedData, dataWithoutDefaults);
 
     return {
-        isActualConfigVersion: currentVersion === latestSchema.version && !isArrayFormat,
+        isActualConfigVersion: migrationResult.schemaVersion === latestSchema.version && !isArrayFormat,
         migratedData: dataWithoutDefaults,
         hasDefaultValues,
     };

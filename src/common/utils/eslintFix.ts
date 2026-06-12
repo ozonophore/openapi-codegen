@@ -1,4 +1,6 @@
-import { APP_LOGGER } from '../Consts';
+import path from 'node:path';
+
+import { APP_LOGGER, buildDefaultReportPath } from '../Consts';
 import { LOGGER_ERROR_CODES, LOGGER_MESSAGES } from '../LoggerMessages';
 import { cleanupCodegenTempDir } from './codegenTempDir';
 import { fileSystemHelpers } from './fileSystemHelpers';
@@ -7,8 +9,8 @@ import { prepareTempEslintConfig } from './prepareTempEslintConfig';
 import { prepareTempTsConfig } from './prepareTempTsConfig';
 
 const DEFAULT_BATCH_SIZE = 50;
-/** JSON report filename (eslint-fix-report.json) written to the project root after batch ESLint fix. */
-const ESLINT_FIX_REPORT_FILE = 'eslint-fix-report.json';
+/** JSON report path written after batch ESLint fix. */
+const ESLINT_FIX_REPORT_FILE = buildDefaultReportPath('eslint-fix-report.json');
 
 /** Single ESLint diagnostic stored in {@link EslintFixReport} (no source/output). */
 export interface EslintFixReportMessage {
@@ -153,6 +155,12 @@ async function tryImportESLint(): Promise<IESLintModule | null> {
 
 async function writeEslintFixReport(report: EslintFixReport, cwd: string): Promise<string> {
     const reportPath = resolveHelper(cwd, ESLINT_FIX_REPORT_FILE);
+    const reportDir = path.dirname(reportPath);
+
+    if (!(await fileSystemHelpers.exists(reportDir))) {
+        await fileSystemHelpers.mkdir(reportDir);
+    }
+
     await fileSystemHelpers.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
     return reportPath;
 }

@@ -1,24 +1,26 @@
-import type { ProjectContext } from '../core/ProjectContext';
+import type { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
+import type { ApiImportScope } from '../utils/apiImportScope';
+import { getAllowedExportsForImport, isApiImport } from '../utils/apiImportScope';
 import { findBestMatch } from '../utils/fuzzy';
 
 export class ImportRule implements Rule {
     async check(
         context: ProjectContext,
         contract: Contract,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        _stats: Stats
+
+        _stats: Stats,
+        apiScope: ApiImportScope
     ): Promise<Finding[]> {
         const findings: Finding[] = [];
-        const rootExports = new Set(contract.sourceFile.getExportedDeclarations().keys());
 
         for (const file of context.getConsumerSourceFiles()) {
             for (const imp of file.getImportDeclarations()) {
-                const moduleName = imp.getModuleSpecifierValue();
-                if (moduleName !== '@lom-api' && !moduleName.startsWith('@lom-api/')) {
+                if (!isApiImport(imp, apiScope)) {
                     continue;
                 }
 
+                const moduleName = imp.getModuleSpecifierValue();
                 const importedSource = imp.getModuleSpecifierSourceFile();
                 if (!importedSource) {
                     findings.push({
@@ -32,7 +34,7 @@ export class ImportRule implements Rule {
                     continue;
                 }
 
-                const allowedExports = moduleName === '@lom-api' ? rootExports : new Set(importedSource.getExportedDeclarations().keys());
+                const allowedExports = getAllowedExportsForImport(imp, apiScope, contract);
 
                 for (const namedImport of imp.getNamedImports()) {
                     const importedName = namedImport.getName();

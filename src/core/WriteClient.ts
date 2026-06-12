@@ -2,6 +2,7 @@ import { ELogLevel, ELogOutput } from '../common/Enums';
 import { Logger } from '../common/Logger';
 import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
+import type { OptionsSlice, ReuseStore } from './reuseStore';
 import { ClientArtifacts } from './types/base/ClientArtifacts.model';
 import { ExportedModel } from './types/base/ExportedModel.model';
 import { ExportedService } from './types/base/ExportedService.model';
@@ -46,8 +47,8 @@ import { writeFileIfChanged, WriteFileIfChangedResult } from './utils/writeFileI
  * @property [validationLibrary] библиотека валидации схем
  * @property emptySchemaStrategy стратегия обработки пустых схем
  * @property [modelsMode] режим генерации моделей
- * @property [useProjectPrettier] форматировать через Prettier проекта
- * @property [useEslintFix] применять ESLint fix к сгенерированным файлам
+ * @property [prettierConfigPath] путь к конфигурации Prettier
+ * @property [eslintConfigPath] путь к конфигурации ESLint
  */
 type TWriteClientProps = {
     client: Client;
@@ -65,6 +66,14 @@ type TWriteClientProps = {
     emptySchemaStrategy: EmptySchemaStrategy;
     modelsMode?: ModelsMode;
     prettierConfigPath?: string;
+    reuseStore?: ReuseStore;
+    optionsSlice?: OptionsSlice;
+    specInput?: string;
+    inputPath?: string;
+    modelSchemas?: Map<string, Record<string, unknown>>;
+    referencedArtifactKeys?: Set<string>;
+    onReuseStat?: (hit: boolean) => void;
+    reuseOnConflict?: 'fail' | 'namespace';
 };
 
 type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOptions' | 'request' | 'useCancelableRequest' | 'useSeparatedIndexes'> & {
@@ -118,6 +127,14 @@ export class WriteClient {
             emptySchemaStrategy,
             modelsMode,
             prettierConfigPath,
+            reuseStore,
+            optionsSlice,
+            specInput,
+            inputPath,
+            modelSchemas,
+            referencedArtifactKeys,
+            onReuseStat,
+            reuseOnConflict,
         } = options;
 
         if (!excludeCoreServiceFiles) {
@@ -183,6 +200,13 @@ export class WriteClient {
                 validationLibrary,
                 emptySchemaStrategy,
                 prettierConfigPath,
+                reuseStore,
+                optionsSlice,
+                specInput,
+                modelSchemas,
+                referencedArtifactKeys,
+                onReuseStat,
+                reuseOnConflict,
             });
             await this.writeClientSchemasIndex({
                 models: schemaModels,
@@ -207,6 +231,13 @@ export class WriteClient {
                 modelsMode,
                 schemaModels,
                 prettierConfigPath,
+                reuseStore,
+                optionsSlice,
+                specInput,
+                modelSchemas,
+                referencedArtifactKeys,
+                onReuseStat,
+                reuseOnConflict,
             });
             return;
         }
@@ -227,6 +258,14 @@ export class WriteClient {
             modelsMode,
             schemaModels: [],
             prettierConfigPath,
+            reuseStore,
+            optionsSlice,
+            specInput,
+            inputPath,
+            modelSchemas,
+            referencedArtifactKeys,
+            onReuseStat,
+            reuseOnConflict,
         });
     }
 
@@ -245,6 +284,14 @@ export class WriteClient {
             modelsMode,
             schemaModels,
             prettierConfigPath,
+            reuseStore,
+            optionsSlice,
+            specInput,
+            inputPath,
+            modelSchemas,
+            referencedArtifactKeys,
+            onReuseStat,
+            reuseOnConflict,
         } = config;
 
         await fileSystemHelpers.mkdir(outputPaths.outputModels);
@@ -263,6 +310,14 @@ export class WriteClient {
             modelsMode,
             outputCorePath: shouldInlineDtoCore ? './' : relativeHelper(outputPaths.outputModels, outputPaths.outputCore),
             prettierConfigPath,
+            reuseStore,
+            optionsSlice,
+            specInput,
+            inputPath,
+            modelSchemas,
+            referencedArtifactKeys,
+            onReuseStat,
+            reuseOnConflict,
         });
         await this.writeClientModelsIndex({
             models: client.models,
@@ -323,8 +378,21 @@ export class WriteClient {
      * @param content содержимое файла
      * @returns результат записи: written или unchanged
      */
-    public async writeOutputFile(filePath: string, content: string): Promise<WriteFileIfChangedResult> {
+    public async writeOutputFile(filePath: string, content: string, options?: { expectedByteSize?: number }): Promise<WriteFileIfChangedResult> {
         this.expectedOutputFiles.add(resolveHelper(process.cwd(), filePath));
+        if (options?.expectedByteSize !== undefined) {
+            try {
+                const fileSize = await fileSystemHelpers.getFileSize(filePath);
+                if (fileSize === options.expectedByteSize) {
+                    this.writeStats.unchanged += 1;
+                    return 'unchanged';
+                }
+            } catch (error: any) {
+                if (error?.code !== 'ENOENT') {
+                    throw error;
+                }
+            }
+        }
         const result = await writeFileIfChanged(filePath, content);
         this.writeStats[result] += 1;
         return result;

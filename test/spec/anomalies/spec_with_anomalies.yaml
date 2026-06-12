@@ -1,0 +1,44 @@
+openapi: 3.0.0
+
+info:
+  title: API with detectable anomalies
+  version: 1.0.0
+
+paths:
+  /items/batch:
+    post:
+      summary: Batch create items
+      responses:
+        '200':
+          description: ok
+  /items:
+    post:
+      summary: Create single item
+      responses:
+        '200':
+          description: ok
+  /pets:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /pets/summary:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  schemas:
+    NodeA:
+      $ref: '#/components/schemas/NodeB'
+    NodeB:
+      $ref: '#/components/schemas/NodeA'

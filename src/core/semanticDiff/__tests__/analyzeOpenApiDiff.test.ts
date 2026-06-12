@@ -2,41 +2,29 @@ import assert from 'node:assert';
 import { describe, test } from 'node:test';
 
 import { analyzeOpenApiDiff } from '../analyzeOpenApiDiff';
+import {
+    breakingModelAndOperationRemovalsScenario,
+    formatNarrowingScenario,
+    governanceBreakingScenario,
+    infoVersionMajorScenario,
+    infoVersionMinorScenario,
+    nonBreakingAdditionsScenario,
+    operationRemovedWithMetadataScenario,
+    propertyRequiredTypeAndEnumScenario,
+    propertyTypeAndEnumScenario,
+    refAndFormatWideningScenario,
+    securitySchemeChangesScenario,
+    semverMajorScenario,
+    semverMinorScenario,
+    semverPatchScenario,
+    stableDedupOrderingScenario,
+    successResponsePayloadChangesScenario,
+    wideningAndNarrowingTransitionsScenario,
+} from './fixtures/diffScenarios';
 
 describe('@unit: analyzeOpenApiDiff', () => {
     test('detects breaking model and operation removals', () => {
-        const oldSpec = {
-            openapi: '3.0.0',
-            paths: {
-                '/pets': {
-                    get: {
-                        responses: {
-                            '200': { description: 'ok' },
-                        },
-                    },
-                },
-            },
-            components: {
-                schemas: {
-                    Pet: {
-                        type: 'object',
-                        properties: {
-                            id: { type: 'string' },
-                        },
-                        required: ['id'],
-                    },
-                },
-            },
-        } as any;
-
-        const newSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: {
-                schemas: {},
-            },
-        } as any;
-
+        const { oldSpec, newSpec } = breakingModelAndOperationRemovalsScenario;
         const report = analyzeOpenApiDiff(oldSpec, newSpec);
 
         assert.strictEqual(report.schemaVersion, '1.1.0');
@@ -46,38 +34,7 @@ describe('@unit: analyzeOpenApiDiff', () => {
     });
 
     test('includes from/to on property type and enum value changes', () => {
-        const oldSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: {
-                schemas: {
-                    User: {
-                        type: 'object',
-                        properties: {
-                            age: { type: 'number' },
-                            role: { enum: ['user', 'admin'] },
-                        },
-                    },
-                },
-            },
-        } as any;
-
-        const newSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: {
-                schemas: {
-                    User: {
-                        type: 'object',
-                        properties: {
-                            age: { type: 'integer' },
-                            role: { enum: ['admin'] },
-                        },
-                    },
-                },
-            },
-        } as any;
-
+        const { oldSpec, newSpec } = propertyTypeAndEnumScenario;
         const report = analyzeOpenApiDiff(oldSpec, newSpec);
         const typeChange = report.changes.find(change => change.type === 'model.property.type.changed' && change.path.includes('/age'));
         const roleTypeChange = report.changes.find(change => change.type === 'model.property.type.changed' && change.path.includes('/role'));
@@ -89,30 +46,7 @@ describe('@unit: analyzeOpenApiDiff', () => {
     });
 
     test('includes operation metadata on operation.removed', () => {
-        const oldSpec = {
-            openapi: '3.0.0',
-            paths: {
-                '/pets': {
-                    get: {
-                        operationId: 'listPets',
-                        summary: 'List pets',
-                        description: 'Returns pets',
-                        tags: ['pets'],
-                        responses: {
-                            '200': { description: 'ok' },
-                        },
-                    },
-                },
-            },
-            components: { schemas: {} },
-        } as any;
-
-        const newSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: { schemas: {} },
-        } as any;
-
+        const { oldSpec, newSpec } = operationRemovedWithMetadataScenario;
         const report = analyzeOpenApiDiff(oldSpec, newSpec);
         const removed = report.changes.find(change => change.type === 'operation.removed');
 
@@ -126,40 +60,7 @@ describe('@unit: analyzeOpenApiDiff', () => {
     });
 
     test('detects property required/type changes and enum changes', () => {
-        const oldSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: {
-                schemas: {
-                    User: {
-                        type: 'object',
-                        properties: {
-                            age: { type: 'number' },
-                            role: { enum: ['user', 'admin'] },
-                        },
-                        required: ['age'],
-                    },
-                },
-            },
-        } as any;
-
-        const newSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: {
-                schemas: {
-                    User: {
-                        type: 'object',
-                        properties: {
-                            age: { type: 'integer' },
-                            role: { enum: ['admin'] },
-                        },
-                        required: [],
-                    },
-                },
-            },
-        } as any;
-
+        const { oldSpec, newSpec } = propertyRequiredTypeAndEnumScenario;
         const report = analyzeOpenApiDiff(oldSpec, newSpec);
 
         assert.ok(report.changes.some(change => change.type === 'model.property.type.changed' && change.severity === 'breaking'));
@@ -168,67 +69,7 @@ describe('@unit: analyzeOpenApiDiff', () => {
     });
 
     test('detects non-breaking additions', () => {
-        const oldSpec = {
-            openapi: '3.0.0',
-            paths: {
-                '/ping': {
-                    get: {
-                        responses: {
-                            '200': { description: 'ok' },
-                        },
-                    },
-                },
-            },
-            components: {
-                schemas: {
-                    Ping: {
-                        type: 'object',
-                        properties: {
-                            value: { type: 'string' },
-                        },
-                    },
-                },
-            },
-        } as any;
-
-        const newSpec = {
-            openapi: '3.0.0',
-            paths: {
-                '/ping': {
-                    get: {
-                        responses: {
-                            '200': { description: 'ok' },
-                            '201': { description: 'created' },
-                        },
-                    },
-                },
-                '/pong': {
-                    get: {
-                        responses: {
-                            '200': { description: 'ok' },
-                        },
-                    },
-                },
-            },
-            components: {
-                schemas: {
-                    Ping: {
-                        type: 'object',
-                        properties: {
-                            value: { type: 'string' },
-                            meta: { type: 'string' },
-                        },
-                    },
-                    Pong: {
-                        type: 'object',
-                        properties: {
-                            value: { type: 'string' },
-                        },
-                    },
-                },
-            },
-        } as any;
-
+        const { oldSpec, newSpec } = nonBreakingAdditionsScenario;
         const report = analyzeOpenApiDiff(oldSpec, newSpec);
 
         assert.ok(report.summary.nonBreaking >= 3);
@@ -238,40 +79,7 @@ describe('@unit: analyzeOpenApiDiff', () => {
     });
 
     test('classifies widening and narrowing transitions for enum/number and union', () => {
-        const oldSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: {
-                schemas: {
-                    Account: {
-                        type: 'object',
-                        properties: {
-                            tier: { enum: ['basic', 'pro'] },
-                            score: { type: 'integer' },
-                            state: { oneOf: [{ type: 'string' }, { type: 'number' }] },
-                        },
-                    },
-                },
-            },
-        } as any;
-
-        const newSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: {
-                schemas: {
-                    Account: {
-                        type: 'object',
-                        properties: {
-                            tier: { enum: ['basic', 'pro', 'enterprise'] },
-                            score: { type: 'number' },
-                            state: { oneOf: [{ type: 'string' }] },
-                        },
-                    },
-                },
-            },
-        } as any;
-
+        const { oldSpec, newSpec } = wideningAndNarrowingTransitionsScenario;
         const report = analyzeOpenApiDiff(oldSpec, newSpec);
 
         assert.ok(report.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/tier') && change.severity === 'non-breaking'));
@@ -280,159 +88,21 @@ describe('@unit: analyzeOpenApiDiff', () => {
     });
 
     test('treats different refs and narrowing formats as breaking, widening formats as non-breaking', () => {
-        const oldSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: {
-                schemas: {
-                    User: {
-                        type: 'object',
-                        properties: {
-                            profile: { $ref: '#/components/schemas/ProfileV1' },
-                            count: { type: 'integer', format: 'int32' },
-                            ratio: { type: 'number', format: 'float' },
-                        },
-                    },
-                    ProfileV1: {
-                        type: 'object',
-                        properties: {
-                            id: { type: 'string' },
-                        },
-                    },
-                    ProfileV2: {
-                        type: 'object',
-                        properties: {
-                            id: { type: 'string' },
-                        },
-                    },
-                },
-            },
-        } as any;
-
-        const newSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: {
-                schemas: {
-                    User: {
-                        type: 'object',
-                        properties: {
-                            profile: { $ref: '#/components/schemas/ProfileV2' },
-                            count: { type: 'integer', format: 'int64' },
-                            ratio: { type: 'number', format: 'double' },
-                        },
-                    },
-                    ProfileV1: {
-                        type: 'object',
-                        properties: {
-                            id: { type: 'string' },
-                        },
-                    },
-                    ProfileV2: {
-                        type: 'object',
-                        properties: {
-                            id: { type: 'string' },
-                        },
-                    },
-                },
-            },
-        } as any;
-
+        const { oldSpec, newSpec } = refAndFormatWideningScenario;
         const wideningReport = analyzeOpenApiDiff(oldSpec, newSpec);
 
         assert.ok(wideningReport.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/profile') && change.severity === 'breaking'));
         assert.ok(wideningReport.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/count') && change.severity === 'non-breaking'));
         assert.ok(wideningReport.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/ratio') && change.severity === 'non-breaking'));
 
-        const narrowingReport = analyzeOpenApiDiff(
-            {
-                openapi: '3.0.0',
-                paths: {},
-                components: {
-                    schemas: {
-                        User: {
-                            type: 'object',
-                            properties: {
-                                count: { type: 'integer', format: 'int64' },
-                            },
-                        },
-                    },
-                },
-            } as any,
-            {
-                openapi: '3.0.0',
-                paths: {},
-                components: {
-                    schemas: {
-                        User: {
-                            type: 'object',
-                            properties: {
-                                count: { type: 'integer', format: 'int32' },
-                            },
-                        },
-                    },
-                },
-            } as any
-        );
+        const { oldSpec: narrowingOldSpec, newSpec: narrowingNewSpec } = formatNarrowingScenario;
+        const narrowingReport = analyzeOpenApiDiff(narrowingOldSpec, narrowingNewSpec);
 
         assert.ok(narrowingReport.changes.some(change => change.type === 'model.property.type.changed' && change.path.includes('/count') && change.severity === 'breaking'));
     });
 
     test('detects success response payload schema changes', () => {
-        const oldSpec = {
-            openapi: '3.0.0',
-            paths: {
-                '/users/{id}': {
-                    get: {
-                        responses: {
-                            '200': {
-                                description: 'ok',
-                                content: {
-                                    'application/json': {
-                                        schema: { type: 'integer' },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            components: {
-                schemas: {},
-            },
-        } as any;
-
-        const newSpec = {
-            openapi: '3.0.0',
-            paths: {
-                '/users/{id}': {
-                    get: {
-                        responses: {
-                            '200': {
-                                description: 'ok',
-                                content: {
-                                    'application/json': {
-                                        schema: { type: 'number' },
-                                    },
-                                },
-                            },
-                            '201': {
-                                description: 'created',
-                                content: {
-                                    'application/json': {
-                                        schema: { type: 'string' },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            components: {
-                schemas: {},
-            },
-        } as any;
-
+        const { oldSpec, newSpec } = successResponsePayloadChangesScenario;
         const report = analyzeOpenApiDiff(oldSpec, newSpec);
 
         assert.ok(report.changes.some(change => change.type === 'operation.response.success.type.changed' && change.severity === 'non-breaking'));
@@ -440,43 +110,7 @@ describe('@unit: analyzeOpenApiDiff', () => {
     });
 
     test('returns stable and deduplicated changes ordering', () => {
-        const oldSpec = {
-            openapi: '3.0.0',
-            paths: {
-                '/z': {
-                    get: {
-                        responses: {
-                            '200': { description: 'ok' },
-                        },
-                    },
-                },
-            },
-            components: {
-                schemas: {
-                    Zeta: {
-                        type: 'object',
-                        properties: {
-                            value: { type: 'string' },
-                        },
-                    },
-                    Alpha: {
-                        type: 'object',
-                        properties: {
-                            value: { type: 'string' },
-                        },
-                    },
-                },
-            },
-        } as any;
-
-        const newSpec = {
-            openapi: '3.0.0',
-            paths: {},
-            components: {
-                schemas: {},
-            },
-        } as any;
-
+        const { oldSpec, newSpec } = stableDedupOrderingScenario;
         const report = analyzeOpenApiDiff(oldSpec, newSpec);
         const keys = report.changes.map(change => `${change.path}|${change.type}|${change.severity}|${change.message}`);
         const sortedKeys = [...keys].sort((left, right) => left.localeCompare(right));
@@ -487,113 +121,21 @@ describe('@unit: analyzeOpenApiDiff', () => {
     });
 
     test('builds semver recommendation matrix (major/minor/patch)', () => {
-        const majorReport = analyzeOpenApiDiff(
-            {
-                openapi: '3.0.0',
-                paths: {
-                    '/users': {
-                        get: {
-                            responses: {
-                                '200': { description: 'ok' },
-                            },
-                        },
-                    },
-                },
-                components: { schemas: {} },
-            } as any,
-            {
-                openapi: '3.0.0',
-                paths: {},
-                components: { schemas: {} },
-            } as any
-        );
+        const majorReport = analyzeOpenApiDiff(semverMajorScenario.oldSpec, semverMajorScenario.newSpec);
         assert.strictEqual(majorReport.recommendation.semver, 'major');
         assert.ok(majorReport.recommendation.reasons.includes('HAS_BREAKING_CHANGES'));
 
-        const minorReport = analyzeOpenApiDiff(
-            {
-                openapi: '3.0.0',
-                paths: {},
-                components: { schemas: {} },
-            } as any,
-            {
-                openapi: '3.0.0',
-                paths: {
-                    '/users': {
-                        get: {
-                            responses: {
-                                '200': { description: 'ok' },
-                            },
-                        },
-                    },
-                },
-                components: { schemas: {} },
-            } as any
-        );
+        const minorReport = analyzeOpenApiDiff(semverMinorScenario.oldSpec, semverMinorScenario.newSpec);
         assert.strictEqual(minorReport.recommendation.semver, 'minor');
         assert.ok(minorReport.recommendation.reasons.includes('HAS_BACKWARD_COMPATIBLE_CHANGES'));
 
-        const patchReport = analyzeOpenApiDiff(
-            {
-                openapi: '3.0.0',
-                paths: {
-                    '/users': {
-                        get: {
-                            responses: {
-                                '200': { description: 'ok' },
-                            },
-                        },
-                    },
-                },
-                components: { schemas: {} },
-            } as any,
-            {
-                openapi: '3.0.0',
-                paths: {
-                    '/users': {
-                        get: {
-                            responses: {
-                                '200': { description: 'ok' },
-                            },
-                        },
-                    },
-                },
-                components: { schemas: {} },
-            } as any
-        );
+        const patchReport = analyzeOpenApiDiff(semverPatchScenario.oldSpec, semverPatchScenario.newSpec);
         assert.strictEqual(patchReport.recommendation.semver, 'patch');
         assert.ok(patchReport.recommendation.reasons.includes('NO_API_SURFACE_CHANGES'));
     });
 
     test('builds governance violations and supports allowBreaking override', () => {
-        const oldSpec = {
-            openapi: '3.0.0',
-            paths: {
-                '/users': {
-                    get: {
-                        operationId: 'getUsers',
-                        responses: {
-                            '200': { description: 'ok' },
-                        },
-                    },
-                },
-            },
-            components: { schemas: {} },
-        } as any;
-
-        const newSpec = {
-            openapi: '3.0.0',
-            paths: {
-                '/users': {
-                    get: {
-                        responses: {
-                            default: { description: 'fallback' },
-                        },
-                    },
-                },
-            },
-            components: { schemas: {} },
-        } as any;
+        const { oldSpec, newSpec } = governanceBreakingScenario;
 
         const strictGovernanceReport = analyzeOpenApiDiff(oldSpec, newSpec);
         assert.ok(strictGovernanceReport.governance.violations.some(violation => violation.ruleId === 'NO_BREAKING_WITHOUT_FLAG'));
@@ -606,49 +148,42 @@ describe('@unit: analyzeOpenApiDiff', () => {
     });
 
     test('applies governance config overrides in semantic diff report', () => {
-        const report = analyzeOpenApiDiff(
-            {
-                openapi: '3.0.0',
-                paths: {
-                    '/users': {
-                        get: {
-                            operationId: 'getUsers',
-                            responses: {
-                                '200': { description: 'ok' },
-                            },
-                        },
+        const { oldSpec, newSpec } = governanceBreakingScenario;
+        const report = analyzeOpenApiDiff(oldSpec, newSpec, {
+            governanceConfig: {
+                rules: {
+                    REQUIRE_OPERATION_ID: {
+                        enabled: false,
+                    },
+                    NO_DEFAULT_WITHOUT_2XX: {
+                        severity: 'error',
                     },
                 },
-                components: { schemas: {} },
-            } as any,
-            {
-                openapi: '3.0.0',
-                paths: {
-                    '/users': {
-                        get: {
-                            responses: {
-                                default: { description: 'fallback' },
-                            },
-                        },
-                    },
-                },
-                components: { schemas: {} },
-            } as any,
-            {
-                governanceConfig: {
-                    rules: {
-                        REQUIRE_OPERATION_ID: {
-                            enabled: false,
-                        },
-                        NO_DEFAULT_WITHOUT_2XX: {
-                            severity: 'error',
-                        },
-                    },
-                },
-            }
-        );
+            },
+        });
 
         assert.ok(!report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
         assert.ok(report.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'));
+    });
+
+    test('detects security scheme removals, additions, and type changes', () => {
+        const { oldSpec, newSpec } = securitySchemeChangesScenario;
+        const report = analyzeOpenApiDiff(oldSpec, newSpec);
+
+        assert.ok(report.changes.some(change => change.type === 'security.scheme.removed' && change.path.includes('apiKeyAuth')));
+        assert.ok(report.changes.some(change => change.type === 'security.scheme.added' && change.path.includes('oauth2Auth')));
+        assert.ok(report.changes.some(change => change.type === 'security.scheme.type.changed' && change.severity === 'breaking'));
+    });
+
+    test('classifies info.version major bump as breaking', () => {
+        const majorReport = analyzeOpenApiDiff(infoVersionMajorScenario.oldSpec, infoVersionMajorScenario.newSpec);
+        const majorChange = majorReport.changes.find(change => change.type === 'spec.info.version.changed');
+        assert.ok(majorChange);
+        assert.strictEqual(majorChange?.severity, 'breaking');
+        assert.strictEqual(majorChange?.from, '1.0.0');
+        assert.strictEqual(majorChange?.to, '2.0.0');
+
+        const minorReport = analyzeOpenApiDiff(infoVersionMinorScenario.oldSpec, infoVersionMinorScenario.newSpec);
+        assert.ok(!minorReport.changes.some(change => change.type === 'spec.info.version.changed'));
     });
 });

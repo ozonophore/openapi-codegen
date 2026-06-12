@@ -1,7 +1,8 @@
 import { Node, SyntaxKind, Type } from 'ts-morph';
 
-import type { ProjectContext } from '../core/ProjectContext';
+import type { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
+import type { ApiImportScope } from '../utils/apiImportScope';
 import { findBestMatch } from '../utils/fuzzy';
 
 /** Правило проверки вызовов методов сгенерированных сервисов в потребителях API. */
@@ -13,7 +14,8 @@ export class ServiceRule implements Rule {
      * @param stats накопительная статистика использования
      * @returns список найденных проблем
      */
-    async check(context: ProjectContext, contract: Contract, stats: Stats): Promise<Finding[]> {
+    async check(context: ProjectContext, contract: Contract, stats: Stats, apiScope: ApiImportScope): Promise<Finding[]> {
+        void apiScope;
         const findings: Finding[] = [];
         const checker = context.getTypeChecker();
 
@@ -26,9 +28,10 @@ export class ServiceRule implements Rule {
                 const serviceAccess = expression.getExpression();
                 if (!Node.isPropertyAccessExpression(serviceAccess)) continue;
 
-                const serviceName = serviceAccess.getName();
+                const serviceKey = serviceAccess.getName();
                 const methodName = expression.getName();
-                if (!contract.services[serviceName]) continue;
+                const serviceName = this.resolveServiceContractName(serviceKey, contract);
+                if (!serviceName) continue;
 
                 stats.usedMethods.add(`${serviceName}.${methodName}`);
 
@@ -51,11 +54,7 @@ export class ServiceRule implements Rule {
                 }
 
                 const args = call.getArguments();
-                const serviceDecl = contract.sourceFile
-                    .getExportedDeclarations()
-                    .get(serviceName)
-                    ?.find(d => Node.isClassDeclaration(d));
-                const methodDecl = serviceDecl && Node.isClassDeclaration(serviceDecl) ? serviceDecl.getMethod(methodName) : undefined;
+                const methodDecl = this.findServiceMethodDeclaration(contract, serviceName, methodName);
                 const requiredParams = methodDecl ? methodDecl.getParameters().filter(p => !p.isOptional()) : methodContract.params.filter(p => !p.isOptional);
                 if (args.length < requiredParams.length) {
                     findings.push({
@@ -93,12 +92,52 @@ export class ServiceRule implements Rule {
         return findings;
     }
 
+    private resolveServiceContractName(serviceKey: string, contract: Contract): string | undefined {
+        if (contract.services[serviceKey]) {
+            return serviceKey;
+        }
+
+        const mappedServiceName = contract.clientServiceKeys[serviceKey];
+        if (mappedServiceName && contract.services[mappedServiceName]) {
+            return mappedServiceName;
+        }
+
+        return undefined;
+    }
+
+    private findServiceMethodDeclaration(contract: Contract, serviceName: string, methodName: string) {
+        const serviceDecl = this.findServiceClassDeclaration(contract, serviceName);
+        return serviceDecl?.getMethod(methodName);
+    }
+
+    private findServiceClassDeclaration(contract: Contract, serviceName: string) {
+        const exportedDecl = contract.sourceFile.getExportedDeclarations().get(serviceName);
+        if (!exportedDecl) {
+            return undefined;
+        }
+
+        for (const decl of exportedDecl) {
+            if (Node.isClassDeclaration(decl)) {
+                return decl;
+            }
+
+            if (Node.isExportSpecifier(decl)) {
+                const symbol = decl.getSymbol();
+                const aliased = symbol?.getAliasedSymbol();
+                const declarations = aliased?.getDeclarations() ?? symbol?.getDeclarations() ?? [];
+                for (const resolvedDecl of declarations) {
+                    if (Node.isClassDeclaration(resolvedDecl)) {
+                        return resolvedDecl;
+                    }
+                }
+            }
+        }
+
+        return undefined;
+    }
+
     private getExpectedParameterType(contract: Contract, serviceName: string, methodName: string, paramIndex: number): Type | undefined {
-        const exportedDecl = contract.sourceFile
-            .getExportedDeclarations()
-            .get(serviceName)
-            ?.find(d => Node.isClassDeclaration(d));
-        const method = exportedDecl && Node.isClassDeclaration(exportedDecl) ? exportedDecl.getMethod(methodName) : undefined;
+        const method = this.findServiceMethodDeclaration(contract, serviceName, methodName);
         const param = method?.getParameters()[paramIndex];
         return param?.getType();
     }

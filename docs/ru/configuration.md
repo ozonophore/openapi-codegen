@@ -21,13 +21,13 @@
     "customExecutorPath": "./custom/createExecutorAdapter.ts",
     "modelsMode": "interfaces",
     "useHistory": false,
-    "diffReport": "./openapi-diff-report.json",
+    "diffReport": "./.openapi-codegen-reports/openapi-diff-report.json",
     "models": {
         "mode": "interfaces"
     },
     "analyze": {
         "useHistory": false,
-        "reportPath": "./openapi-diff-report.json"
+        "reportPath": "./.openapi-codegen-reports/openapi-diff-report.json"
     },
     "miracles": {
         "enabled": true,
@@ -37,9 +37,26 @@
     "plugins": ["./plugins/custom-type.plugin.cjs"],
     "customExecutorPath": "./custom/createExecutorAdapter.ts",
     "cache": false,
-    "cachePath": ".openapi-codegen-cache.json",
+    "cachePath": ".openapi-codegen-store",
     "cacheStrategy": "entity",
+    "reuseOnConflict": "fail",
     "cacheDebug": false,
+    "failOnGovernanceErrors": false,
+    "autoSelect": {
+        "enabled": false,
+        "strict": false,
+        "preferSmallBundles": false,
+        "preferStandards": false
+    },
+    "specAnalysis": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnHigh": false,
+        "crossSpec": true,
+        "maxNestingDepth": 5
+    },
     "prettierConfigPath": "./.prettierrc",
     "tsconfigPath": "./tsconfig.json",
     "eslintConfigPath": "./eslint.config.mjs"
@@ -102,25 +119,31 @@
 | `sortByRequired` | boolean | `false` | Расширенная стратегия сортировки для аргументов |
 | `useSeparatedIndexes` | boolean | `false` | Использовать отдельные index файлы |
 | `strictOpenapi` | boolean | `false` | Включить строгую диагностику OpenAPI и падать на strict-ошибках |
-| `reportFile` | string | `./openapi-report.json` | Путь к JSON-файлу strict-отчета по диагностике OpenAPI |
+| `reportFile` | string | `./.openapi-codegen-reports/openapi-report.json` | Путь к JSON-файлу strict-отчета по диагностике OpenAPI |
+| `failOnGovernanceErrors` | boolean | `false` | Прерывать генерацию при ошибках governance (требует `strictOpenapi`) |
+| `governanceConfig` | string | - | Путь к JSON-файлу правил governance |
 | `items` | array | - | Массив конфигураций (для формата multi-options) |
 | `validationLibrary` | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Стратегия для пустых схем: `keep`, `semantic`, или `skip` |
 | `modelsMode` | string | `interfaces` | Режим генерации моделей: `interfaces` или `classes` |
 | `useHistory` | boolean | `false` | Применять diff‑отчёт при генерации |
-| `diffReport` | string | `./openapi-diff-report.json` | Путь к diff‑отчёту |
+| `diffReport` | string | `./.openapi-codegen-reports/openapi-diff-report.json` | Путь к diff‑отчёту |
 | `models` | object | - | Секция конфигурации моделей (например, `mode`) |
 | `analyze` | object | - | Секция анализа (например, reportPath, useHistory, ignore) |
 | `miracles` | object | - | Секция чудес (enabled, confidence, types) |
 | `cache` | boolean | `false` | Включить кэш генерации |
-| `cachePath` | string | `.openapi-codegen-cache.json` | Путь к файлу кэша относительно output-директории |
-| `cacheStrategy` | string | `entity` | Стратегия кэша: `entity` или `content` |
+| `cachePath` | string | `.openapi-codegen-store` | Путь к store (`entity`: файл в output; `reuse`: корень global store) |
+| `cacheStrategy` | string | `reuse` (схема V6); `entity` после миграции v5→v6 | Стратегия кэша: `entity`, `reuse` или `content` |
+| `reuseOnConflict` | string | `fail` | Политика конфликтов reuse store: `fail` или `namespace` |
 | `cacheDebug` | boolean | `false` | Показывать debug-логи cache hit/miss |
+| `autoSelect` | object \| boolean | выключен | Проектно-зависимый выбор HTTP-клиента и валидатора (*preview*, только root) |
+| `specAnalysis` | object \| boolean | выключен | Анализ качества OpenAPI spec при generate (*preview*; root и per-item) |
+| `anomalyDetection` | object \| boolean | - | Устаревший alias для `specAnalysis` |
 | `prettierConfigPath` | string | - | Путь к файлу конфигурации Prettier для форматирования сгенерированного кода |
 | `tsconfigPath` | string | - | Путь к `tsconfig.json` для пакетного ESLint fix (вместе с `eslintConfigPath`) |
 | `eslintConfigPath` | string | - | Путь к конфигу ESLint для пакетного ESLint fix (вместе с `tsconfigPath`) |
 
-**Примечание:** Вы можете использовать команду `init` для генерации шаблона файла конфигурации.
+**Примечание:** Используйте команду `init` для генерации шаблона конфигурации. Запустите `update-config` для миграции на схему **V6** (добавляет блоки `autoSelect` и `specAnalysis`). См. [Marauder user guide](../MARAUDER_USER_GUIDE.md) для preview-возможностей.
 
 ### Плагины
 

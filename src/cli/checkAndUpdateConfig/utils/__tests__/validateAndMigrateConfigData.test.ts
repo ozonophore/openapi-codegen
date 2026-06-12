@@ -2,13 +2,20 @@ import assert from 'node:assert';
 import { describe, mock, test } from 'node:test';
 
 import { APP_LOGGER } from '../../../../common/Consts';
+import { ELogLevel, ELogOutput } from '../../../../common/Enums';
+import { EmptySchemaStrategy } from '../../../../core/types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../../../../core/types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../../../../core/types/enums/ValidationLibrary.enum';
 import { validateAndMigrateConfigData } from '../validateAndMigrateConfigData';
 
 const flatConfig = {
     input: './test/spec/v3.json',
     output: './generated',
     httpClient: HttpClient.FETCH,
+    validationLibrary: ValidationLibrary.NONE,
+    logLevel: ELogLevel.ERROR,
+    logTarget: ELogOutput.CONSOLE,
+    emptySchemaStrategy: EmptySchemaStrategy.KEEP,
 };
 
 describe('@unit: validateAndMigrateConfigData', () => {
@@ -65,5 +72,31 @@ describe('@unit: validateAndMigrateConfigData', () => {
 
         assert.strictEqual(result.hasDefaultValues, true);
         assert.strictEqual(result.migratedData.httpClient, undefined);
+    });
+
+    test('marks legacy OPTIONS-shaped config as outdated', () => {
+        const legacyConfig = {
+            input: './test/spec/v3.json',
+            output: './generated',
+            httpClient: HttpClient.FETCH,
+        };
+
+        const result = validateAndMigrateConfigData(legacyConfig);
+
+        assert.strictEqual(result.isActualConfigVersion, true);
+    });
+
+    test('strips nested Marauder defaults from migrated config', () => {
+        const withMarauderDefaults = {
+            ...flatConfig,
+            autoSelect: { enabled: false },
+            specAnalysis: { enabled: false },
+        };
+
+        const result = validateAndMigrateConfigData(withMarauderDefaults);
+
+        assert.strictEqual(result.hasDefaultValues, true);
+        assert.strictEqual(result.migratedData.autoSelect, undefined);
+        assert.strictEqual(result.migratedData.specAnalysis, undefined);
     });
 });

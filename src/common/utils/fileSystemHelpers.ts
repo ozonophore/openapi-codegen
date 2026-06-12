@@ -84,6 +84,11 @@ function isPathToFile(path: string): boolean {
     }
 }
 
+const getFileSize = async (path: string): Promise<number> => {
+    const stats = await stat(normalizeHelper(path));
+    return stats.size;
+};
+
 const fileSystemHelpers = {
     readFile,
     writeFile,
@@ -95,6 +100,7 @@ const fileSystemHelpers = {
     isDirectory,
     isPathToFile,
     readdir,
+    getFileSize,
 };
 
 export { fileSystemHelpers };

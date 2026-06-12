@@ -51,12 +51,12 @@ describe('@unit: validateOpenApiStrict', () => {
         assert.strictEqual(report.summary.errors, 1);
         assert.strictEqual(report.summary.warnings, 3);
         assert.strictEqual(report.summary.info, 1);
-        assert.ok(report.issues.some(issue => issue.code === 'UNRESOLVED_REF'));
-        assert.ok(report.issues.some(issue => issue.code === 'CONTENT_MEDIA_TYPE_FALLBACK'));
-        assert.ok(report.issues.some(issue => issue.code === 'SUSPICIOUS_DEFAULT_RESPONSE'));
-        assert.ok(report.issues.some(issue => issue.code === 'MISSING_OPERATION_ID'));
-        assert.ok(report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
-        assert.ok(report.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX'));
+        assert.ok(report.issues.some(issue => issue.code === 'UNRESOLVED_REF' && issue.severity === 'error'));
+        assert.ok(report.issues.some(issue => issue.code === 'CONTENT_MEDIA_TYPE_FALLBACK' && issue.severity === 'warning'));
+        assert.ok(report.issues.some(issue => issue.code === 'SUSPICIOUS_DEFAULT_RESPONSE' && issue.severity === 'warning'));
+        assert.ok(report.issues.some(issue => issue.code === 'MISSING_OPERATION_ID' && issue.severity === 'info'));
+        assert.ok(report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID' && violation.severity === 'warning'));
+        assert.ok(report.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'warning'));
     });
 
     test('returns clean report when no strict issues found', () => {
@@ -158,5 +158,7 @@ describe('@unit: validateOpenApiStrict', () => {
 
         assert.ok(!report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
         assert.ok(report.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'));
+        assert.ok(report.issues.some(issue => issue.code === 'SUSPICIOUS_DEFAULT_RESPONSE' && issue.severity === 'warning'));
+        assert.ok(report.issues.some(issue => issue.code === 'MISSING_OPERATION_ID' && issue.severity === 'info'));
     });
 });
