@@ -23,7 +23,9 @@ describe('@unit: loadGeneratorPlugins', () => {
             const plugins = await loadGeneratorPlugins([pluginPath]);
             assert.ok(plugins.length >= 2);
             assert.strictEqual(plugins[0]?.name, 'custom-type-override');
+            assert.strictEqual(plugins[0]?.apiVersion, '3');
             assert.ok(plugins.some(plugin => plugin.name === 'x-typescript-type'));
+            assert.strictEqual(plugins.find(plugin => plugin.name === 'x-typescript-type')?.apiVersion, '3');
         } finally {
             rmSync(tempDir, { recursive: true, force: true });
         }
@@ -108,6 +110,20 @@ describe('@unit: loadGeneratorPlugins', () => {
                 ),
                 'MyType'
             );
+            const recommendation = await plugin?.mapRecommendation?.(
+                {
+                    recommendation: {
+                        semver: 'minor',
+                        confidence: 'low',
+                        reason: 'test',
+                        reasons: [],
+                    },
+                    summary: { breaking: 0, nonBreaking: 1, informational: 0 },
+                    governance: { summary: { errors: 0, warnings: 0, info: 0 }, violations: [] },
+                },
+                { cwd: process.cwd(), executionMode: 'analyze-diff' }
+            );
+            assert.strictEqual(recommendation?.confidence, 'high');
         } finally {
             rmSync(tempDir, { recursive: true, force: true });
         }
@@ -142,6 +158,70 @@ describe('@unit: loadGeneratorPlugins', () => {
                     { cwd: process.cwd(), executionMode: 'generate' }
                 ),
                 'FactoryFnType'
+            );
+        } finally {
+            rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    test('normalizes legacy v2 plugin object to v3 runtime shape', async () => {
+        const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-v2-legacy-'));
+        const pluginPath = join(tempDir, 'legacy-v2-plugin.cjs');
+
+        writeFileSync(
+            pluginPath,
+            `module.exports = {
+                name: 'legacy-v2',
+                apiVersion: '2',
+                mapRecommendation: ({ recommendation }) => ({
+                    ...recommendation,
+                    confidence: 'high'
+                })
+            };`
+        );
+
+        try {
+            const plugins = await loadGeneratorPlugins([pluginPath]);
+            const plugin = plugins.find(item => item.name === 'legacy-v2');
+            assert.ok(plugin);
+            assert.strictEqual(plugin?.apiVersion, '3');
+            const recommendation = await plugin?.mapRecommendation?.(
+                {
+                    recommendation: {
+                        semver: 'minor',
+                        confidence: 'low',
+                        reason: 'test',
+                        reasons: [],
+                    },
+                    summary: { breaking: 0, nonBreaking: 1, informational: 0 },
+                    governance: { summary: { errors: 0, warnings: 0, info: 0 }, violations: [] },
+                },
+                { cwd: process.cwd(), executionMode: 'analyze-diff' }
+            );
+            assert.strictEqual(recommendation?.confidence, 'high');
+        } finally {
+            rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    test('rejects legacy object that conflicts with v3 factory export shape', async () => {
+        const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-conflict-'));
+        const pluginPath = join(tempDir, 'conflict-plugin.cjs');
+
+        writeFileSync(
+            pluginPath,
+            `module.exports = {
+                name: 'conflict-plugin',
+                createPlugin: (api) => {
+                    api.onSchemaTypeOverride(() => 'ConflictType');
+                }
+            };`
+        );
+
+        try {
+            await assert.rejects(
+                () => loadGeneratorPlugins([pluginPath]),
+                (error: unknown) => error instanceof Error && error.message.includes('both legacy "name" and "createPlugin"')
             );
         } finally {
             rmSync(tempDir, { recursive: true, force: true });

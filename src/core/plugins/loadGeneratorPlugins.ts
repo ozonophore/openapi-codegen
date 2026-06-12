@@ -1,6 +1,7 @@
 import { pathToFileURL } from 'node:url';
 
 import { resolveHelper } from '../../common/utils/pathHelpers';
+import { buildNormalizedPlugin, wrapLegacyPlugin } from './buildNormalizedPlugin';
 import {
     AfterSemanticDiffHandler,
     BeforeReportWriteHandler,
@@ -11,17 +12,19 @@ import {
     OpenApiPluginFactoryWithMeta,
     PluginApi,
     SchemaTypeOverrideHandler,
-    PluginRuntimeContext,
 } from './GeneratorPlugin.model';
 import { getBuiltinPlugins } from './getBuiltinPlugins';
 
 /**
- * Type guard for runtime plugin objects.
+ * Type guard for legacy plugin objects (`{ name: string, ...hooks }`).
  */
-function isOpenApiGeneratorPlugin(value: unknown): value is OpenApiGeneratorPlugin {
+function isLegacyPluginObject(value: unknown): value is OpenApiGeneratorPlugin {
     return !!value && typeof value === 'object' && typeof (value as OpenApiGeneratorPlugin).name === 'string';
 }
 
+/**
+ * Type guard for v3 factory module exports (`{ meta, createPlugin }`).
+ */
 function isFactoryModule(value: unknown): value is OpenApiPluginFactoryModule {
     if (!value || typeof value !== 'object') {
         return false;
@@ -31,7 +34,15 @@ function isFactoryModule(value: unknown): value is OpenApiPluginFactoryModule {
 }
 
 /**
- * Resolves plugin export from a required module.
+ * Detects invalid hybrid export that mixes legacy `name` with factory `createPlugin`.
+ */
+function hasLegacyFactoryConflict(value: OpenApiGeneratorPlugin): boolean {
+    return typeof (value as Record<string, unknown>).createPlugin === 'function';
+}
+
+/**
+ * Resolves plugin export from a loaded module.
+ * Supports `default`, named `plugin`, or direct module export.
  */
 function getPluginFromModule(moduleExports: unknown): unknown {
     const exported = moduleExports as Record<string, unknown>;
@@ -39,7 +50,7 @@ function getPluginFromModule(moduleExports: unknown): unknown {
 }
 
 /**
- * Checks whether loader can fallback from require() to dynamic import().
+ * Checks whether loader can fallback from `require()` to dynamic `import()`.
  */
 function canFallbackToDynamicImport(error: unknown): boolean {
     const errorCode = typeof error === 'object' && error && 'code' in error ? String((error as Record<string, unknown>).code) : '';
@@ -54,7 +65,7 @@ function canFallbackToDynamicImport(error: unknown): boolean {
 }
 
 /**
- * Loads a plugin module from a file path using require() with import() fallback.
+ * Loads a plugin module from a file path using `require()` with `import()` fallback.
  */
 async function loadPluginModule(pluginPath: string): Promise<unknown> {
     try {
@@ -68,13 +79,9 @@ async function loadPluginModule(pluginPath: string): Promise<unknown> {
     }
 }
 
-function createRuntimeContext(base: PluginRuntimeContext, mode: PluginRuntimeContext['executionMode']): PluginRuntimeContext {
-    return {
-        ...base,
-        executionMode: mode,
-    };
-}
-
+/**
+ * Executes a v3 factory, collects registered handlers, and returns a normalized plugin.
+ */
 async function buildPluginFromFactory(factory: OpenApiPluginFactory, meta: OpenApiPluginFactoryModule['meta']): Promise<OpenApiGeneratorPlugin> {
     const schemaTypeOverrideHandlers: SchemaTypeOverrideHandler[] = [];
     const afterSemanticDiffHandlers: AfterSemanticDiffHandler[] = [];
@@ -99,124 +106,64 @@ async function buildPluginFromFactory(factory: OpenApiPluginFactory, meta: OpenA
 
     await factory(api);
 
-    const normalizedPlugin: OpenApiGeneratorPlugin = {
-        name: meta.name,
-        version: meta.version,
-        apiVersion: '3',
-    };
-
-    if (schemaTypeOverrideHandlers.length > 0) {
-        normalizedPlugin.resolveSchemaTypeOverride = (input, runtimeContext = { cwd: process.cwd(), executionMode: 'generate' }) => {
-            for (const handler of schemaTypeOverrideHandlers) {
-                const result = handler(input, createRuntimeContext(runtimeContext, 'generate'));
-                if (typeof result === 'string' && result.trim()) {
-                    return result.trim();
-                }
-            }
-            return undefined;
-        };
-    }
-
-    if (afterSemanticDiffHandlers.length > 0) {
-        normalizedPlugin.afterSemanticDiff = async (ctx, runtimeContext = { cwd: process.cwd(), executionMode: 'analyze-diff' }) => {
-            let currentReport = ctx.report;
-            let wasApplied = false;
-            for (const handler of afterSemanticDiffHandlers) {
-                const result = await handler(
-                    {
-                        ...ctx,
-                        report: currentReport,
-                    },
-                    createRuntimeContext(runtimeContext, 'analyze-diff')
-                );
-                if (result) {
-                    currentReport = result;
-                    wasApplied = true;
-                }
-            }
-            return wasApplied ? currentReport : undefined;
-        };
-    }
-
-    if (mapRecommendationHandlers.length > 0) {
-        normalizedPlugin.mapRecommendation = async (ctx, runtimeContext = { cwd: process.cwd(), executionMode: 'analyze-diff' }) => {
-            let currentRecommendation = ctx.recommendation;
-            let wasApplied = false;
-            for (const handler of mapRecommendationHandlers) {
-                const result = await handler(
-                    {
-                        ...ctx,
-                        recommendation: currentRecommendation,
-                    },
-                    createRuntimeContext(runtimeContext, 'analyze-diff')
-                );
-                if (result) {
-                    currentRecommendation = result;
-                    wasApplied = true;
-                }
-            }
-            return wasApplied ? currentRecommendation : undefined;
-        };
-    }
-
-    if (beforeReportWriteHandlers.length > 0) {
-        normalizedPlugin.beforeReportWrite = async (ctx, runtimeContext = { cwd: process.cwd(), executionMode: 'analyze-diff' }) => {
-            let currentReport = ctx.report;
-            let currentReportPath = ctx.reportPath;
-            let wasApplied = false;
-
-            for (const handler of beforeReportWriteHandlers) {
-                const result = await handler(
-                    {
-                        report: currentReport,
-                        reportPath: currentReportPath,
-                    },
-                    createRuntimeContext(runtimeContext, 'analyze-diff')
-                );
-                if (result?.report) {
-                    currentReport = result.report;
-                    wasApplied = true;
-                }
-                if (result?.reportPath) {
-                    currentReportPath = result.reportPath;
-                    wasApplied = true;
-                }
-            }
-
-            return wasApplied
-                ? {
-                      report: currentReport,
-                      reportPath: currentReportPath,
-                  }
-                : undefined;
-        };
-    }
-
-    return normalizedPlugin;
+    return buildNormalizedPlugin(meta, {
+        schemaTypeOverrideHandlers,
+        afterSemanticDiffHandlers,
+        mapRecommendationHandlers,
+        beforeReportWriteHandlers,
+    });
 }
 
+/**
+ * Normalizes a raw module export to the shared v3 runtime plugin contract.
+ *
+ * Supported export shapes:
+ * 1. v3 factory function with attached `meta`;
+ * 2. v3 module object `{ meta, createPlugin }`;
+ * 3. legacy v1/v2 object `{ name, ...hooks }`.
+ */
 async function normalizePluginEntry(plugin: unknown, pluginPath: string): Promise<OpenApiGeneratorPlugin> {
-    if (isOpenApiGeneratorPlugin(plugin)) {
-        return plugin;
-    }
-
-    if (isFactoryModule(plugin)) {
-        return buildPluginFromFactory(plugin.createPlugin, plugin.meta);
-    }
-
     if (typeof plugin === 'function') {
         const factory = plugin as OpenApiPluginFactoryWithMeta;
         if (!factory.meta || factory.meta.apiVersion !== '3' || typeof factory.meta.name !== 'string') {
             throw new Error(`Invalid plugin at "${pluginPath}": v3 factory export must include "meta" with { name: string, apiVersion: '3' }`);
         }
-        return buildPluginFromFactory(factory, factory.meta);
+        try {
+            return await buildPluginFromFactory(factory, factory.meta);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            throw new Error(`Failed to initialize plugin at "${pluginPath}": ${message}`, { cause: error });
+        }
+    }
+
+    if (isFactoryModule(plugin)) {
+        try {
+            return await buildPluginFromFactory(plugin.createPlugin, plugin.meta);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            throw new Error(`Failed to initialize plugin at "${pluginPath}": ${message}`, { cause: error });
+        }
+    }
+
+    if (isLegacyPluginObject(plugin)) {
+        if (hasLegacyFactoryConflict(plugin)) {
+            throw new Error(
+                `Invalid plugin at "${pluginPath}": object has both legacy "name" and "createPlugin". Use v3 factory export shape { meta, createPlugin } without top-level "name".`
+            );
+        }
+        return wrapLegacyPlugin(plugin);
     }
 
     throw new Error(`Invalid plugin at "${pluginPath}": expected legacy plugin object or v3 factory plugin export`);
 }
 
 /**
- * Loads user plugins and appends built-in plugins as fallback handlers.
+ * Loads user plugins from config paths and appends built-in plugins as fallback handlers.
+ *
+ * Every returned plugin is normalized to `apiVersion: '3'`.
+ * User plugins are listed first; built-in plugins run after them.
+ *
+ * @param pluginPaths - Relative or absolute paths from `openapi.config.json`.
  */
 export async function loadGeneratorPlugins(pluginPaths: string[]): Promise<OpenApiGeneratorPlugin[]> {
     const loadedPlugins: OpenApiGeneratorPlugin[] = [];

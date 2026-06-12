@@ -1,8 +1,11 @@
 import { SemanticDiffReport } from '../semanticDiff/analyzeOpenApiDiff';
+import { wrapLegacyPlugin } from './buildNormalizedPlugin';
 import { OpenApiGeneratorPlugin, PluginRuntimeContext } from './GeneratorPlugin.model';
 
-export type PluginHookName = 'afterSemanticDiff' | 'mapRecommendation' | 'beforeReportWrite';
+/** Supported analyze-diff plugin hook names, including generate-only hook for diagnostic typing. */
+export type PluginHookName = 'resolveSchemaTypeOverride' | 'afterSemanticDiff' | 'mapRecommendation' | 'beforeReportWrite';
 
+/** Diagnostic record produced for each plugin hook invocation in analyze-diff. */
 export type PluginHookDiagnostic = {
     pluginName: string;
     hook: PluginHookName;
@@ -11,15 +14,19 @@ export type PluginHookDiagnostic = {
     message?: string;
 };
 
+/** Input for {@link applySemanticDiffPluginHooks}. */
 export type ApplySemanticDiffPluginHooksInput = {
     report: SemanticDiffReport;
     reportPath: string;
     plugins: OpenApiGeneratorPlugin[];
     allowBreaking: boolean;
+    /** When true, any hook error fails the command. Default: false. */
     strictPluginMode?: boolean;
+    /** Optional callback invoked for each hook diagnostic. */
     onDiagnostic?: (diagnostic: PluginHookDiagnostic) => void;
 };
 
+/** Result of {@link applySemanticDiffPluginHooks}. */
 export type ApplySemanticDiffPluginHooksResult = {
     report: SemanticDiffReport;
     reportPath: string;
@@ -27,16 +34,25 @@ export type ApplySemanticDiffPluginHooksResult = {
 };
 
 /**
- * Safely applies semantic diff plugin hooks in deterministic order.
+ * Applies analyze-diff plugin hooks in deterministic order:
+ * `afterSemanticDiff` → `mapRecommendation` → `beforeReportWrite`.
+ *
+ * Hooks are executed per plugin in config order. Each subsequent plugin receives
+ * the output produced by previous plugins in the same hook stage.
+ *
+ * Legacy v1/v2 plugin objects are normalized to v3 before execution.
+ *
+ * @param input - Semantic diff report, plugin list, and runtime options.
  */
 export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPluginHooksInput): Promise<ApplySemanticDiffPluginHooksResult> {
     const diagnostics: PluginHookDiagnostic[] = [];
     const strictPluginMode = input.strictPluginMode ?? false;
+    const plugins = input.plugins.map(plugin => wrapLegacyPlugin(plugin));
 
     let currentReport = input.report;
     let currentReportPath = input.reportPath;
 
-    for (const plugin of input.plugins) {
+    for (const plugin of plugins) {
         if (!plugin.afterSemanticDiff) {
             continue;
         }
@@ -46,9 +62,12 @@ export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPlugi
             cwd: process.cwd(),
             executionMode: 'analyze-diff',
             emitDiagnostic: diagnostic => {
+                if (diagnostic.hook === 'resolveSchemaTypeOverride') {
+                    return;
+                }
                 diagnostics.push({
                     pluginName: plugin.name,
-                    hook: 'afterSemanticDiff',
+                    hook: diagnostic.hook,
                     status: diagnostic.status,
                     durationMs: 0,
                     message: diagnostic.message,
@@ -101,7 +120,7 @@ export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPlugi
         }
     }
 
-    for (const plugin of input.plugins) {
+    for (const plugin of plugins) {
         if (!plugin.mapRecommendation) {
             continue;
         }
@@ -111,9 +130,12 @@ export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPlugi
             cwd: process.cwd(),
             executionMode: 'analyze-diff',
             emitDiagnostic: diagnostic => {
+                if (diagnostic.hook === 'resolveSchemaTypeOverride') {
+                    return;
+                }
                 diagnostics.push({
                     pluginName: plugin.name,
-                    hook: 'mapRecommendation',
+                    hook: diagnostic.hook,
                     status: diagnostic.status,
                     durationMs: 0,
                     message: diagnostic.message,
@@ -168,7 +190,7 @@ export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPlugi
         }
     }
 
-    for (const plugin of input.plugins) {
+    for (const plugin of plugins) {
         if (!plugin.beforeReportWrite) {
             continue;
         }
@@ -178,9 +200,12 @@ export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPlugi
             cwd: process.cwd(),
             executionMode: 'analyze-diff',
             emitDiagnostic: diagnostic => {
+                if (diagnostic.hook === 'resolveSchemaTypeOverride') {
+                    return;
+                }
                 diagnostics.push({
                     pluginName: plugin.name,
-                    hook: 'beforeReportWrite',
+                    hook: diagnostic.hook,
                     status: diagnostic.status,
                     durationMs: 0,
                     message: diagnostic.message,

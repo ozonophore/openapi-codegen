@@ -38,10 +38,13 @@ If multiple plugins return type overrides, the first non-empty value wins.
 
 Alongside legacy plugin objects (`v1`/`v2`), generator supports a v3 factory contract.
 
+Legacy `v1`/`v2` plugin objects remain valid as author-facing exports, but the loader normalizes them to the shared v3 runtime shape (`apiVersion: '3'`) at load time. Built-in plugins use the same v3 runtime contract.
+
 ### Goals
 
 - Keep full backward compatibility with existing plugin objects.
 - Provide one shared plugin API for both `generate` and `analyze-diff` flows.
+- Normalize all loaded plugins to one runtime contract (v3).
 
 ### v3 contract
 

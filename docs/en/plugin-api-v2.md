@@ -10,6 +10,10 @@ Goal of v2: evolve the plugin system without breaking the existing v1 hook `reso
 - If a plugin exports only `name` and `resolveSchemaTypeOverride`, it is treated as v1.
 - v2 hooks are used only in the `analyze-diff` flow.
 
+## v3 runtime unification
+
+v2 object plugins remain valid exports, but the loader now normalizes both v1 and v2 plugins to the shared v3 runtime contract (`apiVersion: '3'`). New plugins should prefer the v3 factory API documented in [Plugins](plugins.md#common-plugin-contract-v3-factory-api).
+
 ## Plugin contract
 
 ```ts

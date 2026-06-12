@@ -3,6 +3,7 @@ import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import { basename, isAbsolute } from 'path';
 
 import { dirNameHelper, normalizeHelper, relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
+import { wrapLegacyPlugin } from './plugins/buildNormalizedPlugin';
 import { OpenApiGeneratorPlugin, SchemaTypeOverrideContext } from './plugins/GeneratorPlugin.model';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
@@ -76,7 +77,7 @@ export class Context {
             this._sortByRequired = sortByRequired;
         }
 
-        this._plugins = plugins || [];
+        this._plugins = (plugins || []).map(plugin => wrapLegacyPlugin(plugin));
 
         return this;
     }
@@ -139,7 +140,11 @@ export class Context {
     }
 
     /**
-     * Resolves custom type override for schema via registered plugins.
+     * Resolves custom TypeScript type override for a schema via registered plugins.
+     * Plugins are consulted in registration order; the first non-empty override wins.
+     *
+     * @param schema - Raw OpenAPI schema object.
+     * @param context - Parser context for the schema node.
      */
     public resolveSchemaTypeOverride(schema: Record<string, any>, context: SchemaTypeOverrideContext): string | undefined {
         for (const plugin of this._plugins) {
@@ -148,6 +153,7 @@ export class Context {
                 {
                     cwd: process.cwd(),
                     executionMode: 'generate',
+                    emitDiagnostic: () => {},
                 }
             );
             if (typeof override === 'string' && override.trim()) {
