@@ -34,6 +34,59 @@ export interface OpenApiGeneratorPlugin {
 
 If multiple plugins return type overrides, the first non-empty value wins.
 
+## Common Plugin Contract (v3 Factory API)
+
+Alongside legacy plugin objects (`v1`/`v2`), generator supports a v3 factory contract.
+
+Legacy `v1`/`v2` plugin objects remain valid as author-facing exports, but the loader normalizes them to the shared v3 runtime shape (`apiVersion: '3'`) at load time. Built-in plugins use the same v3 runtime contract.
+
+### Goals
+
+- Keep full backward compatibility with existing plugin objects.
+- Provide one shared plugin API for both `generate` and `analyze-diff` flows.
+- Normalize all loaded plugins to one runtime contract (v3).
+
+### v3 contract
+
+Factory plugins register handlers through a shared `PluginApi`:
+
+```ts
+export type OpenApiPluginFactory = (api: PluginApi) => void | Promise<void>;
+
+export interface OpenApiPluginMeta {
+  name: string;
+  version?: string;
+  apiVersion: '3';
+}
+
+export interface PluginApi {
+  readonly meta: OpenApiPluginMeta;
+  onSchemaTypeOverride(handler: (input, runtime) => string | undefined): void;
+  onAfterSemanticDiff(handler: (ctx, runtime) => SemanticDiffReport | void | Promise<SemanticDiffReport | void>): void;
+  onMapRecommendation(handler: (ctx, runtime) => Recommendation | void | Promise<Recommendation | void>): void;
+  onBeforeReportWrite(handler: (ctx, runtime) => BeforeReportWriteResult | void | Promise<BeforeReportWriteResult | void>): void;
+}
+```
+
+Runtime context is shared across handlers:
+
+```ts
+export interface PluginRuntimeContext {
+  cwd: string;
+  executionMode: 'generate' | 'analyze-diff';
+  emitDiagnostic?: (diagnostic: {
+    hook: 'resolveSchemaTypeOverride' | 'afterSemanticDiff' | 'mapRecommendation' | 'beforeReportWrite';
+    status: 'applied' | 'skipped' | 'failed';
+    message?: string;
+  }) => void;
+}
+```
+
+### Export styles for v3
+
+1) Module object export (`meta` + `createPlugin`)
+2) Function export with attached `meta`
+
 ## Module formats
 
 Loader supports:
@@ -84,6 +137,47 @@ const plugin: OpenApiGeneratorPlugin = {
 };
 
 export default plugin;
+```
+
+### 4) v3 Factory plugin (module export, CommonJS)
+
+```js
+module.exports = {
+  meta: {
+    name: 'factory-plugin',
+    version: '1.0.0',
+    apiVersion: '3',
+  },
+  createPlugin: (api) => {
+    api.onSchemaTypeOverride(({ schema }) => {
+      return typeof schema['x-my-type'] === 'string' ? schema['x-my-type'] : undefined;
+    });
+    api.onMapRecommendation(({ recommendation }, runtime) => {
+      if (runtime.executionMode === 'analyze-diff') {
+        return { ...recommendation, confidence: 'high' };
+      }
+      return undefined;
+    });
+  },
+};
+```
+
+### 5) v3 Factory plugin (function export, ESM)
+
+```js
+const pluginFactory = (api) => {
+  api.onSchemaTypeOverride(({ schema }) => {
+    if (typeof schema['x-my-type'] === 'string') return schema['x-my-type'];
+    return undefined;
+  });
+};
+
+pluginFactory.meta = {
+  name: 'factory-plugin-fn',
+  apiVersion: '3',
+};
+
+export default pluginFactory;
 ```
 
 ## Built-in plugin
