@@ -4,6 +4,44 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.1.0-beta.10] — 2026-06-19
+
+### Добавлено
+- Добавлен сгенерированный `core/executor/legacyRequestAdapter.ts` с `createLegacyRequestAdapter()` — мост между legacy-транспортом `request(options, config)` и контрактом `RequestExecutor` (с пробросом `requestRaw`, если кастомный транспорт его экспортирует).
+- Добавлены форматы CLI-скaffold для `init --request` через `--requestFormat`: `transport` (legacy `request` + `requestRaw`), `adapter` (`createExecutorAdapter` для `customExecutorPath`), `executor` (автономный объект `RequestExecutor`).
+- Добавлен CLI-шаблон `customCreateExecutorAdapter.hbs` и интерактивный выбор формата scaffold в `init`.
+- Добавлен `validateExecutorSetup()` в `check-config` — некритичные предупреждения, если файлы `request` / `customExecutorPath` отсутствуют или `customExecutorPath` не экспортирует `createExecutorAdapter`.
+- Добавлен класс `RequestRecovery` для error interceptors — возврат восстановленного значения из `onError` вместо повторного throw.
+- Добавлен `example/executor.ts` — эталонная ky-реализация `createExecutorAdapter`.
+- Добавлена запись `skills/` в npm `files`; секция Agent Skills в README для миграции RequestExecutor и Marauder.
+- Добавлена runtime-зависимость `ky` (используется в example adapter).
+
+### Изменено
+- Рефакторинг шаблона `createExecutorAdapter` — единое преобразование `RequestConfig` → `ApiRequestOptions` через `toApiRequestOptions()` / `toMergedOptions()`; всегда делегирует в транспортный `request` / `requestRaw`.
+- `writeClientCore` копирует `customExecutorPath` в сгенерированный `core/executor/createExecutorAdapter.ts` и определяет экспорт `requestRaw` в кастомном транспорте для legacy adapter.
+- Типы возврата `RequestExecutor` используют `CancelablePromise` при включённом `useCancelableRequest`.
+- `catchErrors` / транспортный `ApiError` — поле `request` стало slim config (`method`, `path`, `headers`, `query`, `body`); payload ответа перенесён в `body`.
+- `createClient` всегда оборачивает executor в `withInterceptors` (включая дефолтный `apiErrorInterceptor`); больше не импортирует `customExecutorPath` в runtime.
+- Поток `init` выставляет `request` или `customExecutorPath` в конфиге по выбранному формату scaffold (`resolveHttpConfigPaths`).
+- Обновлены CLI-scaffold (`customRequest.hbs`, `customRequestExecutor.hbs`) — legacy-сигнатура транспорта, `requestRaw`, обработка `ApiError`, подсказки по миграции.
+- Обновлены примеры RequestExecutor в `docs/en/features.md` и `docs/ru/features.md` (`buildUrl`, `requestRaw`, `OpenAPI.BASE`).
+
+### Исправлено
+- `withInterceptors` — request interceptors теперь мутируют `currentConfig`, используемый в error handlers; `RequestRecovery` из `onError` проходит через response interceptors для `request` и `requestRaw`.
+- `apiErrorInterceptor` — повторно не оборачивает уже существующие экземпляры `ApiError`.
+- `createExecutorAdapter` с кастомным `request` в конфиге — некорректное делегирование при legacy-сигнатуре `ApiRequestOptions`.
+- Пробелы валидации кастомного executor-файла в workflow `check-config`.
+
+### Ломающие изменения
+- `createClient` всегда применяет `withInterceptors` + дефолтный `apiErrorInterceptor` (ранее — только при наличии `options.interceptors`).
+- Модуль `customExecutorPath` копируется в сгенерированный output при генерации; `createClient` больше не импортирует исходный путь в runtime.
+- `ApiError.request` из транспорта больше не содержит полный `ApiRequestOptions` — используйте slim config или читайте payload из `error.body`.
+
+### Тесты
+- Добавлены: `requestExecutorInterceptors.test.ts` (`withInterceptors`, `RequestRecovery`, `validateExecutorSetup`).
+- Расширены: `customRequestRaw.test.ts`, `index.test.ts` (legacy adapter snapshots, копирование custom executor, interceptor pipeline).
+- Обновлены snapshots v2/v3/lom_api для `legacyRequestAdapter`, `createExecutorAdapter`, interceptors и `createClient`.
+
 ## [2.1.0-beta.9] — 2026-06-10
 
 ### Добавлено

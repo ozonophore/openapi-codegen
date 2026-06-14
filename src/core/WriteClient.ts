@@ -126,7 +126,7 @@ export class WriteClient {
             await fileSystemHelpers.mkdir(outputPaths.outputCore);
             await fileSystemHelpers.mkdir(executorPath);
             await fileSystemHelpers.mkdir(interceptorsPath);
-            await this.writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest, modelsMode });
+            await this.writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest, customExecutorPath, modelsMode });
             await this.writeClientCoreIndex({
                 templates,
                 outputCorePath: outputPaths.outputCore,
@@ -164,7 +164,6 @@ export class WriteClient {
                 services: client.services,
                 templates,
                 request,
-                customExecutorPath,
                 prettierConfigPath,
             });
         }

@@ -30,6 +30,7 @@ export const templates: Templates = {
         cancelablePromise: () => 'cancelablePromise',
         httpStatusCode: () => 'httpStatusCode',
         createExecutorAdapter: () => 'createExecutorAdapter',
+        legacyRequestAdapter: () => 'legacyRequestAdapter',
         requestExecutor: () => 'requestExecutor',
         apiErrorInterceptor: () => 'apiErrorInterceptor',
         interceptors: () => 'interceptors',

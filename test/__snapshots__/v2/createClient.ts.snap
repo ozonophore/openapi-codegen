@@ -51,13 +51,12 @@ export function createClient<TExecutorOptions extends Record<string, any>>(optio
     let executor = options.executorFactory
         ? options.executorFactory<TExecutorOptions>({ openApiConfig, createDefaultExecutor })
         : createDefaultExecutor();
-    if (options?.interceptors) {
-        executor = withInterceptors(executor, {
-            onError: [apiErrorInterceptor, ...(options.interceptors?.onError ?? [])],
-            onRequest: options.interceptors?.onRequest,
-            onResponse: options.interceptors?.onResponse,
-        });
-    }
+
+    executor = withInterceptors(executor, {
+        onError: [apiErrorInterceptor, ...(options.interceptors?.onError ?? [])],
+        onRequest: options.interceptors?.onRequest,
+        onResponse: options.interceptors?.onResponse,
+    });
 
     return {
         V2Service: new V2Service(executor),

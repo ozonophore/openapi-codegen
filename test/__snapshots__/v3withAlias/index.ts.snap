@@ -7,7 +7,7 @@
 /* eslint-disable */
 
 export { ApiError } from '././core/ApiError';
-export { RequestConfig, RequestExecutor } from '././core/executor/requestExecutor';
+export type { RequestConfig, RequestExecutor } from '././core/executor/requestExecutor';
 export { createExecutorAdapter } from '././core/executor/createExecutorAdapter';
 export { OpenAPI } from '././core/OpenAPI';
 export type { TOpenAPIConfig } from '././core/OpenAPI';
@@ -21,4 +21,5 @@ export type { V3WithAlias } from '././models/V3WithAlias';
 
 export { V3WithAliasService } from '././services/V3WithAliasService';
 
-export { ClientOptions, createClient } from './createClient';
+export type { ClientOptions }  from './createClient';
+export { createClient } from './createClient';

@@ -7,9 +7,6 @@ import type { RequestExecutor } from '{{{joinPath @root.outputCore './executor/r
 import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from '{{{joinPath @root.outputCore './interceptors/interceptors'}}}';
 import { withInterceptors } from '{{{joinPath @root.outputCore './interceptors/withInterceptors'}}}';
 import { apiErrorInterceptor } from '{{{joinPath @root.outputCore './interceptors/apiErrorInterceptor'}}}';
-{{#if @root.customExecutorPath}}
-import { createExecutorAdapter as createCustomExecutorAdapter } from '{{{@root.customExecutorPath}}}';
-{{/if}}
 
 {{#each services}}
 import { {{name}} } from './services/{{name}}';
@@ -37,22 +34,17 @@ export function createClient<TExecutorOptions extends Record<string, any>>(
   };
 
   const createDefaultExecutor = (): RequestExecutor<TExecutorOptions> =>
-    {{#if @root.customExecutorPath}}
-    createCustomExecutorAdapter<TExecutorOptions>({{#unless @root.useCustomRequest}}openApiConfig{{/unless}});
-    {{else}}
-    createExecutorAdapter<TExecutorOptions>({{#unless @root.useCustomRequest}}openApiConfig{{/unless}});
-    {{/if}}
+    createExecutorAdapter<TExecutorOptions>(openApiConfig);
 
   let executor = options.executorFactory
     ? options.executorFactory<TExecutorOptions>({ openApiConfig, createDefaultExecutor })
     : createDefaultExecutor();
-  if (options?.interceptors) {
-    executor = withInterceptors(executor, {
-      onError: [apiErrorInterceptor, ...(options.interceptors?.onError ?? [])],
-      onRequest: options.interceptors?.onRequest,
-      onResponse: options.interceptors?.onResponse,
-    });
-  }
+
+  executor = withInterceptors(executor, {
+    onError: [apiErrorInterceptor, ...(options.interceptors?.onError ?? [])],
+    onRequest: options.interceptors?.onRequest,
+    onResponse: options.interceptors?.onResponse,
+  });
 
   return {
     {{#each services}}

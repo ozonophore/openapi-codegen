@@ -1,11 +1,18 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+
+// @ts-ignore
 import { ApiError } from './ApiError';
+// @ts-ignore
 import type { ApiResult } from './ApiResult';
+// @ts-ignore
 import type { ApiRequestOptions } from './ApiRequestOptions';
+// @ts-ignore
 import type { TOpenAPIConfig } from './OpenAPI';
+// @ts-ignore
 import { CancelablePromise } from './CancelablePromise';
+// @ts-ignore
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 function getHeaders(options: ApiRequestOptions, config: TOpenAPIConfig): Record<string, unknown> {

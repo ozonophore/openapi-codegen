@@ -7,7 +7,7 @@
 /* eslint-disable */
 
 export { ApiError } from '././core/ApiError';
-export { RequestConfig, RequestExecutor } from '././core/executor/requestExecutor';
+export type { RequestConfig, RequestExecutor } from '././core/executor/requestExecutor';
 export { createExecutorAdapter } from '././core/executor/createExecutorAdapter';
 export { OpenAPI } from '././core/OpenAPI';
 export type { TOpenAPIConfig } from '././core/OpenAPI';
@@ -49,4 +49,5 @@ export { SequencesService } from '././services/SequencesService';
 export { IngredientsService } from '././services/IngredientsService';
 export { AdvancementService } from '././services/AdvancementService';
 
-export { ClientOptions, createClient } from './createClient';
+export type { ClientOptions }  from './createClient';
+export { createClient } from './createClient';

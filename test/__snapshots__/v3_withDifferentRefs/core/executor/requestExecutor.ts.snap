@@ -7,6 +7,7 @@
 /* eslint-disable */
 
 import type { ApiResult } from '../ApiResult';
+type ExecutorReturn<T> = Promise<T>;
 
 export interface RequestConfig {
   method: string;
@@ -25,10 +26,10 @@ export interface RequestExecutor<TOptions = unknown> {
   request<TResponse>(
     config: RequestConfig,
     options?: TOptions
-  ): Promise<TResponse>;
+  ): ExecutorReturn<TResponse>;
 
   requestRaw<TResponse>(
     config: RequestConfig,
     options?: TOptions
-  ): Promise<ApiResult<TResponse>>;
+  ): ExecutorReturn<ApiResult<TResponse>>;
 }

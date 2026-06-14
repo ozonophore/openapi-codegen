@@ -4,7 +4,11 @@
 /* tslint: disable */
 /* eslint: disable */
 // @ts-nocheck
-export default {"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+export default {"1":function(container,depth0,helpers,partials,data) {
+    return "import type { CancelablePromise } from '../CancelablePromise';\n\ntype ExecutorReturn<T> = CancelablePromise<T>;\n";
+},"3":function(container,depth0,helpers,partials,data) {
+    return "type ExecutorReturn<T> = Promise<T>;\n";
+},"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, lookupProperty = container.lookupProperty || function(parent, propertyName) {
         if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
           return parent[propertyName];
@@ -13,5 +17,7 @@ export default {"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpe
     };
 
   return ((stack1 = container.invokePartial(lookupProperty(partials,"header"),depth0,{"name":"header","data":data,"helpers":helpers,"partials":partials,"decorators":container.decorators})) != null ? stack1 : "")
-    + "\nimport type { ApiResult } from '../ApiResult';\n\nexport interface RequestConfig {\n  method: string;\n  path: string;\n\n  headers?: Record<string, string>;\n  query?: Record<string, any>;\n  body?: unknown;\n\n  requestMediaType?: string;\n  responseType?: 'blob';\n  cookies?: Record<string, string>;\n}\n\nexport interface RequestExecutor<TOptions = unknown> {\n  request<TResponse>(\n    config: RequestConfig,\n    options?: TOptions\n  ): Promise<TResponse>;\n\n  requestRaw<TResponse>(\n    config: RequestConfig,\n    options?: TOptions\n  ): Promise<ApiResult<TResponse>>;\n}\n";
+    + "\nimport type { ApiResult } from '../ApiResult';\n"
+    + ((stack1 = lookupProperty(helpers,"if").call(depth0 != null ? depth0 : (container.nullContext || {}),lookupProperty(lookupProperty(data,"root"),"useCancelableRequest"),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.program(3, data, 0),"data":data,"loc":{"start":{"line":4,"column":0},"end":{"line":10,"column":7}}})) != null ? stack1 : "")
+    + "\nexport interface RequestConfig {\n  method: string;\n  path: string;\n\n  headers?: Record<string, string>;\n  query?: Record<string, any>;\n  body?: unknown;\n\n  requestMediaType?: string;\n  responseType?: 'blob';\n  cookies?: Record<string, string>;\n}\n\nexport interface RequestExecutor<TOptions = unknown> {\n  request<TResponse>(\n    config: RequestConfig,\n    options?: TOptions\n  ): ExecutorReturn<TResponse>;\n\n  requestRaw<TResponse>(\n    config: RequestConfig,\n    options?: TOptions\n  ): ExecutorReturn<ApiResult<TResponse>>;\n}\n";
 },"usePartial":true,"useData":true}

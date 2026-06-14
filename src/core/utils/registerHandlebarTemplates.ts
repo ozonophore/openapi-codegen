@@ -43,6 +43,7 @@ import templateCancellablePromise from '../../templatesCompiled/client/core/Canc
 import templateCoreRequest from '../../templatesCompiled/client/core/request';
 import templateCoreRequestExecutor from '../../templatesCompiled/client/core/executor/requestExecutor';
 import templateCreateExecutor from '../../templatesCompiled/client/core/executor/createExecutorAdapter';
+import templateLegacyRequestAdapter from '../../templatesCompiled/client/core/executor/legacyRequestAdapter';
 import templateInterceptors from '../../templatesCompiled/client/core/interceptors/interceptors';
 import templateApiErrorInterceptor from '../../templatesCompiled/client/core/interceptors/apiErrorInterceptor';
 import templateWithInterceptors from '../../templatesCompiled/client/core/interceptors/withInterceptors';
@@ -182,6 +183,7 @@ export function registerHandlebarTemplates(root: {
             httpStatusCode: Handlebars.template(templateHttpStatuses),
             requestExecutor: Handlebars.template(templateCoreRequestExecutor),
             createExecutorAdapter: Handlebars.template(templateCreateExecutor),
+            legacyRequestAdapter: Handlebars.template(templateLegacyRequestAdapter),
             interceptors: Handlebars.template(templateInterceptors),
             apiErrorInterceptor: Handlebars.template(templateApiErrorInterceptor),
             withInterceptors: Handlebars.template(templateWithInterceptors),

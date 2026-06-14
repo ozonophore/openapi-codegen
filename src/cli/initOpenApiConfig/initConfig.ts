@@ -14,9 +14,15 @@ import { findSpecFiles } from './utils/findSpecFiles';
 import { validateSpecFiles } from './utils/validateSpecFiles';
 import { writeConfigFile } from './utils/writeConfigFile';
 
+type HttpConfigPaths = {
+    request?: string;
+    customExecutorPath?: string;
+};
+
 type InitConfigParams = Pick<InitOptions, 'openapiConfig' | 'specsDir' | 'request'> & {
     templates: CLITemplates;
     useInteractiveMode?: boolean;
+    httpConfig?: HttpConfigPaths;
 };
 
 /**
@@ -67,8 +73,10 @@ export async function initConfig(params: InitConfigParams): Promise<void> {
     let config: TRawOptions;
     let useMultiOption = false;
     let customRequest: string | undefined;
+    let customExecutorPath: string | undefined;
     let perSpecRequest = false;
     const hasCustomRequestPath = Boolean(params.request);
+    const httpConfig = params.httpConfig ?? {};
 
     if (validatedSpecs.length > 0) {
         // Если найдены валидные спецификации, спрашиваем о типе конфигурации
@@ -93,11 +101,12 @@ export async function initConfig(params: InitConfigParams): Promise<void> {
             if (!hasCustomRequestPath) {
                 APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.CUSTOM_REQUEST_MISSING_PATH);
             } else {
-                customRequest = params.request;
+                customRequest = httpConfig.request ?? params.request;
+                customExecutorPath = httpConfig.customExecutorPath;
             }
         }
 
-        config = await buildConfig(validatedSpecs, useMultiOption, customRequest, perSpecRequest);
+        config = await buildConfig(validatedSpecs, useMultiOption, { request: customRequest, customExecutorPath }, perSpecRequest);
     } else {
         // Если валидных спецификаций нет, предлагаем создать пример
         APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.NO_VALID_SPEC_FILES_FOUND);
@@ -135,12 +144,13 @@ export async function initConfig(params: InitConfigParams): Promise<void> {
             if (!hasCustomRequestPath) {
                 APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.CUSTOM_REQUEST_MISSING_PATH);
             } else {
-                customRequest = params.request;
+                customRequest = httpConfig.request ?? params.request;
+                customExecutorPath = httpConfig.customExecutorPath;
             }
         }
 
         // Создаем пример конфигурации
-        config = buildExampleConfig(useMultiOption, customRequest, perSpecRequest);
+        config = buildExampleConfig(useMultiOption, { request: customRequest, customExecutorPath }, perSpecRequest);
     }
 
     // Записываем конфигурацию на диск

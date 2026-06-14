@@ -1,6 +1,6 @@
 {{>header}}
 
-import { RequestConfig } from '../executor/requestExecutor';
+import type { RequestConfig } from '../executor/requestExecutor';
 
 export type RequestInterceptor =
   (config: RequestConfig) => RequestConfig | Promise<RequestConfig>;
@@ -10,3 +10,11 @@ export type ResponseInterceptor<T = unknown> =
 
 export type ErrorInterceptor =
   (error: unknown, context: RequestConfig) => unknown | Promise<unknown>;
+
+/**
+ * Return from an ErrorInterceptor to recover from a failed request instead of re-throwing.
+ * The recovered value is passed through onResponse interceptors.
+ */
+export class RequestRecovery<T = unknown> {
+  constructor(public readonly value: T) {}
+}

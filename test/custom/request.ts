@@ -1,25 +1,28 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+
+// @ts-ignore
 import { ApiError } from './ApiError';
+// @ts-ignore
 import type { ApiResult } from './ApiResult';
+// @ts-ignore
 import type { ApiRequestOptions } from './ApiRequestOptions';
+// @ts-ignore
 import type { TOpenAPIConfig } from './OpenAPI';
+// @ts-ignore
 import { EHTTP_STATUS_CODES, EHTTP_STATUS_NAME } from './HttpStatusCode';
 
 function getHeaders(options: ApiRequestOptions, config: TOpenAPIConfig): Record<string, unknown> {
-    // Add your own data collection logic for headers
-    return {}
+    return {};
 }
 
 function getRequestBody(options: ApiRequestOptions) {
-    // Add your own data collection logic for the request body
-    return undefined
+    return undefined;
 }
 
 function getResponseHeader(response: Response, responseHeader?: string): string | null {
-    // Add your own data collection logic to generate response headers.
-    return null
+    return null;
 }
 
 async function getResponseBody(response: Response): Promise<any> {
@@ -39,6 +42,16 @@ async function getResponseBody(response: Response): Promise<any> {
     return null;
 }
 
+function toRequestConfig(options: ApiRequestOptions) {
+    return {
+        method: options.method,
+        path: options.path,
+        headers: options.headers,
+        query: options.query,
+        body: options.body,
+    };
+}
+
 function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
     const errors: Record<string, string> = {
         [EHTTP_STATUS_CODES.BAD_GATEWAY]: EHTTP_STATUS_NAME.BAD_GATEWAY,
@@ -49,15 +62,25 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult): void {
         [EHTTP_STATUS_CODES.SERVICE_UNAVAILABLE]: EHTTP_STATUS_NAME.SERVICE_UNAVAILABLE,
         [EHTTP_STATUS_CODES.UNAUTHORIZED]: EHTTP_STATUS_NAME.UNAUTHORIZED,
         ...options.errors,
-    }
+    };
 
     const error = errors[result.status];
     if (error) {
-        throw new ApiError(result, error);
+        throw new ApiError({
+            status: result.status,
+            message: error,
+            body: result.body,
+            request: toRequestConfig(options),
+        });
     }
 
     if (!result.ok) {
-        throw new ApiError(result, 'Generic Error');
+        throw new ApiError({
+            status: result.status,
+            message: 'Generic Error',
+            body: result.body,
+            request: toRequestConfig(options),
+        });
     }
 }
 
@@ -71,27 +94,30 @@ async function sendRequest(options: ApiRequestOptions, url: string, config: TOpe
     return await fetch(url, request);
 }
 
-export function request<T>(config: TOpenAPIConfig, options: ApiRequestOptions): Promise<T> {
-    return new Promise(async(resolve, reject) => {
-        try {
-            const url = `${config.BASE}${options.path}`.replace('{api-version}', config.VERSION);
+function buildUrl(options: ApiRequestOptions, config: TOpenAPIConfig): string {
+    const path = options.path.replace('{api-version}', config.VERSION);
+    return `${config.BASE}${path}`;
+}
 
-            const response = await sendRequest(options, url, config);
-            const responseBody = await getResponseBody(response);
-            const responseHeader = getResponseHeader(response, options.responseHeader);
+export async function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<T> {
+    const result = await requestRaw<T>(options, config);
+    return result.body;
+}
 
-            const result: ApiResult = {
-                url,
-                ok: response.ok,
-                status: response.status,
-                statusText: response.statusText,
-                body: responseHeader || responseBody,
-            };
+export async function requestRaw<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<ApiResult<T>> {
+    const url = buildUrl(options, config);
+    const response = await sendRequest(options, url, config);
+    const responseBody = await getResponseBody(response);
+    const responseHeader = getResponseHeader(response, options.responseHeader);
 
-            catchErrors(options, result);
-            resolve(result.body);
-        } catch (error) {
-            reject(error);
-        }
-    })
+    const result: ApiResult<T> = {
+        url,
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        body: (responseHeader || responseBody) as T,
+    };
+
+    catchErrors(options, result);
+    return result;
 }

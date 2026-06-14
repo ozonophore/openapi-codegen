@@ -70,8 +70,10 @@
 
 #### Кастомный HTTP-слой
 
-- `request` в конфиге по-прежнему указывает на ваш транспортный модуль.
-- `customExecutorPath` может указывать на `createExecutorAdapter` (или свой адаптер), оборачивающий транспорт в `RequestExecutor`.
+- `request` в конфиге по-прежнему указывает на транспортный модуль (legacy-сигнатура `ApiRequestOptions`); при генерации копируется в `core/request.ts`.
+- `customExecutorPath` указывает на модуль с экспортом `createExecutorAdapter`; при генерации копируется в `core/executor/createExecutorAdapter.ts` (не импортируется в runtime).
+- `createLegacyRequestAdapter(openApiConfig, mapOptions?)` — сгенерированный helper для проектов с legacy custom `request()` без полного переписывания на `RequestExecutor`. Используйте через `createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) })`.
+- Если кастомный транспорт экспортирует `requestRaw`, legacy adapter делегирует в него; иначе `requestRaw` синтезирует минимальный `ApiResult` из `request()` (status 200).
 
 #### Цепочка interceptors
 
@@ -86,6 +88,14 @@ flowchart TD
 ```
 
 Порядок: request interceptors → HTTP → response interceptors; при ошибке сначала error interceptors, затем исключение.
+
+Error interceptors могут вернуть `RequestRecovery(value)` для восстановления после ошибки; восстановленное значение проходит через response interceptors.
+
+`createClient` всегда оборачивает executor в `withInterceptors` с дефолтным `apiErrorInterceptor` (с `2.1.0-beta.10`).
+
+Транспортный `ApiError` (из `catchErrors`) теперь хранит slim `request` config, а payload ответа — в `body`, вместо полного `ApiRequestOptions` в `request`.
+
+При включённом `useCancelableRequest` методы `RequestExecutor.request` / `requestRaw` возвращают `CancelablePromise`.
 
 Влияние:
 - если у вас была кастомная интеграция со старым request-потоком, ее нужно адаптировать под executor-подход;
@@ -175,6 +185,8 @@ flowchart TD
 - `validationLibrary`
 - `emptySchemaStrategy`
 - `customExecutorPath`
+- `requestFormat` в `init` (`transport` | `adapter` | `executor`) — выбор типа scaffold и установка `request` vs `customExecutorPath` в конфиге
+- `executorFactory` в сгенерированном `createClient()` — runtime-хук для обёртки дефолтного executor (legacy adapter, retry, tracing)
 - `useHistory`, `diffReport` (или `analyze.useHistory` / `analyze.reportPath`)
 - `modelsMode` (`interfaces` | `classes`)
 - `prettierConfigPath` (опциональный путь к файлу конфигурации Prettier для вывода)
@@ -205,7 +217,11 @@ flowchart TD
 - интеграцию interceptors,
 - кастомные request/executor адаптеры.
 
-Если используете кастомный executor-модуль, задайте `customExecutorPath`.
+Если используете кастомный executor-модуль, задайте `customExecutorPath` (файл копируется в generated core при регенерации).
+
+Если сохраняете legacy custom `request()` и не хотите полностью переписывать на `RequestExecutor`, перегенерируйте клиент и используйте `createLegacyRequestAdapter` через `executorFactory`, либо задайте `"request"` в конфиге — дефолтный `createExecutorAdapter` сопоставит `RequestConfig` автоматически.
+
+Запустите `check-config`, чтобы увидеть предупреждения об отсутствующих файлах `request` / `customExecutorPath` и некорректном экспорте `createExecutorAdapter`.
 
 ### Шаг 4: Провалидируйте и при необходимости обновите конфиги
 
@@ -214,6 +230,8 @@ flowchart TD
 openapi-codegen-cli check-config --openapi-config ./openapi.config.json
 openapi-codegen-cli update-config --openapi-config ./openapi.config.json
 ```
+
+С `2.1.0-beta.10` `check-config` также выдаёт некритичные предупреждения **Executor config**, если файлы `request` или `customExecutorPath` отсутствуют, либо `customExecutorPath` не экспортирует `function createExecutorAdapter`.
 
 ### Шаг 5: Просмотрите изменения перед применением
 
@@ -321,7 +339,9 @@ openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/pre
 - [ ] Во всех конфигах удален `includeSchemasFiles`.
 - [ ] Везде явно задан `validationLibrary`.
 - [ ] Везде явно задан `emptySchemaStrategy`.
-- [ ] Проверена интеграция request/executor (`RequestExecutor`, interceptors, `customExecutorPath`).
+- [ ] Выбран путь миграции: `customExecutorPath` vs legacy `request` + `createLegacyRequestAdapter` (или `init --requestFormat`).
+- [ ] Проверена интеграция request/executor (`RequestExecutor`, interceptors, `customExecutorPath`, `createLegacyRequestAdapter`).
+- [ ] Выполнен `check-config` для предупреждений по `request` / `customExecutorPath`.
 - [ ] `useProjectPrettier` заменён на `prettierConfigPath`, если нужно форматирование Prettier.
 - [ ] `useEslintFix: true` заменён на пару `tsconfigPath` + `eslintConfigPath`, если нужен пакетный ESLint fix.
 - [ ] Выбран `modelsMode` и при необходимости workflow `useHistory` / diff‑отчёта.

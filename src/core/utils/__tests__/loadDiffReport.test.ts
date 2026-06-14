@@ -34,6 +34,26 @@ describe('@unit: loadDiffReport', () => {
         assert.strictEqual(result, null);
     });
 
+    test('returns null when diffReport path is set but useHistory is disabled', async t => {
+        const dir = createTempDir(t, 'diff-report-no-history-');
+        const reportPath = path.join(dir, 'report.json');
+        fs.writeFileSync(
+            reportPath,
+            JSON.stringify({
+                diff: { all: [{ action: 'changed', path: '$.info.version', severity: 'info', from: '1', to: '2' }] },
+            }),
+            'utf-8'
+        );
+
+        const loaded = loadDiffReport({
+            useHistory: false,
+            diffReport: reportPath,
+            logger: createLogger(),
+        });
+
+        assert.strictEqual(loaded, null);
+    });
+
     test('returns null when report file is missing', () => {
         const result = loadDiffReport({
             useHistory: true,
@@ -54,6 +74,7 @@ describe('@unit: loadDiffReport', () => {
         fs.writeFileSync(reportPath, JSON.stringify(report), 'utf-8');
 
         const loaded = loadDiffReport({
+            useHistory: true,
             diffReport: reportPath,
             logger: createLogger(),
         });
@@ -68,6 +89,7 @@ describe('@unit: loadDiffReport', () => {
         fs.writeFileSync(reportPath, JSON.stringify({ diff: { all: [] }, miracles: [] }), 'utf-8');
 
         const loaded = loadDiffReport({
+            useHistory: true,
             diffReport: reportPath,
             logger: createLogger(),
         });
@@ -161,6 +183,7 @@ describe('@unit: loadDiffReport', () => {
         fs.writeFileSync(reportPath, JSON.stringify(semanticReport), 'utf-8');
 
         const loaded = loadDiffReport({
+            useHistory: true,
             diffReport: reportPath,
             logger: createLogger(),
         });
@@ -227,6 +250,7 @@ describe('@unit: loadDiffReport', () => {
         fs.writeFileSync(reportPath, JSON.stringify(unifiedReport), 'utf-8');
 
         const loaded = loadDiffReport({
+            useHistory: true,
             diffReport: reportPath,
             logger: createLogger(),
         });
@@ -244,6 +268,7 @@ describe('@unit: loadDiffReport', () => {
         fs.writeFileSync(reportPath, '{ not-json', 'utf-8');
 
         const loaded = loadDiffReport({
+            useHistory: true,
             diffReport: reportPath,
             logger: createLogger(),
         });

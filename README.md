@@ -31,7 +31,9 @@
 - Supports generator plugins (`plugins`) including built-in `x-typescript-type`
 - Supports binary request/response generation (`format: binary` -> `Blob`)
 - Supports opt-in generation cache and incremental writes (`--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`)
-- Generated services accept a `RequestExecutor` in the constructor (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`)
+- Generated services accept a `RequestExecutor` in the constructor (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`, `createLegacyRequestAdapter`)
+- CLI `init --requestFormat` scaffolds custom HTTP layers: legacy transport, `createExecutorAdapter`, or standalone `RequestExecutor`
+- `check-config` validates `request` / `customExecutorPath` file presence and `createExecutorAdapter` export
 - Optional output formatting via `prettierConfigPath` (explicit Prettier config file)
 - Optional batch ESLint `--fix` after generation when both `tsconfigPath` and `eslintConfigPath` are set
 - Supports unified `analyze-diff` report (`schemaVersion: 2.0.0`) with separate `semantic` (CI/governance) and `structural` (generation) sections
@@ -45,12 +47,23 @@
 npm install ts-openapi-codegen --save-dev
 ```
 
+## Agent Skills
+
+AI agents can use bundled [Agent Skills](https://agentskills.io) for RequestExecutor migration and Marauder features. After install:
+
+```bash
+cp -r node_modules/ts-openapi-codegen/skills ./openapi-codegen-skills
+```
+
+See [skills/README.md](skills/README.md) for agent paths (Cursor, Claude Code, Codex) and available skills.
+
 ## Documentation
 
 - [Usage](docs/en/usage.md)
 - [Configuration file](docs/en/configuration.md)
 - [Examples](docs/en/examples.md)
 - [Features](docs/en/features.md)
+- [Migration guide](MIGRATION.md)
 - [Plugins](docs/en/plugins.md)
 - [Plugin API v2 (RFC)](docs/en/plugin-api-v2.md)
 - [Русская версия README](README.rus.md)

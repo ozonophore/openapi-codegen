@@ -27,7 +27,7 @@ describe('@unit: buildConfig', () => {
         const validatedSpecs: ValidatedSpec[] = [createMockSpec()];
         const customRequest = './custom/request.ts';
 
-        const result = await buildConfig(validatedSpecs, true, customRequest, true);
+        const result = await buildConfig(validatedSpecs, true, { request: customRequest }, true);
 
         assert.strictEqual(result.items?.[0].request, customRequest);
         assert.strictEqual(result.request, undefined);
@@ -37,7 +37,7 @@ describe('@unit: buildConfig', () => {
         const validatedSpecs: ValidatedSpec[] = [createMockSpec()];
         const customRequest = './custom/request.ts';
 
-        const result = await buildConfig(validatedSpecs, true, customRequest, false);
+        const result = await buildConfig(validatedSpecs, true, { request: customRequest }, false);
 
         assert.strictEqual(result.items?.[0].request, undefined);
         assert.strictEqual(result.request, customRequest);
@@ -76,7 +76,7 @@ describe('@unit: buildConfig', () => {
 
     test('includes request in flat mode', async () => {
         const customRequest = './custom/request.ts';
-        const result = await buildConfig([createMockSpec()], false, customRequest);
+        const result = await buildConfig([createMockSpec()], false, { request: customRequest });
 
         assert.strictEqual(result.request, customRequest);
     });
@@ -100,7 +100,7 @@ describe('@unit: buildExampleConfig', () => {
 
     test('includes root request for multi-option when not perSpecRequest', () => {
         const customRequest = './custom/request.ts';
-        const result = buildExampleConfig(true, customRequest, false);
+        const result = buildExampleConfig(true, { request: customRequest }, false);
 
         assert.strictEqual(result.request, customRequest);
         assert.strictEqual(result.items?.[0].request, undefined);
@@ -108,7 +108,7 @@ describe('@unit: buildExampleConfig', () => {
 
     test('includes per-item request when perSpecRequest is true', () => {
         const customRequest = './custom/request.ts';
-        const result = buildExampleConfig(true, customRequest, true);
+        const result = buildExampleConfig(true, { request: customRequest }, true);
 
         assert.strictEqual(result.request, undefined);
         assert.strictEqual(result.items?.[0].request, customRequest);
