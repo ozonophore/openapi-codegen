@@ -188,6 +188,16 @@ async function getResponseBody(response: Response, options: ApiRequestOptions): 
 }
 
 
+function toRequestConfig(options: ApiRequestOptions): { method: string; path: string; headers?: Record<string, string>; query?: Record<string, any>; body?: unknown } {
+    return {
+        method: options.method,
+        path: options.path,
+        headers: options.headers,
+        query: options.query,
+        body: options.body,
+    };
+}
+
 function catchErrors(options: ApiRequestOptions, result: ApiResult<unknown>): void {
     const errors: Record<string, string> = {
         [EHTTP_STATUS_CODES.BAD_GATEWAY]: EHTTP_STATUS_NAME.BAD_GATEWAY,
@@ -205,7 +215,8 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult<unknown>): vo
         throw new ApiError({
             message: result.statusText,
             status: result.status,
-            request: options,
+            body: result.body,
+            request: toRequestConfig(options),
         });
     }
 
@@ -213,7 +224,8 @@ function catchErrors(options: ApiRequestOptions, result: ApiResult<unknown>): vo
         throw new ApiError({
             message: 'Generic Error',
             status: result.status,
-            request: options,
+            body: result.body,
+            request: toRequestConfig(options),
         });
     }
 }

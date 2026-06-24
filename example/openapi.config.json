@@ -2,6 +2,7 @@
     "httpClient": "fetch",
     "input": "./test/spec/lom/lom_api.v2.yaml",
     "output": "./rest-api/lom_api/",
+    "customExecutorPath": "./example/executor.ts",
     "useUnionTypes": true,
     "sortByRequired": true,
     "useHistory": true,

@@ -1,8 +1,9 @@
 {{>header}}
 
 import type { ApiResult } from '../ApiResult';
-import { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './interceptors';
-import { RequestConfig, RequestExecutor } from '../executor/requestExecutor';
+import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './interceptors';
+import { RequestRecovery } from './interceptors';
+import type { RequestConfig, RequestExecutor } from '../executor/requestExecutor';
 
 export function withInterceptors<TOptions extends Record<string, any> = Record<string, never>>(
     executor: RequestExecutor<TOptions>,
@@ -37,34 +38,48 @@ export function withInterceptors<TOptions extends Record<string, any> = Record<s
 
     return {
         async request<TResponse>(config: RequestConfig, options?: TOptions): Promise<TResponse> {
+            let currentConfig = config;
+
             try {
-                const currentConfig = await runRequestInterceptors(config);
+                currentConfig = await runRequestInterceptors(config);
                 const response = await executor.request<TResponse>(currentConfig, options);
 
                 return runResponseInterceptors(response, currentConfig);
             } catch (caught) {
                 let error = caught;
-                const currentConfig = config;
 
                 for (const interceptor of interceptors.onError ?? []) {
-                    error = await interceptor(error, currentConfig);
+                    const result = await interceptor(error, currentConfig);
+
+                    if (result instanceof RequestRecovery) {
+                        return runResponseInterceptors(result.value as TResponse, currentConfig);
+                    }
+
+                    error = result;
                 }
 
                 throw error;
             }
         },
         async requestRaw<TResponse>(config: RequestConfig, options?: TOptions): Promise<ApiResult<TResponse>> {
+            let currentConfig = config;
+
             try {
-                const currentConfig = await runRequestInterceptors(config);
+                currentConfig = await runRequestInterceptors(config);
                 const response = await executor.requestRaw<TResponse>(currentConfig, options);
 
                 return runResponseInterceptors(response, currentConfig);
             } catch (caught) {
                 let error = caught;
-                const currentConfig = config;
 
                 for (const interceptor of interceptors.onError ?? []) {
-                    error = await interceptor(error, currentConfig);
+                    const result = await interceptor(error, currentConfig);
+
+                    if (result instanceof RequestRecovery) {
+                        return runResponseInterceptors(result.value as ApiResult<TResponse>, currentConfig);
+                    }
+
+                    error = result;
                 }
 
                 throw error;

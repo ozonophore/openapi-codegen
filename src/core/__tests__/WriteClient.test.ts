@@ -61,6 +61,7 @@ describe('@unit: writeClient', () => {
                 cancelablePromise: () => 'cancelablePromise',
                 httpStatusCode: () => 'httpStatusCode',
                 createExecutorAdapter: () => 'createExecutorAdapter',
+                legacyRequestAdapter: () => 'legacyRequestAdapter',
                 requestExecutor: () => 'requestExecutor',
                 apiErrorInterceptor: () => 'apiErrorInterceptor',
                 interceptors: () => 'interceptors',

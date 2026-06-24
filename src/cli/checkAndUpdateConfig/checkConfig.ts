@@ -9,6 +9,7 @@ import { CLICommandResult } from '../types';
 import { ACTION_FOR_CONFIG_DATA_OPTIONS } from './constants';
 import { selectConfigAction } from './utils/selectConfigAction';
 import { validateAndMigrateConfigData } from './utils/validateAndMigrateConfigData';
+import { validateExecutorSetup } from './utils/validateExecutorSetup';
 
 /**
  * Проверяет конфигурационный файл на корректность и актуальность.
@@ -40,6 +41,11 @@ export async function checkConfig(options: OptionValues): Promise<CLICommandResu
 
     try {
         const { isActualConfigVersion, hasDefaultValues, migratedData } = validateAndMigrateConfigData(configData);
+
+        const executorWarnings = validateExecutorSetup(migratedData);
+        for (const warning of executorWarnings) {
+            APP_LOGGER.warn(`Executor config: ${warning}`);
+        }
 
         APP_LOGGER.info(LOGGER_MESSAGES.CONFIG.CONFIG_VALID(validatedOptions.openapiConfig || ''));
 

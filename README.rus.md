@@ -31,7 +31,9 @@
 - Поддерживает плагины генератора (`plugins`), включая встроенный `x-typescript-type`
 - Поддерживает генерацию бинарных request/response (`format: binary` -> `Blob`)
 - Поддерживает opt-in кэш генерации и инкрементальную запись (`--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`)
-- Сгенерированные сервисы принимают `RequestExecutor` в конструкторе (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`)
+- Сгенерированные сервисы принимают `RequestExecutor` в конструкторе (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`, `createLegacyRequestAdapter`)
+- CLI `init --requestFormat` создаёт scaffold кастомного HTTP-слоя: legacy transport, `createExecutorAdapter` или автономный `RequestExecutor`
+- `check-config` проверяет наличие файлов `request` / `customExecutorPath` и экспорт `createExecutorAdapter`
 - Опциональное форматирование вывода через `prettierConfigPath` (явный путь к конфигу Prettier)
 - Опциональный пакетный ESLint `--fix` после генерации при указании `tsconfigPath` и `eslintConfigPath`
 - Поддерживает унифицированный отчёт `analyze-diff` (`schemaVersion: 2.0.0`) с отдельными секциями `semantic` (CI/governance) и `structural` (генерация)
@@ -45,12 +47,23 @@
 npm install ts-openapi-codegen --save-dev
 ```
 
+## Agent Skills
+
+Для AI-агентов в пакете есть [Agent Skills](https://agentskills.io) по RequestExecutor и Marauder. После установки:
+
+```bash
+cp -r node_modules/ts-openapi-codegen/skills ./openapi-codegen-skills
+```
+
+Подробнее: [skills/README.md](skills/README.md) — пути для Cursor, Claude Code, Codex и список навыков.
+
 ## Документация
 
 - [Использование](docs/ru/usage.md)
 - [Файл конфигурации](docs/ru/configuration.md)
 - [Примеры](docs/ru/examples.md)
 - [Возможности](docs/ru/features.md)
+- [Руководство по миграции](MIGRATION.RU.md)
 - [Плагины](docs/ru/plugins.md)
 - [Plugin API v2 (RFC)](docs/ru/plugin-api-v2.md)
 - [English README](README.md)

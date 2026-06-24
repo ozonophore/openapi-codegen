@@ -1,6 +1,6 @@
 {{>header}}
 
-import { ErrorInterceptor } from './interceptors';
+import type { ErrorInterceptor } from './interceptors';
 import { ApiError } from '../ApiError';
 
 interface ExecutorError {
@@ -10,6 +10,10 @@ interface ExecutorError {
 }
 
 export const apiErrorInterceptor: ErrorInterceptor = (error, request) => {
+    if (error instanceof ApiError) {
+        throw error;
+    }
+
     if (typeof error === 'object' && error && 'status' in error) {
         const e = error as ExecutorError;
 

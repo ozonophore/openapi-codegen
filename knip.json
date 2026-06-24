@@ -13,6 +13,7 @@
         "eslint-plugin-lodash",
         "form-data",
         "node-fetch",
+        "ky",
         "qs",
         "@types/axios",
         "@types/node-fetch",

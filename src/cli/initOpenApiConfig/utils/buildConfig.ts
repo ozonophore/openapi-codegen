@@ -2,21 +2,39 @@ import { COMMON_DEFAULT_OPTIONS_VALUES, DEFAULT_OUTPUT_API_DIR } from '../../../
 import { TRawOptions } from '../../../common/TRawOptions';
 import { ValidatedSpec } from './validateSpecFiles';
 
+export type HttpConfigPaths = {
+    request?: string;
+    customExecutorPath?: string;
+};
+
+const spreadHttpConfig = (paths?: HttpConfigPaths, perItem = false): Record<string, string> => {
+    if (!paths) {
+        return {};
+    }
+
+    if (perItem && paths.request) {
+        return { request: paths.request };
+    }
+
+    const result: Record<string, string> = {};
+    if (!perItem && paths.request) {
+        result.request = paths.request;
+    }
+    if (paths.customExecutorPath) {
+        result.customExecutorPath = paths.customExecutorPath;
+    }
+    return result;
+};
+
 /**
  * Формирует конфигурацию на основе валидированных спецификаций
- * @param validatedSpecs - Массив валидированных спецификаций
- * @param useMultiOption - Использовать множественный формат (items)
- * @param customRequest - Путь к кастомной реализации request (опционально)
- * @param perSpecRequest - Использовать отдельный request для каждой спецификации (только для MULTI)
- * @returns Объект конфигурации
- * @throws {Error} Если нет валидированных спецификаций для плоского формата
  */
-export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOption: boolean, customRequest?: string, perSpecRequest?: boolean): Promise<TRawOptions> {
+export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOption: boolean, httpConfig?: HttpConfigPaths, perSpecRequest?: boolean): Promise<TRawOptions> {
     if (useMultiOption) {
         const items = validatedSpecs.map(spec => ({
             input: spec.relativePath,
             output: DEFAULT_OUTPUT_API_DIR,
-            ...(perSpecRequest && customRequest ? { request: customRequest } : {}),
+            ...(perSpecRequest ? spreadHttpConfig(httpConfig, true) : {}),
         }));
 
         return {
@@ -34,7 +52,7 @@ export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOptio
             modelsMode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
             useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
             diffReport: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
-            ...(!perSpecRequest && customRequest ? { request: customRequest } : {}),
+            ...(!perSpecRequest ? spreadHttpConfig(httpConfig) : {}),
             models: {
                 mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
             },
@@ -53,7 +71,6 @@ export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOptio
             throw new Error('No validated spec files found');
         }
 
-        // Для плоского варианта используем первую спецификацию
         const firstSpec = validatedSpecs[0];
 
         return {
@@ -72,7 +89,7 @@ export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOptio
             modelsMode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
             useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
             diffReport: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
-            ...(customRequest ? { request: customRequest } : {}),
+            ...spreadHttpConfig(httpConfig),
             models: {
                 mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
             },
@@ -91,19 +108,15 @@ export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOptio
 
 /**
  * Создает пример конфигурации, когда нет валидированных спецификаций
- * @param useMultiOption - Использовать множественный формат (items)
- * @param customRequest - Путь к кастомной реализации request (опционально)
- * @param perSpecRequest - Использовать отдельный request для каждой спецификации (только для MULTI)
- * @returns Объект конфигурации-примера
  */
-export function buildExampleConfig(useMultiOption: boolean, customRequest?: string, perSpecRequest?: boolean): TRawOptions {
+export function buildExampleConfig(useMultiOption: boolean, httpConfig?: HttpConfigPaths, perSpecRequest?: boolean): TRawOptions {
     if (useMultiOption) {
         return {
             items: [
                 {
                     input: './openapi/spec.yml',
                     output: DEFAULT_OUTPUT_API_DIR,
-                    ...(perSpecRequest && customRequest ? { request: customRequest } : {}),
+                    ...(perSpecRequest ? spreadHttpConfig(httpConfig, true) : {}),
                 },
             ],
             httpClient: COMMON_DEFAULT_OPTIONS_VALUES.httpClient,
@@ -119,7 +132,7 @@ export function buildExampleConfig(useMultiOption: boolean, customRequest?: stri
             modelsMode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
             useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
             diffReport: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
-            ...(!perSpecRequest && customRequest ? { request: customRequest } : {}),
+            ...(!perSpecRequest ? spreadHttpConfig(httpConfig) : {}),
             models: {
                 mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
             },
@@ -150,7 +163,7 @@ export function buildExampleConfig(useMultiOption: boolean, customRequest?: stri
             modelsMode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
             useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
             diffReport: COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
-            ...(customRequest ? { request: customRequest } : {}),
+            ...spreadHttpConfig(httpConfig),
             models: {
                 mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
             },

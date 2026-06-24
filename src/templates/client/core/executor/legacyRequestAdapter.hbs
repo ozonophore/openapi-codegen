@@ -1,0 +1,58 @@
+{{>header}}
+
+import type { ApiResult } from '../ApiResult';
+import type { ApiRequestOptions } from '../ApiRequestOptions';
+import type { TOpenAPIConfig } from '../OpenAPI';
+import { OpenAPI } from '../OpenAPI';
+import { request as legacyRequest } from '../request';
+{{#if @root.useCustomRequestRaw}}
+import { requestRaw as legacyRequestRaw } from '../request';
+{{/if}}
+import type { RequestExecutor, RequestConfig } from './requestExecutor';
+
+function toApiRequestOptions(config: RequestConfig): ApiRequestOptions {
+    return {
+        method: config.method as ApiRequestOptions['method'],
+        path: config.path,
+        headers: config.headers,
+        query: config.query,
+        body: config.body,
+        cookies: config.cookies,
+        mediaType: config.requestMediaType,
+        responseType: config.responseType,
+    };
+}
+
+/**
+ * Adapts legacy request(options, config) transport to the RequestExecutor contract.
+ * Use via createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) }).
+ */
+export function createLegacyRequestAdapter<TRequestOptions extends Record<string, any>>(
+    openApiConfig: TOpenAPIConfig = OpenAPI,
+    mapOptions?: (options: TRequestOptions | undefined) => Partial<ApiRequestOptions>,
+): RequestExecutor<TRequestOptions> {
+    const toMergedOptions = (config: RequestConfig, options?: TRequestOptions): ApiRequestOptions => ({
+        ...toApiRequestOptions(config),
+        ...(mapOptions ? mapOptions(options) : {}),
+    });
+
+    return {
+        request<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<TResponse> {
+            return legacyRequest<TResponse>(toMergedOptions(config, options), openApiConfig);
+        },
+
+        requestRaw<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<ApiResult<TResponse>> {
+            {{#if @root.useCustomRequestRaw}}
+            return legacyRequestRaw<TResponse>(toMergedOptions(config, options), openApiConfig);
+            {{else}}
+            return legacyRequest<TResponse>(toMergedOptions(config, options), openApiConfig).then((body) => ({
+                url: `${openApiConfig.BASE}${config.path}`,
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                body: body as TResponse,
+            }));
+            {{/if}}
+        },
+    };
+}

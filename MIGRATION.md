@@ -70,8 +70,10 @@ Service generation moved to `RequestExecutor`-based runtime.
 
 #### Custom HTTP layer
 
-- `request` in config still points at your transport module.
-- `customExecutorPath` can point at `createExecutorAdapter` (or your own adapter) to wrap that transport in a `RequestExecutor`.
+- `request` in config still points at your transport module (legacy `ApiRequestOptions` signature); it is copied to `core/request.ts` during generation.
+- `customExecutorPath` points at a module exporting `createExecutorAdapter`; it is copied to `core/executor/createExecutorAdapter.ts` during generation (not imported at runtime).
+- `createLegacyRequestAdapter(openApiConfig, mapOptions?)` — generated helper for projects keeping a legacy custom `request()` without rewriting to `RequestExecutor` directly. Use via `createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) })`.
+- If your custom transport exports `requestRaw`, the legacy adapter delegates to it; otherwise `requestRaw` synthesizes a minimal `ApiResult` from `request()` (status 200).
 
 #### Interceptor pipeline
 
@@ -86,6 +88,14 @@ flowchart TD
 ```
 
 Order: request interceptors → HTTP → response interceptors; on failure, error interceptors run before the error is re-thrown.
+
+Error interceptors may return `RequestRecovery(value)` to recover from a failed request; the recovered value passes through response interceptors.
+
+`createClient` always wraps the executor with `withInterceptors` and the default `apiErrorInterceptor` (since `2.1.0-beta.10`).
+
+Transport-level `ApiError` (from `catchErrors`) now stores a slim `request` config and puts the response payload in `body` instead of embedding full `ApiRequestOptions` in `request`.
+
+When `useCancelableRequest` is enabled, `RequestExecutor.request` / `requestRaw` return `CancelablePromise`.
 
 Impact:
 - If you had custom runtime integration around the old request flow, update it to executor-based flow.
@@ -175,6 +185,8 @@ For CLI/config:
 - `validationLibrary`
 - `emptySchemaStrategy`
 - `customExecutorPath`
+- `requestFormat` on `init` (`transport` | `adapter` | `executor`) — selects scaffold type and sets `request` vs `customExecutorPath` in generated config
+- `executorFactory` on generated `createClient()` — runtime hook to wrap the default executor (legacy adapter, retry, tracing)
 - `useHistory`, `diffReport` (or `analyze.useHistory` / `analyze.reportPath`)
 - `modelsMode` (`interfaces` | `classes`)
 - `prettierConfigPath` (optional path to a Prettier config file for generated output)
@@ -205,7 +217,11 @@ Regenerate clients and check:
 - interceptor integration,
 - custom request/executor adapters.
 
-If you use custom adapter module, set `customExecutorPath`.
+If you use custom adapter module, set `customExecutorPath` (file is copied into generated core on regen).
+
+If you keep a legacy custom `request()` and do not want a full executor rewrite, regenerate and use `createLegacyRequestAdapter` via `executorFactory`, or set `"request"` in config so the default `createExecutorAdapter` maps `RequestConfig` automatically.
+
+Run `check-config` to surface missing `request` / `customExecutorPath` files and invalid `createExecutorAdapter` exports.
 
 ### Step 4: Validate and migrate config files
 
@@ -214,6 +230,8 @@ Run:
 openapi-codegen-cli check-config --openapi-config ./openapi.config.json
 openapi-codegen-cli update-config --openapi-config ./openapi.config.json
 ```
+
+Since `2.1.0-beta.10`, `check-config` also emits non-fatal **Executor config** warnings when `request` or `customExecutorPath` files are missing, or when `customExecutorPath` does not export `function createExecutorAdapter`.
 
 ### Step 5: Verify generated diffs before applying
 
@@ -320,7 +338,9 @@ When `useHistory` is on and a property type changes, validation schemas may coer
 - [ ] Replaced `includeSchemasFiles` in all configs.
 - [ ] Selected and set `validationLibrary` explicitly.
 - [ ] Selected and set `emptySchemaStrategy` explicitly.
-- [ ] Reviewed custom request/executor integration (`RequestExecutor`, interceptors, `customExecutorPath`).
+- [ ] Chose migration path: `customExecutorPath` vs legacy `request` + `createLegacyRequestAdapter` (or `init --requestFormat`).
+- [ ] Reviewed custom request/executor integration (`RequestExecutor`, interceptors, `customExecutorPath`, `createLegacyRequestAdapter`).
+- [ ] Ran `check-config` for `request` / `customExecutorPath` warnings.
 - [ ] Replaced `useProjectPrettier` with `prettierConfigPath` where you still want Prettier formatting.
 - [ ] Replaced `useEslintFix: true` with `tsconfigPath` + `eslintConfigPath` where you still want batch ESLint fix.
 - [ ] Decided on `modelsMode` and optional `useHistory` / diff report workflow.

@@ -1,96 +1,132 @@
 {{>header}}
 
-import type { RequestExecutor, RequestConfig } from './request-executor';
+import { ApiError } from './ApiError';
+import type { ApiRequestOptions } from './ApiRequestOptions';
+import type { ApiResult } from './ApiResult';
+import type { TOpenAPIConfig } from './OpenAPI';
 {{#if useCancelableRequest}}
-import type { CancelablePromise } from './CancelablePromise';
+import { CancelablePromise } from './CancelablePromise';
 {{/if}}
 
 /**
- * Определите свой тип опций (опционально)
- * Измените этот интерфейс в соответствии с вашими потребностями
+ * Custom HTTP transport (legacy signature).
+ * This file is copied to core/request.ts during generation.
+ *
+ * After generation, wrap it with createLegacyRequestAdapter from core/executor/legacyRequestAdapter.ts
+ * or set "request" in openapi.config.json — createExecutorAdapter maps RequestConfig automatically.
  */
-interface MyCustomOptions {
-    timeout?: number;
-    retries?: number;
+function buildUrl(options: ApiRequestOptions, config: TOpenAPIConfig): string {
+    const path = options.path.replace('{api-version}', config.VERSION);
+    return `${config.BASE}${path}`;
 }
 
-/**
- * Создайте пользовательский executor
- * Реализуйте свою логику запросов здесь
- *
- * @example Пример использования:
- * 
- * import { createLegacyExecutor } from './generated/core/legacy-request-adapter';
- * import { SimpleService } from './generated/services/SimpleService';
- *
- * const executorWithOptions = createLegacyExecutor<MyCustomOptions>(OpenAPI, (options) => {
- *  // Мапьте ваши пользовательские опции в ApiRequestOptions при необходимости
- *  return {
- *      // Добавьте любые поля ApiRequestOptions на основе options
- *  };
- * });
- * 
- * const simpleService = new SimpleService(executorWithOptions);
- * await simpleService.getCallWithoutParametersAndResponse();
- */
+function toRequestConfig(options: ApiRequestOptions): { method: string; path: string } {
+    return { method: options.method, path: options.path };
+}
+
 {{#if useCancelableRequest}}
 export function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): CancelablePromise<T> {
     return new CancelablePromise(async (resolve, reject, onCancel) => {
         try {
             const abortController = new AbortController();
-            
-            if (options?.timeout) {
-                const timeoutId = setTimeout(() => abortController.abort(), options.timeout);
-                onCancel(() => clearTimeout(timeoutId));
-            }
-            
             onCancel(() => abortController.abort());
-            
-            if (onCancel.isCancelled) {
-                return;
-            }
-            
-            // Ваша пользовательская логика запросов здесь
-            const response = await fetch(config.url, {
-                method: config.method,
-                headers: config.headers,
-                body: config.body ? JSON.stringify(config.body) : undefined,
+
+            const url = buildUrl(options, config);
+            const response = await fetch(url, {
+                method: options.method,
+                headers: options.headers as HeadersInit,
+                body: options.body ? JSON.stringify(options.body) : undefined,
                 signal: abortController.signal,
             });
-            
+
+            const body = await response.json().catch(() => null);
+
             if (!response.ok) {
-                throw new Error(`Request failed: ${response.statusText}`);
+                throw new ApiError({
+                    status: response.status,
+                    message: response.statusText,
+                    body,
+                    request: toRequestConfig(options),
+                });
             }
-            
-            const data = await response.json();
-            resolve(data);
+
+            resolve(body as T);
         } catch (error) {
             reject(error);
         }
     });
-};
-{{else}}
-export async function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<T> {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const url = getUrl(options, config);
-            const response = await sendRequest(options, url, config);
-            const responseBody = getResponseBody(response);
-            const responseHeader = getResponseHeader(response, options.responseHeader);
+}
 
-            const result: ApiResult = {
+export function requestRaw<T>(options: ApiRequestOptions, config: TOpenAPIConfig): CancelablePromise<ApiResult<T>> {
+    return new CancelablePromise(async (resolve, reject, onCancel) => {
+        try {
+            const abortController = new AbortController();
+            onCancel(() => abortController.abort());
+
+            const url = buildUrl(options, config);
+            const response = await fetch(url, {
+                method: options.method,
+                headers: options.headers as HeadersInit,
+                body: options.body ? JSON.stringify(options.body) : undefined,
+                signal: abortController.signal,
+            });
+
+            const body = await response.json().catch(() => null);
+            const result: ApiResult<T> = {
                 url,
-                ok: isSuccess(response.status),
+                ok: response.ok,
                 status: response.status,
                 statusText: response.statusText,
-                body: responseHeader || responseBody,
+                body: body as T,
             };
 
-            catchErrors(options, result);
-            resolve(result.body);
+            if (!response.ok) {
+                throw new ApiError({
+                    status: response.status,
+                    message: response.statusText,
+                    body,
+                    request: toRequestConfig(options),
+                });
+            }
+
+            resolve(result);
         } catch (error) {
             reject(error);
         }
     });
+}
+{{else}}
+export async function request<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<T> {
+    const result = await requestRaw<T>(options, config);
+    return result.body;
+}
+
+export async function requestRaw<T>(options: ApiRequestOptions, config: TOpenAPIConfig): Promise<ApiResult<T>> {
+    const url = buildUrl(options, config);
+    const response = await fetch(url, {
+        method: options.method,
+        headers: options.headers as HeadersInit,
+        body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+
+    const body = await response.json().catch(() => null);
+    const result: ApiResult<T> = {
+        url,
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        body: body as T,
+    };
+
+    if (!response.ok) {
+        throw new ApiError({
+            status: response.status,
+            message: response.statusText,
+            body,
+            request: toRequestConfig(options),
+        });
+    }
+
+    return result;
 }
 {{/if}}

@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.10] — 2026-06-19
+
+### Added
+- Added generated `core/executor/legacyRequestAdapter.ts` with `createLegacyRequestAdapter()` — bridges legacy `request(options, config)` transport to the `RequestExecutor` contract (with `requestRaw` passthrough when the custom transport exports it).
+- Added CLI scaffold formats for `init --request` via `--requestFormat`: `transport` (legacy `request` + `requestRaw`), `adapter` (`createExecutorAdapter` for `customExecutorPath`), `executor` (standalone `RequestExecutor` object).
+- Added `customCreateExecutorAdapter.hbs` CLI template and interactive scaffold picker in `init`.
+- Added `validateExecutorSetup()` in `check-config` — non-fatal warnings when `request` / `customExecutorPath` files are missing or `customExecutorPath` does not export `createExecutorAdapter`.
+- Added `RequestRecovery` class for error interceptors — return recovered values from `onError` instead of re-throwing.
+- Added `example/executor.ts` — ky-based `createExecutorAdapter` reference implementation.
+- Added npm package `files` entry for bundled `skills/`; README Agent Skills section for RequestExecutor migration and Marauder workflows.
+- Added runtime dependency `ky` (used in example adapter).
+
+### Changed
+- Refactored `createExecutorAdapter` template — unified `RequestConfig` → `ApiRequestOptions` mapping via `toApiRequestOptions()` / `toMergedOptions()`; always delegates to transport `request` / `requestRaw`.
+- `writeClientCore` now copies `customExecutorPath` into generated `core/executor/createExecutorAdapter.ts` and detects `requestRaw` export in custom transport for legacy adapter generation.
+- `RequestExecutor` return types use `CancelablePromise` when `useCancelableRequest` is enabled.
+- `catchErrors` / transport `ApiError` — `request` field is a slim config shape (`method`, `path`, `headers`, `query`, `body`); response payload moved to `body`.
+- `createClient` always wraps the executor with `withInterceptors` (including default `apiErrorInterceptor`); no longer imports `customExecutorPath` at runtime.
+- `init` flow sets `request` or `customExecutorPath` in config based on selected scaffold format (`resolveHttpConfigPaths`).
+- Updated CLI scaffolds (`customRequest.hbs`, `customRequestExecutor.hbs`) — legacy transport signature, `requestRaw`, `ApiError` handling, migration hints.
+- Updated `docs/en/features.md` and `docs/ru/features.md` RequestExecutor examples (`buildUrl`, `requestRaw`, `OpenAPI.BASE`).
+
+### Fixed
+- `withInterceptors` — request interceptors now mutate `currentConfig` used in error handlers; `RequestRecovery` from `onError` passes through response interceptors for both `request` and `requestRaw`.
+- `apiErrorInterceptor` — re-throws existing `ApiError` instances without double-wrapping.
+- `createExecutorAdapter` with custom `request` config — incorrect delegation when custom transport used legacy `ApiRequestOptions` signature.
+- Custom executor file validation gaps in config check workflow.
+
+### Breaking Changes
+- `createClient` always applies `withInterceptors` + default `apiErrorInterceptor` (previously only when `options.interceptors` was set).
+- `customExecutorPath` module is copied into generated output at generation time; `createClient` no longer imports the source path at runtime.
+- Transport-thrown `ApiError.request` no longer carries full `ApiRequestOptions` — use slim config fields or read `error.body` for the response payload.
+
+### Tests
+- Added: `requestExecutorInterceptors.test.ts` (`withInterceptors`, `RequestRecovery`, `validateExecutorSetup`).
+- Expanded: `customRequestRaw.test.ts`, `index.test.ts` (legacy adapter snapshots, custom executor copy, interceptor pipeline).
+- Updated snapshots across v2/v3/lom_api fixtures for `legacyRequestAdapter`, `createExecutorAdapter`, interceptors, and `createClient`.
+
 ## [2.1.0-beta.9] — 2026-06-10
 
 ### Added

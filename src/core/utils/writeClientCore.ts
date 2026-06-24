@@ -13,6 +13,7 @@ import { WriteClient } from '../WriteClient';
  * @param outputCorePath The directory for generating the kernel settings
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param request: Path to custom request file
+ * @param customExecutorPath: Path to custom executor file
  * @param useCancelableRequest Use cancelable request type
  */
 interface IWriteClientCore {
@@ -23,6 +24,7 @@ interface IWriteClientCore {
     request?: string;
     useCancelableRequest?: boolean;
     useSeparatedIndexes?: boolean;
+    customExecutorPath?: string;
     modelsMode?: ModelsMode;
 }
 
@@ -36,7 +38,7 @@ interface IWriteClientCore {
  * @param useCancelableRequest Use cancelable request type
  */
 export async function writeClientCore(this: WriteClient, options: IWriteClientCore): Promise<void> {
-    const { client, templates, outputCorePath, httpClient, request, useCancelableRequest, useSeparatedIndexes, modelsMode } = options;
+    const { client, templates, outputCorePath, httpClient, request, useCancelableRequest, useSeparatedIndexes, customExecutorPath, modelsMode } = options;
     const context = {
         httpClient,
         server: client.server,
@@ -48,6 +50,26 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
     this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.CORE_START);
 
     const hasCustomRequest = !!request;
+    const hasCustomExecutor = !!customExecutorPath;
+    let useCustomRequestRaw = false;
+
+    if (hasCustomRequest) {
+        const requestFile = resolveHelper(process.cwd(), request);
+        const requestFileExists = await fileSystemHelpers.exists(requestFile);
+        if (!requestFileExists) {
+            throw new Error(`Custom request file "${requestFile}" does not exists`);
+        }
+        const requestFileContent = await fileSystemHelpers.readFile(requestFile, 'utf8');
+        useCustomRequestRaw = /\bexport\s+(async\s+)?function\s+requestRaw\b/.test(requestFileContent);
+    }
+
+    if (hasCustomExecutor) {
+        const executorFile = resolveHelper(process.cwd(), customExecutorPath);
+        const executorFileExists = await fileSystemHelpers.exists(executorFile);
+        if (!executorFileExists) {
+            throw new Error(`Custom executor file "${executorFile}" does not exists`);
+        }
+    }
 
     await this.writeOutputFile(resolveHelper(outputCorePath, 'OpenAPI.ts'), templates.core.settings(context));
     await this.writeOutputFile(resolveHelper(outputCorePath, 'ApiError.ts'), templates.core.apiError({}));
@@ -62,20 +84,23 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
     }
     await this.writeOutputFile(resolveHelper(outputCorePath, 'HttpStatusCode.ts'), templates.core.httpStatusCode({}));
     await this.writeOutputFile(resolveHelper(outputCorePath, 'request.ts'), templates.core.request(context));
-    await this.writeOutputFile(resolveHelper(outputCorePath, 'executor/requestExecutor.ts'), templates.core.requestExecutor({}));
-    await this.writeOutputFile(resolveHelper(outputCorePath, 'executor/createExecutorAdapter.ts'), templates.core.createExecutorAdapter({ useCustomRequest: hasCustomRequest }));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'executor/requestExecutor.ts'), templates.core.requestExecutor({ useCancelableRequest }));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'executor/createExecutorAdapter.ts'), templates.core.createExecutorAdapter({}));
+    await this.writeOutputFile(resolveHelper(outputCorePath, 'executor/legacyRequestAdapter.ts'), templates.core.legacyRequestAdapter({ useCustomRequestRaw }));
     await this.writeOutputFile(resolveHelper(outputCorePath, 'interceptors/interceptors.ts'), templates.core.interceptors({}));
     await this.writeOutputFile(resolveHelper(outputCorePath, 'interceptors/apiErrorInterceptor.ts'), templates.core.apiErrorInterceptor({}));
     await this.writeOutputFile(resolveHelper(outputCorePath, 'interceptors/withInterceptors.ts'), templates.core.withInterceptors({}));
 
     if (hasCustomRequest) {
         const requestFile = resolveHelper(process.cwd(), request);
-        const requestFileExists = await fileSystemHelpers.exists(requestFile);
-        if (!requestFileExists) {
-            throw new Error(`Custom request file "${requestFile}" does not exists`);
-        }
         await fileSystemHelpers.copyFile(requestFile, resolveHelper(outputCorePath, 'request.ts'));
         this.registerOutputFile(resolveHelper(outputCorePath, 'request.ts'));
+    }
+
+    if (hasCustomExecutor) {
+        const executorFile = resolveHelper(process.cwd(), customExecutorPath);
+        await fileSystemHelpers.copyFile(executorFile, resolveHelper(outputCorePath, 'executor/createExecutorAdapter.ts'));
+        this.registerOutputFile(resolveHelper(outputCorePath, 'executor/createExecutorAdapter.ts'));
     }
 
     this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.CORE_FINISH);

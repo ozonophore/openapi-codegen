@@ -341,6 +341,8 @@ const client = createClient({
 
 ```ts
 import type { RequestExecutor, RequestConfig } from './generated/core/executor/requestExecutor';
+import type { ApiResult } from './generated/core/ApiResult';
+import { OpenAPI } from './generated/core/OpenAPI';
 import { withInterceptors } from './generated/core/interceptors/withInterceptors';
 import { SimpleService } from './generated/services/SimpleService';
 
@@ -348,9 +350,11 @@ interface MyCustomOptions {
     timeout?: number;
 }
 
+const buildUrl = (config: RequestConfig) => `${OpenAPI.BASE}${config.path}`;
+
 const baseExecutor: RequestExecutor<MyCustomOptions> = {
     async request<T>(config: RequestConfig, options?: MyCustomOptions): Promise<T> {
-        const response = await fetch(config.url, {
+        const response = await fetch(buildUrl(config), {
             method: config.method,
             headers: config.headers,
             body: config.body ? JSON.stringify(config.body) : undefined,
@@ -364,6 +368,23 @@ const baseExecutor: RequestExecutor<MyCustomOptions> = {
         }
 
         return response.json();
+    },
+    async requestRaw<T>(config: RequestConfig, options?: MyCustomOptions): Promise<ApiResult<T>> {
+        const url = buildUrl(config);
+        const response = await fetch(url, {
+            method: config.method,
+            headers: config.headers,
+            body: config.body ? JSON.stringify(config.body) : undefined,
+            signal: options?.timeout ? AbortSignal.timeout(options.timeout) : undefined,
+        });
+        const body = (await response.json()) as T;
+        return {
+            url,
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+            body,
+        };
     },
 };
 
@@ -409,6 +430,9 @@ const client = createClient({
             async request<TResponse>(config, options) {
                 console.debug('Request to', openApiConfig.BASE, config.path);
                 return baseExecutor.request<TResponse>(config, options);
+            },
+            requestRaw<TResponse>(config, options) {
+                return baseExecutor.requestRaw<TResponse>(config, options);
             },
         };
     },

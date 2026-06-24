@@ -1,5 +1,6 @@
 import * as Handlebars from 'handlebars/runtime';
 
+import templateCreateExecutorAdapter from '../../../templatesCompiled/cli/customCreateExecutorAdapter';
 import templateRequest from '../../../templatesCompiled/cli/customRequest';
 import templateRequestExecutor from '../../../templatesCompiled/cli/customRequestExecutor';
 import templateConfig from '../../../templatesCompiled/cli/openApiConfig';
@@ -11,6 +12,7 @@ export function registerHandlebarTemplates(): CLITemplates {
         config: Handlebars.template(templateConfig),
         request: Handlebars.template(templateRequest),
         requestExecutor: Handlebars.template(templateRequestExecutor),
+        createExecutorAdapter: Handlebars.template(templateCreateExecutorAdapter),
     };
 
     Handlebars.registerPartial('header', Handlebars.template(partialHeader));

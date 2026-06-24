@@ -26,5 +26,6 @@ export *{{#notEquals ../services.length 1}} as Services${{{@index}}}{{/notEquals
 {{/if}}
 
 {{#if core}}
-export { ClientOptions, createClient } from './createClient';
+export type { ClientOptions }  from './createClient';
+export { createClient } from './createClient';
 {{/if}}

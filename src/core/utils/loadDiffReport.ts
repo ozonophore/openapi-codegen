@@ -70,15 +70,14 @@ const isFreshEnough = (reportPath: string, inputPath?: string): boolean => {
 
 /**
  * Загружает diff-отчёт с диска и приводит его к legacy-формату для генерации.
- * @param useHistory признак использования истории изменений
+ * @param useHistory признак использования истории изменений; отчёт загружается только при true
  * @param [diffReport] путь к файлу отчёта
  * @param [inputPath] путь к входной спецификации для проверки актуальности отчёта
  * @param logger логгер для диагностических сообщений
  * @returns legacy diff-отчёт или null, если отчёт отсутствует или устарел
  */
 export const loadDiffReport = ({ useHistory, diffReport, inputPath, logger }: LoadDiffReportParams): DiffReport | null => {
-    const shouldLoad = useHistory || !!diffReport;
-    if (!shouldLoad) return null;
+    if (!useHistory) return null;
 
     const reportPath = diffReport || DEFAULT_ANALYZE_DIFF_REPORT_PATH;
     if (!fs.existsSync(reportPath)) {

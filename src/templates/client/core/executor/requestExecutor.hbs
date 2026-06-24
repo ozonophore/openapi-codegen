@@ -1,6 +1,13 @@
 {{>header}}
 
 import type { ApiResult } from '../ApiResult';
+{{#if @root.useCancelableRequest}}
+import type { CancelablePromise } from '../CancelablePromise';
+
+type ExecutorReturn<T> = CancelablePromise<T>;
+{{else}}
+type ExecutorReturn<T> = Promise<T>;
+{{/if}}
 
 export interface RequestConfig {
   method: string;
@@ -19,10 +26,10 @@ export interface RequestExecutor<TOptions = unknown> {
   request<TResponse>(
     config: RequestConfig,
     options?: TOptions
-  ): Promise<TResponse>;
+  ): ExecutorReturn<TResponse>;
 
   requestRaw<TResponse>(
     config: RequestConfig,
     options?: TOptions
-  ): Promise<ApiResult<TResponse>>;
+  ): ExecutorReturn<ApiResult<TResponse>>;
 }
