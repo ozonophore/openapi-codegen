@@ -8,6 +8,10 @@ import { TFlatOptions, TRawOptions, TStrictFlatOptions } from '../common/TRawOpt
 import { eslintFixBatch } from '../common/utils/eslintFix';
 import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../common/utils/pathHelpers';
+import { normalizeMarauderBoolean } from '../common/VersionedSchema/Utils/createBooleanToObjectSchema';
+import { mergeMarauderBlockDeep } from '../common/VersionedSchema/Utils/mergeMarauderBlock';
+import { runAnomalyDetection } from './analysis/runAnomalyDetection';
+import { runAnomalyExploitation } from './analysis/runAnomalyExploitation';
 import { Parser as ParserV2 } from './api/v2/Parser';
 import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
@@ -51,6 +55,17 @@ export class OpenApiClient {
         return this._writeClient;
     }
 
+    private mergeItemMarauderBlock<T extends Record<string, unknown>>(root: T | boolean | undefined, item: T | boolean | undefined): T | undefined {
+        if (item === undefined) {
+            return normalizeMarauderBoolean(root);
+        }
+        if (root === undefined) {
+            return normalizeMarauderBoolean(item);
+        }
+
+        return mergeMarauderBlockDeep(normalizeMarauderBoolean(root), normalizeMarauderBoolean(item)) as T;
+    }
+
     private normalizeOptions(rawOptions: TRawOptions): TFlatOptions[] {
         const modelsMode = rawOptions.modelsMode ?? rawOptions.models?.mode;
         const useHistory = rawOptions.useHistory ?? rawOptions.analyze?.useHistory;
@@ -60,6 +75,9 @@ export class OpenApiClient {
             return rawOptions.items.map(item => ({
                 ...item,
                 httpClient: rawOptions.httpClient,
+                autoSelect: normalizeMarauderBoolean(rawOptions.autoSelect),
+                anomalyDetection: this.mergeItemMarauderBlock(rawOptions.anomalyDetection, (item as TFlatOptions).anomalyDetection),
+                anomalyExploitation: this.mergeItemMarauderBlock(rawOptions.anomalyExploitation, (item as TFlatOptions).anomalyExploitation),
                 request: item.request ?? rawOptions.request, // ?? для fallback на глобальный
                 plugins: item.plugins ?? rawOptions.plugins,
                 customExecutorPath: rawOptions.customExecutorPath,
@@ -82,6 +100,7 @@ export class OpenApiClient {
                 modelsMode: item.modelsMode ?? modelsMode,
                 strictOpenapi: rawOptions.strictOpenapi,
                 reportFile: rawOptions.reportFile,
+                failOnGovernanceErrors: rawOptions.failOnGovernanceErrors,
                 governanceConfig: rawOptions.governanceConfig,
                 cache: rawOptions.cache,
                 cachePath: rawOptions.cachePath,
@@ -100,6 +119,9 @@ export class OpenApiClient {
                     outputModels: rawOptions.outputModels,
                     outputSchemas: rawOptions.outputSchemas,
                     httpClient: rawOptions.httpClient,
+                    autoSelect: normalizeMarauderBoolean(rawOptions.autoSelect),
+                    anomalyDetection: normalizeMarauderBoolean(rawOptions.anomalyDetection),
+                    anomalyExploitation: normalizeMarauderBoolean(rawOptions.anomalyExploitation),
                     useOptions: rawOptions.useOptions,
                     useUnionTypes: rawOptions.useUnionTypes,
                     includeSchemasFiles: rawOptions.includeSchemasFiles,
@@ -122,6 +144,7 @@ export class OpenApiClient {
                     modelsMode,
                     strictOpenapi: rawOptions.strictOpenapi,
                     reportFile: rawOptions.reportFile,
+                    failOnGovernanceErrors: rawOptions.failOnGovernanceErrors,
                     governanceConfig: rawOptions.governanceConfig,
                     cache: rawOptions.cache,
                     cachePath: rawOptions.cachePath,
@@ -167,12 +190,16 @@ export class OpenApiClient {
             miracles: item.miracles || COMMON_DEFAULT_OPTIONS_VALUES.miracles,
             strictOpenapi: item.strictOpenapi ?? COMMON_DEFAULT_OPTIONS_VALUES.strictOpenapi,
             reportFile: item.reportFile || COMMON_DEFAULT_OPTIONS_VALUES.reportFile,
+            failOnGovernanceErrors: item.failOnGovernanceErrors ?? COMMON_DEFAULT_OPTIONS_VALUES.failOnGovernanceErrors,
             prettierConfigPath: item.prettierConfigPath ?? COMMON_DEFAULT_OPTIONS_VALUES.prettierConfigPath,
             governanceConfig: item.governanceConfig || COMMON_DEFAULT_OPTIONS_VALUES.governanceConfig,
             cache: item.cache ?? COMMON_DEFAULT_OPTIONS_VALUES.cache,
             cachePath: item.cachePath || COMMON_DEFAULT_OPTIONS_VALUES.cachePath,
             cacheStrategy: item.cacheStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheStrategy,
             cacheDebug: item.cacheDebug ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheDebug,
+            autoSelect: item.autoSelect ?? COMMON_DEFAULT_OPTIONS_VALUES.autoSelect,
+            anomalyDetection: item.anomalyDetection ?? COMMON_DEFAULT_OPTIONS_VALUES.anomalyDetection,
+            anomalyExploitation: item.anomalyExploitation ?? COMMON_DEFAULT_OPTIONS_VALUES.anomalyExploitation,
         };
     }
 
@@ -351,8 +378,11 @@ export class OpenApiClient {
             modelsMode = ModelsMode.INTERFACES,
             strictOpenapi,
             reportFile,
+            failOnGovernanceErrors,
             prettierConfigPath,
             governanceConfig,
+            anomalyDetection,
+            anomalyExploitation,
         } = item;
         const outputPaths: OutputPaths = getOutputPaths({
             output,
@@ -394,6 +424,14 @@ export class OpenApiClient {
         });
         const openApi = await getOpenApiSpec(context, absoluteInput);
 
+        if (anomalyDetection?.enabled || anomalyExploitation?.enabled) {
+            const report = await runAnomalyDetection(openApi, { ...(anomalyDetection ?? {}), enabled: true }, this.writeClient.logger);
+
+            if (anomalyExploitation?.enabled) {
+                await runAnomalyExploitation(report, output, { ...anomalyExploitation, enabled: true }, this.writeClient.logger);
+            }
+        }
+
         if (strictOpenapi) {
             const parserValidationIssues = await validateWithSwaggerParser(absoluteInput);
             const governancePolicy = await loadGovernanceConfig(governanceConfig);
@@ -408,6 +446,10 @@ export class OpenApiClient {
 
             if (strictReport.summary.errors > 0) {
                 throw new Error(`Strict OpenAPI validation failed with ${strictReport.summary.errors} error(s). Report: ${reportPath}`);
+            }
+
+            if (failOnGovernanceErrors && strictReport.governance.summary.errors > 0) {
+                throw new Error(`Governance validation failed with ${strictReport.governance.summary.errors} error(s). Report: ${reportPath}`);
             }
         }
 
@@ -549,6 +591,7 @@ export class OpenApiClient {
                 diffReport: item.diffReport,
                 modelsMode: item.modelsMode,
                 strictOpenapi: item.strictOpenapi,
+                failOnGovernanceErrors: item.failOnGovernanceErrors,
             },
         };
 

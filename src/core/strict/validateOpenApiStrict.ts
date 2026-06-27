@@ -4,8 +4,8 @@ import path from 'path';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import { resolveHelper } from '../../common/utils/pathHelpers';
-import { getContent } from '../api/v3/parser/getContent';
 import { Context } from '../Context';
+import { collectOperationDiagnostics, OperationDiagnosticRuleId } from '../governance/collectOperationDiagnostics';
 import { evaluateGovernanceRules, GovernancePolicyConfig, GovernanceReport } from '../governance/evaluateGovernanceRules';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 
@@ -39,25 +39,11 @@ type ValidateOpenApiStrictParams = {
     governanceConfig?: GovernancePolicyConfig;
 };
 
-const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const;
-
-/**
- * Normalizes a media type value by:
- * 1) removing parameters after `;`
- * 2) trimming surrounding spaces
- * 3) converting to lowercase.
- */
-function normalizeMediaType(mediaType: string): string {
-    return mediaType.split(';')[0].trim().toLowerCase();
-}
-
-/**
- * Checks whether a response code key is an explicit success code.
- * Supports exact `2xx` numeric codes and OpenAPI range form `2XX`.
- */
-function isSuccessResponseCode(responseCode: string): boolean {
-    return /^\s*2\d\d\s*$/.test(responseCode) || /^\s*2xx\s*$/i.test(responseCode);
-}
+const STRICT_ISSUE_CODES: Record<OperationDiagnosticRuleId, StrictIssue['code']> = {
+    REQUIRE_OPERATION_ID: 'MISSING_OPERATION_ID',
+    NO_DEFAULT_WITHOUT_2XX: 'SUSPICIOUS_DEFAULT_RESPONSE',
+    CONTENT_MEDIA_TYPE_FALLBACK: 'CONTENT_MEDIA_TYPE_FALLBACK',
+};
 
 /**
  * Builds aggregated counters for report summary from collected issues.
@@ -171,83 +157,15 @@ function collectUnresolvedRefIssues(context: StrictValidationContext): StrictIss
 }
 
 /**
- * Collects operation-level diagnostics:
- * - `info` for missing `operationId`
- * - `warning` for fallback media type selection
- * - `warning` for `default` response without explicit `2xx`.
+ * Maps shared operation diagnostics to strict-mode issues.
  */
 function collectOperationIssues(openApi: CommonOpenApi): StrictIssue[] {
-    const issues: StrictIssue[] = [];
-    const paths = openApi.paths as Record<string, Record<string, any>>;
-
-    for (const [routePath, pathItem] of Object.entries(paths ?? {})) {
-        for (const method of HTTP_METHODS) {
-            const operation = pathItem?.[method];
-            if (!operation || typeof operation !== 'object') {
-                continue;
-            }
-
-            const operationPath = `${routePath} ${method.toUpperCase()}`;
-
-            if (!operation.operationId) {
-                issues.push({
-                    severity: 'info',
-                    code: 'MISSING_OPERATION_ID',
-                    message: 'Operation does not define operationId.',
-                    path: operationPath,
-                });
-            }
-
-            const requestBodyContent = operation?.requestBody?.content;
-            if (requestBodyContent && typeof requestBodyContent === 'object') {
-                const selectedContent = getContent(requestBodyContent);
-                if (selectedContent && normalizeMediaType(selectedContent.mediaType) !== 'application/json') {
-                    issues.push({
-                        severity: 'warning',
-                        code: 'CONTENT_MEDIA_TYPE_FALLBACK',
-                        message: `No application/json found, fallback media type selected: ${selectedContent.mediaType}`,
-                        path: `${operationPath} requestBody.content`,
-                    });
-                }
-            }
-
-            const responses = operation?.responses as Record<string, any> | undefined;
-            if (responses && typeof responses === 'object') {
-                const responseCodes = Object.keys(responses);
-                const hasDefaultResponse = responseCodes.includes('default');
-                const hasExplicitSuccessResponse = responseCodes.some(isSuccessResponseCode);
-
-                if (hasDefaultResponse && !hasExplicitSuccessResponse) {
-                    issues.push({
-                        severity: 'warning',
-                        code: 'SUSPICIOUS_DEFAULT_RESPONSE',
-                        message: 'Default response is used without an explicit 2xx response.',
-                        path: `${operationPath} responses.default`,
-                    });
-                }
-
-                for (const responseCode of responseCodes) {
-                    const response = responses[responseCode];
-                    const responseContent = response?.content;
-                    if (!responseContent || typeof responseContent !== 'object') {
-                        continue;
-                    }
-
-                    const selectedContent = getContent(responseContent);
-                    if (selectedContent && normalizeMediaType(selectedContent.mediaType) !== 'application/json') {
-                        issues.push({
-                            severity: 'warning',
-                            code: 'CONTENT_MEDIA_TYPE_FALLBACK',
-                            message: `No application/json found, fallback media type selected: ${selectedContent.mediaType}`,
-                            path: `${operationPath} responses.${responseCode}.content`,
-                        });
-                    }
-                }
-            }
-        }
-    }
-
-    return issues;
+    return collectOperationDiagnostics(openApi).map(diagnostic => ({
+        severity: diagnostic.severity,
+        code: STRICT_ISSUE_CODES[diagnostic.ruleId],
+        message: diagnostic.message,
+        path: diagnostic.path,
+    }));
 }
 
 /**

@@ -7,6 +7,7 @@ import { evaluateGovernanceRules, GovernancePolicyConfig, GovernanceReport } fro
 import type { UnifiedDiffReport } from '../types/DiffReport.model';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 import type { MiracleEntry } from '../types/shared/Miracle.model';
+import { forEachOperationInSpec, isExplicitSuccessResponseCode } from '../utils/openApiOperationWalker';
 
 type ChangeSeverity = 'breaking' | 'non-breaking' | 'informational';
 
@@ -117,8 +118,6 @@ type CanonicalOperation = {
     description?: string;
     tags?: string[];
 };
-
-const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const;
 
 /**
  * Extracts OpenAPI v2/v3 schema container from a loaded spec.
@@ -453,13 +452,6 @@ function buildCanonicalModels(spec: CommonOpenApi): Map<string, CanonicalModel> 
 }
 
 /**
- * Checks whether response key is an explicit successful HTTP status key.
- */
-function isSuccessResponseKey(value: string): boolean {
-    return /^\s*2\d\d\s*$/.test(value) || /^\s*2xx\s*$/i.test(value);
-}
-
-/**
  * Resolves response payload schema type for OpenAPI v2/v3 response object.
  */
 function getResponsePayloadType(response: unknown): string {
@@ -498,78 +490,68 @@ function getResponsePayloadType(response: unknown): string {
  */
 function buildCanonicalOperations(spec: CommonOpenApi): Map<string, CanonicalOperation> {
     const operations = new Map<string, CanonicalOperation>();
-    const specRecord = spec as unknown as Record<string, unknown>;
-    const paths = (specRecord.paths as Record<string, unknown> | undefined) ?? {};
 
-    for (const [routePath, pathItemRaw] of Object.entries(paths)) {
-        const pathItem = (pathItemRaw as OperationLike) ?? {};
+    forEachOperationInSpec(spec, ({ path: routePath, method, operation: operationRaw, pathItem: pathItemRaw }) => {
+        const pathItem = pathItemRaw as OperationLike;
+        const operation = operationRaw as OperationLike;
+        const operationKey = `${method.toUpperCase()} ${routePath}`;
 
         const pathParametersRaw = pathItem.parameters;
         const pathParameters = Array.isArray(pathParametersRaw) ? pathParametersRaw : [];
+        const operationParametersRaw = operation.parameters;
+        const operationParameters = Array.isArray(operationParametersRaw) ? operationParametersRaw : [];
 
-        for (const method of HTTP_METHODS) {
-            const operationRaw = pathItem[method];
-            if (!operationRaw || typeof operationRaw !== 'object') {
+        const mergedParameters = [...pathParameters, ...operationParameters];
+        const parameters = new Map<string, CanonicalParameter>();
+
+        for (const parameterRaw of mergedParameters) {
+            if (!parameterRaw || typeof parameterRaw !== 'object') {
                 continue;
             }
 
-            const operation = operationRaw as OperationLike;
-            const operationKey = `${method.toUpperCase()} ${routePath}`;
-            const operationParametersRaw = operation.parameters;
-            const operationParameters = Array.isArray(operationParametersRaw) ? operationParametersRaw : [];
-
-            const mergedParameters = [...pathParameters, ...operationParameters];
-            const parameters = new Map<string, CanonicalParameter>();
-
-            for (const parameterRaw of mergedParameters) {
-                if (!parameterRaw || typeof parameterRaw !== 'object') {
-                    continue;
-                }
-
-                const parameter = parameterRaw as SchemaLike;
-                const parameterName = typeof parameter.name === 'string' ? parameter.name : '';
-                const parameterIn = typeof parameter.in === 'string' ? parameter.in : 'unknown';
-                if (!parameterName) {
-                    continue;
-                }
-
-                const schema = (parameter.schema as SchemaLike | undefined) ?? parameter;
-                const type = getSchemaType(schema);
-                const required = parameter.required === true;
-
-                parameters.set(`${parameterIn}:${parameterName}`, { required, type });
+            const parameter = parameterRaw as SchemaLike;
+            const parameterName = typeof parameter.name === 'string' ? parameter.name : '';
+            const parameterIn = typeof parameter.in === 'string' ? parameter.in : 'unknown';
+            if (!parameterName) {
+                continue;
             }
 
-            const requestBody = operation.requestBody as SchemaLike | undefined;
-            const requestBodyRequired = requestBody?.required === true;
+            const schema = (parameter.schema as SchemaLike | undefined) ?? parameter;
+            const type = getSchemaType(schema);
+            const required = parameter.required === true;
 
-            const successResponses = new Map<string, string>();
-            const responses = operation.responses as Record<string, unknown> | undefined;
-            if (responses && typeof responses === 'object') {
-                for (const [responseCode, responseValue] of Object.entries(responses)) {
-                    if (isSuccessResponseKey(responseCode)) {
-                        successResponses.set(responseCode, getResponsePayloadType(responseValue));
-                    }
-                }
-            }
-
-            const operationId = typeof operation.operationId === 'string' ? operation.operationId : undefined;
-            const summary = typeof operation.summary === 'string' ? operation.summary : undefined;
-            const description = typeof operation.description === 'string' ? operation.description : undefined;
-            const tagsRaw = operation.tags;
-            const tags = Array.isArray(tagsRaw) ? tagsRaw.map(tag => String(tag)) : undefined;
-
-            operations.set(operationKey, {
-                parameters,
-                requestBodyRequired,
-                successResponses,
-                operationId,
-                summary,
-                description,
-                tags,
-            });
+            parameters.set(`${parameterIn}:${parameterName}`, { required, type });
         }
-    }
+
+        const requestBody = operation.requestBody as SchemaLike | undefined;
+        const requestBodyRequired = requestBody?.required === true;
+
+        const successResponses = new Map<string, string>();
+        const responses = operation.responses as Record<string, unknown> | undefined;
+        if (responses && typeof responses === 'object') {
+            for (const [responseCode, responseValue] of Object.entries(responses)) {
+                if (isExplicitSuccessResponseCode(responseCode)) {
+                    successResponses.set(responseCode, getResponsePayloadType(responseValue));
+                }
+            }
+        }
+
+        const operationId = typeof operation.operationId === 'string' ? operation.operationId : undefined;
+        const summary = typeof operation.summary === 'string' ? operation.summary : undefined;
+        const description = typeof operation.description === 'string' ? operation.description : undefined;
+        const tagsRaw = operation.tags;
+        const tags = Array.isArray(tagsRaw) ? tagsRaw.map(tag => String(tag)) : undefined;
+
+        operations.set(operationKey, {
+            parameters,
+            requestBodyRequired,
+            successResponses,
+            operationId,
+            summary,
+            description,
+            tags,
+        });
+    });
 
     return operations;
 }
@@ -856,6 +838,82 @@ function diffOperations(oldOperations: Map<string, CanonicalOperation>, newOpera
 }
 
 /**
+ * Detects changes in components.securitySchemes between two specs.
+ */
+function diffSecuritySchemes(oldSpec: CommonOpenApi, newSpec: CommonOpenApi, changes: SemanticDiffChange[]): void {
+    const oldComponents = (oldSpec as unknown as Record<string, unknown>).components as Record<string, unknown> | undefined;
+    const newComponents = (newSpec as unknown as Record<string, unknown>).components as Record<string, unknown> | undefined;
+    const oldSecurity = (oldComponents?.securitySchemes ?? {}) as Record<string, Record<string, unknown>>;
+    const newSecurity = (newComponents?.securitySchemes ?? {}) as Record<string, Record<string, unknown>>;
+
+    for (const schemeName of Object.keys(oldSecurity)) {
+        if (!newSecurity[schemeName]) {
+            pushChange(changes, 'breaking', 'security.scheme.removed', `#/components/securitySchemes/${schemeName}`, `Security scheme "${schemeName}" was removed.`, { from: oldSecurity[schemeName] });
+        }
+    }
+
+    for (const schemeName of Object.keys(newSecurity)) {
+        if (!oldSecurity[schemeName]) {
+            pushChange(changes, 'non-breaking', 'security.scheme.added', `#/components/securitySchemes/${schemeName}`, `Security scheme "${schemeName}" was added.`, { to: newSecurity[schemeName] });
+        }
+    }
+
+    for (const [schemeName, newScheme] of Object.entries(newSecurity)) {
+        const oldScheme = oldSecurity[schemeName];
+        if (!oldScheme) {
+            continue;
+        }
+
+        const oldType = oldScheme.type;
+        const newType = newScheme.type;
+        if (oldType !== undefined && newType !== undefined && oldType !== newType) {
+            pushChange(
+                changes,
+                'breaking',
+                'security.scheme.type.changed',
+                `#/components/securitySchemes/${schemeName}/type`,
+                `Security scheme "${schemeName}" type changed from "${String(oldType)}" to "${String(newType)}".`,
+                { from: oldType, to: newType }
+            );
+        }
+    }
+}
+
+function isMajorVersionChange(oldVersion: string, newVersion: string): boolean {
+    const oldMajor = Number.parseInt(oldVersion.split('.')[0] ?? '', 10);
+    const newMajor = Number.parseInt(newVersion.split('.')[0] ?? '', 10);
+
+    if (Number.isNaN(oldMajor) || Number.isNaN(newMajor)) {
+        return false;
+    }
+
+    return newMajor > oldMajor;
+}
+
+/**
+ * Detects info.version changes; major semver bump is classified as breaking.
+ */
+function diffInfoVersion(oldSpec: CommonOpenApi, newSpec: CommonOpenApi, changes: SemanticDiffChange[]): void {
+    const oldInfo = (oldSpec as unknown as Record<string, unknown>).info as Record<string, unknown> | undefined;
+    const newInfo = (newSpec as unknown as Record<string, unknown>).info as Record<string, unknown> | undefined;
+    const oldVersion = oldInfo?.version;
+    const newVersion = newInfo?.version;
+
+    if (!oldVersion || !newVersion || oldVersion === newVersion) {
+        return;
+    }
+
+    if (!isMajorVersionChange(String(oldVersion), String(newVersion))) {
+        return;
+    }
+
+    pushChange(changes, 'breaking', 'spec.info.version.changed', '#/info/version', `API version changed from "${oldVersion}" to "${newVersion}".`, {
+        from: oldVersion,
+        to: newVersion,
+    });
+}
+
+/**
  * Calculates summary counters from semantic changes list.
  */
 function buildSummary(changes: SemanticDiffChange[]): SemanticDiffSummary {
@@ -934,6 +992,8 @@ export function analyzeOpenApiDiff(oldSpec: CommonOpenApi, newSpec: CommonOpenAp
     const changes: SemanticDiffChange[] = [];
     diffModels(oldModels, newModels, changes);
     diffOperations(oldOperations, newOperations, changes);
+    diffSecuritySchemes(oldSpec, newSpec, changes);
+    diffInfoVersion(oldSpec, newSpec, changes);
 
     const normalizedChanges = normalizeAndDedupeChanges(changes);
 

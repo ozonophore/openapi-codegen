@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
@@ -19,8 +19,9 @@ const createTempDir = (t: TestContext, prefix: string): string => {
     return tempDir;
 };
 
-function sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function setFileMtimeMs(filePath: string, mtimeMs: number): void {
+    const mtime = new Date(mtimeMs);
+    utimesSync(filePath, mtime, mtime);
 }
 
 describe('@unit: generation cache', () => {
@@ -70,7 +71,6 @@ describe('@unit: generation cache', () => {
         const stableFile = path.join(outputDir, 'core', 'OpenAPI.ts');
         const firstMtime = statSync(stableFile).mtimeMs;
 
-        await sleep(1100);
         await generate({
             input,
             output: outputDir,
@@ -112,7 +112,7 @@ describe('@unit: generation cache', () => {
         specObject.info.version = `${specObject.info.version}-cache-test`;
         writeFileSync(specCopy, JSON.stringify(specObject, null, 2), 'utf8');
 
-        await sleep(1100);
+        setFileMtimeMs(openApiFile, firstMtime - 2000);
         await generate({
             input: specCopy,
             output: outputDir,
@@ -123,7 +123,7 @@ describe('@unit: generation cache', () => {
         } as any);
 
         const secondMtime = statSync(openApiFile).mtimeMs;
-        assert.ok(secondMtime > firstMtime, 'Changed spec must update generated output');
+        assert.ok(secondMtime > firstMtime - 2000, 'Changed spec must update generated output');
     });
 
     test('content strategy: warm run does not rewrite unchanged files', async t => {
@@ -144,7 +144,6 @@ describe('@unit: generation cache', () => {
         const stableFile = path.join(outputDir, 'core', 'OpenAPI.ts');
         const firstMtime = statSync(stableFile).mtimeMs;
 
-        await sleep(1100);
         await generate({
             input,
             output: outputDir,
@@ -180,7 +179,6 @@ describe('@unit: generation cache', () => {
         const firstMtime = statSync(stableFile).mtimeMs;
         const filesBefore = readdirSync(outputDir, { recursive: true, encoding: 'utf8' });
 
-        await sleep(1100);
         await generate({
             httpClient: HttpClient.FETCH,
             cache: true,

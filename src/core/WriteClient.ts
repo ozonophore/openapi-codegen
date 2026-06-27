@@ -46,8 +46,8 @@ import { writeFileIfChanged, WriteFileIfChangedResult } from './utils/writeFileI
  * @property [validationLibrary] библиотека валидации схем
  * @property emptySchemaStrategy стратегия обработки пустых схем
  * @property [modelsMode] режим генерации моделей
- * @property [useProjectPrettier] форматировать через Prettier проекта
- * @property [useEslintFix] применять ESLint fix к сгенерированным файлам
+ * @property [prettierConfigPath] путь к конфигурации Prettier
+ * @property [eslintConfigPath] путь к конфигурации ESLint
  */
 type TWriteClientProps = {
     client: Client;

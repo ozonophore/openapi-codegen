@@ -1,0 +1,202 @@
+/**
+ * Avatar Service Wrapper
+ * Automatically generated wrapper for {{serviceName}} service
+ * Integrates with swarm coordination and health monitoring
+ */
+
+import { {{swarmNameCamel}}Coordinator, {{swarmNameCamel}}ServiceRegistry } from '../coordinator';
+
+export interface AvatarServiceConfig {
+  serviceId: string;
+  baseURL: string;
+  timeout: number;
+  retryPolicy: {
+    maxRetries: number;
+    initialDelayMs: number;
+  };
+}
+
+/**
+ * Avatar wrapper for {{serviceName}} service
+ */
+export class {{serviceName}}Avatar {
+  private readonly config: AvatarServiceConfig;
+  private readonly client: any; // Real service client
+  private requestCount: number = 0;
+  private errorCount: number = 0;
+  private healthCheckInterval: NodeJS.Timeout | null = null;
+
+  constructor(
+    config: AvatarServiceConfig,
+    client: any
+  ) {
+    this.config = config;
+    this.client = client;
+
+    // Register with coordinator
+    {{swarmNameCamel}}Coordinator.registerService(config.serviceId);
+
+    // Start health monitoring
+    this.startHealthMonitoring();
+  }
+
+  /**
+   * Execute operation with retry logic and monitoring
+   */
+  public async executeOperation<T>(
+    operationName: string,
+    params: any
+  ): Promise<T> {
+    const retryPolicy = this.config.retryPolicy;
+    let lastError: any;
+
+    for (let attempt = 0; attempt <= retryPolicy.maxRetries; attempt++) {
+      try {
+        this.requestCount++;
+
+        // Call actual service
+        const result = await Promise.race([
+          this.client[operationName](params),
+          this.createTimeout(),
+        ]);
+
+        return result;
+      } catch (error) {
+        lastError = error;
+        this.errorCount++;
+
+        if (attempt < retryPolicy.maxRetries) {
+          const delay = retryPolicy.initialDelayMs * Math.pow(2, attempt);
+          await this.sleep(delay);
+        }
+      }
+    }
+
+    throw lastError;
+  }
+
+  /**
+   * Get service metrics
+   */
+  public getMetrics() {
+    return {
+      serviceId: this.config.serviceId,
+      totalRequests: this.requestCount,
+      totalErrors: this.errorCount,
+      errorRate: this.requestCount > 0 ? this.errorCount / this.requestCount : 0,
+      health: this.errorCount / Math.max(this.requestCount, 1) < 0.05 ? 'healthy' : 'degraded',
+    };
+  }
+
+  /**
+   * Health check
+   */
+  public async healthCheck(): Promise<boolean> {
+    try {
+      // Would call health endpoint
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Start periodic health monitoring
+   */
+  private startHealthMonitoring(): void {
+    this.healthCheckInterval = setInterval(() => {
+      this.healthCheck();
+    }, 60000);
+  }
+
+  /**
+   * Stop health monitoring
+   */
+  public shutdown(): void {
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval);
+    }
+  }
+
+  /**
+   * Helper: create timeout promise
+   */
+  private createTimeout(): Promise<never> {
+    return new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Request timeout')), this.config.timeout)
+    );
+  }
+
+  /**
+   * Helper: sleep
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+}
+
+/**
+ * Avatar group for managing multiple instances
+ */
+export class {{serviceName}}AvatarGroup {
+  private avatars: Map<string, {{serviceName}}Avatar>;
+  private rrIndex: number = 0;
+
+  constructor() {
+    this.avatars = new Map();
+  }
+
+  /**
+   * Add avatar to group
+   */
+  public addAvatar(avatar: {{serviceName}}Avatar, instanceId: string): void {
+    this.avatars.set(instanceId, avatar);
+  }
+
+  /**
+   * Execute operation on best available avatar
+   */
+  public async executeOnBest<T>(
+    operationName: string,
+    params: any
+  ): Promise<T> {
+    const healthyAvatars = Array.from(this.avatars.values()).filter(
+      a => a.getMetrics().health === 'healthy'
+    );
+
+    if (healthyAvatars.length === 0) {
+      throw new Error('No healthy avatars available');
+    }
+
+    const selected = healthyAvatars[this.rrIndex % healthyAvatars.length];
+    this.rrIndex = (this.rrIndex + 1) % healthyAvatars.length;
+    return selected.executeOperation(operationName, params);
+  }
+
+  /**
+   * Get group metrics
+   */
+  public getGroupMetrics(): any {
+    const metrics = Array.from(this.avatars.values()).map(a => a.getMetrics());
+    const totalRequests = metrics.reduce((sum, m) => sum + m.totalRequests, 0);
+    const totalErrors = metrics.reduce((sum, m) => sum + m.totalErrors, 0);
+
+    return {
+      instanceCount: this.avatars.size,
+      healthyCount: metrics.filter(m => m.health === 'healthy').length,
+      totalRequests,
+      totalErrors,
+      overallErrorRate: totalRequests > 0 ? totalErrors / totalRequests : 0,
+    };
+  }
+
+  /**
+   * Shutdown all avatars
+   */
+  public shutdownAll(): void {
+    for (const avatar of this.avatars.values()) {
+      avatar.shutdown();
+    }
+    this.avatars.clear();
+  }
+}

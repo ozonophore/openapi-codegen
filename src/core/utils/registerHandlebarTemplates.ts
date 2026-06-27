@@ -52,6 +52,12 @@ import xhrGetRequestBody from '../../templatesCompiled/client/core/xhr/getReques
 import xhrGetResponseBody from '../../templatesCompiled/client/core/xhr/getResponseBody';
 import xhrGetResponseHeader from '../../templatesCompiled/client/core/xhr/getResponseHeader';
 import xhrRequest from '../../templatesCompiled/client/core/xhr/request';
+import templateOptimizationAutoBatcher from '../../templatesCompiled/client/optimization/autoBatcher';
+import templateOptimizationCircuitBreaker from '../../templatesCompiled/client/optimization/circuitBreaker';
+import templateOptimizationConnectionPooling from '../../templatesCompiled/client/optimization/connection-pooling';
+import templateOptimizationRequestDeduplication from '../../templatesCompiled/client/optimization/request-deduplication';
+import templateOptimizationSmartCaching from '../../templatesCompiled/client/optimization/smartCaching';
+import templateOptimizationTimeFolding from '../../templatesCompiled/client/optimization/time-folding';
 import xhrSendRequest from '../../templatesCompiled/client/core/xhr/sendRequest';
 import templateClient from '../../templatesCompiled/client/exportClient';
 import templateExportSchemas from '../../templatesCompiled/client/exportSchema';
@@ -141,6 +147,10 @@ import partialJsonSchemaSchemaComposition from '../../templatesCompiled/client/j
 
 import { Templates } from '../types/base/Templates.model';
 
+import templateAvatarService from '../../templatesCompiled/microservices/avatarService';
+import templateSwarmApiServer from '../../templatesCompiled/microservices/swarmApiServer';
+import templateSwarmCoordinator from '../../templatesCompiled/microservices/swarmCoordinator';
+
 /**
  * Read all the Handlebar templates that we need and return on wrapper object
  * so we can easily access the templates in out generator / write functions.
@@ -187,6 +197,11 @@ export function registerHandlebarTemplates(root: {
             interceptors: Handlebars.template(templateInterceptors),
             apiErrorInterceptor: Handlebars.template(templateApiErrorInterceptor),
             withInterceptors: Handlebars.template(templateWithInterceptors),
+        },
+        microservices: {
+            swarmCoordinator: Handlebars.template(templateSwarmCoordinator),
+            avatarService: Handlebars.template(templateAvatarService),
+            swarmApiServer: Handlebars.template(templateSwarmApiServer),
         },
     };
 
@@ -306,6 +321,13 @@ export function registerHandlebarTemplates(root: {
         Handlebars.registerPartial('joi/joiSchemaReference', Handlebars.template(partialJoiSchemaReference));
         Handlebars.registerPartial('joi/joiSchemaComposition', Handlebars.template(partialJoiSchemaComposition));
     }
+
+    Handlebars.registerPartial('optimization/autoBatcher', Handlebars.template(templateOptimizationAutoBatcher));
+    Handlebars.registerPartial('optimization/circuitBreaker', Handlebars.template(templateOptimizationCircuitBreaker));
+    Handlebars.registerPartial('optimization/smartCaching', Handlebars.template(templateOptimizationSmartCaching));
+    Handlebars.registerPartial('optimization/request-deduplication', Handlebars.template(templateOptimizationRequestDeduplication));
+    Handlebars.registerPartial('optimization/connection-pooling', Handlebars.template(templateOptimizationConnectionPooling));
+    Handlebars.registerPartial('optimization/time-folding', Handlebars.template(templateOptimizationTimeFolding));
 
     if (root.validationLibrary === ValidationLibrary.JSONSCHEMA) {
         Handlebars.registerPartial('jsonschema/exportSchema', Handlebars.template(templateExportJsonSchemaSchema));

@@ -33,4 +33,9 @@ export interface Templates {
         apiErrorInterceptor: Handlebars.TemplateDelegate;
         withInterceptors: Handlebars.TemplateDelegate;
     };
+    microservices?: {
+        swarmCoordinator: Handlebars.TemplateDelegate;
+        avatarService: Handlebars.TemplateDelegate;
+        swarmApiServer: Handlebars.TemplateDelegate;
+    };
 }

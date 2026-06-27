@@ -7,6 +7,7 @@ export const LOGGER_ERROR_CODES = {
     CONFIG_FILE_MISSING: 'CONFIG_FILE_MISSING',
     CONFIG_FILE_NOT_FOUND_AT: 'CONFIG_FILE_NOT_FOUND_AT',
     NO_OPTIONS_PROVIDED: 'NO_OPTIONS_PROVIDED',
+    CONFIG_VALIDATION_FAILED: 'CONFIG_VALIDATION_FAILED',
     NO_SPEC_FILES_FOUND: 'NO_SPEC_FILES_FOUND',
     NO_VALID_SPEC_FILES_FOUND: 'NO_VALID_SPEC_FILES_FOUND',
     PREVIEW_DIR_EMPTY: 'PREVIEW_DIR_EMPTY',
@@ -28,6 +29,8 @@ export const LOGGER_ERROR_RECOMMENDATIONS: Record<TLoggerErrorCode, string> = {
     CONFIG_FILE_NOT_FOUND_AT: 'Проверьте правильность пути к конфигурационному файлу (--openapi-config) и наличие файла на диске. Обновите путь или создайте файл с нужными параметрами.',
     NO_OPTIONS_PROVIDED:
         'Укажите входные и выходные параметры генерации: как минимум --input (путь к спецификации или директории со спецификациями) и --output (директория для сгенерированного клиента).',
+    CONFIG_VALIDATION_FAILED:
+        'Проверьте формат openapi.config.json: имена полей и типы должны соответствовать схеме V6. Для Marauder используйте anomalyExploitation (не exploitAnomalies) и объектный формат или boolean shorthand для autoSelect/anomalyDetection.',
     NO_SPEC_FILES_FOUND: 'Убедитесь, что в указанной директории действительно есть OpenAPI-файлы (.yaml/.yml/.json). При необходимости скорректируйте путь к каталогу со спецификациями.',
     NO_VALID_SPEC_FILES_FOUND: 'Проверьте формат и структуру файлов спецификаций. Убедитесь, что они соответствуют стандарту OpenAPI v2/v3 и не содержат критических ошибок валидации.',
     PREVIEW_DIR_EMPTY:
@@ -55,6 +58,8 @@ export const LOGGER_MESSAGES = {
         CACHE_HIT: (input: string) => `[openapi-codegen] Cache hit: ${input}`,
         CACHE_MISS: (input: string) => `[openapi-codegen] Cache miss: ${input}`,
         STRICT_REPORT_CREATED: (reportPath: string) => `Strict OpenAPI report created: ${reportPath}`,
+        ANOMALY_REPORT_CREATED: (reportPath: string) => `Anomaly detection report created: ${reportPath}`,
+        ANOMALY_EXPLOITATION_CREATED: (outputDir: string) => `Anomaly exploitation optimizations written to: ${outputDir}`,
     },
 
     // ========== OpenAPI Specification Messages ==========

@@ -43,12 +43,32 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     miracles: {},
     strictOpenapi: false,
     reportFile: './openapi-report.json',
+    failOnGovernanceErrors: false,
     governanceConfig: '',
     cache: false,
     cachePath: '.openapi-codegen-cache.json',
     cacheStrategy: 'entity',
     cacheDebug: false,
     prettierConfigPath: '',
+    autoSelect: {
+        enabled: false,
+        strict: false,
+        preferSmallBundles: false,
+        preferStandards: false,
+    },
+    anomalyDetection: {
+        enabled: false,
+        severity: 'medium',
+        reportFormat: 'json',
+        reportPath: './anomaly-report.json',
+        failOnAnomalies: false,
+        maxNestingDepth: 5,
+    },
+    anomalyExploitation: {
+        enabled: false,
+        strategy: 'balanced',
+        categories: ['time-folding', 'batch-requests', 'circuit-breaker', 'smart-caching', 'connection-pooling', 'request-deduplication'],
+    },
 };
 
 export const APP_LOGGER = new Logger({
