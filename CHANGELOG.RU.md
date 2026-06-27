@@ -12,6 +12,7 @@
 - Добавлен CLI-шаблон `customCreateExecutorAdapter.hbs` и интерактивный выбор формата scaffold в `init`.
 - Добавлен `validateExecutorSetup()` в `check-config` — некритичные предупреждения, если файлы `request` / `customExecutorPath` отсутствуют или `customExecutorPath` не экспортирует `createExecutorAdapter`.
 - Добавлен класс `RequestRecovery` для error interceptors — возврат восстановленного значения из `onError` вместо повторного throw.
+- Добавлен helper `isRequestRecovery()` в сгенерированный `core/interceptors/interceptors.ts` — определяет recovery через `Symbol.for`-метку (надёжно при повторной загрузке модулей interceptors, напр. dynamic import + coverage).
 - Добавлен `example/executor.ts` — эталонная ky-реализация `createExecutorAdapter`.
 - Добавлена запись `skills/` в npm `files`; секция Agent Skills в README для миграции RequestExecutor и Marauder.
 - Добавлена runtime-зависимость `ky` (используется в example adapter).
@@ -25,9 +26,11 @@
 - Поток `init` выставляет `request` или `customExecutorPath` в конфиге по выбранному формату scaffold (`resolveHttpConfigPaths`).
 - Обновлены CLI-scaffold (`customRequest.hbs`, `customRequestExecutor.hbs`) — legacy-сигнатура транспорта, `requestRaw`, обработка `ApiError`, подсказки по миграции.
 - Обновлены примеры RequestExecutor в `docs/en/features.md` и `docs/ru/features.md` (`buildUrl`, `requestRaw`, `OpenAPI.BASE`).
+- Сгенерированный client core (`indexCore`) экспортирует `isRequestRecovery` вместе с `RequestRecovery`.
 
 ### Исправлено
 - `withInterceptors` — request interceptors теперь мутируют `currentConfig`, используемый в error handlers; `RequestRecovery` из `onError` проходит через response interceptors для `request` и `requestRaw`.
+- `withInterceptors` — recovery определяется через `isRequestRecovery()` вместо `instanceof RequestRecovery`; исправлен случай, когда `RequestRecovery` повторно бросался как ошибка при dynamic import (CI publish workflow).
 - `apiErrorInterceptor` — повторно не оборачивает уже существующие экземпляры `ApiError`.
 - `createExecutorAdapter` с кастомным `request` в конфиге — некорректное делегирование при legacy-сигнатуре `ApiRequestOptions`.
 - Пробелы валидации кастомного executor-файла в workflow `check-config`.
@@ -39,6 +42,7 @@
 
 ### Тесты
 - Добавлены: `requestExecutorInterceptors.test.ts` (`withInterceptors`, `RequestRecovery`, `validateExecutorSetup`).
+- Усилен `requestExecutorInterceptors.test.ts` — типизированный loader generated-runtime, изолированный output под `test/generated/`, порядок import, совместимый с coverage.
 - Расширены: `customRequestRaw.test.ts`, `index.test.ts` (legacy adapter snapshots, копирование custom executor, interceptor pipeline).
 - Обновлены snapshots v2/v3/lom_api для `legacyRequestAdapter`, `createExecutorAdapter`, interceptors и `createClient`.
 

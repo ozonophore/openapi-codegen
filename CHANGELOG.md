@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `customCreateExecutorAdapter.hbs` CLI template and interactive scaffold picker in `init`.
 - Added `validateExecutorSetup()` in `check-config` — non-fatal warnings when `request` / `customExecutorPath` files are missing or `customExecutorPath` does not export `createExecutorAdapter`.
 - Added `RequestRecovery` class for error interceptors — return recovered values from `onError` instead of re-throwing.
+- Added `isRequestRecovery()` helper in generated `core/interceptors/interceptors.ts` — detects recovery via a `Symbol.for` brand (reliable when interceptors modules are loaded more than once, e.g. dynamic import + coverage).
 - Added `example/executor.ts` — ky-based `createExecutorAdapter` reference implementation.
 - Added npm package `files` entry for bundled `skills/`; README Agent Skills section for RequestExecutor migration and Marauder workflows.
 - Added runtime dependency `ky` (used in example adapter).
@@ -26,9 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `init` flow sets `request` or `customExecutorPath` in config based on selected scaffold format (`resolveHttpConfigPaths`).
 - Updated CLI scaffolds (`customRequest.hbs`, `customRequestExecutor.hbs`) — legacy transport signature, `requestRaw`, `ApiError` handling, migration hints.
 - Updated `docs/en/features.md` and `docs/ru/features.md` RequestExecutor examples (`buildUrl`, `requestRaw`, `OpenAPI.BASE`).
+- Generated client core (`indexCore`) now exports `isRequestRecovery` alongside `RequestRecovery`.
 
 ### Fixed
 - `withInterceptors` — request interceptors now mutate `currentConfig` used in error handlers; `RequestRecovery` from `onError` passes through response interceptors for both `request` and `requestRaw`.
+- `withInterceptors` — recovery detection uses `isRequestRecovery()` instead of `instanceof RequestRecovery`, fixing cases where `RequestRecovery` was re-thrown as an error under dynamic import (CI publish workflow).
 - `apiErrorInterceptor` — re-throws existing `ApiError` instances without double-wrapping.
 - `createExecutorAdapter` with custom `request` config — incorrect delegation when custom transport used legacy `ApiRequestOptions` signature.
 - Custom executor file validation gaps in config check workflow.
@@ -40,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Tests
 - Added: `requestExecutorInterceptors.test.ts` (`withInterceptors`, `RequestRecovery`, `validateExecutorSetup`).
+- Hardened `requestExecutorInterceptors.test.ts` — typed generated-runtime loader, isolated output under `test/generated/`, import order safe for coverage.
 - Expanded: `customRequestRaw.test.ts`, `index.test.ts` (legacy adapter snapshots, custom executor copy, interceptor pipeline).
 - Updated snapshots across v2/v3/lom_api fixtures for `legacyRequestAdapter`, `createExecutorAdapter`, interceptors, and `createClient`.
 

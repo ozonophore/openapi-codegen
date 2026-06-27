@@ -17,10 +17,18 @@ export type ResponseInterceptor<T = unknown> =
 export type ErrorInterceptor =
   (error: unknown, context: RequestConfig) => unknown | Promise<unknown>;
 
+const REQUEST_RECOVERY_BRAND = Symbol.for('@openapi-codegen/RequestRecovery');
+
 /**
  * Return from an ErrorInterceptor to recover from a failed request instead of re-throwing.
  * The recovered value is passed through onResponse interceptors.
  */
 export class RequestRecovery<T = unknown> {
-  constructor(public readonly value: T) {}
+  constructor(public readonly value: T) {
+    Object.defineProperty(this, REQUEST_RECOVERY_BRAND, { value: true, enumerable: false });
+  }
+}
+
+export function isRequestRecovery(value: unknown): value is RequestRecovery {
+  return typeof value === 'object' && value !== null && REQUEST_RECOVERY_BRAND in value;
 }
