@@ -6,11 +6,13 @@ import { LOGGER_MESSAGES } from '../../LoggerMessages';
 import { validateZodOptions, validateZodOptionsRaw } from '../../Validation';
 import { EVersionedSchemaType } from '../Enums';
 import { SchemaMigrationPlan, VersionedSchema, VersionMatchResult } from '../Types';
+import { applyKnownConfigKeyAliases } from './applyKnownConfigKeyAliases';
 import { determineBestMatchingSchemaVersion } from './determineBestMatchingSchemaVersion';
 import { generateKeyMappingForInvalidKeys } from './generateKeyMappingForInvalidKeys';
 import { getCurrentErrorMessage } from './getCurrentErrorMessage';
 import { getUniqueKeysFromSchemas } from './getUniqueKeysFromSchemas';
-import { getUniqueObjectKeys } from './getUniqueObjectKeys';
+import { hasMarauderShapedKeys } from './hasMarauderShapedKeys';
+import { normalizeMarauderConfigBlocks } from './normalizeMarauderConfigBlocks';
 import { replaceInvalidKeysWithMappedNames } from './replaceInvalidKeysWithMappedNames';
 import { validateAndSuggestKeyCorrections } from './validateAndSuggestKeyCorrections';
 
@@ -35,25 +37,46 @@ type MigrateToLatestResult = {
 };
 
 /**
- * Migrates raw input through the migration graph to the latest schema version.
- * Migration path is resolved by `fromVersion -> toVersion` links from `migrationPlans`.
+ * Мигрирует сырые данные конфигурации до последней версии схемы.
+ * Путь миграции определяется связями `fromVersion → toVersion` из `migrationPlans`.
+ *
+ * Для проверки опечаток и автозамены ключей используются только ключи верхнего уровня
+ * (`Object.keys`), а не `getUniqueObjectKeys`: последний рекурсивно собирает имена
+ * вложенных полей (`enabled`, `severity` внутри `autoSelect` и т.д.), из‑за чего
+ * V6-конфиги с Marauder-блоками ложно отклонялись как «неизвестные поля».
+ * Вложенная структура проверяется Zod при пошаговой миграции.
+ *
+ * @param rawInput исходные данные конфигурации
+ * @param migrationPlans цепочка планов миграции между версиями
+ * @param versionedSchemas все версии схем для сопоставления и валидации
+ * @param migrationMode режим миграции (generate, validate-config и др.)
+ * @returns результат миграции или null, если вход пуст
  */
 export function migrateDataToLatestSchemaVersion({ rawInput, migrationPlans, versionedSchemas, migrationMode }: MigrateToLatestProps): MigrateToLatestResult | null {
+    const aliasedInput = applyKnownConfigKeyAliases(rawInput);
     const schemas = versionedSchemas.map(el => el.schema);
     const allUniqueKeysFromSchemas = getUniqueKeysFromSchemas(schemas);
-    const allUniqueKeysFromRawInput = getUniqueObjectKeys(rawInput);
+    const topLevelInputKeys = Object.keys(aliasedInput);
 
-    validateAndSuggestKeyCorrections(allUniqueKeysFromRawInput, allUniqueKeysFromSchemas);
+    validateAndSuggestKeyCorrections(topLevelInputKeys, allUniqueKeysFromSchemas);
 
-    const guessedVersion = determineBestMatchingSchemaVersion(rawInput, versionedSchemas);
+    const guessedVersion = determineBestMatchingSchemaVersion(aliasedInput, versionedSchemas);
     const guessedValidationSchema = schemas[guessedVersion.lastVersionIndex];
 
     const schemaPossibleKeys = getUniqueKeysFromSchemas([guessedValidationSchema]);
-    const replacingKeysMap = generateKeyMappingForInvalidKeys(allUniqueKeysFromRawInput, schemaPossibleKeys);
+    const replacingKeysMap = generateKeyMappingForInvalidKeys(topLevelInputKeys, schemaPossibleKeys);
 
-    let currentData = replacingKeysMap.size ? replaceInvalidKeysWithMappedNames(rawInput, replacingKeysMap) : rawInput;
+    let currentData = replacingKeysMap.size ? replaceInvalidKeysWithMappedNames(aliasedInput, replacingKeysMap) : aliasedInput;
 
     const actualSchema = versionedSchemas[versionedSchemas.length - 1];
+
+    if (hasMarauderShapedKeys(currentData) && guessedVersion.latestVersion !== actualSchema.version) {
+        const latestValidationResult = validateZodOptionsRaw(actualSchema.schema, currentData);
+        if (!latestValidationResult.success) {
+            getCurrentErrorMessage(latestValidationResult.error, replacingKeysMap);
+        }
+    }
+
     const schemasByVersion = new Map(versionedSchemas.map(schemaInfo => [schemaInfo.version, schemaInfo.schema]));
     const migrationPlanByFromVersion = new Map(migrationPlans.map(plan => [plan.fromVersion, plan]));
 
@@ -107,6 +130,8 @@ export function migrateDataToLatestSchemaVersion({ rawInput, migrationPlans, ver
             APP_LOGGER.warn(LOGGER_MESSAGES.MIGRATION.OPENAPI_SCHEMA_MIGRATED);
         }
     }
+
+    currentData = normalizeMarauderConfigBlocks(currentData);
 
     const validationResult = validateZodOptionsRaw(actualSchema.schema, currentData);
     if (!validationResult.success) {

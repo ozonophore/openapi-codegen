@@ -28,7 +28,9 @@ export function validateAndSuggestKeyCorrections(rawInputKeys: string[], allowed
 
     // Generating error messages
     for (const [key, { bestMatch, bestDistance }] of distanceMap) {
-        if (bestMatch && bestDistance <= 3) {
+        if (key === 'exploitAnomalies') {
+            errors.push(`The "${key}" field is not recognized. Use "anomalyExploitation" in config, not "exploitAnomalies" (CLI alias).`);
+        } else if (bestMatch && bestDistance <= 3) {
             errors.push(`The "${key}" field is not recognized. Perhaps you meant "${bestMatch}".`);
         } else {
             errors.push(`The "${key}" field is not recognized.`);

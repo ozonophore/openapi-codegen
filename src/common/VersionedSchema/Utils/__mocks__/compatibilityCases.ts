@@ -124,6 +124,7 @@ export const compatibilityCases: CompatibilityCase[] = [
         from: 'v4',
         to: 'v5',
         expect: [
+            { type: 'added', key: 'failOnGovernanceErrors' },
             { type: 'added', key: 'prettierConfigPath' },
             { type: 'added', key: 'tsconfigPath' },
             { type: 'added', key: 'eslintConfigPath' },
@@ -131,6 +132,16 @@ export const compatibilityCases: CompatibilityCase[] = [
             { type: 'added', key: 'cachePath' },
             { type: 'added', key: 'cacheStrategy' },
             { type: 'added', key: 'cacheDebug' },
+        ],
+    },
+    {
+        type: EVersionedSchemaType.UNIFIED_OPTIONS,
+        from: 'v5',
+        to: 'v6',
+        expect: [
+            { type: 'added', key: 'autoSelect' },
+            { type: 'added', key: 'anomalyDetection' },
+            { type: 'added', key: 'anomalyExploitation' },
         ],
     },
 ];

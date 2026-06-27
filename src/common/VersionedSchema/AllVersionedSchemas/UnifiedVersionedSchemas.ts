@@ -8,6 +8,7 @@ import { unifiedOptionsSchemaV2 } from './UnifiedOptionsSchemaV2';
 import { unifiedOptionsSchemaV3 } from './UnifiedOptionsSchemaV3';
 import { unifiedOptionsSchemaV4 } from './UnifiedOptionsSchemaV4';
 import { unifiedOptionsSchemaV5 } from './UnifiedOptionsSchemaV5';
+import { unifiedOptionsSchemaV6 } from './UnifiedOptionsSchemaV6';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Last<T extends readonly unknown[]> = T extends readonly [...infer _, infer L] ? L : never;
@@ -18,6 +19,7 @@ const unifiedSchemaDefinitions = [
     { version: 'v3', base: unifiedOptionsSchemaV3 },
     { version: 'v4', base: unifiedOptionsSchemaV4 },
     { version: 'v5', base: unifiedOptionsSchemaV5 },
+    { version: 'v6', base: unifiedOptionsSchemaV6 },
 ] as const;
 
 type UnifiedSchemaDefinitions = typeof unifiedSchemaDefinitions;

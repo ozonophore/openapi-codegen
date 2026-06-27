@@ -3,6 +3,10 @@ import { z } from 'zod';
 import { EmptySchemaStrategy } from '../../core/types/enums/EmptySchemaStrategy.enum';
 import { ModelsMode } from '../../core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../../core/types/enums/ValidationLibrary.enum';
+import { IMPLEMENTED_ANOMALY_CATEGORIES } from './anomalyDetectorCategories';
+import { createBooleanToObjectSchema } from './Utils/createBooleanToObjectSchema';
+
+const anomalyCategorySchema = z.enum(IMPLEMENTED_ANOMALY_CATEGORIES);
 
 /** Output paths */
 
@@ -52,6 +56,7 @@ export const specialParametersSchemasV4 = z.object({
 export const strictModeParametersSchema = z.object({
     strictOpenapi: z.boolean().optional(),
     reportFile: z.string().optional(),
+    failOnGovernanceErrors: z.boolean().optional(),
 });
 
 /** Additional parameters */
@@ -111,3 +116,42 @@ export const experimentalParametersSchemaV2 = z.object({
     sortByRequired: z.boolean().optional(),
     useSeparatedIndexes: z.boolean().optional(),
 });
+
+/** Phase 1: Auto-selection and anomaly detection */
+
+const autoSelectConfigSchema = z.object({
+    enabled: z.boolean().optional(),
+    strict: z.boolean().optional(),
+    preferSmallBundles: z.boolean().optional(),
+    preferStandards: z.boolean().optional(),
+});
+
+const anomalyDetectionConfigSchema = z.object({
+    enabled: z.boolean().optional(),
+    severity: z.enum(['low', 'medium', 'high']).optional(),
+    reportFormat: z.enum(['json', 'markdown', 'html']).optional(),
+    reportPath: z.string().optional(),
+    failOnAnomalies: z.boolean().optional(),
+    maxNestingDepth: z.number().int().positive().optional(),
+    includeCategories: z.array(anomalyCategorySchema).optional(),
+    excludeCategories: z.array(anomalyCategorySchema).optional(),
+});
+
+const anomalyExploitationConfigSchema = z.object({
+    enabled: z.boolean().optional(),
+    strategy: z.enum(['aggressive', 'balanced', 'conservative']).optional(),
+    outputPath: z.string().optional(),
+    categories: z.array(z.enum(['time-folding', 'batch-requests', 'circuit-breaker', 'smart-caching', 'connection-pooling', 'request-deduplication'])).optional(),
+});
+
+/**
+ * Boolean shorthand parity with CLI flags (`--auto-select`, etc.).
+ * Internal parsed shape is always an object: true/false → { enabled: true/false }
+ *
+ * Consolidation: Uses createBooleanToObjectSchema utility instead of inline duplicated logic.
+ * This eliminates the per-schema copy-paste pattern that was repeated 3 times here,
+ * plus 3 more times in autoSelectHelpers and normalizeMarauderConfigBlocks.
+ */
+export const autoSelectConfigSchemaOrBoolean = createBooleanToObjectSchema(autoSelectConfigSchema);
+export const anomalyDetectionConfigSchemaOrBoolean = createBooleanToObjectSchema(anomalyDetectionConfigSchema);
+export const anomalyExploitationConfigSchemaOrBoolean = createBooleanToObjectSchema(anomalyExploitationConfigSchema);
