@@ -35,7 +35,9 @@ openapi generate --input ./spec.json --output ./dist
 | `--sortByRequired` | `-s` | boolean | `false` | Use extended sorting strategy for function arguments |
 | `--useSeparatedIndexes` | - | boolean | `false` | Use separate index files for core, models, schemas, and services |
 | `--strict-openapi` | - | boolean | `false` | Enable strict OpenAPI diagnostics and fail generation when strict errors are found |
+| `--fail-on-governance-errors` | - | boolean | `false` | Fail generation when governance violations include errors (requires `--strict-openapi`; config key: `failOnGovernanceErrors`) |
 | `--report-file` | - | string | `./openapi-report.json` | Path to strict OpenAPI diagnostics report JSON file |
+| `--governance-config` | - | string | - | Path to governance rules JSON config file |
 | `--logLevel` | `-l` | string | `error` | Logging level: `info`, `warn`, or `error` |
 | `--logTarget` | `-t` | string | `console` | Logging target: `console` or `file` |
 | `--validationLibrary` | - | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
@@ -186,12 +188,12 @@ Example (excerpt):
 
 ### Command: `analyze-usage`
 
-Analyzes how a TypeScript consumer project uses generated API exports and writes a JSON report.
+Analyzes how a TypeScript consumer project uses generated API exports and writes a JSON report. Imports are resolved **path-based** from `--sourcePath`: any import that resolves (via TypeScript module resolution) to the generated entry file or a file under its directory is treated as an API import. Module aliases such as `@my-org/api` are supported when they resolve to that path.
 
 **Usage:**
 ```bash
 openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --tsconfigPath ./tsconfig.json
-openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --output ./api-report.json --check
+openapi analyze-usage --sourcePath ./src/api/index.ts --projectPath . --output ./api-report.json --check
 ```
 
 **Options:**
@@ -200,10 +202,73 @@ openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --output
 - `--tsconfigPath` / `-t` - Optional path to `tsconfig.json`
 - `--output` / `-o` - Output JSON report file path (default: `api-report.json`)
 - `--check` / `-c` - CI mode: exits with code `1` when ERROR-level mismatches are found
+- `--diff-report` - Path to `analyze-diff` JSON report for RENAME miracle validation against consumer code
 
 The command prints a usage summary to console and writes a JSON report with findings and coverage details.
 
-Recommended CI chain:
+Only files under `{projectPath}/src/**/*.{ts,tsx}` are scanned; code outside `src/` is ignored.
+
+### Command: `migrate`
+
+Plans a phased migration between named API clients and writes a plan, guide, and runtime helpers. Does **not** switch production traffic.
+
+**Usage:**
+```bash
+openapi migrate --from-client axios-client --to-client fetch-client --strategy canary
+openapi migrate --from-client old --to-client new --diff-report ./openapi-diff-report.json
+```
+
+**Options:**
+- `--from-client` - Current client name (required)
+- `--to-client` - Target client name (required)
+- `--strategy` - `canary` | `blue-green` | `shadow` | `staged` (default: `canary`)
+- `--diff-report` - Path to `analyze-diff` JSON report for breaking-change-aware phase planning
+- `--output-file` - Path to save migration plan JSON
+- `--generate-guide` / `--no-generate-guide` - Write `MIGRATION_GUIDE.md` (default: on)
+- `--guide-path` - Migration guide output path (default: `./MIGRATION_GUIDE.md`)
+- `--format` - `json` | `markdown` (default: `markdown`)
+
+### Unified CI pipeline
+
+End-to-end quality gate combining spec diff, codegen, consumer validation, and optional migration planning:
+
+```bash
+# 1. Spec delta + governance (writes unified diff report v2.0.0)
+openapi analyze-diff \
+  --input ./openapi/spec.yaml \
+  --compare-with ./openapi/spec.base.yaml \
+  --governance-config ./governance.json \
+  --ci \
+  --output-report ./openapi-diff-report.json
+
+# 2. Generate with strict diagnostics + governance gate
+openapi generate \
+  --input ./openapi/spec.yaml \
+  --output ./generated \
+  --strict-openapi \
+  --governance-config ./governance.json \
+  --fail-on-governance-errors
+
+# 3. Consumer contract check (optional RENAME miracle cross-check)
+openapi analyze-usage \
+  --sourcePath ./generated/index.ts \
+  --projectPath . \
+  --check \
+  --diff-report ./openapi-diff-report.json
+
+# 4. Typecheck
+tsc --noEmit
+
+# 5. Migration planning when switching clients (optional)
+openapi migrate \
+  --from-client axios-client \
+  --to-client fetch-client \
+  --diff-report ./openapi-diff-report.json
+```
+
+**Severity mapping (shared diagnostics):** missing `operationId` appears as **info** in strict `issues[]` and **warning** in `governance.violations` (override to `error` via governance config). Use `--fail-on-governance-errors` on generate to block on governance errors when `--strict-openapi` is enabled.
+
+Recommended minimal post-generate chain:
 ```bash
 openapi generate --input ./openapi/spec.yaml --output ./generated
 openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --check

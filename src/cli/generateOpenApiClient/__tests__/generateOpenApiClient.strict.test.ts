@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
+import { DEFAULT_OPENAPI_CONFIG_FILENAME } from '../../../common/Consts';
 import { installSilenceLoggers } from '../../../test/helpers/silenceLoggers';
 import type { CLICommandResult } from '../../types';
 import { generateOpenApiClient } from '../generateOpenApiClient';
@@ -212,5 +213,70 @@ describe('@unit: generateOpenApiClient strict-openapi', () => {
         const report = JSON.parse(readFileSync(reportFile, 'utf8')) as StrictReport;
         assert.ok(!report.governance.violations.some(violation => violation.ruleId === 'REQUIRE_OPERATION_ID'));
         assert.ok(report.governance.violations.some(violation => violation.ruleId === 'NO_DEFAULT_WITHOUT_2XX' && violation.severity === 'error'));
+    });
+
+    test('failOnGovernanceErrors stops generation when governance reports errors', async t => {
+        const tempDir = createTempDir(t, 'openapi-cli-strict-fail-gov-');
+        const inputSpec = path.join(tempDir, 'policy-openapi.json');
+        const reportFile = path.join(tempDir, 'strict-report.json');
+        const governanceConfig = path.join(tempDir, 'governance.json');
+        const outputDir = path.join(tempDir, 'generated');
+
+        writeFileSync(
+            inputSpec,
+            JSON.stringify({
+                openapi: '3.0.0',
+                info: {
+                    title: 'Policy API',
+                    version: '1.0.0',
+                },
+                paths: {
+                    '/policy': {
+                        get: {
+                            responses: {
+                                default: {
+                                    description: 'fallback',
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        );
+
+        writeFileSync(
+            governanceConfig,
+            JSON.stringify({
+                rules: {
+                    NO_DEFAULT_WITHOUT_2XX: {
+                        severity: 'error',
+                    },
+                },
+            })
+        );
+
+        const result = await runStrictGenerate({
+            input: inputSpec,
+            output: outputDir,
+            strictOpenapi: true,
+            failOnGovernanceErrors: true,
+            reportFile,
+            governanceConfig,
+        });
+
+        assert.strictEqual(result.success, false);
+    });
+
+    test('direct mode succeeds with Commander default openapiConfig', async t => {
+        const tempDir = createTempDir(t, 'openapi-cli-direct-ocn-');
+        const outputDir = path.join(tempDir, 'generated');
+
+        const result = await runStrictGenerate({
+            openapiConfig: DEFAULT_OPENAPI_CONFIG_FILENAME,
+            input: path.join(repoRoot, 'test/spec/lom/lom_api.yaml'),
+            output: outputDir,
+        });
+
+        assert.strictEqual(result.success, true);
     });
 });

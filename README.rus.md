@@ -40,6 +40,11 @@
 - Восстанавливает совместимость `generate --useHistory` с semantic diff-отчётами (ghost operations/properties, coercion, rename miracles)
 - Использует селективное раскрытие OpenAPI `$ref` в analyze-diff для более быстрого и безопасного сравнения
 - Автоматическое обнаружение RENAME / TYPE_COERCION miracles из semantic-изменений свойств
+- Поддерживает проектно-зависимый автоподбор оптимального HTTP-клиента и библиотеки валидации (`--auto-select`, конфиг `autoSelect`) — *preview*
+- Поддерживает обнаружение аномалий OpenAPI с подсказками по оптимизации (`--anomaly-detection`, конфиг `anomalyDetection`) — *preview*
+- Поддерживает планирование миграций между клиентами без простоя (команда `migrate`: `canary` / `blue-green` / `shadow` / `staged`) — *preview*
+- Поддерживает оркестрацию мультисервисного «Avatar Swarm» с рекомендациями и отчётами JSON/Markdown/HTML (команда `swarm`) — *preview*
+- Схема конфигурации V6 добавляет опциональные блоки `autoSelect` и `anomalyDetection` (обновление через `update-config`)
 
 ## Установка
 

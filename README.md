@@ -40,6 +40,11 @@
 - Restores `generate --useHistory` compatibility with semantic diff reports (ghost operations/properties, coercion, rename miracles)
 - Uses selective OpenAPI `$ref` expansion in analyze-diff for faster and safer comparison
 - Automatic RENAME / TYPE_COERCION miracle detection from semantic property changes
+- Supports project-aware auto-selection of the optimal HTTP client and validation library (`--auto-select`, config `autoSelect`) — *preview*
+- Supports OpenAPI anomaly detection with optimization hints (`--anomaly-detection`, config `anomalyDetection`) — *preview*
+- Supports planning zero-downtime client-to-client migrations (`migrate` command: `canary` / `blue-green` / `shadow` / `staged`) — *preview*
+- Supports multi-service "Avatar Swarm" orchestration with recommendations and JSON/Markdown/HTML reports (`swarm` command) — *preview*
+- Config schema V6 adds optional `autoSelect` and `anomalyDetection` blocks (upgrade via `update-config`)
 
 ## Install
 

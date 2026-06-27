@@ -2,16 +2,17 @@ import { SyntaxKind } from 'ts-morph';
 
 import type { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
+import type { ApiImportScope } from '../utils/apiImportScope';
+import { isApiImport } from '../utils/apiImportScope';
 
 export class ModelRule implements Rule {
-    async check(context: ProjectContext, contract: Contract, stats: Stats): Promise<Finding[]> {
+    async check(context: ProjectContext, contract: Contract, stats: Stats, apiScope: ApiImportScope): Promise<Finding[]> {
         const findings: Finding[] = [];
         const knownModels = new Set(contract.models);
 
         for (const file of context.getConsumerSourceFiles()) {
             for (const imp of file.getImportDeclarations()) {
-                const moduleName = imp.getModuleSpecifierValue();
-                if (moduleName !== '@lom-api' && !moduleName.startsWith('@lom-api/')) {
+                if (!isApiImport(imp, apiScope)) {
                     continue;
                 }
 

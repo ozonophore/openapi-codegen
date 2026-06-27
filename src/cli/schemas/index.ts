@@ -5,6 +5,7 @@ export * from './checkConfig';
 export * from './generate';
 export * from './init';
 export * from './previewChanges';
+export * from './swarm.schema';
 export * from './updateConfig';
 
 // Тип для всех возможных CLI опций (для union type)

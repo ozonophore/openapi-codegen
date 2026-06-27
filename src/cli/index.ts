@@ -16,10 +16,14 @@ import { analyzeUsage } from './analyzeUsage/analyzeUsage';
 import { checkConfig } from './checkAndUpdateConfig/checkConfig';
 import { updateConfig } from './checkAndUpdateConfig/updateConfig';
 import { generateOpenApiClient } from './generateOpenApiClient/generateOpenApiClient';
+import { heal } from './heal/heal';
 import { init } from './initOpenApiConfig/init';
+import { migrate } from './migrate/migrate';
 import { previewChanges } from './previewChanges/previewChanges';
+import { swarm } from './swarm/swarm';
 import { CLICommandResult } from './types';
 import { getCLIName } from './utils';
+import { mergeNestedCliOptions, parseNestedCliOptions } from './utils/parseNestedCliOptions';
 
 const packageDetails = JSON.parse(fs.readFileSync(joinHelper(__dirname, '../../package.json'), 'utf-8'));
 
@@ -76,6 +80,7 @@ program
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
     .option('--useSeparatedIndexes', 'Use separate index files for the core, models, schemas, and services.')
     .option('--strict-openapi', 'Enable strict OpenAPI diagnostics report and fail generation when strict errors are found')
+    .option('--fail-on-governance-errors', 'When used with --strict-openapi, fail generation when governance policy reports errors')
     .option('--report-file <value>', 'Path to strict OpenAPI diagnostics report JSON file', './openapi-report.json')
     .option('--governance-config <value>', 'Path to governance rules JSON config file')
     .addOption(new Option('--validationLibrary <value>', 'Validation library to use for schema validation').choices([...Object.values(ValidationLibrary)]).default(ValidationLibrary.NONE))
@@ -87,11 +92,20 @@ program
     .option('--cachePath <value>', 'Path to generation cache file relative to output directory (default: .openapi-codegen-cache.json)')
     .addOption(new Option('--cacheStrategy <value>', 'Cache strategy').choices(['content', 'entity']).default('entity'))
     .option('--cacheDebug', 'Show cache hit/miss debug logs (default: false)')
+    .option(
+        '--auto-select',
+        'Enable automatic selection of optimal validators and HTTP clients based on project analysis. Supports JSON object or dot-notation flags like --auto-select.strict (default: false)'
+    )
+    .option(
+        '--anomaly-detection',
+        'Enable detection and reporting of API specification anomalies. Supports JSON object or dot-notation flags like --anomaly-detection.fail-on-anomalies (default: false)'
+    )
+    .option('--exploit-anomalies', 'Generate optimization modules from detected anomalies (automatically enables detection, default: false)')
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        const result = await generateOpenApiClient(options);
+        const result = await generateOpenApiClient(mergeNestedCliOptions(options, preParsedNestedOptions));
         finishCommand(result);
     });
 
@@ -169,18 +183,6 @@ program
 
 /**
  * analyze-diff - Команда для анализа изменений между двумя версиями OpenAPI спецификации
- *
- * @example Как использовать сейчас
- * Сравнение с явным старым файлом:
- * openapi-codegen-cli analyze-diff \
- * --input ./openapi/current.yaml \
- * --compare-with ./openapi/previous.yaml \
- * --output-report ./openapi-diff-report.json
- *
- * Сравнение с версией из Git:
- * openapi-codegen-cli analyze-diff \
- * --input openapi/spec.yaml \
- * --git HEAD~1
  */
 program
     .command('analyze-diff')
@@ -225,6 +227,7 @@ program
     .option('-t, --tsconfigPath <value>', 'Optional path to tsconfig.json')
     .option('-o, --output <value>', 'Output report filename', 'api-report.json')
     .option('-c, --check', 'CI mode (exit code 1 when errors are found)')
+    .option('--diff-report <value>', 'Path to analyze-diff report JSON for rename miracle validation')
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })
@@ -233,12 +236,96 @@ program
         finishCommand(result);
     });
 
+/**
+ * migrate - Команда для планирования постепенной миграции клиента
+ */
+program
+    .command('migrate')
+    .description('Plan a zero-downtime phased migration between API clients (generates plan, guide, and runtime helpers)')
+    .addHelpText('before', getCLIName(APP_NAME))
+    .usage('[options]')
+    .option('--from-client <value>', 'Current client name (e.g., "axios-client") (required)', '')
+    .option('--to-client <value>', 'Target client name (e.g., "fetch-client") (required)', '')
+    .addOption(new Option('--strategy <value>', 'Migration strategy').choices(['canary', 'blue-green', 'shadow', 'staged']).default('canary'))
+    .option('--phase-count <value>', 'Number of migration phases (default: 4)', '4')
+    .option('--phase-duration <value>', 'Duration of each phase (default: 1h)', '1h')
+    .option('--checkpoint-frequency <value>', 'Checkpoint frequency (default: 15m)', '15m')
+    .option('--rollback-threshold <value>', 'Error rate threshold for rollback in % (default: 5)', '5')
+    .option('--diff-report <value>', 'Path to analyze-diff report JSON for breaking-change-aware planning')
+    .option('--enable-monitoring', 'Enable monitoring during migration (default: true)')
+    .option('--enable-metrics', 'Collect detailed metrics (default: true)')
+    .option('--output-file <value>', 'Path to save migration plan JSON')
+    .option('--generate-guide', 'Generate detailed migration guide (default: true)')
+    .option('--no-generate-guide', 'Skip generating migration guide')
+    .option('--guide-path <value>', 'Path to save migration guide (default: ./MIGRATION_GUIDE.md)')
+    .option('--runtime-helper-path <value>', 'Path to save migration runtime helper (default: ./migration-runtime-client.ts)')
+    .addOption(new Option('--format <value>', 'Output format').choices(['json', 'markdown']).default('markdown'))
+    .hook('preAction', async () => {
+        await updateNotifier.checkAndNotify();
+    })
+    .action(async (options: OptionValues) => {
+        await migrate(options);
+    });
+
+/**
+ * swarm - Команда для управления рассредоточенной системой микросервис-клиентов (Avatar Swarm)
+ */
+program
+    .command('swarm')
+    .description('Generate and coordinate multiple API clients with AI-powered recommendations')
+    .addHelpText('before', getCLIName(APP_NAME))
+    .usage('[options]')
+    .option('-sd, --specs-dir <value>', 'Directory containing OpenAPI specification files')
+    .option('--specs <value>', 'JSON array of spec configs with names and paths')
+    .option('-o, --output <value>', 'Output directory for generated swarm (required)', '')
+    .addOption(new Option('--strategy <value>', 'Coordination strategy').choices(['consensus', 'voting', 'hierarchical']).default('consensus'))
+    .option('--consensus-threshold <value>', 'Consensus threshold (0-1) for decision making (default: 0.66)', '0.66')
+    .option('--enable-health-monitoring', 'Enable health monitoring (default: true)')
+    .option('--enable-performance-profiling', 'Enable performance profiling (default: true)')
+    .option('--enable-auto-optimization', 'Enable automatic optimization (default: true)')
+    .option('--ai-recommendations', 'Enable AI-powered recommendations (default: true)')
+    .addOption(new Option('--report-format <value>', 'Report output format').choices(['json', 'markdown', 'html', 'all']).default('markdown'))
+    .option('--generate-api-server', 'Generate API server for swarm coordination (default: false)')
+    .option('--api-server-port <value>', 'Port for generated API server (default: 3100)', '3100')
+    .hook('preAction', async () => {
+        await updateNotifier.checkAndNotify();
+    })
+    .action(async (options: OptionValues) => {
+        await swarm(options);
+    });
+
+/**
+ * heal - Self-healing monitor for remote OpenAPI spec changes
+ */
+program
+    .command('heal')
+    .description('Monitor a remote OpenAPI spec and auto-apply non-breaking changes to the local copy')
+    .addHelpText('before', getCLIName(APP_NAME))
+    .usage('[options]')
+    .option('--spec-url <value>', 'Remote OpenAPI spec URL (required)', '')
+    .option('--local-spec <value>', 'Path to local OpenAPI spec file (required)', '')
+    .option('-o, --output <value>', 'Regenerate client into this directory after auto-apply (optional)')
+    .option('--monitor-interval <value>', 'Monitoring interval, e.g. 15m, 1h (default: 1h)', '1h')
+    .option('--log-file <value>', 'Path to healing event log (default: ./self-healing.log)')
+    .option('--once', 'Run a single check and exit (default: continuous monitoring)')
+    .option('--no-auto-apply-non-breaking', 'Do not auto-apply non-breaking changes')
+    .option('--no-notify-on-breaking', 'Do not escalate breaking changes for review')
+    .option('--no-create-backup', 'Skip backup before applying changes')
+    .hook('preAction', async () => {
+        await updateNotifier.checkAndNotify();
+    })
+    .action(async (options: OptionValues) => {
+        await heal(options);
+    });
+
 program.exitOverride();
 program.showSuggestionAfterError(false);
 
+const { cleanedArgv, nestedOptions: preParsedNestedOptions } = parseNestedCliOptions(process.argv);
+
 // Парсирование аргументов с обработкой ошибок
 try {
-    program.parse(process.argv);
+    program.parse(cleanedArgv);
 } catch (error: unknown) {
     if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === 'commander.unknownOption') {
         const errorMessage = (error as { message?: string })?.message ?? '';

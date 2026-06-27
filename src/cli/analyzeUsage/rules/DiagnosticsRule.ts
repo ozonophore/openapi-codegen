@@ -1,18 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ts } from 'ts-morph';
 
 import type { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
+import type { ApiImportScope } from '../utils/apiImportScope';
+import { isApiImport } from '../utils/apiImportScope';
 
 export class DiagnosticsRule implements Rule {
-    async check(context: ProjectContext, _contract: Contract, _stats: Stats): Promise<Finding[]> {
+    async check(context: ProjectContext, _contract: Contract, _stats: Stats, apiScope: ApiImportScope): Promise<Finding[]> {
         const findings: Finding[] = [];
 
         for (const file of context.getConsumerSourceFiles()) {
-            const hasApiImport = file.getImportDeclarations().some(imp => {
-                const moduleName = imp.getModuleSpecifierValue();
-                return moduleName === '@lom-api' || moduleName.startsWith('@lom-api/');
-            });
+            const hasApiImport = file.getImportDeclarations().some(imp => isApiImport(imp, apiScope));
             if (!hasApiImport) continue;
 
             const diagnostics = context.project.getPreEmitDiagnostics().filter(diag => {
@@ -41,7 +39,6 @@ export class DiagnosticsRule implements Rule {
                         context: { code: diagnostic.getCode() },
                     });
                 } else if (typeof messageText === 'object') {
-                    // For multiline messages, concatenate the text parts.
                     const mainMessage = messageText.getMessageText();
                     const details =
                         messageText

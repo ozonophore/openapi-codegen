@@ -5,6 +5,62 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.11] — 2026-06-12
+
+The "Marauder" feature set: project-aware selection, OpenAPI anomaly detection, gradual migration planning, and multi-service "Avatar Swarm" orchestration. These features are opt-in and shipped as a preview (see Known limitations).
+
+### Added
+- **AutoSelector** (`--auto-select` / config `autoSelect`): analyzes the target project (`package.json` dependencies, deployment target, bundle-size hints) and recommends the optimal `validationLibrary` and `httpClient`, with explanations and high-priority optimization tips. Supports `strict`, `preferSmallBundles`, `preferStandards` options and custom selection rules (`src/core/autoSelect/`).
+- **AnomalyDetector** (`--anomaly-detection` / config `anomalyDetection`): scans parsed OpenAPI specs for optimization/quality anomalies — inconsistent response types, batch/redundant endpoints, missing pagination/caching headers, rate-limit and deprecated patterns, deeply nested objects — and reports severity, summary and recommendations (`src/core/analysis/AnomalyDetector.ts`).
+- **AnomalyExploiter** (`--exploit-anomalies` / config `anomalyExploitation`): generates optimization TypeScript modules from detected anomalies via Handlebars templates (`src/core/analysis/AnomalyExploiter.ts`).
+- **`heal` command**: monitors a remote OpenAPI spec and auto-applies non-breaking changes to the local copy; optional client regeneration via `--output` (`src/cli/heal/`, `SelfHealingClient`).
+- **`migrate` command**: plans a zero-downtime, phased migration between two API clients (`--from-client`, `--to-client`, `--strategy` `canary|blue-green|shadow|staged`, `--phase-count`, `--phase-duration`, `--checkpoint-frequency`, `--rollback-threshold`, `--output-file`, `--generate-guide`, `--format`). Emits a plan and a `MIGRATION_GUIDE.md` (`src/cli/migrate/`, `src/core/migration/`).
+- **`swarm` command**: orchestrates multiple OpenAPI specifications into an "Avatar Swarm" (`--specs-dir` / `--specs`, `--output`, `--strategy` `consensus|voting|hierarchical`, `--consensus-threshold`, `--report-format` `json|markdown|html|all`, and health/profiling/optimization toggles). Runs anomaly analysis per service, produces ranked recommendations and JSON/Markdown/HTML reports plus swarm metadata (`src/cli/swarm/`, `src/core/microservices/`).
+- **New programmatic core APIs** exported from `core`: `GradualMigrationPlanner`, `TrafficSplitter`, `ChangeDetector`, `SelfHealingClient`, `AnomalyExploiter`, `runAnomalyDetection`, `runAnomalyExploitation`, and the Avatar Swarm stack (`AvatarSwarmGenerator`, `RecommendationEngine`, `ReportGenerator`).
+- **Client optimization & microservice templates**: Handlebars templates for generated client optimizations (`autoBatcher`, `circuitBreaker`, `smartCaching`) and microservice coordination (`avatarService`, `swarmCoordinator`).
+- Config schema `UNIFIED_OPTIONS_v6` with optional `autoSelect` and `anomalyDetection` blocks, and a v5→v6 migration plan.
+
+### Changed
+- The latest unified config schema is now **V6**. Existing configs migrate automatically via `update-config`; the change is additive and backward compatible.
+
+### Fixed
+- Restored a clean build/lint of the Marauder modules (`tsc --noEmit` and `eslint` pass with zero errors).
+- `swarm`: pass a proper `Context` to `getOpenApiSpec`, and serialize `Map` fields in JSON reports/metadata so they are no longer lost.
+- `AvatarConfig.spec` / `AvatarSwarmGenerator` / `AnomalyDetector` now use `CommonOpenApi`, accepting both OpenAPI v2 and v3 specs.
+- `migrate`: validation failures are now reported and exit non-zero instead of being silently cast away.
+- `OpenApiClient`: `autoSelect` and `anomalyDetection` are propagated into normalized item options instead of being overwritten by defaults.
+- `ChangeDetector`: version comparison uses `info.version` only (no spec-format fallback); removed schema properties are classified as breaking (`migrationRequired: true`).
+- `AnomalyDetectionConfig.severity` aligned to `low | medium | high` across types and schema.
+- Fixed the generated `ConnectionPool` acquire logic in `AnomalyExploiter` (track created vs `maxSize`).
+- `heal --once`: writes the updated local spec to disk on auto-apply; client regeneration runs only after a `specWritten` event (skipped on no-op cycles).
+- `SelfHealingClient`: YAML spec output uses the `yaml` package instead of broken custom serialization.
+- `migrate`: `--rollback-threshold` is wired into `GradualMigrationPlanner` rollback phase criteria.
+- `swarm`: JSON/Markdown/HTML reports use real `analysisResult` from `AvatarSwarmGenerator` (stub removed).
+- Avatar Swarm stack exported from `core/index.ts` via `export * from './microservices'`.
+- `migrate` CLI description corrected to plan-only (does not execute live traffic).
+- Previously dead flags wired: `enableHealthMonitoring`, `enablePerformanceProfiling` (`swarm`); `enableMonitoring`, `enableMetrics` (`migrate`).
+- Anomaly schema trimmed to 10 implemented detector categories; removed placeholder categories without detectors.
+- Noisy anomaly heuristics (`missing-pagination`, `missing-caching-headers`) excluded by default via `excludeCategories`.
+- Shared `mergeMarauderBlock` util replaces duplicated shallow merge in CLI and `OpenApiClient`.
+- Anomaly summary strings no longer use unmeasured performance multipliers (`+10-100x`).
+- `swarm` command validated via `swarm.schema.ts` (Zod).
+- `AutoSelector` reads `package.json` once per analysis pass.
+
+### Tests
+- Added `SelfHealingClient.test.ts` (6 tests): spec apply/backup, `runOnce` chain, no false success on empty path, breaking-change review, YAML output, log file append.
+- Added `heal.test.ts` (2 tests): client regen gated on `specWritten`.
+- Added `GradualMigrationPlanner.test.ts`: `rollbackThreshold`, `checkpointFrequency`, `enableMetrics`.
+- Added `ChangeDetector.test.ts`: auto-applicable additions, breaking endpoint removal.
+- Added `migrate.test.ts`: `rollbackThreshold` surfaced in CLI output.
+
+### Known limitations (preview)
+- `migrate` plans migration and emits runtime helpers; it does not switch live production traffic.
+- `heal` continuous mode updates the local spec on each interval but does not regenerate the client (regen requires `--once` + `--output` after a successful auto-apply).
+- `swarm` coordinator templates provide coordination scaffolding; wire real health endpoints for production use.
+- Optimization modules from `--exploit-anomalies` require manual integration into the generated client.
+- `anomalyDetection`: 10 implemented categories; `missing-pagination` / `missing-caching-headers` excluded by default (opt in via `"excludeCategories": []`).
+- Marauder config block merge is shallow spread, not recursive deep merge.
+
 ## [2.1.0-beta.10] — 2026-06-19
 
 ### Added

@@ -1,10 +1,13 @@
-import { ProjectContext } from '../../../core/projectProbe';
+import type { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
+import type { ApiImportScope } from '../utils/apiImportScope';
 
 export class CoverageRule implements Rule {
     private readonly ignoredUnusedModels = new Set(['ApiError', 'RequestConfig', 'RequestExecutor', 'TOpenAPIConfig', 'OpenAPI', 'createExecutorAdapter', 'ClientOptions']);
 
-    async check(_context: ProjectContext, contract: Contract, stats: Stats): Promise<Finding[]> {
+    async check(context: ProjectContext, contract: Contract, stats: Stats, apiScope: ApiImportScope): Promise<Finding[]> {
+        void context;
+        void apiScope;
         const findings: Finding[] = [];
 
         // Проверка неиспользуемых схем

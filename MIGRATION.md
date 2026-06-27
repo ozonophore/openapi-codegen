@@ -179,6 +179,65 @@ Example (excerpt):
 - Old 1.1.0 reports are still loadable via adapter; re-generate for full `structural` fidelity.
 - Miracles confirmation workflow is unchanged: set `"status": "confirmed"` before generation.
 
+### 8) Marauder feature set (`2.2.0`)
+
+The "Marauder" features (auto-selection, anomaly detection, gradual migration planning, Avatar Swarm) are **additive and opt-in**. There are no breaking changes for existing configs; everything is off by default.
+
+#### Config schema V6 (auto-migration)
+
+The latest unified config schema is now `UNIFIED_OPTIONS_v6`. It adds two optional blocks. Run:
+
+```bash
+openapi-codegen-cli update-config --openapi-config ./openapi.config.json
+```
+
+New optional config blocks (defaults shown):
+
+```json
+{
+  "autoSelect": {
+    "enabled": false,
+    "strict": false,
+    "preferSmallBundles": false,
+    "preferStandards": false
+  },
+  "anomalyDetection": {
+    "enabled": false,
+    "severity": "medium",
+    "reportFormat": "json",
+    "reportPath": "./anomaly-report.json"
+  }
+}
+```
+
+#### New CLI commands
+
+```bash
+# Plan a gradual, zero-downtime migration between two clients
+openapi-codegen-cli migrate --from-client axios-client --to-client fetch-client --strategy canary
+
+# Orchestrate multiple specs into an Avatar Swarm with reports
+openapi-codegen-cli swarm --specs-dir ./specs --output ./generated-swarm --report-format all
+```
+
+#### Programmatic (library-only) APIs
+
+```ts
+import {
+  GradualMigrationPlanner,
+  TrafficSplitter,
+  ChangeDetector,
+  SelfHealingClient,
+  AnomalyExploiter,
+} from 'ts-openapi-codegen/core';
+```
+
+#### Preview limitations to be aware of
+
+- `--anomaly-detection` is recognized but not yet executed during `generate`; use the `AnomalyDetector` API or the `swarm` command.
+- `--auto-select` currently applies only when generating from `openapi.config.json`, not for direct `--input`/`--output` runs.
+- `migrate` and `swarm` produce plans/reports only; they do not perform live traffic migration or emit full client trees yet.
+
 ## New/Updated Options You Should Review
 
 For CLI/config:
@@ -191,6 +250,9 @@ For CLI/config:
 - `modelsMode` (`interfaces` | `classes`)
 - `prettierConfigPath` (optional path to a Prettier config file for generated output)
 - `tsconfigPath` + `eslintConfigPath` (optional pair to enable batch ESLint fix after generation)
+- `autoSelect` / `--auto-select` (preview: project-aware client & validator selection)
+- `anomalyDetection` / `--anomaly-detection` (preview: OpenAPI anomaly reporting)
+- `migrate` and `swarm` commands (preview)
 - `previewChanges` command and its folders:
   - `.ts-openapi-codegen-preview-changes`
   - `.ts-openapi-codegen-diff-changes`

@@ -2,6 +2,8 @@ import { Node, SyntaxKind } from 'ts-morph';
 
 import type { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
+import type { ApiImportScope } from '../utils/apiImportScope';
+import { isApiImport } from '../utils/apiImportScope';
 
 /** Правило проверки использования createClient и ClientOptions в потребителях API. */
 export class ClientRule implements Rule {
@@ -10,9 +12,10 @@ export class ClientRule implements Rule {
      * @param context контекст проекта
      * @param contract контракт сгенерированного API
      * @param stats накопительная статистика использования
+     * @param apiScope область импортов сгенерированного API
      * @returns список найденных проблем
      */
-    async check(context: ProjectContext, contract: Contract, stats: Stats): Promise<Finding[]> {
+    async check(context: ProjectContext, contract: Contract, stats: Stats, apiScope: ApiImportScope): Promise<Finding[]> {
         const findings: Finding[] = [];
         const checker = context.getTypeChecker();
         const clientOptionsDecl = contract.sourceFile.getExportedDeclarations().get('ClientOptions')?.[0];
@@ -34,8 +37,7 @@ export class ClientRule implements Rule {
             const createClientNames = new Set<string>();
 
             for (const imp of imports) {
-                const moduleName = imp.getModuleSpecifierValue();
-                if (moduleName !== '@lom-api' && !moduleName.startsWith('@lom-api/')) {
+                if (!isApiImport(imp, apiScope)) {
                     continue;
                 }
                 for (const namedImport of imp.getNamedImports()) {
@@ -80,7 +82,7 @@ export class ClientRule implements Rule {
                 id: 'CLIENT_NOT_FOUND',
                 category: 'USAGE',
                 severity: 'WARNING',
-                message: 'No createClient call from @lom-api was found in src.',
+                message: 'No createClient call from the generated API entry was found in src.',
                 file: 'Global',
                 line: 0,
             });
