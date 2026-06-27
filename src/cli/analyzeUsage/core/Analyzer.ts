@@ -6,7 +6,7 @@ import { ModelRule } from '../rules/ModelRule';
 import { SchemaRule } from '../rules/SchemaRule';
 import { ServiceRule } from '../rules/ServiceRule';
 import type { Contract, Finding, Stats } from '../types';
-import type { ProjectContext } from './ProjectContext';
+import type { ProjectContext } from '../../../core/projectProbe';
 
 export class Analyzer {
     private _context: ProjectContext;

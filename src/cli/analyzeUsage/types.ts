@@ -1,6 +1,6 @@
 import type { SourceFile } from 'ts-morph';
 
-import type { ProjectContext } from './core/ProjectContext';
+import type { ProjectContext } from '../../core/projectProbe';
 
 export interface MethodMetadata {
     name: string;

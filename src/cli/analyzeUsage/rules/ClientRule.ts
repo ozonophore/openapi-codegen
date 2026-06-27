@@ -1,6 +1,6 @@
 import { Node, SyntaxKind } from 'ts-morph';
 
-import type { ProjectContext } from '../core/ProjectContext';
+import type { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
 
 /** Правило проверки использования createClient и ClientOptions в потребителях API. */

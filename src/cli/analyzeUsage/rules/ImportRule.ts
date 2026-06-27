@@ -1,4 +1,4 @@
-import type { ProjectContext } from '../core/ProjectContext';
+import type { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
 import { findBestMatch } from '../utils/fuzzy';
 

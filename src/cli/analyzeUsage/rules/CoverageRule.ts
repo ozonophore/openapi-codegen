@@ -1,4 +1,4 @@
-import { ProjectContext } from '../core/ProjectContext';
+import { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
 
 export class CoverageRule implements Rule {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ts } from 'ts-morph';
 
-import type { ProjectContext } from '../core/ProjectContext';
+import type { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
 
 export class DiagnosticsRule implements Rule {

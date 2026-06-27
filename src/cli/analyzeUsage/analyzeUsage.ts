@@ -3,7 +3,7 @@ import path from 'path';
 
 import { CLICommandResult } from '../types';
 import { Analyzer } from './core/Analyzer';
-import { ProjectContext } from './core/ProjectContext';
+import { ProjectContext } from '../../core/projectProbe';
 import { Scanner } from './core/Scanner';
 import { Stats } from './types';
 import { Reporter } from './utils/report';

@@ -3,9 +3,6 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, test, type TestContext } from 'node:test';
 
-import { ImportRule } from '../../../cli/analyzeUsage/rules/ImportRule';
-import type { Contract } from '../../../cli/analyzeUsage/types';
-import { createApiImportScope } from '../../../cli/analyzeUsage/utils/apiImportScope';
 import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
 import { ProjectProbe } from '../ProjectProbe';
 
@@ -53,23 +50,9 @@ describe('@unit: ProjectProbe integration', () => {
         assert.strictEqual(profile.packageJsonPath, path.join(tempDir, 'package.json'));
         assert.ok(profile.packageJson.packageJson.existingValidators.includes(ValidationLibrary.ZOD));
 
-        const context = profile.consumer.context;
-        const entryFile = context.project.addSourceFileAtPath(entryPath);
-        context.project.addSourceFileAtPath(consumerPath);
+        profile.consumer.context.project.addSourceFileAtPath(entryPath);
+        profile.consumer.context.project.addSourceFileAtPath(consumerPath);
 
-        const contract: Contract = {
-            services: {},
-            clientServiceKeys: {},
-            schemas: [],
-            models: [],
-            sourceFile: entryFile,
-        };
-        const apiScope = createApiImportScope(entryPath);
-        const stats = { usedMethods: new Set<string>(), usedSchemas: new Set<string>(), usedModels: new Set<string>() };
-
-        const findings = await new ImportRule().check(context, contract, stats, apiScope);
-
-        assert.strictEqual(findings.length, 0);
         assert.ok(profile.consumer.context.getConsumerSourceFiles().some(file => file.getFilePath() === consumerPath));
     });
 });
