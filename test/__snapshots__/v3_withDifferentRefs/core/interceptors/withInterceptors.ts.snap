@@ -8,7 +8,7 @@
 
 import type { ApiResult } from '../ApiResult';
 import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './interceptors';
-import { RequestRecovery } from './interceptors';
+import { isRequestRecovery } from './interceptors';
 import type { RequestConfig, RequestExecutor } from '../executor/requestExecutor';
 
 export function withInterceptors<TOptions extends Record<string, any> = Record<string, never>>(
@@ -57,7 +57,7 @@ export function withInterceptors<TOptions extends Record<string, any> = Record<s
                 for (const interceptor of interceptors.onError ?? []) {
                     const result = await interceptor(error, currentConfig);
 
-                    if (result instanceof RequestRecovery) {
+                    if (isRequestRecovery(result)) {
                         return runResponseInterceptors(result.value as TResponse, currentConfig);
                     }
 
@@ -81,7 +81,7 @@ export function withInterceptors<TOptions extends Record<string, any> = Record<s
                 for (const interceptor of interceptors.onError ?? []) {
                     const result = await interceptor(error, currentConfig);
 
-                    if (result instanceof RequestRecovery) {
+                    if (isRequestRecovery(result)) {
                         return runResponseInterceptors(result.value as ApiResult<TResponse>, currentConfig);
                     }
 

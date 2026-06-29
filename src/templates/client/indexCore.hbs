@@ -4,7 +4,7 @@ export { ApiError } from './ApiError';
 export type { RequestConfig, RequestExecutor } from './executor/requestExecutor';
 export { createExecutorAdapter } from './executor/createExecutorAdapter';
 export { createLegacyRequestAdapter } from './executor/legacyRequestAdapter';
-export { RequestInterceptor, ResponseInterceptor, ErrorInterceptor, RequestRecovery } from './interceptors/interceptors';
+export { RequestInterceptor, ResponseInterceptor, ErrorInterceptor, RequestRecovery, isRequestRecovery } from './interceptors/interceptors';
 export { apiErrorInterceptor } from './interceptors/apiErrorInterceptor';
 export { withInterceptors } from './interceptors/withInterceptors';
 {{#if @root.modelsMode}}
