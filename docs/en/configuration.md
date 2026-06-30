@@ -1,5 +1,9 @@
 ### Configuration File
 
+> **Full reference:** [configuration-reference.md](configuration-reference.md)
+> **Copy-paste recipes:** [config-recipes.md](config-recipes.md)
+> **HTTP keys (`request`, `customExecutorPath`):** [request-executor.md](request-executor.md)
+
 Instead of passing all options via CLI, you can use a configuration file. Create `openapi.config.json` in your project root:
 
 **Single options format:**
@@ -7,7 +11,7 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 {
     "input": "./spec.json",
     "output": "./dist",
-    "client": "fetch",
+    "httpClient": "fetch",
     "useOptions": false,
     "useUnionTypes": false,
     "excludeCoreServiceFiles": false,
@@ -21,25 +25,11 @@ Instead of passing all options via CLI, you can use a configuration file. Create
     "customExecutorPath": "./custom/createExecutorAdapter.ts",
     "modelsMode": "interfaces",
     "useHistory": false,
-    "diffReport": "./openapi-diff-report.json",
-    "models": {
-        "mode": "interfaces"
-    },
-    "analyze": {
-        "useHistory": false,
-        "reportPath": "./openapi-diff-report.json"
-    },
-    "miracles": {
-        "enabled": true,
-        "confidence": 1,
-        "types": ["RENAME", "TYPE_COERCION"]
-    },
+    "diffReport": "./.openapi-codegen-reports/openapi-diff-report.json",
+    "validationLibrary": "none",
+    "emptySchemaStrategy": "keep",
     "plugins": ["./plugins/custom-type.plugin.cjs"],
-    "customExecutorPath": "./custom/createExecutorAdapter.ts",
     "cache": false,
-    "cachePath": ".openapi-codegen-cache.json",
-    "cacheStrategy": "entity",
-    "cacheDebug": false,
     "prettierConfigPath": "./.prettierrc",
     "tsconfigPath": "./tsconfig.json",
     "eslintConfigPath": "./eslint.config.mjs"
@@ -50,7 +40,7 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 ```json
 {
     "output": "./dist",
-    "client": "fetch",
+    "httpClient": "fetch",
     "excludeCoreServiceFiles": true,
     "items": [
         {
@@ -64,69 +54,14 @@ Instead of passing all options via CLI, you can use a configuration file. Create
 }
 ```
 
-**Array format (multiple configs):**
-```json
-[
-    {
-        "input": "./first.yml",
-        "output": "./dist",
-        "client": "xhr"
-    },
-    {
-        "input": "./second.yml",
-        "output": "./dist",
-        "client": "fetch"
-    }
-]
-```
+For the complete key table see [configuration-reference.md](configuration-reference.md).
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `input` | string | - | OpenAPI specification path/URL (required for items) |
-| `output` | string | - | Output directory (required) |
-| `outputCore` | string | `{output}` | Output directory for core files |
-| `outputServices` | string | `{output}` | Output directory for services |
-| `outputModels` | string | `{output}` | Output directory for models |
-| `outputSchemas` | string | `{output}` | Output directory for schemas |
-| `client` | string | `fetch` | HTTP client: `fetch`, `xhr`, `node`, or `axios` |
-| `useOptions` | boolean | `false` | Use options instead of arguments |
-| `useUnionTypes` | boolean | `false` | Use union types instead of enums |
-| `excludeCoreServiceFiles` | boolean | `false` | Exclude core and service files generation |
-| `request` | string | - | Path to custom request file |
-| `plugins` | string[] | `[]` | Paths to generator plugins |
-| `customExecutorPath` | string | - | Path to custom `createExecutorAdapter` module |
-| `interfacePrefix` | string | `I` | Prefix for interface models |
-| `enumPrefix` | string | `E` | Prefix for enum models |
-| `typePrefix` | string | `T` | Prefix for type models |
-| `useCancelableRequest` | boolean | `false` | Use cancelable promise as return type |
-| `sortByRequired` | boolean | `false` | Extended sorting strategy for arguments |
-| `useSeparatedIndexes` | boolean | `false` | Use separate index files |
-| `strictOpenapi` | boolean | `false` | Enable strict OpenAPI diagnostics and fail generation on strict errors |
-| `reportFile` | string | `./openapi-report.json` | Path to strict OpenAPI diagnostics report JSON file |
-| `items` | array | - | Array of configurations (for multi-options format) |
-| `validationLibrary` | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
-| `emptySchemaStrategy` | string | `keep` | Strategy for empty schemas: `keep`, `semantic`, or `skip` |
-| `modelsMode` | string | `interfaces` | Models generation mode: `interfaces` or `classes` |
-| `useHistory` | boolean | `false` | Apply diff report annotations during generation |
-| `diffReport` | string | `./openapi-diff-report.json` | Path to diff report JSON |
-| `models` | object | - | Models config section (e.g. `mode`) |
-| `analyze` | object | - | Analyze config section (e.g. reportPath, useHistory, ignore) |
-| `miracles` | object | - | Miracles config section (enabled, confidence, types) |
-| `cache` | boolean | `false` | Enable generation cache |
-| `cachePath` | string | `.openapi-codegen-cache.json` | Path to cache file relative to output directory |
-| `cacheStrategy` | string | `entity` | Cache strategy: `entity` or `content` |
-| `cacheDebug` | boolean | `false` | Show cache hit/miss debug logs |
-| `prettierConfigPath` | string | - | Path to a Prettier config file for formatting generated output |
-| `tsconfigPath` | string | - | Path to `tsconfig.json` for batch ESLint fix (used together with `eslintConfigPath`) |
-| `eslintConfigPath` | string | - | Path to ESLint config for batch ESLint fix (used together with `tsconfigPath`) |
-
-**Note:** You can use the `init` command to generate a template configuration file.
+**Note:** You can use `openapi-codegen-cli init` to generate a template configuration file.
 
 ### Plugins
 
 Generator plugins can override schema type mapping (for example via `x-typescript-type`) and extend generation behavior.
 
 - Configuration key: `plugins` (array of module paths)
-- Supported module formats: CJS, ESM, and TS (when runtime supports TS imports)
 - Full guide: [Plugins](plugins.md)
 - Plugin API v2 (RFC, `analyze-diff` hooks): [Plugin API v2](plugin-api-v2.md)

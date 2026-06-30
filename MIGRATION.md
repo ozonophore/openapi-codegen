@@ -1,5 +1,8 @@
 # Migration Guide: 1.0.0 -> 2.1.0
 
+> **Structured migration paths:** [docs/en/migration.md](docs/en/migration.md)
+> **RequestExecutor (custom HTTP):** [docs/en/request-executor.md](docs/en/request-executor.md)
+
 This guide describes how to migrate from `1.0.0` to `2.1.0` based on the repository diff.
 
 ## Scope
@@ -62,40 +65,16 @@ Service generation moved to `RequestExecutor`-based runtime.
 
 **After:** each generated service receives a `RequestExecutor` in its constructor and calls `executor.request()` or `executor.requestRaw()`.
 
-#### RequestExecutor contract
+> **Full guide:** [docs/en/request-executor.md](docs/en/request-executor.md) — glossary, decision tree, scenarios M0–M12, codegen/runtime matrices, copy-paste recipes, FAQ, and `check-config` warning decode.
+>
+> **Migration paths:** [docs/en/migration.md](docs/en/migration.md) — Path B (custom HTTP) checklist.
 
-- `request<T>(config, options?)` — returns the parsed response body.
-- `requestRaw<T>(config, options?)` — returns `ApiResult<T>` (`url`, `ok`, `status`, `statusText`, `body`).
-- `RequestConfig` describes method, path, headers, query, body, media types, and optional `responseType: 'blob'`.
+**Summary of breaking behavior (2.1.0-beta.10):**
 
-#### Custom HTTP layer
-
-- `request` in config still points at your transport module (legacy `ApiRequestOptions` signature); it is copied to `core/request.ts` during generation.
-- `customExecutorPath` points at a module exporting `createExecutorAdapter`; it is copied to `core/executor/createExecutorAdapter.ts` during generation (not imported at runtime).
-- `createLegacyRequestAdapter(openApiConfig, mapOptions?)` — generated helper for projects keeping a legacy custom `request()` without rewriting to `RequestExecutor` directly. Use via `createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) })`.
-- If your custom transport exports `requestRaw`, the legacy adapter delegates to it; otherwise `requestRaw` synthesizes a minimal `ApiResult` from `request()` (status 200).
-
-#### Interceptor pipeline
-
-```mermaid
-flowchart TD
-  A[RequestConfig] --> B[Request interceptors]
-  B --> C[HTTP via executor]
-  C --> D[Response interceptors]
-  D --> E[Parsed result]
-  C -->|error| F[Error interceptors]
-  F --> G[Throw or recover]
-```
-
-Order: request interceptors → HTTP → response interceptors; on failure, error interceptors run before the error is re-thrown.
-
-Error interceptors may return `RequestRecovery(value)` to recover from a failed request; the recovered value passes through response interceptors.
-
-`createClient` always wraps the executor with `withInterceptors` and the default `apiErrorInterceptor` (since `2.1.0-beta.10`).
-
-Transport-level `ApiError` (from `catchErrors`) now stores a slim `request` config and puts the response payload in `body` instead of embedding full `ApiRequestOptions` in `request`.
-
-When `useCancelableRequest` is enabled, `RequestExecutor.request` / `requestRaw` return `CancelablePromise`.
+- `createClient` always wraps the executor with `withInterceptors` and `apiErrorInterceptor`.
+- `ApiError` stores a slim `request` config; response payload is in `error.body`.
+- Config keys: `"request"` (transport) vs `customExecutorPath` (adapter) — see hub glossary.
+- `createLegacyRequestAdapter` for transports without `requestRaw` (dev only; synthetic status 200).
 
 Impact:
 - If you had custom runtime integration around the old request flow, update it to executor-based flow.
@@ -338,8 +317,8 @@ When `useHistory` is on and a property type changes, validation schemas may coer
 - [ ] Replaced `includeSchemasFiles` in all configs.
 - [ ] Selected and set `validationLibrary` explicitly.
 - [ ] Selected and set `emptySchemaStrategy` explicitly.
-- [ ] Chose migration path: `customExecutorPath` vs legacy `request` + `createLegacyRequestAdapter` (or `init --requestFormat`).
-- [ ] Reviewed custom request/executor integration (`RequestExecutor`, interceptors, `customExecutorPath`, `createLegacyRequestAdapter`).
+- [ ] Chose migration path: see [docs/en/request-executor.md](docs/en/request-executor.md) (M0–M12) or `init --requestFormat`.
+- [ ] Reviewed custom request/executor integration — hub: [docs/en/request-executor.md](docs/en/request-executor.md).
 - [ ] Ran `check-config` for `request` / `customExecutorPath` warnings.
 - [ ] Replaced `useProjectPrettier` with `prettierConfigPath` where you still want Prettier formatting.
 - [ ] Replaced `useEslintFix: true` with `tsconfigPath` + `eslintConfigPath` where you still want batch ESLint fix.

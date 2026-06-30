@@ -31,15 +31,21 @@
 - Supports generator plugins (`plugins`) including built-in `x-typescript-type`
 - Supports binary request/response generation (`format: binary` -> `Blob`)
 - Supports opt-in generation cache and incremental writes (`--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`)
-- Generated services accept a `RequestExecutor` in the constructor (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`, `createLegacyRequestAdapter`)
-- CLI `init --requestFormat` scaffolds custom HTTP layers: legacy transport, `createExecutorAdapter`, or standalone `RequestExecutor`
-- `check-config` validates `request` / `customExecutorPath` file presence and `createExecutorAdapter` export
+- Generated clients use `RequestExecutor` + `createClient` — see [RequestExecutor hub](docs/en/request-executor.md)
 - Optional output formatting via `prettierConfigPath` (explicit Prettier config file)
 - Optional batch ESLint `--fix` after generation when both `tsconfigPath` and `eslintConfigPath` are set
 - Supports unified `analyze-diff` report (`schemaVersion: 2.0.0`) with separate `semantic` (CI/governance) and `structural` (generation) sections
 - Restores `generate --useHistory` compatibility with semantic diff reports (ghost operations/properties, coercion, rename miracles)
 - Uses selective OpenAPI `$ref` expansion in analyze-diff for faster and safer comparison
 - Automatic RENAME / TYPE_COERCION miracle detection from semantic property changes
+
+## Choose your path
+
+| I want to… | Start here |
+|------------|------------|
+| Generate my first client | [Getting started](docs/en/getting-started.md) |
+| Upgrade from 1.x or fix custom HTTP / `check-config` warnings | **[RequestExecutor hub](docs/en/request-executor.md)** |
+| Migrate config keys and diff reports | [Migration guide](docs/en/migration.md) |
 
 ## Install
 
@@ -55,19 +61,32 @@ AI agents can use bundled [Agent Skills](https://agentskills.io) for RequestExec
 cp -r node_modules/ts-openapi-codegen/skills ./openapi-codegen-skills
 ```
 
-See [skills/README.md](skills/README.md) for agent paths (Cursor, Claude Code, Codex) and available skills.
+See [skills/README.md](skills/README.md) for agent paths (Cursor, Claude Code, Codex).
+
+- **Human docs:** [RequestExecutor hub](docs/en/request-executor.md)
+- **Agent cheatsheet:** [skills/request-executor-openapi-codegen/SKILL.md](skills/request-executor-openapi-codegen/SKILL.md)
 
 ## Documentation
 
-- [Usage](docs/en/usage.md)
-- [Configuration file](docs/en/configuration.md)
-- [Examples](docs/en/examples.md)
-- [Features](docs/en/features.md)
-- [Migration guide](MIGRATION.md)
-- [Plugins](docs/en/plugins.md)
-- [Plugin API v2 (RFC)](docs/en/plugin-api-v2.md)
-- [Русская версия README](README.rus.md)
-- [Русская документация](docs/ru/usage.md)
+See [docs/README.md](docs/README.md) for the full index.
+
+| Doc | Description |
+|-----|-------------|
+| [Getting started](docs/en/getting-started.md) | Generate → `createClient` → call API |
+| **[RequestExecutor hub](docs/en/request-executor.md)** | Custom HTTP, migration, troubleshooting |
+| [Migration guide](docs/en/migration.md) | Upgrade paths A/B/C |
+| [Config recipes](docs/en/config-recipes.md) | Copy-paste config patterns |
+| [Configuration reference](docs/en/configuration-reference.md) | All config keys |
+| [CLI reference](docs/en/cli-reference.md) | All commands and flags |
+| [Features](docs/en/features.md) | Enums, cache, plugins, diff reports |
+| [Examples](docs/en/examples.md) | Usage examples |
+| [MIGRATION.md](MIGRATION.md) | Breaking changes index |
+| [Plugins](docs/en/plugins.md) | Generator plugins |
+| [Plugin API v2 (RFC)](docs/en/plugin-api-v2.md) | analyze-diff hooks |
+| [Usage (legacy)](docs/en/usage.md) | Redirects to CLI reference |
+| [Configuration (legacy)](docs/en/configuration.md) | Redirects to configuration reference |
+| [Русская версия README](README.rus.md) | Russian README |
+| [Русская документация](docs/ru/usage.md) | Russian usage |
 
 [npm-url]: https://www.npmjs.com/package/ts-openapi-codegen
 [npm-image]: https://img.shields.io/npm/v/ts-openapi-codegen.svg

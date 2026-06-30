@@ -1,5 +1,8 @@
 # Руководство по миграции: 1.0.0 -> 2.1.0
 
+> **Структурированные пути миграции:** [docs/ru/migration.md](docs/ru/migration.md)
+> **RequestExecutor (custom HTTP):** [docs/ru/request-executor.md](docs/ru/request-executor.md)
+
 Этот документ описывает переход с `1.0.0` на `2.1.0` на основе diff изменений в репозитории.
 
 ## Область миграции
@@ -62,43 +65,19 @@
 
 **Стало:** каждый сгенерированный сервис получает `RequestExecutor` в конструкторе и вызывает `executor.request()` или `executor.requestRaw()`.
 
-#### Контракт RequestExecutor
+> **Полное руководство:** [docs/ru/request-executor.md](docs/ru/request-executor.md) — глоссарий, дерево решений, сценарии M0–M12, матрицы codegen/runtime, рецепты, FAQ, расшифровка warnings `check-config`.
+>
+> **Пути миграции:** [docs/ru/migration.md](docs/ru/migration.md) — чеклист Path B (custom HTTP).
 
-- `request<T>(config, options?)` — возвращает распарсенное тело ответа.
-- `requestRaw<T>(config, options?)` — возвращает `ApiResult<T>` (`url`, `ok`, `status`, `statusText`, `body`).
-- `RequestConfig` описывает method, path, headers, query, body, media types и опционально `responseType: 'blob'`.
+**Кратко о breaking behavior (2.1.0-beta.10):**
 
-#### Кастомный HTTP-слой
-
-- `request` в конфиге по-прежнему указывает на транспортный модуль (legacy-сигнатура `ApiRequestOptions`); при генерации копируется в `core/request.ts`.
-- `customExecutorPath` указывает на модуль с экспортом `createExecutorAdapter`; при генерации копируется в `core/executor/createExecutorAdapter.ts` (не импортируется в runtime).
-- `createLegacyRequestAdapter(openApiConfig, mapOptions?)` — сгенерированный helper для проектов с legacy custom `request()` без полного переписывания на `RequestExecutor`. Используйте через `createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) })`.
-- Если кастомный транспорт экспортирует `requestRaw`, legacy adapter делегирует в него; иначе `requestRaw` синтезирует минимальный `ApiResult` из `request()` (status 200).
-
-#### Цепочка interceptors
-
-```mermaid
-flowchart TD
-  A[RequestConfig] --> B[Request interceptors]
-  B --> C[HTTP через executor]
-  C --> D[Response interceptors]
-  D --> E[Результат]
-  C -->|ошибка| F[Error interceptors]
-  F --> G[Повторный throw или обработка]
-```
-
-Порядок: request interceptors → HTTP → response interceptors; при ошибке сначала error interceptors, затем исключение.
-
-Error interceptors могут вернуть `RequestRecovery(value)` для восстановления после ошибки; восстановленное значение проходит через response interceptors.
-
-`createClient` всегда оборачивает executor в `withInterceptors` с дефолтным `apiErrorInterceptor` (с `2.1.0-beta.10`).
-
-Транспортный `ApiError` (из `catchErrors`) теперь хранит slim `request` config, а payload ответа — в `body`, вместо полного `ApiRequestOptions` в `request`.
-
-При включённом `useCancelableRequest` методы `RequestExecutor.request` / `requestRaw` возвращают `CancelablePromise`.
+- `createClient` всегда оборачивает executor в `withInterceptors` и `apiErrorInterceptor`.
+- `ApiError` хранит компактный `request`; payload ответа — в `error.body`.
+- Ключи конфига: `"request"` (transport) vs `customExecutorPath` (adapter) — см. глоссарий hub.
+- `createLegacyRequestAdapter` для transport без `requestRaw` (только dev; синтетический status 200).
 
 Влияние:
-- если у вас была кастомная интеграция со старым request-потоком, ее нужно адаптировать под executor-подход;
+- если у вас была кастомная интеграция со старым request-потоком, её нужно адаптировать под executor-подход;
 - в generated core появились/обновились артефакты для executor/interceptors (`core/executor`, interceptor-файлы).
 
 ### 4) Унификация схемы конфигурации
@@ -339,8 +318,8 @@ openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/pre
 - [ ] Во всех конфигах удален `includeSchemasFiles`.
 - [ ] Везде явно задан `validationLibrary`.
 - [ ] Везде явно задан `emptySchemaStrategy`.
-- [ ] Выбран путь миграции: `customExecutorPath` vs legacy `request` + `createLegacyRequestAdapter` (или `init --requestFormat`).
-- [ ] Проверена интеграция request/executor (`RequestExecutor`, interceptors, `customExecutorPath`, `createLegacyRequestAdapter`).
+- [ ] Выбран путь миграции: см. [docs/ru/request-executor.md](docs/ru/request-executor.md) (M0–M12) или `init --requestFormat`.
+- [ ] Проверена интеграция request/executor — hub: [docs/ru/request-executor.md](docs/ru/request-executor.md).
 - [ ] Выполнен `check-config` для предупреждений по `request` / `customExecutorPath`.
 - [ ] `useProjectPrettier` заменён на `prettierConfigPath`, если нужно форматирование Prettier.
 - [ ] `useEslintFix: true` заменён на пару `tsconfigPath` + `eslintConfigPath`, если нужен пакетный ESLint fix.

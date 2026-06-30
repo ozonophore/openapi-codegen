@@ -31,15 +31,21 @@
 - Поддерживает плагины генератора (`plugins`), включая встроенный `x-typescript-type`
 - Поддерживает генерацию бинарных request/response (`format: binary` -> `Blob`)
 - Поддерживает opt-in кэш генерации и инкрементальную запись (`--cache`, `--cachePath`, `--cacheStrategy`, `--cacheDebug`)
-- Сгенерированные сервисы принимают `RequestExecutor` в конструкторе (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`, `createLegacyRequestAdapter`)
-- CLI `init --requestFormat` создаёт scaffold кастомного HTTP-слоя: legacy transport, `createExecutorAdapter` или автономный `RequestExecutor`
-- `check-config` проверяет наличие файлов `request` / `customExecutorPath` и экспорт `createExecutorAdapter`
+- Сгенерированные клиенты используют `RequestExecutor` + `createClient` — см. [RequestExecutor hub](docs/ru/request-executor.md)
 - Опциональное форматирование вывода через `prettierConfigPath` (явный путь к конфигу Prettier)
 - Опциональный пакетный ESLint `--fix` после генерации при указании `tsconfigPath` и `eslintConfigPath`
 - Поддерживает унифицированный отчёт `analyze-diff` (`schemaVersion: 2.0.0`) с отдельными секциями `semantic` (CI/governance) и `structural` (генерация)
 - Восстанавливает совместимость `generate --useHistory` с semantic diff-отчётами (ghost operations/properties, coercion, rename miracles)
 - Использует селективное раскрытие OpenAPI `$ref` в analyze-diff для более быстрого и безопасного сравнения
 - Автоматическое обнаружение RENAME / TYPE_COERCION miracles из semantic-изменений свойств
+
+## Выберите свой путь
+
+| Задача | Документ |
+|--------|----------|
+| Сгенерировать первый клиент | [Быстрый старт](docs/ru/getting-started.md) |
+| Апгрейд с 1.x / custom HTTP / warnings `check-config` | **[RequestExecutor hub](docs/ru/request-executor.md)** |
+| Миграция конфига и diff reports | [Миграция](docs/ru/migration.md) |
 
 ## Установка
 
@@ -55,19 +61,29 @@ npm install ts-openapi-codegen --save-dev
 cp -r node_modules/ts-openapi-codegen/skills ./openapi-codegen-skills
 ```
 
-Подробнее: [skills/README.md](skills/README.md) — пути для Cursor, Claude Code, Codex и список навыков.
+Подробнее: [skills/README.md](skills/README.md).
+
+- **Документация для людей:** [RequestExecutor hub](docs/ru/request-executor.md)
+- **Cheatsheet для агентов:** [skills/request-executor-openapi-codegen/SKILL.md](skills/request-executor-openapi-codegen/SKILL.md)
 
 ## Документация
 
-- [Использование](docs/ru/usage.md)
-- [Файл конфигурации](docs/ru/configuration.md)
-- [Примеры](docs/ru/examples.md)
-- [Возможности](docs/ru/features.md)
-- [Руководство по миграции](MIGRATION.RU.md)
-- [Плагины](docs/ru/plugins.md)
-- [Plugin API v2 (RFC)](docs/ru/plugin-api-v2.md)
-- [English README](README.md)
-- [English docs](docs/en/usage.md)
+Полный индекс: [docs/ru/README.md](docs/ru/README.md).
+
+| Документ | Описание |
+|----------|----------|
+| [Быстрый старт](docs/ru/getting-started.md) | Generate → `createClient` → вызов API |
+| **[RequestExecutor hub](docs/ru/request-executor.md)** | Custom HTTP, миграция |
+| [Миграция](docs/ru/migration.md) | Пути A/B/C |
+| [Рецепты конфигов](docs/ru/config-recipes.md) | Паттерны конфига |
+| [Справочник конфигурации](docs/ru/configuration-reference.md) | Все ключи |
+| [Справочник CLI](docs/ru/cli-reference.md) | Команды и флаги |
+| [Возможности](docs/ru/features.md) | Опции генерации |
+| [Примеры](docs/ru/examples.md) | Примеры |
+| [MIGRATION.RU.md](MIGRATION.RU.md) | Breaking changes |
+| [Плагины](docs/ru/plugins.md) | Plugins |
+| [English README](README.md) | English landing |
+| [English docs](docs/en/request-executor.md) | RequestExecutor (EN) |
 
 [npm-url]: https://www.npmjs.com/package/ts-openapi-codegen
 [npm-image]: https://img.shields.io/npm/v/ts-openapi-codegen.svg

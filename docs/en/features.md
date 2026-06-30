@@ -8,7 +8,7 @@ The generator supports multiple HTTP clients:
 - **node** - Node.js compatible client using `node-fetch`
 - **axios** - Axios HTTP client
 
-Select the client using the `--httpClient` option or `client` property in config file.
+Select the client using the `--httpClient` option or `httpClient` property in config file.
 
 ### Generation cache `--cache`
 
@@ -287,154 +287,27 @@ export function request<T>(config: TOpenAPIConfig, options: ApiRequestOptions): 
 
 ### RequestExecutor
 
-Starting from version **2.0.0** the generated services use the `RequestExecutor` interface
-instead of direct calls to the `request` core function.
+Starting from **2.0.0**, generated services use the `RequestExecutor` contract and `createClient()` for runtime wiring.
 
-The `RequestExecutor` is a single HTTP logic integration point responsible for executing requests
-and extending client behavior. It allows you to:
-- use any transport (fetch/axios/xhr/custom);
-- Centrally handle requests, responses, and errors;
-- expand the client's behavior without changing the generated services.
+**Canonical guide:** [request-executor.md](request-executor.md) — glossary, decision tree, scenarios M0–M12, recipes, FAQ, `check-config` warnings.
 
-#### Interceptors
+**Edge cases (gRPC, CancelablePromise, custom errors):** [advanced/request-executor-deep-dive.md](advanced/request-executor-deep-dive.md)
 
-`RequestExecutor` supports **interceptors**, which allow you to implement additional
-logic at different stages of the request lifecycle.:
+Quick example — auth via interceptors (no regen):
 
-- `onRequest` — modification of the request before sending (headers, auth, logging);
-- `onResponse` — processing successful responses;
-- `onError` — centralized error handling.
-
-Interceptors are applied at the executor level and are automatically used by all
-generated services.
-
-```ts
+```typescript
 import { createClient } from './generated';
 
 const client = createClient({
-    interceptors: {
-        onRequest: [
-            (config) => ({
-                ...config,
-                headers: {
-                    ...config.headers,
-                    Authorization: 'Bearer token',
-                },
-            }),
-        ],
-        onError: [
-            (error) => {
-                console.error(error);
-                throw error;
-            },
-        ],
-    },
-});
-```
-
-#### Custom implementation of RequestExecutor with interceptors
-
-A custom `RequestExecutor` can be used together with interceptors.
-In this case, the executor is responsible only for the transport and execution of the request,
-while the interceptors are responsible for the extensible business logic (authorization, logging, error handling).
-
-```ts
-import type { RequestExecutor, RequestConfig } from './generated/core/executor/requestExecutor';
-import type { ApiResult } from './generated/core/ApiResult';
-import { OpenAPI } from './generated/core/OpenAPI';
-import { withInterceptors } from './generated/core/interceptors/withInterceptors';
-import { SimpleService } from './generated/services/SimpleService';
-
-interface MyCustomOptions {
-    timeout?: number;
-}
-
-const buildUrl = (config: RequestConfig) => `${OpenAPI.BASE}${config.path}`;
-
-const baseExecutor: RequestExecutor<MyCustomOptions> = {
-    async request<T>(config: RequestConfig, options?: MyCustomOptions): Promise<T> {
-        const response = await fetch(buildUrl(config), {
-            method: config.method,
-            headers: config.headers,
-            body: config.body ? JSON.stringify(config.body) : undefined,
-            signal: options?.timeout
-                ? AbortSignal.timeout(options.timeout)
-                : undefined,
-        });
-
-        if (!response.ok) {
-            throw new Error(`Request failed: ${response.status}`);
-        }
-
-        return response.json();
-    },
-    async requestRaw<T>(config: RequestConfig, options?: MyCustomOptions): Promise<ApiResult<T>> {
-        const url = buildUrl(config);
-        const response = await fetch(url, {
-            method: config.method,
-            headers: config.headers,
-            body: config.body ? JSON.stringify(config.body) : undefined,
-            signal: options?.timeout ? AbortSignal.timeout(options.timeout) : undefined,
-        });
-        const body = (await response.json()) as T;
-        return {
-            url,
-            ok: response.ok,
-            status: response.status,
-            statusText: response.statusText,
-            body,
-        };
-    },
-};
-
-// Wrapping the executor interceptors
-const executor = withInterceptors(baseExecutor, {
+  openApi: { BASE: 'https://api.example.com' },
+  interceptors: {
     onRequest: [
-        (config) => ({
-            ...config,
-            headers: {
-                ...config.headers,
-                Authorization: 'Bearer token',
-            },
-        }),
+      (config) => ({
+        ...config,
+        headers: { ...config.headers, Authorization: `Bearer ${token}` },
+      }),
     ],
-    onError: [
-        (error) => {
-            console.error(error);
-            throw error;
-        },
-    ],
-});
-
-const service = new SimpleService(executor);
-await service.getCallWithoutParametersAndResponse({ timeout: 5000 });
-```
-
-#### Using generated `createClient` with `customExecutorPath` and `executorFactory`
-
-If you set `customExecutorPath` in generation config, `createClient.ts` imports your custom
-`createExecutorAdapter` and uses it as the default executor.
-
-You can additionally pass `executorFactory` at runtime to wrap/extend this default executor
-(for retry, tracing, metrics, etc.) without changing generated services.
-
-```ts
-import { createClient } from './generated';
-
-const client = createClient({
-    executorFactory: ({ openApiConfig, createDefaultExecutor }) => {
-        const baseExecutor = createDefaultExecutor();
-
-        return {
-            async request<TResponse>(config, options) {
-                console.debug('Request to', openApiConfig.BASE, config.path);
-                return baseExecutor.request<TResponse>(config, options);
-            },
-            requestRaw<TResponse>(config, options) {
-                return baseExecutor.requestRaw<TResponse>(config, options);
-            },
-        };
-    },
+  },
 });
 ```
 
