@@ -55,7 +55,7 @@ npm install ts-openapi-codegen --save-dev
 
 ## Agent Skills
 
-AI agents can use bundled [Agent Skills](https://agentskills.io) for RequestExecutor migration and Marauder features. After install:
+AI agents can use bundled [Agent Skills](https://agentskills.io) for RequestExecutor migration and Marauder preview features. After install:
 
 ```bash
 cp -r node_modules/ts-openapi-codegen/skills ./openapi-codegen-skills
@@ -63,8 +63,8 @@ cp -r node_modules/ts-openapi-codegen/skills ./openapi-codegen-skills
 
 See [skills/README.md](skills/README.md) for agent paths (Cursor, Claude Code, Codex).
 
-- **Human docs:** [RequestExecutor hub](docs/en/request-executor.md)
-- **Agent cheatsheet:** [skills/request-executor-openapi-codegen/SKILL.md](skills/request-executor-openapi-codegen/SKILL.md)
+- **Human docs:** [RequestExecutor hub](docs/en/request-executor.md) · [Marauder guide](docs/MARAUDER_USER_GUIDE.md)
+- **Agent cheatsheets:** [request-executor](skills/request-executor-openapi-codegen/SKILL.md) · [marauder](skills/marauder-openapi-codegen/SKILL.md)
 
 ## Documentation
 

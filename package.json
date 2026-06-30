@@ -64,6 +64,8 @@
     "checkTypes": "tsc --noEmit",
     "find-deadcode:dev": "knip",
     "find-deadcode": "knip --production --strict",
+    "lint:skills": "tsx scripts/lint-skills-portability.ts",
+    "sync:skills": "tsx scripts/sync-skills.ts",
     "prepare": "husky"
   },
   "dependencies": {

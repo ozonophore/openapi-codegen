@@ -63,8 +63,8 @@ cp -r node_modules/ts-openapi-codegen/skills ./openapi-codegen-skills
 
 Подробнее: [skills/README.md](skills/README.md).
 
-- **Документация для людей:** [RequestExecutor hub](docs/ru/request-executor.md)
-- **Cheatsheet для агентов:** [skills/request-executor-openapi-codegen/SKILL.md](skills/request-executor-openapi-codegen/SKILL.md)
+- **Документация для людей:** [RequestExecutor hub](docs/ru/request-executor.md) · [Marauder](docs/MARAUDER_USER_GUIDE.md)
+- **Cheatsheet для агентов:** [request-executor](skills/request-executor-openapi-codegen/SKILL.md) · [marauder](skills/marauder-openapi-codegen/SKILL.md)
 
 ## Документация
 

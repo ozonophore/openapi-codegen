@@ -18,11 +18,14 @@ cp -r node_modules/ts-openapi-codegen/skills ./openapi-codegen-skills
 
 Copy or symlink the skill folders from `node_modules/ts-openapi-codegen/skills/`.
 
+**Maintainers (openapi-codegen repo):** run `npm run sync:skills` to copy `skills/` into `.cursor/skills/` for local Cursor development.
+
 ## Available skills
 
 | Skill | Purpose | Human docs |
 |-------|---------|------------|
 | `request-executor-openapi-codegen` | RequestExecutor config, M0–M12, codegen/runtime matrices | [EN](../docs/en/request-executor.md) · [RU](../docs/ru/request-executor.md) |
+| `marauder-openapi-codegen` | auto-select, spec analysis, reuse cache (preview) | [MARAUDER_USER_GUIDE.md](../docs/MARAUDER_USER_GUIDE.md) |
 
 ## RequestExecutor
 

@@ -26,6 +26,9 @@ jobs:
       - name: Build library
         run: npm run release
 
+      - name: Lint skills portability
+        run: npm run lint:skills
+
       - name: Run unit tests
         run: npm run test:coverage
 

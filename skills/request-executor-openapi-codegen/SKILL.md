@@ -2,12 +2,12 @@
 name: request-executor-openapi-codegen
 description: >-
   Agent cheatsheet for RequestExecutor (2.0.0+): createClient, request/customExecutorPath,
-  M0–M12, codegen A–F, runtime R1–R5. Canonical human docs: docs/en/request-executor.md
+  M0–M12, codegen A–F, runtime R1–R5. Canonical human docs in package docs/en/request-executor.md
 ---
 
 # RequestExecutor — agent cheatsheet
 
-**Canonical human docs:** [docs/en/request-executor.md](../../docs/en/request-executor.md) · [docs/ru/request-executor.md](../../docs/ru/request-executor.md)
+**Canonical human docs:** `node_modules/ts-openapi-codegen/docs/en/request-executor.md` · [GitHub](https://github.com/ozonophore/openapi-codegen/blob/master/docs/en/request-executor.md)
 
 Use the hub for prose, FAQ, copy-paste recipes, and `check-config` warning decode. This file is optimized for classification and config diffs.
 
@@ -57,7 +57,7 @@ Status on success → methodRaw(), not method()
 
 ## M0–M12 table
 
-See hub [scenario picker](../../docs/en/request-executor.md#scenario-picker-m0m12).
+See hub scenario picker (link above) or [reference.md](reference.md).
 
 ## Agent workflow
 
@@ -67,17 +67,17 @@ See hub [scenario picker](../../docs/en/request-executor.md#scenario-picker-m0m1
 4. `check-config` → `preview-changes` → `generate`
 5. Runtime: `createClient({ openApi, interceptors?, executorFactory? })`
 
-## Ground truth files
+## Generated client layout (after codegen)
 
-| Scenario | Path |
-|----------|------|
-| M2 transport | `test/custom/request.ts` |
-| M7 adapter | `test/custom/createExecutorAdapter.ts`, `example/executor.ts` |
-| Architecture pointer | `example/REQUEST_EXECUTION_ARCHITECTURE.md` |
-| validateExecutorSetup | `src/cli/checkAndUpdateConfig/utils/validateExecutorSetup.ts` |
+| Scenario | Typical path in `{output}/` |
+|----------|----------------------------|
+| M0 default transport | `core/request.ts`, `core/executor/createExecutorAdapter.ts` |
+| M2 custom transport | `core/request.ts` (copied from config `"request"`) |
+| M7 custom adapter | `core/executor/createExecutorAdapter.ts` (copied from `customExecutorPath`) |
+| Types | `core/executor/requestExecutor.ts` |
 
 ## Additional resources
 
-- [reference.md](reference.md) — types and field tables
-- [examples.md](examples.md) — short code snippets
-- [Migration](../../docs/en/migration.md) — Path B checklist
+- [reference.md](reference.md) — types and config fields
+- [examples.md](examples.md) — inline copy-paste snippets
+- Human migration checklist: `node_modules/ts-openapi-codegen/docs/en/migration.md`

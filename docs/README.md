@@ -25,7 +25,7 @@
 | [Plugins](en/plugins.md) | Generator plugins |
 | [Plugin API v2](en/plugin-api-v2.md) | RFC for analyze-diff hooks |
 | [RequestExecutor deep dive](en/advanced/request-executor-deep-dive.md) | M8, M10, M11 edge cases |
-| [Marauder user guide](MARAUDER_USER_GUIDE.md) | Preview: auto-select, spec analysis, heal |
+| [Marauder user guide](MARAUDER_USER_GUIDE.md) | Preview: auto-select, spec analysis, reuse cache |
 
 ## Other languages
 
