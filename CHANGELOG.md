@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.11] — 2026-06-12
+
+Marauder refocus preview: project-aware auto-select, OpenAPI spec analysis (`specAnalysis`), and incremental generation cache with ReuseStore. Features are opt-in (see Known limitations).
+
+### Added
+- **AutoSelector** (`--auto-select` / config `autoSelect`): analyzes the target project (`package.json` dependencies, deployment target, bundle-size hints) and recommends the optimal `validationLibrary` and `httpClient`, with explanations and optimization tips. Supports `strict`, `preferSmallBundles`, `preferStandards` and custom selection rules (`src/core/autoSelect/`).
+- **Nested Marauder CLI flags** via `parseNestedCliOptions`: dot-notation (`--auto-select.strict`, `--spec-analysis.fail-on-high`), inline JSON (`--auto-select='{"enabled":true}'`), and boolean shorthands (`--spec-analysis=true`); consumed before Commander parsing
+- **ReuseStore** (`cacheStrategy: "reuse"`): global artifact store under `.openapi-codegen-store` with `optionsSliceHash`-suffixed paths, integrity verification, GC, and `ReuseConflictError` on schema drift; **`reuseOnConflict`** (`fail` | `namespace`) on CLI and in config
+- **CodegenSpecAnalyzer** and **CrossSpecAnalyzer** (`--spec-analysis` / config `specAnalysis`): per-spec and cross-spec OpenAPI quality detectors; `crossSpec: true` by default. `--anomaly-detection` / `anomalyDetection` remain deprecated aliases
+- **Unified generation report** at `{output}/reports/latest.json` (or `<cachePath>/reports/latest.json` with reuse) when `cache` or `specAnalysis` is enabled
+- **`cacheStrategy: "content"`**: explicit content-only incremental mode (no entity/reuse store)
+- **`--fail-on-governance-errors`** / config **`failOnGovernanceErrors`**: fail `generate` when governance policy reports errors (requires `--strict-openapi`)
+- **`reuseWriterHelpers`**: shared DRY layer for model/schema reuse writers
+- **`mergeSpecAnalysisConfigAcrossItems`**: merges `specAnalysis` settings across multi-item configs
+- **Per-item autoSelect overrides** when probe recommendations differ across outputs
+- **`analyze-usage --diff-report`**: cross-check RENAME miracles from `analyze-diff` against consumer imports; path-based API import scope via TypeScript module resolution (supports aliases); shared **`ProjectProbe`**; scans `{projectPath}/src/**/*.{ts,tsx}` only
+- **Programmatic exports** from `core`: `AutoSelector`, `ProjectProbe`, `runSpecAnalysis`, `CodegenSpecAnalyzer`, `CrossSpecAnalyzer`, `ReuseStore`, `GenerationReport`, and related types
+- Config schema **`UNIFIED_OPTIONS_v6`** with optional `autoSelect` and `specAnalysis` blocks, and a v5→v6 migration plan
+
+### Changed
+- **Breaking:** default CLI report paths now write to `./.openapi-codegen-reports/` instead of the project root (`openapi-report.json`, `anomaly-report.*`, `openapi-diff-report.json`, `openapi-usage-report.json`, `eslint-fix-report.json`). Explicit `--report-file`, `--output-report`, `--output`, and config paths are unchanged.
+- **Marauder scope refocused** on generation-time spec analysis and artifact reuse
+- The latest unified config schema is now **V6**. Existing configs migrate automatically via `update-config`; the change is additive and backward compatible
+- **`specAnalysis`** is the canonical config/CLI block; `anomalyDetection` remains a deprecated alias
+- **`runAnomalyDetection`** is a thin deprecated alias to `runSpecAnalysis` (no double-run)
+- **`failOnHigh`** / legacy **`failOnAnomalies`** evaluated only after cross-spec analysis completes
+- **CLI `--cacheStrategy`** no longer defaults to `entity` or `reuse`; omit the flag to keep the config value (V5→V6 migration sets `entity` for compatibility; V6 schema default is `reuse`)
+- **Default `cachePath`** in runtime defaults: `.openapi-codegen-cache.json` → **`.openapi-codegen-store`**
+- **AutoSelector** default validator fallback is `NONE` (was `ZOD`)
+- Cross-spec drift/conflict findings are deduplicated; cross-spec detectors respect `filterSpecFindings`
+
+### Removed
+- CLI commands: **`heal`**, **`migrate`**, **`swarm`**
+- **`--exploit-anomalies`** / config **`anomalyExploitation`**
+- Core modules: `AnomalyExploiter`, Avatar Swarm stack, gradual migration runtime, `SelfHealingClient`
+- Client optimization and microservice Handlebars templates
+
+### Fixed
+- Artifact path collisions when the same model name is generated with different `validationLibrary` or prefixes
+- CLI `--cacheStrategy` overriding config `cacheStrategy: "entity"` when the flag was omitted
+- Partial unified generation report written on `ReuseConflictError`
+- Cross-spec name-hash drift duplicates; `failOnHigh` with relative output paths in multi-item configs
+- `OpenApiClient`: `autoSelect` and `specAnalysis` propagated into normalized item options instead of being overwritten by defaults
+- `analyze-usage`: Zod schema aligned with CLI flags (`--sourcePath`, `--projectPath`); path-based import scope replaces brittle module-name matching
+
+### Known limitations (preview)
+- `--auto-select` applies when generating from `openapi.config.json` or merged multi-item configs
+- `specAnalysis` reports quality issues; it does not auto-fix specs
+- Reuse store requires `modelsMode: "interfaces"` (default); class mode disables artifact reuse
+- Marauder config block merge is shallow spread, not recursive deep merge
+
 ## [2.1.0-beta.10] — 2026-06-19
 
 ### Added

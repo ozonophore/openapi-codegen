@@ -2,7 +2,15 @@
 import { Command, Option, OptionValues } from 'commander';
 import fs from 'fs';
 
-import { APP_LOGGER, DEFAULT_DIFF_CHANGES_DIR, DEFAULT_OPENAPI_CONFIG_FILENAME, DEFAULT_OUTPUT_API_DIR, DEFAULT_PREVIEW_CHANGES_DIR } from '../common/Consts';
+import {
+    APP_LOGGER,
+    COMMON_DEFAULT_OPTIONS_VALUES,
+    DEFAULT_ANALYZE_USAGE_REPORT_PATH,
+    DEFAULT_DIFF_CHANGES_DIR,
+    DEFAULT_OPENAPI_CONFIG_FILENAME,
+    DEFAULT_OUTPUT_API_DIR,
+    DEFAULT_PREVIEW_CHANGES_DIR,
+} from '../common/Consts';
 import { ELogLevel, ELogOutput } from '../common/Enums';
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import { UpdateNotifier } from '../common/UpdateNotifier';
@@ -20,6 +28,7 @@ import { init } from './initOpenApiConfig/init';
 import { previewChanges } from './previewChanges/previewChanges';
 import { CLICommandResult } from './types';
 import { getCLIName } from './utils';
+import { mergeNestedCliOptions, parseNestedCliOptions } from './utils/parseNestedCliOptions';
 
 const packageDetails = JSON.parse(fs.readFileSync(joinHelper(__dirname, '../../package.json'), 'utf-8'));
 
@@ -76,7 +85,8 @@ program
     .option('-s, --sortByRequired', 'Property sorting strategy: simplified or extended')
     .option('--useSeparatedIndexes', 'Use separate index files for the core, models, schemas, and services.')
     .option('--strict-openapi', 'Enable strict OpenAPI diagnostics report and fail generation when strict errors are found')
-    .option('--report-file <value>', 'Path to strict OpenAPI diagnostics report JSON file', './openapi-report.json')
+    .option('--fail-on-governance-errors', 'When used with --strict-openapi, fail generation when governance policy reports errors')
+    .option('--report-file <value>', 'Path to strict OpenAPI diagnostics report JSON file', COMMON_DEFAULT_OPTIONS_VALUES.reportFile)
     .option('--governance-config <value>', 'Path to governance rules JSON config file')
     .addOption(new Option('--validationLibrary <value>', 'Validation library to use for schema validation').choices([...Object.values(ValidationLibrary)]).default(ValidationLibrary.NONE))
     .addOption(new Option('--emptySchemaStrategy <value>', 'How to handle empty generated schemas').choices([...Object.values(EmptySchemaStrategy)]).default(EmptySchemaStrategy.KEEP))
@@ -84,14 +94,21 @@ program
     .option('--tsconfigPath <value>', 'Path to project tsconfig.json for batch ESLint fix (requires --eslintConfigPath)')
     .option('--eslintConfigPath <value>', 'Path to project ESLint config for batch ESLint fix (requires --tsconfigPath)')
     .option('--cache', 'Enable generation cache (default: disabled)')
-    .option('--cachePath <value>', 'Path to generation cache file relative to output directory (default: .openapi-codegen-cache.json)')
-    .addOption(new Option('--cacheStrategy <value>', 'Cache strategy').choices(['content', 'entity']).default('entity'))
+    .option('--cachePath <value>', 'Path to generation cache file relative to output directory (default: .openapi-codegen-store)')
+    .addOption(new Option('--cacheStrategy <value>', 'Cache strategy').choices(['content', 'entity', 'reuse']))
+    .addOption(new Option('--reuseOnConflict <value>', 'Reuse store conflict policy when cacheStrategy is reuse').choices(['fail', 'namespace']))
     .option('--cacheDebug', 'Show cache hit/miss debug logs (default: false)')
+    .option(
+        '--auto-select',
+        'Enable automatic selection of optimal validators and HTTP clients based on project analysis. Supports JSON object or dot-notation flags like --auto-select.strict (default: false)'
+    )
+    .option('--spec-analysis', 'Enable detection and reporting of API specification anomalies. Supports JSON object or dot-notation flags like --spec-analysis.fail-on-high (default: false)')
+    .option('--anomaly-detection', 'Deprecated alias for --spec-analysis. Supports JSON object or dot-notation flags like --anomaly-detection.fail-on-anomalies (default: false)')
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })
     .action(async (options: OptionValues) => {
-        const result = await generateOpenApiClient(options);
+        const result = await generateOpenApiClient(mergeNestedCliOptions(options, preParsedNestedOptions));
         finishCommand(result);
     });
 
@@ -169,18 +186,6 @@ program
 
 /**
  * analyze-diff - Команда для анализа изменений между двумя версиями OpenAPI спецификации
- *
- * @example Как использовать сейчас
- * Сравнение с явным старым файлом:
- * openapi-codegen-cli analyze-diff \
- * --input ./openapi/current.yaml \
- * --compare-with ./openapi/previous.yaml \
- * --output-report ./openapi-diff-report.json
- *
- * Сравнение с версией из Git:
- * openapi-codegen-cli analyze-diff \
- * --input openapi/spec.yaml \
- * --git HEAD~1
  */
 program
     .command('analyze-diff')
@@ -223,8 +228,9 @@ program
     .option('-s, --sourcePath <value>', 'Path to generated API file')
     .option('-p, --projectPath <value>', 'Root of your React/TS project')
     .option('-t, --tsconfigPath <value>', 'Optional path to tsconfig.json')
-    .option('-o, --output <value>', 'Output report filename', 'api-report.json')
+    .option('-o, --output <value>', 'Output report filename', DEFAULT_ANALYZE_USAGE_REPORT_PATH)
     .option('-c, --check', 'CI mode (exit code 1 when errors are found)')
+    .option('--diff-report <value>', 'Path to analyze-diff report JSON for rename miracle validation')
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })
@@ -236,9 +242,11 @@ program
 program.exitOverride();
 program.showSuggestionAfterError(false);
 
+const { cleanedArgv, nestedOptions: preParsedNestedOptions } = parseNestedCliOptions(process.argv);
+
 // Парсирование аргументов с обработкой ошибок
 try {
-    program.parse(process.argv);
+    program.parse(cleanedArgv);
 } catch (error: unknown) {
     if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === 'commander.unknownOption') {
         const errorMessage = (error as { message?: string })?.message ?? '';

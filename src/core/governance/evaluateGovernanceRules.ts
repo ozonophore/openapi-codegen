@@ -1,4 +1,5 @@
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
+import { collectOperationDiagnostics } from './collectOperationDiagnostics';
 
 type GovernanceSeverity = 'error' | 'warning' | 'info';
 
@@ -44,14 +45,7 @@ type GovernanceInput = {
     governanceConfig?: GovernancePolicyConfig;
 };
 
-const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const;
-
-/**
- * Checks whether response key is an explicit successful HTTP status code key.
- */
-function isSuccessResponseCode(responseCode: string): boolean {
-    return /^\s*2\d\d\s*$/.test(responseCode) || /^\s*2xx\s*$/i.test(responseCode);
-}
+const GOVERNANCE_OPERATION_RULE_IDS = new Set<GovernanceRuleId>(['REQUIRE_OPERATION_ID', 'NO_DEFAULT_WITHOUT_2XX']);
 
 /**
  * Builds governance summary counters from violations.
@@ -143,52 +137,27 @@ export function evaluateGovernanceRules(params: GovernanceInput): GovernanceRepo
         }
     }
 
-    const paths = (openApi as unknown as Record<string, unknown>).paths as Record<string, unknown> | undefined;
-    for (const [routePath, pathItemRaw] of Object.entries(paths ?? {})) {
-        const pathItem = (pathItemRaw as Record<string, unknown>) ?? {};
-
-        for (const method of HTTP_METHODS) {
-            const operationRaw = pathItem[method];
-            if (!operationRaw || typeof operationRaw !== 'object') {
-                continue;
-            }
-
-            const operation = operationRaw as Record<string, unknown>;
-            const operationPath = `${routePath} ${method.toUpperCase()}`;
-
-            const requireOperationIdRule = getEffectiveRuleConfig('REQUIRE_OPERATION_ID', governanceConfig);
-            if (requireOperationIdRule.enabled && !operation.operationId) {
-                if (!isViolationAllowed(requireOperationIdRule.allowList, operationPath, operationPath)) {
-                    violations.push({
-                        ruleId: 'REQUIRE_OPERATION_ID',
-                        severity: requireOperationIdRule.severity,
-                        message: 'Operation must define operationId.',
-                        path: operationPath,
-                    });
-                }
-            }
-
-            const responses = operation.responses as Record<string, unknown> | undefined;
-            if (!responses || typeof responses !== 'object') {
-                continue;
-            }
-
-            const responseCodes = Object.keys(responses);
-            const hasDefaultResponse = responseCodes.includes('default');
-            const hasSuccessResponse = responseCodes.some(isSuccessResponseCode);
-            const noDefaultWithout2xxRule = getEffectiveRuleConfig('NO_DEFAULT_WITHOUT_2XX', governanceConfig);
-            if (noDefaultWithout2xxRule.enabled && hasDefaultResponse && !hasSuccessResponse) {
-                const violationPath = `${operationPath} responses.default`;
-                if (!isViolationAllowed(noDefaultWithout2xxRule.allowList, operationPath, violationPath)) {
-                    violations.push({
-                        ruleId: 'NO_DEFAULT_WITHOUT_2XX',
-                        severity: noDefaultWithout2xxRule.severity,
-                        message: 'Default response is present without an explicit 2xx response.',
-                        path: violationPath,
-                    });
-                }
-            }
+    for (const diagnostic of collectOperationDiagnostics(openApi)) {
+        if (!GOVERNANCE_OPERATION_RULE_IDS.has(diagnostic.ruleId as GovernanceRuleId)) {
+            continue;
         }
+
+        const ruleId = diagnostic.ruleId as GovernanceRuleId;
+        const ruleConfig = getEffectiveRuleConfig(ruleId, governanceConfig);
+        if (!ruleConfig.enabled) {
+            continue;
+        }
+
+        if (isViolationAllowed(ruleConfig.allowList, diagnostic.operationPath, diagnostic.path)) {
+            continue;
+        }
+
+        violations.push({
+            ruleId,
+            severity: ruleConfig.severity,
+            message: diagnostic.message,
+            path: diagnostic.path,
+        });
     }
 
     return {

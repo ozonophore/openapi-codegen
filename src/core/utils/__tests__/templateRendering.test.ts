@@ -71,7 +71,9 @@ const exportModelsContext = {
 };
 
 describe('@unit: templateRendering', () => {
-    for (const httpClient of Object.values(HttpClient)) {
+    const supportedHttpClients = [HttpClient.FETCH, HttpClient.XHR, HttpClient.NODE, HttpClient.AXIOS];
+
+    for (const httpClient of supportedHttpClients) {
         for (const useCancelableRequest of [false, true] as const) {
             test(`renders request template for ${httpClient} (cancelable=${useCancelableRequest})`, () => {
                 const templates = registerHandlebarTemplates({

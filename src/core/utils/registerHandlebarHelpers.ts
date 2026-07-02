@@ -179,6 +179,7 @@ export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOpti
                 return `${base}Schema`;
         }
     });
+
     Handlebars.registerHelper('getRequiredFields', function (this: any, properties: Model[]) {
         const required = properties
             .filter(prop => prop.isRequired)

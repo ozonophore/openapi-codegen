@@ -11,6 +11,8 @@ junit.xml
 .cursorignore
 .cursor
 .ts-openapi-codegen-diff-changes
+.openapi-codegen-reports
+.openapi-codegen-store
 
 *.iml
 dist
@@ -29,3 +31,4 @@ __logs__
 AGENTS.md
 reports.md
 graphify-out
+research-out

@@ -1,7 +1,9 @@
 import type { ExportedDeclarations } from 'ts-morph';
 import { Node, SourceFile, SyntaxKind } from 'ts-morph';
 
+import { APP_LOGGER } from '../../../common/Consts';
 import type { Contract, MethodMetadata } from '../types';
+import { extractClientServiceKeys } from '../utils/clientServiceKeys';
 
 /** Сканер экспортов сгенерированного API-файла для построения контракта. */
 export class Scanner {
@@ -17,7 +19,7 @@ export class Scanner {
     public scan(): Contract {
         const exports = this.generatedFile.getExportedDeclarations();
 
-        console.log(`DEBUG SCANNER: File exports:`, Array.from(exports.keys()));
+        APP_LOGGER.debug(`Scanner: file exports: ${Array.from(exports.keys()).join(', ')}`);
 
         // 1. Сервисы: экспорты с суффиксом "Service"
         const services: Record<string, MethodMetadata[]> = {};
@@ -46,12 +48,16 @@ export class Scanner {
         // 3. Схемы: все экспорты с суффиксом Schema
         const schemas = this.extractSchemas(exports);
 
-        console.log(`DEBUG SCANNER: Services found: ${Object.keys(services).length}`);
-        console.log(`DEBUG SCANNER: Models found (types/interfaces/classes): ${models.length}`);
-        console.log(`DEBUG SCANNER: Schemas found: ${schemas.length}`);
+        const clientServiceKeys = extractClientServiceKeys(this.generatedFile);
+
+        APP_LOGGER.debug(`Scanner: services found: ${Object.keys(services).length}`);
+        APP_LOGGER.debug(`Scanner: models found (types/interfaces/classes): ${models.length}`);
+        APP_LOGGER.debug(`Scanner: schemas found: ${schemas.length}`);
+        APP_LOGGER.debug(`Scanner: createClient service keys: ${Object.keys(clientServiceKeys).join(', ')}`);
 
         return {
             services,
+            clientServiceKeys,
             schemas,
             models,
             sourceFile: this.generatedFile,
@@ -59,6 +65,17 @@ export class Scanner {
     }
 
     private extractMethodsFromDeclaration(decl: ExportedDeclarations): MethodMetadata[] {
+        if (Node.isExportSpecifier(decl)) {
+            const symbol = decl.getSymbol();
+            const aliased = symbol?.getAliasedSymbol();
+            const declarations = aliased?.getDeclarations() ?? symbol?.getDeclarations() ?? [];
+            const methods: MethodMetadata[] = [];
+            for (const resolvedDecl of declarations) {
+                methods.push(...this.extractMethodsFromDeclaration(resolvedDecl as ExportedDeclarations));
+            }
+            return methods;
+        }
+
         const methods: MethodMetadata[] = [];
 
         // Сценарий А: Сервис объявлен как переменная с объектным литералом

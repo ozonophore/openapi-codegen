@@ -179,6 +179,162 @@ Example (excerpt):
 - Old 1.1.0 reports are still loadable via adapter; re-generate for full `structural` fidelity.
 - Miracles confirmation workflow is unchanged: set `"status": "confirmed"` before generation.
 
+### 8) Default CLI report paths (`2.1.0-beta.11`)
+
+**Breaking change:** when you omit explicit paths, CLI tools now write reports under `./.openapi-codegen-reports/` instead of the project root.
+
+| Report | New default path |
+|--------|------------------|
+| Strict OpenAPI diagnostics (`--report-file`) | `./.openapi-codegen-reports/openapi-report.json` |
+| Spec analysis (`specAnalysis.reportPath`) | `./.openapi-codegen-reports/anomaly-report.json` |
+| `analyze-diff` (`--output-report`) | `./.openapi-codegen-reports/openapi-diff-report.json` |
+| `analyze-usage` (`--output`) | `./.openapi-codegen-reports/openapi-usage-report.json` |
+| Batch ESLint fix summary | `./.openapi-codegen-reports/eslint-fix-report.json` |
+| `generate --diffReport` / config `diffReport` | `./.openapi-codegen-reports/openapi-diff-report.json` |
+
+Explicit `--report-file`, `--output-report`, `--output`, `--diffReport`, and config paths are unchanged.
+
+**Recommended steps:**
+
+1. Update CI scripts and artifact collectors that expect root-level `openapi-*.json` files.
+2. Add `.openapi-codegen-reports/` and `.openapi-codegen-store/` to `.gitignore` (both are in the repo template).
+3. Or pin explicit paths in config/CLI if you need the old layout.
+
+### 9) Marauder feature set (`2.1.0-beta.11`)
+
+The "Marauder" preview features ship in **`2.1.0-beta.11`**. They are **additive and opt-in** for config keys; everything is off by default.
+
+#### Config schema V6 (auto-migration)
+
+The latest unified config schema is now `UNIFIED_OPTIONS_v6`. Run:
+
+```bash
+openapi-codegen-cli update-config --openapi-config ./openapi.config.json
+```
+
+New optional config blocks (defaults shown):
+
+```json
+{
+  "autoSelect": {
+    "enabled": false,
+    "strict": false,
+    "preferSmallBundles": false,
+    "preferStandards": false
+  },
+  "specAnalysis": {
+    "enabled": false,
+    "severity": "medium",
+    "reportFormat": "json",
+    "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+    "failOnHigh": false,
+    "crossSpec": true,
+    "maxNestingDepth": 5
+  }
+}
+```
+
+#### Spec analysis (`specAnalysis`)
+
+`specAnalysis` replaces the deprecated `anomalyDetection` alias. Both keys are accepted in config for backward compatibility; prefer `specAnalysis` in new configs.
+
+- CLI: `--spec-analysis` with dot-notation (e.g. `--spec-analysis.fail-on-high`, `--spec-analysis.report-path`); `--anomaly-detection` is a deprecated alias
+- Inline JSON/boolean also supported: `--spec-analysis=true`, `--auto-select='{"strict":true}'`
+- Config: root and per-item (`items[]`) overrides; multi-item configs merge via `mergeSpecAnalysisConfigAcrossItems`
+- Runs during `generate` when enabled; writes a quality report to `reportPath`
+- With `cache: true` or `specAnalysis.enabled`, a unified generation report is written to `{output}/reports/latest.json` (or `<cachePath>/reports/latest.json` when using reuse)
+- `failOnHigh` / legacy `failOnAnomalies` is evaluated only after cross-spec analysis completes (`finalizeSpecAnalysis`)
+
+#### Cache strategies (`cacheStrategy`)
+
+When `cache: true`, choose how incremental generation works:
+
+| Strategy | Behavior |
+|----------|----------|
+| `entity` | Per-output `.openapi-codegen-cache.json`; skips full regeneration when inputs unchanged (V5 default after migration) |
+| `reuse` | Global `.openapi-codegen-store` with shared model/schema artifacts copied into output (preview default in V6) |
+| `content` | No entity/reuse store; relies on `writeFileIfChanged` only (always active, but logged when `cacheDebug: true`) |
+
+CLI `--cacheStrategy` is optional; omit it to keep the value from `openapi.config.json`.
+
+#### Reuse store (`cacheStrategy: "reuse"`)
+
+When `cache: true` and `cacheStrategy: "reuse"`:
+
+- Canonical model/schema artifacts are stored under `.openapi-codegen-store` (or `cachePath`)
+- Per-output files receive a full copy of the artifact content (byte-for-byte from the store on cache hit)
+- Artifact paths include an `optionsSliceHash` suffix so the same model name with different `validationLibrary`/prefixes gets distinct store files
+- Same model name with a different schema throws `ReuseConflictError` and fails generation (default `reuseOnConflict: "fail"`)
+- Set `reuseOnConflict: "namespace"` to store conflicting schemas under spec-scoped artifact paths instead of failing
+
+Example:
+
+```json
+{
+  "cache": true,
+  "cacheStrategy": "reuse",
+  "cachePath": ".openapi-codegen-store",
+  "reuseOnConflict": "namespace",
+  "items": [
+    { "input": "./specs/a.yaml", "output": "./generated/a" },
+    { "input": "./specs/b.yaml", "output": "./generated/b" }
+  ]
+}
+```
+
+Minimal example (default conflict policy):
+
+```json
+{
+  "cache": true,
+  "cacheStrategy": "reuse",
+  "cachePath": ".openapi-codegen-store",
+  "items": [
+    { "input": "./specs/a.yaml", "output": "./generated/a" },
+    { "input": "./specs/b.yaml", "output": "./generated/b" }
+  ]
+}
+```
+
+CLI: `--reuseOnConflict namespace` (optional; omit to keep config value).
+
+#### Auto-select (`autoSelect`)
+
+- CLI: `--auto-select` (dot-notation: `--auto-select.strict`, `--auto-select.prefer-standards`)
+- Config: root only (copied to all items at runtime)
+- For multi-item configs without root `output`, analysis probes the first item's directories; when items use different outputs, each unique output is probed — if recommendations differ, per-item overrides are applied and a warning is logged
+
+#### Governance gate on generate
+
+- CLI: `--fail-on-governance-errors` (requires `--strict-openapi`)
+- Config: root `failOnGovernanceErrors`
+- Fails generation when strict diagnostics governance summary reports errors
+
+#### analyze-usage improvements
+
+- `--diff-report` — path to `analyze-diff` JSON; validates RENAME miracles against consumer imports
+- API imports resolved path-based from `--sourcePath` (TypeScript module resolution, aliases supported)
+- Scans only `{projectPath}/src/**/*.{ts,tsx}`
+
+Example CI chain:
+
+```bash
+openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml --ci
+openapi generate --openapi-config ./openapi.config.json --strict-openapi --fail-on-governance-errors
+openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --check --diff-report ./.openapi-codegen-reports/openapi-diff-report.json
+```
+
+#### Deprecated aliases
+
+- `anomalyDetection` → use `specAnalysis` (still parsed for legacy configs)
+- Removed in this refocus: `heal`, `migrate`, `swarm`, and `anomalyExploitation` CLI commands/APIs
+
+#### Preview limitations
+
+- `--auto-select` applies when generating from `openapi.config.json` or merged multi-item configs
+- `specAnalysis` reports quality issues; it does not auto-fix specs
+- Reuse store requires `modelsMode: "interfaces"` (default); class mode disables artifact reuse
+
 ## New/Updated Options You Should Review
 
 For CLI/config:
@@ -191,6 +347,12 @@ For CLI/config:
 - `modelsMode` (`interfaces` | `classes`)
 - `prettierConfigPath` (optional path to a Prettier config file for generated output)
 - `tsconfigPath` + `eslintConfigPath` (optional pair to enable batch ESLint fix after generation)
+- `autoSelect` / `--auto-select` (preview: project-aware client & validator selection)
+- `specAnalysis` / `--spec-analysis` (preview: OpenAPI spec quality analysis during generate)
+- `failOnGovernanceErrors` / `--fail-on-governance-errors` (with `--strict-openapi`)
+- `cacheStrategy: "reuse"` with `.openapi-codegen-store` and `reuseOnConflict` (preview: cross-spec artifact reuse)
+- `analyze-usage --diff-report` (RENAME miracle validation against consumer code)
+- Deprecated alias: `anomalyDetection` → `specAnalysis`
 - `previewChanges` command and its folders:
   - `.ts-openapi-codegen-preview-changes`
   - `.ts-openapi-codegen-diff-changes`
@@ -282,7 +444,7 @@ After (`2.x` style):
 
 CLI/config:
 - `useHistory` (boolean)
-- `diffReport` (path, default: `./openapi-diff-report.json`)
+- `diffReport` (path, default: `./.openapi-codegen-reports/openapi-diff-report.json`)
 - or `analyze.useHistory` / `analyze.reportPath` in config
 
 Generate the report:
@@ -331,7 +493,7 @@ When `useHistory` is on and a property type changes, validation schemas may coer
 
 **Before:** `useEslintFix: true` plus `tsconfigPath` and `eslintConfigPath`.
 
-**After:** set **both** `tsconfigPath` and `eslintConfigPath` (CLI or config). No separate enable flag. If only one path is set, batch ESLint is skipped with a warning.
+**After:** set **both** `tsconfigPath` and `eslintConfigPath` (CLI or config). No separate enable flag. If only one path is set, batch ESLint is skipped with a warning. Summary is written to `./.openapi-codegen-reports/eslint-fix-report.json`.
 
 ## Migration Checklist
 
@@ -348,6 +510,10 @@ When `useHistory` is on and a property type changes, validation schemas may coer
 - [ ] Updated report parsers to `report.semantic.*` / `report.structural.*`.
 - [ ] Verified `generate --useHistory` picks up structural data.
 - [ ] Reviewed duplicate-alias import changes after regeneration.
-- [ ] Ran `check-config` and `update-config`.
+- [ ] Updated CI/report collectors for `./.openapi-codegen-reports/` default paths (or pinned explicit paths).
+- [ ] Added `.openapi-codegen-reports/` and `.openapi-codegen-store/` to `.gitignore`.
+- [ ] Chose `cacheStrategy` explicitly if relying on prior `entity` behavior (`cache`, `cachePath`, `reuseOnConflict`).
+- [ ] Renamed config `anomalyDetection` → `specAnalysis` where applicable; `failOnAnomalies` → `failOnHigh`.
+- [ ] Ran `update-config` to migrate config to V6 (Marauder blocks).
 - [ ] Ran `preview-changes` and reviewed diffs.
 - [ ] Updated snapshots/tests.

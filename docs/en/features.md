@@ -17,16 +17,43 @@ Generation cache is **opt-in** (disabled by default). Enable it with `--cache` o
 **Options:**
 
 - `cache` (default: `false`)
-- `cachePath` (default: `.openapi-codegen-cache.json`, relative to output directory)
-- `cacheStrategy` — `entity` (default) or `content`
+- `cachePath` (default: `.openapi-codegen-store`)
+- `cacheStrategy` — `entity`, `reuse`, or `content` (V6 schema default: `reuse`; v5→v6 migration sets `entity` for existing configs)
+- `reuseOnConflict` (default: `fail`) — when `cacheStrategy` is `reuse`: `fail` throws on schema drift; `namespace` stores under spec-scoped paths
 - `cacheDebug` (default: `false`)
 
 **Strategies:**
 
-- **`entity`** — on cache hit, item generation is skipped; fastest for unchanged inputs and options.
-- **`content`** — generation still runs; only changed files are written (content-aware writes).
+- **`entity`** — per-output `.openapi-codegen-cache.json`; on cache hit, item generation is skipped; fastest for unchanged inputs and options.
+- **`reuse`** — global `.openapi-codegen-store` with shared model/schema artifacts copied into each output (preview; requires `modelsMode: "interfaces"`).
+- **`content`** — generation still runs; only changed files are written via `writeFileIfChanged` (no entity/reuse store).
 
-The cache stores a fingerprint (spec content, generator version, key options) and the list of generated files. Unchanged outputs keep stable mtimes, which helps local and CI incremental workflows.
+**When to use which strategy:**
+
+| Scenario | Recommended | Why |
+|----------|-------------|-----|
+| Single spec, unchanged input | `entity` | Skips the entire item on cache hit |
+| Monorepo / multi-spec with shared models | `reuse` | 2nd+ specs reuse rendered model/schema artifacts |
+| No cache or minimal overhead | `cache: false` or `content` | No store manifest; `content` still skips unchanged file writes |
+| Fair reuse benchmark | `example/openapi.reuse.bench.config.json` | Same items as base config + only `cache`/`reuse`; unlike `openapi.reuse.config.json`, no Marauder extras (`autoSelect`, `specAnalysis`) |
+
+Reuse always parses the spec and generates core/services; it does not skip generation like entity cache. Warm reuse wins when shared schemas dominate (multi-item configs). Cold reuse may be slower than no-cache while populating the store.
+
+For perf regression checks, see `test/reusePerformance.test.ts`. Enable `cacheDebug: true` to include manifest phase timings in `{cachePath}/reports/latest.json`.
+
+Reuse store fingerprints use MD5 (`manifest.json` version 2). Upgrading from version 1 invalidates the existing store on the next generate (artifacts are recreated; orphans are removed by GC).
+
+When `cache` or `specAnalysis` is enabled, a unified generation report is written to `{output}/reports/latest.json` (or `<cachePath>/reports/latest.json` in reuse mode).
+
+### Marauder preview (`2.1.0-beta.11`)
+
+Opt-in features during `generate` (config schema **V6**):
+
+- **`--auto-select` / `autoSelect`** — probes the target project and recommends `httpClient` and `validationLibrary`.
+- **`--spec-analysis` / `specAnalysis`** — per-spec and cross-spec OpenAPI quality detectors; writes a report to `reportPath` (default: `./.openapi-codegen-reports/anomaly-report.json`). `--anomaly-detection` is a deprecated alias.
+- Dot-notation CLI flags: `--auto-select.strict`, `--spec-analysis.fail-on-high`, inline JSON objects.
+
+See [Marauder user guide](../MARAUDER_USER_GUIDE.md) and [Migration guide](../../MIGRATION.md).
 
 ### Argument style vs. Object style `--useOptions`
 There's no [named parameter](https://en.wikipedia.org/wiki/Named_parameter) in JavaScript or TypeScript, because of

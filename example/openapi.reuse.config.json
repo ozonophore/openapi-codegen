@@ -1,0 +1,47 @@
+{
+    "httpClient": "fetch",
+    "customExecutorPath": "./example/executor.ts",
+    "useUnionTypes": true,
+    "sortByRequired": true,
+    "cache": true,
+    "cacheStrategy": "reuse",
+    "reuseOnConflict": "namespace",
+    "cachePath": ".openapi-codegen-store",
+    "autoSelect": {
+        "enabled": true,
+        "strict": false,
+        "preferStandards": true
+    },
+    "specAnalysis": {
+        "enabled": true,
+        "severity": "medium",
+        "crossSpec": true,
+        "failOnHigh": false,
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json"
+    },
+    "items": [
+        {
+            "input": "./test/spec/lom/lom_api.yaml",
+            "output": "./test/generated/lom_api/"
+        },
+        {
+            "input": "./test/spec/lom/lom_api.v1.yaml",
+            "output": "./test/generated/lom_api_v2/"
+        },
+        {
+            "input": "./test/spec/lom/lom_api.v2.yaml",
+            "output": "./test/generated/lom_api_v3/"
+        },
+        {
+            "input": "./test/spec/v2.json",
+            "output": "./test/generated/v2/"
+        }, {
+            "input": "./test/spec/v3.json",
+            "output": "./test/generated/v3/"
+        }, {
+            "input": "./test/spec/v3.withDifferentRefs.yml",
+            "output": "./test/generated/v3_withDifferentRefs/"
+        }
+    ]
+}

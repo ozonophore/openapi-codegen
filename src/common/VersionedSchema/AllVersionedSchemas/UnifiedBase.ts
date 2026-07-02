@@ -4,7 +4,7 @@ import { HttpClient } from '../../../core/types/enums/HttpClient.enum';
 import { ELogLevel, ELogOutput } from '../../Enums';
 import { additionalParametersSchemaV2, experimentalParametersSchemaV2, outputPathsSchema } from '../CommonSchemas';
 
-const unifiedItemSchema = z.object({
+export const unifiedItemSchema = z.object({
     ...outputPathsSchema.shape,
     ...additionalParametersSchemaV2.shape,
     ...experimentalParametersSchemaV2.shape,

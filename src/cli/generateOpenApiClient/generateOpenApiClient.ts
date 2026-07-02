@@ -14,6 +14,8 @@ import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/U
 import * as OpenAPI from '../../core';
 import { GenerateOptions, generateOptionsSchema } from '../schemas';
 import { CLICommandResult } from '../types';
+import { executeAutoSelection } from './autoSelectHelpers';
+import { mergeGenerateCliOverrides, pickDirectFlatCliInput } from './generateCliOverrides';
 
 const generateCliFlatSchema = flatOptionsSchema.strict().superRefine((data, ctx) => {
     if (data.excludeCoreServiceFiles === true && data.request) {
@@ -51,11 +53,7 @@ export async function generateOpenApiClient(options: OptionValues): Promise<CLIC
 
         const hasMinimumRequiredOptions = !!validatedOptions.input && !!validatedOptions.output;
         if (hasMinimumRequiredOptions) {
-            const directOptionsValidationResult = validateZodOptions(generateCliFlatSchema, {
-                input: validatedOptions.input,
-                output: validatedOptions.output,
-                ...clientOptions,
-            });
+            const directOptionsValidationResult = validateZodOptions(generateCliFlatSchema, pickDirectFlatCliInput(clientOptions, validatedOptions));
 
             if (!directOptionsValidationResult.success) {
                 APP_LOGGER.errorWithHint({
@@ -66,12 +64,10 @@ export async function generateOpenApiClient(options: OptionValues): Promise<CLIC
                 return { success: false, error: directOptionsValidationResult.errors.join('\n') };
             }
 
-            await OpenAPI.generate({
-                ...(directOptionsValidationResult.data as TRawOptions),
-                prettierConfigPath: validatedOptions.prettierConfigPath,
-                tsconfigPath: validatedOptions.tsconfigPath,
-                eslintConfigPath: validatedOptions.eslintConfigPath,
-            });
+            const directOptions: TRawOptions = mergeGenerateCliOverrides(directOptionsValidationResult.data as TRawOptions, validatedOptions);
+            const directAutoSelectResult = executeAutoSelection(directOptions, APP_LOGGER);
+            const mergedDirectOptions: TRawOptions = directAutoSelectResult.items ? { ...directOptions, items: directAutoSelectResult.items } : { ...directOptions, ...directAutoSelectResult };
+            await OpenAPI.generate(mergedDirectOptions);
             await APP_LOGGER.shutdownLoggerAsync();
             return { success: true };
         }
@@ -109,27 +105,18 @@ export async function generateOpenApiClient(options: OptionValues): Promise<CLIC
         }
 
         const { value } = migratedOptions;
-        const mergedOptions: TRawOptions = {
-            ...(value as TRawOptions),
-            strictOpenapi: validatedOptions.strictOpenapi ?? (value as TRawOptions).strictOpenapi,
-            reportFile: validatedOptions.reportFile ?? (value as TRawOptions).reportFile,
-            governanceConfig: validatedOptions.governanceConfig ?? (value as TRawOptions).governanceConfig,
-            cache: validatedOptions.cache ?? (value as TRawOptions).cache,
-            cachePath: validatedOptions.cachePath ?? (value as TRawOptions).cachePath,
-            cacheStrategy: validatedOptions.cacheStrategy ?? (value as TRawOptions).cacheStrategy,
-            cacheDebug: validatedOptions.cacheDebug ?? (value as TRawOptions).cacheDebug,
-            prettierConfigPath: validatedOptions.prettierConfigPath ?? (value as TRawOptions).prettierConfigPath,
-            tsconfigPath: validatedOptions.tsconfigPath ?? (value as TRawOptions).tsconfigPath,
-            eslintConfigPath: validatedOptions.eslintConfigPath ?? (value as TRawOptions).eslintConfigPath,
-        };
+        const mergedOptions: TRawOptions = mergeGenerateCliOverrides(value as TRawOptions, validatedOptions);
 
-        await OpenAPI.generate(mergedOptions);
+        const autoSelectResult = executeAutoSelection(mergedOptions, APP_LOGGER);
+        const finalOptions: TRawOptions = autoSelectResult.items ? { ...mergedOptions, items: autoSelectResult.items } : { ...mergedOptions, ...autoSelectResult };
+
+        await OpenAPI.generate(finalOptions);
         await APP_LOGGER.shutdownLoggerAsync();
         return { success: true };
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
         APP_LOGGER.errorWithHint({
-            code: 'SPEC_FILES_FIND_ERROR',
+            code: 'CONFIG_VALIDATION_FAILED',
             message: LOGGER_MESSAGES.ERROR.GENERIC(message),
             error,
         });

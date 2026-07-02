@@ -1,11 +1,13 @@
 import { SyntaxKind } from 'ts-morph';
 
-import type { ProjectContext } from '../core/ProjectContext';
+import type { ProjectContext } from '../../../core/projectProbe';
 import type { Contract, Finding, Rule, Stats } from '../types';
+import type { ApiImportScope } from '../utils/apiImportScope';
+import { isApiImport } from '../utils/apiImportScope';
 import { findBestMatch } from '../utils/fuzzy';
 
 export class SchemaRule implements Rule {
-    async check(context: ProjectContext, contract: Contract, stats: Stats): Promise<Finding[]> {
+    async check(context: ProjectContext, contract: Contract, stats: Stats, apiScope: ApiImportScope): Promise<Finding[]> {
         const findings: Finding[] = [];
         const knownSchemas = new Set(contract.schemas);
 
@@ -13,8 +15,7 @@ export class SchemaRule implements Rule {
             const imports = file.getImportDeclarations();
 
             for (const imp of imports) {
-                const moduleName = imp.getModuleSpecifierValue();
-                if (moduleName !== '@lom-api' && !moduleName.startsWith('@lom-api/')) {
+                if (!isApiImport(imp, apiScope)) {
                     continue;
                 }
 

@@ -8,6 +8,7 @@ import { createDefaultFieldsMigration } from '../Utils/createDefaultFieldsMigrat
 import { createFieldTransformationMigration } from '../Utils/createFieldTransformationMigration';
 import { createTrivialMigration } from '../Utils/createTrivialMigration';
 import { getLatestVersionFromMigrationPlans } from '../Utils/getLatestVersionFromMigrationPlans';
+import { normalizeMarauderConfigBlocks } from '../Utils/normalizeMarauderConfigBlocks';
 
 /**
  * Adds a prefix to all version strings in a migration plan array.
@@ -53,7 +54,16 @@ export const allMigrationPlans: SchemaMigrationPlan<Record<string, any>, Record<
         emptySchemaStrategy: EmptySchemaStrategy.KEEP,
     }),
     createDefaultFieldsMigration('UNIFIED_OPTIONS_v4', 'UNIFIED_OPTIONS_v5', {
-        strictOpenapi: false,
-        reportFile: '',
+        prettierConfigPath: '',
+        cache: false,
+        cachePath: '.openapi-codegen-cache.json',
+        cacheStrategy: 'entity',
+        cacheDebug: false,
     }),
+    createFieldTransformationMigration(
+        'UNIFIED_OPTIONS_v5',
+        'UNIFIED_OPTIONS_v6',
+        data => normalizeMarauderConfigBlocks(data),
+        'Adds optional Marauder config blocks and normalizes boolean shorthand to { enabled } objects'
+    ),
 ];

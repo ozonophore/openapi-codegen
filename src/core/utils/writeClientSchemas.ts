@@ -1,8 +1,10 @@
 import { mkdirSync } from 'fs';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
-import { format } from '../../common/utils/format';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import type { OptionsSlice } from '../reuseStore';
+import { ReuseStore } from '../reuseStore';
+import { formatArtifactContent, type ReuseWriterContext, writeSchemaWithReuse } from '../reuseStore/reuseWriterHelpers';
 import { Templates } from '../types/base/Templates.model';
 import { EmptySchemaStrategy } from '../types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../types/enums/HttpClient.enum';
@@ -26,6 +28,14 @@ interface IWriteClientSchemas {
     validationLibrary?: ValidationLibrary;
     emptySchemaStrategy: EmptySchemaStrategy;
     prettierConfigPath?: string;
+    reuseStore?: ReuseStore;
+    optionsSlice?: OptionsSlice;
+    specInput?: string;
+    inputPath?: string;
+    modelSchemas?: Map<string, Record<string, unknown>>;
+    referencedArtifactKeys?: Set<string>;
+    onReuseStat?: (hit: boolean) => void;
+    reuseOnConflict?: 'fail' | 'namespace';
 }
 
 function isEmptySchemaModel(model: Model): boolean {
@@ -41,7 +51,24 @@ function isEmptySchemaModel(model: Model): boolean {
  * @param useUnionTypes Use union types instead of enums
  */
 export async function writeClientSchemas(this: WriteClient, options: IWriteClientSchemas): Promise<Model[]> {
-    const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary, emptySchemaStrategy, prettierConfigPath } = options;
+    const {
+        models,
+        templates,
+        outputSchemasPath,
+        httpClient,
+        useUnionTypes,
+        validationLibrary,
+        emptySchemaStrategy,
+        prettierConfigPath,
+        reuseStore,
+        optionsSlice,
+        specInput,
+        inputPath,
+        modelSchemas,
+        referencedArtifactKeys,
+        onReuseStat,
+        reuseOnConflict,
+    } = options;
     if (templates.exports.schema) {
         this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SCHEMAS_START);
 
@@ -61,6 +88,35 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
 
             this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
 
+            const canReuse = reuseStore && optionsSlice && specInput && modelSchemas;
+            if (canReuse) {
+                const reuseCtx: ReuseWriterContext = {
+                    reuseStore,
+                    optionsSlice,
+                    specInput,
+                    inputPath: inputPath ?? specInput,
+                    modelSchemas,
+                    referencedArtifactKeys,
+                    onReuseStat,
+                    reuseOnConflict,
+                    prettierConfigPath,
+                };
+                await writeSchemaWithReuse(this, model, file, reuseCtx, async () =>
+                    formatArtifactContent(
+                        templates.exports.schema({
+                            ...model,
+                            httpClient,
+                            useUnionTypes,
+                            validationLibrary,
+                            emptySchemaStrategy,
+                        }),
+                        prettierConfigPath
+                    )
+                );
+                this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
+                continue;
+            }
+
             const templateResult = templates.exports.schema({
                 ...model,
                 httpClient,
@@ -68,7 +124,7 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
                 validationLibrary,
                 emptySchemaStrategy,
             });
-            const formattedValue = await format(templateResult, undefined, prettierConfigPath);
+            const formattedValue = await formatArtifactContent(templateResult, prettierConfigPath);
             await this.writeOutputFile(file, formattedValue);
 
             this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));

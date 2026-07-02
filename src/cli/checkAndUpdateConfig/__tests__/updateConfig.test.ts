@@ -59,4 +59,19 @@ describe('@unit: updateConfig', () => {
 
         infoMock.mock.restore();
     });
+
+    test('second update-config run is idempotent for minimal flat config', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'update-config-idempotent-'));
+        const configPath = await writeConfig(dir, flatConfig);
+        const infoMock = mock.method(APP_LOGGER, 'info', () => undefined);
+
+        const firstRun = await updateConfig({ openapiConfig: configPath });
+        assert.strictEqual(firstRun.success, true);
+
+        const secondRun = await updateConfig({ openapiConfig: configPath });
+        assert.strictEqual(secondRun.success, true);
+        assert.strictEqual(infoMock.mock.callCount(), 2);
+
+        infoMock.mock.restore();
+    });
 });

@@ -34,6 +34,11 @@ interface ISelectConfigActionOptions {
 export async function selectConfigAction(options: ISelectConfigActionOptions): Promise<void> {
     APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.USER_WARNING(options.warningMessage));
 
+    if (!process.stdin.isTTY) {
+        APP_LOGGER.info(LOGGER_MESSAGES.CONFIG.ACTION_SKIPPED);
+        return;
+    }
+
     const selectedAction = await selectDialog<EActionForConfigData>({
         message: 'Choose an action:',
         choices: options.actionChoices,

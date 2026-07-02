@@ -1,4 +1,5 @@
 import { promises as fsPromises } from 'fs';
+import { basename, extname } from 'path';
 
 import { COMMON_DEFAULT_OPTIONS_VALUES, DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../common/Consts';
 import { Logger } from '../common/Logger';
@@ -8,6 +9,9 @@ import { TFlatOptions, TRawOptions, TStrictFlatOptions } from '../common/TRawOpt
 import { eslintFixBatch } from '../common/utils/eslintFix';
 import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../common/utils/pathHelpers';
+import { normalizeMarauderBoolean } from '../common/VersionedSchema/Utils/createBooleanToObjectSchema';
+import { mergeMarauderBlockDeep } from '../common/VersionedSchema/Utils/mergeMarauderBlock';
+import { resolveSpecAnalysisConfig } from '../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
 import { Parser as ParserV2 } from './api/v2/Parser';
 import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
@@ -15,6 +19,13 @@ import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
 import { loadGovernanceConfig } from './governance/loadGovernanceConfig';
 import { loadGeneratorPlugins } from './plugins/loadGeneratorPlugins';
+import { buildModelSchemaMap, ReuseStore } from './reuseStore';
+import { buildOptionsSlice } from './reuseStore/ArtifactFingerprinter';
+import type { GenerationReport, ReuseConflictRecord, SpecGenerationStats } from './reuseStore/GenerationReport';
+import { analyzeCrossSpecManifest, writeGenerationReport } from './reuseStore/GenerationReport';
+import { ReuseConflictError } from './reuseStore/types';
+import { createSpecAnalysisAccumulator, finalizeSpecAnalysis, mergeSpecAnalysisConfigAcrossItems, runSpecAnalysis, type SpecAnalysisAccumulator } from './specAnalysis/runSpecAnalysis';
+import type { SpecAnalysisReport } from './specAnalysis/types';
 import { validateOpenApiStrict, validateWithSwaggerParser, writeOpenApiStrictReport } from './strict/validateOpenApiStrict';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
@@ -40,6 +51,7 @@ export class OpenApiClient {
     private static readonly CACHE_FINGERPRINT_VERSION = 1;
     private static readonly DEFAULT_CACHE_FILENAME = '.openapi-codegen-cache.json';
     private _writeClient: WriteClient | null = null;
+    private specAnalysisAccumulator: SpecAnalysisAccumulator | null = null;
     /** ESLint paths from top-level rawOptions (not per items[] entry). */
     private eslintFixOptions: TEslintFixOptions = {};
 
@@ -51,6 +63,17 @@ export class OpenApiClient {
         return this._writeClient;
     }
 
+    private mergeItemMarauderBlock<T extends Record<string, unknown>>(root: T | boolean | undefined, item: T | boolean | undefined): T | undefined {
+        if (item === undefined) {
+            return normalizeMarauderBoolean(root);
+        }
+        if (root === undefined) {
+            return normalizeMarauderBoolean(item);
+        }
+
+        return mergeMarauderBlockDeep(normalizeMarauderBoolean(root), normalizeMarauderBoolean(item)) as T;
+    }
+
     private normalizeOptions(rawOptions: TRawOptions): TFlatOptions[] {
         const modelsMode = rawOptions.modelsMode ?? rawOptions.models?.mode;
         const useHistory = rawOptions.useHistory ?? rawOptions.analyze?.useHistory;
@@ -60,6 +83,9 @@ export class OpenApiClient {
             return rawOptions.items.map(item => ({
                 ...item,
                 httpClient: rawOptions.httpClient,
+                autoSelect: normalizeMarauderBoolean(rawOptions.autoSelect),
+                specAnalysis: this.mergeItemMarauderBlock(rawOptions.specAnalysis, (item as TFlatOptions).specAnalysis),
+                anomalyDetection: this.mergeItemMarauderBlock(rawOptions.anomalyDetection, (item as TFlatOptions).anomalyDetection),
                 request: item.request ?? rawOptions.request, // ?? для fallback на глобальный
                 plugins: item.plugins ?? rawOptions.plugins,
                 customExecutorPath: rawOptions.customExecutorPath,
@@ -82,11 +108,13 @@ export class OpenApiClient {
                 modelsMode: item.modelsMode ?? modelsMode,
                 strictOpenapi: rawOptions.strictOpenapi,
                 reportFile: rawOptions.reportFile,
+                failOnGovernanceErrors: rawOptions.failOnGovernanceErrors,
                 governanceConfig: rawOptions.governanceConfig,
                 cache: rawOptions.cache,
                 cachePath: rawOptions.cachePath,
                 cacheStrategy: rawOptions.cacheStrategy,
                 cacheDebug: rawOptions.cacheDebug,
+                reuseOnConflict: rawOptions.reuseOnConflict,
                 prettierConfigPath: rawOptions.prettierConfigPath,
             }));
         } else {
@@ -100,6 +128,9 @@ export class OpenApiClient {
                     outputModels: rawOptions.outputModels,
                     outputSchemas: rawOptions.outputSchemas,
                     httpClient: rawOptions.httpClient,
+                    autoSelect: normalizeMarauderBoolean(rawOptions.autoSelect),
+                    specAnalysis: normalizeMarauderBoolean(rawOptions.specAnalysis),
+                    anomalyDetection: normalizeMarauderBoolean(rawOptions.anomalyDetection),
                     useOptions: rawOptions.useOptions,
                     useUnionTypes: rawOptions.useUnionTypes,
                     includeSchemasFiles: rawOptions.includeSchemasFiles,
@@ -122,11 +153,13 @@ export class OpenApiClient {
                     modelsMode,
                     strictOpenapi: rawOptions.strictOpenapi,
                     reportFile: rawOptions.reportFile,
+                    failOnGovernanceErrors: rawOptions.failOnGovernanceErrors,
                     governanceConfig: rawOptions.governanceConfig,
                     cache: rawOptions.cache,
                     cachePath: rawOptions.cachePath,
                     cacheStrategy: rawOptions.cacheStrategy,
                     cacheDebug: rawOptions.cacheDebug,
+                    reuseOnConflict: rawOptions.reuseOnConflict,
                     prettierConfigPath: rawOptions.prettierConfigPath,
                 },
             ];
@@ -167,12 +200,17 @@ export class OpenApiClient {
             miracles: item.miracles || COMMON_DEFAULT_OPTIONS_VALUES.miracles,
             strictOpenapi: item.strictOpenapi ?? COMMON_DEFAULT_OPTIONS_VALUES.strictOpenapi,
             reportFile: item.reportFile || COMMON_DEFAULT_OPTIONS_VALUES.reportFile,
+            failOnGovernanceErrors: item.failOnGovernanceErrors ?? COMMON_DEFAULT_OPTIONS_VALUES.failOnGovernanceErrors,
             prettierConfigPath: item.prettierConfigPath ?? COMMON_DEFAULT_OPTIONS_VALUES.prettierConfigPath,
             governanceConfig: item.governanceConfig || COMMON_DEFAULT_OPTIONS_VALUES.governanceConfig,
             cache: item.cache ?? COMMON_DEFAULT_OPTIONS_VALUES.cache,
             cachePath: item.cachePath || COMMON_DEFAULT_OPTIONS_VALUES.cachePath,
             cacheStrategy: item.cacheStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheStrategy,
             cacheDebug: item.cacheDebug ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheDebug,
+            reuseOnConflict: item.reuseOnConflict ?? COMMON_DEFAULT_OPTIONS_VALUES.reuseOnConflict,
+            autoSelect: item.autoSelect ?? COMMON_DEFAULT_OPTIONS_VALUES.autoSelect,
+            specAnalysis: resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection) ?? COMMON_DEFAULT_OPTIONS_VALUES.specAnalysis,
+            anomalyDetection: item.anomalyDetection ?? COMMON_DEFAULT_OPTIONS_VALUES.anomalyDetection,
         };
     }
 
@@ -237,12 +275,43 @@ export class OpenApiClient {
 
         try {
             const start = process.hrtime.bigint();
+            this.validateConsistentCacheSettings(items);
             const cacheEnabled = items[0]?.cache === true;
+            const cacheStrategy = items[0]?.cacheStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheStrategy;
+            const useReuseStore = cacheEnabled && cacheStrategy === 'reuse';
+            const needsEntityCacheFallback = cacheEnabled && items.some(item => item.modelsMode === ModelsMode.CLASSES);
             const generationCaches = new Map<string, GenerationCache>();
+            let reuseStore: ReuseStore | null = null;
+            const referencedArtifactKeys = new Set<string>();
+            const specStats: SpecGenerationStats[] = [];
+            const reuseConflicts: ReuseConflictRecord[] = [];
+            let totalReuseHits = 0;
+            let totalReuseMisses = 0;
+            let specQualityReport: SpecAnalysisReport | undefined;
+            let reportBasePath = this.resolveOutputRoot(items[0]!.output);
+            let manifestLoadMs = 0;
+            let manifestSaveMs = 0;
+            let gcMs = 0;
+
+            if (items.some(item => resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection)?.enabled)) {
+                this.specAnalysisAccumulator = createSpecAnalysisAccumulator();
+            }
 
             if (!cacheEnabled) {
-                this.warnOnSharedOutputsWithoutCache(items);
-            } else {
+                this.warnOnSharedOutputs(items);
+            } else if (useReuseStore) {
+                this.warnOnSharedCoreServiceOutputs(items);
+                reuseStore = new ReuseStore(this.resolveReuseStorePath(items[0]!.cachePath));
+                const loadStart = process.hrtime.bigint();
+                await reuseStore.load();
+                manifestLoadMs = Number(process.hrtime.bigint() - loadStart) / 1e6;
+                reportBasePath = reuseStore.getRootPath();
+                if (items.some(item => item.modelsMode === ModelsMode.CLASSES)) {
+                    this.writeClient.logger.warn('ReuseStore is disabled for modelsMode=classes; falling back to entity cache for those items');
+                }
+            }
+
+            if (cacheEnabled && (cacheStrategy === 'entity' || needsEntityCacheFallback)) {
                 for (const outputRoot of this.getUniqueResolvedOutputs(items)) {
                     const sampleItem = items.find(item => this.resolveOutputRoot(item.output) === outputRoot);
                     if (!sampleItem) {
@@ -253,14 +322,85 @@ export class OpenApiClient {
                     await generationCache.load();
                     generationCaches.set(outputRoot, generationCache);
                 }
+            } else if (cacheEnabled && cacheStrategy === 'content' && items[0]?.cacheDebug) {
+                this.writeClient.logger.info('cacheStrategy: content — relying on writeFileIfChanged only');
             }
+
+            const buildGenerationReport = (): GenerationReport => {
+                const report: GenerationReport = {
+                    generatedAt: new Date().toISOString(),
+                    generatorVersion: process.env.npm_package_version || 'dev',
+                    specs: specStats,
+                    reuse: {
+                        totalHits: totalReuseHits,
+                        totalMisses: totalReuseMisses,
+                        conflicts: reuseConflicts,
+                    },
+                };
+
+                if (reuseStore && items.some(item => resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection)?.crossSpec !== false)) {
+                    report.crossSpec = analyzeCrossSpecManifest(reuseStore.getManifest());
+                }
+
+                if (specQualityReport) {
+                    report.specQuality = {
+                        ...specQualityReport,
+                        failOnHighTriggered: specQualityReport.summary.high > 0,
+                    };
+                }
+
+                if (items[0]?.cacheDebug && reuseStore) {
+                    report.phases = { manifestLoadMs, manifestSaveMs, gcMs };
+                }
+
+                return report;
+            };
 
             for (const option of items) {
                 const fileStart = process.hrtime.bigint();
-                const generationCache = cacheEnabled ? (generationCaches.get(this.resolveOutputRoot(option.output)) ?? null) : null;
-                await this.generateSingle(option, generationCache);
+                const generationCache =
+                    cacheEnabled && (cacheStrategy === 'entity' || (cacheStrategy === 'reuse' && option.modelsMode === ModelsMode.CLASSES))
+                        ? (generationCaches.get(this.resolveOutputRoot(option.output)) ?? null)
+                        : null;
+                let reuseHits = 0;
+                let reuseMisses = 0;
+
+                try {
+                    await this.generateSingle(option, generationCache, {
+                        reuseStore: useReuseStore ? reuseStore : null,
+                        referencedArtifactKeys,
+                        onReuseStat: hit => {
+                            if (hit) {
+                                reuseHits += 1;
+                                totalReuseHits += 1;
+                            } else {
+                                reuseMisses += 1;
+                                totalReuseMisses += 1;
+                            }
+                        },
+                    });
+                } catch (error) {
+                    if (error instanceof ReuseConflictError) {
+                        reuseConflicts.push({
+                            ...error.details,
+                            timestamp: new Date().toISOString(),
+                        });
+                        if (cacheEnabled || this.specAnalysisAccumulator) {
+                            await writeGenerationReport(reportBasePath, buildGenerationReport());
+                        }
+                    }
+                    throw error;
+                }
+
                 const fileEnd = process.hrtime.bigint();
                 const fileDurationInSeconds = Number(fileEnd - fileStart) / 1e9;
+                specStats.push({
+                    specItem: this.getSpecItemName(option.input),
+                    input: option.input,
+                    durationMs: Math.round(fileDurationInSeconds * 1000),
+                    reuseHits,
+                    reuseMisses,
+                });
                 this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.DURATION_FOR_FILE(option.input, fileDurationInSeconds.toFixed(3)));
             }
             if (items[0]?.useSeparatedIndexes) {
@@ -269,9 +409,40 @@ export class OpenApiClient {
                 await this.writeClient.combineAndWrite();
             }
             await this.cleanupStaleOutputs(items);
-            if (cacheEnabled) {
+            if (cacheEnabled && cacheStrategy === 'entity') {
                 for (const generationCache of generationCaches.values()) {
                     await generationCache.save();
+                }
+            }
+            if (this.specAnalysisAccumulator) {
+                const crossSpecItems = items.map(item => ({
+                    name: this.getSpecItemName(item.input),
+                    input: item.input,
+                    outputModels: item.outputModels,
+                    outputSchemas: item.outputSchemas,
+                }));
+                const mergedSpecAnalysis = mergeSpecAnalysisConfigAcrossItems(
+                    items.map(item => {
+                        const resolved = resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection);
+                        return resolved ? { ...resolved, enabled: resolved.enabled ?? true } : undefined;
+                    })
+                );
+                specQualityReport = await finalizeSpecAnalysis(this.specAnalysisAccumulator, crossSpecItems, mergedSpecAnalysis, this.writeClient.logger, reuseStore?.getManifest());
+                this.specAnalysisAccumulator = null;
+            }
+
+            if (cacheEnabled || specQualityReport) {
+                await writeGenerationReport(reportBasePath, buildGenerationReport());
+            }
+
+            if (reuseStore) {
+                const gcStart = process.hrtime.bigint();
+                await reuseStore.gc(referencedArtifactKeys);
+                gcMs = Number(process.hrtime.bigint() - gcStart) / 1e6;
+                if (reuseStore.isDirty()) {
+                    const saveStart = process.hrtime.bigint();
+                    await reuseStore.save();
+                    manifestSaveMs = Number(process.hrtime.bigint() - saveStart) / 1e6;
                 }
             }
             const writeStats = this.writeClient.getWriteStats();
@@ -299,6 +470,18 @@ export class OpenApiClient {
         return resolveHelper(process.cwd(), output);
     }
 
+    private resolveReuseStorePath(cachePath: string): string {
+        if (cachePath.startsWith('/') || /^[A-Za-z]:[\\/]/.test(cachePath)) {
+            return cachePath;
+        }
+        return resolveHelper(process.cwd(), cachePath || '.openapi-codegen-store');
+    }
+
+    private getSpecItemName(input: string): string {
+        const absoluteInput = resolveHelper(process.cwd(), input);
+        return basename(absoluteInput, extname(absoluteInput));
+    }
+
     private resolveCachePathForOutput(output: string, cachePath: string): string {
         if (cachePath.startsWith('/') || /^[A-Za-z]:[\\/]/.test(cachePath)) {
             return cachePath;
@@ -306,7 +489,22 @@ export class OpenApiClient {
         return resolveHelper(this.resolveOutputRoot(output), cachePath || OpenApiClient.DEFAULT_CACHE_FILENAME);
     }
 
-    private warnOnSharedOutputsWithoutCache(items: TStrictFlatOptions[]): void {
+    private validateConsistentCacheSettings(items: TStrictFlatOptions[]): void {
+        if (items.length <= 1) {
+            return;
+        }
+
+        const first = items[0]!;
+        for (const item of items.slice(1)) {
+            if (item.cache !== first.cache || item.cacheStrategy !== first.cacheStrategy || item.cachePath !== first.cachePath || item.reuseOnConflict !== first.reuseOnConflict) {
+                this.writeClient.logger.warn(
+                    `Cache settings differ between "${first.input}" and "${item.input}" (cache=${item.cache}, cacheStrategy=${item.cacheStrategy}, cachePath=${item.cachePath}, reuseOnConflict=${item.reuseOnConflict})`
+                );
+            }
+        }
+    }
+
+    private warnOnSharedOutputs(items: TStrictFlatOptions[]): void {
         const countByOutput = new Map<string, number>();
         for (const item of items) {
             const output = this.resolveOutputRoot(item.output);
@@ -323,7 +521,47 @@ export class OpenApiClient {
         this.writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.CACHE_SHARED_OUTPUT_WARNING(duplicatedOutputs.map(output => `- ${output}`).join('\n')));
     }
 
-    private async generateSingle(item: TStrictFlatOptions, generationCache: GenerationCache | null): Promise<void> {
+    private warnOnSharedCoreServiceOutputs(items: TStrictFlatOptions[]): void {
+        const countByPath = new Map<string, Set<string>>();
+        for (const item of items) {
+            const paths = getOutputPaths({
+                output: item.output,
+                outputCore: item.outputCore,
+                outputServices: item.outputServices,
+                outputModels: item.outputModels,
+                outputSchemas: item.outputSchemas,
+            });
+            for (const pathKey of ['outputCore' as const, 'outputServices' as const]) {
+                const resolved = paths[pathKey];
+                if (!countByPath.has(resolved)) {
+                    countByPath.set(resolved, new Set());
+                }
+                countByPath.get(resolved)!.add(this.getSpecItemName(item.input));
+            }
+        }
+
+        const collisions = Array.from(countByPath.entries()).filter(([, specs]) => specs.size > 1);
+        if (collisions.length === 0) {
+            return;
+        }
+
+        const details = collisions.map(([path, specs]) => `- ${path}: ${Array.from(specs).join(', ')}`).join('\n');
+        this.writeClient.logger.warn(`Shared core/services output paths detected (ReuseStore covers models/schemas only):\n${details}`);
+    }
+
+    private warnOnSharedOutputsWithoutCache(items: TStrictFlatOptions[]): void {
+        this.warnOnSharedOutputs(items);
+    }
+
+    private async generateSingle(
+        item: TStrictFlatOptions,
+        generationCache: GenerationCache | null,
+        reuseContext?: {
+            reuseStore: ReuseStore | null;
+            referencedArtifactKeys: Set<string>;
+            onReuseStat?: (hit: boolean) => void;
+        }
+    ): Promise<void> {
         const {
             input,
             output,
@@ -351,8 +589,10 @@ export class OpenApiClient {
             modelsMode = ModelsMode.INTERFACES,
             strictOpenapi,
             reportFile,
+            failOnGovernanceErrors,
             prettierConfigPath,
             governanceConfig,
+            specAnalysis,
         } = item;
         const outputPaths: OutputPaths = getOutputPaths({
             output,
@@ -363,8 +603,11 @@ export class OpenApiClient {
         });
         const absoluteInput = resolveHelper(process.cwd(), input);
         const cacheKey = this.getCacheKey(item, absoluteInput);
-        const cacheFingerprint = await this.getCacheFingerprint(item, absoluteInput);
-        const useEntityCache = item.cache && item.cacheStrategy === 'entity' && generationCache !== null;
+        const useEntityCache = item.cache && generationCache !== null && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && item.modelsMode === ModelsMode.CLASSES));
+        const useReuseStore = item.cache && item.cacheStrategy === 'reuse' && reuseContext?.reuseStore != null && item.modelsMode !== ModelsMode.CLASSES;
+        const cacheFingerprint = useEntityCache ? await this.getCacheFingerprint(item, absoluteInput) : '';
+        const specInput = this.getSpecItemName(item.input);
+        const optionsSlice = buildOptionsSlice(item);
         if (useEntityCache) {
             const cachedEntry = generationCache!.get(cacheKey);
             if (cachedEntry && cachedEntry.fingerprint === cacheFingerprint) {
@@ -394,6 +637,14 @@ export class OpenApiClient {
         });
         const openApi = await getOpenApiSpec(context, absoluteInput);
 
+        if (specAnalysis?.enabled) {
+            await runSpecAnalysis(openApi, { ...specAnalysis, enabled: true }, this.writeClient.logger, this.getSpecItemName(input), this.specAnalysisAccumulator ?? undefined, {
+                interface: interfacePrefix,
+                enum: enumPrefix,
+                type: typePrefix,
+            });
+        }
+
         if (strictOpenapi) {
             const parserValidationIssues = await validateWithSwaggerParser(absoluteInput);
             const governancePolicy = await loadGovernanceConfig(governanceConfig);
@@ -408,6 +659,10 @@ export class OpenApiClient {
 
             if (strictReport.summary.errors > 0) {
                 throw new Error(`Strict OpenAPI validation failed with ${strictReport.summary.errors} error(s). Report: ${reportPath}`);
+            }
+
+            if (failOnGovernanceErrors && strictReport.governance.summary.errors > 0) {
+                throw new Error(`Governance validation failed with ${strictReport.governance.summary.errors} error(s). Report: ${reportPath}`);
             }
         }
 
@@ -443,6 +698,7 @@ export class OpenApiClient {
                 });
                 const clientFinal = postProcessClient(clientWithDiff);
                 const clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
+                const modelSchemas = buildModelSchemaMap(context);
                 this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V2);
                 await this.writeClient.writeClient({
                     client: clientPrepared,
@@ -460,6 +716,14 @@ export class OpenApiClient {
                     emptySchemaStrategy,
                     modelsMode,
                     prettierConfigPath,
+                    reuseStore: useReuseStore ? reuseContext!.reuseStore! : undefined,
+                    optionsSlice: useReuseStore ? optionsSlice : undefined,
+                    specInput: useReuseStore ? specInput : undefined,
+                    inputPath: useReuseStore ? absoluteInput : undefined,
+                    modelSchemas: useReuseStore ? modelSchemas : undefined,
+                    referencedArtifactKeys: useReuseStore ? reuseContext!.referencedArtifactKeys : undefined,
+                    onReuseStat: useReuseStore ? reuseContext!.onReuseStat : undefined,
+                    reuseOnConflict: useReuseStore ? item.reuseOnConflict : undefined,
                 });
                 break;
             }
@@ -477,6 +741,7 @@ export class OpenApiClient {
                 });
                 const clientFinal = postProcessClient(clientWithDiff);
                 const clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
+                const modelSchemas = buildModelSchemaMap(context);
                 this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V3);
                 await this.writeClient.writeClient({
                     client: clientPrepared,
@@ -494,12 +759,20 @@ export class OpenApiClient {
                     emptySchemaStrategy,
                     modelsMode,
                     prettierConfigPath,
+                    reuseStore: useReuseStore ? reuseContext!.reuseStore! : undefined,
+                    optionsSlice: useReuseStore ? optionsSlice : undefined,
+                    specInput: useReuseStore ? specInput : undefined,
+                    inputPath: useReuseStore ? absoluteInput : undefined,
+                    modelSchemas: useReuseStore ? modelSchemas : undefined,
+                    referencedArtifactKeys: useReuseStore ? reuseContext!.referencedArtifactKeys : undefined,
+                    onReuseStat: useReuseStore ? reuseContext!.onReuseStat : undefined,
+                    reuseOnConflict: useReuseStore ? item.reuseOnConflict : undefined,
                 });
                 break;
             }
         }
         const generatedFiles = this.writeClient.getExpectedOutputFilesArray().filter(filePath => !knownFilesBefore.has(filePath));
-        if (item.cache && generationCache) {
+        if (item.cache && generationCache && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && item.modelsMode === ModelsMode.CLASSES))) {
             generationCache.set({
                 key: cacheKey,
                 fingerprint: cacheFingerprint,
@@ -549,6 +822,7 @@ export class OpenApiClient {
                 diffReport: item.diffReport,
                 modelsMode: item.modelsMode,
                 strictOpenapi: item.strictOpenapi,
+                failOnGovernanceErrors: item.failOnGovernanceErrors,
             },
         };
 

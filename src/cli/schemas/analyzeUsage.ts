@@ -1,43 +1,33 @@
 import { z } from 'zod';
 
-import { DEFAULT_OUTPUT_API_DIR } from '../../common/Consts';
+import { DEFAULT_ANALYZE_USAGE_REPORT_PATH } from '../../common/Consts';
 import { baseCLIOptionsSchema, emptyStringToUndefined } from './base';
-
-const failOnCategorySchema = z.enum(['unusedExports', 'unresolvedImports', 'structuralChanges', 'typingIssues']);
 
 export const analyzeUsageOptionsSchema = z
     .object({
         ...baseCLIOptionsSchema.shape,
-        apiRoot: emptyStringToUndefined.default(DEFAULT_OUTPUT_API_DIR),
-        projectRoot: emptyStringToUndefined,
-        tsconfig: emptyStringToUndefined,
-        reportFile: emptyStringToUndefined,
-        mdReport: emptyStringToUndefined,
-        failOn: emptyStringToUndefined,
-        generatedEntry: emptyStringToUndefined,
+        sourcePath: emptyStringToUndefined,
+        projectPath: emptyStringToUndefined,
+        tsconfigPath: emptyStringToUndefined,
+        output: emptyStringToUndefined.default(DEFAULT_ANALYZE_USAGE_REPORT_PATH),
+        check: z.boolean().optional(),
+        diffReport: emptyStringToUndefined.describe('Path to analyze-diff report JSON for rename miracle validation'),
     })
     .superRefine((data, ctx) => {
-        if (!data.apiRoot) {
+        if (!data.sourcePath) {
             ctx.addIssue({
                 code: 'custom',
-                message: '"--api-root" is required for analyze-usage command',
-                path: ['apiRoot'],
+                message: '"--sourcePath" (-s) is required for analyze-usage command',
+                path: ['sourcePath'],
             });
         }
 
-        if (data.failOn && data.failOn !== 'none') {
-            for (const category of data.failOn
-                .split(',')
-                .map(item => item.trim())
-                .filter(Boolean)) {
-                if (!failOnCategorySchema.safeParse(category).success) {
-                    ctx.addIssue({
-                        code: 'custom',
-                        message: `Unsupported --fail-on category: ${category}`,
-                        path: ['failOn'],
-                    });
-                }
-            }
+        if (!data.projectPath) {
+            ctx.addIssue({
+                code: 'custom',
+                message: '"--projectPath" (-p) is required for analyze-usage command',
+                path: ['projectPath'],
+            });
         }
     });
 

@@ -1,6 +1,7 @@
 import type { SourceFile } from 'ts-morph';
 
-import type { ProjectContext } from './core/ProjectContext';
+import type { ProjectContext } from '../../core/projectProbe';
+import type { ApiImportScope } from './utils/apiImportScope';
 
 export interface MethodMetadata {
     name: string;
@@ -10,6 +11,8 @@ export interface MethodMetadata {
 
 export interface Contract {
     services: Record<string, MethodMetadata[]>;
+    /** createClient return keys mapped to exported service class names (e.g. SimpleService → SimpleService). */
+    clientServiceKeys: Record<string, string>;
     schemas: string[];
     models: string[];
     sourceFile: SourceFile;
@@ -38,5 +41,5 @@ export interface CoverageReport {
 }
 
 export interface Rule {
-    check(context: ProjectContext, contract: Contract, stats: Stats): Promise<Finding[]>;
+    check(context: ProjectContext, contract: Contract, stats: Stats, apiScope: ApiImportScope): Promise<Finding[]>;
 }

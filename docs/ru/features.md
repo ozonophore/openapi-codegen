@@ -17,16 +17,43 @@
 **Опции:**
 
 - `cache` (по умолчанию: `false`)
-- `cachePath` (по умолчанию: `.openapi-codegen-cache.json`, относительно output-директории)
-- `cacheStrategy` — `entity` (по умолчанию) или `content`
+- `cachePath` (по умолчанию: `.openapi-codegen-store`)
+- `cacheStrategy` — `entity`, `reuse` или `content` (дефолт схемы V6: `reuse`; миграция v5→v6 ставит `entity` для существующих конфигов)
+- `reuseOnConflict` (по умолчанию: `fail`) — при `cacheStrategy: "reuse"`: `fail` прерывает при drift схемы; `namespace` хранит в spec-scoped путях
 - `cacheDebug` (по умолчанию: `false`)
 
 **Стратегии:**
 
-- **`entity`** — при cache hit генерация item пропускается; максимальное ускорение при неизменных входе и опциях.
-- **`content`** — генерация выполняется; записываются только изменённые файлы (запись с учётом содержимого).
+- **`entity`** — per-output `.openapi-codegen-cache.json`; при cache hit генерация item пропускается.
+- **`reuse`** — глобальный `.openapi-codegen-store` с общими артефактами model/schema, копируемыми в каждый output (preview; требует `modelsMode: "interfaces"`).
+- **`content`** — генерация выполняется; записываются только изменённые файлы через `writeFileIfChanged` (без entity/reuse store).
 
-Кэш хранит отпечаток (содержимое спецификации, версия генератора, ключевые опции) и список сгенерированных файлов. Неизменённые артефакты сохраняют mtime, что удобно для локальной разработки и инкрементальных CI-прогонов.
+**Когда какую стратегию выбирать:**
+
+| Сценарий | Рекомендация | Почему |
+|----------|--------------|--------|
+| Одна спека, вход не менялся | `entity` | На cache hit пропускается вся генерация item |
+| Monorepo / несколько спек с общими моделями | `reuse` | 2-я и следующие спеки переиспользуют отрендеренные model/schema |
+| Без кэша или минимальный overhead | `cache: false` или `content` | Без manifest store; `content` всё равно пропускает неизменённые файлы |
+| Честный бенчмарк reuse | `example/openapi.reuse.bench.config.json` | Те же items, что в базовом конфиге + только `cache`/`reuse`; в отличие от `openapi.reuse.config.json`, без Marauder (`autoSelect`, `specAnalysis`) |
+
+Reuse всегда парсит спеку и генерирует core/services; не пропускает генерацию как entity cache. Warm reuse выигрывает при доминировании shared schemas (multi-item). Cold reuse может быть медленнее no-cache при заполнении store.
+
+Для регрессионных perf-проверок см. `test/reusePerformance.test.ts`. Включите `cacheDebug: true`, чтобы в `{cachePath}/reports/latest.json` попали тайминги фаз manifest.
+
+Reuse store использует MD5 для fingerprint (`manifest.json` version 2). При апгрейде с version 1 существующий store инвалидируется на следующем `generate` (артеfacts пересоздаются; orphans удаляет GC).
+
+При включённых `cache` или `specAnalysis` unified-отчёт генерации пишется в `{output}/reports/latest.json` (или `<cachePath>/reports/latest.json` в режиме reuse).
+
+### Marauder preview (`2.1.0-beta.11`)
+
+Opt-in возможности во время `generate` (схема конфигурации **V6**):
+
+- **`--auto-select` / `autoSelect`** — анализирует целевой проект и рекомендует `httpClient` и `validationLibrary`.
+- **`--spec-analysis` / `specAnalysis`** — per-spec и cross-spec детекторы качества OpenAPI; пишет отчёт в `reportPath` (по умолчанию: `./.openapi-codegen-reports/anomaly-report.json`). `--anomaly-detection` — устаревший alias.
+- Dot-notation CLI: `--auto-select.strict`, `--spec-analysis.fail-on-high`, inline JSON.
+
+См. [Marauder user guide](../MARAUDER_USER_GUIDE.md) и [Руководство по миграции](../../MIGRATION.RU.md).
 
 ### Стиль аргументов vs. Стиль объектов `--useOptions`
 В JavaScript или TypeScript нет [именованных параметров](https://en.wikipedia.org/wiki/Named_parameter), поэтому
