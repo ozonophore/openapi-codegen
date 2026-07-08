@@ -2,16 +2,43 @@
 
 CLI инструмент поддерживает семь команд: `generate`, `check-config`, `update-config`, `init`, `preview-changes`, `analyze-diff` и `analyze-usage`.
 
+### Таблица быстрых решений
+
+| Я хочу… | Используй команду |
+|---------|------------------|
+| Создать файл конфигурации | `init` |
+| Сгенерировать клиент | `generate` |
+| Предпросмотр вывода перед перезаписью | `preview-changes` |
+| Проверить наличие breaking changes в спеке | `analyze-diff` |
+| Проверить, что приложение всё ещё вызывает существующие эндпоинты | `analyze-usage` |
+| Валидировать файл конфигурации | `check-config` |
+| Обновить конфиг до последней схемы | `update-config` |
+
+---
+
 ### Команда: `generate`
+
+> **Когда использовать:** Первый шаг после `init`. Запускайте при каждом изменении OpenAPI-спецификации для пересоздания TypeScript-клиента.
+>
+> **Критические флаги для вашего проекта:**
+> - **`--httpClient`**: выбери `fetch` (браузер/Node.js), `axios` (популярный клиент), `xhr` (браузер) или `node` (Node.js native)
+> - **`--useOptions`**: использует объект опций вместо отдельных аргументов — улучшает читаемость при множестве параметров
+> - **`--validationLibrary`**: добавляет runtime-валидацию (`zod`, `joi`, `yup`) или пропускает (`none`)
+> - **`--request` vs `--customExecutorPath`**: используй `--request` для legacy custom request функции или `--customExecutorPath` для новой RequestExecutor-совместимости (2.0.0+)
+> - **`--cache`** / **`--cacheStrategy`**: включи для кэширования генерации; используй `entity` (локальный) или `reuse` (глобальный) кэш
+> - **`--strict-openapi`**: проверяет спеку на ошибки и предупреждения; комбинируй с `--fail-on-governance-errors` для строгого контроля качества
+> - **`--auto-select`** / **`--spec-analysis`**: preview-функции для автоматического выбора клиента и анализа качества спеки (см. [Marauder preview features](features.md#marauder-preview-features))
 
 Генерирует TypeScript клиент на основе спецификаций OpenAPI.
 
 **Базовое использование:**
 ```bash
-openapi generate --input ./spec.json --output ./dist
+openapi-codegen-cli generate --input ./spec.json --output ./dist
 ```
 
 **Все доступные опции:**
+
+> **Примечание:** Каждый флаг CLI может быть также установлен в конфиге `openapi.config.json`. Флаги CLI переопределяют значения из конфига.
 
 | Опция | Короткая | Тип | По умолчанию | Описание |
 |-------|----------|-----|--------------|----------|
@@ -57,21 +84,21 @@ openapi generate --input ./spec.json --output ./dist
 | `--spec-analysis` | - | boolean \| object | `false` | Анализ качества OpenAPI spec во время генерации (*preview*) |
 | `--anomaly-detection` | - | boolean \| object | `false` | Устаревший alias для `--spec-analysis` |
 
-**Marauder preview flags (dot-notation):** `--auto-select`, `--auto-select.strict`, `--spec-analysis.fail-on-high`, inline JSON (`--auto-select='{"strict":true}'`). Обрабатываются до Commander; см. [Marauder user guide](../MARAUDER_USER_GUIDE.md).
+**Marauder preview flags (dot-notation):** `--auto-select`, `--auto-select.strict`, `--spec-analysis.fail-on-high`, inline JSON (`--auto-select='{"strict":true}'`). Обрабатываются до Commander; см. [Marauder preview features](features.md#marauder-preview-features).
 
 **Примеры:**
 ```bash
 # Базовая генерация
-openapi generate --input ./spec.json --output ./dist
+openapi-codegen-cli generate --input ./spec.json --output ./dist
 
 # С пользовательским HTTP клиентом
-openapi generate --input ./spec.json --output ./dist --httpClient axios
+openapi-codegen-cli generate --input ./spec.json --output ./dist --httpClient axios
 
 # С файлом конфигурации
-openapi generate --openapi-config ./my-config.json
+openapi-codegen-cli generate --openapi-config ./my-config.json
 
 # Со всеми опциями через CLI
-openapi generate \
+openapi-codegen-cli generate \
   --input ./spec.json \
   --output ./dist \
   --httpClient fetch \
@@ -82,12 +109,14 @@ openapi generate \
 
 ### Команда: `check-config`
 
+> **Когда использовать:** Запускайте при ошибках конфигурации или после ручного редактирования `openapi.config.json`. Полезно как pre-generate шаг в CI для раннего обнаружения неверных настроек.
+
 Проверяет структуру и значения файла конфигурации.
 
 **Использование:**
 ```bash
-openapi check-config
-openapi check-config --openapi-config ./custom-config.json
+openapi-codegen-cli check-config
+openapi-codegen-cli check-config --openapi-config ./custom-config.json
 ```
 
 **Опции:**
@@ -95,12 +124,14 @@ openapi check-config --openapi-config ./custom-config.json
 
 ### Команда: `update-config`
 
+> **Когда использовать:** Запускайте после обновления `ts-openapi-codegen` до новой мажорной или минорной версии. Мигрирует `openapi.config.json` на актуальную схему, добавляя блоки `autoSelect` и `specAnalysis`.
+
 Обновляет файл конфигурации до последней поддерживаемой версии схемы.
 
 **Использование:**
 ```bash
-openapi update-config
-openapi update-config --openapi-config ./custom-config.json
+openapi-codegen-cli update-config
+openapi-codegen-cli update-config --openapi-config ./custom-config.json
 ```
 
 **Опции:**
@@ -108,18 +139,20 @@ openapi update-config --openapi-config ./custom-config.json
 
 ### Команда: `init`
 
+> **Когда использовать:** Первый шаг при настройке инструмента в новом проекте. Создаёт шаблон `openapi.config.json`, который можно доработать перед запуском `generate`.
+
 Генерирует шаблон файла конфигурации.
 
 **Использование:**
 ```bash
 # Генерация шаблона с настройками по умолчанию
-openapi init
+openapi-codegen-cli init
 
 # Пользовательское имя файла конфигурации
-openapi init --openapi-config ./my-config.json
+openapi-codegen-cli init --openapi-config ./my-config.json
 
 # Явно указать директорию со спецификациями OpenAPI
-openapi init --specs-dir ./openapi
+openapi-codegen-cli init --specs-dir ./openapi
 ```
 
 **Опции:**
@@ -132,12 +165,14 @@ openapi init --specs-dir ./openapi
 
 ### Команда: `preview-changes`
 
+> **Когда использовать:** Перед применением обновления спеки в production-кодовой базе. Показывает, какие именно generated-файлы изменятся, чтобы заранее спланировать обновления на стороне consumer.
+
 Показывает различия между уже сгенерированным кодом и новым результатом генерации без перезаписи текущей директории generated-кода.
 
 **Использование:**
 ```bash
-openapi preview-changes
-openapi preview-changes --openapi-config ./custom-config.json
+openapi-codegen-cli preview-changes
+openapi-codegen-cli preview-changes --openapi-config ./custom-config.json
 ```
 
 **Опции:**
@@ -148,12 +183,14 @@ openapi preview-changes --openapi-config ./custom-config.json
 
 ### Команда: `analyze-diff`
 
+> **Когда использовать:** На каждом PR с изменением OpenAPI-спеки. Обнаруживает breaking changes и нарушения governance до того, как они дойдут до consumer. Используйте `--ci` для завершения CI с ошибкой, `--allow-breaking` — для допуска намеренных breaking changes.
+
 Анализирует изменения между двумя версиями OpenAPI и формирует JSON‑отчет.
 
 **Использование:**
 ```bash
-openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml
-openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
+openapi-codegen-cli analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml
+openapi-codegen-cli analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 ```
 
 **Опции:**
@@ -167,7 +204,7 @@ openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 - `--ci` - Код выхода 1 при ошибках governance
 - `--allow-breaking` - Разрешить breaking changes в проверках governance
 
-**Хуки плагинов (v2):** укажите пути к модулям в `plugins` внутри `openapi.config.json`. См. [Plugin API v2 (RFC)](plugin-api-v2.md).
+**Хуки плагинов (v2):** укажите пути к модулям в `plugins` внутри `openapi.config.json`. См. [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
 
 #### Miracles и подтверждение
 
@@ -197,12 +234,14 @@ openapi analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 
 ### Команда: `analyze-usage`
 
+> **Когда использовать:** После `generate` в CI для проверки, что приложение по-прежнему импортирует и вызывает все эндпоинты сгенерированного клиента. Используйте `--check` для завершения CI с ошибкой при несоответствиях уровня ERROR. Комбинируйте с `--diff-report` для кросс-валидации RENAME miracles.
+
 Анализирует, как TypeScript consumer-проект использует экспорты generated API, и формирует JSON-отчёт. Импорты резолвятся **path-based** от `--sourcePath`: любой import, который через TypeScript module resolution попадает в entry-файл generated API или файл в его директории, считается API-импортом. Поддерживаются aliases вроде `@my-org/api`, если они резолвятся в этот путь.
 
 **Использование:**
 ```bash
-openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --tsconfigPath ./tsconfig.json
-openapi analyze-usage --sourcePath ./src/api/index.ts --projectPath . --output ./api-report.json --check
+openapi-codegen-cli analyze-usage --sourcePath ./generated/index.ts --projectPath . --tsconfigPath ./tsconfig.json
+openapi-codegen-cli analyze-usage --sourcePath ./src/api/index.ts --projectPath . --output ./api-report.json --check
 ```
 
 **Опции:**
@@ -221,21 +260,21 @@ openapi analyze-usage --sourcePath ./src/api/index.ts --projectPath . --output .
 
 ```bash
 # 1. Spec delta + governance (unified diff report v2.0.0)
-openapi analyze-diff \
+openapi-codegen-cli analyze-diff \
   --input ./openapi/spec.yaml \
   --compare-with ./openapi/spec.base.yaml \
   --governance-config ./governance.json \
   --ci
 
 # 2. Generate со strict diagnostics + governance gate
-openapi generate \
+openapi-codegen-cli generate \
   --openapi-config ./openapi.config.json \
   --strict-openapi \
   --governance-config ./governance.json \
   --fail-on-governance-errors
 
 # 3. Проверка consumer (опционально — cross-check RENAME miracles)
-openapi analyze-usage \
+openapi-codegen-cli analyze-usage \
   --sourcePath ./generated/index.ts \
   --projectPath . \
   --check \
@@ -245,9 +284,11 @@ openapi analyze-usage \
 tsc --noEmit
 ```
 
+**Карта серьёзности (общая диагностика):** отсутствие `operationId` отображается как **info** в strict `issues[]` и **warning** в `governance.violations` (можно переопределить на `error` через config governance). Используй `--fail-on-governance-errors` при generate для блокирования на governance-ошибках, когда включен `--strict-openapi`.
+
 Рекомендуемая минимальная цепочка после generate:
 ```bash
-openapi generate --input ./openapi/spec.yaml --output ./generated
-openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --check
+openapi-codegen-cli generate --input ./openapi/spec.yaml --output ./generated
+openapi-codegen-cli analyze-usage --sourcePath ./generated/index.ts --projectPath . --check
 tsc --noEmit
 ```

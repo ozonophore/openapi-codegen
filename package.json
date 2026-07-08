@@ -1,6 +1,6 @@
 {
   "name": "ts-openapi-codegen",
-  "version": "2.1.0-beta.11",
+  "version": "2.1.0-beta.12",
   "description": "Library that generates Typescript clients based on the OpenAPI specification. It bases on openapi-typescript-codegen",
   "author": "Alexey Zverev",
   "homepage": "https://github.com/ozonophore/openapi-codegen.git",
@@ -53,7 +53,7 @@
     "run": "node ./test/index.js",
     "test:unit": "node --experimental-test-coverage --experimental-test-module-mocks --import tsx --test-name-pattern \"@unit\" --test-timeout=60000 --test \"**/*.test.ts\"",
     "test:update": "UPDATE_SNAPSHOTS=true npm run test:unit",
-    "test:coverage": "node --experimental-test-coverage --import tsx --test-name-pattern \"@unit\" --test-timeout=60000 --test \"**/*.test.ts\"",
+    "test:coverage": "node --experimental-test-coverage --experimental-test-module-mocks --import tsx --test-name-pattern \"@unit\" --test-timeout=60000 --test \"**/*.test.ts\"",
     "eslint": "eslint \"./src/**/*.ts\"",
     "eslint:fix": "eslint \"./src/**/*.ts\" --fix",
     "prettier": "prettier \"./src/**/*.ts\" --check",
