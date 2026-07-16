@@ -91,7 +91,7 @@ Order: request interceptors → HTTP → response interceptors; on failure, erro
 
 Error interceptors may return `RequestRecovery(value)` to recover from a failed request; the recovered value passes through response interceptors.
 
-`createClient` always wraps the executor with `withInterceptors` and the default `apiErrorInterceptor` (since `2.1.0-beta.10`).
+`createClient` always wraps the executor with `withInterceptors` and the default `apiErrorInterceptor` (since `2.1.0`).
 
 Transport-level `ApiError` (from `catchErrors`) now stores a slim `request` config and puts the response payload in `body` instead of embedding full `ApiRequestOptions` in `request`.
 
@@ -179,7 +179,7 @@ Example (excerpt):
 - Old 1.1.0 reports are still loadable via adapter; re-generate for full `structural` fidelity.
 - Miracles confirmation workflow is unchanged: set `"status": "confirmed"` before generation.
 
-### 8) Default CLI report paths (`2.1.0-beta.11`)
+### 8) Default CLI report paths (`2.1.0`)
 
 **Breaking change:** when you omit explicit paths, CLI tools now write reports under `./.openapi-codegen-reports/` instead of the project root.
 
@@ -200,13 +200,13 @@ Explicit `--report-file`, `--output-report`, `--output`, `--diffReport`, and con
 2. Add `.openapi-codegen-reports/` and `.openapi-codegen-store/` to `.gitignore` (both are in the repo template).
 3. Or pin explicit paths in config/CLI if you need the old layout.
 
-### 9) Marauder feature set (`2.1.0-beta.11`)
+### 9) Marauder feature set (`2.1.0`)
 
-The "Marauder" preview features ship in **`2.1.0-beta.11`**. They are **additive and opt-in** for config keys; everything is off by default.
+The "Marauder" preview features ship in **`2.1.0`**. They are **additive and opt-in** for config keys; everything is off by default.
 
-#### Config schema V6 (auto-migration)
+#### Config schema (auto-migration)
 
-The latest unified config schema is now `UNIFIED_OPTIONS_v6`. Run:
+Configs use the current unified schema. Run:
 
 ```bash
 openapi-codegen-cli update-config --openapi-config ./openapi.config.json
@@ -251,8 +251,8 @@ When `cache: true`, choose how incremental generation works:
 
 | Strategy | Behavior |
 |----------|----------|
-| `entity` | Per-output `.openapi-codegen-cache.json`; skips full regeneration when inputs unchanged (V5 default after migration) |
-| `reuse` | Global `.openapi-codegen-store` with shared model/schema artifacts copied into output (preview default in V6) |
+| `entity` | Per-output `.openapi-codegen-cache.json`; skips full regeneration when inputs unchanged (`update-config` may keep this for older configs) |
+| `reuse` | Global `.openapi-codegen-store` with shared model/schema artifacts copied into output (current preview default) |
 | `content` | No entity/reuse store; relies on `writeFileIfChanged` only (always active, but logged when `cacheDebug: true`) |
 
 CLI `--cacheStrategy` is optional; omit it to keep the value from `openapi.config.json`.
@@ -328,12 +328,90 @@ openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --check 
 
 - `anomalyDetection` → use `specAnalysis` (still parsed for legacy configs)
 - Removed in this refocus: `heal`, `migrate`, `swarm`, and `anomalyExploitation` CLI commands/APIs
+  - Note: from `2.1.0`, `generate --swarm` / config `swarm` writes a Swarm **manifest only**; it does not restore the top-level `swarm` command (see §10)
 
 #### Preview limitations
 
 - `--auto-select` applies when generating from `openapi.config.json` or merged multi-item configs
 - `specAnalysis` reports quality issues; it does not auto-fix specs
 - Reuse store requires `modelsMode: "interfaces"` (default); class mode disables artifact reuse
+
+### 10) Marauder Phase 2 (`2.1.0`)
+
+Phase 2 adds more **opt-in** Marauder steps on `generate`. New config keys are additive; existing configs remain valid. Everything stays off by default.
+
+Top-level CLI commands `heal`, `migrate`, and `swarm` remain **removed** (see §9). Phase 2 does **not** restore them.
+
+Example config: `example/openapi.marauder.config.json`.
+
+#### New optional config keys (defaults shown)
+
+```json
+{
+  "workspaceReport": {
+    "enabled": false,
+    "path": "./workspace-report",
+    "format": "json"
+  },
+  "trafficSplitter": {
+    "enabled": false,
+    "strategy": "weighted"
+  },
+  "swarm": {
+    "enabled": false,
+    "output": "./swarm-manifest.json"
+  },
+  "preAnalyze": false,
+  "reuseMode": "copy"
+}
+```
+
+Root-only (not inherited by `items[]`). CLI flags mirror config: `--workspace-report`, `--traffic-splitter`, `--swarm`, `--pre-analyze`, `--reuse-mode <copy|auto-group>` (dot-notation supported for object blocks).
+
+#### Workspace report (`workspaceReport` / `--workspace-report`)
+
+- After generation (+ after `finalizeSpecAnalysis` when applicable), writes `{path}.json` and/or `{path}.md` (`format`: `json` | `markdown` | `both`)
+- Aggregates per-spec stats and cross-spec findings (ReuseStore manifest when reuse is enabled)
+- Write failures are logged as warnings; generation is not blocked
+
+#### Traffic splitter helper (`trafficSplitter` / `--traffic-splitter`)
+
+- Writes a standalone `TrafficSplitter.ts` into the first item’s output (no external imports)
+- Helper only — does **not** switch live traffic or deploy clients
+- Multi-item configs log a warning but still generate
+
+#### Swarm manifest (`swarm` / `--swarm` on `generate`)
+
+- Writes `swarm-manifest.json` (avatars, shared models, operation index)
+- Manifest only — **not** the removed top-level `swarm` command (no per-avatar client scaffolding)
+
+#### Pre-analyze (`preAnalyze` / `--pre-analyze`)
+
+- Before any files are written: parses items, runs `CrossSpecAnalyzer`, prints shared-model / conflict summary to stdout
+- Does not block generation; parse failures for individual specs are warnings
+
+#### Reuse mode (`reuseMode` / `--reuse-mode`)
+
+| Value | Behavior |
+|-------|----------|
+| `copy` (default) | Existing reuse layout: full artifact copies into each output |
+| `auto-group` | Shared models under `{LCA}/__shared__/…` with re-export stubs in each output |
+
+- `auto-group` requires `cacheStrategy: "reuse"`; otherwise warn + fallback to `copy`
+- Trivial LCA (no useful shared root) → warn + fallback to `copy`
+
+#### Cache / fingerprint notes after upgrade
+
+- Entity-cache hash algorithm changed (SHA-256 → MD5); expect a one-time cold regen
+- Reuse artifact fingerprints include more schema fields and plugin config — more misses until the store warm-up completes
+- Cross-spec category `cross-spec-drift` is no longer emitted (conflicts / reuse opportunities / output collisions remain)
+
+#### Preview limitations
+
+- All Phase 2 features are opt-in and may change before stable release
+- `--swarm` on `generate` ≠ restored top-level `swarm`
+- `--traffic-splitter` does not perform canary cutover in production
+- `preAnalyze` is advisory (stdout only); it does not write a report file
 
 ## New/Updated Options You Should Review
 
@@ -351,6 +429,11 @@ For CLI/config:
 - `specAnalysis` / `--spec-analysis` (preview: OpenAPI spec quality analysis during generate)
 - `failOnGovernanceErrors` / `--fail-on-governance-errors` (with `--strict-openapi`)
 - `cacheStrategy: "reuse"` with `.openapi-codegen-store` and `reuseOnConflict` (preview: cross-spec artifact reuse)
+- `reuseMode` / `--reuse-mode` (`copy` | `auto-group`; preview, requires `cacheStrategy: "reuse"` for auto-group)
+- `workspaceReport` / `--workspace-report` (preview: multi-spec workspace summary)
+- `trafficSplitter` / `--traffic-splitter` (preview: canary helper module only — no live traffic)
+- `swarm` / `--swarm` on `generate` (preview: Swarm **manifest** only; top-level `swarm` command stays removed)
+- `preAnalyze` / `--pre-analyze` (preview: cross-spec stdout analysis before writes)
 - `analyze-usage --diff-report` (RENAME miracle validation against consumer code)
 - Deprecated alias: `anomalyDetection` → `specAnalysis`
 - `previewChanges` command and its folders:
@@ -393,7 +476,7 @@ openapi-codegen-cli check-config --openapi-config ./openapi.config.json
 openapi-codegen-cli update-config --openapi-config ./openapi.config.json
 ```
 
-Since `2.1.0-beta.10`, `check-config` also emits non-fatal **Executor config** warnings when `request` or `customExecutorPath` files are missing, or when `customExecutorPath` does not export `function createExecutorAdapter`.
+Since `2.1.0`, `check-config` also emits non-fatal **Executor config** warnings when `request` or `customExecutorPath` files are missing, or when `customExecutorPath` does not export `function createExecutorAdapter`.
 
 ### Step 5: Verify generated diffs before applying
 
@@ -514,6 +597,8 @@ When `useHistory` is on and a property type changes, validation schemas may coer
 - [ ] Added `.openapi-codegen-reports/` and `.openapi-codegen-store/` to `.gitignore`.
 - [ ] Chose `cacheStrategy` explicitly if relying on prior `entity` behavior (`cache`, `cachePath`, `reuseOnConflict`).
 - [ ] Renamed config `anomalyDetection` → `specAnalysis` where applicable; `failOnAnomalies` → `failOnHigh`.
-- [ ] Ran `update-config` to migrate config to V6 (Marauder blocks).
+- [ ] Ran `update-config` to migrate config to the latest schema (Marauder blocks).
+- [ ] Reviewed Marauder Phase 2 opt-ins (`workspaceReport`, `trafficSplitter`, `swarm` manifest, `preAnalyze`, `reuseMode`) if needed.
+- [ ] Expected one-time entity-cache / reuse-store warm-up after upgrade to `2.1.0`.
 - [ ] Ran `preview-changes` and reviewed diffs.
 - [ ] Updated snapshots/tests.

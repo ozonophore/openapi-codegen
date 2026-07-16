@@ -1,0 +1,38 @@
+### Requirement: preAnalyze выполняет cross-spec анализ до записи первых файлов
+При `rawOptions.preAnalyze === true`, до первого вызова `generateSingle`, `OpenApiClient`
+ДОЛЖЕН: распарсить все спеки из `items` (только схемы, без записи артефактов), запустить
+`CrossSpecAnalyzer`, вывести отчёт в stdout через `logger.forceInfo`. Генерация продолжается
+в штатном режиме — `preAnalyze` не блокирует.
+
+`runCrossSpecAnalysis` ДОЛЖЕН получать реальный список `items` (а не пустой `[]`), чтобы
+`detectSharedOutputCollisionRisk` мог корректно обнаруживать коллизии output-путей.
+
+#### Scenario: анализ выполняется до записи файлов
+- **WHEN** `preAnalyze: true` и конфиг имеет 3 items
+- **THEN** вывод с результатами кросс-спечного анализа появляется в stdout до сообщений о генерации спек
+
+#### Scenario: preAnalyze: false пропускает шаг
+- **WHEN** `preAnalyze` отсутствует или `false`
+- **THEN** предгенерационный анализ не выполняется, stdout не содержит соответствующего вывода
+
+#### Scenario: detectSharedOutputCollisionRisk обнаруживает коллизии при preAnalyze
+- **WHEN** `preAnalyze: true` и два items имеют одинаковый `outputModels`
+- **THEN** stdout содержит предупреждение о `shared-output-collision-risk`
+
+---
+
+### Requirement: вывод preAnalyze содержит структурированную сводку
+Вывод ДОЛЖЕН включать: количество shared-моделей, количество конфликтов, топ-5 shared-моделей с числом спек, детали конфликтов (name/hash).
+
+#### Scenario: вывод содержит счётчики и топ shared-моделей
+- **WHEN** между тремя specs есть 5 общих моделей и 1 конфликт
+- **THEN** stdout содержит строки вида `"Shared models: 5"`, `"Conflicts: 1"` и список топ-моделей
+
+---
+
+### Requirement: ошибки парсинга в preAnalyze логируются, генерация не прерывается
+Если одна из спек недоступна или не парсится во время `preAnalyze`, ошибка ДОЛЖНА логироваться как warn, анализ продолжается по оставшимся specs, генерация стартует в штатном режиме.
+
+#### Scenario: недоступная спека в preAnalyze не блокирует генерацию
+- **WHEN** один из `items.input` указывает на несуществующий файл и `preAnalyze: true`
+- **THEN** в stdout появляется warn, генерация остальных specs выполняется успешно

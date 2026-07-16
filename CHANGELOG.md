@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.13] — 2026-07-17
+
+Marauder Phase 2 preview: workspace reports, Avatar Swarm manifests, TrafficSplitter helpers, pre-generation cross-spec analysis, and `reuseMode: "auto-group"`, plus ReuseStore / entity-cache hardening. Features remain opt-in (see Known limitations).
+
+### Added
+
+- **`--workspace-report` / config `workspaceReport`**: after multi-spec `generate`, writes a workspace summary (per-spec timing/reuse stats + shared models) as JSON and/or Markdown (`path`, `format`: `json` | `markdown` | `both`)
+- **`--traffic-splitter` / config `trafficSplitter`**: generates a standalone `TrafficSplitter.ts` into the first item’s output for canary-style routing helpers (`weighted`, `round-robin`, `header-based`, `header-and-weighted`; sticky sessions, weights, headers). Does **not** switch live traffic
+- **`--swarm` / config `swarm`**: writes an Avatar Swarm **manifest** (`avatars`, `sharedModels`, `operationIndex`) to `swarm.output` (default `./swarm-manifest.json`) — not full per-service client scaffolding
+- **`--pre-analyze` / config `preAnalyze`**: parses all items and prints cross-spec shared-model / name-hash conflict findings to stdout before any client files are written
+- **`--reuse-mode` / config `reuseMode`**: `copy` (default) or `auto-group` (canonical models under `{LCA}/__shared__/` with `export * from '…'` stubs in each client). Requires `cacheStrategy: "reuse"`; falls back to `copy` with a warning when LCA is trivial or reuse is off
+- Nested CLI parsing for `workspace-report`, `traffic-splitter`, and `swarm` (boolean + dot-notation / inline JSON), same pattern as `--auto-select` / `--spec-analysis`
+- Example config: `example/openapi.marauder.config.json`
+- Programmatic exports: `AvatarSwarmGenerator`, `writeSwarmOutput`, `TrafficSplitter`, `generateTrafficSplitterModule`, `buildWorkspaceReport`, `writeWorkspaceReport`, and related types
+- Config schema extended with optional `workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode` (additive; migrate via `update-config` if needed)
+
+### Changed
+
+- **CLI / logger UX:** remaining Russian user-facing strings in `LoggerMessages`, `init` option help, and `check-config` interactive choices translated to English
+- **ReuseStore integrity:** atomic manifest write (tmp + rename), recover from corrupted JSON by clearing orphan artifacts, always verify content hash on read, multi-entry name/kind index for conflict detection
+- **Artifact fingerprints:** hash more schema constraints (`minimum`/`maximum`/`pattern`/`const`/`discriminator`/length & items bounds, etc.), sort `required`/`enum`, guard circular `$ref` graphs, include plugin **config** (not only names) in `pluginsHash`
+- **`GenerationCache`:** hash algorithm SHA-256 → MD5; drop unread entries on save; tolerate corrupted cache files
+- Entity-cache persistence also runs when class-mode forces a reuse fallback (`needsEntityCacheFallback`)
+- Multi-item warning focuses on differing `modelsMode` (reuse-relevant) instead of differing cache settings
+- Cross-spec analysis no longer emits separate early “drift” findings (conflicts / reuse opportunities / output collisions remain)
+
+### Fixed
+
+- Reuse path collisions / integrity edge cases addressed by stronger fingerprinting and hash verification
+- Generation cache growth from stale unused keys pruned on save
+- Corrupted reuse manifest / entity cache no longer soft-fail into inconsistent state without recovery
+
+### Breaking Changes
+
+- Existing **entity caches** and **reuse store fingerprints** may invalidate after upgrade (expected one-time regen / more misses) due to MD5 cache keys and expanded schema/plugin hashing
+- Consumers relying on **`cross-spec-drift`** findings will no longer see that category
+- Preview only — `trafficSplitter` / `swarm` are helpers/manifests; they do not restore removed `heal` / `migrate` / full swarm CLI commands from earlier Marauder preview builds
+
+### Known limitations (preview)
+
+- `workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, and `reuseMode` are **root-oriented**; traffic splitter warns and writes into the **first** item’s output on multi-item configs
+- `reuseMode: "auto-group"` needs a non-trivial common ancestor among output paths; otherwise falls back to `copy`
+- Swarm manifest `operationIds` / operation index are minimal (spec-item namespaced stubs)
+- Optimization / live migration / remote heal flows remain out of scope (same as the Marauder refocus)
+- Marauder config merge remains shallow/deep only where already defined for existing blocks
+
 ## [2.1.0-beta.12] — 2026-07-08
 
 **Documentation restructuring with progressive disclosure.** README redesigned for better first-time user experience, all documentation pages reorganized by usage context and tiered reference, Marauder guide consolidated into `features.md`, and three root-level redirect files removed for clarity.
@@ -69,16 +115,16 @@ Marauder refocus preview: project-aware auto-select, OpenAPI spec analysis (`spe
 - **Per-item autoSelect overrides** when probe recommendations differ across outputs
 - **`analyze-usage --diff-report`**: cross-check RENAME miracles from `analyze-diff` against consumer imports; path-based API import scope via TypeScript module resolution (supports aliases); shared **`ProjectProbe`**; scans `{projectPath}/src/**/*.{ts,tsx}` only
 - **Programmatic exports** from `core`: `AutoSelector`, `ProjectProbe`, `runSpecAnalysis`, `CodegenSpecAnalyzer`, `CrossSpecAnalyzer`, `ReuseStore`, `GenerationReport`, and related types
-- Config schema **`UNIFIED_OPTIONS_v6`** with optional `autoSelect` and `specAnalysis` blocks, and a v5→v6 migration plan
+- Optional config blocks `autoSelect` and `specAnalysis`; existing configs migrate automatically via `update-config`
 
 ### Changed
 - **Breaking:** default CLI report paths now write to `./.openapi-codegen-reports/` instead of the project root (`openapi-report.json`, `anomaly-report.*`, `openapi-diff-report.json`, `openapi-usage-report.json`, `eslint-fix-report.json`). Explicit `--report-file`, `--output-report`, `--output`, and config paths are unchanged.
 - **Marauder scope refocused** on generation-time spec analysis and artifact reuse
-- The latest unified config schema is now **V6**. Existing configs migrate automatically via `update-config`; the change is additive and backward compatible
+- Config schema updates are additive and backward compatible; run `update-config` to refresh older files
 - **`specAnalysis`** is the canonical config/CLI block; `anomalyDetection` remains a deprecated alias
 - **`runAnomalyDetection`** is a thin deprecated alias to `runSpecAnalysis` (no double-run)
 - **`failOnHigh`** / legacy **`failOnAnomalies`** evaluated only after cross-spec analysis completes
-- **CLI `--cacheStrategy`** no longer defaults to `entity` or `reuse`; omit the flag to keep the config value (V5→V6 migration sets `entity` for compatibility; V6 schema default is `reuse`)
+- **CLI `--cacheStrategy`** no longer defaults to `entity` or `reuse`; omit the flag to keep the config value (`update-config` may set `entity` for compatibility with older configs; the current schema default is `reuse`)
 - **Default `cachePath`** in runtime defaults: `.openapi-codegen-cache.json` → **`.openapi-codegen-store`**
 - **AutoSelector** default validator fallback is `NONE` (was `ZOD`)
 - Cross-spec drift/conflict findings are deduplicated; cross-spec detectors respect `filterSpecFindings`
@@ -164,7 +210,7 @@ Marauder refocus preview: project-aware auto-select, OpenAPI spec analysis (`spe
 - Removed dead `buildLegacyReport.ts` module.
 
 ### Fixed
-- `generate --useHistory` silently ignored semantic 1.1.0 reports since beta.5 — restored via adapter chain.
+- `generate --useHistory` silently ignored semantic 1.1.0 reports in earlier 2.1.0 builds — restored via adapter chain.
 - Ghost properties/operations, TYPE_COERCION, RENAME getters, and JSDoc `@info` for history-aware generation.
 - `classes` mode broken imports/types in generated services.
 - Stale diff report used without warning (mtime check vs input spec).

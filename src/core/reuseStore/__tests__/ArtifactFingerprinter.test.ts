@@ -63,4 +63,47 @@ describe('@unit: ArtifactFingerprinter', () => {
         assert.equal(keyA, keyB);
         assert.notEqual(keyA, buildArtifactKey('User', 'schema', schemaHash, optionsSliceHash));
     });
+
+    test('hashSchema is stable regardless of required array order', () => {
+        const schemaA = { type: 'object', required: ['alpha', 'beta', 'gamma'] };
+        const schemaB = { type: 'object', required: ['gamma', 'alpha', 'beta'] };
+        assert.equal(hashSchema(schemaA), hashSchema(schemaB));
+    });
+
+    test('hashSchema is stable regardless of enum array order', () => {
+        const schemaA = { type: 'string', enum: ['a', 'b', 'c'] };
+        const schemaB = { type: 'string', enum: ['c', 'a', 'b'] };
+        assert.equal(hashSchema(schemaA), hashSchema(schemaB));
+    });
+
+    test('hashSchema with different required values produces different hashes', () => {
+        const schemaA = { type: 'object', required: ['id'] };
+        const schemaB = { type: 'object', required: ['name'] };
+        assert.notEqual(hashSchema(schemaA), hashSchema(schemaB));
+    });
+
+    test('hashSchema does not throw on cyclic $ref', () => {
+        // Schema has a property that $refs back to itself via __root wrapper
+        const schema: Record<string, unknown> = {
+            type: 'object',
+            properties: {
+                child: { $ref: '#/components/schemas/__root' },
+            },
+        };
+        // hashSchema wraps as { components: { schemas: { __root: schema } } }
+        // so the $ref resolves back to schema, creating a cycle
+        assert.doesNotThrow(() => hashSchema(schema));
+    });
+
+    test('hashSchema cyclic $ref produces stable hash', () => {
+        const schemaA: Record<string, unknown> = {
+            type: 'object',
+            properties: { self: { $ref: '#/components/schemas/__root' } },
+        };
+        const schemaB: Record<string, unknown> = {
+            type: 'object',
+            properties: { self: { $ref: '#/components/schemas/__root' } },
+        };
+        assert.equal(hashSchema(schemaA), hashSchema(schemaB));
+    });
 });

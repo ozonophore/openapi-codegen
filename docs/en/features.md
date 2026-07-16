@@ -51,9 +51,14 @@ Opt-in features during `generate` (current config schema):
 
 - **`--auto-select` / `autoSelect`** — probes the target project and recommends `httpClient` and `validationLibrary`.
 - **`--spec-analysis` / `specAnalysis`** — per-spec and cross-spec OpenAPI quality detectors; writes a report to `reportPath` (default: `./.openapi-codegen-reports/anomaly-report.json`). `--anomaly-detection` is a deprecated alias.
-- Dot-notation CLI flags: `--auto-select.strict`, `--spec-analysis.fail-on-high`, inline JSON objects.
+- **`--workspace-report` / `workspaceReport`** — multi-spec workspace summary (JSON and/or Markdown).
+- **`--traffic-splitter` / `trafficSplitter`** — generates a standalone `TrafficSplitter.ts` helper (no live traffic).
+- **`--swarm` / `swarm`** — writes an Avatar Swarm **manifest** only (top-level `swarm` / `heal` / `migrate` commands stay removed).
+- **`--pre-analyze` / `preAnalyze`** — cross-spec shared-model / conflict summary to stdout before any files are written.
+- **`--reuse-mode` / `reuseMode`** — `copy` (default) or `auto-group` shared models **and compatible client core** under `{LCA}/__shared__/`.
+- Dot-notation CLI flags: `--auto-select.strict`, `--spec-analysis.fail-on-high`, `--workspace-report.format`, `--traffic-splitter.strategy`, `--swarm.output`, inline JSON objects.
 
-See [Marauder preview features](#marauder-preview-features) below and [Migration guide](../../MIGRATION.md).
+See [Marauder preview features](#marauder-preview-features) below and [Migration guide](../../MIGRATION.md) (§10).
 
 ### Argument style vs. Object style `--useOptions`
 There's no [named parameter](https://en.wikipedia.org/wiki/Named_parameter) in JavaScript or TypeScript, because of
@@ -662,18 +667,24 @@ in your `tsconfig.json` file.
 
 ### Why Marauder?
 
-By default, openapi-codegen generates a client "in a vacuum": you choose the HTTP client, the validator, track spec quality, and maintain sync with the backend yourself. Marauder adds **project context**, **spec quality checks**, and **incremental artifact caching** — without breaking existing workflows.
+By default, openapi-codegen generates a client "in a vacuum": you choose the HTTP client, the validator, track spec quality, and maintain sync with the backend yourself. Marauder adds **project context**, **spec quality checks**, **incremental artifact caching**, and **multi-spec workspace helpers** — without breaking existing workflows.
 
 | Pain | What Marauder gives | CLI / config |
 |------|---------------------|--------------|
 | Unclear which `httpClient` / `validationLibrary` fits your stack | Analyzes `package.json` and recommends for React, Node, RN, edge | `--auto-select` / `autoSelect` |
 | Spec is "formally valid" but inconvenient for clients (cycles, duplicates, deprecated) | Per-spec and cross-spec quality report + optional CI gate | `--spec-analysis` / `specAnalysis` |
-| Multi-spec monorepo: the same models are generated repeatedly | Global ReuseStore with shared artifacts | `cacheStrategy: "reuse"` |
+| Multi-spec monorepo: the same models are generated repeatedly | Global ReuseStore with shared artifacts (`copy` or `auto-group`) | `cacheStrategy: "reuse"`, `reuseMode` |
+| Need a multi-spec summary after generate | Workspace report JSON/Markdown | `--workspace-report` / `workspaceReport` |
+| Want shared-model conflicts before writes | Pre-generation stdout analysis | `--pre-analyze` / `preAnalyze` |
+| Planning canary cutover between two clients | Standalone `TrafficSplitter.ts` helper | `--traffic-splitter` / `trafficSplitter` |
+| Need a machine-readable multi-service index | Avatar Swarm **manifest** | `--swarm` / `swarm` |
 
 **What Marauder does not do:**
 - does not auto-fix the spec — reports only (`specAnalysis`);
 - does not replace semantic diff (`analyze-diff`) or consumer code check (`analyze-usage`);
-- does not switch production traffic or sync remote specs by URL.
+- does not switch production traffic — `trafficSplitter` only emits a helper module;
+- does not restore removed top-level `heal` / `migrate` / `swarm` CLI commands (`--swarm` writes a manifest only);
+- does not sync remote specs by URL.
 
 ---
 
@@ -689,7 +700,13 @@ Your task
 │     → generate --spec-analysis (+ fail-on-high for gate)
 │
 ├─ "Multiple specs — want to reuse model/schema artifacts"
-│     → cache: true, cacheStrategy: "reuse"
+│     → cache: true, cacheStrategy: "reuse" (+ optional --reuse-mode auto-group)
+│
+├─ "Multi-spec summary / shared-model check before writes"
+│     → generate --workspace-report / --pre-analyze
+│
+├─ "Canary helper or Swarm manifest (codegen only)"
+│     → generate --traffic-splitter / --swarm
 │
 └─ "Full quality gate chain"
       → analyze-diff → generate (strict + spec-analysis) → analyze-usage --diff-report
@@ -771,7 +788,7 @@ openapi-codegen-cli analyze-usage -s ./src/api/index.ts -p . --check \
 
 ### Scenario: Monorepo with Full Marauder Capabilities
 
-A large project with multiple backend teams, each with its own spec. Combines `--auto-select`, `--spec-analysis`, and the reuse store so all three Marauder capabilities work together.
+A large project with multiple backend teams, each with its own spec. Combines `--auto-select`, `--spec-analysis`, reuse store, and optional Phase 2 helpers. Full example: [`example/openapi.marauder.config.json`](../../example/openapi.marauder.config.json). See also [Migration guide §10](../../MIGRATION.md).
 
 ```json
 {
@@ -779,20 +796,26 @@ A large project with multiple backend teams, each with its own spec. Combines `-
   "cacheStrategy": "reuse",
   "cachePath": ".openapi-codegen-store",
   "reuseOnConflict": "namespace",
+  "reuseMode": "auto-group",
+  "preAnalyze": true,
+  "workspaceReport": {
+    "enabled": true,
+    "path": "./reports/workspace-report",
+    "format": "both"
+  },
   "items": [
     {
       "input": "./specs/orders.yaml",
       "output": "./generated/orders",
-      "autoSelect": { "enabled": true, "strict": true },
       "specAnalysis": { "enabled": true, "severity": "medium", "failOnHigh": true }
     },
     {
       "input": "./specs/catalog.yaml",
       "output": "./generated/catalog",
-      "autoSelect": { "enabled": true, "strict": true },
       "specAnalysis": { "enabled": true, "severity": "medium", "failOnHigh": true }
     }
-  ]
+  ],
+  "autoSelect": { "enabled": true, "strict": true }
 }
 ```
 
@@ -800,11 +823,11 @@ A large project with multiple backend teams, each with its own spec. Combines `-
 # CI step: spec quality gate + generation with reuse
 openapi-codegen-cli analyze-diff -i specs/orders.yaml --compare-with specs/orders.base.yaml --ci
 openapi-codegen-cli analyze-diff -i specs/catalog.yaml --compare-with specs/catalog.base.yaml --ci
-openapi-codegen-cli generate -ocn openapi.config.json
-# shared models are written to .openapi-codegen-store once, reused in both outputs
+openapi-codegen-cli generate -ocn openapi.config.json --pre-analyze --workspace-report
+# shared models land in .openapi-codegen-store (and __shared__/ when reuseMode is auto-group)
 ```
 
-**Result:** Both clients share model artifacts from the store, each gets the right `httpClient`/`validationLibrary` for the project stack, and any `high`-severity spec issue blocks the build.
+**Result:** Clients share model artifacts, get stack-aware `httpClient`/`validationLibrary`, and `high`-severity spec issues block the build. Optional workspace report / pre-analyze surface cross-spec overlap before and after writes.
 
 ---
 
@@ -862,7 +885,6 @@ openapi-codegen-cli generate -i spec.yaml -o ./src/api --auto-select.prefer-smal
 **Cross-spec detectors** (`crossSpec: true` by default):
 - `cross-spec-name-hash-conflict`
 - `cross-spec-reuse-opportunity`
-- `cross-spec-drift`
 - `shared-output-collision-risk`
 
 ```json
@@ -899,31 +921,142 @@ openapi-codegen-cli generate -i spec.yaml -o ./src/api --auto-select.prefer-smal
 | `reuse` | Global `.openapi-codegen-store`; shared model/schema artifacts (current schema default) |
 | `content` | Only `writeFileIfChanged`; no entity/reuse store |
 
+**`reuseMode`** (when `cacheStrategy: "reuse"`):
+
+| Value | Behavior |
+|-------|----------|
+| `copy` (default) | Full artifact copies into each output |
+| `auto-group` | Canonical models under `{LCA}/__shared__/…` and shareable client core under `{LCA}/__shared__/core/…`, with `export * from '…'` stubs in each client |
+
+`auto-group` requires `cacheStrategy: "reuse"`; otherwise warn + fallback to `copy`. Trivial LCA (no useful shared root among outputs) also falls back to `copy`.
+
+**Shared core:** identical boilerplate (`ApiError`, `ApiRequestOptions`, …) is deduplicated under `__shared__/core/`. Files that differ per item stay local — notably `OpenAPI.ts` when `server`/`version` differ, and `request.ts` / executor adapters when the effective `request` differs. Effective `request` is `items[].request ??` root `request` (same as generation normalization): a root-level custom request is shared across items; a per-item override prevents cross-item sharing of that transport.
+
 **Reuse limitations:** requires `modelsMode: "interfaces"` (default). Class mode disables artifact reuse.
 
 ---
 
-### 4. Programmatic API
+### 4. `generate --workspace-report`
 
-| Export | Purpose |
-|--------|---------|
-| `AutoSelector` | Project-aware selection (automatic selection) |
-| `ProjectProbe` | Shared project context probe (project analyzer) |
-| `runSpecAnalysis` | Spec quality analysis entry point (spec quality analysis) |
-| `CodegenSpecAnalyzer`, `CrossSpecAnalyzer` | Per-spec / cross-spec detectors (spec detectors) |
-| `ReuseStore`, `GenerationReport` | Cache store and unified report (reuse storage, generation report) |
-| `runAnomalyDetection` | Deprecated alias → `runSpecAnalysis` (anomaly detection) |
+After multi-spec `generate`, writes a workspace summary as `{path}.json` and/or `{path}.md`.
 
-```typescript
-import { AutoSelector, ProjectProbe } from 'ts-openapi-codegen';
+```bash
+openapi-codegen-cli generate -ocn openapi.config.json --workspace-report
+openapi-codegen-cli generate -ocn openapi.config.json \
+  --workspace-report.format=both \
+  --workspace-report.path=./reports/workspace-report
+```
+
+```json
+{
+  "workspaceReport": {
+    "enabled": true,
+    "path": "./workspace-report",
+    "format": "json"
+  }
+}
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | `false` | Write report after generate |
+| `path` | `./workspace-report` | Base path (extensions added by format) |
+| `format` | `json` | `json` \| `markdown` \| `both` |
+
+Root-oriented. Write failures are warnings; generation is not blocked.
+
+---
+
+### 5. `generate --traffic-splitter`
+
+Writes a standalone `TrafficSplitter.ts` into the **first** item’s output for canary-style routing helpers. Does **not** switch live traffic or deploy clients.
+
+```bash
+openapi-codegen-cli generate -ocn openapi.config.json --traffic-splitter
+openapi-codegen-cli generate -ocn openapi.config.json --traffic-splitter.strategy=weighted
+```
+
+```json
+{
+  "trafficSplitter": {
+    "enabled": true,
+    "strategy": "weighted",
+    "oldClientWeight": 80,
+    "newClientWeight": 20,
+    "stickySessions": true
+  }
+}
+```
+
+Strategies: `weighted` \| `round-robin` \| `header-based` \| `header-and-weighted`. Multi-item configs log a warning but still write the helper to the first output.
+
+---
+
+### 6. `generate --swarm` (manifest only)
+
+Writes `swarm-manifest.json` (`avatars`, `sharedModels`, `operationIndex`). This is **not** the removed top-level `swarm` command — no per-avatar client scaffolding.
+
+```bash
+openapi-codegen-cli generate -ocn openapi.config.json --swarm
+openapi-codegen-cli generate -ocn openapi.config.json --swarm.output=./reports/swarm-manifest.json
+```
+
+```json
+{
+  "swarm": {
+    "enabled": true,
+    "output": "./swarm-manifest.json"
+  }
+}
 ```
 
 ---
 
-### 5. Preview limitations
+### 7. `generate --pre-analyze`
+
+Before any client files are written: parses items, runs cross-spec analysis, prints shared-model / conflict summary to stdout. Non-blocking; individual parse failures are warnings.
+
+```bash
+openapi-codegen-cli generate -ocn openapi.config.json --pre-analyze
+```
+
+```json
+{
+  "preAnalyze": true
+}
+```
+
+---
+
+### 8. Programmatic API
+
+| Export | Purpose |
+|--------|---------|
+| `AutoSelector` | Project-aware selection |
+| `ProjectProbe` | Shared project context probe |
+| `runSpecAnalysis` | Spec quality analysis entry point |
+| `CodegenSpecAnalyzer`, `CrossSpecAnalyzer` | Per-spec / cross-spec detectors |
+| `ReuseStore`, `GenerationReport` | Cache store and unified report |
+| `AvatarSwarmGenerator`, `writeSwarmOutput` | Swarm manifest generation |
+| `TrafficSplitter`, `generateTrafficSplitterModule` | Canary helper class / generated module |
+| `buildWorkspaceReport`, `writeWorkspaceReport` | Workspace summary build/write |
+| `runAnomalyDetection` | Deprecated alias → `runSpecAnalysis` |
+
+```typescript
+import { AutoSelector, ProjectProbe, buildWorkspaceReport } from 'ts-openapi-codegen';
+```
+
+---
+
+### 9. Preview limitations
 
 - `--auto-select` — available during `generate` from `openapi.config.json` or merged multi-item configs
 - `specAnalysis` — reports only; no auto-fix
 - Reuse store — `modelsMode: "interfaces"` only
+- `reuseMode: "auto-group"` — needs `cacheStrategy: "reuse"` and a non-trivial LCA among outputs
+- `workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode` — root-oriented
+- `--traffic-splitter` — helper only; no live cutover; multi-item writes to first output
+- `--swarm` on `generate` ≠ restored top-level `swarm` / `heal` / `migrate`
+- `preAnalyze` — advisory stdout only; no report file
 - Marauder config merge — shallow spread, not recursive deep merge
 - CLI dot-notation is parsed **before** Commander (`parseNestedCliOptions`)

@@ -104,6 +104,14 @@ program
     )
     .option('--spec-analysis', 'Enable detection and reporting of API specification anomalies. Supports JSON object or dot-notation flags like --spec-analysis.fail-on-high (default: false)')
     .option('--anomaly-detection', 'Deprecated alias for --spec-analysis. Supports JSON object or dot-notation flags like --anomaly-detection.fail-on-anomalies (default: false)')
+    .option('--workspace-report', 'Enable workspace report generation for multi-spec runs. Supports dot-notation: --workspace-report.format, --workspace-report.path (default: false)')
+    .option(
+        '--traffic-splitter',
+        'Enable traffic splitter module generation for canary migrations. Supports dot-notation: --traffic-splitter.strategy, --traffic-splitter.old-client-weight, etc. (default: false)'
+    )
+    .option('--swarm', 'Enable AvatarSwarm manifest generation. Supports dot-notation: --swarm.output (default: false)')
+    .option('--pre-analyze', 'Run cross-spec pre-generation analysis and print findings to stdout before writing any files (default: false)')
+    .addOption(new Option('--reuse-mode <value>', 'Reuse deduplication mode when cacheStrategy is reuse').choices(['copy', 'auto-group']))
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })
@@ -152,11 +160,11 @@ program
     .description('Generates a configuration file template for a set of single or multiple options')
     .addHelpText('before', getCLIName(APP_NAME))
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options', DEFAULT_OPENAPI_CONFIG_FILENAME)
-    .option('-sd, --specs-dir <value>', 'Путь до директории с файлами спецификации', './openapi')
+    .option('-sd, --specs-dir <value>', 'Path to directory with specification files', './openapi')
     .option('--request <value>', 'Path to custom request file')
     .option('--requestFormat <value>', 'Scaffold format for --request: transport | adapter | executor (default: transport)')
     .option('--useCancelableRequest', 'Use cancelled promise as returned data type in request (default: false)')
-    .option('--useInteractiveMode', 'Использовать интерактивный режим команды. В терминале будут задаваться вопросы  (default: false)')
+    .option('--useInteractiveMode', 'Use interactive command mode. Questions will be asked in the terminal (default: false)')
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })

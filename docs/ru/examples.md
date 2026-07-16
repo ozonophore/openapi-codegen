@@ -317,7 +317,14 @@ openapi-codegen-cli generate --openapi-config ./openapi.config.json --cache --ca
 
 **Marauder preview flags при generate:**
 ```bash
-openapi-codegen-cli generate --openapi-config ./openapi.config.json --auto-select --spec-analysis
+openapi-codegen-cli generate --openapi-config ./openapi.config.json \
+  --auto-select --spec-analysis \
+  --workspace-report --pre-analyze \
+  --traffic-splitter --swarm \
+  --reuse-mode auto-group
+
+# Полный пример Phase 2:
+openapi-codegen-cli generate -ocn example/openapi.marauder.config.json
 ```
 
 **Проверка consumer usage с cross-validation diff:**

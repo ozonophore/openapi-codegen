@@ -143,6 +143,11 @@ export const compatibilityCases: CompatibilityCase[] = [
             { type: 'added', key: 'autoSelect' },
             { type: 'added', key: 'specAnalysis' },
             { type: 'added', key: 'anomalyDetection' },
+            { type: 'added', key: 'workspaceReport' },
+            { type: 'added', key: 'trafficSplitter' },
+            { type: 'added', key: 'swarm' },
+            { type: 'added', key: 'preAnalyze' },
+            { type: 'added', key: 'reuseMode' },
         ],
     },
 ];

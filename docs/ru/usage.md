@@ -28,6 +28,7 @@ CLI инструмент поддерживает семь команд: `genera
 > - **`--cache`** / **`--cacheStrategy`**: включи для кэширования генерации; используй `entity` (локальный) или `reuse` (глобальный) кэш
 > - **`--strict-openapi`**: проверяет спеку на ошибки и предупреждения; комбинируй с `--fail-on-governance-errors` для строгого контроля качества
 > - **`--auto-select`** / **`--spec-analysis`**: preview-функции для автоматического выбора клиента и анализа качества спеки (см. [Marauder preview features](features.md#marauder-preview-features))
+> - **`--workspace-report`** / **`--traffic-splitter`** / **`--swarm`** / **`--pre-analyze`** / **`--reuse-mode`**: Marauder Phase 2 preview (сводка workspace, canary helper, Swarm-манифест, pre-gen анализ, layout reuse)
 
 Генерирует TypeScript клиент на основе спецификаций OpenAPI.
 
@@ -83,8 +84,13 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 | `--auto-select` | - | boolean \| object | `false` | Проектно-зависимый выбор HTTP-клиента и библиотеки валидации (*preview*) |
 | `--spec-analysis` | - | boolean \| object | `false` | Анализ качества OpenAPI spec во время генерации (*preview*) |
 | `--anomaly-detection` | - | boolean \| object | `false` | Устаревший alias для `--spec-analysis` |
+| `--workspace-report` | - | boolean \| object | `false` | Multi-spec сводка workspace после generate (*preview*; `path`, `format`: `json` \| `markdown` \| `both`) |
+| `--traffic-splitter` | - | boolean \| object | `false` | Пишет helper `TrafficSplitter.ts` в output первого item (*preview*; без live traffic) |
+| `--swarm` | - | boolean \| object | `false` | Пишет только Swarm-манифест (*preview*; top-level `swarm` / `heal` / `migrate` удалены) |
+| `--pre-analyze` | - | boolean | `false` | Cross-spec анализ в stdout до записи файлов (*preview*; non-blocking) |
+| `--reuse-mode` | - | string | `copy` | Layout reuse: `copy` \| `auto-group` (*preview*; для `auto-group` нужен `cacheStrategy: "reuse"`) |
 
-**Marauder preview flags (dot-notation):** `--auto-select`, `--auto-select.strict`, `--spec-analysis.fail-on-high`, inline JSON (`--auto-select='{"strict":true}'`). Обрабатываются до Commander; см. [Marauder preview features](features.md#marauder-preview-features).
+**Marauder preview flags (dot-notation):** `--auto-select`, `--auto-select.strict`, `--spec-analysis.fail-on-high`, `--workspace-report.format`, `--traffic-splitter.strategy`, `--swarm.output`, `--pre-analyze`, `--reuse-mode`, inline JSON (`--auto-select='{"strict":true}'`). Обрабатываются до Commander; см. [Marauder preview features](features.md#marauder-preview-features).
 
 **Примеры:**
 ```bash

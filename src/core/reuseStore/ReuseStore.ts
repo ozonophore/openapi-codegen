@@ -1,10 +1,14 @@
-import { dirname } from 'path';
+import { rename as fsRename } from 'fs';
+import { dirname, join } from 'path';
+import { promisify } from 'util';
 
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { buildArtifactKey, buildOptionsSliceHash, hashFingerprint, hashSchema } from './ArtifactFingerprinter';
 import type { ArtifactKind, ManifestArtifact, ManifestReference, OptionsSlice, ReuseConflictErrorDetails, ReuseLookupResult, ReuseStoreManifest } from './types';
 import { ReuseConflictError } from './types';
+
+const rename = promisify(fsRename);
 
 const MANIFEST_VERSION = 2;
 const MANIFEST_FILENAME = 'manifest.json';
@@ -36,7 +40,7 @@ export class ReuseStore {
     private readonly rootPath: string;
     private manifest: ReuseStoreManifest;
     private dirty = false;
-    private readonly nameKindIndex = new Map<string, ManifestArtifact>();
+    private readonly nameKindIndex = new Map<string, ManifestArtifact[]>();
 
     constructor(storeRootPath: string) {
         this.rootPath = resolveHelper(process.cwd(), storeRootPath);
@@ -66,9 +70,16 @@ export class ReuseStore {
             return;
         }
 
-        const raw = await fileSystemHelpers.readFile(manifestPath, 'utf8');
-        const parsed = JSON.parse(raw) as ReuseStoreManifest;
+        let parsed: ReuseStoreManifest | undefined;
+        try {
+            const raw = await fileSystemHelpers.readFile(manifestPath, 'utf8');
+            parsed = JSON.parse(raw) as ReuseStoreManifest;
+        } catch {
+            // Corrupted JSON — treat as bad manifest
+        }
+
         if (!parsed || parsed.version !== MANIFEST_VERSION || !parsed.artifacts) {
+            await this.cleanOrphanArtifacts();
             return;
         }
 
@@ -85,7 +96,17 @@ export class ReuseStore {
         this.manifest.updatedAt = new Date().toISOString();
         this.manifest.generatorVersion = process.env.npm_package_version || 'dev';
         await fileSystemHelpers.mkdir(this.rootPath);
-        await fileSystemHelpers.writeFile(this.getManifestPath(), JSON.stringify(this.manifest, null, 2));
+
+        const manifestPath = this.getManifestPath();
+        const tmpPath = `${manifestPath}.tmp`;
+        await fileSystemHelpers.writeFile(tmpPath, JSON.stringify(this.manifest, null, 2));
+        try {
+            await rename(tmpPath, manifestPath);
+        } catch {
+            // Windows: target may exist — try unlinking first
+            await fileSystemHelpers.rmdir(tmpPath);
+            await fileSystemHelpers.writeFile(manifestPath, JSON.stringify(this.manifest, null, 2));
+        }
         this.dirty = false;
     }
 
@@ -144,7 +165,6 @@ export class ReuseStore {
         const reference: ManifestReference = {
             specItem,
             outputPath,
-            kind: 'artifact',
         };
 
         const existing = this.manifest.artifacts[artifactKey];
@@ -179,7 +199,13 @@ export class ReuseStore {
         };
 
         this.manifest.artifacts[artifactKey] = entry;
-        this.nameKindIndex.set(nameKindIndexKey(name, kind), entry);
+        const indexKey = nameKindIndexKey(name, kind);
+        const bucket = this.nameKindIndex.get(indexKey);
+        if (bucket) {
+            bucket.push(entry);
+        } else {
+            this.nameKindIndex.set(indexKey, [entry]);
+        }
         this.trackSpecItem(specItem, inputPath, artifactKey);
         this.markDirty();
         return entry;
@@ -193,11 +219,7 @@ export class ReuseStore {
 
         const existingRef = entry.referencedBy.find(ref => ref.specItem === reference.specItem && ref.outputPath === reference.outputPath);
         if (existingRef) {
-            if (existingRef.kind !== reference.kind) {
-                existingRef.kind = reference.kind;
-                entry.updatedAt = new Date().toISOString();
-                this.markDirty();
-            }
+            // reference already recorded, no update needed
         } else {
             entry.referencedBy.push(reference);
             entry.updatedAt = new Date().toISOString();
@@ -228,10 +250,6 @@ export class ReuseStore {
 
         const content = await fileSystemHelpers.readFile(absolutePath, 'utf8');
 
-        if (entry.byteSize > 0) {
-            return content;
-        }
-
         if (ReuseStore.hashContent(content) !== entry.contentHash) {
             return null;
         }
@@ -254,7 +272,7 @@ export class ReuseStore {
         return hashFingerprint(content);
     }
 
-    getManifest(): ReuseStoreManifest {
+    getManifest(): Readonly<ReuseStoreManifest> {
         return this.manifest;
     }
 
@@ -276,14 +294,24 @@ export class ReuseStore {
 
             delete this.manifest.artifacts[artifactKey];
             const indexKey = nameKindIndexKey(entry.name, entry.kind);
-            if (this.nameKindIndex.get(indexKey)?.artifactKey === artifactKey) {
-                this.nameKindIndex.delete(indexKey);
+            const bucket = this.nameKindIndex.get(indexKey);
+            if (bucket) {
+                const filtered = bucket.filter(e => e.artifactKey !== artifactKey);
+                if (filtered.length === 0) {
+                    this.nameKindIndex.delete(indexKey);
+                } else {
+                    this.nameKindIndex.set(indexKey, filtered);
+                }
             }
             deletedKeys.push(artifactKey);
         }
 
         if (deletedKeys.length > 0) {
             this.markDirty();
+            const deletedSet = new Set(deletedKeys);
+            for (const specItem of Object.values(this.manifest.specItems)) {
+                specItem.artifactKeys = specItem.artifactKeys.filter(k => !deletedSet.has(k));
+            }
         }
 
         return { deletedKeys, deletedFiles };
@@ -302,16 +330,22 @@ export class ReuseStore {
     private rebuildNameKindIndex(): void {
         this.nameKindIndex.clear();
         for (const entry of Object.values(this.manifest.artifacts)) {
-            this.nameKindIndex.set(nameKindIndexKey(entry.name, entry.kind), entry);
+            const key = nameKindIndexKey(entry.name, entry.kind);
+            const bucket = this.nameKindIndex.get(key);
+            if (bucket) {
+                bucket.push(entry);
+            } else {
+                this.nameKindIndex.set(key, [entry]);
+            }
         }
     }
 
     private findNameKindConflict(name: string, kind: ArtifactKind, schemaHash: string): ManifestArtifact | undefined {
-        const entry = this.nameKindIndex.get(nameKindIndexKey(name, kind));
-        if (entry && entry.schemaHash !== schemaHash) {
-            return entry;
+        const bucket = this.nameKindIndex.get(nameKindIndexKey(name, kind));
+        if (!bucket) {
+            return undefined;
         }
-        return undefined;
+        return bucket.find(entry => entry.schemaHash !== schemaHash);
     }
 
     private assertPathAvailable(relativeArtifactPath: string, name: string, kind: ArtifactKind, schema: Record<string, unknown>, optionsSlice: OptionsSlice, specItem: string): void {
@@ -362,5 +396,14 @@ export class ReuseStore {
 
     private markDirty(): void {
         this.dirty = true;
+    }
+
+    private async cleanOrphanArtifacts(): Promise<void> {
+        const artifactsDir = join(this.rootPath, 'artifacts');
+        const exists = await fileSystemHelpers.exists(artifactsDir);
+        if (!exists) {
+            return;
+        }
+        await fileSystemHelpers.rmdir(artifactsDir);
     }
 }

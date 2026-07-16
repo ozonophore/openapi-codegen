@@ -3,17 +3,17 @@ import { EActionForConfigData } from './types';
 
 export const ACTION_FOR_CONFIG_DATA_OPTIONS: EnquirerSelectChoice<EActionForConfigData>[] = [
     {
-        name: 'Сформировать пример',
+        name: 'Generate example',
         value: EActionForConfigData.GET_EXAMPLE,
-        hint: 'Будет сформирован пример файла конфигурации для дальнейшего запуска генерации',
+        hint: 'An example configuration file will be generated for subsequent generation runs',
     },
     {
-        name: 'Перезаписать',
+        name: 'Overwrite',
         value: EActionForConfigData.REWRITE,
-        hint: 'Файл конфигурации будет обновлён до актуальной версии',
+        hint: 'The configuration file will be updated to the current version',
     },
     {
-        name: 'Ничего не делать',
+        name: 'Do nothing',
         value: EActionForConfigData.SKIP,
     },
 ];

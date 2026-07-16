@@ -100,7 +100,7 @@ describe('@unit: reuse store integration', () => {
         } as any);
 
         const manifest = JSON.parse(readFileSync(path.join(storePath, 'manifest.json'), 'utf8')) as {
-            artifacts: Record<string, { name: string; relativePath: string; referencedBy: Array<{ specItem: string; kind: string }> }>;
+            artifacts: Record<string, { name: string; relativePath: string; referencedBy: Array<{ specItem: string }> }>;
         };
         const artifactEntries = Object.values(manifest.artifacts);
         const userArtifacts = artifactEntries.filter(entry => entry.relativePath.includes('models/User'));
@@ -119,7 +119,6 @@ describe('@unit: reuse store integration', () => {
         const referencedSpecItems = new Set(userArtifacts[0]!.referencedBy.map(ref => ref.specItem));
         assert.ok(referencedSpecItems.has('api-a'));
         assert.ok(referencedSpecItems.has('api-b'));
-        assert.ok(userArtifacts[0]!.referencedBy.every(ref => ref.kind === 'artifact'), 'All manifest references should use kind artifact');
     });
 
     test('second spec hits existing store artifact without creating a duplicate', async t => {
@@ -143,24 +142,23 @@ describe('@unit: reuse store integration', () => {
         await generate({ ...generateOptions, items: [{ input: specA, output: outputA }] } as any);
 
         const manifestAfterFirst = JSON.parse(readFileSync(path.join(storePath, 'manifest.json'), 'utf8')) as {
-            artifacts: Record<string, { name: string; relativePath: string; referencedBy: Array<{ specItem: string; kind: string }> }>;
+            artifacts: Record<string, { name: string; relativePath: string; referencedBy: Array<{ specItem: string }> }>;
         };
         const artifactCountAfterFirst = Object.keys(manifestAfterFirst.artifacts).length;
         const userArtifactAfterFirst = Object.values(manifestAfterFirst.artifacts).find(entry => entry.relativePath.includes('models/User'));
         assert.ok(userArtifactAfterFirst);
         assert.equal(userArtifactAfterFirst!.referencedBy.length, 1);
-        assert.equal(userArtifactAfterFirst!.referencedBy[0]!.kind, 'artifact');
 
         await generate({ ...generateOptions, items: [{ input: specB, output: outputB }] } as any);
 
         const manifestAfterSecond = JSON.parse(readFileSync(path.join(storePath, 'manifest.json'), 'utf8')) as {
-            artifacts: Record<string, { name: string; relativePath: string; referencedBy: Array<{ specItem: string; kind: string }> }>;
+            artifacts: Record<string, { name: string; relativePath: string; referencedBy: Array<{ specItem: string }> }>;
         };
         const userArtifacts = Object.values(manifestAfterSecond.artifacts).filter(entry => entry.relativePath.includes('models/User'));
 
         assert.equal(Object.keys(manifestAfterSecond.artifacts).length, artifactCountAfterFirst, 'Hit should not create duplicate store artifacts');
         assert.equal(userArtifacts.length, 1);
-        assert.ok(userArtifacts[0]!.referencedBy.some(ref => ref.specItem === 'api-b' && ref.kind === 'artifact'));
+        assert.ok(userArtifacts[0]!.referencedBy.some(ref => ref.specItem === 'api-b'));
     });
 
     test('re-renders artifact when store integrity check fails', async t => {
@@ -242,12 +240,11 @@ describe('@unit: reuse store integration', () => {
         } as any);
 
         const manifest = JSON.parse(readFileSync(path.join(storePath, 'manifest.json'), 'utf8')) as {
-            artifacts: Record<string, { name: string; relativePath: string; referencedBy: Array<{ specItem: string; kind: string }> }>;
+            artifacts: Record<string, { name: string; relativePath: string; referencedBy: Array<{ specItem: string }> }>;
         };
         const userArtifacts = Object.values(manifest.artifacts).filter(entry => entry.relativePath.includes('models/User'));
 
         assert.equal(userArtifacts.length, 2, 'Conflicting User schemas should produce separate namespaced store artifacts');
-        assert.ok(userArtifacts.every(entry => entry.referencedBy.every(ref => ref.kind === 'artifact')));
         assert.ok(readFileSync(path.join(outputA, 'models', 'User.ts'), 'utf8').includes('id: string'));
         assert.ok(readFileSync(path.join(outputB, 'models', 'User.ts'), 'utf8').includes('id: number'));
     });

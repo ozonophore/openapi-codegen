@@ -208,7 +208,6 @@ describe('@unit: ReuseStore', () => {
                 storeB.markReferenced(lookup.entry.artifactKey, {
                     specItem: 'spec_a',
                     outputPath: 'src/api/spec_a/models/User.ts',
-                    kind: 'artifact',
                 });
             }
             assert.equal(storeB.isDirty(), false);
@@ -247,6 +246,101 @@ describe('@unit: ReuseStore', () => {
             assert.deepEqual(gcResult.deletedKeys, [entry.artifactKey]);
             assert.equal(Object.keys(store.getManifest().artifacts).length, 0);
             assert.equal(fs.existsSync(store.resolveArtifactPath(relativeArtifactPath)), false);
+        } finally {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
+        }
+    });
+
+    test('readArtifactIfIntegrityOk returns null when file has same byteSize but different content', async () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-codegen-reuse-store-'));
+        try {
+            const store = new ReuseStore(tmpDir);
+            await store.load();
+            const optionsSlice = buildOptionsSlice(COMMON_DEFAULT_OPTIONS_VALUES);
+            const optionsSliceHash = buildOptionsSliceHash(optionsSlice);
+            const schema = { type: 'object' };
+            const relativePath = buildModelArtifactRelativePath({ name: 'Foo', path: 'Foo', export: 'interface', alias: 'Foo', properties: [], enum: [] } as never, optionsSliceHash);
+
+            const originalContent = 'export interface IFoo {}';
+            const tamperedContent = 'export interface IBar {}'; // same length, different content
+            assert.equal(originalContent.length, tamperedContent.length, 'test requires equal lengths');
+
+            const entry = store.register({
+                name: 'Foo',
+                kind: 'model',
+                schema,
+                optionsSlice,
+                relativeArtifactPath: relativePath,
+                contentHash: ReuseStore.hashContent(originalContent),
+                byteSize: Buffer.byteLength(originalContent),
+                specItem: 'spec_a',
+                inputPath: './specs/spec_a.yaml',
+                outputPath: 'src/api/spec_a/models/Foo.ts',
+            });
+
+            // Write tampered content (same byte size, wrong hash)
+            await store.writeArtifact(relativePath, tamperedContent);
+
+            const result = await store.readArtifactIfIntegrityOk(entry);
+            assert.equal(result, null, 'must return null when contentHash does not match');
+        } finally {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
+        }
+    });
+
+    test('nameKindIndex holds multiple entries for same name|kind after namespace registrations', async () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-codegen-reuse-store-'));
+        try {
+            const store = new ReuseStore(tmpDir);
+            await store.load();
+            const optionsSlice = buildOptionsSlice(COMMON_DEFAULT_OPTIONS_VALUES);
+            const optionsSliceHash = buildOptionsSliceHash(optionsSlice);
+
+            const schemaA = { type: 'object', properties: { id: { type: 'string' } } };
+            const schemaB = { type: 'object', properties: { name: { type: 'string' } } };
+
+            const pathA = buildModelArtifactRelativePath({ name: 'UserDto', path: 'UserDto__specA', export: 'interface', alias: 'UserDto', properties: [], enum: [] } as never, optionsSliceHash);
+            const pathB = buildModelArtifactRelativePath({ name: 'UserDto', path: 'UserDto__specB', export: 'interface', alias: 'UserDto', properties: [], enum: [] } as never, optionsSliceHash);
+
+            store.register({
+                name: 'UserDto',
+                kind: 'model',
+                schema: schemaA,
+                optionsSlice,
+                relativeArtifactPath: pathA,
+                contentHash: 'hash-a',
+                specItem: 'spec_a',
+                inputPath: './specs/spec_a.yaml',
+                outputPath: 'src/api/spec_a/models/UserDto.ts',
+                skipConflictCheck: true,
+            });
+            store.register({
+                name: 'UserDto',
+                kind: 'model',
+                schema: schemaB,
+                optionsSlice,
+                relativeArtifactPath: pathB,
+                contentHash: 'hash-b',
+                specItem: 'spec_b',
+                inputPath: './specs/spec_b.yaml',
+                outputPath: 'src/api/spec_b/models/UserDto.ts',
+                skipConflictCheck: true,
+            });
+
+            // Both artifacts must exist in the manifest
+            const artifacts = Object.values(store.getManifest().artifacts);
+            const userDtoEntries = artifacts.filter(a => a.name === 'UserDto' && a.kind === 'model');
+            assert.equal(userDtoEntries.length, 2, 'both namespace artifacts must be stored');
+
+            // After save + reload, the nameKindIndex must hold both entries
+            await store.save();
+            const storeB = new ReuseStore(tmpDir);
+            await storeB.load();
+
+            // Lookup with a third distinct schema — should report conflict (not miss)
+            const schemaC = { type: 'object', properties: { email: { type: 'string' } } };
+            const lookupC = storeB.lookup('UserDto', 'model', schemaC, optionsSlice);
+            assert.equal(lookupC.status, 'conflict', 'third distinct schema must produce conflict, not miss');
         } finally {
             fs.rmSync(tmpDir, { recursive: true, force: true });
         }

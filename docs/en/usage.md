@@ -33,7 +33,7 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 > - **Required vs Optional:** Options without a default value are required. Others are optional and inherit defaults from `openapi.config.json` if not overridden.
 > - **Global vs Command-specific:** Global options (like `--openapi-config`) apply to most commands. Command-specific options (like `--httpClient`, `--cache`) apply only to `generate`.
 > - **Config file relationship:** Most CLI flags map directly to configuration file keys: `--httpClient fetch` on CLI equals `"httpClient": "fetch"` in config. When both are set, CLI flags take precedence.
-> - **Preview flags:** Marauder preview flags (like `--auto-select`, `--spec-analysis`) use dot-notation for sub-options (e.g., `--auto-select.strict`) or inline JSON (e.g., `--auto-select='{"strict":true}'`).
+> - **Preview flags:** Marauder preview flags (like `--auto-select`, `--spec-analysis`, `--workspace-report`, `--traffic-splitter`, `--swarm`) use dot-notation for sub-options (e.g., `--auto-select.strict`, `--workspace-report.format`) or inline JSON (e.g., `--auto-select='{"strict":true}'`). Scalars: `--pre-analyze`, `--reuse-mode`.
 
 | Option | Short | Type | Default | Description |
 |--------|-------|------|---------|-------------|
@@ -87,8 +87,16 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 | `--spec-analysis` | - | boolean \| object | `false` | OpenAPI spec quality analysis during generation (*preview*) |
 | | | | | **Marauder anomaly detection (preview):** Analyzes spec quality and detects structural anomalies (missing operationId, orphaned parameters, etc.). Use `--spec-analysis.fail-on-high` to block generation on high-severity issues. Requires explicit enabling; off by default. See [Marauder preview features](features.md#marauder-preview-features). |
 | `--anomaly-detection` | - | boolean \| object | `false` | Deprecated alias for `--spec-analysis` |
+| `--workspace-report` | - | boolean \| object | `false` | Multi-spec workspace summary after generate (*preview*) |
+| | | | | Dot-notation: `--workspace-report.format`, `--workspace-report.path`. Formats: `json` \| `markdown` \| `both`. |
+| `--traffic-splitter` | - | boolean \| object | `false` | Generate `TrafficSplitter.ts` helper in first item output (*preview*; no live traffic) |
+| | | | | Dot-notation: `--traffic-splitter.strategy`, weights, sticky sessions, headers. |
+| `--swarm` | - | boolean \| object | `false` | Write Avatar Swarm **manifest** only (*preview*; top-level `swarm` command stays removed) |
+| | | | | Dot-notation: `--swarm.output` (default `./swarm-manifest.json`). |
+| `--pre-analyze` | - | boolean | `false` | Cross-spec stdout analysis before writing files (*preview*) |
+| `--reuse-mode` | - | string | from config | Reuse layout when `cacheStrategy` is `reuse`: `copy` \| `auto-group` (*preview*) |
 
-**Marauder preview flags (dot-notation):** `--auto-select`, `--auto-select.strict`, `--spec-analysis.fail-on-high`, inline JSON (`--auto-select='{"strict":true}'`). Parsed before Commander; see [Marauder preview features](features.md#marauder-preview-features).
+**Marauder preview flags (dot-notation):** `--auto-select`, `--auto-select.strict`, `--spec-analysis.fail-on-high`, `--workspace-report.format`, `--traffic-splitter.strategy`, `--swarm.output`, inline JSON (`--auto-select='{"strict":true}'`), plus `--pre-analyze` and `--reuse-mode`. Parsed before Commander; see [Marauder preview features](features.md#marauder-preview-features).
 
 **Examples:**
 ```bash

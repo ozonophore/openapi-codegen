@@ -1,6 +1,13 @@
 import { z } from 'zod';
 
-import { anomalyDetectionConfigSchemaOrBoolean, autoSelectConfigSchemaOrBoolean, specAnalysisConfigSchemaOrBoolean } from '../CommonSchemas';
+import {
+    anomalyDetectionConfigSchemaOrBoolean,
+    autoSelectConfigSchemaOrBoolean,
+    specAnalysisConfigSchemaOrBoolean,
+    swarmConfigSchemaOrBoolean,
+    trafficSplitterConfigSchemaOrBoolean,
+    workspaceReportConfigSchemaOrBoolean,
+} from '../CommonSchemas';
 import { unifiedItemSchema } from './UnifiedBase';
 import { unifiedOptionsSchemaV5 } from './UnifiedOptionsSchemaV5';
 
@@ -17,6 +24,16 @@ export const unifiedOptionsSchemaV6 = unifiedOptionsSchemaV5.extend({
     specAnalysis: specAnalysisConfigSchemaOrBoolean.optional(),
     /** @deprecated Use specAnalysis instead. */
     anomalyDetection: anomalyDetectionConfigSchemaOrBoolean.optional(),
+    /** Swarm-lite: сводный отчёт по workspace (только root). */
+    workspaceReport: workspaceReportConfigSchemaOrBoolean.optional(),
+    /** Хелпер canary-миграции между двумя версиями клиента (только root). */
+    trafficSplitter: trafficSplitterConfigSchemaOrBoolean.optional(),
+    /** AvatarSwarm: машиночитаемая карта multi-spec системы (только root). */
+    swarm: swarmConfigSchemaOrBoolean.optional(),
+    /** Предгенерационный cross-spec анализ пересечений моделей (только root). */
+    preAnalyze: z.boolean().optional(),
+    /** Режим дедупликации при cacheStrategy: reuse (только root). */
+    reuseMode: z.enum(['copy', 'auto-group']).optional(),
     items: z.array(unifiedItemSchemaV6).min(1).optional(),
 });
 

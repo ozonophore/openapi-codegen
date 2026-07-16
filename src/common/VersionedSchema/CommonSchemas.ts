@@ -155,3 +155,37 @@ export const autoSelectConfigSchemaOrBoolean = createBooleanToObjectSchema(autoS
 export const specAnalysisConfigSchemaOrBoolean = createBooleanToObjectSchema(specAnalysisConfigSchema);
 /** @deprecated Use specAnalysisConfigSchemaOrBoolean instead. */
 export const anomalyDetectionConfigSchemaOrBoolean = createBooleanToObjectSchema(anomalyDetectionConfigSchema);
+
+/** Phase 2: Workspace Report (Swarm-lite) */
+
+const workspaceReportConfigSchema = z.object({
+    enabled: z.boolean().optional(),
+    path: z.string().optional(),
+    format: z.enum(['json', 'markdown', 'both']).optional(),
+});
+
+export const workspaceReportConfigSchemaOrBoolean = createBooleanToObjectSchema(workspaceReportConfigSchema);
+
+/** Phase 2: Traffic Splitter — canary migration helper */
+
+const trafficSplitterConfigSchema = z.object({
+    enabled: z.boolean().optional(),
+    strategy: z.enum(['weighted', 'round-robin', 'header-based', 'header-and-weighted']).optional(),
+    oldClientWeight: z.number().optional(),
+    newClientWeight: z.number().optional(),
+    stickySessions: z.boolean().optional(),
+    sessionDuration: z.string().optional(),
+    headerName: z.string().optional(),
+    headerValues: z.object({ old: z.string(), new: z.string() }).optional(),
+});
+
+export const trafficSplitterConfigSchemaOrBoolean = createBooleanToObjectSchema(trafficSplitterConfigSchema);
+
+/** Phase 2: AvatarSwarm manifest generator */
+
+const swarmConfigSchema = z.object({
+    enabled: z.boolean().optional(),
+    output: z.string().optional(),
+});
+
+export const swarmConfigSchemaOrBoolean = createBooleanToObjectSchema(swarmConfigSchema);

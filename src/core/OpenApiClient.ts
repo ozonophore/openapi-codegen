@@ -16,14 +16,21 @@ import { Parser as ParserV2 } from './api/v2/Parser';
 import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
+import { AvatarSwarmGenerator } from './avatarSwarm/AvatarSwarmGenerator';
+import { writeSwarmOutput } from './avatarSwarm/writeSwarmOutput';
 import { Context } from './Context';
 import { loadGovernanceConfig } from './governance/loadGovernanceConfig';
+import { generateTrafficSplitterModule } from './migration/generateTrafficSplitterModule';
 import { loadGeneratorPlugins } from './plugins/loadGeneratorPlugins';
 import { buildModelSchemaMap, ReuseStore } from './reuseStore';
 import { buildOptionsSlice } from './reuseStore/ArtifactFingerprinter';
 import type { GenerationReport, ReuseConflictRecord, SpecGenerationStats } from './reuseStore/GenerationReport';
 import { analyzeCrossSpecManifest, writeGenerationReport } from './reuseStore/GenerationReport';
+import { resolveOutputGroups } from './reuseStore/OutputGroupResolver';
+import { SharedFolderWriter } from './reuseStore/SharedFolderWriter';
+import { SHARED_FOLDER_NAME } from './reuseStore/SharedFolderWriter';
 import { ReuseConflictError } from './reuseStore/types';
+import { runPreAnalyze } from './specAnalysis/runPreAnalyze';
 import { createSpecAnalysisAccumulator, finalizeSpecAnalysis, mergeSpecAnalysisConfigAcrossItems, runSpecAnalysis, type SpecAnalysisAccumulator } from './specAnalysis/runSpecAnalysis';
 import type { SpecAnalysisReport } from './specAnalysis/types';
 import { validateOpenApiStrict, validateWithSwaggerParser, writeOpenApiStrictReport } from './strict/validateOpenApiStrict';
@@ -42,6 +49,8 @@ import { postProcessClient } from './utils/postProcessClient';
 import { prepareDtoModels } from './utils/prepareDtoModels';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { resolveClassesModeTypes } from './utils/resolveClassesModeTypes';
+import { buildWorkspaceReport } from './workspaceReport/buildWorkspaceReport';
+import { writeWorkspaceReport } from './workspaceReport/writeWorkspaceReport';
 import { WriteClient } from './WriteClient';
 
 /**
@@ -211,6 +220,11 @@ export class OpenApiClient {
             autoSelect: item.autoSelect ?? COMMON_DEFAULT_OPTIONS_VALUES.autoSelect,
             specAnalysis: resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection) ?? COMMON_DEFAULT_OPTIONS_VALUES.specAnalysis,
             anomalyDetection: item.anomalyDetection ?? COMMON_DEFAULT_OPTIONS_VALUES.anomalyDetection,
+            workspaceReport: item.workspaceReport ?? COMMON_DEFAULT_OPTIONS_VALUES.workspaceReport,
+            trafficSplitter: item.trafficSplitter ?? COMMON_DEFAULT_OPTIONS_VALUES.trafficSplitter,
+            swarm: item.swarm ?? COMMON_DEFAULT_OPTIONS_VALUES.swarm,
+            preAnalyze: item.preAnalyze ?? COMMON_DEFAULT_OPTIONS_VALUES.preAnalyze,
+            reuseMode: item.reuseMode ?? COMMON_DEFAULT_OPTIONS_VALUES.reuseMode,
         };
     }
 
@@ -227,8 +241,11 @@ export class OpenApiClient {
         return Array.from(roots);
     }
 
-    private async cleanupStaleOutputs(items: TStrictFlatOptions[]): Promise<void> {
+    private async cleanupStaleOutputs(items: TStrictFlatOptions[], sharedFolderLca?: string): Promise<void> {
         const outputRoots = this.getOutputRoots(items);
+        if (sharedFolderLca) {
+            outputRoots.push(resolveHelper(sharedFolderLca, SHARED_FOLDER_NAME));
+        }
         const expectedFiles = this.writeClient.getExpectedOutputFiles();
 
         for (const root of outputRoots) {
@@ -267,7 +284,7 @@ export class OpenApiClient {
         return true;
     }
 
-    private async generateCodeForItems(items: TStrictFlatOptions[]): Promise<void> {
+    private async generateCodeForItems(items: TStrictFlatOptions[], rawOptions: TRawOptions): Promise<void> {
         if (items.length === 0) {
             throw new Error(LOGGER_MESSAGES.GENERATION.NO_OPTIONS);
         }
@@ -293,6 +310,22 @@ export class OpenApiClient {
             let manifestSaveMs = 0;
             let gcMs = 0;
 
+            const reuseMode = rawOptions.reuseMode ?? 'copy';
+            if (reuseMode === 'auto-group' && cacheStrategy !== 'reuse') {
+                this.writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.AUTO_GROUP_REQUIRES_REUSE_CACHE);
+            }
+
+            let sharedFolderWriter: SharedFolderWriter | null = null;
+            if (reuseMode === 'auto-group' && useReuseStore) {
+                const absoluteOutputPaths = items.map(item => this.resolveOutputRoot(item.output));
+                const lca = resolveOutputGroups(absoluteOutputPaths);
+                if (lca) {
+                    sharedFolderWriter = new SharedFolderWriter(this.writeClient, lca);
+                } else {
+                    this.writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.AUTO_GROUP_LCA_TRIVIAL_FALLBACK);
+                }
+            }
+
             if (items.some(item => resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection)?.enabled)) {
                 this.specAnalysisAccumulator = createSpecAnalysisAccumulator();
             }
@@ -300,7 +333,7 @@ export class OpenApiClient {
             if (!cacheEnabled) {
                 this.warnOnSharedOutputs(items);
             } else if (useReuseStore) {
-                this.warnOnSharedCoreServiceOutputs(items);
+                this.warnOnSharedCoreServiceOutputs(items, !!sharedFolderWriter);
                 reuseStore = new ReuseStore(this.resolveReuseStorePath(items[0]!.cachePath));
                 const loadStart = process.hrtime.bigint();
                 await reuseStore.load();
@@ -356,6 +389,10 @@ export class OpenApiClient {
                 return report;
             };
 
+            if (rawOptions.preAnalyze === true) {
+                await runPreAnalyze(items, this.writeClient.logger);
+            }
+
             for (const option of items) {
                 const fileStart = process.hrtime.bigint();
                 const generationCache =
@@ -369,6 +406,7 @@ export class OpenApiClient {
                     await this.generateSingle(option, generationCache, {
                         reuseStore: useReuseStore ? reuseStore : null,
                         referencedArtifactKeys,
+                        sharedFolderWriter: sharedFolderWriter ?? undefined,
                         onReuseStat: hit => {
                             if (hit) {
                                 reuseHits += 1;
@@ -408,8 +446,37 @@ export class OpenApiClient {
             } else {
                 await this.writeClient.combineAndWrite();
             }
-            await this.cleanupStaleOutputs(items);
-            if (cacheEnabled && cacheStrategy === 'entity') {
+
+            const trafficSplitterConfig = rawOptions.trafficSplitter;
+            const trafficSplitterEnabled = trafficSplitterConfig && typeof trafficSplitterConfig === 'object' ? trafficSplitterConfig.enabled : trafficSplitterConfig === true;
+            if (trafficSplitterEnabled) {
+                if (items.length > 1) {
+                    this.writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.TRAFFIC_SPLITTER_MULTI_ITEM_WARN);
+                }
+                const cfg = typeof trafficSplitterConfig === 'object' ? trafficSplitterConfig : {};
+                const firstItemOutput = items[0]?.output ?? '.';
+                try {
+                    await generateTrafficSplitterModule(cfg, firstItemOutput);
+                } catch (err: any) {
+                    this.writeClient.logger.warn(`trafficSplitter: failed to generate module — ${err.message}`);
+                }
+            }
+
+            const swarmConfig = rawOptions.swarm;
+            const swarmEnabled = swarmConfig && typeof swarmConfig === 'object' ? swarmConfig.enabled : swarmConfig === true;
+            if (swarmEnabled) {
+                const cfg = typeof swarmConfig === 'object' ? swarmConfig : {};
+                try {
+                    const generator = new AvatarSwarmGenerator();
+                    const manifest = generator.build(items, specStats, reuseStore);
+                    await writeSwarmOutput(manifest, cfg);
+                } catch (err: any) {
+                    this.writeClient.logger.warn(`swarm: failed to generate manifest — ${err.message}`);
+                }
+            }
+
+            await this.cleanupStaleOutputs(items, sharedFolderWriter?.lca);
+            if (cacheEnabled && (cacheStrategy === 'entity' || needsEntityCacheFallback)) {
                 for (const generationCache of generationCaches.values()) {
                     await generationCache.save();
                 }
@@ -433,6 +500,18 @@ export class OpenApiClient {
 
             if (cacheEnabled || specQualityReport) {
                 await writeGenerationReport(reportBasePath, buildGenerationReport());
+            }
+
+            const workspaceReportConfig = rawOptions.workspaceReport;
+            const workspaceReportEnabled = workspaceReportConfig && typeof workspaceReportConfig === 'object' ? workspaceReportConfig.enabled : workspaceReportConfig === true;
+            if (workspaceReportEnabled) {
+                const cfg = typeof workspaceReportConfig === 'object' ? workspaceReportConfig : {};
+                try {
+                    const report = buildWorkspaceReport(specStats, reuseStore);
+                    await writeWorkspaceReport(report, cfg);
+                } catch (err: any) {
+                    this.writeClient.logger.warn(`workspaceReport: failed to write report — ${err.message}`);
+                }
             }
 
             if (reuseStore) {
@@ -496,9 +575,10 @@ export class OpenApiClient {
 
         const first = items[0]!;
         for (const item of items.slice(1)) {
-            if (item.cache !== first.cache || item.cacheStrategy !== first.cacheStrategy || item.cachePath !== first.cachePath || item.reuseOnConflict !== first.reuseOnConflict) {
+            if (item.modelsMode !== first.modelsMode) {
                 this.writeClient.logger.warn(
-                    `Cache settings differ between "${first.input}" and "${item.input}" (cache=${item.cache}, cacheStrategy=${item.cacheStrategy}, cachePath=${item.cachePath}, reuseOnConflict=${item.reuseOnConflict})`
+                    `modelsMode differs between "${first.input}" (${first.modelsMode}) and "${item.input}" (${item.modelsMode}). ` +
+                        `This may cause unexpected cache behavior when cacheStrategy is "reuse".`
                 );
             }
         }
@@ -521,7 +601,7 @@ export class OpenApiClient {
         this.writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.CACHE_SHARED_OUTPUT_WARNING(duplicatedOutputs.map(output => `- ${output}`).join('\n')));
     }
 
-    private warnOnSharedCoreServiceOutputs(items: TStrictFlatOptions[]): void {
+    private warnOnSharedCoreServiceOutputs(items: TStrictFlatOptions[], sharedCoreActive = false): void {
         const countByPath = new Map<string, Set<string>>();
         for (const item of items) {
             const paths = getOutputPaths({
@@ -546,7 +626,9 @@ export class OpenApiClient {
         }
 
         const details = collisions.map(([path, specs]) => `- ${path}: ${Array.from(specs).join(', ')}`).join('\n');
-        this.writeClient.logger.warn(`Shared core/services output paths detected (ReuseStore covers models/schemas only):\n${details}`);
+        this.writeClient.logger.warn(
+            sharedCoreActive ? LOGGER_MESSAGES.GENERATION.SHARED_CORE_SERVICES_PATH_COLLISION(details) : LOGGER_MESSAGES.GENERATION.SHARED_CORE_SERVICES_PATH_COLLISION_MODELS_ONLY(details)
+        );
     }
 
     private warnOnSharedOutputsWithoutCache(items: TStrictFlatOptions[]): void {
@@ -560,6 +642,7 @@ export class OpenApiClient {
             reuseStore: ReuseStore | null;
             referencedArtifactKeys: Set<string>;
             onReuseStat?: (hit: boolean) => void;
+            sharedFolderWriter?: SharedFolderWriter;
         }
     ): Promise<void> {
         const {
@@ -724,6 +807,7 @@ export class OpenApiClient {
                     referencedArtifactKeys: useReuseStore ? reuseContext!.referencedArtifactKeys : undefined,
                     onReuseStat: useReuseStore ? reuseContext!.onReuseStat : undefined,
                     reuseOnConflict: useReuseStore ? item.reuseOnConflict : undefined,
+                    sharedFolderWriter: useReuseStore ? reuseContext!.sharedFolderWriter : undefined,
                 });
                 break;
             }
@@ -767,6 +851,7 @@ export class OpenApiClient {
                     referencedArtifactKeys: useReuseStore ? reuseContext!.referencedArtifactKeys : undefined,
                     onReuseStat: useReuseStore ? reuseContext!.onReuseStat : undefined,
                     reuseOnConflict: useReuseStore ? item.reuseOnConflict : undefined,
+                    sharedFolderWriter: useReuseStore ? reuseContext!.sharedFolderWriter : undefined,
                 });
                 break;
             }
@@ -921,6 +1006,6 @@ export class OpenApiClient {
         this.eslintFixOptions = extractEslintFixOptions(rawOptions);
 
         const items = this.normalizeOptions(rawOptions).map(item => this.addDefaultValues(item));
-        await this.generateCodeForItems(items);
+        await this.generateCodeForItems(items, rawOptions);
     }
 }
