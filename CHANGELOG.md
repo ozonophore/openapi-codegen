@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.12] — 2026-07-08
+
+**Documentation restructuring with progressive disclosure.** README redesigned for better first-time user experience, all documentation pages reorganized by usage context and tiered reference, Marauder guide consolidated into `features.md`, and three root-level redirect files removed for clarity.
+
+### Added
+
+**README & Getting Started**
+- **Quick Start** section in both READMEs: `install` → `init` → `generate` → TypeScript import, readable in under 2 minutes.
+- **Grouped features summary** in READMEs: 3 categories (Generation, Analysis & CI, Advanced / Preview), each with ≤ 5 items, replacing the flat 30-item list.
+- **CLI commands reference table** with "When to use" context column for all 7 commands.
+
+**Documentation Pages**
+- **Quick Decision Table** at the top of `docs/en/usage.md` and `docs/ru/usage.md`: "I want to… → Use this command" for all CLI operations.
+- **"When to use" context block** (1–3 sentences) before each command's options table in `docs/en/usage.md` and `docs/ru/usage.md`.
+- **Six-tier configuration reference** in `docs/en/configuration.md` and `docs/ru/configuration.md`:
+  - Tier 1: Basic/required options
+  - Tier 2: Output structure
+  - Tier 3: Code style & generation
+  - Tier 4: Diff & Governance
+  - Tier 5: Cache / Reuse strategies
+  - Tier 6: Preview (Marauder)
+  - Each tier includes value-oriented intro sentence.
+- **Marauder Preview Features section** in `docs/en/features.md` and `docs/ru/features.md`:
+  - Feature map with quick navigation.
+  - Scenarios A–F with complete working examples.
+  - Per-feature reference: `--auto-select`, `--spec-analysis`, cache/reuse, programmatic API, known limitations.
+  - Content migrated from the now-deleted `docs/MARAUDER_USER_GUIDE.md`.
+- **Scenario F example** (monorepo with all Marauder features): multi-item config with per-item `autoSelect` + `specAnalysis` + shared reuse store, plus CI/CD snippet.
+- **Three user-journey examples** in `docs/en/examples.md` and `docs/ru/examples.md`:
+  - First-time: new project setup (5 minutes).
+  - Team setup: multi-spec configuration with shared config.
+  - Full CI/CD: automated generation and validation in pipelines.
+
+### Changed
+
+- README "Why this tool?" section replaced with 3-sentence prose narrative (no bullet list) for more natural reading.
+- **Internal documentation links** updated everywhere:
+  - `docs/MARAUDER_USER_GUIDE.md` → `features.md#marauder-preview-features`
+  - Root stubs `docs/plugins.md` / `docs/plugin-api-v2.md` → `docs/en/plugins.md` / `docs/ru/plugins.md` (localized canonical versions).
+- **Node.js request template** (`src/templates/client/core/node/request.hbs`): `AbortController` import now conditionally included only when `useCancelableRequest` is `true`, reducing bundle footprint for projects that don't use cancellation.
+
+### Removed
+
+- `docs/MARAUDER_USER_GUIDE.md` — content fully migrated to `docs/en/features.md` and `docs/ru/features.md`.
+- `docs/plugins.md` and `docs/plugin-api-v2.md` — two-line HTTP redirect stubs removed; localized pages in `docs/en/` and `docs/ru/` are now the canonical source.
+- **Agent Skills** section from both READMEs (previously linked to unpublished `skills/` directory; will be re-added once skills are ready for public release).
+
 ## [2.1.0-beta.11] — 2026-06-12
 
 Marauder refocus preview: project-aware auto-select, OpenAPI spec analysis (`specAnalysis`), and incremental generation cache with ReuseStore. Features are opt-in (see Known limitations).

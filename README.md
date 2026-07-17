@@ -14,55 +14,62 @@
 ![lines-image]
 ![Minimum node.js version](https://badgen.net/npm/node/next)
 
-> Node.js library that generates Typescript clients based on the OpenAPI specification.
+> Node.js library that generates TypeScript clients based on the OpenAPI specification.
 
-## Why?
-- Frontend ❤️ OpenAPI, but we do not want to use JAVA codegen in our builds
-- Quick, lightweight, robust and framework agnostic 🚀
-- Supports generation of TypeScript clients
-- Supports generations of fetch, XHR, Node.js and axios http clients
-- Supports OpenAPI specification v2.0 and v3.0
-- Supports JSON and YAML files for input
-- Supports generation through CLI, Node.js and NPX
-- Supports tsc and @babel/plugin-transform-typescript
-- Supports customization names of models
-- Supports external references using [`swagger-parser`](https://github.com/APIDevTools/swagger-parser/)
-- Supports strict OpenAPI diagnostics with JSON reports (`--strict-openapi`, `--report-file`, `--fail-on-governance-errors`)
-- Supports generator plugins (`plugins`) including built-in `x-typescript-type`
-- Supports binary request/response generation (`format: binary` -> `Blob`)
-- CLI reports default to `./.openapi-codegen-reports/` (strict, diff, usage, anomaly, eslint-fix summaries)
-- Supports opt-in generation cache with three strategies: `entity` (per-output file), `reuse` (global store), `content` (`writeFileIfChanged` only) — `--cache`, `--cachePath`, `--cacheStrategy`, `--reuseOnConflict`, `--cacheDebug`
-- Generated services accept a `RequestExecutor` in the constructor (`request` / `requestRaw`, interceptors, `customExecutorPath` / `createExecutorAdapter`, `createLegacyRequestAdapter`)
-- CLI `init --requestFormat` scaffolds custom HTTP layers: legacy transport, `createExecutorAdapter`, or standalone `RequestExecutor`
-- `check-config` validates `request` / `customExecutorPath` file presence and `createExecutorAdapter` export
-- Optional output formatting via `prettierConfigPath` (explicit Prettier config file)
-- Optional batch ESLint `--fix` after generation when both `tsconfigPath` and `eslintConfigPath` are set
-- Supports unified `analyze-diff` report (`schemaVersion: 2.0.0`) with separate `semantic` (CI/governance) and `structural` (generation) sections
-- Restores `generate --useHistory` compatibility with semantic diff reports (ghost operations/properties, coercion, rename miracles)
-- Uses selective OpenAPI `$ref` expansion in analyze-diff for faster and safer comparison
-- Automatic RENAME / TYPE_COERCION miracle detection from semantic property changes
-- Supports project-aware auto-selection of the optimal HTTP client and validation library (`--auto-select`, config `autoSelect`; dot-notation flags supported) — *preview*
-- Supports OpenAPI spec quality analysis during generation (`--spec-analysis`, config `specAnalysis`; `--anomaly-detection` is a deprecated CLI alias) — *preview*
-- Supports cross-spec artifact reuse via global ReuseStore (`cacheStrategy: "reuse"`, `.openapi-codegen-store`) with unified `reports/latest.json` when cache or spec analysis is enabled — *preview*
-- Config schema V6 adds optional `autoSelect` and `specAnalysis` blocks (upgrade via `update-config`); `anomalyDetection` is a deprecated config alias for `specAnalysis`
-- `analyze-usage` validates consumer API imports (path-based resolution, aliases) and optionally cross-checks RENAME miracles via `--diff-report`
-- Seven CLI commands: `generate`, `check-config`, `update-config`, `init`, `preview-changes`, `analyze-diff`, `analyze-usage`
-
-## Install
+## Quick Start
 
 ```bash
 npm install ts-openapi-codegen --save-dev
+
+# Create a configuration file
+openapi-codegen-cli init
+
+# Generate the TypeScript client
+openapi-codegen-cli generate
 ```
 
-## Agent Skills
+Import the generated client in your project:
 
-AI agents can use bundled [Agent Skills](https://agentskills.io) for RequestExecutor migration and Marauder features. After install:
+```typescript
+import { createClient } from './generated';
 
-```bash
-cp -r node_modules/ts-openapi-codegen/skills ./openapi-codegen-skills
+const api = createClient({ interceptors: { onRequest: [...] } });
+const users = await api.UserService.getUsers();
 ```
 
-See [skills/README.md](skills/README.md) for agent paths (Cursor, Claude Code, Codex) and available skills.
+## Why this tool?
+
+Frontend teams love OpenAPI contracts but hate maintaining hand-written HTTP wrappers. This tool generates fully-typed TypeScript clients directly from your spec — no Java, no heavy runtimes, no framework lock-in. You stay in control of the HTTP layer, the output directory, and the update cadence.
+
+## What you get
+
+**Generation**
+- TypeScript clients for `fetch`, `xhr`, `node` (node-fetch), and `axios`
+- Models as interfaces or DTO classes with getters and `toJSON()`
+- Runtime validation schemas for Zod, Joi, Yup, and JSON Schema
+- Generator plugins including built-in `x-typescript-type` support
+
+**Analysis & CI**
+- Strict OpenAPI diagnostics with governance rules and JSON reports
+- `analyze-diff` — detect breaking changes between spec versions
+- `analyze-usage` — verify your app still calls every generated endpoint
+
+**Advanced / Preview**
+- `--auto-select` — project-aware HTTP client and validation library recommendation *(preview)*
+- `--spec-analysis` — per-spec and cross-spec quality detectors *(preview)*
+- `cacheStrategy: "reuse"` — global ReuseStore for shared model artifacts in monorepos *(preview)*
+
+## CLI Commands
+
+| Command | Purpose | When to use |
+|---------|---------|-------------|
+| `init` | Create `openapi.config.json` | First time setup |
+| `generate` | Generate TypeScript client | After every spec change |
+| `preview-changes` | Diff current vs new output | Before overwriting generated files |
+| `analyze-diff` | Detect breaking changes | On every spec PR / CI |
+| `analyze-usage` | Verify consumer imports | After generation in CI |
+| `check-config` | Validate config file | When config errors appear |
+| `update-config` | Migrate config to latest schema | After upgrading the package |
 
 ## Documentation
 
@@ -71,11 +78,18 @@ See [skills/README.md](skills/README.md) for agent paths (Cursor, Claude Code, C
 - [Examples](docs/en/examples.md)
 - [Features](docs/en/features.md)
 - [Migration guide](MIGRATION.md)
-- [Marauder user guide (preview)](docs/MARAUDER_USER_GUIDE.md)
-- [Plugins](docs/en/plugins.md)
-- [Plugin API v2 (RFC)](docs/en/plugin-api-v2.md)
+- [Plugins](docs/en/features.md#plugin-system)
+- [Plugin API v2 (RFC)](docs/en/features.md#plugin-api-v2-rfc)
 - [Русская версия README](README.rus.md)
 - [Русская документация](docs/ru/usage.md)
+
+## Contributing
+
+Pull requests are welcome. Please open an issue first to discuss what you would like to change.
+
+## License
+
+MIT
 
 [npm-url]: https://www.npmjs.com/package/ts-openapi-codegen
 [npm-image]: https://img.shields.io/npm/v/ts-openapi-codegen.svg
@@ -83,8 +97,6 @@ See [skills/README.md](skills/README.md) for agent paths (Cursor, Claude Code, C
 [license-image]: http://img.shields.io/npm/l/ts-openapi-codegen.svg
 [downloads-url]: http://npm-stat.com/charts.html?package=ts-openapi-codegen
 [downloads-image]: http://img.shields.io/npm/dm/ts-openapi-codegen.svg
-[travis-url]: https://app.travis-ci.com/github/ozonophore/openapi-codegen
-[travis-image]: https://app.travis-ci.com/github/ozonophore/openapi-codegen.svg?branch=master
 [coverage-url]: https://codecov.io/gh/ozonophore/openapi-codegen
 [coverage-image]: https://codecov.io/gh/ozonophore/openapi-codegen/branch/master/graph/badge.svg?token=RBPZ01BW0Y
 [typescript-url]: https://www.typescriptlang.org

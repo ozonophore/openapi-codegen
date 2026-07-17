@@ -1,6 +1,8 @@
 {{>header}}
 
+{{#if @root.useCancelableRequest}}
 import { AbortController } from 'abort-controller';
+{{/if}}
 import FormData from 'form-data';
 import fetch, { BodyInit, Headers, RequestInit, Response } from 'node-fetch';
 import { types } from 'util';

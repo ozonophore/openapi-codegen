@@ -8,7 +8,7 @@ The generator supports multiple HTTP clients:
 - **node** - Node.js compatible client using `node-fetch`
 - **axios** - Axios HTTP client
 
-Select the client using the `--httpClient` option or `client` property in config file.
+Select the client using the `--httpClient` option or `httpClient` property in config file.
 
 ### Generation cache `--cache`
 
@@ -18,7 +18,7 @@ Generation cache is **opt-in** (disabled by default). Enable it with `--cache` o
 
 - `cache` (default: `false`)
 - `cachePath` (default: `.openapi-codegen-store`)
-- `cacheStrategy` — `entity`, `reuse`, or `content` (V6 schema default: `reuse`; v5→v6 migration sets `entity` for existing configs)
+- `cacheStrategy` — `entity`, `reuse`, or `content` (current schema default: `reuse`; config schema migration sets `entity` for existing configs)
 - `reuseOnConflict` (default: `fail`) — when `cacheStrategy` is `reuse`: `fail` throws on schema drift; `namespace` stores under spec-scoped paths
 - `cacheDebug` (default: `false`)
 
@@ -45,15 +45,15 @@ Reuse store fingerprints use MD5 (`manifest.json` version 2). Upgrading from ver
 
 When `cache` or `specAnalysis` is enabled, a unified generation report is written to `{output}/reports/latest.json` (or `<cachePath>/reports/latest.json` in reuse mode).
 
-### Marauder preview (`2.1.0-beta.11`)
+### Marauder preview
 
-Opt-in features during `generate` (config schema **V6**):
+Opt-in features during `generate` (current config schema):
 
 - **`--auto-select` / `autoSelect`** — probes the target project and recommends `httpClient` and `validationLibrary`.
 - **`--spec-analysis` / `specAnalysis`** — per-spec and cross-spec OpenAPI quality detectors; writes a report to `reportPath` (default: `./.openapi-codegen-reports/anomaly-report.json`). `--anomaly-detection` is a deprecated alias.
 - Dot-notation CLI flags: `--auto-select.strict`, `--spec-analysis.fail-on-high`, inline JSON objects.
 
-See [Marauder user guide](../MARAUDER_USER_GUIDE.md) and [Migration guide](../../MIGRATION.md).
+See [Marauder preview features](#marauder-preview-features) below and [Migration guide](../../MIGRATION.md).
 
 ### Argument style vs. Object style `--useOptions`
 There's no [named parameter](https://en.wikipedia.org/wiki/Named_parameter) in JavaScript or TypeScript, because of
@@ -632,7 +632,7 @@ By default, this library will generate a client that is compatible with the (bro
 however this client will not work inside the Node.js environment. If you want to generate a Node.js compatible client then
 you can specify `--httpClient node` in the openapi call:
 
-`openapi generate --input ./spec.json --output ./dist --httpClient node`
+`openapi-codegen-cli generate --input ./spec.json --output ./dist --httpClient node`
 
 This will generate a client that uses [`node-fetch`](https://www.npmjs.com/package/node-fetch) internally. However,
 in order to compile and run this client, you will need to install the `node-fetch` dependencies:
@@ -651,3 +651,279 @@ in your `tsconfig.json` file.
     "allowSyntheticDefaultImports": true
 }
 ```
+
+---
+
+## Marauder Preview Features
+
+> Current config schema.
+
+**Marauder** is the preview feature set of `openapi-codegen-cli`. All features are **opt-in** and backward compatible: existing configs continue to work; new blocks are added via `update-config`.
+
+### Why Marauder?
+
+By default, openapi-codegen generates a client "in a vacuum": you choose the HTTP client, the validator, track spec quality, and maintain sync with the backend yourself. Marauder adds **project context**, **spec quality checks**, and **incremental artifact caching** — without breaking existing workflows.
+
+| Pain | What Marauder gives | CLI / config |
+|------|---------------------|--------------|
+| Unclear which `httpClient` / `validationLibrary` fits your stack | Analyzes `package.json` and recommends for React, Node, RN, edge | `--auto-select` / `autoSelect` |
+| Spec is "formally valid" but inconvenient for clients (cycles, duplicates, deprecated) | Per-spec and cross-spec quality report + optional CI gate | `--spec-analysis` / `specAnalysis` |
+| Multi-spec monorepo: the same models are generated repeatedly | Global ReuseStore with shared artifacts | `cacheStrategy: "reuse"` |
+
+**What Marauder does not do:**
+- does not auto-fix the spec — reports only (`specAnalysis`);
+- does not replace semantic diff (`analyze-diff`) or consumer code check (`analyze-usage`);
+- does not switch production traffic or sync remote specs by URL.
+
+---
+
+### Feature map: what to choose
+
+```
+Your task
+│
+├─ "Don't know what to generate for our monorepo / RN / Vercel"
+│     → generate --auto-select
+│
+├─ "Want to catch spec issues before merge / in CI"
+│     → generate --spec-analysis (+ fail-on-high for gate)
+│
+├─ "Multiple specs — want to reuse model/schema artifacts"
+│     → cache: true, cacheStrategy: "reuse"
+│
+└─ "Full quality gate chain"
+      → analyze-diff → generate (strict + spec-analysis) → analyze-usage --diff-report
+```
+
+---
+
+### Scenario: Automatic Selection (new frontend project)
+
+```bash
+openapi-codegen-cli update-config -ocn openapi.config.json
+openapi-codegen-cli generate -i ./openapi/spec.yaml -o ./src/api --auto-select
+```
+
+**Result:** for React/Next — `fetch` + `none` (no Zod if it's not in deps).
+
+### Scenario: Strict Selection from Existing Stack
+
+```json
+{
+  "autoSelect": {
+    "enabled": true,
+    "strict": true
+  }
+}
+```
+
+AutoSelector will choose **only** from what is already in `package.json`.
+
+### Scenario: API Quality Control in CI
+
+```json
+{
+  "items": [{
+    "input": "./openapi/spec.yaml",
+    "output": "./src/api",
+    "specAnalysis": {
+      "enabled": true,
+      "severity": "high",
+      "failOnHigh": true,
+      "reportPath": "./.openapi-codegen-reports/anomaly-report.json"
+    }
+  }]
+}
+```
+
+```bash
+openapi-codegen-cli generate -ocn openapi.config.json --spec-analysis
+# dot-notation:
+openapi-codegen-cli generate -i spec.yaml -o ./src/api \
+  --spec-analysis \
+  --spec-analysis.fail-on-high=true \
+  --spec-analysis.severity=high
+```
+
+### Scenario: Model Reuse in Multi-Spec Monorepo
+
+```json
+{
+  "cache": true,
+  "cacheStrategy": "reuse",
+  "cachePath": ".openapi-codegen-store",
+  "reuseOnConflict": "namespace",
+  "items": [
+    { "input": "./specs/a.yaml", "output": "./generated/a" },
+    { "input": "./specs/b.yaml", "output": "./generated/b" }
+  ]
+}
+```
+
+### Scenario: Comprehensive Spec, Client, and Usage Analytics
+
+```bash
+openapi-codegen-cli analyze-diff -i spec.yaml --compare-with spec.base.yaml --ci
+openapi-codegen-cli generate -ocn openapi.config.json --auto-select --spec-analysis
+openapi-codegen-cli analyze-usage -s ./src/api/index.ts -p . --check \
+  --diff-report ./.openapi-codegen-reports/openapi-diff-report.json
+```
+
+### Scenario: Monorepo with Full Marauder Capabilities
+
+A large project with multiple backend teams, each with its own spec. Combines `--auto-select`, `--spec-analysis`, and the reuse store so all three Marauder capabilities work together.
+
+```json
+{
+  "cache": true,
+  "cacheStrategy": "reuse",
+  "cachePath": ".openapi-codegen-store",
+  "reuseOnConflict": "namespace",
+  "items": [
+    {
+      "input": "./specs/orders.yaml",
+      "output": "./generated/orders",
+      "autoSelect": { "enabled": true, "strict": true },
+      "specAnalysis": { "enabled": true, "severity": "medium", "failOnHigh": true }
+    },
+    {
+      "input": "./specs/catalog.yaml",
+      "output": "./generated/catalog",
+      "autoSelect": { "enabled": true, "strict": true },
+      "specAnalysis": { "enabled": true, "severity": "medium", "failOnHigh": true }
+    }
+  ]
+}
+```
+
+```bash
+# CI step: spec quality gate + generation with reuse
+openapi-codegen-cli analyze-diff -i specs/orders.yaml --compare-with specs/orders.base.yaml --ci
+openapi-codegen-cli analyze-diff -i specs/catalog.yaml --compare-with specs/catalog.base.yaml --ci
+openapi-codegen-cli generate -ocn openapi.config.json
+# shared models are written to .openapi-codegen-store once, reused in both outputs
+```
+
+**Result:** Both clients share model artifacts from the store, each gets the right `httpClient`/`validationLibrary` for the project stack, and any `high`-severity spec issue blocks the build.
+
+---
+
+### 1. `generate --auto-select`
+
+**Problem it solves:** Manual selection of `httpClient` and `validationLibrary` often leads to unnecessary deps, incompatibility (axios in RN/edge), and duplicated validators.
+
+**Auto-select** reads `package.json` of the target project and applies recommendations **before** generation.
+
+```bash
+openapi-codegen-cli generate -i spec.yaml -o ./src/api --auto-select
+openapi-codegen-cli generate -i spec.yaml -o ./src/api --auto-select.strict=true
+openapi-codegen-cli generate -i spec.yaml -o ./src/api --auto-select.prefer-small-bundles=true
+```
+
+```json
+{
+  "autoSelect": {
+    "enabled": true,
+    "strict": false,
+    "preferSmallBundles": false,
+    "preferStandards": false
+  }
+}
+```
+
+| Field | Default | Effect |
+|-------|---------|--------|
+| `enabled` | `false` | Run analysis before generate |
+| `strict` | `false` | Only deps from `package.json` |
+| `preferSmallBundles` | `false` | At bundle constraints → `validationLibrary: none` |
+| `preferStandards` | `false` | fetch + Zod as web-standard stack |
+
+**Scope:** `autoSelect` is **root-only** (applied to all items). Per-item `httpClient`/`validationLibrary` overrides are applied when probe recommendations differ between outputs.
+
+**Defaults without signals:** `fetch` + `none` (validator fallback — `NONE`, not `ZOD`).
+
+---
+
+### 2. `generate --spec-analysis`
+
+**Problem it solves:** OpenAPI validators catch syntax, but not **contract quality**: circular `$ref`, deeply nested schemas, inconsistent responses, ambiguous model names.
+
+`specAnalysis` (canonical name) replaces deprecated alias `anomalyDetection`. CLI: `--spec-analysis`; deprecated alias: `--anomaly-detection`.
+
+**Per-spec detectors:**
+- `circular-schema-refs`
+- `deeply-nested-schema`
+- `inconsistent-response-types`
+- `ambiguous-model-name`
+- `deprecated-in-active-paths`
+- `missing-operation-id`
+- `empty-or-untyped-schema`
+
+**Cross-spec detectors** (`crossSpec: true` by default):
+- `cross-spec-name-hash-conflict`
+- `cross-spec-reuse-opportunity`
+- `cross-spec-drift`
+- `shared-output-collision-risk`
+
+```json
+{
+  "specAnalysis": {
+    "enabled": true,
+    "severity": "medium",
+    "reportFormat": "json",
+    "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+    "failOnHigh": false,
+    "crossSpec": true,
+    "maxNestingDepth": 5
+  }
+}
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | `false` | Run during generate |
+| `severity` | `medium` | Threshold: `low` \| `medium` \| `high` |
+| `reportFormat` | `json` | `json` \| `markdown` \| `html` |
+| `reportPath` | `./.openapi-codegen-reports/anomaly-report.json` | Report path |
+| `failOnHigh` | `false` | Fail generate on **high** severity |
+| `crossSpec` | `true` | Cross-spec analysis in multi-item configs |
+| `maxNestingDepth` | `5` | Threshold for deeply-nested-schema |
+
+---
+
+### 3. Generation cache and ReuseStore
+
+| Strategy | Behavior |
+|----------|----------|
+| `entity` | Per-output `.openapi-codegen-cache.json`; skips full regen on cache hit (default after config schema migration) |
+| `reuse` | Global `.openapi-codegen-store`; shared model/schema artifacts (current schema default) |
+| `content` | Only `writeFileIfChanged`; no entity/reuse store |
+
+**Reuse limitations:** requires `modelsMode: "interfaces"` (default). Class mode disables artifact reuse.
+
+---
+
+### 4. Programmatic API
+
+| Export | Purpose |
+|--------|---------|
+| `AutoSelector` | Project-aware selection (automatic selection) |
+| `ProjectProbe` | Shared project context probe (project analyzer) |
+| `runSpecAnalysis` | Spec quality analysis entry point (spec quality analysis) |
+| `CodegenSpecAnalyzer`, `CrossSpecAnalyzer` | Per-spec / cross-spec detectors (spec detectors) |
+| `ReuseStore`, `GenerationReport` | Cache store and unified report (reuse storage, generation report) |
+| `runAnomalyDetection` | Deprecated alias → `runSpecAnalysis` (anomaly detection) |
+
+```typescript
+import { AutoSelector, ProjectProbe } from 'ts-openapi-codegen';
+```
+
+---
+
+### 5. Preview limitations
+
+- `--auto-select` — available during `generate` from `openapi.config.json` or merged multi-item configs
+- `specAnalysis` — reports only; no auto-fix
+- Reuse store — `modelsMode: "interfaces"` only
+- Marauder config merge — shallow spread, not recursive deep merge
+- CLI dot-notation is parsed **before** Commander (`parseNestedCliOptions`)
