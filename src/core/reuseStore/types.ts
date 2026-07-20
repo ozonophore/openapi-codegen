@@ -1,6 +1,6 @@
 import type { TStrictFlatOptions } from '../../common/TRawOptions';
 
-export type ArtifactKind = 'model' | 'schema' | 'enum' | 'core';
+export type ArtifactKind = 'model' | 'schema' | 'enum';
 
 export type OptionsSlice = Pick<
     TStrictFlatOptions,
@@ -22,7 +22,6 @@ export type OptionsSlice = Pick<
 export type ManifestReference = {
     specItem: string;
     outputPath: string;
-    kind: 'artifact';
 };
 
 export type ManifestArtifact = {
@@ -73,7 +72,7 @@ export class ReuseConflictError extends Error {
 
     constructor(details: ReuseConflictErrorDetails) {
         super(
-            `Model "${details.name}" schema mismatch between "${details.existingSpec}" and "${details.incomingSpec}"\n` +
+            `${details.kind.charAt(0).toUpperCase() + details.kind.slice(1)} "${details.name}" schema mismatch between "${details.existingSpec}" and "${details.incomingSpec}"\n` +
                 `  ${details.existingSpec}:     schemaHash=${details.existingSchemaHash.slice(0, 8)}...\n` +
                 `  ${details.incomingSpec}: schemaHash=${details.incomingSchemaHash.slice(0, 8)}...\n` +
                 `  Hint: rename component in one spec, or set reuseOnConflict: "namespace"`

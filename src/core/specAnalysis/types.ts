@@ -8,7 +8,6 @@ export enum SpecFindingCategoryEnum {
     EmptyOrUntypedSchema = 'empty-or-untyped-schema',
     CrossSpecNameHashConflict = 'cross-spec-name-hash-conflict',
     CrossSpecReuseOpportunity = 'cross-spec-reuse-opportunity',
-    CrossSpecDrift = 'cross-spec-drift',
     SharedOutputCollisionRisk = 'shared-output-collision-risk',
 }
 

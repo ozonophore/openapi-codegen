@@ -3,7 +3,32 @@ import { createHash } from 'crypto';
 import type { TStrictFlatOptions } from '../../common/TRawOptions';
 import type { ArtifactKind, OptionsSlice } from './types';
 
-const SCHEMA_HASH_KEYS = new Set(['type', 'properties', 'required', 'enum', 'items', 'allOf', 'oneOf', 'anyOf', 'format', 'nullable', 'additionalProperties', 'description']);
+const SCHEMA_HASH_KEYS = new Set([
+    'type',
+    'properties',
+    'required',
+    'enum',
+    'items',
+    'allOf',
+    'oneOf',
+    'anyOf',
+    'format',
+    'nullable',
+    'additionalProperties',
+    'description',
+    'minimum',
+    'maximum',
+    'pattern',
+    'const',
+    'default',
+    'discriminator',
+    'minLength',
+    'maxLength',
+    'minItems',
+    'maxItems',
+    'exclusiveMinimum',
+    'exclusiveMaximum',
+]);
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
@@ -43,17 +68,22 @@ export function hashFingerprint(value: string): string {
     return createHash('md5').update(value).digest('hex');
 }
 
-function normalizeSchemaNode(schema: unknown, rootSchema: Record<string, unknown>): unknown {
+function normalizeSchemaNode(schema: unknown, rootSchema: Record<string, unknown>, visited: Set<object> = new Set()): unknown {
     if (!schema || typeof schema !== 'object') {
         return schema;
     }
+
+    if (visited.has(schema as object)) {
+        return { $ref: '[Circular]' };
+    }
+    visited.add(schema as object);
 
     const node = schema as Record<string, unknown>;
 
     if (typeof node.$ref === 'string') {
         const resolved = resolveRef(node.$ref, rootSchema);
         if (resolved) {
-            return normalizeSchemaNode(resolved, rootSchema);
+            return normalizeSchemaNode(resolved, rootSchema, visited);
         }
         return { $ref: node.$ref };
     }
@@ -71,20 +101,26 @@ function normalizeSchemaNode(schema: unknown, rootSchema: Record<string, unknown
             const properties = value as Record<string, unknown>;
             const normalizedProperties: Record<string, unknown> = {};
             for (const propertyName of Object.keys(properties).sort()) {
-                normalizedProperties[propertyName] = normalizeSchemaNode(properties[propertyName], rootSchema);
+                normalizedProperties[propertyName] = normalizeSchemaNode(properties[propertyName], rootSchema, visited);
             }
             normalized[key] = normalizedProperties;
             continue;
         }
 
+        if ((key === 'required' || key === 'enum') && Array.isArray(value)) {
+            normalized[key] = [...value].sort();
+            continue;
+        }
+
         if (Array.isArray(value)) {
-            normalized[key] = value.map(item => normalizeSchemaNode(item, rootSchema));
+            normalized[key] = value.map(item => normalizeSchemaNode(item, rootSchema, visited));
             continue;
         }
 
         normalized[key] = value;
     }
 
+    visited.delete(schema as object);
     return normalized;
 }
 
@@ -126,15 +162,20 @@ export function hashSchema(schema: Record<string, unknown>): string {
 }
 
 export function buildOptionsSlice(options: TStrictFlatOptions): OptionsSlice {
-    const pluginNames = (options.plugins ?? [])
+    const pluginEntries = (options.plugins ?? [])
         .map(plugin => {
             if (typeof plugin === 'string') {
-                return plugin;
+                return { name: plugin, config: {} as Record<string, unknown> };
             }
-            return typeof plugin === 'object' && plugin !== null && 'name' in plugin ? String((plugin as { name: string }).name) : '';
+            if (typeof plugin === 'object' && plugin !== null && 'name' in plugin) {
+                const p = plugin as { name: string; [key: string]: unknown };
+                const { name, ...config } = p;
+                return { name: String(name), config: config as Record<string, unknown> };
+            }
+            return null;
         })
-        .filter(Boolean)
-        .sort();
+        .filter((p): p is { name: string; config: Record<string, unknown> } => p !== null && Boolean(p.name))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
     return {
         validationLibrary: options.validationLibrary,
@@ -148,7 +189,7 @@ export function buildOptionsSlice(options: TStrictFlatOptions): OptionsSlice {
         useSeparatedIndexes: options.useSeparatedIndexes,
         httpClient: options.httpClient,
         prettierConfigPath: options.prettierConfigPath,
-        pluginsHash: hashFingerprint(stableStringify(pluginNames)),
+        pluginsHash: hashFingerprint(stableStringify(pluginEntries)),
     };
 }
 

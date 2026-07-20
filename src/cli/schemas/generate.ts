@@ -1,6 +1,13 @@
 import { z } from 'zod';
 
-import { anomalyDetectionConfigSchemaOrBoolean, autoSelectConfigSchemaOrBoolean, specAnalysisConfigSchemaOrBoolean } from '../../common/VersionedSchema/CommonSchemas';
+import {
+    anomalyDetectionConfigSchemaOrBoolean,
+    autoSelectConfigSchemaOrBoolean,
+    specAnalysisConfigSchemaOrBoolean,
+    swarmConfigSchemaOrBoolean,
+    trafficSplitterConfigSchemaOrBoolean,
+    workspaceReportConfigSchemaOrBoolean,
+} from '../../common/VersionedSchema/CommonSchemas';
 import { ModelsMode } from '../../core/types/enums/ModelsMode.enum';
 import { baseCLIOptionsSchema, emptyStringToUndefined } from './base';
 
@@ -28,6 +35,11 @@ const generateOptionsBaseSchema = z
         specAnalysis: specAnalysisConfigSchemaOrBoolean.optional(),
         /** @deprecated Use specAnalysis instead. */
         anomalyDetection: anomalyDetectionConfigSchemaOrBoolean.optional(),
+        workspaceReport: workspaceReportConfigSchemaOrBoolean.optional(),
+        trafficSplitter: trafficSplitterConfigSchemaOrBoolean.optional(),
+        swarm: swarmConfigSchemaOrBoolean.optional(),
+        preAnalyze: z.boolean().optional(),
+        reuseMode: z.enum(['copy', 'auto-group']).optional(),
     })
     .superRefine((data, ctx) => {
         const hasDirectMode = !!(data.input?.trim() && data.output?.trim());

@@ -57,7 +57,9 @@ Frontend teams love OpenAPI contracts but hate maintaining hand-written HTTP wra
 **Advanced / Preview**
 - `--auto-select` — project-aware HTTP client and validation library recommendation *(preview)*
 - `--spec-analysis` — per-spec and cross-spec quality detectors *(preview)*
-- `cacheStrategy: "reuse"` — global ReuseStore for shared model artifacts in monorepos *(preview)*
+- `cacheStrategy: "reuse"` / `--reuse-mode` — shared model artifacts (`copy` | `auto-group`) *(preview)*
+- `--workspace-report` / `--pre-analyze` / `--swarm` — multi-spec report, pre-gen analysis, Swarm manifest only *(preview)*
+- `--traffic-splitter` — generates `TrafficSplitter.ts` helper (no live traffic) *(preview)*
 
 ## CLI Commands
 

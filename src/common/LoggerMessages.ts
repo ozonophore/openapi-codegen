@@ -1,8 +1,8 @@
 /**
- * Константы с текстовыми сообщениями для Logger
- * Все тексты для логирования должны быть вынесены сюда для централизованного управления
+ * Constants with text messages for Logger
+ * All logging texts should be placed here for centralized management
  */
-/** Коды ошибок CLI для централизованного логирования. */
+/** CLI error codes for centralized logging. */
 export const LOGGER_ERROR_CODES = {
     CONFIG_FILE_MISSING: 'CONFIG_FILE_MISSING',
     CONFIG_FILE_NOT_FOUND_AT: 'CONFIG_FILE_NOT_FOUND_AT',
@@ -17,32 +17,31 @@ export const LOGGER_ERROR_CODES = {
     ESLINT_FIX_FAILED: 'ESLINT_FIX_FAILED',
 } as const;
 
-/** Тип кода ошибки CLI. */
+/** CLI error code type. */
 export type TLoggerErrorCode = keyof typeof LOGGER_ERROR_CODES;
 
 /**
- * Человекочитаемые рекомендации для пользователя CLI по коду ошибки
+ * Human-readable recommendations for CLI users by error code
  */
 export const LOGGER_ERROR_RECOMMENDATIONS: Record<TLoggerErrorCode, string> = {
     CONFIG_FILE_MISSING:
-        'Создайте конфигурационный файл (по умолчанию openapi.config.json) или укажите путь к нему через опцию --openapi-config. В качестве альтернативы можно передать обязательные параметры --input и --output напрямую в команду.',
-    CONFIG_FILE_NOT_FOUND_AT: 'Проверьте правильность пути к конфигурационному файлу (--openapi-config) и наличие файла на диске. Обновите путь или создайте файл с нужными параметрами.',
+        'Create a configuration file (default: openapi.config.json) or provide its path via the --openapi-config option. Alternatively, pass the required parameters --input and --output directly to the command.',
+    CONFIG_FILE_NOT_FOUND_AT: 'Verify the path to the configuration file (--openapi-config) and ensure the file exists on disk. Update the path or create a file with the required parameters.',
     NO_OPTIONS_PROVIDED:
-        'Укажите входные и выходные параметры генерации: как минимум --input (путь к спецификации или директории со спецификациями) и --output (директория для сгенерированного клиента).',
+        'Provide the generation input and output parameters: at minimum --input (path to a specification or a directory with specifications) and --output (directory for the generated client).',
     CONFIG_VALIDATION_FAILED:
-        'Проверьте формат openapi.config.json: имена полей и типы должны соответствовать схеме V6. Для Marauder используйте specAnalysis (не anomalyExploitation/exploitAnomalies) и объектный формат или boolean shorthand для autoSelect/specAnalysis.',
-    NO_SPEC_FILES_FOUND: 'Убедитесь, что в указанной директории действительно есть OpenAPI-файлы (.yaml/.yml/.json). При необходимости скорректируйте путь к каталогу со спецификациями.',
-    NO_VALID_SPEC_FILES_FOUND: 'Проверьте формат и структуру файлов спецификаций. Убедитесь, что они соответствуют стандарту OpenAPI v2/v3 и не содержат критических ошибок валидации.',
-    PREVIEW_DIR_EMPTY:
-        'Сначала выполните генерацию клиента, чтобы появились файлы для сравнения, или укажите другую директорию для превью. Если каталог должен существовать, проверьте правильность пути.',
-    PREVIEW_CLEANUP_FAILED: 'Проверьте права доступа к директории превью и отсутствует ли блокировка файлов сторонними процессами. При необходимости очистите каталог вручную и повторите команду.',
-    SPEC_FILES_FIND_ERROR: 'Проверьте корректность маски поиска и доступ к файловой системе. Убедитесь, что у вас есть права чтения для директории со спецификациями.',
+        'Check the format of openapi.config.json: field names and types must correspond to the current schema. For Marauder, use specAnalysis (not anomalyExploitation/exploitAnomalies) and the object format or boolean shorthand for autoSelect/specAnalysis.',
+    NO_SPEC_FILES_FOUND: 'Ensure that the specified directory actually contains OpenAPI files (.yaml/.yml/.json). If necessary, correct the path to the specifications directory.',
+    NO_VALID_SPEC_FILES_FOUND: 'Check the format and structure of the specification files. Make sure they conform to the OpenAPI v2/v3 standard and do not contain critical validation errors.',
+    PREVIEW_DIR_EMPTY: 'Run code generation first so that files are available for comparison, or specify another preview directory. If the directory should already exist, verify the path is correct.',
+    PREVIEW_CLEANUP_FAILED: 'Check the permissions on the preview directory and ensure no file locks are held by other processes. If necessary, clean the directory manually and repeat the command.',
+    SPEC_FILES_FIND_ERROR: 'Check the search glob pattern and filesystem read access. Ensure you have read permissions for the specifications directory.',
     PRETTIER_FORMAT_FAILED:
-        'Проверьте синтаксис сгенерированного фрагмента и настройки Prettier (включая опцию prettierConfigPath). При необходимости укажите корректный путь к конфигу или поправьте файл конфигурации.',
-    ESLINT_FIX_FAILED: 'Проверьте, что пути tsconfigPath и eslintConfigPath корректны, ESLint установлен в проекте, и что сгенерированные файлы доступны для чтения и записи.',
+        'Check the syntax of the generated fragment and the Prettier settings (including the prettierConfigPath option). If necessary, provide a valid config path or fix the configuration file.',
+    ESLINT_FIX_FAILED: 'Verify that tsconfigPath and eslintConfigPath are correct, that ESLint is installed in the project, and that the generated files are readable and writable.',
 };
 
-/** Централизованные текстовые сообщения для Logger. */
+/** Centralized text messages for Logger. */
 export const LOGGER_MESSAGES = {
     // ========== Generation Messages (OpenApiClient) ==========
     GENERATION: {
@@ -59,6 +58,13 @@ export const LOGGER_MESSAGES = {
         CACHE_MISS: (input: string) => `[openapi-codegen] Cache miss: ${input}`,
         STRICT_REPORT_CREATED: (reportPath: string) => `Strict OpenAPI report created: ${reportPath}`,
         ANOMALY_REPORT_CREATED: (reportPath: string) => `Anomaly detection report created: ${reportPath}`,
+        AUTO_GROUP_REQUIRES_REUSE_CACHE: 'reuseMode: auto-group requires cacheStrategy: reuse — auto-group is ignored, falling back to copy',
+        AUTO_GROUP_LCA_TRIVIAL_FALLBACK: 'reuseMode: auto-group: LCA is trivial, falling back to copy',
+        SHARED_CORE_CONTENT_CONFLICT: (relativeCorePath: string) => `reuseMode: auto-group: shared core conflict for "${relativeCorePath}" — keeping a full local copy for this item`,
+        SHARED_CORE_SERVICES_PATH_COLLISION: (details: string) =>
+            `Shared core/services output paths detected (auto-group may still share compatible core under __shared__/core; colliding outputCore/outputServices can overwrite):\n${details}`,
+        SHARED_CORE_SERVICES_PATH_COLLISION_MODELS_ONLY: (details: string) => `Shared core/services output paths detected (ReuseStore covers models/schemas only):\n${details}`,
+        TRAFFIC_SPLITTER_MULTI_ITEM_WARN: 'trafficSplitter is not intended for multi-item configs — file will be written to the output of the first item',
     },
 
     // ========== OpenAPI Specification Messages ==========
@@ -72,13 +78,13 @@ export const LOGGER_MESSAGES = {
     CONFIG: {
         FILE_MISSING: 'The configuration file is missing',
         FILE_MISSING_HINT: 'Provide non-empty "--input" and "--output" options, or a valid "--openapi-config" file path.',
-        FILE_NOT_FOUND: (path: string) => `Отсутствует файл: ${path}`,
+        FILE_NOT_FOUND: (path: string) => `File not found: ${path}`,
         FILE_NOT_FOUND_AT: (path: string) => `Configuration file not found at "${path}"`,
         CONVERSION_FAILED: "Couldn't convert the set of options to the current version",
-        UPDATING_FAILED: 'Ошибка при обновлении данных конфигурационного файла',
-        CHECKING_FAILED: 'Ошибка при проверке данных конфигурационного файла',
-        CONFIG_VALID: (path: string) => `Параметры конфигурации в файле "${path}" прошли проверку`,
-        CONFIG_UP_TO_DATE: (path: string) => `Данные в файле "${path}" актуальны`,
+        UPDATING_FAILED: 'Error updating configuration file data',
+        CHECKING_FAILED: 'Error checking configuration file data',
+        CONFIG_VALID: (path: string) => `Configuration parameters in "${path}" have passed validation`,
+        CONFIG_UP_TO_DATE: (path: string) => `The data in "${path}" is up to date`,
         FILE_UPDATED: (configPath: string) => `Configuration file "${configPath}" has been updated`,
         ACTION_SKIPPED: 'Action skipped.',
         UNKNOWN_ACTION: (action: string) => `Unknown action: ${action}`,
@@ -92,8 +98,8 @@ export const LOGGER_MESSAGES = {
         NO_SPEC_FILES_FOUND: (directory: string) => `No spec files found in directory: ${directory}`,
         NO_VALID_SPEC_FILES_FOUND: 'No valid OpenAPI specification files found.',
         CUSTOM_REQUEST_MISSING_PATH: 'Custom request was selected, but --request path is not provided. The "request" field will be skipped.',
-        WARNING_OUTDATED_CONFIG: 'Ваша версия конфигурации устарела и нуждается в обновлении.',
-        WARNING_DEFAULT_VALUES: 'В вашей конфигурации есть значения по умолчанию, которые можно удалить.',
+        WARNING_OUTDATED_CONFIG: 'Your configuration version is outdated and needs to be updated.',
+        WARNING_DEFAULT_VALUES: 'Your configuration contains default values that can be removed.',
         USER_WARNING: (message: string) => `\n${message}\n`,
     },
 

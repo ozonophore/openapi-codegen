@@ -2,12 +2,18 @@ const MARAUDER_GROUP_KEYS: Record<string, string> = {
     'auto-select': 'autoSelect',
     'spec-analysis': 'specAnalysis',
     'anomaly-detection': 'anomalyDetection',
+    'workspace-report': 'workspaceReport',
+    'traffic-splitter': 'trafficSplitter',
+    swarm: 'swarm',
 };
 
 export type NestedMarauderOptions = {
     autoSelect?: Record<string, unknown>;
     specAnalysis?: Record<string, unknown>;
     anomalyDetection?: Record<string, unknown>;
+    workspaceReport?: Record<string, unknown>;
+    trafficSplitter?: Record<string, unknown>;
+    swarm?: Record<string, unknown>;
 };
 
 function kebabToCamel(value: string): string {
@@ -144,7 +150,7 @@ export function parseNestedCliOptions(argv: readonly string[]): {
 export function mergeNestedCliOptions<T extends Record<string, unknown>>(cliOptions: T, nestedOptions: NestedMarauderOptions): T {
     const merged: Record<string, unknown> = { ...cliOptions };
 
-    for (const groupKey of ['autoSelect', 'specAnalysis', 'anomalyDetection'] as const) {
+    for (const groupKey of ['autoSelect', 'specAnalysis', 'anomalyDetection', 'workspaceReport', 'trafficSplitter', 'swarm'] as const) {
         const nestedGroup = nestedOptions[groupKey];
         if (!nestedGroup) {
             continue;

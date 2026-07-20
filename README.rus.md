@@ -64,7 +64,9 @@ Frontend-команды любят OpenAPI-контракты, но ненави
 **Продвинутое / Preview**
 - `--auto-select` — рекомендация HTTP-клиента и библиотеки валидации на основе проекта *(preview)*
 - `--spec-analysis` — per-spec и cross-spec детекторы качества спеки *(preview)*
-- `cacheStrategy: "reuse"` — глобальный ReuseStore для переиспользования артефактов в monorepo *(preview)*
+- `cacheStrategy: "reuse"` / `--reuse-mode` — общие model-артефакты (`copy` | `auto-group`) *(preview)*
+- `--workspace-report` / `--pre-analyze` / `--swarm` — multi-spec отчёт, pre-gen анализ, только Swarm-манифест *(preview)*
+- `--traffic-splitter` — генерирует helper `TrafficSplitter.ts` (без live traffic) *(preview)*
 
 ## CLI-команды
 

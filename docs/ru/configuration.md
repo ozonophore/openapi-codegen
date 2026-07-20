@@ -15,7 +15,7 @@
 | Включить CI gates | `analyze`, `strictOpenapi`, `failOnGovernanceErrors` |
 | Пользовательский HTTP клиент | `customExecutorPath` (современно) или `request` (legacy) |
 | Кэшировать сгенерированный код | `cache: true`, `cacheStrategy: "entity"` или `"reuse"` |
-| Preview: Auto-select | `autoSelect: true`, `specAnalysis` |
+| Preview: Marauder | `autoSelect`, `specAnalysis`, `workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode` |
 
 ---
 
@@ -179,7 +179,7 @@
 |-----|-----|--------------|----------|
 | `cache` | boolean | `false` | Включить кэш генерации |
 | `cachePath` | string | `.openapi-codegen-store` | Путь к store (`entity`: файл в output; `reuse`: корень global store) |
-| `cacheStrategy` | string | `reuse` (схема V6); `entity` после миграции конфигурации | Стратегия кэша: `entity`, `reuse` или `content` |
+| `cacheStrategy` | string | `reuse` (актуальная схема); `entity` после миграции конфигурации | Стратегия кэша: `entity`, `reuse` или `content` |
 | `reuseOnConflict` | string | `fail` | Политика конфликтов reuse store: `fail` или `namespace` |
 | `cacheDebug` | boolean | `false` | Показывать debug-логи cache hit/miss |
 
@@ -187,15 +187,20 @@
 
 ### Уровень 6 — Preview (Marauder)
 
-**Когда использовать:** Opt-in возможности для расширенных workflow-ов.
+**Когда использовать:** Opt-in возможности Marauder preview (2.1.0).
 
-Opt-in возможности, добавленные в актуальную схему конфигурации. Запустите `update-config` для добавления этих блоков. Подробности — в разделе [Marauder preview features](features.md#marauder-preview-features).
+Opt-in возможности, добавленные в актуальную схему конфигурации. Запустите `update-config` для добавления этих блоков. Подробности — в разделе [Marauder preview features](features.md#marauder-preview-features). Пример Phase 2: [`example/openapi.marauder.config.json`](../../example/openapi.marauder.config.json); миграция — [MIGRATION.RU.md](../../MIGRATION.RU.md) §10.
 
 | Имя | Тип | По умолчанию | Описание |
 |-----|-----|--------------|----------|
 | `autoSelect` | object \| boolean | выключен | Проектно-зависимый выбор HTTP-клиента и валидатора (*preview*, только root) |
 | `specAnalysis` | object \| boolean | выключен | Анализ качества OpenAPI spec при generate (*preview*; root и per-item) |
 | `anomalyDetection` | object \| boolean | — | Устаревший alias для `specAnalysis` |
+| `workspaceReport` | object \| boolean | выключен | Multi-spec сводка после generate (*preview*, только root; `path`, `format`: `json` \| `markdown` \| `both`) |
+| `trafficSplitter` | object \| boolean | выключен | Пишет helper `TrafficSplitter.ts` в output первого item (*preview*, только root; без live traffic; стратегии: `weighted` \| `round-robin` \| `header-based` \| `header-and-weighted`) |
+| `swarm` | object \| boolean | выключен | Пишет только Swarm-манифест при generate (*preview*, только root; top-level `swarm` / `heal` / `migrate` удалены) |
+| `preAnalyze` | boolean | `false` | Cross-spec анализ в stdout до записи файлов (*preview*, только root; non-blocking) |
+| `reuseMode` | string | `copy` | Layout reuse: `copy` \| `auto-group` (*preview*, только root; `auto-group` требует `cacheStrategy: "reuse"`) |
 
 ---
 
@@ -211,7 +216,7 @@ Opt-in возможности, добавленные в актуальную с
 
 ---
 
-**Примечание:** Используйте команду `init` для генерации шаблона конфигурации. Запустите `update-config` для миграции на актуальную схему (добавляет блоки `autoSelect` и `specAnalysis`).
+**Примечание:** Используйте команду `init` для генерации шаблона конфигурации. Запустите `update-config` для миграции на актуальную схему (добавляет блоки `autoSelect`, `specAnalysis` и при необходимости Phase 2: `workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode`).
 
 ### Плагины
 

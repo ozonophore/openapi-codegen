@@ -78,6 +78,21 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
         failOnAnomalies: false,
         maxNestingDepth: 5,
     },
+    workspaceReport: {
+        enabled: false,
+        path: './workspace-report',
+        format: 'json',
+    },
+    trafficSplitter: {
+        enabled: false,
+        strategy: 'weighted',
+    },
+    swarm: {
+        enabled: false,
+        output: './swarm-manifest.json',
+    },
+    preAnalyze: false,
+    reuseMode: 'copy',
 };
 
 export const APP_LOGGER = new Logger({

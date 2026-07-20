@@ -60,7 +60,7 @@ function createSpecHash(spec: unknown): string {
     });
 
     return crypto
-        .createHash('sha256')
+        .createHash('md5')
         .update(serializedSpec ?? '')
         .digest('hex');
 }

@@ -14,8 +14,7 @@ export type CrossSpecContext = {
 class CrossSpecAnalyzer {
     analyze(ctx: CrossSpecContext, config?: SpecAnalysisConfig): SpecFinding[] {
         const conflictFindings = detectNameHashConflicts(ctx);
-        const conflictNames = new Set(conflictFindings.flatMap(f => f.affectedPaths ?? []));
-        const findings = [...conflictFindings, ...detectReuseOpportunities(ctx), ...detectCrossSpecDrift(ctx, conflictNames), ...detectSharedOutputCollisionRisk(ctx)];
+        const findings = [...conflictFindings, ...detectReuseOpportunities(ctx), ...detectSharedOutputCollisionRisk(ctx)];
         return config ? filterSpecFindings(findings, config) : findings;
     }
 }
@@ -91,25 +90,6 @@ function detectReuseOpportunities(ctx: CrossSpecContext): SpecFinding[] {
     return findings;
 }
 
-function detectCrossSpecDrift(ctx: CrossSpecContext, skipNames: Set<string>): SpecFinding[] {
-    const findings: SpecFinding[] = [];
-
-    for (const [name, hashGroups] of groupArtifactsByName(ctx.manifest).entries()) {
-        if (hashGroups.length <= 1 || skipNames.has(name)) {
-            continue;
-        }
-
-        findings.push(
-            createFinding(SpecFindingCategoryEnum.CrossSpecDrift, 'info', `Model "${name}" uses ${hashGroups.length} different schema hashes across specs (early drift warning)`, {
-                affectedPaths: [name],
-                suggestedAction: 'Review schemas with the same name for unintended divergence',
-            })
-        );
-    }
-
-    return findings;
-}
-
 function detectSharedOutputCollisionRisk(ctx: CrossSpecContext): SpecFinding[] {
     const outputGroups = new Map<string, Set<string>>();
 
@@ -168,7 +148,7 @@ export function buildManifestFromParsedSpecs(
 
             if (existing) {
                 if (!existing.referencedBy.some(ref => ref.specItem === specItem)) {
-                    existing.referencedBy.push({ specItem, outputPath: specItem, kind: 'artifact' });
+                    existing.referencedBy.push({ specItem, outputPath: specItem });
                 }
                 continue;
             }
@@ -183,7 +163,7 @@ export function buildManifestFromParsedSpecs(
                 contentHash: schemaHash,
                 byteSize: 0,
                 firstSeenSpec: specItem,
-                referencedBy: [{ specItem, outputPath: specItem, kind: 'artifact' }],
+                referencedBy: [{ specItem, outputPath: specItem }],
                 createdAt: now,
                 updatedAt: now,
             };

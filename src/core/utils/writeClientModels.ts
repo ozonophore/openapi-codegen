@@ -5,6 +5,7 @@ import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import type { OptionsSlice } from '../reuseStore';
 import { ReuseStore } from '../reuseStore';
 import { formatArtifactContent, type ReuseWriterContext, writeModelWithReuse } from '../reuseStore/reuseWriterHelpers';
+import type { SharedFolderWriter } from '../reuseStore/SharedFolderWriter';
 import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ModelsMode } from '../types/enums/ModelsMode.enum';
@@ -36,6 +37,7 @@ interface IWriteClientModels {
     referencedArtifactKeys?: Set<string>;
     onReuseStat?: (hit: boolean) => void;
     reuseOnConflict?: 'fail' | 'namespace';
+    sharedFolderWriter?: SharedFolderWriter;
 }
 
 /**
@@ -65,6 +67,7 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
         referencedArtifactKeys,
         onReuseStat,
         reuseOnConflict,
+        sharedFolderWriter,
     } = options;
 
     this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_START);
@@ -118,6 +121,7 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
                 onReuseStat,
                 reuseOnConflict,
                 prettierConfigPath,
+                sharedFolderWriter,
             };
             await writeModelWithReuse(this, model, file, outputModelsPath, reuseCtx, async () =>
                 formatArtifactContent(

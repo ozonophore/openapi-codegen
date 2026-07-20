@@ -25,14 +25,14 @@ export function buildSchemaArtifactRelativePath(model: Model, optionsSliceHash: 
     return appendOptionsSliceHash(base, optionsSliceHash);
 }
 
-export function buildNamespacedModelArtifactRelativePath(model: Model, specItem: string, optionsSliceHash: string): string {
+export function buildNamespacedModelArtifactRelativePath(model: Model, specItem: string, optionsSliceHash: string, schemaHash: string): string {
     const folder = model.export === 'enum' ? 'enums' : 'models';
-    const base = `artifacts/${folder}/${normalizeModelPath(model.path)}__${specItem}.ts`;
+    const base = `artifacts/${folder}/${normalizeModelPath(model.path)}__${specItem}__${schemaHash.slice(0, 8)}.ts`;
     return appendOptionsSliceHash(base, optionsSliceHash);
 }
 
-export function buildNamespacedSchemaArtifactRelativePath(model: Model, specItem: string, optionsSliceHash: string): string {
-    const base = `artifacts/schemas/${normalizeModelPath(model.path)}Schema__${specItem}.ts`;
+export function buildNamespacedSchemaArtifactRelativePath(model: Model, specItem: string, optionsSliceHash: string, schemaHash: string): string {
+    const base = `artifacts/schemas/${normalizeModelPath(model.path)}Schema__${specItem}__${schemaHash.slice(0, 8)}.ts`;
     return appendOptionsSliceHash(base, optionsSliceHash);
 }
 
@@ -60,7 +60,8 @@ export function resolveModelSchema(model: Model, schemaByComponentName: Map<stri
         return byPath;
     }
 
-    const strippedName = model.name.replace(/^[IET]/, '');
+    const STRIP_PREFIXES = ['I', 'E', 'T'];
+    const strippedName = STRIP_PREFIXES.includes(model.name.charAt(0)) ? model.name.slice(1) : model.name;
     const byName = schemaByComponentName.get(strippedName);
     if (byName) {
         return byName;

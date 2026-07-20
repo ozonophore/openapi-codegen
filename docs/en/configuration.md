@@ -15,7 +15,7 @@ Use this table to find the keys you need for your use case:
 | Enable CI gates | `analyze`, `strictOpenapi`, `failOnGovernanceErrors` |
 | Custom HTTP client | `customExecutorPath` (modern) or `request` (legacy) |
 | Cache generated code | `cache: true`, `cacheStrategy: "entity"` or `"reuse"` |
-| Preview: Auto-select | `autoSelect: true`, `specAnalysis` |
+| Preview: Marauder | `autoSelect`, `specAnalysis`, `workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode` |
 
 ---
 
@@ -193,15 +193,20 @@ Incremental generation strategies. Start with `entity` for a single spec, use `r
 
 ### Tier 6 — Preview (Marauder)
 
-**When to use:** Enable Marauder preview features (2.1.0-beta.11).
+**When to use:** Enable Marauder preview features (2.1.0).
 
-Opt-in features added in current config schema. Run `update-config` to add these blocks. See [Marauder preview features](features.md#marauder-preview-features) for full details.
+Opt-in features added in the current config schema. Run `update-config` to refresh older files. See [Marauder preview features](features.md#marauder-preview-features), [`example/openapi.marauder.config.json`](../../example/openapi.marauder.config.json), and [Migration guide §10](../../MIGRATION.md).
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
 | `autoSelect` | object \| boolean | disabled | Project-aware HTTP client and validation library selection (*preview*, root only) |
 | `specAnalysis` | object \| boolean | disabled | OpenAPI spec quality analysis during generate (*preview*; root and per-item) |
 | `anomalyDetection` | object \| boolean | — | Deprecated alias for `specAnalysis` |
+| `workspaceReport` | object \| boolean | disabled | Multi-spec workspace summary JSON/Markdown after generate (*preview*, root) |
+| `trafficSplitter` | object \| boolean | disabled | Emit `TrafficSplitter.ts` helper into first item output — no live traffic (*preview*, root) |
+| `swarm` | object \| boolean | disabled | Write Avatar Swarm **manifest** only (*preview*, root; top-level `swarm` command stays removed) |
+| `preAnalyze` | boolean | `false` | Cross-spec stdout analysis before writes (*preview*, root) |
+| `reuseMode` | `"copy"` \| `"auto-group"` | `"copy"` | Reuse layout when `cacheStrategy: "reuse"` (*preview*, root) |
 
 ---
 
@@ -257,7 +262,7 @@ Some keys can be set at both the root level and within nested config sections. H
 
 **Recommendation:** Prefer nested config (e.g., `models.mode`, `analyze.useHistory`) for new projects. Root-level variants are maintained for backward compatibility but may be deprecated in future versions.
 
-**Note:** Use the `init` command to generate a template configuration file. Run `update-config` to migrate to current schema (adds `autoSelect` and `specAnalysis` blocks).
+**Note:** Use the `init` command to generate a template configuration file. Run `update-config` to migrate to the current schema (adds Marauder blocks such as `autoSelect`, `specAnalysis`, `workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode` when applicable).
 
 ### Plugins
 

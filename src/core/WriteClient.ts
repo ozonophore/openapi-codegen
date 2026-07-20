@@ -3,6 +3,7 @@ import { Logger } from '../common/Logger';
 import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
 import type { OptionsSlice, ReuseStore } from './reuseStore';
+import type { SharedFolderWriter } from './reuseStore/SharedFolderWriter';
 import { ClientArtifacts } from './types/base/ClientArtifacts.model';
 import { ExportedModel } from './types/base/ExportedModel.model';
 import { ExportedService } from './types/base/ExportedService.model';
@@ -74,6 +75,7 @@ type TWriteClientProps = {
     referencedArtifactKeys?: Set<string>;
     onReuseStat?: (hit: boolean) => void;
     reuseOnConflict?: 'fail' | 'namespace';
+    sharedFolderWriter?: SharedFolderWriter;
 };
 
 type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOptions' | 'request' | 'useCancelableRequest' | 'useSeparatedIndexes'> & {
@@ -135,6 +137,7 @@ export class WriteClient {
             referencedArtifactKeys,
             onReuseStat,
             reuseOnConflict,
+            sharedFolderWriter,
         } = options;
 
         if (!excludeCoreServiceFiles) {
@@ -143,7 +146,17 @@ export class WriteClient {
             await fileSystemHelpers.mkdir(outputPaths.outputCore);
             await fileSystemHelpers.mkdir(executorPath);
             await fileSystemHelpers.mkdir(interceptorsPath);
-            await this.writeClientCore({ client, templates, outputCorePath: outputPaths.outputCore, httpClient, request, useCancelableRequest, customExecutorPath, modelsMode });
+            await this.writeClientCore({
+                client,
+                templates,
+                outputCorePath: outputPaths.outputCore,
+                httpClient,
+                request,
+                useCancelableRequest,
+                customExecutorPath,
+                modelsMode,
+                sharedFolderWriter,
+            });
             await this.writeClientCoreIndex({
                 templates,
                 outputCorePath: outputPaths.outputCore,
@@ -238,6 +251,7 @@ export class WriteClient {
                 referencedArtifactKeys,
                 onReuseStat,
                 reuseOnConflict,
+                sharedFolderWriter,
             });
             return;
         }
@@ -266,6 +280,7 @@ export class WriteClient {
             referencedArtifactKeys,
             onReuseStat,
             reuseOnConflict,
+            sharedFolderWriter,
         });
     }
 
@@ -292,6 +307,7 @@ export class WriteClient {
             referencedArtifactKeys,
             onReuseStat,
             reuseOnConflict,
+            sharedFolderWriter,
         } = config;
 
         await fileSystemHelpers.mkdir(outputPaths.outputModels);
@@ -318,6 +334,7 @@ export class WriteClient {
             referencedArtifactKeys,
             onReuseStat,
             reuseOnConflict,
+            sharedFolderWriter,
         });
         await this.writeClientModelsIndex({
             models: client.models,

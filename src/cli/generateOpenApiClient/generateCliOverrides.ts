@@ -20,10 +20,24 @@ const GENERATE_CLI_OVERRIDE_KEYS = [
     'useHistory',
     'diffReport',
     'modelsMode',
+    'preAnalyze',
+    'reuseMode',
 ] as const satisfies readonly (keyof GenerateOptions)[];
 
 /** Keys excluded from `flatOptionsSchema` direct-mode validation (handled elsewhere). */
-const DIRECT_FLAT_CLI_EXCLUDE_KEYS = new Set(['openapiConfig', 'tsconfigPath', 'eslintConfigPath', 'autoSelect', 'specAnalysis', 'anomalyDetection', 'input', 'output']);
+const DIRECT_FLAT_CLI_EXCLUDE_KEYS = new Set([
+    'openapiConfig',
+    'tsconfigPath',
+    'eslintConfigPath',
+    'autoSelect',
+    'specAnalysis',
+    'anomalyDetection',
+    'workspaceReport',
+    'trafficSplitter',
+    'swarm',
+    'input',
+    'output',
+]);
 
 /**
  * Собирает вход для direct-mode валидации `flatOptionsSchema`.
@@ -66,6 +80,16 @@ export function mergeGenerateCliOverrides(config: TRawOptions, cli: GenerateOpti
     merged.autoSelect = mergeMarauderBlockDeep(config.autoSelect, cli.autoSelect);
     merged.specAnalysis = resolveSpecAnalysisConfig(mergeMarauderBlockDeep(config.specAnalysis, cli.specAnalysis), mergeMarauderBlockDeep(config.anomalyDetection, cli.anomalyDetection));
     merged.anomalyDetection = mergeMarauderBlockDeep(config.anomalyDetection, cli.anomalyDetection);
+
+    (merged as Record<string, unknown>).workspaceReport = mergeMarauderBlockDeep(
+        (config as Record<string, unknown>).workspaceReport as Parameters<typeof mergeMarauderBlockDeep>[0],
+        cli.workspaceReport
+    );
+    (merged as Record<string, unknown>).trafficSplitter = mergeMarauderBlockDeep(
+        (config as Record<string, unknown>).trafficSplitter as Parameters<typeof mergeMarauderBlockDeep>[0],
+        cli.trafficSplitter
+    );
+    (merged as Record<string, unknown>).swarm = mergeMarauderBlockDeep((config as Record<string, unknown>).swarm as Parameters<typeof mergeMarauderBlockDeep>[0], cli.swarm);
 
     return merged;
 }
