@@ -17,6 +17,7 @@ import { UpdateNotifier } from '../common/UpdateNotifier';
 import { joinHelper } from '../common/utils/pathHelpers';
 import { EmptySchemaStrategy } from '../core/types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
+import { ModelsLayout } from '../core/types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 import { analyzeDiff } from './analyzeDiff/analyzeDiff';
@@ -72,7 +73,8 @@ program
     .option('--useUnionTypes', 'Use union types instead of enums (default: false)')
     .option('--useHistory', 'Apply diff report annotations during generation (default: false)')
     .option('--diffReport <value>', 'Path to a diff report JSON file')
-    .addOption(new Option('--modelsMode <value>', 'Models generation mode').choices([...Object.values(ModelsMode)]).default(ModelsMode.INTERFACES))
+    .addOption(new Option('--modelsMode <value>', 'Models generation mode (default from config / normalize: interfaces)').choices([...Object.values(ModelsMode)]))
+    .addOption(new Option('--modelsLayout <value>', 'Models file layout for classes mode (bundle | per-file)').choices([...Object.values(ModelsLayout)]))
     .option('--excludeCoreServiceFiles', 'The generation of the core and services is excluded (default: false)')
     .option('--request <value>', 'Path to custom request file')
     .option('--customExecutorPath <value>', 'Path to custom createExecutorAdapter module')

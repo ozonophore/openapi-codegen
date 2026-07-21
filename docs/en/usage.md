@@ -70,6 +70,7 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 | `--validationLibrary` | - | string | `none` | Validation library for schema generation: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
 | `--emptySchemaStrategy` | - | string | `keep` | Strategy for empty schemas: `keep`, `semantic`, or `skip` |
 | `--modelsMode` | - | string | `interfaces` | Models generation mode: `interfaces` or `classes` |
+| `--modelsLayout` | - | string | `bundle` | File layout for `classes` mode: `bundle` (single `models.ts`) or `per-file` (one Raw+Dto file per `model.path`). Nested config: `models.layout` |
 | `--useHistory` | - | boolean | `false` | Apply diff report annotations during generation |
 | `--diffReport` | - | string | `./.openapi-codegen-reports/openapi-diff-report.json` | Path to diff report JSON |
 | `--prettierConfigPath` | - | string | - | Path to a Prettier config file; when the file exists, generated code is formatted with it, otherwise built-in defaults are used |
@@ -220,7 +221,7 @@ openapi-codegen-cli analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 
 #### Miracles and confirmation
 
-The diff report can contain `structural.miracles` (unified report v2.0.0) with detected renames/type-coercions. Only confirmed miracles are applied in generation.
+The diff report can contain `structural.miracles` (unified report v2.0.0) with detected renames/type-coercions. By default, generation applies miracles with `status: "confirmed"` **or** `confidence === 1`. Optionally narrow or disable them via config `miracles.{enabled,confidence,types}` (inherited root→items).
 
 **How to confirm miracles:**
 1. Run `analyze-diff` and open the generated report (default: `./.openapi-codegen-reports/openapi-diff-report.json`).

@@ -1,0 +1,13 @@
+{{>header}}
+
+import { BaseDto } from '{{{joinPath @root.outputCore 'BaseDto'}}}';
+import { fromArray } from '{{{joinPath @root.outputCore 'dtoUtils'}}}';
+
+{{#if dtoImports}}
+{{#each dtoImports}}
+import type { {{{rawName}}} } from '{{{normalizePath path}}}';
+import { {{{dtoName}}} } from '{{{normalizePath path}}}';
+{{/each}}
+{{/if}}
+
+{{>exportClassesModel}}

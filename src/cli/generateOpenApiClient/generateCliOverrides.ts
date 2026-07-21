@@ -20,6 +20,7 @@ const GENERATE_CLI_OVERRIDE_KEYS = [
     'useHistory',
     'diffReport',
     'modelsMode',
+    'modelsLayout',
     'preAnalyze',
     'reuseMode',
 ] as const satisfies readonly (keyof GenerateOptions)[];

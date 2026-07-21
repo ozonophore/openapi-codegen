@@ -44,7 +44,7 @@
 ---
 
 ### Requirement: типы WorkspaceReport соответствуют PDD §2.4
-`src/core/workspaceReport/types.ts` ДОЛЖЕН содержать интерфейсы `WorkspaceReport`, `WorkspaceSpecSummary`, `WorkspaceReportConfig` точно соответствующие структуре из PDD.md §2.4. `WorkspaceSpecSummary` ДОЛЖЕН включать поля: `name`, `input`, `durationMs`, `reuseHits`, `reuseMisses`.
+`src/core/workspaceReport/types.ts` ДОЛЖЕН содержать интерфейсы `WorkspaceReport`, `WorkspaceSpecSummary`, `WorkspaceReportConfig` точно соответствующие структуре из `openspec/research/PDD.md` §2.4. `WorkspaceSpecSummary` ДОЛЖЕН включать поля: `name`, `input`, `durationMs`, `reuseHits`, `reuseMisses`.
 
 #### Scenario: WorkspaceSpecSummary содержит все обязательные поля
 - **WHEN** `specStats` передан в `buildWorkspaceReport`

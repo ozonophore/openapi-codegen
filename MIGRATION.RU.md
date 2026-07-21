@@ -334,7 +334,7 @@ openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --check 
 
 - `--auto-select` применяется при генерации из `openapi.config.json` или merged multi-item конфигов
 - `specAnalysis` сообщает о проблемах качества; спеки автоматически не исправляет
-- Reuse store требует `modelsMode: "interfaces"` (по умолчанию); режим classes отключает reuse артефактов
+- Reuse store требует `modelsMode: "interfaces"` (по умолчанию) **или** `modelsMode: "classes"` с `models.layout: "per-file"`; `bundle` layout отключает reuse артефактов (entity-cache fallback)
 
 ### 10) Marauder Phase 2 (`2.1.0`)
 
@@ -590,6 +590,7 @@ openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/pre
 - [ ] `useProjectPrettier` заменён на `prettierConfigPath`, если нужно форматирование Prettier.
 - [ ] `useEslintFix: true` заменён на пару `tsconfigPath` + `eslintConfigPath`, если нужен пакетный ESLint fix.
 - [ ] Выбран `modelsMode` и при необходимости workflow `useHistory` / diff‑отчёта.
+- [ ] При `modelsMode: "classes"` выбран `models.layout`: оставить default `bundle` или включить `per-file` (рекомендуется для новых проектов; смена layout меняет пути импортов).
 - [ ] Перезапустили `analyze-diff` для получения отчёта 2.0.0.
 - [ ] Обновили парсеры отчётов на `report.semantic.*` / `report.structural.*`.
 - [ ] Проверили, что `generate --useHistory` подхватывает structural-данные.

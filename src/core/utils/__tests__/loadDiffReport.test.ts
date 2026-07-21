@@ -275,4 +275,47 @@ describe('@unit: loadDiffReport', () => {
 
         assert.strictEqual(loaded, null);
     });
+
+    test('analyze-usage path loads when useHistory true; generate gate stays closed without it', async t => {
+        const dir = createTempDir(t, 'diff-report-usage-gate-');
+        const reportPath = path.join(dir, 'report.json');
+        fs.writeFileSync(
+            reportPath,
+            JSON.stringify({
+                schemaVersion: '2.0.0',
+                semantic: { changes: [] },
+                structural: {
+                    diff: { all: [] },
+                    miracles: [
+                        {
+                            oldPath: '$.a',
+                            newPath: '$.b',
+                            type: 'RENAME',
+                            confidence: 1,
+                            status: 'confirmed',
+                        },
+                    ],
+                    stats: {},
+                },
+            }),
+            'utf-8'
+        );
+
+        assert.strictEqual(
+            loadDiffReport({
+                useHistory: false,
+                diffReport: reportPath,
+                logger: createLogger(),
+            }),
+            null
+        );
+
+        const loaded = loadDiffReport({
+            useHistory: true,
+            diffReport: reportPath,
+            logger: createLogger(),
+        });
+        assert.ok(loaded);
+        assert.strictEqual(loaded?.miracles?.length, 1);
+    });
 });

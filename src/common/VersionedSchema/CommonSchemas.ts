@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { EmptySchemaStrategy } from '../../core/types/enums/EmptySchemaStrategy.enum';
+import { ModelsLayout } from '../../core/types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../../core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../../core/types/enums/ValidationLibrary.enum';
 import { IMPLEMENTED_ANOMALY_CATEGORIES } from './anomalyDetectorCategories';
@@ -71,10 +72,12 @@ export const additionalParametersSchema = z.object({
     useHistory: z.boolean().optional(),
     diffReport: z.string().optional(),
     modelsMode: z.enum(ModelsMode).optional(),
+    modelsLayout: z.enum(ModelsLayout).optional(),
 });
 
 export const modelsConfigSchema = z.object({
     mode: z.enum(ModelsMode).optional(),
+    layout: z.enum(ModelsLayout).optional(),
     corePath: z.string().optional(),
     modelsPath: z.string().optional(),
 });

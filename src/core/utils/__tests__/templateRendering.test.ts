@@ -203,4 +203,56 @@ describe('@unit: templateRendering', () => {
         assert.ok(output.length > 20);
         assert.match(output, /UserSchema/i);
     });
+
+    test('yup boolean emits transform when needsCoercion', () => {
+        const templates = registerHandlebarTemplates({
+            httpClient: HttpClient.FETCH,
+            useOptions: false,
+            useUnionTypes: false,
+            validationLibrary: ValidationLibrary.YUP,
+        });
+
+        const coerced = templates.exports.schema({
+            ...schemaModel,
+            export: 'interface',
+            properties: [
+                {
+                    ...schemaModel,
+                    name: 'active',
+                    export: 'generic',
+                    type: 'boolean',
+                    base: 'boolean',
+                    isDefinition: false,
+                    properties: [],
+                    needsCoercion: true,
+                    coercionTo: 'boolean',
+                },
+            ],
+            httpClient: HttpClient.FETCH,
+            useUnionTypes: false,
+            validationLibrary: ValidationLibrary.YUP,
+        });
+        assert.match(coerced, /yup\.boolean\(\)\.transform/);
+
+        const plain = templates.exports.schema({
+            ...schemaModel,
+            export: 'interface',
+            properties: [
+                {
+                    ...schemaModel,
+                    name: 'active',
+                    export: 'generic',
+                    type: 'boolean',
+                    base: 'boolean',
+                    isDefinition: false,
+                    properties: [],
+                },
+            ],
+            httpClient: HttpClient.FETCH,
+            useUnionTypes: false,
+            validationLibrary: ValidationLibrary.YUP,
+        });
+        assert.match(plain, /yup\.boolean\(\)/);
+        assert.doesNotMatch(plain, /yup\.boolean\(\)\.transform/);
+    });
 });

@@ -9,7 +9,15 @@
     return value == null || value % {{{multipleOf}}} === 0;
 }){{/if}}{{#if isNullable}}.nullable(){{/if}}
 {{else equals base 'boolean'}}
-yup.boolean(){{#if isNullable}}.nullable(){{/if}}
+{{#if needsCoercion}}yup.boolean().transform((value, original) => {
+    if (original == null || typeof original === 'boolean') return original;
+    if (typeof original === 'string') {
+        const normalized = original.trim().toLowerCase();
+        if (normalized === 'true' || normalized === '1' || normalized === 'yes') return true;
+        if (normalized === 'false' || normalized === '0' || normalized === 'no') return false;
+    }
+    return value;
+}){{else}}yup.boolean(){{/if}}{{#if isNullable}}.nullable(){{/if}}
 {{else equals base 'File'}}
 yup.mixed(){{#if isNullable}}.nullable(){{/if}}
 {{else equals base 'null'}}

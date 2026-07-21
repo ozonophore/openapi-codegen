@@ -25,7 +25,7 @@ Generation cache is **opt-in** (disabled by default). Enable it with `--cache` o
 **Strategies:**
 
 - **`entity`** — per-output `.openapi-codegen-cache.json`; on cache hit, item generation is skipped; fastest for unchanged inputs and options.
-- **`reuse`** — global `.openapi-codegen-store` with shared model/schema artifacts copied into each output (preview; requires `modelsMode: "interfaces"`).
+- **`reuse`** — global `.openapi-codegen-store` with shared model/schema artifacts copied into each output (preview; requires `modelsMode: "interfaces"` **or** `modelsMode: "classes"` with `models.layout: "per-file"`).
 - **`content`** — generation still runs; only changed files are written via `writeFileIfChanged` (no entity/reuse store).
 
 **When to use which strategy:**
@@ -158,7 +158,7 @@ The `--validationLibrary` parameter allows you to generate runtime validation sc
 When `--useHistory` is enabled and a diff report marks a type change, validators will attempt to coerce values:
 - **Zod** uses `z.coerce.*`
 - **Joi** uses `Joi.alternatives().try(...)`
-- **Yup** uses `.transform(...)`
+- **Yup** uses `.transform(...)` (including string→boolean when `needsCoercion`)
 - **JSON Schema (AJV)** enables `coerceTypes`
 
 ### Models mode `--modelsMode`
@@ -167,7 +167,14 @@ By default, models are generated as TypeScript interfaces/types. When `--modelsM
 - `*Raw` interfaces matching the API JSON
 - `*Dto` classes with getters, defaults, recursive constructors, and `toJSON()`
 
-The output is consolidated into a single `models.ts` file, and `BaseDto`/`dtoUtils` are emitted in `core`.
+**Layout (`models.layout` / `--modelsLayout`):**
+
+| Value | Behavior |
+|-------|----------|
+| `bundle` (default) | All Raw/Dto in a single `models.ts` (backward-compatible with beta.1+) |
+| `per-file` | One file per `model.path` containing Raw+Dto (+ alias), same topology as `interfaces` |
+
+Prefer `per-file` for new projects. `BaseDto` / `dtoUtils` are emitted in `core`. With `layout: "per-file"`, ReuseStore works for classes mode; with `bundle`, reuse falls back to entity cache.
 
 Let's say we have the following model:
 
@@ -932,7 +939,7 @@ openapi-codegen-cli generate -i spec.yaml -o ./src/api --auto-select.prefer-smal
 
 **Shared core:** identical boilerplate (`ApiError`, `ApiRequestOptions`, …) is deduplicated under `__shared__/core/`. Files that differ per item stay local — notably `OpenAPI.ts` when `server`/`version` differ, and `request.ts` / executor adapters when the effective `request` differs. Effective `request` is `items[].request ??` root `request` (same as generation normalization): a root-level custom request is shared across items; a per-item override prevents cross-item sharing of that transport.
 
-**Reuse limitations:** requires `modelsMode: "interfaces"` (default). Class mode disables artifact reuse.
+**Reuse limitations:** requires `modelsMode: "interfaces"` (default) **or** `modelsMode: "classes"` with `models.layout: "per-file"`. Class mode with default `bundle` layout disables artifact reuse (entity-cache fallback).
 
 ---
 
@@ -1052,7 +1059,7 @@ import { AutoSelector, ProjectProbe, buildWorkspaceReport } from 'ts-openapi-cod
 
 - `--auto-select` — available during `generate` from `openapi.config.json` or merged multi-item configs
 - `specAnalysis` — reports only; no auto-fix
-- Reuse store — `modelsMode: "interfaces"` only
+- Reuse store — `modelsMode: "interfaces"` or `classes` + `layout: "per-file"`
 - `reuseMode: "auto-group"` — needs `cacheStrategy: "reuse"` and a non-trivial LCA among outputs
 - `workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode` — root-oriented
 - `--traffic-splitter` — helper only; no live cutover; multi-item writes to first output

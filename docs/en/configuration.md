@@ -37,10 +37,12 @@ Use this table to find the keys you need for your use case:
     "request": "./custom-request.ts",
     "customExecutorPath": "./custom/createExecutorAdapter.ts",
     "modelsMode": "interfaces",
+    "modelsLayout": "bundle",
     "useHistory": false,
     "diffReport": "./.openapi-codegen-reports/openapi-diff-report.json",
     "models": {
-        "mode": "interfaces"
+        "mode": "interfaces",
+        "layout": "bundle"
     },
     "analyze": {
         "useHistory": false,
@@ -145,6 +147,7 @@ Naming and formatting conventions for the generated output.
 | `enumPrefix` | string | `E` | Prefix for enum models |
 | `typePrefix` | string | `T` | Prefix for type models |
 | `modelsMode` | string | `interfaces` | Models generation mode: `interfaces` or `classes` |
+| `modelsLayout` | string | `bundle` | File layout for `classes`: `bundle` (single `models.ts`) or `per-file` (one Raw+Dto file per `model.path`). Nested: `models.layout` |
 | `validationLibrary` | string | `none` | Validation library: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Strategy for empty schemas: `keep`, `semantic`, or `skip` |
 | `useCancelableRequest` | boolean | `false` | Use cancelable promise as return type |
@@ -170,7 +173,7 @@ Options for CI quality gates, spec validation, and breaking-change tracking.
 | `useHistory` | boolean | `false` | Apply diff report annotations during generation |
 | `diffReport` | string | `./.openapi-codegen-reports/openapi-diff-report.json` | Path to diff report JSON |
 | `analyze` | object | — | Analyze config section (reportPath, useHistory, ignore) |
-| `miracles` | object | — | Miracles config section (enabled, confidence, types) |
+| `miracles` | object | — | Miracles filter applied at generate time: `enabled`, `confidence` threshold, `types` allowlist (`RENAME`, `TYPE_COERCION`). Default without block: `confirmed` or `confidence === 1` |
 | `plugins` | string[] | `[]` | Paths to generator plugins |
 
 ---
@@ -257,6 +260,7 @@ Some keys can be set at both the root level and within nested config sections. H
 | Key | Root Level | Nested Location | Precedence | Notes |
 |-----|-----------|-----------------|-----------|-------|
 | `modelsMode` | `"modelsMode": "interfaces"` | `"models": { "mode": "interfaces" }` | Nested `models.mode` takes precedence | Use `models.mode` in modern configs; `modelsMode` is kept for backward compatibility |
+| `modelsLayout` | `"modelsLayout": "bundle"` | `"models": { "layout": "bundle" }` | Nested `models.layout` takes precedence | `bundle` (default) or `per-file`; only affects `modelsMode: classes` |
 | `useHistory` | `"useHistory": true` | `"analyze": { "useHistory": true }` | Nested `analyze.useHistory` takes precedence | Specific to diff analysis; set within `analyze` block |
 | `diffReport` | `"diffReport": "./path"` | `"analyze": { "reportPath": "./path" }` | Nested `analyze.reportPath` takes precedence | Note the key name differs: `diffReport` vs. `reportPath` |
 

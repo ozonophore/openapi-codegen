@@ -8,6 +8,7 @@ import {
     trafficSplitterConfigSchemaOrBoolean,
     workspaceReportConfigSchemaOrBoolean,
 } from '../../common/VersionedSchema/CommonSchemas';
+import { ModelsLayout } from '../../core/types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../../core/types/enums/ModelsMode.enum';
 import { baseCLIOptionsSchema, emptyStringToUndefined } from './base';
 
@@ -19,6 +20,7 @@ const generateOptionsBaseSchema = z
         useHistory: z.boolean().optional(),
         diffReport: emptyStringToUndefined,
         modelsMode: z.enum(ModelsMode).optional(),
+        modelsLayout: z.enum(ModelsLayout).optional(),
         strictOpenapi: z.boolean().optional(),
         reportFile: emptyStringToUndefined,
         failOnGovernanceErrors: z.boolean().optional(),

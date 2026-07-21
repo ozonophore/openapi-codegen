@@ -25,7 +25,7 @@
 **Стратегии:**
 
 - **`entity`** — per-output `.openapi-codegen-cache.json`; при cache hit генерация item пропускается.
-- **`reuse`** — глобальный `.openapi-codegen-store` с общими артефактами model/schema, копируемыми в каждый output (preview; требует `modelsMode: "interfaces"`).
+- **`reuse`** — глобальный `.openapi-codegen-store` с общими артефактами model/schema, копируемыми в каждый output (preview; требует `modelsMode: "interfaces"` **или** `modelsMode: "classes"` с `models.layout: "per-file"`).
 - **`content`** — генерация выполняется; записываются только изменённые файлы через `writeFileIfChanged` (без entity/reuse store).
 
 **Когда какую стратегию выбирать:**
@@ -158,7 +158,7 @@ const order: Order = {
 Если включен `--useHistory` и в diff‑отчёте есть смена типа, валидаторы будут пытаться выполнять коэрсинг:
 - **Zod** использует `z.coerce.*`
 - **Joi** использует `Joi.alternatives().try(...)`
-- **Yup** использует `.transform(...)`
+- **Yup** использует `.transform(...)` (включая string→boolean при `needsCoercion`)
 - **JSON Schema (AJV)** включает `coerceTypes`
 
 ### Режим моделей `--modelsMode`
@@ -167,7 +167,14 @@ const order: Order = {
 - `*Raw` интерфейсы (JSON‑формат API)
 - `*Dto` классы с геттерами, дефолтами, рекурсивными конструкторами и `toJSON()`
 
-Вывод консолидируется в один файл `models.ts`, а `BaseDto`/`dtoUtils` добавляются в `core`.
+**Раскладка (`models.layout` / `--modelsLayout`):**
+
+| Значение | Поведение |
+|----------|-----------|
+| `bundle` (default) | Все Raw/Dto в одном `models.ts` (совместимо с beta.1+) |
+| `per-file` | Один файл на `model.path` с Raw+Dto (+ alias), как у `interfaces` |
+
+Для новых проектов рекомендуется `per-file`. `BaseDto`/`dtoUtils` добавляются в `core`. При `layout: "per-file"` ReuseStore работает и для classes; при `bundle` — entity-cache fallback.
 
 Допустим, у нас есть следующая модель:
 
@@ -930,7 +937,7 @@ openapi-codegen-cli generate -i spec.yaml -o ./src/api --auto-select.prefer-smal
 
 **Shared core:** идентичный boilerplate (`ApiError`, `ApiRequestOptions`, …) дедуплицируется в `__shared__/core/`. Файлы, которые отличаются между items, остаются локальными — в частности `OpenAPI.ts` при разных `server`/`version`, и `request.ts` / executor-адаптеры при разном эффективном `request`. Эффективный `request` = `items[].request ??` корневой `request` (как при нормализации генерации): корневой custom request шарится между items; per-item override запрещает кросс-item шаринг этого transport.
 
-**Ограничения reuse:** требует `modelsMode: "interfaces"` (default). Class mode отключает artifact reuse.
+**Ограничения reuse:** требует `modelsMode: "interfaces"` (default) **или** `modelsMode: "classes"` с `models.layout: "per-file"`. Class mode с default `bundle` отключает artifact reuse (entity-cache fallback).
 
 ---
 
@@ -1043,7 +1050,7 @@ import { AutoSelector, ProjectProbe } from 'ts-openapi-codegen';
 
 - `--auto-select` — при generate из `openapi.config.json` или merged multi-item configs
 - `specAnalysis` — отчёты only; не auto-fix
-- Reuse store — `modelsMode: "interfaces"` only; `auto-group` требует `cacheStrategy: "reuse"`
+- Reuse store — `modelsMode: "interfaces"` or `classes` + `layout: "per-file"`; `auto-group` требует `cacheStrategy: "reuse"`
 - Phase 2 ключи (`workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode`) — root-oriented, opt-in
 - `--swarm` на `generate` ≠ возвращённая top-level команда `swarm`
 - `--traffic-splitter` не выполняет canary-cutover в production
