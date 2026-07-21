@@ -2,6 +2,7 @@ import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { Templates } from '../types/base/Templates.model';
+import { ModelsLayout } from '../types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../types/enums/ModelsMode.enum';
 import { Model } from '../types/shared/Model.model';
 import { WriteClient } from '../WriteClient';
@@ -12,10 +13,11 @@ interface IOptionsProps {
     outputModelsPath: string;
     useSeparatedIndexes?: boolean;
     modelsMode?: ModelsMode;
+    modelsLayout?: ModelsLayout;
 }
 
 export async function writeClientModelsIndex(this: WriteClient, options: IOptionsProps) {
-    const { models, templates, outputModelsPath, useSeparatedIndexes, modelsMode } = options;
+    const { models, templates, outputModelsPath, useSeparatedIndexes, modelsMode, modelsLayout } = options;
 
     if (!useSeparatedIndexes) {
         return;
@@ -24,7 +26,7 @@ export async function writeClientModelsIndex(this: WriteClient, options: IOption
 
     this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.INDEX_DATA_WRITTEN(filePath));
 
-    const content = templates.indexes.models({ models, modelsMode });
+    const content = templates.indexes.models({ models, modelsMode, modelsLayout });
     let existingContent = '';
     const fileExists = await fileSystemHelpers.exists(filePath);
     if (fileExists) {

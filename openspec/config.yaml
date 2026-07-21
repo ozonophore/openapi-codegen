@@ -2,19 +2,30 @@ schema: spec-driven
 
 # Project context (optional)
 # This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Tech stack: TypeScript, Node.js CLI/codegen (openapi-codegen).
+  Spec workflow: OpenSpec spec-driven (proposal / design / specs / tasks).
+
+  Research / evidence documents (not formal OpenSpec artifacts):
+  - Change-scoped reverse-PDDs, audits, test reports → colocate under
+    `openspec/changes/<change-name>/research/` and cite as `research/<file>.md`
+    from that change's proposal/design/tasks. They archive with the change.
+  - Living multi-change companions (shared reverse-specs, cross-cutting audits) →
+    `openspec/research/` and cite as `openspec/research/<file>.md`.
+  - Do NOT put research at repo root or under `docs/en|ru` (product docs only).
+  - Do NOT treat research files as required for `openspec apply`: decisions and
+    requirements must still live in design/specs/tasks; research is provenance.
+  - When archiving, OpenSpec moves only the change folder — change-scoped
+    research travels automatically; living `openspec/research/` stays put.
 
 # Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - If citing a reverse-PDD or audit, use the research path convention above
+      (`research/…` for change-scoped, `openspec/research/…` for living).
+  design:
+    - Summarize actionable decisions from research inline; keep research as
+      provenance, not as the only source of requirements.
+  tasks:
+    - Prefer task wording that stands alone; research citations are optional
+      provenance (e.g. section headings may point at `research/…`).

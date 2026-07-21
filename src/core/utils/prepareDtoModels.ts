@@ -7,7 +7,10 @@ import { unique } from './unique';
 type NameMapEntry = {
     rawName: string;
     dtoName: string;
+    dtoKind: 'class' | 'alias';
 };
+
+const normalizeImportPath = (value: string): string => (value.startsWith('./') ? value.slice(2) : value);
 
 const getBaseName = (model: Model): string => model.alias || model.name;
 
@@ -123,6 +126,14 @@ const buildOptionalSuffix = (property: Model): string => {
     return '';
 };
 
+const resolveClassRef = (typeName: string, nameMap: Map<string, NameMapEntry>): NameMapEntry | undefined => {
+    const mapped = nameMap.get(typeName);
+    if (!mapped || mapped.dtoKind !== 'class') {
+        return undefined;
+    }
+    return mapped;
+};
+
 const buildDtoInit = (property: Model, nameMap: Map<string, NameMapEntry>): string => {
     const accessor = buildPropertyTarget(property.name, 'data');
     const optionalSuffix = buildOptionalSuffix(property);
@@ -130,7 +141,11 @@ const buildDtoInit = (property: Model, nameMap: Map<string, NameMapEntry>): stri
 
     const isReference = property.export === 'reference' && nameMap.has(property.type);
     if (isReference) {
-        const dtoName = nameMap.get(property.type)!.dtoName;
+        const mapped = nameMap.get(property.type)!;
+        if (mapped.dtoKind !== 'class') {
+            return applyCoercion(`${accessor}${defaultSuffix}`, property, accessor);
+        }
+        const dtoName = mapped.dtoName;
         if (property.isRequired) {
             return applyCoercion(`new ${dtoName}(${accessor})`, property, accessor);
         }
@@ -140,13 +155,28 @@ const buildDtoInit = (property: Model, nameMap: Map<string, NameMapEntry>): stri
 
     if (property.export === 'array') {
         const itemModel = property.link ?? { ...property, export: 'reference' as const, link: null };
-        const itemIsRef = itemModel.export === 'reference' && nameMap.has(itemModel.type);
-        if (itemIsRef) {
-            const dtoName = nameMap.get(itemModel.type)!.dtoName;
+        const classRef = itemModel.export === 'reference' ? resolveClassRef(itemModel.type, nameMap) : undefined;
+        if (classRef) {
+            const dtoName = classRef.dtoName;
             if (property.isRequired) {
                 return applyCoercion(`fromArray(${dtoName}, ${accessor})`, property, accessor);
             }
             const expr = `${accessor} ? fromArray(${dtoName}, ${accessor}) : undefined`;
+            return applyCoercion(expr, property, accessor);
+        }
+        return applyCoercion(`${accessor}${defaultSuffix}`, property, accessor);
+    }
+
+    if (property.export === 'dictionary') {
+        const itemModel = property.link ?? { ...property, export: 'reference' as const, link: null };
+        const classRef = itemModel.export === 'reference' ? resolveClassRef(itemModel.type, nameMap) : undefined;
+        if (classRef) {
+            const dtoName = classRef.dtoName;
+            const mapExpr = `Object.fromEntries(Object.entries(${accessor}).map(([key, value]) => [key, new ${dtoName}(value)]))`;
+            if (property.isRequired) {
+                return applyCoercion(mapExpr, property, accessor);
+            }
+            const expr = `${accessor} ? ${mapExpr} : undefined`;
             return applyCoercion(expr, property, accessor);
         }
         return applyCoercion(`${accessor}${defaultSuffix}`, property, accessor);
@@ -159,6 +189,10 @@ const buildDtoToJson = (property: Model, nameMap: Map<string, NameMapEntry>): st
     const accessor = buildPropertyTarget(property.name, 'this');
     const isReference = property.export === 'reference' && nameMap.has(property.type);
     if (isReference) {
+        const mapped = nameMap.get(property.type)!;
+        if (mapped.dtoKind !== 'class') {
+            return undefined;
+        }
         if (property.isRequired) {
             return `${accessor}.toJSON()`;
         }
@@ -167,12 +201,24 @@ const buildDtoToJson = (property: Model, nameMap: Map<string, NameMapEntry>): st
 
     if (property.export === 'array') {
         const itemModel = property.link ?? { ...property, export: 'reference' as const, link: null };
-        const itemIsRef = itemModel.export === 'reference' && nameMap.has(itemModel.type);
-        if (itemIsRef) {
+        const classRef = itemModel.export === 'reference' ? resolveClassRef(itemModel.type, nameMap) : undefined;
+        if (classRef) {
             if (property.isRequired) {
                 return `${accessor}.map(item => item.toJSON())`;
             }
             return `${accessor} ? ${accessor}.map(item => item.toJSON()) : undefined`;
+        }
+    }
+
+    if (property.export === 'dictionary') {
+        const itemModel = property.link ?? { ...property, export: 'reference' as const, link: null };
+        const classRef = itemModel.export === 'reference' ? resolveClassRef(itemModel.type, nameMap) : undefined;
+        if (classRef) {
+            const mapExpr = `Object.fromEntries(Object.entries(${accessor}).map(([key, value]) => [key, value.toJSON()]))`;
+            if (property.isRequired) {
+                return mapExpr;
+            }
+            return `${accessor} ? ${mapExpr} : undefined`;
         }
     }
 
@@ -222,6 +268,61 @@ const attachDtoGetters = (client: Client): void => {
     });
 };
 
+const attachDtoImports = (client: Client, nameMap: Map<string, NameMapEntry>, pathToEntry: Map<string, NameMapEntry & { path: string }>): void => {
+    const pathForEntry = (mapped: NameMapEntry): string | undefined => {
+        for (const entry of pathToEntry.values()) {
+            if (entry.dtoName === mapped.dtoName) {
+                return entry.path;
+            }
+        }
+        return undefined;
+    };
+
+    client.models.forEach(model => {
+        if (!model.isDefinition) return;
+
+        const seen = new Set<string>();
+        const dtoImports: NonNullable<Model['dtoImports']> = [];
+
+        const addImport = (typeName: string, importPath?: string) => {
+            const normalizedPath = importPath ? normalizeImportPath(importPath) : undefined;
+            const pathMapped = normalizedPath ? pathToEntry.get(normalizedPath) : undefined;
+            const mapped = pathMapped ?? nameMap.get(typeName);
+            if (!mapped || mapped.dtoName === model.dtoName || seen.has(mapped.dtoName)) {
+                return;
+            }
+            const importTarget = importPath || pathMapped?.path || pathForEntry(mapped);
+            if (!importTarget) {
+                return;
+            }
+            seen.add(mapped.dtoName);
+            dtoImports.push({ rawName: mapped.rawName, dtoName: mapped.dtoName, path: importTarget });
+        };
+
+        for (const imprt of model.imports ?? []) {
+            addImport(imprt.name, imprt.path);
+            if (imprt.alias) {
+                addImport(imprt.alias, imprt.path);
+            }
+        }
+
+        const walkProps = (property: Model) => {
+            if (property.export === 'reference') {
+                addImport(property.type);
+            }
+            if (property.link) {
+                walkProps(property.link);
+            }
+            property.properties?.forEach(walkProps);
+        };
+        model.properties?.forEach(walkProps);
+
+        if (dtoImports.length > 0) {
+            model.dtoImports = dtoImports;
+        }
+    });
+};
+
 /**
  * Подготавливает raw/DTO-модели и геттеры для режима classes.
  * @param client сгенерированный клиент
@@ -229,16 +330,22 @@ const attachDtoGetters = (client: Client): void => {
  */
 export const prepareDtoModels = (client: Client): Client => {
     const nameMap = new Map<string, NameMapEntry>();
+    const pathToEntry = new Map<string, NameMapEntry & { path: string }>();
 
     client.models.forEach(model => {
         const baseName = getBaseName(model);
+        const dtoKind: 'class' | 'alias' = model.export === 'interface' ? 'class' : 'alias';
         const rawName = `${baseName}Raw`;
         const dtoName = `${baseName}Dto`;
+        const entry: NameMapEntry = { rawName, dtoName, dtoKind };
         model.rawName = rawName;
         model.dtoName = dtoName;
         model.exportName = baseName;
-        model.dtoKind = model.export === 'interface' ? 'class' : 'alias';
-        nameMap.set(baseName, { rawName, dtoName });
+        model.dtoKind = dtoKind;
+        nameMap.set(baseName, entry);
+        if (model.isDefinition && model.path) {
+            pathToEntry.set(normalizeImportPath(model.path), { ...entry, path: model.path });
+        }
     });
 
     const resolveRaw = resolveTypeFactory(nameMap, 'raw');
@@ -264,6 +371,7 @@ export const prepareDtoModels = (client: Client): Client => {
         });
     });
 
+    attachDtoImports(client, nameMap, pathToEntry);
     attachDtoGetters(client);
     return client;
 };

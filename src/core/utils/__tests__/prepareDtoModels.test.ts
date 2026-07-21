@@ -255,6 +255,89 @@ describe('@unit: prepareDtoModels', () => {
         assert.strictEqual(itemsProperty?.dtoType, 'IIngredient$2Dto');
     });
 
+    test('dtoImports resolve $N export names from import path', () => {
+        const ingredient1 = createInterfaceModel('IIngredient', [createPrimitiveModel('id', 'string')]);
+        ingredient1.path = 'components/schemas-v2/Ingredient';
+        const ingredient2 = createInterfaceModel('IIngredient', [createPrimitiveModel('pathwayId', 'string')]);
+        ingredient2.alias = 'IIngredient$2';
+        ingredient2.path = 'components/schemas/Ingredient';
+
+        const container = createInterfaceModel('IContainer', [
+            {
+                ...createPrimitiveModel('items', 'IIngredient'),
+                export: 'reference',
+                type: 'IIngredient$2',
+                isRequired: true,
+            },
+        ]);
+        container.imports = [{ name: 'IIngredient', alias: '', path: './components/schemas/Ingredient' }];
+
+        const prepared = prepareDtoModels({
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [container, ingredient1, ingredient2],
+            services: [],
+        });
+
+        const dtoImports = prepared.models.find(model => model.name === 'IContainer')?.dtoImports;
+        assert.ok(dtoImports?.some(entry => entry.rawName === 'IIngredient$2Raw' && entry.dtoName === 'IIngredient$2Dto'));
+        assert.ok(!dtoImports?.some(entry => entry.rawName === 'IIngredientRaw' && entry.path.includes('schemas/Ingredient')));
+    });
+
+    test('does not emit new for primitive alias references', () => {
+        const typeAlias: Model = {
+            ...createPrimitiveModel('TType', 'string'),
+            name: 'TType',
+            path: 'schemas/Type',
+            export: 'generic',
+            isDefinition: true,
+        };
+
+        const ref: Model = {
+            ...createPrimitiveModel('value', 'TType'),
+            export: 'reference',
+            type: 'TType',
+            isRequired: true,
+        };
+        const wrapper = createInterfaceModel('IWrapper', [ref]);
+
+        const prepared = prepareDtoModels({
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [wrapper, typeAlias],
+            services: [],
+        });
+
+        const property = prepared.models.find(model => model.name === 'IWrapper')?.properties[0];
+        assert.strictEqual(property?.dtoInit, 'data.value');
+        assert.ok(!property?.dtoInit?.includes('new '));
+        assert.strictEqual(property?.dtoToJSON, undefined);
+    });
+
+    test('maps dictionary-of-reference values to Dto instances', () => {
+        const profile = createInterfaceModel('IProfile', [createPrimitiveModel('bio', 'string')]);
+        profile.path = 'schemas/Profile';
+
+        const dict: Model = {
+            ...createPrimitiveModel('byId', 'IProfile'),
+            export: 'dictionary',
+            link: { ...createPrimitiveModel('IProfile', 'IProfile'), export: 'reference', type: 'IProfile' },
+            isRequired: false,
+        };
+        const user = createInterfaceModel('IUser', [dict]);
+
+        const prepared = prepareDtoModels({
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [user, profile],
+            services: [],
+        });
+
+        const property = prepared.models.find(model => model.name === 'IUser')?.properties[0];
+        assert.match(property?.dtoInit ?? '', /Object\.fromEntries.*new IProfileDto/);
+        assert.match(property?.dtoToJSON ?? '', /Object\.fromEntries.*toJSON/);
+    });
+
     test('adds undefined fallback for optional dto fields without defaults', () => {
         const optionalProp = createPrimitiveModel('detail', 'string');
         optionalProp.isRequired = false;

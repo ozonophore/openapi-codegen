@@ -318,4 +318,177 @@ describe('@unit: applyDiffReportToClient (TYPE_COERCION miracles)', () => {
         assert.strictEqual(updated2?.ghostProperties?.length, 1);
         assert.strictEqual(updated2?.ghostProperties?.[0].name, 'legacyField');
     });
+
+    test('skips miracles when miraclesConfig.enabled is false', () => {
+        const client: Client = {
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [createObjectModel('IUser', [createPropertyModel('fullName', 'string')])],
+            services: [],
+        };
+
+        const openApi = {
+            openapi: '3.0.0',
+            info: { title: 'Test', version: '1.0.0' },
+            paths: {},
+            components: {
+                schemas: {
+                    User: {
+                        type: 'object',
+                        properties: {
+                            fullName: { type: 'string' },
+                        },
+                    },
+                },
+            },
+        };
+
+        const report: DiffReport = {
+            diff: { all: [] },
+            miracles: [
+                {
+                    oldPath: '$.components.schemas.User.properties.name',
+                    newPath: '$.components.schemas.User.properties.fullName',
+                    type: 'RENAME',
+                    confidence: 1,
+                    status: 'confirmed',
+                    modelName: 'IUser',
+                    oldProperty: 'name',
+                    newProperty: 'fullName',
+                },
+            ],
+        };
+
+        const result = applyDiffReportToClient({
+            client,
+            openApi,
+            openApiVersion: OpenApiVersion.V3,
+            diffReport: report,
+            prefix: { interface: 'I', enum: 'E', type: 'T' },
+            miraclesConfig: { enabled: false },
+        });
+
+        assert.strictEqual(result.miracles?.length ?? 0, 0);
+    });
+
+    test('filters auto-generated miracles by confidence threshold', () => {
+        const client: Client = {
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [createObjectModel('IUser', [createPropertyModel('fullName', 'string')])],
+            services: [],
+        };
+
+        const openApi = {
+            openapi: '3.0.0',
+            info: { title: 'Test', version: '1.0.0' },
+            paths: {},
+            components: {
+                schemas: {
+                    User: {
+                        type: 'object',
+                        properties: {
+                            fullName: { type: 'string' },
+                        },
+                    },
+                },
+            },
+        };
+
+        const report: DiffReport = {
+            diff: { all: [] },
+            miracles: [
+                {
+                    oldPath: '$.components.schemas.User.properties.name',
+                    newPath: '$.components.schemas.User.properties.fullName',
+                    type: 'RENAME',
+                    confidence: 0.8,
+                    status: 'auto-generated',
+                    modelName: 'IUser',
+                    oldProperty: 'name',
+                    newProperty: 'fullName',
+                },
+            ],
+        };
+
+        const filtered = applyDiffReportToClient({
+            client,
+            openApi,
+            openApiVersion: OpenApiVersion.V3,
+            diffReport: report,
+            prefix: { interface: 'I', enum: 'E', type: 'T' },
+            miraclesConfig: { confidence: 1 },
+        });
+        assert.strictEqual(filtered.miracles?.length ?? 0, 0);
+
+        const allowed = applyDiffReportToClient({
+            client: { ...client, models: [createObjectModel('IUser', [createPropertyModel('fullName', 'string')])] },
+            openApi,
+            openApiVersion: OpenApiVersion.V3,
+            diffReport: {
+                ...report,
+                miracles: [{ ...report.miracles![0], confidence: 1 }],
+            },
+            prefix: { interface: 'I', enum: 'E', type: 'T' },
+            miraclesConfig: { confidence: 1 },
+        });
+        assert.strictEqual(allowed.miracles?.length, 1);
+    });
+
+    test('filters miracles by types allowlist', () => {
+        const client: Client = {
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [createObjectModel('IUser', [createPropertyModel('age', 'number')])],
+            services: [],
+        };
+
+        const openApi = {
+            openapi: '3.0.0',
+            info: { title: 'Test', version: '1.0.0' },
+            paths: {},
+            components: {
+                schemas: {
+                    User: {
+                        type: 'object',
+                        properties: {
+                            age: { type: 'number' },
+                        },
+                    },
+                },
+            },
+        };
+
+        const report: DiffReport = {
+            diff: { all: [] },
+            miracles: [
+                {
+                    oldPath: '$.components.schemas.User.properties.name',
+                    newPath: '$.components.schemas.User.properties.fullName',
+                    type: 'RENAME',
+                    confidence: 1,
+                    status: 'confirmed',
+                },
+                {
+                    oldPath: '$.components.schemas.User.properties.age',
+                    newPath: '$.components.schemas.User.properties.age',
+                    type: 'TYPE_COERCION',
+                    confidence: 1,
+                    status: 'confirmed',
+                },
+            ],
+        };
+
+        const result = applyDiffReportToClient({
+            client,
+            openApi,
+            openApiVersion: OpenApiVersion.V3,
+            diffReport: report,
+            prefix: { interface: 'I', enum: 'E', type: 'T' },
+            miraclesConfig: { types: ['TYPE_COERCION'] },
+        });
+
+        assert.strictEqual(result.miracles?.length, 1);
+        assert.strictEqual(result.miracles?.[0].type, 'TYPE_COERCION');
+    });
 });

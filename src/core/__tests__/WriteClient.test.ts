@@ -51,6 +51,7 @@ describe('@unit: writeClient', () => {
                 schema: () => 'schema',
                 service: () => 'service',
                 models: () => 'models',
+                classesModel: () => 'classesModel',
             },
             core: {
                 settings: () => 'settings',

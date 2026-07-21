@@ -2,7 +2,7 @@
 
 Кодовая база содержит три уровня кэширования/переиспользования артефактов: `GenerationCache`
 (entity-стратегия), `ReuseStore` (reuse-стратегия), `ArtifactFingerprinter` (ключи для обоих).
-Audit-документ `SPEC-REUSE.md` выявил три критических (P0) бага, пять high (P1) и ряд medium (P2)
+Audit-документ `openspec/research/SPEC-REUSE.md` выявил три критических (P0) бага, пять high (P1) и ряд medium (P2)
 проблем. Большинство из них — изолированные точечные правки в одном методе, без архитектурных
 изменений. Основные модули: `src/core/utils/GenerationCache.ts`,
 `src/core/reuseStore/ReuseStore.ts`, `src/core/reuseStore/ArtifactFingerprinter.ts`,

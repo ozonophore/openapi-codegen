@@ -55,6 +55,7 @@ export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOptio
             ...(!perSpecRequest ? spreadHttpConfig(httpConfig) : {}),
             models: {
                 mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+                layout: COMMON_DEFAULT_OPTIONS_VALUES.modelsLayout,
             },
             analyze: {
                 useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
@@ -92,6 +93,7 @@ export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOptio
             ...spreadHttpConfig(httpConfig),
             models: {
                 mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+                layout: COMMON_DEFAULT_OPTIONS_VALUES.modelsLayout,
             },
             analyze: {
                 useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
@@ -135,6 +137,7 @@ export function buildExampleConfig(useMultiOption: boolean, httpConfig?: HttpCon
             ...(!perSpecRequest ? spreadHttpConfig(httpConfig) : {}),
             models: {
                 mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+                layout: COMMON_DEFAULT_OPTIONS_VALUES.modelsLayout,
             },
             analyze: {
                 useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
@@ -166,6 +169,7 @@ export function buildExampleConfig(useMultiOption: boolean, httpConfig?: HttpCon
             ...spreadHttpConfig(httpConfig),
             models: {
                 mode: COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+                layout: COMMON_DEFAULT_OPTIONS_VALUES.modelsLayout,
             },
             analyze: {
                 useHistory: COMMON_DEFAULT_OPTIONS_VALUES.useHistory,

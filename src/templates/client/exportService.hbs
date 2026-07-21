@@ -2,9 +2,15 @@
 
 {{#if imports}}
 {{#equals @root.modelsMode 'classes'}}
+{{#equals @root.modelsLayout 'per-file'}}
+{{#each imports}}
+import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{joinPath @root.outputModels path}}}';
+{{/each}}
+{{else}}
 {{#each imports}}
 import type { {{{name}}} } from '{{{joinPath @root.outputModels 'models'}}}';
 {{/each}}
+{{/equals}}
 {{else}}
 {{#each imports}}
 import type { {{{name}}}{{#if alias}} as {{{alias}}}{{/if}} } from '{{{joinPath @root.outputModels path}}}';

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **`models.layout` / `--modelsLayout`**: `bundle` (default) | `per-file` for `modelsMode: classes`. Per-file keeps one Raw+Dto file per `model.path` (interfaces topology) without breaking existing bundle consumers.
+- Runtime filtering for config `miracles.{enabled,confidence,types}` (previously schema-only) with root→items inheritance.
+- Yup boolean `needsCoercion` transform (parity with Zod/Joi string→boolean).
+
+### Fixed
+
+- `analyze-usage --diff-report` now passes `useHistory: true` so RENAME post-check can load the report.
+- ReuseStore enabled for `modelsMode: classes` when `layout: per-file` (bundle still uses entity-cache fallback).
+
+### Changed
+
+- Docs: classes layout options; CHANGELOG beta.9 report hash wording corrected to MD5 (matches code).
+
 ## [2.1.0-beta.13] — 2026-07-17
 
 Marauder Phase 2 preview: workspace reports, Avatar Swarm manifests, TrafficSplitter helpers, pre-generation cross-spec analysis, and `reuseMode: "auto-group"`, plus ReuseStore / entity-cache hardening. Features remain opt-in (see Known limitations).
@@ -194,7 +211,7 @@ Marauder refocus preview: project-aware auto-select, OpenAPI spec analysis (`spe
 ## [2.1.0-beta.9] — 2026-06-10
 
 ### Added
-- Added unified diff report `schemaVersion: "2.0.0"` with `semantic` and `structural` sections, plus `metadata` (base/target paths, SHA-256 hashes, timestamp).
+- Added unified diff report `schemaVersion: "2.0.0"` with `semantic` and `structural` sections, plus `metadata` (base/target paths, **MD5** hashes of serialized specs, timestamp). Note: an earlier changelog draft incorrectly said SHA-256; the implementation uses MD5 (`createSpecHash` in `analyzeDiff.ts`).
 - Added semantic-to-structural adapter layer (`adaptSemanticToStructural`, `semanticChangesToDiffEntries`, `semanticPointerToJsonPath`).
 - Added `buildMiraclesFromSemanticChanges` — automatic RENAME (Levenshtein heuristic) and TYPE_COERCION miracles from semantic property changes.
 - Added selective `$ref` expansion for analyze-diff (`expandOpenApiRefsForSemanticDiff`, `loadSemanticOpenApiSpec`) instead of full dereference.

@@ -18,6 +18,9 @@ export const templates: Templates = {
             if (!first) return 'models';
             return `// models:${first.rawName ?? ''}:${first.dtoName ?? ''}:${first.dtoGetters?.length ?? 0}`;
         },
+        classesModel: (params?: { rawName?: string; dtoName?: string; path?: string; outputCore?: string }) => {
+            return `// classesModel:${params?.path ?? ''}:${params?.rawName ?? ''}:${params?.dtoName ?? ''}:core=${params?.outputCore ?? ''}`;
+        },
         schema: () => 'schema',
         service: () => 'service',
     },

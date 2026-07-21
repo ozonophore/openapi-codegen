@@ -12,6 +12,7 @@ import { SimpleClientArtifacts } from './types/base/SimpleClientArtifacts.model'
 import { Templates } from './types/base/Templates.model';
 import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from './types/enums/HttpClient.enum';
+import { ModelsLayout } from './types/enums/ModelsLayout.enum';
 import { ModelsMode } from './types/enums/ModelsMode.enum';
 import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import type { Client } from './types/shared/Client.model';
@@ -48,6 +49,7 @@ import { writeFileIfChanged, WriteFileIfChangedResult } from './utils/writeFileI
  * @property [validationLibrary] библиотека валидации схем
  * @property emptySchemaStrategy стратегия обработки пустых схем
  * @property [modelsMode] режим генерации моделей
+ * @property [modelsLayout] раскладка файлов моделей для classes mode
  * @property [prettierConfigPath] путь к конфигурации Prettier
  * @property [eslintConfigPath] путь к конфигурации ESLint
  */
@@ -66,6 +68,7 @@ type TWriteClientProps = {
     validationLibrary?: ValidationLibrary;
     emptySchemaStrategy: EmptySchemaStrategy;
     modelsMode?: ModelsMode;
+    modelsLayout?: ModelsLayout;
     prettierConfigPath?: string;
     reuseStore?: ReuseStore;
     optionsSlice?: OptionsSlice;
@@ -128,6 +131,7 @@ export class WriteClient {
             validationLibrary = ValidationLibrary.NONE,
             emptySchemaStrategy,
             modelsMode,
+            modelsLayout,
             prettierConfigPath,
             reuseStore,
             optionsSlice,
@@ -181,6 +185,7 @@ export class WriteClient {
                 useCancelableRequest,
                 prettierConfigPath,
                 modelsMode,
+                modelsLayout,
             });
             await this.writeClientServicesIndex({
                 services: client.services,
@@ -242,6 +247,7 @@ export class WriteClient {
                 validationLibrary,
                 emptySchemaStrategy,
                 modelsMode,
+                modelsLayout,
                 schemaModels,
                 prettierConfigPath,
                 reuseStore,
@@ -270,6 +276,7 @@ export class WriteClient {
             validationLibrary,
             emptySchemaStrategy,
             modelsMode,
+            modelsLayout,
             schemaModels: [],
             prettierConfigPath,
             reuseStore,
@@ -297,6 +304,7 @@ export class WriteClient {
             validationLibrary,
             emptySchemaStrategy,
             modelsMode,
+            modelsLayout,
             schemaModels,
             prettierConfigPath,
             reuseStore,
@@ -324,6 +332,7 @@ export class WriteClient {
             useUnionTypes,
             useOptions,
             modelsMode,
+            modelsLayout,
             outputCorePath: shouldInlineDtoCore ? './' : relativeHelper(outputPaths.outputModels, outputPaths.outputCore),
             prettierConfigPath,
             reuseStore,
@@ -342,6 +351,7 @@ export class WriteClient {
             outputModelsPath: outputPaths.outputModels,
             useSeparatedIndexes,
             modelsMode,
+            modelsLayout,
         });
 
         await fileSystemHelpers.mkdir(outputPaths.output);
@@ -355,6 +365,7 @@ export class WriteClient {
             emptySchemaStrategy,
             schemaModels,
             modelsMode,
+            modelsLayout,
         });
     }
 
@@ -510,7 +521,7 @@ export class WriteClient {
         const result: Map<string, ClientArtifacts> = new Map<string, ClientArtifacts>();
         for (const [key, value] of this.config.entries()) {
             for (const item of value) {
-                const { outputPaths, client, templates, useUnionTypes, excludeCoreServiceFiles, validationLibrary, schemaModels, modelsMode } = item;
+                const { outputPaths, client, templates, useUnionTypes, excludeCoreServiceFiles, validationLibrary, schemaModels, modelsMode, modelsLayout } = item;
                 const outputCore = this.getOutputPath(outputPaths?.outputCore, key, 'core');
                 const outputModels = this.getOutputPath(outputPaths?.outputModels, key, 'models');
                 const outputSchemas = this.getOutputPath(outputPaths?.outputSchemas, key, 'schemas');
@@ -519,6 +530,9 @@ export class WriteClient {
                 const clientIndex = this.ensureClientIndex(result, key, templates);
                 if (!clientIndex.modelsMode) {
                     clientIndex.modelsMode = modelsMode;
+                }
+                if (!clientIndex.modelsLayout) {
+                    clientIndex.modelsLayout = modelsLayout;
                 }
 
                 if (!excludeCoreServiceFiles) {
@@ -602,6 +616,7 @@ export class WriteClient {
                 schemas: [],
                 services: [],
                 modelsMode: undefined,
+                modelsLayout: undefined,
                 modelsPackage: undefined,
             });
         }

@@ -130,4 +130,32 @@ describe('@unit: generateCliOverrides', () => {
             severity: 'high',
         });
     });
+
+    test('mergeGenerateCliOverrides preserves config modelsMode when CLI omits flag', () => {
+        const merged = mergeGenerateCliOverrides(
+            {
+                input: './spec.json',
+                output: './out',
+                modelsMode: 'classes',
+                modelsLayout: 'per-file',
+            } as any,
+            { input: './spec.json', output: './out' } as any
+        );
+
+        assert.strictEqual(merged.modelsMode, 'classes');
+        assert.strictEqual(merged.modelsLayout, 'per-file');
+    });
+
+    test('mergeGenerateCliOverrides lets explicit CLI modelsMode win over config', () => {
+        const merged = mergeGenerateCliOverrides(
+            {
+                input: './spec.json',
+                output: './out',
+                modelsMode: 'classes',
+            } as any,
+            { modelsMode: 'interfaces' } as any
+        );
+
+        assert.strictEqual(merged.modelsMode, 'interfaces');
+    });
 });

@@ -15,7 +15,13 @@ export type { TOpenAPIConfig{{#notEquals ../core.length 1}} as TOpenAPIConfig${{
 {{#if models}}
 
 {{#equals @root.modelsMode 'classes'}}
-export * from './{{{joinPath @root.modelsPackage 'models'}}}';
+{{#equals @root.modelsLayout 'per-file'}}
+{{#each models}}
+export * from './{{{joinPath package path}}}';
+{{/each}}
+{{else}}
+export * from './{{{joinPath @root.modelsPackage 'models'}}}'';
+{{/equals}}
 {{else}}
 {{#each models}}
 {{#if enum}}

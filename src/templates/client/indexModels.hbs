@@ -2,7 +2,13 @@
 
 {{#if models}}
 {{#equals @root.modelsMode 'classes'}}
+{{#equals @root.modelsLayout 'per-file'}}
+{{#each models}}
+export * from './{{{path}}}';
+{{/each}}
+{{else}}
 export * from './models';
+{{/equals}}
 {{else}}
 {{#each models}}
 {{#if enum}}
