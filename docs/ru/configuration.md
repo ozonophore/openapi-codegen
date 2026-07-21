@@ -37,10 +37,12 @@
     "request": "./custom-request.ts",
     "customExecutorPath": "./custom/createExecutorAdapter.ts",
     "modelsMode": "interfaces",
+    "modelsLayout": "bundle",
     "useHistory": false,
     "diffReport": "./.openapi-codegen-reports/openapi-diff-report.json",
     "models": {
-        "mode": "interfaces"
+        "mode": "interfaces",
+        "layout": "bundle"
     },
     "analyze": {
         "useHistory": false,
@@ -143,6 +145,7 @@
 | `enumPrefix` | string | `E` | Префикс для enum моделей |
 | `typePrefix` | string | `T` | Префикс для type моделей |
 | `modelsMode` | string | `interfaces` | Режим генерации моделей: `interfaces` или `classes` |
+| `modelsLayout` | string | `bundle` | Раскладка файлов для `classes`: `bundle` (один `models.ts`) или `per-file` (один Raw+Dto на `model.path`). Nested: `models.layout` |
 | `validationLibrary` | string | `none` | Библиотека валидации: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Стратегия для пустых схем: `keep`, `semantic`, или `skip` |
 | `useCancelableRequest` | boolean | `false` | Использовать отменяемый promise как тип возврата |
@@ -166,7 +169,7 @@
 | `useHistory` | boolean | `false` | Применять diff-отчёт при генерации |
 | `diffReport` | string | `./.openapi-codegen-reports/openapi-diff-report.json` | Путь к diff-отчёту |
 | `analyze` | object | — | Секция анализа (reportPath, useHistory, ignore) |
-| `miracles` | object | — | Секция чудес (enabled, confidence, types) |
+| `miracles` | object | — | Фильтр miracles при generate: `enabled`, порог `confidence`, allowlist `types` (`RENAME`, `TYPE_COERCION`). Без блока — default: `confirmed` или `confidence === 1` |
 | `plugins` | string[] | `[]` | Пути к плагинам генератора |
 
 ---

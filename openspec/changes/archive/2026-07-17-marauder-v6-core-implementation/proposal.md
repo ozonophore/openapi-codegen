@@ -1,6 +1,6 @@
 ## Почему
 
-CLI-флаги и схема валидации для пяти Marauder V6-опций (`workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode`) уже добавлены, однако сами функции не реализованы: `OpenApiClient` их не читает, соответствующие модули в `src/core/` отсутствуют. Это изменение реализует всю core-логику, описанную в PDD.md (ветка `wip_marauder_next`, коммиты `9adadcd`, `7727a79`, `8071efe`, `efba83f`), чтобы флаги оказывали реальный эффект при генерации.
+CLI-флаги и схема валидации для пяти Marauder V6-опций (`workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode`) уже добавлены, однако сами функции не реализованы: `OpenApiClient` их не читает, соответствующие модули в `src/core/` отсутствуют. Это изменение реализует всю core-логику, описанную в `openspec/research/PDD.md` (ветка `wip_marauder_next`, коммиты `9adadcd`, `7727a79`, `8071efe`, `efba83f`), чтобы флаги оказывали реальный эффект при генерации.
 
 ## Что меняется
 

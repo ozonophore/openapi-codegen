@@ -49,6 +49,7 @@ describe('@unit: ArtifactFingerprinter', () => {
             enumPrefix: 'E',
             typePrefix: 'T',
             modelsMode: 'interfaces' as OptionsSlice['modelsMode'],
+            modelsLayout: 'bundle' as OptionsSlice['modelsLayout'],
             sortByRequired: false,
             emptySchemaStrategy: 'keep' as OptionsSlice['emptySchemaStrategy'],
             useSeparatedIndexes: false,

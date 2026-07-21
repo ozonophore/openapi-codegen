@@ -589,6 +589,7 @@ When `useHistory` is on and a property type changes, validation schemas may coer
 - [ ] Replaced `useProjectPrettier` with `prettierConfigPath` where you still want Prettier formatting.
 - [ ] Replaced `useEslintFix: true` with `tsconfigPath` + `eslintConfigPath` where you still want batch ESLint fix.
 - [ ] Decided on `modelsMode` and optional `useHistory` / diff report workflow.
+- [ ] If using `modelsMode: "classes"`, chose `models.layout`: keep default `bundle` or opt into `per-file` (recommended for new projects; changing layout updates import paths — regenerate consumers).
 - [ ] Re-ran `analyze-diff` to produce 2.0.0 report.
 - [ ] Updated report parsers to `report.semantic.*` / `report.structural.*`.
 - [ ] Verified `generate --useHistory` picks up structural data.

@@ -7,6 +7,7 @@ import path from 'path';
 
 import { generate, HttpClient } from '../src';
 import type { TRawOptions } from '../src/common/TRawOptions';
+import { ModelsLayout } from '../src/core/types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../src/core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../src/core/types/enums/ValidationLibrary.enum';
 import { installSilenceLoggers } from '../src/test/helpers/silenceLoggers';
@@ -122,6 +123,32 @@ describe('@unit: generate', () => {
         assert.ok(modelsContent.includes('export class'), 'Expected models.ts to contain class exports');
         assert.ok(modelsContent.includes('Raw'), 'Expected models.ts to contain Raw interfaces');
         assert.ok(baseDtoContent.includes('abstract class BaseDto'), 'Expected BaseDto.ts to be generated');
+    });
+
+    test('v3: modelsMode=classes with layout=per-file writes path files', async () => {
+        const output = './test/generated/v3-classes-per-file/';
+
+        await generate(
+            defaultGenerateOptions({
+                input: v3Spec,
+                output,
+                modelsMode: ModelsMode.CLASSES,
+                modelsLayout: ModelsLayout.PER_FILE,
+            })
+        );
+
+        const modelsDir = path.join(process.cwd(), 'test', 'generated', 'v3-classes-per-file', 'models');
+        const bundleFile = path.join(modelsDir, 'models.ts');
+        const coreBaseDto = path.join(process.cwd(), 'test', 'generated', 'v3-classes-per-file', 'core', 'BaseDto.ts');
+
+        assert.ok(!existsSync(bundleFile), 'Expected no models.ts bundle for per-file layout');
+        assert.ok(existsSync(coreBaseDto), 'Expected BaseDto.ts to be generated');
+
+        const modelFiles = sync(path.join(modelsDir, '**', '*.ts')).filter(file => !file.endsWith(`${path.sep}index.ts`));
+        assert.ok(modelFiles.length > 0, 'Expected per-path model files');
+
+        const sample = readFileSync(modelFiles[0], 'utf8');
+        assert.ok(sample.includes('Raw') || sample.includes('Dto') || sample.includes('export'), 'Expected DTO/Raw content in per-file model');
     });
 
     test('v3withAlias: generated files match snapshots', async () => {

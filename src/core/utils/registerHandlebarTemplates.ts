@@ -57,6 +57,7 @@ import templateClient from '../../templatesCompiled/client/exportClient';
 import templateExportSchemas from '../../templatesCompiled/client/exportSchema';
 import templateExportModel from '../../templatesCompiled/client/exportModel';
 import templateExportModels from '../../templatesCompiled/client/exportModels';
+import templateExportClassesModelFile from '../../templatesCompiled/client/exportClassesModelFile';
 import templateExportService from '../../templatesCompiled/client/exportService';
 import templateFullIndex from '../../templatesCompiled/client/indexFull';
 import templateSimpeIndex from '../../templatesCompiled/client/indexSimple';
@@ -68,6 +69,7 @@ import partialBase from '../../templatesCompiled/client/partials/base';
 import partialExportComposition from '../../templatesCompiled/client/partials/exportComposition';
 import partialExportEnum from '../../templatesCompiled/client/partials/exportEnum';
 import partialExportInterface from '../../templatesCompiled/client/partials/exportInterface';
+import partialExportClassesModel from '../../templatesCompiled/client/partials/exportClassesModel';
 import partialExportType from '../../templatesCompiled/client/partials/exportType';
 import partialHeader from '../../templatesCompiled/client/partials/header';
 import partialIsNullable from '../../templatesCompiled/client/partials/isNullable';
@@ -168,6 +170,7 @@ export function registerHandlebarTemplates(root: {
             client: Handlebars.template(templateClient),
             model: Handlebars.template(templateExportModel),
             models: Handlebars.template(templateExportModels),
+            classesModel: Handlebars.template(templateExportClassesModelFile),
             schema: Handlebars.template(templateExportSchemas),
             service: Handlebars.template(templateExportService),
         },
@@ -195,6 +198,7 @@ export function registerHandlebarTemplates(root: {
     Handlebars.registerPartial('exportInterface', Handlebars.template(partialExportInterface));
     Handlebars.registerPartial('exportComposition', Handlebars.template(partialExportComposition));
     Handlebars.registerPartial('exportType', Handlebars.template(partialExportType));
+    Handlebars.registerPartial('exportClassesModel', Handlebars.template(partialExportClassesModel));
     Handlebars.registerPartial('header', Handlebars.template(partialHeader));
     Handlebars.registerPartial('isNullable', Handlebars.template(partialIsNullable));
     Handlebars.registerPartial('isReadOnly', Handlebars.template(partialIsReadOnly));

@@ -184,6 +184,7 @@ export function buildOptionsSlice(options: TStrictFlatOptions): OptionsSlice {
         enumPrefix: options.enumPrefix,
         typePrefix: options.typePrefix,
         modelsMode: options.modelsMode,
+        modelsLayout: options.modelsLayout,
         sortByRequired: options.sortByRequired,
         emptySchemaStrategy: options.emptySchemaStrategy,
         useSeparatedIndexes: options.useSeparatedIndexes,

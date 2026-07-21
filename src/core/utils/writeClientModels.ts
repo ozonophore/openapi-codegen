@@ -1,16 +1,27 @@
 import { mkdirSync } from 'fs';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
-import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { dirNameHelper, relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import type { OptionsSlice } from '../reuseStore';
 import { ReuseStore } from '../reuseStore';
 import { formatArtifactContent, type ReuseWriterContext, writeModelWithReuse } from '../reuseStore/reuseWriterHelpers';
 import type { SharedFolderWriter } from '../reuseStore/SharedFolderWriter';
 import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
+import { ModelsLayout } from '../types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../types/enums/ModelsMode.enum';
 import type { Model } from '../types/shared/Model.model';
 import { WriteClient } from '../WriteClient';
+import { isClassesBundleLayout, isClassesPerFileLayout } from './modelsLayoutHelpers';
+
+/** Relative path from a per-file model directory to core (from models root). */
+export function resolvePerFileOutputCore(outputCoreFromModelsRoot: string, modelPath: string): string {
+    const modelDir = dirNameHelper(modelPath);
+    if (!modelDir || modelDir === '.') {
+        return outputCoreFromModelsRoot;
+    }
+    return relativeHelper(modelDir, outputCoreFromModelsRoot);
+}
 
 /**
  * @param models Array of Models to write
@@ -27,6 +38,7 @@ interface IWriteClientModels {
     useUnionTypes: boolean;
     useOptions?: boolean;
     modelsMode?: ModelsMode;
+    modelsLayout?: ModelsLayout;
     outputCorePath?: string;
     prettierConfigPath?: string;
     reuseStore?: ReuseStore;
@@ -56,6 +68,7 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
         httpClient,
         useUnionTypes,
         modelsMode,
+        modelsLayout,
         outputCorePath,
         useOptions,
         prettierConfigPath,
@@ -72,7 +85,7 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
 
     this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_START);
 
-    if (modelsMode === ModelsMode.CLASSES) {
+    if (isClassesBundleLayout(modelsMode, modelsLayout)) {
         const file = resolveHelper(outputModelsPath, 'models.ts');
         const templateResult = templates.exports.models({
             models,
@@ -81,6 +94,7 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             useOptions,
             outputCore: outputCorePath || '../core',
             modelsMode,
+            modelsLayout,
         });
         const formattedValue = await formatArtifactContent(templateResult, prettierConfigPath);
         await this.writeOutputFile(file, formattedValue);
@@ -109,6 +123,32 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
 
         this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
 
+        const renderModel = async () => {
+            if (isClassesPerFileLayout(modelsMode, modelsLayout)) {
+                const outputCoreFromModelsRoot = outputCorePath || '../core';
+                return formatArtifactContent(
+                    templates.exports.classesModel({
+                        ...model,
+                        httpClient,
+                        useUnionTypes,
+                        useOptions,
+                        outputCore: resolvePerFileOutputCore(outputCoreFromModelsRoot, modelFolderPath),
+                        modelsMode,
+                        modelsLayout,
+                    }),
+                    prettierConfigPath
+                );
+            }
+            return formatArtifactContent(
+                templates.exports.model({
+                    ...model,
+                    httpClient,
+                    useUnionTypes,
+                }),
+                prettierConfigPath
+            );
+        };
+
         const canReuse = reuseStore && optionsSlice && specInput && modelSchemas;
         if (canReuse) {
             const reuseCtx: ReuseWriterContext = {
@@ -123,26 +163,12 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
                 prettierConfigPath,
                 sharedFolderWriter,
             };
-            await writeModelWithReuse(this, model, file, outputModelsPath, reuseCtx, async () =>
-                formatArtifactContent(
-                    templates.exports.model({
-                        ...model,
-                        httpClient,
-                        useUnionTypes,
-                    }),
-                    prettierConfigPath
-                )
-            );
+            await writeModelWithReuse(this, model, file, outputModelsPath, reuseCtx, renderModel);
             this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
             continue;
         }
 
-        const templateResult = templates.exports.model({
-            ...model,
-            httpClient,
-            useUnionTypes,
-        });
-        const formattedValue = await formatArtifactContent(templateResult, prettierConfigPath);
+        const formattedValue = await renderModel();
         await this.writeOutputFile(file, formattedValue);
         this.registerLintTarget(file, outputModelsPath);
 

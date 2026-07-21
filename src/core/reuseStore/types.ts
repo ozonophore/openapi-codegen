@@ -10,6 +10,7 @@ export type OptionsSlice = Pick<
     | 'enumPrefix'
     | 'typePrefix'
     | 'modelsMode'
+    | 'modelsLayout'
     | 'sortByRequired'
     | 'emptySchemaStrategy'
     | 'useSeparatedIndexes'

@@ -36,6 +36,7 @@ import type { SpecAnalysisReport } from './specAnalysis/types';
 import { validateOpenApiStrict, validateWithSwaggerParser, writeOpenApiStrictReport } from './strict/validateOpenApiStrict';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
+import { ModelsLayout } from './types/enums/ModelsLayout.enum';
 import { ModelsMode } from './types/enums/ModelsMode.enum';
 import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import type { Client } from './types/shared/Client.model';
@@ -45,6 +46,7 @@ import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
 import { DiffReport, loadDiffReport } from './utils/loadDiffReport';
+import { isClassesBundleLayout } from './utils/modelsLayoutHelpers';
 import { postProcessClient } from './utils/postProcessClient';
 import { prepareDtoModels } from './utils/prepareDtoModels';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
@@ -85,8 +87,10 @@ export class OpenApiClient {
 
     private normalizeOptions(rawOptions: TRawOptions): TFlatOptions[] {
         const modelsMode = rawOptions.modelsMode ?? rawOptions.models?.mode;
+        const modelsLayout = rawOptions.modelsLayout ?? rawOptions.models?.layout;
         const useHistory = rawOptions.useHistory ?? rawOptions.analyze?.useHistory;
         const diffReport = rawOptions.diffReport ?? rawOptions.analyze?.reportPath;
+        const rootMiracles = rawOptions.miracles;
         if (rawOptions.items && rawOptions.items.length > 0) {
             // Для items: Наследуем глобальный request, если не переопределён
             return rawOptions.items.map(item => ({
@@ -115,6 +119,8 @@ export class OpenApiClient {
                 useHistory: item.useHistory ?? useHistory,
                 diffReport: item.diffReport ?? diffReport,
                 modelsMode: item.modelsMode ?? modelsMode,
+                modelsLayout: item.modelsLayout ?? modelsLayout,
+                miracles: (item as TFlatOptions).miracles ?? rootMiracles,
                 strictOpenapi: rawOptions.strictOpenapi,
                 reportFile: rawOptions.reportFile,
                 failOnGovernanceErrors: rawOptions.failOnGovernanceErrors,
@@ -160,6 +166,9 @@ export class OpenApiClient {
                     useHistory,
                     diffReport,
                     modelsMode,
+                    modelsLayout,
+                    miracles: rootMiracles,
+                    models: rawOptions.models,
                     strictOpenapi: rawOptions.strictOpenapi,
                     reportFile: rawOptions.reportFile,
                     failOnGovernanceErrors: rawOptions.failOnGovernanceErrors,
@@ -204,6 +213,7 @@ export class OpenApiClient {
             useHistory: item.useHistory ?? COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
             diffReport: item.diffReport || COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
             modelsMode: item.modelsMode ?? COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
+            modelsLayout: item.modelsLayout ?? item.models?.layout ?? COMMON_DEFAULT_OPTIONS_VALUES.modelsLayout,
             models: item.models || COMMON_DEFAULT_OPTIONS_VALUES.models,
             analyze: item.analyze || COMMON_DEFAULT_OPTIONS_VALUES.analyze,
             miracles: item.miracles || COMMON_DEFAULT_OPTIONS_VALUES.miracles,
@@ -296,7 +306,7 @@ export class OpenApiClient {
             const cacheEnabled = items[0]?.cache === true;
             const cacheStrategy = items[0]?.cacheStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheStrategy;
             const useReuseStore = cacheEnabled && cacheStrategy === 'reuse';
-            const needsEntityCacheFallback = cacheEnabled && items.some(item => item.modelsMode === ModelsMode.CLASSES);
+            const needsEntityCacheFallback = cacheEnabled && items.some(item => isClassesBundleLayout(item.modelsMode, item.modelsLayout));
             const generationCaches = new Map<string, GenerationCache>();
             let reuseStore: ReuseStore | null = null;
             const referencedArtifactKeys = new Set<string>();
@@ -339,8 +349,8 @@ export class OpenApiClient {
                 await reuseStore.load();
                 manifestLoadMs = Number(process.hrtime.bigint() - loadStart) / 1e6;
                 reportBasePath = reuseStore.getRootPath();
-                if (items.some(item => item.modelsMode === ModelsMode.CLASSES)) {
-                    this.writeClient.logger.warn('ReuseStore is disabled for modelsMode=classes; falling back to entity cache for those items');
+                if (items.some(item => isClassesBundleLayout(item.modelsMode, item.modelsLayout))) {
+                    this.writeClient.logger.warn('ReuseStore is disabled for modelsMode=classes with layout=bundle; falling back to entity cache for those items');
                 }
             }
 
@@ -396,7 +406,7 @@ export class OpenApiClient {
             for (const option of items) {
                 const fileStart = process.hrtime.bigint();
                 const generationCache =
-                    cacheEnabled && (cacheStrategy === 'entity' || (cacheStrategy === 'reuse' && option.modelsMode === ModelsMode.CLASSES))
+                    cacheEnabled && (cacheStrategy === 'entity' || (cacheStrategy === 'reuse' && isClassesBundleLayout(option.modelsMode, option.modelsLayout)))
                         ? (generationCaches.get(this.resolveOutputRoot(option.output)) ?? null)
                         : null;
                 let reuseHits = 0;
@@ -670,6 +680,8 @@ export class OpenApiClient {
             useHistory,
             diffReport,
             modelsMode = ModelsMode.INTERFACES,
+            modelsLayout = ModelsLayout.BUNDLE,
+            miracles,
             strictOpenapi,
             reportFile,
             failOnGovernanceErrors,
@@ -686,8 +698,9 @@ export class OpenApiClient {
         });
         const absoluteInput = resolveHelper(process.cwd(), input);
         const cacheKey = this.getCacheKey(item, absoluteInput);
-        const useEntityCache = item.cache && generationCache !== null && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && item.modelsMode === ModelsMode.CLASSES));
-        const useReuseStore = item.cache && item.cacheStrategy === 'reuse' && reuseContext?.reuseStore != null && item.modelsMode !== ModelsMode.CLASSES;
+        const useEntityCache =
+            item.cache && generationCache !== null && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && isClassesBundleLayout(item.modelsMode, item.modelsLayout)));
+        const useReuseStore = item.cache && item.cacheStrategy === 'reuse' && reuseContext?.reuseStore != null && !isClassesBundleLayout(item.modelsMode, item.modelsLayout);
         const cacheFingerprint = useEntityCache ? await this.getCacheFingerprint(item, absoluteInput) : '';
         const specInput = this.getSpecItemName(item.input);
         const optionsSlice = buildOptionsSlice(item);
@@ -778,6 +791,7 @@ export class OpenApiClient {
                     openApiVersion,
                     diffReport: diffReportData,
                     context,
+                    miracles,
                 });
                 const clientFinal = postProcessClient(clientWithDiff);
                 const clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
@@ -798,6 +812,7 @@ export class OpenApiClient {
                     validationLibrary,
                     emptySchemaStrategy,
                     modelsMode,
+                    modelsLayout,
                     prettierConfigPath,
                     reuseStore: useReuseStore ? reuseContext!.reuseStore! : undefined,
                     optionsSlice: useReuseStore ? optionsSlice : undefined,
@@ -822,6 +837,7 @@ export class OpenApiClient {
                     openApiVersion,
                     diffReport: diffReportData,
                     context,
+                    miracles,
                 });
                 const clientFinal = postProcessClient(clientWithDiff);
                 const clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
@@ -842,6 +858,7 @@ export class OpenApiClient {
                     validationLibrary,
                     emptySchemaStrategy,
                     modelsMode,
+                    modelsLayout,
                     prettierConfigPath,
                     reuseStore: useReuseStore ? reuseContext!.reuseStore! : undefined,
                     optionsSlice: useReuseStore ? optionsSlice : undefined,
@@ -857,7 +874,7 @@ export class OpenApiClient {
             }
         }
         const generatedFiles = this.writeClient.getExpectedOutputFilesArray().filter(filePath => !knownFilesBefore.has(filePath));
-        if (item.cache && generationCache && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && item.modelsMode === ModelsMode.CLASSES))) {
+        if (item.cache && generationCache && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && isClassesBundleLayout(item.modelsMode, item.modelsLayout)))) {
             generationCache.set({
                 key: cacheKey,
                 fingerprint: cacheFingerprint,
@@ -906,6 +923,7 @@ export class OpenApiClient {
                 useHistory: item.useHistory,
                 diffReport: item.diffReport,
                 modelsMode: item.modelsMode,
+                modelsLayout: item.modelsLayout,
                 strictOpenapi: item.strictOpenapi,
                 failOnGovernanceErrors: item.failOnGovernanceErrors,
             },
@@ -977,7 +995,14 @@ export class OpenApiClient {
         });
     }
 
-    private applyDiffReportIfNeeded(params: { client: Client; openApi: Record<string, unknown>; openApiVersion: OpenApiVersion; diffReport: DiffReport | null; context: Context }): Client {
+    private applyDiffReportIfNeeded(params: {
+        client: Client;
+        openApi: Record<string, unknown>;
+        openApiVersion: OpenApiVersion;
+        diffReport: DiffReport | null;
+        context: Context;
+        miracles?: TStrictFlatOptions['miracles'];
+    }): Client {
         if (!params.diffReport) {
             return params.client;
         }
@@ -989,6 +1014,7 @@ export class OpenApiClient {
             diffReport: params.diffReport,
             prefix: params.context.prefix,
             context: params.context,
+            miraclesConfig: params.miracles,
         });
     }
 

@@ -13,6 +13,7 @@ export interface Templates {
         client: Handlebars.TemplateDelegate;
         model: Handlebars.TemplateDelegate;
         models: Handlebars.TemplateDelegate;
+        classesModel: Handlebars.TemplateDelegate;
         schema: Handlebars.TemplateDelegate;
         service: Handlebars.TemplateDelegate;
     };

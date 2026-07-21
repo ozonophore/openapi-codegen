@@ -71,7 +71,8 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 | `--validationLibrary` | - | string | `none` | Библиотека валидации для генерации схем: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
 | `--emptySchemaStrategy` | - | string | `keep` | Стратегия для пустых схем: `keep`, `semantic`, или `skip` |
 | `--modelsMode` | - | string | `interfaces` | Режим генерации моделей: `interfaces` или `classes` |
-| `--useHistory` | - | boolean | `false` | Применять diff-отчёт при генерации |
+| `--modelsLayout` | - | string | `bundle` | Раскладка файлов для `classes`: `bundle` (один `models.ts`) или `per-file` (один Raw+Dto файл на `model.path`). Nested: `models.layout` |
+| `--useHistory` | - | boolean | `false` | Применять аннотации diff-отчёта при генерации |
 | `--diffReport` | - | string | `./.openapi-codegen-reports/openapi-diff-report.json` | Путь к diff-отчёту |
 | `--prettierConfigPath` | - | string | - | Путь к файлу конфигурации Prettier; если файл существует, сгенерированный код форматируется по нему, иначе используются встроенные настройки |
 | `--tsconfigPath` | - | string | - | Путь к `tsconfig.json` для пакетного ESLint `--fix` после генерации (нужен `--eslintConfigPath`) |
@@ -214,7 +215,7 @@ openapi-codegen-cli analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 
 #### Miracles и подтверждение
 
-В diff‑отчёте unified v2.0.0 может быть раздел `structural.miracles` с обнаруженными переименованиями/коэрсингом типов. В генерации применяются только подтверждённые записи.
+В diff‑отчёте unified v2.0.0 может быть раздел `structural.miracles` с обнаруженными переименованиями/коэрсингом типов. По умолчанию в генерации применяются miracles со `status: "confirmed"` **или** `confidence === 1`. Дополнительно можно сузить или отключить их через конфиг `miracles.{enabled,confidence,types}` (наследование root→items).
 
 **Как подтверждать чудеса:**
 1. Запустите `analyze-diff` и откройте отчёт (по умолчанию: `./.openapi-codegen-reports/openapi-diff-report.json`).
