@@ -56,6 +56,7 @@ export const analyzeUsage = async (options: OptionValues): Promise<CLICommandRes
             const diffReportPath = path.resolve(validatedOptions.diffReport);
             const diffReport = loadDiffReport({
                 diffReport: diffReportPath,
+                useHistory: true,
                 logger: APP_LOGGER,
             });
 

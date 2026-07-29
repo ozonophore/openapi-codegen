@@ -9,7 +9,7 @@
 ## Цели / Не-цели
 
 **Цели:**
-- Реализовать все пять core-модулей согласно PDD.md
+- Реализовать все пять core-модулей согласно `openspec/research/PDD.md`
 - Подключить их к `OpenApiClient` и `WriteClient` в существующий пайплайн
 - Пробросить новые поля через `TFlatOptions` / `TStrictFlatOptions`
 - Экспортировать публичные API из `src/core/index.ts`

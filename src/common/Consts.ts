@@ -1,5 +1,6 @@
 import { EmptySchemaStrategy } from '../core/types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../core/types/enums/HttpClient.enum';
+import { ModelsLayout } from '../core/types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../core/types/enums/ModelsMode.enum';
 import { ValidationLibrary } from '../core/types/enums/ValidationLibrary.enum';
 import { ELogLevel, ELogOutput } from './Enums';
@@ -42,7 +43,8 @@ export const COMMON_DEFAULT_OPTIONS_VALUES: TStrictFlatOptions = {
     useHistory: false,
     diffReport: DEFAULT_ANALYZE_DIFF_REPORT_PATH,
     modelsMode: ModelsMode.INTERFACES,
-    models: {},
+    modelsLayout: ModelsLayout.BUNDLE,
+    models: { layout: ModelsLayout.BUNDLE },
     analyze: {},
     miracles: {},
     strictOpenapi: false,

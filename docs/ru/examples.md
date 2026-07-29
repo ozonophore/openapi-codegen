@@ -302,7 +302,19 @@ openapi-codegen-cli generate
 
 **С DTO моделями (режим classes):**
 ```bash
+# Default layout: один models.ts (bundle)
 openapi-codegen-cli generate --input ./spec.json --output ./dist --modelsMode classes
+
+# Per-file: один Raw+Dto файл на model.path (рекомендуется для новых проектов)
+openapi-codegen-cli generate --input ./spec.json --output ./dist --modelsMode classes --modelsLayout per-file
+```
+
+Эквивалент в конфиге:
+```json
+{
+  "modelsMode": "classes",
+  "models": { "layout": "per-file" }
+}
 ```
 
 **Сгенерировать diff-отчёт:**

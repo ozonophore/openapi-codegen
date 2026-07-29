@@ -1,0 +1,13 @@
+{
+    "httpClient": "fetch",
+    "customExecutorPath": "./example/executor.ts",
+    "useUnionTypes": true,
+    "sortByRequired": true,
+    "modelsMode": "classes",
+    "models": {
+        "mode": "classes",
+        "layout": "per-file"
+    },
+    "input": "./test/spec/v3.json",
+    "output": "./test/generated/v3-classes-per-file/"
+}

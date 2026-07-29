@@ -4,6 +4,23 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.1.0-beta.14] — 2026-07-25
+
+### Добавлено
+
+- **`models.layout` / `--modelsLayout`**: `bundle` (по умолчанию) | `per-file` для `modelsMode: classes`. Per-file сохраняет один файл Raw+Dto на `model.path` (топология как у `interfaces`) без ломки существующих потребителей bundle.
+- Runtime-фильтрация конфига `miracles.{enabled,confidence,types}` (раньше только в схеме) с наследованием root→items.
+- Yup boolean `needsCoercion` transform (паритет с Zod/Joi string→boolean).
+
+### Исправлено
+
+- `analyze-usage --diff-report` теперь передаёт `useHistory: true`, чтобы RENAME post-check мог загрузить отчёт.
+- ReuseStore включён для `modelsMode: classes` при `layout: per-file` (для `bundle` по-прежнему entity-cache fallback).
+
+### Изменено
+
+- Документация: опции layout для classes; в CHANGELOG beta.9 формулировка про hash отчёта исправлена на MD5 (как в коде).
+
 ## [2.1.0-beta.13] — 2026-07-17
 
 Marauder Phase 2 (preview): workspace-отчёты, манифесты Avatar Swarm, хелпер TrafficSplitter, предгенерационный cross-spec анализ и `reuseMode: "auto-group"`, плюс укрепление ReuseStore и entity-кэша. Возможности по-прежнему opt-in (см. Известные ограничения).
@@ -145,7 +162,7 @@ Marauder refocus preview: проектно-зависимый auto-select, ан�
 ### Известные ограничения (preview)
 - `--auto-select` применяется при генерации из `openapi.config.json` или merged multi-item конфигов
 - `specAnalysis` сообщает о проблемах качества; спеки автоматически не исправляет
-- Reuse store требует `modelsMode: "interfaces"` (по умолчанию); режим classes отключает reuse артефактов
+- Reuse store требует `modelsMode: "interfaces"` (по умолчанию) **или** `modelsMode: "classes"` с `models.layout: "per-file"`; layout `bundle` отключает reuse артефактов (entity-cache fallback)
 - Shallow merge для Marauder config blocks (не recursive deep merge)
 
 ## [2.1.0-beta.10] — 2026-06-19
@@ -193,7 +210,7 @@ Marauder refocus preview: проектно-зависимый auto-select, ан�
 ## [2.1.0-beta.9] — 2026-06-10
 
 ### Добавлено
-- Добавлен унифицированный diff-отчёт `schemaVersion: "2.0.0"` с секциями `semantic` и `structural`, а также `metadata` (пути base/target, SHA-256 хеши, timestamp).
+- Добавлен унифицированный diff-отчёт `schemaVersion: "2.0.0"` с секциями `semantic` и `structural`, а также `metadata` (пути base/target, **MD5** хеши сериализованных спек, timestamp). Примечание: в ранней формулировке changelog ошибочно указывался SHA-256; в коде используется MD5 (`createSpecHash` в `analyzeDiff.ts`).
 - Добавлен слой адаптации semantic→structural (`adaptSemanticToStructural`, `semanticChangesToDiffEntries`, `semanticPointerToJsonPath`).
 - Добавлен `buildMiraclesFromSemanticChanges` — автоматическое обнаружение RENAME (эвристика Levenshtein) и TYPE_COERCION miracles из semantic-изменений свойств.
 - Добавлено селективное раскрытие `$ref` для analyze-diff (`expandOpenApiRefsForSemanticDiff`, `loadSemanticOpenApiSpec`) вместо полного dereference.

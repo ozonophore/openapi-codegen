@@ -3,6 +3,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 junit.xml
+skills-lock.json
 
 .DS_Store
 .tmp
@@ -13,6 +14,7 @@ junit.xml
 .ts-openapi-codegen-diff-changes
 .openapi-codegen-reports
 .openapi-codegen-store
+.agents
 
 *.iml
 dist

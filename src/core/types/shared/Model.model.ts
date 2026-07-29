@@ -66,6 +66,11 @@ export interface Model extends Schema {
     dtoToJSON?: string;
     dtoTarget?: string;
     dtoKind?: 'class' | 'alias';
+    dtoImports?: {
+        rawName: string;
+        dtoName: string;
+        path: string;
+    }[];
     dtoGetters?: {
         oldName: string;
         newName: string;

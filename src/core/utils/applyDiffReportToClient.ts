@@ -21,6 +21,12 @@ import { getServiceClassName } from './getServiceClassName';
 import type { DiffReport, DiffReportEntry } from './loadDiffReport';
 import { ensureService } from './serviceHelpers';
 
+type MiraclesConfig = {
+    enabled?: boolean;
+    confidence?: number;
+    types?: Array<'RENAME' | 'TYPE_COERCION'>;
+};
+
 type ApplyDiffParams = {
     client: Client;
     openApi: Record<string, unknown>;
@@ -28,6 +34,24 @@ type ApplyDiffParams = {
     diffReport: DiffReport | null;
     prefix: PrefixArtifacts;
     context?: Context;
+    miraclesConfig?: MiraclesConfig;
+};
+
+const passesMiracleFilter = (miracle: MiracleEntry, miraclesConfig?: MiraclesConfig): boolean => {
+    if (miraclesConfig?.enabled === false) {
+        return false;
+    }
+    if (miraclesConfig?.types && miraclesConfig.types.length > 0 && !miraclesConfig.types.includes(miracle.type as 'RENAME' | 'TYPE_COERCION')) {
+        return false;
+    }
+    if (miracle.status === 'confirmed') {
+        return true;
+    }
+    if (typeof miraclesConfig?.confidence === 'number') {
+        return (miracle.confidence ?? 0) >= miraclesConfig.confidence;
+    }
+    // HEAD default when miracles block is omitted or has no confidence override
+    return miracle.confidence === 1;
 };
 
 type OperationMatch = {
@@ -476,11 +500,11 @@ const applyMiracleTypeCoercions = (client: Client, confirmedMiracles: MiracleEnt
  * @param [context] контекст генерации для разрешения имён схем
  * @returns клиент с аннотациями diff
  */
-export const applyDiffReportToClient = ({ client, openApi, openApiVersion, diffReport, prefix, context }: ApplyDiffParams): Client => {
+export const applyDiffReportToClient = ({ client, openApi, openApiVersion, diffReport, prefix, context, miraclesConfig }: ApplyDiffParams): Client => {
     const entries = diffReport?.diff?.all ?? [];
     const schemaNameMap = buildSchemaNameMap(openApi, openApiVersion, prefix, context);
     const confirmedMiracles = (diffReport?.miracles ?? [])
-        .filter(miracle => miracle.status === 'confirmed' || miracle.confidence === 1)
+        .filter(miracle => passesMiracleFilter(miracle, miraclesConfig))
         .map(miracle => {
             const oldSegments = parseJsonPath(miracle.oldPath);
             const newSegments = parseJsonPath(miracle.newPath);
