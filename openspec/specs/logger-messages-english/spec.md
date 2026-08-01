@@ -1,3 +1,11 @@
+## Purpose
+
+Cross-cutting policy: English-only runtime strings, LOGGER_MESSAGES centralization.
+
+**Referenced from baseline:** `config-management`, `generation-cache-and-reuse`, `code-generation`.
+
+## Requirements
+
 ### Requirement: LOGGER_MESSAGES is for logger output only
 `LOGGER_MESSAGES` and `LOGGER_ERROR_RECOMMENDATIONS` in `src/common/LoggerMessages.ts` are the single source of truth exclusively for strings that flow through the `logger` object (`logger.info`, `logger.warn`, `logger.error`, etc.). UI labels (interactive dialog choices, hints), CLI option description strings, and other non-logger text SHALL NOT be placed in `LOGGER_MESSAGES`. Such strings belong inline at their point of use or in a dedicated UI constants file.
 

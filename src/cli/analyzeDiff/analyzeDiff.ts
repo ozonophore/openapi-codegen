@@ -104,7 +104,7 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
 
         const governancePolicy = await loadGovernanceConfig(validatedOptions.governanceConfig);
         const ignoreRules = loadIgnoreRules(validatedOptions.openapiConfig);
-        const plugins = await loadGeneratorPlugins(resolvePluginPaths(validatedOptions.openapiConfig));
+        const plugins = await loadGeneratorPlugins(resolvePluginPaths(validatedOptions.openapiConfig, validatedOptions.plugins));
 
         const baseReport = analyzeOpenApiDiff(oldSpec, newSpec, {
             allowBreaking: validatedOptions.allowBreaking ?? false,

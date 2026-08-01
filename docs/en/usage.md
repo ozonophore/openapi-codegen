@@ -213,11 +213,11 @@ openapi-codegen-cli analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 - `--output-report` - Path to save JSON diff report (default: `./.openapi-codegen-reports/openapi-diff-report.json`)
 - `--openapi-config` / `-ocn` - Path to configuration file (default: `openapi.config.json`); v2 plugin hooks load `plugins` from this file
 - `--governance-config` - Path to governance rules JSON config file
-- `--strict-plugin-mode` - Fail when a plugin hook throws (default: log and continue)
+- `--strict-plugin-mode` - Fail when a plugin hook throws on `analyze-diff`, or when `resolveSchemaTypeOverride` throws on `generate` (default: log and continue)
 - `--ci` - Exit with code 1 when governance errors are found
 - `--allow-breaking` - Allow breaking changes in governance checks
 
-**Plugin hooks (v2):** register plugin module paths in `plugins` inside `openapi.config.json`. See [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
+**Plugin hooks (v2):** register plugin module paths in `plugins` inside `openapi.config.json`, or pass `--plugins` on `analyze-diff` / `generate`. See [Plugins](plugins.md) and [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
 
 #### Miracles and confirmation
 

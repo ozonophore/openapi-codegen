@@ -1,3 +1,11 @@
+## Purpose
+
+Auto-group reuse: LCA resolution, `__shared__` folder, stubs, barrel integration.
+
+**Baseline:** `document-service-baseline/generation-cache-and-reuse`.
+
+## Requirements
+
 ### Requirement: OutputGroupResolver находит LCA для output-путей
 `resolveOutputGroups(absoluteOutputPaths: string[])` ДОЛЖЕН находить Longest Common Ancestor (LCA) для двух и более путей. Если LCA тривиален (корень ФС, `/`, или совпадает с одним из входных путей) — ДОЛЖЕН возвращать `null` как сигнал для fallback к copy-based reuse.
 

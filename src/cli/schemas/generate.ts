@@ -42,6 +42,8 @@ const generateOptionsBaseSchema = z
         swarm: swarmConfigSchemaOrBoolean.optional(),
         preAnalyze: z.boolean().optional(),
         reuseMode: z.enum(['copy', 'auto-group']).optional(),
+        plugins: z.array(z.string()).optional(),
+        strictPluginMode: z.boolean().optional(),
     })
     .superRefine((data, ctx) => {
         const hasDirectMode = !!(data.input?.trim() && data.output?.trim());

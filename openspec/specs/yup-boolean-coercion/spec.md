@@ -2,6 +2,8 @@
 
 Yup boolean schema coercion when `needsCoercion` is set, parity with Zod/Joi branches.
 
+**Baseline:** `document-service-baseline/generated-client-output`.
+
 ## Requirements
 
 ### Requirement: Yup boolean coercion when needsCoercion

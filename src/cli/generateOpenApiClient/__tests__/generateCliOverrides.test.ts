@@ -158,4 +158,27 @@ describe('@unit: generateCliOverrides', () => {
 
         assert.strictEqual(merged.modelsMode, 'interfaces');
     });
+
+    test('mergeGenerateCliOverrides merges CLI plugins into per-item plugins', () => {
+        const merged = mergeGenerateCliOverrides(
+            {
+                plugins: ['./root.cjs'],
+                items: [
+                    { input: './a.yaml', output: './out-a', plugins: ['./item-a.cjs'] },
+                    { input: './b.yaml', output: './out-b' },
+                ],
+            } as any,
+            { plugins: ['./from-cli.cjs'] } as any
+        );
+
+        assert.deepStrictEqual(
+            (merged.plugins as { path: string }[]).map(entry => entry.path),
+            ['./root.cjs', './from-cli.cjs']
+        );
+        assert.deepStrictEqual(
+            (merged.items![0].plugins as { path: string }[]).map(entry => entry.path),
+            ['./item-a.cjs', './from-cli.cjs']
+        );
+        assert.strictEqual(merged.items![1].plugins, undefined);
+    });
 });

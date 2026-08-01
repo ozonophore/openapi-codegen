@@ -66,6 +66,8 @@ export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOptio
                 confidence: 1,
                 types: ['RENAME', 'TYPE_COERCION'],
             },
+            // Optional: generator / analyze-diff plugins (paths or { path, name?, config? })
+            plugins: [],
         };
     } else {
         if (validatedSpecs.length === 0) {
@@ -104,6 +106,7 @@ export async function buildConfig(validatedSpecs: ValidatedSpec[], useMultiOptio
                 confidence: 1,
                 types: ['RENAME', 'TYPE_COERCION'],
             },
+            plugins: [],
         };
     }
 }
@@ -148,6 +151,7 @@ export function buildExampleConfig(useMultiOption: boolean, httpConfig?: HttpCon
                 confidence: 1,
                 types: ['RENAME', 'TYPE_COERCION'],
             },
+            plugins: [],
         };
     } else {
         return {
@@ -180,6 +184,7 @@ export function buildExampleConfig(useMultiOption: boolean, httpConfig?: HttpCon
                 confidence: 1,
                 types: ['RENAME', 'TYPE_COERCION'],
             },
+            plugins: [],
         };
     }
 }

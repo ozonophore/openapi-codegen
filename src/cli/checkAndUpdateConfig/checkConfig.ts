@@ -10,6 +10,7 @@ import { ACTION_FOR_CONFIG_DATA_OPTIONS } from './constants';
 import { selectConfigAction } from './utils/selectConfigAction';
 import { validateAndMigrateConfigData } from './utils/validateAndMigrateConfigData';
 import { validateExecutorSetup } from './utils/validateExecutorSetup';
+import { validatePluginPaths } from './utils/validatePluginPaths';
 
 /**
  * Проверяет конфигурационный файл на корректность и актуальность.
@@ -45,6 +46,11 @@ export async function checkConfig(options: OptionValues): Promise<CLICommandResu
         const executorWarnings = validateExecutorSetup(migratedData);
         for (const warning of executorWarnings) {
             APP_LOGGER.warn(`Executor config: ${warning}`);
+        }
+
+        const pluginWarnings = validatePluginPaths(migratedData as Record<string, unknown>);
+        for (const warning of pluginWarnings) {
+            APP_LOGGER.warn(`Plugin config: ${warning}`);
         }
 
         APP_LOGGER.info(LOGGER_MESSAGES.CONFIG.CONFIG_VALID(validatedOptions.openapiConfig || ''));

@@ -5,6 +5,8 @@ Shared client core under Marauder `reuseMode: "auto-group"`: eligible core files
 `{LCA}/__shared__/core/` with stubs in each item’s `core/`, gated by content hash and
 transport fingerprint (root vs per-item `request`).
 
+**Baseline:** `document-service-baseline/generation-cache-and-reuse`.
+
 ## Requirements
 
 ### Requirement: переиспользуемые core-файлы размещаются в __shared__/core

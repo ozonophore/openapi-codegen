@@ -13,8 +13,9 @@ export { generateTrafficSplitterModule } from './migration/generateTrafficSplitt
 export { TrafficSplitter } from './migration/TrafficSplitter';
 export type { SessionStats, TrafficSplitterConfig, TrafficSplittingResult } from './migration/types';
 export type { OpenApiGeneratorPlugin, SchemaTypeOverrideContext, SchemaTypeOverrideInput, TOpenApiVersion } from './plugins';
-export type { ApplySemanticDiffPluginHooksResult, PluginHookDiagnostic, PluginHookName } from './plugins';
-export { applySemanticDiffPluginHooks } from './plugins';
+export type { ApplySemanticDiffPluginHooksResult, LoadGeneratorPluginsOptions, PluginHookDiagnostic, PluginHookName } from './plugins';
+export type { NormalizedPluginEntry, PluginConfigEntry, PluginConfigObject } from './plugins';
+export { applySemanticDiffPluginHooks, extractPluginPaths, loadGeneratorPlugins, mergePluginPaths, normalizePluginEntry } from './plugins';
 export type { ConsumerProjectInfo, ProbeOptions, ProjectContextOptions, UnifiedProjectProfile } from './projectProbe';
 export { ProjectContext, ProjectProbe } from './projectProbe';
 export type { OptionsSlice, ReuseLookupResult, ReuseStoreManifest } from './reuseStore';

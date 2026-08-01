@@ -167,10 +167,30 @@ export function buildOptionsSlice(options: TStrictFlatOptions): OptionsSlice {
             if (typeof plugin === 'string') {
                 return { name: plugin, config: {} as Record<string, unknown> };
             }
-            if (typeof plugin === 'object' && plugin !== null && 'name' in plugin) {
-                const p = plugin as { name: string; [key: string]: unknown };
-                const { name, ...config } = p;
-                return { name: String(name), config: config as Record<string, unknown> };
+            if (typeof plugin === 'object' && plugin !== null) {
+                const p = plugin as { path?: unknown; name?: unknown; config?: unknown };
+                if (typeof p.path === 'string' && p.path.trim()) {
+                    const name = typeof p.name === 'string' && p.name.trim() ? p.name.trim() : p.path;
+                    const config = p.config && typeof p.config === 'object' && !Array.isArray(p.config) ? (p.config as Record<string, unknown>) : ({} as Record<string, unknown>);
+                    return { name, config };
+                }
+                if (typeof p.name === 'string' && p.name.trim()) {
+                    const entry = p as {
+                        name: string;
+                        path?: unknown;
+                        config?: unknown;
+                        [key: string]: unknown;
+                    };
+                    const rest: Record<string, unknown> = {};
+                    for (const [key, value] of Object.entries(entry)) {
+                        if (key !== 'name' && key !== 'path' && key !== 'config') {
+                            rest[key] = value;
+                        }
+                    }
+                    const explicitConfig = entry.config;
+                    const config = explicitConfig && typeof explicitConfig === 'object' && !Array.isArray(explicitConfig) ? (explicitConfig as Record<string, unknown>) : rest;
+                    return { name: String(entry.name), config };
+                }
             }
             return null;
         })
@@ -190,6 +210,7 @@ export function buildOptionsSlice(options: TStrictFlatOptions): OptionsSlice {
         useSeparatedIndexes: options.useSeparatedIndexes,
         httpClient: options.httpClient,
         prettierConfigPath: options.prettierConfigPath,
+        disableBuiltinPlugins: options.disableBuiltinPlugins ?? false,
         pluginsHash: hashFingerprint(stableStringify(pluginEntries)),
     };
 }

@@ -22,6 +22,7 @@ import { Context } from './Context';
 import { loadGovernanceConfig } from './governance/loadGovernanceConfig';
 import { generateTrafficSplitterModule } from './migration/generateTrafficSplitterModule';
 import { loadGeneratorPlugins } from './plugins/loadGeneratorPlugins';
+import { extractPluginPaths } from './plugins/pluginEntries';
 import { buildModelSchemaMap, ReuseStore } from './reuseStore';
 import { buildOptionsSlice } from './reuseStore/ArtifactFingerprinter';
 import type { GenerationReport, ReuseConflictRecord, SpecGenerationStats } from './reuseStore/GenerationReport';
@@ -59,7 +60,7 @@ import { WriteClient } from './WriteClient';
  * Оркестратор генерации OpenAPI-клиента: парсинг спецификации, применение diff-отчёта и запись артефактов.
  */
 export class OpenApiClient {
-    private static readonly CACHE_FINGERPRINT_VERSION = 1;
+    private static readonly CACHE_FINGERPRINT_VERSION = 2;
     private static readonly DEFAULT_CACHE_FILENAME = '.openapi-codegen-cache.json';
     private _writeClient: WriteClient | null = null;
     private specAnalysisAccumulator: SpecAnalysisAccumulator | null = null;
@@ -101,6 +102,8 @@ export class OpenApiClient {
                 anomalyDetection: this.mergeItemMarauderBlock(rawOptions.anomalyDetection, (item as TFlatOptions).anomalyDetection),
                 request: item.request ?? rawOptions.request, // ?? для fallback на глобальный
                 plugins: item.plugins ?? rawOptions.plugins,
+                disableBuiltinPlugins: (item as TFlatOptions).disableBuiltinPlugins ?? rawOptions.disableBuiltinPlugins,
+                strictPluginMode: (item as TFlatOptions).strictPluginMode ?? rawOptions.strictPluginMode,
                 customExecutorPath: rawOptions.customExecutorPath,
                 useOptions: rawOptions.useOptions,
                 useUnionTypes: rawOptions.useUnionTypes,
@@ -152,6 +155,8 @@ export class OpenApiClient {
                     excludeCoreServiceFiles: rawOptions.excludeCoreServiceFiles,
                     request: rawOptions.request,
                     plugins: rawOptions.plugins,
+                    disableBuiltinPlugins: rawOptions.disableBuiltinPlugins,
+                    strictPluginMode: rawOptions.strictPluginMode,
                     customExecutorPath: rawOptions.customExecutorPath,
                     interfacePrefix: rawOptions.interfacePrefix,
                     enumPrefix: rawOptions.enumPrefix,
@@ -199,6 +204,8 @@ export class OpenApiClient {
             excludeCoreServiceFiles: item.excludeCoreServiceFiles ?? COMMON_DEFAULT_OPTIONS_VALUES.excludeCoreServiceFiles,
             request: item.request || COMMON_DEFAULT_OPTIONS_VALUES.request,
             plugins: item.plugins || COMMON_DEFAULT_OPTIONS_VALUES.plugins,
+            disableBuiltinPlugins: item.disableBuiltinPlugins ?? COMMON_DEFAULT_OPTIONS_VALUES.disableBuiltinPlugins,
+            strictPluginMode: item.strictPluginMode ?? COMMON_DEFAULT_OPTIONS_VALUES.strictPluginMode,
             customExecutorPath: item.customExecutorPath || COMMON_DEFAULT_OPTIONS_VALUES.customExecutorPath,
             interfacePrefix: item.interfacePrefix || COMMON_DEFAULT_OPTIONS_VALUES.interfacePrefix,
             enumPrefix: item.enumPrefix || COMMON_DEFAULT_OPTIONS_VALUES.enumPrefix,
@@ -668,6 +675,8 @@ export class OpenApiClient {
             excludeCoreServiceFiles,
             request,
             plugins,
+            disableBuiltinPlugins,
+            strictPluginMode,
             customExecutorPath,
             interfacePrefix,
             enumPrefix,
@@ -723,13 +732,16 @@ export class OpenApiClient {
             }
         }
         const knownFilesBefore = new Set(this.writeClient.getExpectedOutputFilesArray());
-        const generatorPlugins = await loadGeneratorPlugins(plugins);
+        const generatorPlugins = await loadGeneratorPlugins(extractPluginPaths(plugins), {
+            disableBuiltins: disableBuiltinPlugins,
+        });
         const context = new Context({
             input: absoluteInput,
             output: outputPaths,
             prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix },
             sortByRequired,
             plugins: generatorPlugins,
+            strictPluginMode,
         });
         const openApi = await getOpenApiSpec(context, absoluteInput);
 
@@ -911,6 +923,8 @@ export class OpenApiClient {
                 excludeCoreServiceFiles: item.excludeCoreServiceFiles,
                 request: item.request,
                 plugins: item.plugins,
+                disableBuiltinPlugins: item.disableBuiltinPlugins,
+                strictPluginMode: item.strictPluginMode,
                 customExecutorPath: item.customExecutorPath,
                 interfacePrefix: item.interfacePrefix,
                 enumPrefix: item.enumPrefix,

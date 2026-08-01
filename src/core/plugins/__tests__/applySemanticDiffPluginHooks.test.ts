@@ -81,6 +81,25 @@ describe('@unit: applySemanticDiffPluginHooks', () => {
         assert.ok(result.diagnostics.every(item => item.status === 'applied'));
     });
 
+    test('beforeReportWrite empty result is skipped', async () => {
+        const plugin: OpenApiGeneratorPlugin = {
+            name: 'noop-before-write',
+            apiVersion: '2',
+            beforeReportWrite: () => ({}),
+        };
+
+        const result = await applySemanticDiffPluginHooks({
+            report: createBaseReport(),
+            reportPath: './report.json',
+            plugins: [plugin],
+            allowBreaking: false,
+            strictPluginMode: false,
+        });
+
+        assert.strictEqual(result.reportPath, './report.json');
+        assert.ok(result.diagnostics.some(item => item.hook === 'beforeReportWrite' && item.status === 'skipped'));
+    });
+
     test('non-strict mode keeps working when plugin hook fails', async () => {
         const faultyPlugin: OpenApiGeneratorPlugin = {
             name: 'faulty-plugin',

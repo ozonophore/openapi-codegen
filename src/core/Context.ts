@@ -2,6 +2,7 @@
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import { basename, isAbsolute } from 'path';
 
+import { APP_LOGGER } from '../common/Consts';
 import { dirNameHelper, normalizeHelper, relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
 import { OpenApiGeneratorPlugin, SchemaTypeOverrideContext } from './plugins/GeneratorPlugin.model';
 import { OutputPaths } from './types/base/OutputPaths.model';
@@ -18,6 +19,7 @@ type TContextProps = {
     prefix?: PrefixArtifacts;
     sortByRequired?: boolean;
     plugins?: OpenApiGeneratorPlugin[];
+    strictPluginMode?: boolean;
 };
 
 type RefsLike = {
@@ -55,12 +57,13 @@ export class Context {
 
     private _sortByRequired: boolean = false;
     private _plugins: OpenApiGeneratorPlugin[] = [];
+    private _strictPluginMode: boolean = false;
 
     private specRoot!: string;
     private entryFile?: string;
     private virtualFiles: VirtualFileMap = new Map();
 
-    constructor({ input, output, prefix, sortByRequired, plugins }: TContextProps) {
+    constructor({ input, output, prefix, sortByRequired, plugins, strictPluginMode }: TContextProps) {
         this._output = output;
         this._refs = {} as RefsLike;
         if (isString(input)) {
@@ -77,6 +80,7 @@ export class Context {
         }
 
         this._plugins = plugins || [];
+        this._strictPluginMode = strictPluginMode ?? false;
 
         return this;
     }
@@ -143,9 +147,20 @@ export class Context {
      */
     public resolveSchemaTypeOverride(schema: Record<string, any>, context: SchemaTypeOverrideContext): string | undefined {
         for (const plugin of this._plugins) {
-            const override = plugin.resolveSchemaTypeOverride?.({ schema, context });
-            if (typeof override === 'string' && override.trim()) {
-                return override.trim();
+            if (!plugin.resolveSchemaTypeOverride) {
+                continue;
+            }
+            try {
+                const override = plugin.resolveSchemaTypeOverride({ schema, context });
+                if (typeof override === 'string' && override.trim()) {
+                    return override.trim();
+                }
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                if (this._strictPluginMode) {
+                    throw new Error(`Plugin "${plugin.name}" failed in resolveSchemaTypeOverride: ${message}`);
+                }
+                APP_LOGGER.warn(`Plugin "${plugin.name}" failed in resolveSchemaTypeOverride: ${message}`);
             }
         }
         return undefined;

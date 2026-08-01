@@ -1,3 +1,11 @@
+## Purpose
+
+Zod validation and CLI merge plumbing for `generate` command flags.
+
+**Baseline:** `document-service-baseline/code-generation`.
+
+## Requirements
+
 ### Requirement: generateOptionsBaseSchema принимает поле workspaceReport
 `generateOptionsBaseSchema` в `src/cli/schemas/generate.ts` ДОЛЖНА включать поле `workspaceReport` с типом `workspaceReportConfigSchemaOrBoolean.optional()`, следуя паттерну `autoSelectConfigSchemaOrBoolean`. Когда поле является булевым `true`, Zod НЕ ДОЛЖЕН его трансформировать; когда это объект — Zod ДОЛЖЕН валидировать его форму (`enabled`, `path`, `format`).
 
@@ -86,3 +94,20 @@
 #### Scenario: CLI скаляр переопределяет скаляр из конфига
 - **WHEN** конфиг содержит `{ reuseMode: "copy" }` и CLI передаёт `--reuse-mode auto-group`
 - **THEN** итоговый результат содержит `reuseMode: "auto-group"`
+
+---
+
+### Requirement: generateOptionsBaseSchema принимает поля plugins и strictPluginMode
+`generateOptionsBaseSchema` в `src/cli/schemas/generate.ts` ДОЛЖНА включать
+`plugins` как `z.array(z.string()).optional()` и `strictPluginMode` как
+`z.boolean().optional()`. `mergeGenerateCliOverrides` ДОЛЖЕН сливать CLI `plugins`
+с конфигом через `mergePluginPaths` и ДОЛЖЕН передавать `strictPluginMode` как scalar
+override.
+
+#### Scenario: Схема принимает plugins и strictPluginMode
+- **WHEN** raw options содержат `plugins: ['./a.cjs']` и `strictPluginMode: true`
+- **THEN** Zod-валидация проходит успешно
+
+#### Scenario: CLI plugins сливаются в конфиг
+- **WHEN** конфиг содержит `plugins: ['./from-config.cjs']`, а CLI передаёт `plugins: ['./from-cli.cjs']`
+- **THEN** в merged config effective plugins включают оба пути в порядке config-first

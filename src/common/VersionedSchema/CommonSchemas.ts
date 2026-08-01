@@ -60,12 +60,24 @@ export const strictModeParametersSchema = z.object({
     failOnGovernanceErrors: z.boolean().optional(),
 });
 
+/** Plugin config entry: path string or object with optional name/config for fingerprints. */
+const pluginConfigEntrySchema = z.union([
+    z.string(),
+    z.object({
+        path: z.string().min(1),
+        name: z.string().optional(),
+        config: z.record(z.string(), z.unknown()).optional(),
+    }),
+]);
+
 /** Additional parameters */
 
 export const additionalParametersSchema = z.object({
     clean: z.boolean().optional(),
     request: z.string().optional(),
-    plugins: z.array(z.string()).optional(),
+    plugins: z.array(pluginConfigEntrySchema).optional(),
+    disableBuiltinPlugins: z.boolean().optional(),
+    strictPluginMode: z.boolean().optional(),
     interfacePrefix: z.string().optional(),
     enumPrefix: z.string().optional(),
     typePrefix: z.string().optional(),
