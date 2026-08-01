@@ -1,8 +1,13 @@
 import { pathToFileURL } from 'node:url';
 
+import { APP_LOGGER } from '../../common/Consts';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { OpenApiGeneratorPlugin } from './GeneratorPlugin.model';
 import { getBuiltinPlugins } from './getBuiltinPlugins';
+
+export type LoadGeneratorPluginsOptions = {
+    disableBuiltins?: boolean;
+};
 
 /**
  * Type guard for runtime plugin objects.
@@ -49,10 +54,25 @@ async function loadPluginModule(pluginPath: string): Promise<unknown> {
     }
 }
 
+function hasV2Hooks(plugin: OpenApiGeneratorPlugin): boolean {
+    return !!(plugin.afterSemanticDiff || plugin.mapRecommendation || plugin.beforeReportWrite);
+}
+
+function warnPluginApiVersion(plugin: OpenApiGeneratorPlugin): void {
+    const apiVersion = plugin.apiVersion;
+    if (apiVersion != null && apiVersion !== '1' && apiVersion !== '2') {
+        APP_LOGGER.warn(`Plugin "${plugin.name}" declares unsupported apiVersion "${String(apiVersion)}". Supported versions are "1" and "2"; Plugin API v3 factory is not shipped.`);
+        return;
+    }
+    if (apiVersion == null && hasV2Hooks(plugin)) {
+        APP_LOGGER.warn(`Plugin "${plugin.name}" implements analyze-diff hooks but omits apiVersion. Set apiVersion: "2" for Plugin API v2.`);
+    }
+}
+
 /**
  * Loads user plugins and appends built-in plugins as fallback handlers.
  */
-export async function loadGeneratorPlugins(pluginPaths: string[]): Promise<OpenApiGeneratorPlugin[]> {
+export async function loadGeneratorPlugins(pluginPaths: string[], options?: LoadGeneratorPluginsOptions): Promise<OpenApiGeneratorPlugin[]> {
     const loadedPlugins: OpenApiGeneratorPlugin[] = [];
 
     for (const pluginPath of pluginPaths) {
@@ -62,7 +82,12 @@ export async function loadGeneratorPlugins(pluginPaths: string[]): Promise<OpenA
         if (!isOpenApiGeneratorPlugin(plugin)) {
             throw new Error(`Invalid plugin at "${pluginPath}": expected export with shape { name: string }`);
         }
+        warnPluginApiVersion(plugin);
         loadedPlugins.push(plugin);
+    }
+
+    if (options?.disableBuiltins) {
+        return loadedPlugins;
     }
 
     return [...loadedPlugins, ...getBuiltinPlugins()];

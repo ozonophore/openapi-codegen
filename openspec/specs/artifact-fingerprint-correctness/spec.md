@@ -3,6 +3,8 @@
 Correct artifact fingerprints: full schema-hash field whitelist, cycle-safe `$ref`
 normalization, order-independent `required`/`enum`, and plugin config in options slice hash.
 
+**Baseline:** `document-service-baseline/generation-cache-and-reuse`.
+
 ## Requirements
 
 ### Requirement: SCHEMA_HASH_KEYS содержит полный набор семантически значимых полей
@@ -52,13 +54,20 @@ normalization, order-independent `required`/`enum`, and plugin config in options
 ---
 
 ### Requirement: optionsSlice включает конфигурацию плагинов
-`buildOptionsSlice` ДОЛЖЕН включать сериализованную конфигурацию каждого плагина
-(не только имя). Изменение конфигурации плагина ДОЛЖНО приводить к смене `optionsSliceHash`.
+`buildOptionsSlice` ДОЛЖЕН включать сериализованную конфигурацию каждой записи плагина
+(не только имя). Object entry `{ path, name?, config? }` ДОЛЖЕН использовать `path` как
+идентификатор (или явный `name`), а `config` — как хешируемые опции. Изменение
+object `config` ДОЛЖНО менять `pluginsHash`. Строковые записи `plugins: ['./p.cjs']` ДОЛЖНЫ
+сохранять прежнее поведение hash.
 
 #### Scenario: изменение конфигурации плагина инвалидирует hash
-- **WHEN** плагин `my-plugin` изменяет опцию с `{ mode: 'a' }` на `{ mode: 'b' }`
-- **THEN** `buildOptionsSlice` возвращает другой hash для нового конфига
+- **WHEN** плагин `{ path: './p.cjs', config: { mode: 'a' } }` меняет config на `{ mode: 'b' }`
+- **THEN** `buildOptionsSlice` возвращает другой `pluginsHash`
 
 #### Scenario: одинаковый конфиг плагина даёт одинаковый hash
-- **WHEN** два конфига с идентичным плагином и его настройками
-- **THEN** `buildOptionsSlice` возвращает одинаковый hash
+- **WHEN** два конфига с идентичной object entry `{ path, name?, config? }`
+- **THEN** `buildOptionsSlice` возвращает одинаковый `pluginsHash`
+
+#### Scenario: path entry без name использует path как ключ
+- **WHEN** записи `{ path: './p.cjs', config: { x: 1 } }` и `{ path: './p.cjs', name: './p.cjs', config: { x: 1 } }`
+- **THEN** `pluginsHash` совпадает

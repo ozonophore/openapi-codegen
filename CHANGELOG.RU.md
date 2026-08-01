@@ -4,6 +4,27 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.1.0-beta.15] — 2026-08-01
+
+### Добавлено
+
+- **`generate --plugins` / `analyze-diff --plugins`**: пути CLI merge с config `plugins` (сначала config, dedupe по path). `--strict-plugin-mode` на `generate`: fail при throw в `resolveSchemaTypeOverride` (по умолчанию: warn и продолжение; ошибки load всегда fatal). Config `strictPluginMode` поддерживается на root / в `items[]`.
+- Записи config `plugins` могут быть `{ path, name?, config? }`, чтобы `pluginsHash` артефактов учитывал реальный config плагина (string paths по-прежнему валидны).
+- `disableBuiltinPlugins` для отключения builtin `x-typescript-type`.
+- Публичный export: `loadGeneratorPlugins`, `mergePluginPaths`, `extractPluginPaths`.
+- Восстановлена документация: `docs/en|ru/plugins.md`, якоря features `#plugin-system` / `#plugin-api-v2-rfc`, example `example/plugins/custom-type.plugin.cjs`.
+- `check-config` предупреждает, если файлы plugin path отсутствуют на диске.
+
+### Исправлено
+
+- Context `preAnalyze` теперь загружает эффективные item/root plugins (не принудительный `[]`).
+- Diagnostics `beforeReportWrite`: `applied` только когда report и/или reportPath реально изменились (пустой `{}` → `skipped`).
+
+### Изменено
+
+- Мягкая инвалидация cache: object-shaped `config` плагина меняет `pluginsHash` (string-only configs без изменений).
+- Loader предупреждает о неподдерживаемом `apiVersion` плагина (не `"1"` / `"2"`); Plugin API v3 factory по-прежнему не shipped.
+
 ## [2.1.0-beta.14] — 2026-07-25
 
 ### Добавлено

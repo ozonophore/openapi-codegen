@@ -1,6 +1,7 @@
 import { TRawOptions } from '../../common/TRawOptions';
 import { mergeMarauderBlockDeep } from '../../common/VersionedSchema/Utils/mergeMarauderBlock';
 import { resolveSpecAnalysisConfig } from '../../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
+import { mergePluginPaths, type PluginConfigEntry } from '../../core/plugins/pluginEntries';
 import { GenerateOptions } from '../schemas';
 
 /** Ключи опций generate, которые CLI может перекрыть поверх конфига (скалярные поля). */
@@ -23,6 +24,7 @@ const GENERATE_CLI_OVERRIDE_KEYS = [
     'modelsLayout',
     'preAnalyze',
     'reuseMode',
+    'strictPluginMode',
 ] as const satisfies readonly (keyof GenerateOptions)[];
 
 /** Keys excluded from `flatOptionsSchema` direct-mode validation (handled elsewhere). */
@@ -91,6 +93,24 @@ export function mergeGenerateCliOverrides(config: TRawOptions, cli: GenerateOpti
         cli.trafficSplitter
     );
     (merged as Record<string, unknown>).swarm = mergeMarauderBlockDeep((config as Record<string, unknown>).swarm as Parameters<typeof mergeMarauderBlockDeep>[0], cli.swarm);
+
+    if (cli.plugins !== undefined) {
+        const cliPluginPaths = cli.plugins as string[];
+        merged.plugins = mergePluginPaths(config.plugins as PluginConfigEntry[] | undefined, cliPluginPaths);
+
+        if (merged.items?.length) {
+            merged.items = merged.items.map(item => {
+                const itemPlugins = (item as { plugins?: PluginConfigEntry[] }).plugins;
+                if (itemPlugins === undefined) {
+                    return item;
+                }
+                return {
+                    ...item,
+                    plugins: mergePluginPaths(itemPlugins, cliPluginPaths),
+                };
+            });
+        }
+    }
 
     return merged;
 }

@@ -227,5 +227,5 @@ Opt-in возможности, добавленные в актуальную с
 
 - Ключ конфигурации: `plugins` (массив путей к модулям)
 - Поддерживаемые форматы модулей: CJS, ESM и TS (если рантайм поддерживает импорт TS)
-- Подробное руководство: [Плагины](features.md#plugin-system)
-- Plugin API v2 (RFC, хуки `analyze-diff`): [Plugin API v2](features.md#plugin-api-v2-rfc)
+- Подробное руководство: [Плагины](plugins.md)
+- Короткие якоря: [features.md#plugin-system](features.md#plugin-system), [Plugin API v2](features.md#plugin-api-v2-rfc)

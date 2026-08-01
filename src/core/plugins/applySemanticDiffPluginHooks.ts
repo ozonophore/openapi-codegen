@@ -154,6 +154,8 @@ export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPlugi
                 reportPath: currentReportPath,
             });
 
+            const previousReport = currentReport;
+            const previousReportPath = currentReportPath;
             if (maybeResult?.report) {
                 currentReport = maybeResult.report;
             }
@@ -161,10 +163,12 @@ export async function applySemanticDiffPluginHooks(input: ApplySemanticDiffPlugi
                 currentReportPath = maybeResult.reportPath;
             }
 
+            const didChange = currentReport !== previousReport || currentReportPath !== previousReportPath;
+
             const diagnostic: PluginHookDiagnostic = {
                 pluginName: plugin.name,
                 hook: 'beforeReportWrite',
-                status: maybeResult ? 'applied' : 'skipped',
+                status: didChange ? 'applied' : 'skipped',
                 durationMs: Date.now() - startedAt,
             };
             diagnostics.push(diagnostic);

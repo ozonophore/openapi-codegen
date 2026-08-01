@@ -80,7 +80,7 @@ Frontend teams love OpenAPI contracts but hate maintaining hand-written HTTP wra
 - [Examples](docs/en/examples.md)
 - [Features](docs/en/features.md)
 - [Migration guide](MIGRATION.md)
-- [Plugins](docs/en/features.md#plugin-system)
+- [Plugins](docs/en/plugins.md)
 - [Plugin API v2 (RFC)](docs/en/features.md#plugin-api-v2-rfc)
 - [Русская версия README](README.rus.md)
 - [Русская документация](docs/ru/usage.md)

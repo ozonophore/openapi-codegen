@@ -207,11 +207,11 @@ openapi-codegen-cli analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 - `--output-report` - Путь для сохранения diff‑отчёта (по умолчанию: `./.openapi-codegen-reports/openapi-diff-report.json`)
 - `--openapi-config` / `-ocn` - Путь к файлу конфигурации (по умолчанию: `openapi.config.json`); v2-хуки плагинов читают `plugins` из этого файла
 - `--governance-config` - Путь к JSON-файлу правил governance
-- `--strict-plugin-mode` - Завершать с ошибкой при исключении в хуке плагина (по умолчанию: лог и продолжение)
+- `--strict-plugin-mode` - Завершать с ошибкой при throw в hook (`analyze-diff`) или в `resolveSchemaTypeOverride` (`generate`; по умолчанию: лог и продолжение)
 - `--ci` - Код выхода 1 при ошибках governance
 - `--allow-breaking` - Разрешить breaking changes в проверках governance
 
-**Хуки плагинов (v2):** укажите пути к модулям в `plugins` внутри `openapi.config.json`. См. [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
+**Хуки плагинов (v2):** укажите пути к модулям в `plugins` внутри `openapi.config.json` или передайте `--plugins` для `analyze-diff` / `generate`. См. [Плагины](plugins.md) и [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
 
 #### Miracles и подтверждение
 

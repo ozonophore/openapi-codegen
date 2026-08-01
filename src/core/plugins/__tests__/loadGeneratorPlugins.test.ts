@@ -70,4 +70,50 @@ describe('@unit: loadGeneratorPlugins', () => {
             rmSync(tempDir, { recursive: true, force: true });
         }
     });
+
+    test('disableBuiltins skips x-typescript-type', async () => {
+        const plugins = await loadGeneratorPlugins([], { disableBuiltins: true });
+        assert.strictEqual(plugins.length, 0);
+    });
+
+    test('warns but loads plugin with unsupported apiVersion', async () => {
+        const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-apiver-'));
+        const pluginPath = join(tempDir, 'v3-plugin.cjs');
+
+        writeFileSync(
+            pluginPath,
+            `module.exports = {
+                name: 'future-v3',
+                apiVersion: '3',
+                resolveSchemaTypeOverride: () => undefined
+            };`
+        );
+
+        try {
+            const plugins = await loadGeneratorPlugins([pluginPath], { disableBuiltins: true });
+            assert.strictEqual(plugins[0]?.name, 'future-v3');
+        } finally {
+            rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    test('warns but loads v2 plugin without apiVersion', async () => {
+        const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-v2-no-apiver-'));
+        const pluginPath = join(tempDir, 'v2-no-apiver.cjs');
+
+        writeFileSync(
+            pluginPath,
+            `module.exports = {
+                name: 'v2-no-apiver',
+                afterSemanticDiff: ({ report }) => report
+            };`
+        );
+
+        try {
+            const plugins = await loadGeneratorPlugins([pluginPath], { disableBuiltins: true });
+            assert.strictEqual(plugins[0]?.name, 'v2-no-apiver');
+        } finally {
+            rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
 });

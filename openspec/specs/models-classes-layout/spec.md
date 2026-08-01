@@ -3,6 +3,8 @@
 Configurable file layout for `modelsMode: classes` (`bundle` default vs `per-file` opt-in),
 including service/barrel imports, ReuseStore gating, CLI override correctness, and DTO peer imports.
 
+**Baseline:** `document-service-baseline/openapi-spec-parsing`, `document-service-baseline/generated-client-output`.
+
 ## Requirements
 
 ### Requirement: Configurable layout for classes mode

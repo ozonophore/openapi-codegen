@@ -1,3 +1,11 @@
+## Purpose
+
+Example config artifact for Marauder multi-spec options.
+
+**Baseline:** `document-service-baseline/code-generation`. Example: `reuseMode: auto-group` requires `cacheStrategy: reuse`.
+
+## Requirements
+
 ### Requirement: новый файл примера конфига для функций Marauder V6
 В директории `example/` ДОЛЖЕН быть создан новый файл `example/openapi.marauder.config.json`. Файл ДОЛЖЕН демонстрировать все пять новых root-уровневых опций Marauder V6 (`workspaceReport`, `trafficSplitter`, `swarm`, `preAnalyze`, `reuseMode`) в реалистичном сценарии multi-spec монорепозитория с как минимум двумя items. Файл ДОЛЖЕН быть валидным `.json` с описательными значениями полей без комментариев, в соответствии с форматом существующего `example/openapi.config.json`. Все поля ДОЛЖНЫ использовать реалистичные, неплейсхолдерные значения, которые пользователь может скопировать и адаптировать.
 

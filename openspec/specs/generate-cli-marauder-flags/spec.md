@@ -1,3 +1,11 @@
+## Purpose
+
+CLI flag surface for Marauder blocks (`--workspace-report`, `--traffic-splitter`, etc.).
+
+**Baseline:** `document-service-baseline/code-generation`.
+
+## Requirements
+
 ### Requirement: Config validation error recommendation is version-agnostic
 The recommendation message shown when `CONFIG_VALIDATION_FAILED` error occurs SHALL use version-agnostic language. It MUST NOT reference a specific configuration schema version (e.g., "V6"). The message MUST guide users to check field names and types against "the current schema".
 

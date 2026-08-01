@@ -11,6 +11,7 @@ export const analyzeDiffOptionsSchema = z
         git: emptyStringToUndefined,
         outputReport: emptyStringToUndefined.default(DEFAULT_ANALYZE_DIFF_REPORT_PATH),
         governanceConfig: emptyStringToUndefined,
+        plugins: z.array(z.string()).optional(),
         strictPluginMode: z.boolean().optional(),
         ci: z.boolean().optional(),
         allowBreaking: z.boolean().optional(),

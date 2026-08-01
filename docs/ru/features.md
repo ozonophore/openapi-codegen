@@ -1057,3 +1057,18 @@ import { AutoSelector, ProjectProbe } from 'ts-openapi-codegen';
 - `preAnalyze` — advisory (только stdout); отдельный report-файл не пишет
 - Marauder config merge — shallow spread, не recursive deep merge
 - CLI dot-notation парсится **до** Commander (`parseNestedCliOptions`)
+
+---
+
+## Plugin system
+
+Каноническое руководство: [Плагины](plugins.md).
+
+- Config `plugins` (строка или `{ path, name?, config? }`)
+- CLI: `generate --plugins` / `analyze-diff --plugins`
+- Builtin `x-typescript-type`; отключение через `disableBuiltinPlugins`
+- **Plugin API v3 factory не shipped**
+
+## Plugin API v2 (RFC)
+
+Хуки semantic-diff для `analyze-diff`: `afterSemanticDiff`, `mapRecommendation`, `beforeReportWrite`. Подробности: [Плагины — API v2](plugins.md#plugin-api-v2-analyze-diff).

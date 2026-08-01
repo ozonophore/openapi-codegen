@@ -4,6 +4,8 @@ import { resolveHelper } from '../../common/utils/pathHelpers';
 import { Parser as ParserV2 } from '../api/v2/Parser';
 import { Parser as ParserV3 } from '../api/v3/Parser';
 import { Context } from '../Context';
+import { loadGeneratorPlugins } from '../plugins/loadGeneratorPlugins';
+import { extractPluginPaths } from '../plugins/pluginEntries';
 import { hashSchema } from '../reuseStore/ArtifactFingerprinter';
 import { buildModelSchemaMap } from '../reuseStore/reuseHelpers';
 import { getOpenApiSpec } from '../utils/getOpenApiSpec';
@@ -20,6 +22,9 @@ export async function runPreAnalyze(items: TStrictFlatOptions[], logger: Logger)
         const specItem = getSpecItemName(item.input);
 
         try {
+            const generatorPlugins = await loadGeneratorPlugins(extractPluginPaths(item.plugins), {
+                disableBuiltins: item.disableBuiltinPlugins,
+            });
             const context = new Context({
                 input: absoluteInput,
                 output: {
@@ -35,7 +40,8 @@ export async function runPreAnalyze(items: TStrictFlatOptions[], logger: Logger)
                     type: item.typePrefix,
                 },
                 sortByRequired: item.sortByRequired,
-                plugins: [],
+                plugins: generatorPlugins,
+                strictPluginMode: item.strictPluginMode,
             });
 
             const openApi = await getOpenApiSpec(context, absoluteInput);

@@ -55,6 +55,7 @@ describe('@unit: ArtifactFingerprinter', () => {
             useSeparatedIndexes: false,
             httpClient: 'fetch' as OptionsSlice['httpClient'],
             prettierConfigPath: '',
+            disableBuiltinPlugins: false,
             pluginsHash: 'abc',
         };
         const optionsSliceHash = buildOptionsSliceHash(optionsSlice);

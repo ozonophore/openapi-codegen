@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.15] — 2026-08-01
+
+### Added
+
+- **`generate --plugins` / `analyze-diff --plugins`**: CLI paths merge with config `plugins` (config first, path dedupe). `--strict-plugin-mode` on `generate`: fail when `resolveSchemaTypeOverride` throws (default: warn and continue; load errors always fatal). Config `strictPluginMode` supported at root / `items[]`.
+- Config `plugins` entries may be `{ path, name?, config? }` so artifact `pluginsHash` can include real plugin config (string paths remain valid).
+- `disableBuiltinPlugins` to skip builtin `x-typescript-type`.
+- Public export: `loadGeneratorPlugins`, `mergePluginPaths`, `extractPluginPaths`.
+- Docs restored: `docs/en|ru/plugins.md`, features anchors `#plugin-system` / `#plugin-api-v2-rfc`, example `example/plugins/custom-type.plugin.cjs`.
+- `check-config` warns when plugin path files are missing.
+
+### Fixed
+
+- `preAnalyze` Context now loads effective item/root plugins (not forced `[]`).
+- `beforeReportWrite` diagnostics: `applied` only when report and/or reportPath actually change (empty `{}` → `skipped`).
+
+### Changed
+
+- Soft cache invalidation: object-shaped plugin `config` changes `pluginsHash` (string-only configs unchanged).
+- Loader warns on unsupported plugin `apiVersion` (not `"1"` / `"2"`); Plugin API v3 factory remains not shipped.
+
+
 ## [2.1.0-beta.14] — 2026-07-25
 
 ### Added

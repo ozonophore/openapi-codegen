@@ -114,6 +114,8 @@ program
     .option('--swarm', 'Enable AvatarSwarm manifest generation. Supports dot-notation: --swarm.output (default: false)')
     .option('--pre-analyze', 'Run cross-spec pre-generation analysis and print findings to stdout before writing any files (default: false)')
     .addOption(new Option('--reuse-mode <value>', 'Reuse deduplication mode when cacheStrategy is reuse').choices(['copy', 'auto-group']))
+    .option('--plugins [paths...]', 'Generator plugin module paths (merged with config plugins; config first)')
+    .option('--strict-plugin-mode', 'Fail when a generator plugin throws in resolveSchemaTypeOverride (default: warn and continue)')
     .hook('preAction', async () => {
         await updateNotifier.checkAndNotify();
     })
@@ -217,6 +219,7 @@ program
     .option('--output-report <value>', 'Path to save JSON diff report')
     .option('-ocn, --openapi-config <value>', 'The path to the configuration file, listing the options (default: "openapi.config.json")', DEFAULT_OPENAPI_CONFIG_FILENAME)
     .option('--governance-config <value>', 'Path to governance rules JSON config file')
+    .option('--plugins [paths...]', 'Semantic-diff plugin module paths (merged with config plugins; config first)')
     .option('--strict-plugin-mode', 'Fail when plugin hook execution throws')
     .option('--ci', 'Exit with code 1 when governance errors are found')
     .option('--allow-breaking', 'Allow breaking changes in governance checks')

@@ -274,5 +274,5 @@ Generator plugins can override schema type mapping (for example via `x-typescrip
 
 - Configuration key: `plugins` (array of module paths)
 - Supported module formats: CJS, ESM, and TS (when runtime supports TS imports)
-- Full guide: [Plugins](features.md#plugin-system)
-- Plugin API v2 (RFC, `analyze-diff` hooks): [Plugin API v2](features.md#plugin-api-v2-rfc)
+- Full guide: [Plugins](plugins.md)
+- Short anchors: [features.md#plugin-system](features.md#plugin-system), [Plugin API v2](features.md#plugin-api-v2-rfc)

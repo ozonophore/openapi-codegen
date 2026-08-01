@@ -1067,3 +1067,18 @@ import { AutoSelector, ProjectProbe, buildWorkspaceReport } from 'ts-openapi-cod
 - `preAnalyze` — advisory stdout only; no report file
 - Marauder config merge — shallow spread, not recursive deep merge
 - CLI dot-notation is parsed **before** Commander (`parseNestedCliOptions`)
+
+---
+
+## Plugin system
+
+See the canonical guide: [Plugins](plugins.md).
+
+- Config `plugins` (string or `{ path, name?, config? }`)
+- CLI: `generate --plugins` / `analyze-diff --plugins`
+- Builtin `x-typescript-type`; opt out with `disableBuiltinPlugins`
+- **Plugin API v3 factory is not shipped**
+
+## Plugin API v2 (RFC)
+
+Semantic-diff hooks for `analyze-diff`: `afterSemanticDiff`, `mapRecommendation`, `beforeReportWrite`. Full details: [Plugins — API v2](plugins.md#plugin-api-v2-analyze-diff).
