@@ -1,4 +1,3 @@
-import { promises as fsPromises } from 'fs';
 import { basename, extname } from 'path';
 
 import { COMMON_DEFAULT_OPTIONS_VALUES, DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../common/Consts';
@@ -6,7 +5,6 @@ import { Logger } from '../common/Logger';
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import { extractEslintFixOptions, TEslintFixOptions } from '../common/TEslintFixOptions';
 import { TFlatOptions, TRawOptions, TStrictFlatOptions } from '../common/TRawOptions';
-import { eslintFixBatch } from '../common/utils/eslintFix';
 import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../common/utils/pathHelpers';
 import { normalizeMarauderBoolean } from '../common/VersionedSchema/Utils/createBooleanToObjectSchema';
@@ -16,24 +14,14 @@ import { Parser as ParserV2 } from './api/v2/Parser';
 import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
-import { AvatarSwarmGenerator } from './avatarSwarm/AvatarSwarmGenerator';
-import { writeSwarmOutput } from './avatarSwarm/writeSwarmOutput';
 import { Context } from './Context';
+import { GenerationBatchSession, type ItemRunContext } from './GenerationBatchSession';
 import { loadGovernanceConfig } from './governance/loadGovernanceConfig';
-import { generateTrafficSplitterModule } from './migration/generateTrafficSplitterModule';
 import { loadGeneratorPlugins } from './plugins/loadGeneratorPlugins';
 import { extractPluginPaths } from './plugins/pluginEntries';
 import { buildModelSchemaMap, ReuseStore } from './reuseStore';
 import { buildOptionsSlice } from './reuseStore/ArtifactFingerprinter';
-import type { GenerationReport, ReuseConflictRecord, SpecGenerationStats } from './reuseStore/GenerationReport';
-import { analyzeCrossSpecManifest, writeGenerationReport } from './reuseStore/GenerationReport';
-import { resolveOutputGroups } from './reuseStore/OutputGroupResolver';
-import { SharedFolderWriter } from './reuseStore/SharedFolderWriter';
-import { SHARED_FOLDER_NAME } from './reuseStore/SharedFolderWriter';
-import { ReuseConflictError } from './reuseStore/types';
-import { runPreAnalyze } from './specAnalysis/runPreAnalyze';
-import { createSpecAnalysisAccumulator, finalizeSpecAnalysis, mergeSpecAnalysisConfigAcrossItems, runSpecAnalysis, type SpecAnalysisAccumulator } from './specAnalysis/runSpecAnalysis';
-import type { SpecAnalysisReport } from './specAnalysis/types';
+import { runSpecAnalysis } from './specAnalysis/runSpecAnalysis';
 import { validateOpenApiStrict, validateWithSwaggerParser, writeOpenApiStrictReport } from './strict/validateOpenApiStrict';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
@@ -52,8 +40,6 @@ import { postProcessClient } from './utils/postProcessClient';
 import { prepareDtoModels } from './utils/prepareDtoModels';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { resolveClassesModeTypes } from './utils/resolveClassesModeTypes';
-import { buildWorkspaceReport } from './workspaceReport/buildWorkspaceReport';
-import { writeWorkspaceReport } from './workspaceReport/writeWorkspaceReport';
 import { WriteClient } from './WriteClient';
 
 /**
@@ -61,9 +47,7 @@ import { WriteClient } from './WriteClient';
  */
 export class OpenApiClient {
     private static readonly CACHE_FINGERPRINT_VERSION = 2;
-    private static readonly DEFAULT_CACHE_FILENAME = '.openapi-codegen-cache.json';
     private _writeClient: WriteClient | null = null;
-    private specAnalysisAccumulator: SpecAnalysisAccumulator | null = null;
     /** ESLint paths from top-level rawOptions (not per items[] entry). */
     private eslintFixOptions: TEslintFixOptions = {};
 
@@ -245,423 +229,7 @@ export class OpenApiClient {
         };
     }
 
-    private getOutputRoots(items: TStrictFlatOptions[]): string[] {
-        const roots = new Set<string>();
-        for (const item of items) {
-            const outputDirs = [item.output, item.outputCore, item.outputSchemas, item.outputModels, item.outputServices];
-            for (const dir of outputDirs) {
-                if (dir) {
-                    roots.add(resolveHelper(process.cwd(), dir));
-                }
-            }
-        }
-        return Array.from(roots);
-    }
-
-    private async cleanupStaleOutputs(items: TStrictFlatOptions[], sharedFolderLca?: string): Promise<void> {
-        const outputRoots = this.getOutputRoots(items);
-        if (sharedFolderLca) {
-            outputRoots.push(resolveHelper(sharedFolderLca, SHARED_FOLDER_NAME));
-        }
-        const expectedFiles = this.writeClient.getExpectedOutputFiles();
-
-        for (const root of outputRoots) {
-            await this.removeStaleFilesInDirectory(root, expectedFiles);
-        }
-    }
-
-    private async removeStaleFilesInDirectory(path: string, expectedFiles: Set<string>): Promise<boolean> {
-        const stats = await fsPromises.stat(path).catch(() => null);
-        if (!stats) {
-            return false;
-        }
-
-        if (stats.isFile()) {
-            if (!expectedFiles.has(path)) {
-                await fileSystemHelpers.rmdir(path);
-                return false;
-            }
-            return true;
-        }
-
-        const entries = await fsPromises.readdir(path);
-        let hasAnyFile = false;
-
-        for (const entry of entries) {
-            const childPath = resolveHelper(path, entry);
-            const childHasFiles = await this.removeStaleFilesInDirectory(childPath, expectedFiles);
-            hasAnyFile = hasAnyFile || childHasFiles;
-        }
-
-        if (!hasAnyFile) {
-            await fileSystemHelpers.rmdir(path);
-            return false;
-        }
-
-        return true;
-    }
-
-    private async generateCodeForItems(items: TStrictFlatOptions[], rawOptions: TRawOptions): Promise<void> {
-        if (items.length === 0) {
-            throw new Error(LOGGER_MESSAGES.GENERATION.NO_OPTIONS);
-        }
-        this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.STARTED(items.length));
-
-        try {
-            const start = process.hrtime.bigint();
-            this.validateConsistentCacheSettings(items);
-            const cacheEnabled = items[0]?.cache === true;
-            const cacheStrategy = items[0]?.cacheStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheStrategy;
-            const useReuseStore = cacheEnabled && cacheStrategy === 'reuse';
-            const needsEntityCacheFallback = cacheEnabled && items.some(item => isClassesBundleLayout(item.modelsMode, item.modelsLayout));
-            const generationCaches = new Map<string, GenerationCache>();
-            let reuseStore: ReuseStore | null = null;
-            const referencedArtifactKeys = new Set<string>();
-            const specStats: SpecGenerationStats[] = [];
-            const reuseConflicts: ReuseConflictRecord[] = [];
-            let totalReuseHits = 0;
-            let totalReuseMisses = 0;
-            let specQualityReport: SpecAnalysisReport | undefined;
-            let reportBasePath = this.resolveOutputRoot(items[0]!.output);
-            let manifestLoadMs = 0;
-            let manifestSaveMs = 0;
-            let gcMs = 0;
-
-            const reuseMode = rawOptions.reuseMode ?? 'copy';
-            if (reuseMode === 'auto-group' && cacheStrategy !== 'reuse') {
-                this.writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.AUTO_GROUP_REQUIRES_REUSE_CACHE);
-            }
-
-            let sharedFolderWriter: SharedFolderWriter | null = null;
-            if (reuseMode === 'auto-group' && useReuseStore) {
-                const absoluteOutputPaths = items.map(item => this.resolveOutputRoot(item.output));
-                const lca = resolveOutputGroups(absoluteOutputPaths);
-                if (lca) {
-                    sharedFolderWriter = new SharedFolderWriter(this.writeClient, lca);
-                } else {
-                    this.writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.AUTO_GROUP_LCA_TRIVIAL_FALLBACK);
-                }
-            }
-
-            if (items.some(item => resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection)?.enabled)) {
-                this.specAnalysisAccumulator = createSpecAnalysisAccumulator();
-            }
-
-            if (!cacheEnabled) {
-                this.warnOnSharedOutputs(items);
-            } else if (useReuseStore) {
-                this.warnOnSharedCoreServiceOutputs(items, !!sharedFolderWriter);
-                reuseStore = new ReuseStore(this.resolveReuseStorePath(items[0]!.cachePath));
-                const loadStart = process.hrtime.bigint();
-                await reuseStore.load();
-                manifestLoadMs = Number(process.hrtime.bigint() - loadStart) / 1e6;
-                reportBasePath = reuseStore.getRootPath();
-                if (items.some(item => isClassesBundleLayout(item.modelsMode, item.modelsLayout))) {
-                    this.writeClient.logger.warn('ReuseStore is disabled for modelsMode=classes with layout=bundle; falling back to entity cache for those items');
-                }
-            }
-
-            if (cacheEnabled && (cacheStrategy === 'entity' || needsEntityCacheFallback)) {
-                for (const outputRoot of this.getUniqueResolvedOutputs(items)) {
-                    const sampleItem = items.find(item => this.resolveOutputRoot(item.output) === outputRoot);
-                    if (!sampleItem) {
-                        continue;
-                    }
-                    const cachePath = this.resolveCachePathForOutput(sampleItem.output, sampleItem.cachePath);
-                    const generationCache = new GenerationCache(cachePath);
-                    await generationCache.load();
-                    generationCaches.set(outputRoot, generationCache);
-                }
-            } else if (cacheEnabled && cacheStrategy === 'content' && items[0]?.cacheDebug) {
-                this.writeClient.logger.info('cacheStrategy: content — relying on writeFileIfChanged only');
-            }
-
-            const buildGenerationReport = (): GenerationReport => {
-                const report: GenerationReport = {
-                    generatedAt: new Date().toISOString(),
-                    generatorVersion: process.env.npm_package_version || 'dev',
-                    specs: specStats,
-                    reuse: {
-                        totalHits: totalReuseHits,
-                        totalMisses: totalReuseMisses,
-                        conflicts: reuseConflicts,
-                    },
-                };
-
-                if (reuseStore && items.some(item => resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection)?.crossSpec !== false)) {
-                    report.crossSpec = analyzeCrossSpecManifest(reuseStore.getManifest());
-                }
-
-                if (specQualityReport) {
-                    report.specQuality = {
-                        ...specQualityReport,
-                        failOnHighTriggered: specQualityReport.summary.high > 0,
-                    };
-                }
-
-                if (items[0]?.cacheDebug && reuseStore) {
-                    report.phases = { manifestLoadMs, manifestSaveMs, gcMs };
-                }
-
-                return report;
-            };
-
-            if (rawOptions.preAnalyze === true) {
-                await runPreAnalyze(items, this.writeClient.logger);
-            }
-
-            for (const option of items) {
-                const fileStart = process.hrtime.bigint();
-                const generationCache =
-                    cacheEnabled && (cacheStrategy === 'entity' || (cacheStrategy === 'reuse' && isClassesBundleLayout(option.modelsMode, option.modelsLayout)))
-                        ? (generationCaches.get(this.resolveOutputRoot(option.output)) ?? null)
-                        : null;
-                let reuseHits = 0;
-                let reuseMisses = 0;
-
-                try {
-                    await this.generateSingle(option, generationCache, {
-                        reuseStore: useReuseStore ? reuseStore : null,
-                        referencedArtifactKeys,
-                        sharedFolderWriter: sharedFolderWriter ?? undefined,
-                        onReuseStat: hit => {
-                            if (hit) {
-                                reuseHits += 1;
-                                totalReuseHits += 1;
-                            } else {
-                                reuseMisses += 1;
-                                totalReuseMisses += 1;
-                            }
-                        },
-                    });
-                } catch (error) {
-                    if (error instanceof ReuseConflictError) {
-                        reuseConflicts.push({
-                            ...error.details,
-                            timestamp: new Date().toISOString(),
-                        });
-                        if (cacheEnabled || this.specAnalysisAccumulator) {
-                            await writeGenerationReport(reportBasePath, buildGenerationReport());
-                        }
-                    }
-                    throw error;
-                }
-
-                const fileEnd = process.hrtime.bigint();
-                const fileDurationInSeconds = Number(fileEnd - fileStart) / 1e9;
-                specStats.push({
-                    specItem: this.getSpecItemName(option.input),
-                    input: option.input,
-                    durationMs: Math.round(fileDurationInSeconds * 1000),
-                    reuseHits,
-                    reuseMisses,
-                });
-                this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.DURATION_FOR_FILE(option.input, fileDurationInSeconds.toFixed(3)));
-            }
-            if (items[0]?.useSeparatedIndexes) {
-                await this.writeClient.combineAndWrightSimple();
-            } else {
-                await this.writeClient.combineAndWrite();
-            }
-
-            const trafficSplitterConfig = rawOptions.trafficSplitter;
-            const trafficSplitterEnabled = trafficSplitterConfig && typeof trafficSplitterConfig === 'object' ? trafficSplitterConfig.enabled : trafficSplitterConfig === true;
-            if (trafficSplitterEnabled) {
-                if (items.length > 1) {
-                    this.writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.TRAFFIC_SPLITTER_MULTI_ITEM_WARN);
-                }
-                const cfg = typeof trafficSplitterConfig === 'object' ? trafficSplitterConfig : {};
-                const firstItemOutput = items[0]?.output ?? '.';
-                try {
-                    await generateTrafficSplitterModule(cfg, firstItemOutput);
-                } catch (err: any) {
-                    this.writeClient.logger.warn(`trafficSplitter: failed to generate module — ${err.message}`);
-                }
-            }
-
-            const swarmConfig = rawOptions.swarm;
-            const swarmEnabled = swarmConfig && typeof swarmConfig === 'object' ? swarmConfig.enabled : swarmConfig === true;
-            if (swarmEnabled) {
-                const cfg = typeof swarmConfig === 'object' ? swarmConfig : {};
-                try {
-                    const generator = new AvatarSwarmGenerator();
-                    const manifest = generator.build(items, specStats, reuseStore);
-                    await writeSwarmOutput(manifest, cfg);
-                } catch (err: any) {
-                    this.writeClient.logger.warn(`swarm: failed to generate manifest — ${err.message}`);
-                }
-            }
-
-            await this.cleanupStaleOutputs(items, sharedFolderWriter?.lca);
-            if (cacheEnabled && (cacheStrategy === 'entity' || needsEntityCacheFallback)) {
-                for (const generationCache of generationCaches.values()) {
-                    await generationCache.save();
-                }
-            }
-            if (this.specAnalysisAccumulator) {
-                const crossSpecItems = items.map(item => ({
-                    name: this.getSpecItemName(item.input),
-                    input: item.input,
-                    outputModels: item.outputModels,
-                    outputSchemas: item.outputSchemas,
-                }));
-                const mergedSpecAnalysis = mergeSpecAnalysisConfigAcrossItems(
-                    items.map(item => {
-                        const resolved = resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection);
-                        return resolved ? { ...resolved, enabled: resolved.enabled ?? true } : undefined;
-                    })
-                );
-                specQualityReport = await finalizeSpecAnalysis(this.specAnalysisAccumulator, crossSpecItems, mergedSpecAnalysis, this.writeClient.logger, reuseStore?.getManifest());
-                this.specAnalysisAccumulator = null;
-            }
-
-            if (cacheEnabled || specQualityReport) {
-                await writeGenerationReport(reportBasePath, buildGenerationReport());
-            }
-
-            const workspaceReportConfig = rawOptions.workspaceReport;
-            const workspaceReportEnabled = workspaceReportConfig && typeof workspaceReportConfig === 'object' ? workspaceReportConfig.enabled : workspaceReportConfig === true;
-            if (workspaceReportEnabled) {
-                const cfg = typeof workspaceReportConfig === 'object' ? workspaceReportConfig : {};
-                try {
-                    const report = buildWorkspaceReport(specStats, reuseStore);
-                    await writeWorkspaceReport(report, cfg);
-                } catch (err: any) {
-                    this.writeClient.logger.warn(`workspaceReport: failed to write report — ${err.message}`);
-                }
-            }
-
-            if (reuseStore) {
-                const gcStart = process.hrtime.bigint();
-                await reuseStore.gc(referencedArtifactKeys);
-                gcMs = Number(process.hrtime.bigint() - gcStart) / 1e6;
-                if (reuseStore.isDirty()) {
-                    const saveStart = process.hrtime.bigint();
-                    await reuseStore.save();
-                    manifestSaveMs = Number(process.hrtime.bigint() - saveStart) / 1e6;
-                }
-            }
-            const writeStats = this.writeClient.getWriteStats();
-            this.writeClient.logger.info(LOGGER_MESSAGES.GENERATION.WRITE_STATS(writeStats.written, writeStats.unchanged));
-
-            await this.runBatchEslintFixIfEnabled();
-
-            this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.FINISHED);
-            const end = process.hrtime.bigint();
-            const durationInSeconds = Number(end - start) / 1e9;
-            this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.FINISHED_WITH_DURATION(durationInSeconds.toFixed(3)));
-        } catch (error: any) {
-            this.writeClient.logger.error(LOGGER_MESSAGES.ERROR.GENERIC(error.message));
-            throw error;
-        }
-
-        this.writeClient.logger.shutdownLogger();
-    }
-
-    private getUniqueResolvedOutputs(items: TStrictFlatOptions[]): string[] {
-        return Array.from(new Set(items.map(item => this.resolveOutputRoot(item.output))));
-    }
-
-    private resolveOutputRoot(output: string): string {
-        return resolveHelper(process.cwd(), output);
-    }
-
-    private resolveReuseStorePath(cachePath: string): string {
-        if (cachePath.startsWith('/') || /^[A-Za-z]:[\\/]/.test(cachePath)) {
-            return cachePath;
-        }
-        return resolveHelper(process.cwd(), cachePath || '.openapi-codegen-store');
-    }
-
-    private getSpecItemName(input: string): string {
-        const absoluteInput = resolveHelper(process.cwd(), input);
-        return basename(absoluteInput, extname(absoluteInput));
-    }
-
-    private resolveCachePathForOutput(output: string, cachePath: string): string {
-        if (cachePath.startsWith('/') || /^[A-Za-z]:[\\/]/.test(cachePath)) {
-            return cachePath;
-        }
-        return resolveHelper(this.resolveOutputRoot(output), cachePath || OpenApiClient.DEFAULT_CACHE_FILENAME);
-    }
-
-    private validateConsistentCacheSettings(items: TStrictFlatOptions[]): void {
-        if (items.length <= 1) {
-            return;
-        }
-
-        const first = items[0]!;
-        for (const item of items.slice(1)) {
-            if (item.modelsMode !== first.modelsMode) {
-                this.writeClient.logger.warn(
-                    `modelsMode differs between "${first.input}" (${first.modelsMode}) and "${item.input}" (${item.modelsMode}). ` +
-                        `This may cause unexpected cache behavior when cacheStrategy is "reuse".`
-                );
-            }
-        }
-    }
-
-    private warnOnSharedOutputs(items: TStrictFlatOptions[]): void {
-        const countByOutput = new Map<string, number>();
-        for (const item of items) {
-            const output = this.resolveOutputRoot(item.output);
-            countByOutput.set(output, (countByOutput.get(output) ?? 0) + 1);
-        }
-        const duplicatedOutputs = Array.from(countByOutput.entries())
-            .filter(([, count]) => count > 1)
-            .map(([output]) => output);
-
-        if (duplicatedOutputs.length === 0) {
-            return;
-        }
-
-        this.writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.CACHE_SHARED_OUTPUT_WARNING(duplicatedOutputs.map(output => `- ${output}`).join('\n')));
-    }
-
-    private warnOnSharedCoreServiceOutputs(items: TStrictFlatOptions[], sharedCoreActive = false): void {
-        const countByPath = new Map<string, Set<string>>();
-        for (const item of items) {
-            const paths = getOutputPaths({
-                output: item.output,
-                outputCore: item.outputCore,
-                outputServices: item.outputServices,
-                outputModels: item.outputModels,
-                outputSchemas: item.outputSchemas,
-            });
-            for (const pathKey of ['outputCore' as const, 'outputServices' as const]) {
-                const resolved = paths[pathKey];
-                if (!countByPath.has(resolved)) {
-                    countByPath.set(resolved, new Set());
-                }
-                countByPath.get(resolved)!.add(this.getSpecItemName(item.input));
-            }
-        }
-
-        const collisions = Array.from(countByPath.entries()).filter(([, specs]) => specs.size > 1);
-        if (collisions.length === 0) {
-            return;
-        }
-
-        const details = collisions.map(([path, specs]) => `- ${path}: ${Array.from(specs).join(', ')}`).join('\n');
-        this.writeClient.logger.warn(
-            sharedCoreActive ? LOGGER_MESSAGES.GENERATION.SHARED_CORE_SERVICES_PATH_COLLISION(details) : LOGGER_MESSAGES.GENERATION.SHARED_CORE_SERVICES_PATH_COLLISION_MODELS_ONLY(details)
-        );
-    }
-
-    private warnOnSharedOutputsWithoutCache(items: TStrictFlatOptions[]): void {
-        this.warnOnSharedOutputs(items);
-    }
-
-    private async generateSingle(
-        item: TStrictFlatOptions,
-        generationCache: GenerationCache | null,
-        reuseContext?: {
-            reuseStore: ReuseStore | null;
-            referencedArtifactKeys: Set<string>;
-            onReuseStat?: (hit: boolean) => void;
-            sharedFolderWriter?: SharedFolderWriter;
-        }
-    ): Promise<void> {
+    private async generateSingle(item: TStrictFlatOptions, generationCache: GenerationCache | null, itemRunContext?: ItemRunContext): Promise<{ entitySkipped: boolean }> {
         const {
             input,
             output,
@@ -709,23 +277,21 @@ export class OpenApiClient {
         const cacheKey = this.getCacheKey(item, absoluteInput);
         const useEntityCache =
             item.cache && generationCache !== null && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && isClassesBundleLayout(item.modelsMode, item.modelsLayout)));
-        const useReuseStore = item.cache && item.cacheStrategy === 'reuse' && reuseContext?.reuseStore != null && !isClassesBundleLayout(item.modelsMode, item.modelsLayout);
+        const useReuseStore = item.cache && item.cacheStrategy === 'reuse' && itemRunContext?.reuseStore != null && !isClassesBundleLayout(item.modelsMode, item.modelsLayout);
         const cacheFingerprint = useEntityCache ? await this.getCacheFingerprint(item, absoluteInput) : '';
         const specInput = this.getSpecItemName(item.input);
         const optionsSlice = buildOptionsSlice(item);
         if (useEntityCache) {
-            const cachedEntry = generationCache!.get(cacheKey);
-            if (cachedEntry && cachedEntry.fingerprint === cacheFingerprint) {
-                const allFilesExist = await this.filesExist(cachedEntry.files);
-                if (allFilesExist) {
-                    for (const filePath of cachedEntry.files) {
-                        this.writeClient.registerOutputFile(filePath);
-                    }
-                    if (item.cacheDebug) {
-                        this.writeClient.logger.info(LOGGER_MESSAGES.GENERATION.CACHE_HIT(input));
-                    }
-                    return;
+            const willEntitySkip = await this.resolveEntitySkipForItem(item, generationCache, itemRunContext?.reuseStore ?? null);
+            if (willEntitySkip) {
+                const cachedEntry = generationCache!.get(cacheKey)!;
+                for (const filePath of cachedEntry.files) {
+                    this.writeClient.registerOutputFile(filePath);
                 }
+                if (item.cacheDebug) {
+                    this.writeClient.logger.info(LOGGER_MESSAGES.GENERATION.CACHE_HIT(input));
+                }
+                return { entitySkipped: true };
             }
             if (item.cacheDebug) {
                 this.writeClient.logger.info(LOGGER_MESSAGES.GENERATION.CACHE_MISS(input));
@@ -746,7 +312,7 @@ export class OpenApiClient {
         const openApi = await getOpenApiSpec(context, absoluteInput);
 
         if (specAnalysis?.enabled) {
-            await runSpecAnalysis(openApi, { ...specAnalysis, enabled: true }, this.writeClient.logger, this.getSpecItemName(input), this.specAnalysisAccumulator ?? undefined, {
+            await runSpecAnalysis(openApi, { ...specAnalysis, enabled: true }, this.writeClient.logger, this.getSpecItemName(input), itemRunContext?.specAnalysisAccumulator ?? undefined, {
                 interface: interfacePrefix,
                 enum: enumPrefix,
                 type: typePrefix,
@@ -826,15 +392,15 @@ export class OpenApiClient {
                     modelsMode,
                     modelsLayout,
                     prettierConfigPath,
-                    reuseStore: useReuseStore ? reuseContext!.reuseStore! : undefined,
+                    reuseStore: useReuseStore ? itemRunContext!.reuseStore! : undefined,
                     optionsSlice: useReuseStore ? optionsSlice : undefined,
                     specInput: useReuseStore ? specInput : undefined,
                     inputPath: useReuseStore ? absoluteInput : undefined,
                     modelSchemas: useReuseStore ? modelSchemas : undefined,
-                    referencedArtifactKeys: useReuseStore ? reuseContext!.referencedArtifactKeys : undefined,
-                    onReuseStat: useReuseStore ? reuseContext!.onReuseStat : undefined,
+                    referencedArtifactKeys: useReuseStore ? itemRunContext!.referencedArtifactKeys : undefined,
+                    onReuseStat: useReuseStore ? itemRunContext!.onReuseStat : undefined,
                     reuseOnConflict: useReuseStore ? item.reuseOnConflict : undefined,
-                    sharedFolderWriter: useReuseStore ? reuseContext!.sharedFolderWriter : undefined,
+                    sharedFolderWriter: useReuseStore ? itemRunContext!.sharedFolderWriter : undefined,
                 });
                 break;
             }
@@ -872,15 +438,15 @@ export class OpenApiClient {
                     modelsMode,
                     modelsLayout,
                     prettierConfigPath,
-                    reuseStore: useReuseStore ? reuseContext!.reuseStore! : undefined,
+                    reuseStore: useReuseStore ? itemRunContext!.reuseStore! : undefined,
                     optionsSlice: useReuseStore ? optionsSlice : undefined,
                     specInput: useReuseStore ? specInput : undefined,
                     inputPath: useReuseStore ? absoluteInput : undefined,
                     modelSchemas: useReuseStore ? modelSchemas : undefined,
-                    referencedArtifactKeys: useReuseStore ? reuseContext!.referencedArtifactKeys : undefined,
-                    onReuseStat: useReuseStore ? reuseContext!.onReuseStat : undefined,
+                    referencedArtifactKeys: useReuseStore ? itemRunContext!.referencedArtifactKeys : undefined,
+                    onReuseStat: useReuseStore ? itemRunContext!.onReuseStat : undefined,
                     reuseOnConflict: useReuseStore ? item.reuseOnConflict : undefined,
-                    sharedFolderWriter: useReuseStore ? reuseContext!.sharedFolderWriter : undefined,
+                    sharedFolderWriter: useReuseStore ? itemRunContext!.sharedFolderWriter : undefined,
                 });
                 break;
             }
@@ -894,6 +460,8 @@ export class OpenApiClient {
                 updatedAt: Date.now(),
             });
         }
+
+        return { entitySkipped: false };
     }
 
     private getCacheKey(item: TStrictFlatOptions, absoluteInput: string): string {
@@ -946,6 +514,30 @@ export class OpenApiClient {
         return GenerationCache.hash(JSON.stringify(fingerprint));
     }
 
+    private getSpecItemName(input: string): string {
+        const absoluteInput = resolveHelper(process.cwd(), input);
+        return basename(absoluteInput, extname(absoluteInput));
+    }
+
+    private async resolveEntitySkipForItem(item: TStrictFlatOptions, generationCache: GenerationCache | null, reuseStore: ReuseStore | null): Promise<boolean> {
+        void reuseStore;
+        const useEntityCache =
+            item.cache && generationCache !== null && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && isClassesBundleLayout(item.modelsMode, item.modelsLayout)));
+        if (!useEntityCache || !generationCache) {
+            return false;
+        }
+
+        const absoluteInput = resolveHelper(process.cwd(), item.input);
+        const cacheKey = this.getCacheKey(item, absoluteInput);
+        const cacheFingerprint = await this.getCacheFingerprint(item, absoluteInput);
+        const cachedEntry = generationCache.get(cacheKey);
+        if (!cachedEntry || cachedEntry.fingerprint !== cacheFingerprint) {
+            return false;
+        }
+
+        return this.filesExist(cachedEntry.files);
+    }
+
     private async filesExist(paths: string[]): Promise<boolean> {
         for (const filePath of paths) {
             const exists = await fileSystemHelpers.exists(filePath);
@@ -954,50 +546,6 @@ export class OpenApiClient {
             }
         }
         return true;
-    }
-
-    /**
-     * Runs batch ESLint fix after combineAndWrite / combineAndWrightSimple when both paths are set.
-     * Warns and skips when only one path is provided; always clears the WriteClient lint registry.
-     */
-    private async runBatchEslintFixIfEnabled(): Promise<void> {
-        const opts = this.eslintFixOptions;
-        const hasTsconfig = !!opts.tsconfigPath;
-        const hasEslintConfig = !!opts.eslintConfigPath;
-
-        if (!hasTsconfig && !hasEslintConfig) {
-            this.writeClient.clearLintTargets();
-            return;
-        }
-
-        if (!hasTsconfig || !hasEslintConfig) {
-            this.writeClient.logger.warn(LOGGER_MESSAGES.FORMATTING.ESLINT_PATHS_MISSING);
-            this.writeClient.clearLintTargets();
-            return;
-        }
-
-        try {
-            const { files, includeGlobs } = this.writeClient.getLintTargets();
-            if (files.length === 0) {
-                return;
-            }
-
-            const fixStart = process.hrtime.bigint();
-            this.writeClient.logger.forceInfo(LOGGER_MESSAGES.FORMATTING.ESLINT_BATCH_STARTED);
-
-            await eslintFixBatch({
-                files,
-                includeGlobs,
-                tsconfigPath: opts.tsconfigPath!,
-                eslintConfigPath: opts.eslintConfigPath!,
-            });
-
-            const fixEnd = process.hrtime.bigint();
-            const durationInSeconds = Number(fixEnd - fixStart) / 1e9;
-            this.writeClient.logger.forceInfo(LOGGER_MESSAGES.FORMATTING.ESLINT_BATCH_FINISHED(durationInSeconds.toFixed(3)));
-        } finally {
-            this.writeClient.clearLintTargets();
-        }
     }
 
     private async loadDiffReportIfNeeded(params: { useHistory?: boolean; diffReport?: string; inputPath?: string }): Promise<DiffReport | null> {
@@ -1046,6 +594,12 @@ export class OpenApiClient {
         this.eslintFixOptions = extractEslintFixOptions(rawOptions);
 
         const items = this.normalizeOptions(rawOptions).map(item => this.addDefaultValues(item));
-        await this.generateCodeForItems(items, rawOptions);
+        const session = new GenerationBatchSession({
+            writeClient: this.writeClient,
+            eslintFixOptions: this.eslintFixOptions,
+            generateItem: (item, generationCache, itemRunContext) => this.generateSingle(item, generationCache, itemRunContext),
+            shouldEntitySkip: (item, generationCache, reuseStore) => this.resolveEntitySkipForItem(item, generationCache, reuseStore),
+        });
+        await session.run(items, rawOptions);
     }
 }
