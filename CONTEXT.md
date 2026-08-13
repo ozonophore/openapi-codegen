@@ -30,7 +30,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 
 | Term | Role |
 |------|------|
-| **OpenApiClient** | Facade: options normalize/defaults; constructs WriteClient, item session, and batch session |
+| **OpenApiClient** | Facade: constructs WriteClient, item/batch sessions; options meaning in `resolveGenerationOptions` |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
@@ -92,3 +92,13 @@ WriteClient is a composing facade. Ownership:
 - **WriteClient** — logger, `writeClient()` orchestration, leaf `writeClient*` bindings, public delegates
 - **SharedFolderWriter** — LCA only (no WriteClient ctor arg)
 - **OpenSpec change:** `pdtch-191-write-client-concern-split`
+
+## Generation options resolve
+
+Owns raw config → strict items: Zod validate (**throws**, no `process.exit`) → flatten items|flat → inherit → defaults.
+
+- **Module:** `resolveGenerationOptions` (`src/core/resolveGenerationOptions.ts`)
+- **Item overrides:** `item.X ?? root.X` for `interfacePrefix`, `enumPrefix`, `typePrefix`, `useCancelableRequest`, `sortByRequired`, `useSeparatedIndexes` (plus existing request/plugins/history/models/miracles)
+- **Call site:** `OpenApiClient.generate(rawOptions)` then `GenerationBatchSession.run(items, rawOptions)`
+- **Visibility:** internal (not re-exported from `src/core/index.ts`)
+- **OpenSpec change:** `pdtch-191-generation-options-resolve`

@@ -1,7 +1,7 @@
 import type { HttpClient } from '../types/enums/HttpClient.enum';
 
 export type CoreTransportFingerprintInput = {
-    /** Effective request path after normalizeOptions, or undefined for generated default. */
+    /** Effective request path after resolveGenerationOptions, or undefined for generated default. */
     request?: string;
     customExecutorPath?: string;
     httpClient: HttpClient | string;
@@ -12,7 +12,7 @@ export type CoreTransportFingerprintInput = {
 
 /**
  * Stable key for transport options that affect request-sensitive core files.
- * Call after normalizeOptions so root vs per-item `request` is already resolved.
+ * Call after resolveGenerationOptions so root vs per-item `request` is already resolved.
  */
 export function buildCoreTransportFingerprint(input: CoreTransportFingerprintInput): string {
     return [input.request ?? 'generated-default', input.customExecutorPath ?? '', String(input.httpClient), String(!!input.useCancelableRequest), String(!!input.useCustomRequestRaw)].join('\0');
