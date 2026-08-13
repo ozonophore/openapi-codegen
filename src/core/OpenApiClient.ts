@@ -1,55 +1,17 @@
-import { COMMON_DEFAULT_OPTIONS_VALUES, DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../common/Consts';
+import { COMMON_DEFAULT_OPTIONS_VALUES } from '../common/Consts';
 import { Logger } from '../common/Logger';
-import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import { extractEslintFixOptions, TEslintFixOptions } from '../common/TEslintFixOptions';
 import { TFlatOptions, TRawOptions, TStrictFlatOptions } from '../common/TRawOptions';
-import { resolveHelper } from '../common/utils/pathHelpers';
 import { normalizeMarauderBoolean } from '../common/VersionedSchema/Utils/createBooleanToObjectSchema';
 import { mergeMarauderBlockDeep } from '../common/VersionedSchema/Utils/mergeMarauderBlock';
 import { resolveSpecAnalysisConfig } from '../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
-import { Parser as ParserV2 } from './api/v2/Parser';
-import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
-import { Parser as ParserV3 } from './api/v3/Parser';
-import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
-import { Context } from './Context';
-import { createResolvedContext } from './createResolvedContext';
-import { GenerationBatchSession, type ItemRunContext } from './GenerationBatchSession';
-import {
-    buildCacheKey,
-    buildEntityFingerprint,
-    defaultFilesExist,
-    getSpecItemName,
-    resolveEntitySkipCandidate,
-    shouldEntitySkip,
-    usesEntityCache,
-    usesReuseStoreForItem,
-} from './generationCache/EntitySkip';
-import { loadGovernanceConfig } from './governance/loadGovernanceConfig';
-import { loadGeneratorPlugins } from './plugins/loadGeneratorPlugins';
-import { mergePluginPaths } from './plugins/pluginEntries';
-import { buildModelSchemaMap } from './reuseStore';
-import { buildOptionsSlice } from './reuseStore/ArtifactFingerprinter';
-import { runSpecAnalysis } from './specAnalysis/runSpecAnalysis';
-import { validateOpenApiStrict, validateWithSwaggerParser, writeOpenApiStrictReport } from './strict/validateOpenApiStrict';
-import { OutputPaths } from './types/base/OutputPaths.model';
-import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
-import { ModelsLayout } from './types/enums/ModelsLayout.enum';
-import { ModelsMode } from './types/enums/ModelsMode.enum';
-import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
-import type { Client } from './types/shared/Client.model';
-import { applyDiffReportToClient } from './utils/applyDiffReportToClient';
-import type { GenerationCache } from './utils/GenerationCache';
-import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
-import { getOutputPaths } from './utils/getOutputPaths';
-import { DiffReport, loadDiffReport } from './utils/loadDiffReport';
-import { postProcessClient } from './utils/postProcessClient';
-import { prepareDtoModels } from './utils/prepareDtoModels';
-import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
-import { resolveClassesModeTypes } from './utils/resolveClassesModeTypes';
+import { GenerationBatchSession } from './GenerationBatchSession';
+import { shouldEntitySkip } from './generationCache/EntitySkip';
+import { GenerationItemSession } from './GenerationItemSession';
 import { WriteClient } from './WriteClient';
 
 /**
- * Оркестратор генерации OpenAPI-клиента: парсинг спецификации, применение diff-отчёта и запись артефактов.
+ * Facade: options normalize/defaults; constructs WriteClient, Generation item session, and Generation batch session.
  */
 export class OpenApiClient {
     private _writeClient: WriteClient | null = null;
@@ -234,260 +196,6 @@ export class OpenApiClient {
         };
     }
 
-    private async generateSingle(item: TStrictFlatOptions, generationCache: GenerationCache | null, itemRunContext?: ItemRunContext): Promise<{ entitySkipped: boolean }> {
-        const {
-            input,
-            output,
-            outputCore,
-            outputServices,
-            outputModels,
-            outputSchemas,
-            httpClient,
-            useOptions,
-            useUnionTypes,
-            excludeCoreServiceFiles,
-            request,
-            plugins,
-            disableBuiltinPlugins,
-            strictPluginMode,
-            customExecutorPath,
-            interfacePrefix,
-            enumPrefix,
-            typePrefix,
-            useCancelableRequest,
-            sortByRequired,
-            useSeparatedIndexes,
-            validationLibrary = ValidationLibrary.NONE,
-            emptySchemaStrategy = EmptySchemaStrategy.KEEP,
-            useHistory,
-            diffReport,
-            modelsMode = ModelsMode.INTERFACES,
-            modelsLayout = ModelsLayout.BUNDLE,
-            miracles,
-            strictOpenapi,
-            reportFile,
-            failOnGovernanceErrors,
-            prettierConfigPath,
-            governanceConfig,
-            specAnalysis,
-        } = item;
-        const outputPaths: OutputPaths = getOutputPaths({
-            output,
-            outputCore,
-            outputServices,
-            outputModels,
-            outputSchemas,
-        });
-        const absoluteInput = resolveHelper(process.cwd(), input);
-        const cacheKey = buildCacheKey(item, absoluteInput);
-        const useEntityCache = usesEntityCache(item, generationCache);
-        const useReuseStore = usesReuseStoreForItem(item, itemRunContext?.reuseStore ?? null);
-        const cacheFingerprint = useEntityCache ? await buildEntityFingerprint(item, absoluteInput) : '';
-        const specInput = getSpecItemName(item.input);
-        const optionsSlice = buildOptionsSlice(item);
-        if (useEntityCache) {
-            const willEntitySkip = await resolveEntitySkipCandidate({
-                useEntityCache,
-                generationCache,
-                cacheKey,
-                cacheFingerprint,
-                useReuseStore,
-                reuseStore: itemRunContext?.reuseStore ?? null,
-                specInput,
-                filesExist: defaultFilesExist,
-            });
-            if (willEntitySkip) {
-                const cachedEntry = generationCache!.get(cacheKey)!;
-                for (const filePath of cachedEntry.files) {
-                    this.writeClient.registerOutputFile(filePath);
-                }
-                if (item.cacheDebug) {
-                    this.writeClient.logger.info(LOGGER_MESSAGES.GENERATION.CACHE_HIT(input));
-                }
-                return { entitySkipped: true };
-            }
-            if (item.cacheDebug) {
-                this.writeClient.logger.info(LOGGER_MESSAGES.GENERATION.CACHE_MISS(input));
-            }
-        }
-        const knownFilesBefore = new Set(this.writeClient.getExpectedOutputFilesArray());
-        const generatorPlugins = await loadGeneratorPlugins(mergePluginPaths(plugins, null), {
-            disableBuiltins: disableBuiltinPlugins,
-        });
-        const { context, openApi } = await createResolvedContext({
-            input: absoluteInput,
-            output: outputPaths,
-            prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix },
-            sortByRequired,
-            plugins: generatorPlugins,
-            strictPluginMode,
-        });
-
-        if (specAnalysis?.enabled) {
-            await runSpecAnalysis(openApi, { ...specAnalysis, enabled: true }, this.writeClient.logger, getSpecItemName(input), itemRunContext?.specAnalysisAccumulator ?? undefined, {
-                interface: interfacePrefix,
-                enum: enumPrefix,
-                type: typePrefix,
-            });
-        }
-
-        if (strictOpenapi) {
-            const parserValidationIssues = await validateWithSwaggerParser(absoluteInput);
-            const governancePolicy = await loadGovernanceConfig(governanceConfig);
-            const strictReport = validateOpenApiStrict({
-                openApi,
-                context,
-                preIssues: parserValidationIssues,
-                governanceConfig: governancePolicy,
-            });
-            const reportPath = await writeOpenApiStrictReport(strictReport, reportFile);
-            this.writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.STRICT_REPORT_CREATED(reportPath));
-
-            if (strictReport.summary.errors > 0) {
-                throw new Error(`Strict OpenAPI validation failed with ${strictReport.summary.errors} error(s). Report: ${reportPath}`);
-            }
-
-            if (failOnGovernanceErrors && strictReport.governance.summary.errors > 0) {
-                throw new Error(`Governance validation failed with ${strictReport.governance.summary.errors} error(s). Report: ${reportPath}`);
-            }
-        }
-
-        const openApiVersion = getOpenApiVersion(openApi);
-        const templates = registerHandlebarTemplates({
-            httpClient,
-            useUnionTypes,
-            useOptions,
-            validationLibrary,
-            useBatchEslintFix: Boolean(this.eslintFixOptions.tsconfigPath && this.eslintFixOptions.eslintConfigPath),
-        });
-        const diffReportData = await this.loadDiffReportIfNeeded({
-            useHistory,
-            diffReport,
-            inputPath: absoluteInput,
-        });
-        if (useHistory && !diffReportData) {
-            const reportPath = diffReport || DEFAULT_ANALYZE_DIFF_REPORT_PATH;
-            this.writeClient.logger.warn(LOGGER_MESSAGES.DIFF_REPORT.USE_HISTORY_NO_REPORT(reportPath));
-        }
-        this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.DEFINING_VERSION);
-        let clientPrepared: Client;
-        switch (openApiVersion) {
-            case OpenApiVersion.V2: {
-                const client = new ParserV2(context).parse(openApi as OpenApiV2);
-                const clientWithDiff = this.applyDiffReportIfNeeded({
-                    client,
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    openApi,
-                    openApiVersion,
-                    diffReport: diffReportData,
-                    context,
-                    miracles,
-                });
-                const clientFinal = postProcessClient(clientWithDiff);
-                clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
-                this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V2);
-                break;
-            }
-
-            case OpenApiVersion.V3: {
-                const client = new ParserV3(context).parse(openApi as OpenApiV3);
-                const clientWithDiff = this.applyDiffReportIfNeeded({
-                    client,
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    openApi,
-                    openApiVersion,
-                    diffReport: diffReportData,
-                    context,
-                    miracles,
-                });
-                const clientFinal = postProcessClient(clientWithDiff);
-                clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
-                this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V3);
-                break;
-            }
-        }
-        const modelSchemas = buildModelSchemaMap(context);
-        const reuse =
-            useReuseStore && itemRunContext?.reuseStore
-                ? {
-                      reuseStore: itemRunContext.reuseStore,
-                      optionsSlice,
-                      specInput,
-                      inputPath: absoluteInput,
-                      modelSchemas,
-                      referencedArtifactKeys: itemRunContext.referencedArtifactKeys,
-                      onReuseStat: itemRunContext.onReuseStat,
-                      reuseOnConflict: item.reuseOnConflict,
-                      prettierConfigPath,
-                      sharedFolderWriter: itemRunContext.sharedFolderWriter,
-                  }
-                : undefined;
-        await this.writeClient.writeClient({
-            client: clientPrepared,
-            templates,
-            outputPaths,
-            httpClient,
-            useOptions,
-            useUnionTypes,
-            excludeCoreServiceFiles,
-            request,
-            customExecutorPath,
-            useCancelableRequest,
-            useSeparatedIndexes,
-            validationLibrary,
-            emptySchemaStrategy,
-            modelsMode,
-            modelsLayout,
-            prettierConfigPath,
-            reuse,
-        });
-        const generatedFiles = this.writeClient.getExpectedOutputFilesArray().filter(filePath => !knownFilesBefore.has(filePath));
-        if (item.cache && generationCache && (item.cacheStrategy === 'entity' || item.cacheStrategy === 'reuse')) {
-            generationCache.set({
-                key: cacheKey,
-                fingerprint: cacheFingerprint,
-                files: generatedFiles,
-                updatedAt: Date.now(),
-            });
-        }
-
-        return { entitySkipped: false };
-    }
-
-    private async loadDiffReportIfNeeded(params: { useHistory?: boolean; diffReport?: string; inputPath?: string }): Promise<DiffReport | null> {
-        return loadDiffReport({
-            useHistory: params.useHistory,
-            diffReport: params.diffReport,
-            inputPath: params.inputPath,
-            logger: this.writeClient.logger,
-        });
-    }
-
-    private applyDiffReportIfNeeded(params: {
-        client: Client;
-        openApi: Record<string, unknown>;
-        openApiVersion: OpenApiVersion;
-        diffReport: DiffReport | null;
-        context: Context;
-        miracles?: TStrictFlatOptions['miracles'];
-    }): Client {
-        if (!params.diffReport) {
-            return params.client;
-        }
-
-        return applyDiffReportToClient({
-            client: params.client,
-            openApi: params.openApi,
-            openApiVersion: params.openApiVersion,
-            diffReport: params.diffReport,
-            prefix: params.context.prefix,
-            context: params.context,
-            miraclesConfig: params.miracles,
-        });
-    }
-
     /**
      * Запускает генерацию клиента по опциям CLI или конфигурации.
      * @param rawOptions сырые опции генерации
@@ -502,10 +210,14 @@ export class OpenApiClient {
         this.eslintFixOptions = extractEslintFixOptions(rawOptions);
 
         const items = this.normalizeOptions(rawOptions).map(item => this.addDefaultValues(item));
+        const itemSession = new GenerationItemSession({
+            writeClient: this.writeClient,
+            eslintFixOptions: this.eslintFixOptions,
+        });
         const session = new GenerationBatchSession({
             writeClient: this.writeClient,
             eslintFixOptions: this.eslintFixOptions,
-            generateItem: (item, generationCache, itemRunContext) => this.generateSingle(item, generationCache, itemRunContext),
+            generateItem: (item, generationCache, itemRunContext) => itemSession.run(item, generationCache, itemRunContext),
             shouldEntitySkip: (item, generationCache, reuseStore) => shouldEntitySkip({ item, generationCache, reuseStore }),
         });
         await session.run(items, rawOptions);

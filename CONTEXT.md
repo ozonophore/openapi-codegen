@@ -8,7 +8,7 @@ Owns the **multi-item Generation lifecycle** for one `generate()` run: cache / R
 
 - **Module:** `GenerationBatchSession` (`src/core/GenerationBatchSession.ts`)
 - **Deps:** `writeClient`, `eslintFixOptions`, `generateItem`, `shouldEntitySkip`
-- **Does not own:** per-item parse → Client → Write (`generateSingle` stays on `OpenApiClient`)
+- **Does not own:** per-item parse → Client → Write (`GenerationItemSession`, wired as `generateItem`)
 - **Seam to per-item:** callbacks (`generateItem` → `{ entitySkipped }`, `shouldEntitySkip`); Spec analysis accumulator lives on the session and is passed inside **`itemRunContext`** (reuse fields + accumulator) — not a separate argument
 - **Visibility:** internal module (not re-exported from `src/core/index.ts`), same as `OpenApiClient`
 - **Logger:** `shutdownLogger` stays at the end of the session success path (behavioral preserve)
@@ -16,11 +16,22 @@ Owns the **multi-item Generation lifecycle** for one `generate()` run: cache / R
 - **Gates:** when all items `entitySkipped`, skip index combine and batch ESLint (clear lint targets)
 - **OpenSpec change:** `pdtch-191-generation-batch-session`
 
+## Generation item session
+
+Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached outputs on hit) → plugins / `createResolvedContext` → Spec analysis / strict → templates → Diff load/apply → V2/V3 parse / postProcess / DTO → `ReuseWriterContext` → `WriteClient.writeClient` → GenerationCache.set.
+
+- **Module:** `GenerationItemSession` (`src/core/GenerationItemSession.ts`)
+- **Deps:** `{ writeClient, eslintFixOptions }`; `run(item, generationCache, itemRunContext)` with required `ItemRunContext`
+- **Wiring:** facade constructs it inside `generate(rawOptions)` and passes `generateItem: (item, cache, ctx) => itemSession.run(...)`
+- **Visibility:** internal (not re-exported from `src/core/index.ts`)
+- **OpenSpec change:** `pdtch-191-generation-item-session`
+
 ## Related terms
 
 | Term | Role |
 |------|------|
-| **OpenApiClient** | Facade: options normalize/defaults, `generateSingle`; constructs and runs the batch session |
+| **OpenApiClient** | Facade: options normalize/defaults; constructs WriteClient, item session, and batch session |
+| **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **WriteClient** | Output session: write artifacts, expected-file registry, lint targets, index combine |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
 | **GenerationCache** | Entity/content cache entries per output root |
@@ -32,10 +43,10 @@ Owns the **multi-item Generation lifecycle** for one `generate()` run: cache / R
 Policy for skipping a Spec item when GenerationCache hit is valid: fingerprint match + files on disk. Applies when `cacheStrategy` is **`entity` or `reuse`** (hybrid skip). For `reuse`, skip also requires a Reuse manifest **presence** guard (`specItems[spec]` exists) — not per-artifact integrity hashing.
 
 - **Module:** `src/core/generationCache/EntitySkip.ts` (GenerationCache stays in `src/core/utils/GenerationCache.ts`)
-- **Interface:** `buildCacheKey`, `buildEntityFingerprint`, `shouldEntitySkip` — no `registerOutputFile` (Write side effect stays in `generateSingle`)
+- **Interface:** `buildCacheKey`, `buildEntityFingerprint`, `shouldEntitySkip` — no `registerOutputFile` (Write side effect stays in Generation item session)
 - **Fingerprint (v3):** `cacheFingerprintVersion` + `generatorVersion` + `specHash` + **`optionsSliceHash`** (from `buildOptionsSlice` / reuse fingerprinter) + **residual** options not in `OptionsSlice` (`request`, `useOptions`, `includeSchemasFiles`, `excludeCoreServiceFiles`, `strictPluginMode`, `customExecutorPath`, `useCancelableRequest`, `useHistory`, `diffReport`, `strictOpenapi`, `failOnGovernanceErrors`). No raw `plugins` / `disableBuiltinPlugins` in residual (covered by slice).
 - **Serialization:** `stableStringify` + same hash helper as reuse fingerprints
-- **Call sites:** `OpenApiClient.generateSingle` and session `shouldEntitySkip` callback; `getSpecItemName` shared (preAnalyze / AvatarSwarm use the same helper)
+- **Call sites:** `GenerationItemSession.run` and batch session `shouldEntitySkip` callback; `getSpecItemName` shared (preAnalyze / AvatarSwarm use the same helper)
 - **Cache break:** bump to fingerprint version **3** (one-time warm miss)
 - **OpenSpec change:** `pdtch-191-entity-skip-fingerprint`
 
@@ -46,7 +57,7 @@ Opaque handle for applying ReuseStore policy while writing models/schemas.
 - **Type:** `ReuseWriterContext` in `reuseStore/reuseWriterHelpers.ts` (required when present: store, optionsSlice, specInput, inputPath, modelSchemas; optional keys/stats/conflict/shared/prettier)
 - **Write seam:** `WriteClient.writeClient` / `writeClientModels` / `writeClientSchemas` take `reuse?: ReuseWriterContext` — not a 9-field flat bag
 - **Output adapter:** `ReuseOutputAdapter = { writeOutputFile; registerLintTarget? }`; reuse helpers depend on the adapter, not the `WriteClient` class
-- **Assembly:** built once in `OpenApiClient.generateSingle` from `itemRunContext` + local slice/schemas/paths
+- **Assembly:** built once in `GenerationItemSession.run` from `itemRunContext` + local slice/schemas/paths
 - **Write:** V2/V3 share one `writeProps`; single models-finalize so `inputPath` survives `validationLibrary !== NONE`
 - **Hit path:** `writeOutputFile` compares content, not `expectedByteSize`
 - **OpenSpec change:** `pdtch-191-reuse-write-session`

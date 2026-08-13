@@ -46,7 +46,7 @@ export type GenerationBatchSessionDeps = {
 
 /**
  * Owns the multi-item Generation batch lifecycle (setup → finalize → ESLint).
- * Per-item parse/write stays behind `generateItem` on the facade.
+ * Per-item parse/write runs behind `generateItem`, wired by the facade to GenerationItemSession.
  */
 export class GenerationBatchSession {
     private static readonly DEFAULT_CACHE_FILENAME = '.openapi-codegen-cache.json';

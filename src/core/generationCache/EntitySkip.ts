@@ -103,7 +103,7 @@ export async function shouldEntitySkip(params: {
     });
 }
 
-/** Low-level skip check when key/fingerprint already computed (generateSingle write path). */
+/** Low-level skip check when key/fingerprint already computed (Generation item session write path). */
 export async function resolveEntitySkipCandidate(params: {
     useEntityCache: boolean;
     generationCache: GenerationCache | null;
