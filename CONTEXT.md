@@ -34,6 +34,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **Diff report** | Lifecycle home: adapt + persist/load + types → consumer `DiffReport`; produce in `semanticDiff`; apply via item-session thin wrappers |
+| **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; git/`parseContent` stays in CLI |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
 | **GenerationCache** | Entity/content cache entries per output root |
 | **Context** | Parse-time Spec context (refs, virtual file map, plugins) — not passed to WriteClient |
@@ -115,4 +116,16 @@ First-cut deepen: home adapt + persist/load + apply + miracle build + types unde
 - **Call shape:** `GenerationItemSession` `loadDiffReportIfNeeded` / `applyDiffReportIfNeeded` unchanged
 - **On-disk:** Unified 2.0 + Semantic 1.1 + legacy read compat unchanged
 - **OpenSpec change:** `pdtch-191-diff-report-lifecycle`
-- **Out of scope:** `produceUnifiedDiffReport` high-level, schema collapse, Unified-direct apply, dual Spec-load unify, plugin entry config, Session/options/WriteClient rethink
+- **Out of scope:** `produceUnifiedDiffReport` high-level, schema collapse, Unified-direct apply, plugin entry config, Session/options/WriteClient rethink
+
+## Spec load unify
+
+Shared Spec resolve prologue + two modes under `src/core/specLoad/`.
+
+- **Layout:** `resolveOpenApiRefs.ts` (path/exists/`SwaggerParser.resolve` + root) · `forContext.ts` · `forSemantic.ts` · `expandOpenApiRefsForSemanticDiff.ts` · shared minimal refs interface · barrel `index.ts` (internal, used surface only, not from `core/index`)
+- **Facades (thin, keep paths):** `createResolvedContext.ts` · `utils/loadSemanticOpenApiSpec.ts` (`loadSemanticOpenApiSpec` / `loadSemanticOpenApiObject`)
+- **Modes:** `forContext` → Context.attach + root; `forSemantic` → resolve + expand clone (file + in-memory object)
+- **Stays in CLI:** git `readSpecFromGit` / `parseSpecContent` (`SwaggerParser.parse`)
+- **Out of scope:** Context lazy-ref / virtual-map semantics change, Diff package, `validateWithSwaggerParser` merge, Session/Write/options, git parse absorb
+- **OpenSpec change:** `pdtch-191-spec-load-unify`
+
