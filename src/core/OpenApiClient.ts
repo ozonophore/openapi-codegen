@@ -371,6 +371,7 @@ export class OpenApiClient {
             this.writeClient.logger.warn(LOGGER_MESSAGES.DIFF_REPORT.USE_HISTORY_NO_REPORT(reportPath));
         }
         this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.DEFINING_VERSION);
+        let clientPrepared: Client;
         switch (openApiVersion) {
             case OpenApiVersion.V2: {
                 const client = new ParserV2(context).parse(openApi as OpenApiV2);
@@ -385,36 +386,8 @@ export class OpenApiClient {
                     miracles,
                 });
                 const clientFinal = postProcessClient(clientWithDiff);
-                const clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
-                const modelSchemas = buildModelSchemaMap(context);
+                clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
                 this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V2);
-                await this.writeClient.writeClient({
-                    client: clientPrepared,
-                    templates,
-                    outputPaths,
-                    httpClient,
-                    useOptions,
-                    useUnionTypes,
-                    excludeCoreServiceFiles,
-                    request,
-                    customExecutorPath,
-                    useCancelableRequest,
-                    useSeparatedIndexes,
-                    validationLibrary,
-                    emptySchemaStrategy,
-                    modelsMode,
-                    modelsLayout,
-                    prettierConfigPath,
-                    reuseStore: useReuseStore ? itemRunContext!.reuseStore! : undefined,
-                    optionsSlice: useReuseStore ? optionsSlice : undefined,
-                    specInput: useReuseStore ? specInput : undefined,
-                    inputPath: useReuseStore ? absoluteInput : undefined,
-                    modelSchemas: useReuseStore ? modelSchemas : undefined,
-                    referencedArtifactKeys: useReuseStore ? itemRunContext!.referencedArtifactKeys : undefined,
-                    onReuseStat: useReuseStore ? itemRunContext!.onReuseStat : undefined,
-                    reuseOnConflict: useReuseStore ? item.reuseOnConflict : undefined,
-                    sharedFolderWriter: useReuseStore ? itemRunContext!.sharedFolderWriter : undefined,
-                });
                 break;
             }
 
@@ -431,39 +404,46 @@ export class OpenApiClient {
                     miracles,
                 });
                 const clientFinal = postProcessClient(clientWithDiff);
-                const clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
-                const modelSchemas = buildModelSchemaMap(context);
+                clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
                 this.writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V3);
-                await this.writeClient.writeClient({
-                    client: clientPrepared,
-                    templates,
-                    outputPaths,
-                    httpClient,
-                    useOptions,
-                    useUnionTypes,
-                    excludeCoreServiceFiles,
-                    request,
-                    customExecutorPath,
-                    useCancelableRequest,
-                    useSeparatedIndexes,
-                    validationLibrary,
-                    emptySchemaStrategy,
-                    modelsMode,
-                    modelsLayout,
-                    prettierConfigPath,
-                    reuseStore: useReuseStore ? itemRunContext!.reuseStore! : undefined,
-                    optionsSlice: useReuseStore ? optionsSlice : undefined,
-                    specInput: useReuseStore ? specInput : undefined,
-                    inputPath: useReuseStore ? absoluteInput : undefined,
-                    modelSchemas: useReuseStore ? modelSchemas : undefined,
-                    referencedArtifactKeys: useReuseStore ? itemRunContext!.referencedArtifactKeys : undefined,
-                    onReuseStat: useReuseStore ? itemRunContext!.onReuseStat : undefined,
-                    reuseOnConflict: useReuseStore ? item.reuseOnConflict : undefined,
-                    sharedFolderWriter: useReuseStore ? itemRunContext!.sharedFolderWriter : undefined,
-                });
                 break;
             }
         }
+        const modelSchemas = buildModelSchemaMap(context);
+        const reuse =
+            useReuseStore && itemRunContext?.reuseStore
+                ? {
+                      reuseStore: itemRunContext.reuseStore,
+                      optionsSlice,
+                      specInput,
+                      inputPath: absoluteInput,
+                      modelSchemas,
+                      referencedArtifactKeys: itemRunContext.referencedArtifactKeys,
+                      onReuseStat: itemRunContext.onReuseStat,
+                      reuseOnConflict: item.reuseOnConflict,
+                      prettierConfigPath,
+                      sharedFolderWriter: itemRunContext.sharedFolderWriter,
+                  }
+                : undefined;
+        await this.writeClient.writeClient({
+            client: clientPrepared,
+            templates,
+            outputPaths,
+            httpClient,
+            useOptions,
+            useUnionTypes,
+            excludeCoreServiceFiles,
+            request,
+            customExecutorPath,
+            useCancelableRequest,
+            useSeparatedIndexes,
+            validationLibrary,
+            emptySchemaStrategy,
+            modelsMode,
+            modelsLayout,
+            prettierConfigPath,
+            reuse,
+        });
         const generatedFiles = this.writeClient.getExpectedOutputFilesArray().filter(filePath => !knownFilesBefore.has(filePath));
         if (item.cache && generationCache && (item.cacheStrategy === 'entity' || item.cacheStrategy === 'reuse')) {
             generationCache.set({

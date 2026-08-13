@@ -2,8 +2,6 @@ import { mkdirSync } from 'fs';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
-import type { OptionsSlice } from '../reuseStore';
-import { ReuseStore } from '../reuseStore';
 import { formatArtifactContent, type ReuseWriterContext, writeSchemaWithReuse } from '../reuseStore/reuseWriterHelpers';
 import { Templates } from '../types/base/Templates.model';
 import { EmptySchemaStrategy } from '../types/enums/EmptySchemaStrategy.enum';
@@ -28,14 +26,7 @@ interface IWriteClientSchemas {
     validationLibrary?: ValidationLibrary;
     emptySchemaStrategy: EmptySchemaStrategy;
     prettierConfigPath?: string;
-    reuseStore?: ReuseStore;
-    optionsSlice?: OptionsSlice;
-    specInput?: string;
-    inputPath?: string;
-    modelSchemas?: Map<string, Record<string, unknown>>;
-    referencedArtifactKeys?: Set<string>;
-    onReuseStat?: (hit: boolean) => void;
-    reuseOnConflict?: 'fail' | 'namespace';
+    reuse?: ReuseWriterContext;
 }
 
 function isEmptySchemaModel(model: Model): boolean {
@@ -51,24 +42,7 @@ function isEmptySchemaModel(model: Model): boolean {
  * @param useUnionTypes Use union types instead of enums
  */
 export async function writeClientSchemas(this: WriteClient, options: IWriteClientSchemas): Promise<Model[]> {
-    const {
-        models,
-        templates,
-        outputSchemasPath,
-        httpClient,
-        useUnionTypes,
-        validationLibrary,
-        emptySchemaStrategy,
-        prettierConfigPath,
-        reuseStore,
-        optionsSlice,
-        specInput,
-        inputPath,
-        modelSchemas,
-        referencedArtifactKeys,
-        onReuseStat,
-        reuseOnConflict,
-    } = options;
+    const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary, emptySchemaStrategy, prettierConfigPath, reuse } = options;
     if (templates.exports.schema) {
         this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SCHEMAS_START);
 
@@ -88,20 +62,11 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
 
             this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
 
-            const canReuse = reuseStore && optionsSlice && specInput && modelSchemas;
-            if (canReuse) {
-                const reuseCtx: ReuseWriterContext = {
-                    reuseStore,
-                    optionsSlice,
-                    specInput,
-                    inputPath: inputPath ?? specInput,
-                    modelSchemas,
-                    referencedArtifactKeys,
-                    onReuseStat,
-                    reuseOnConflict,
-                    prettierConfigPath,
+            if (reuse) {
+                const adapter = {
+                    writeOutputFile: (path: string, content: string) => this.writeOutputFile(path, content),
                 };
-                await writeSchemaWithReuse(this, model, file, reuseCtx, async () =>
+                await writeSchemaWithReuse(adapter, model, file, reuse, async () =>
                     formatArtifactContent(
                         templates.exports.schema({
                             ...model,
@@ -110,7 +75,7 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
                             validationLibrary,
                             emptySchemaStrategy,
                         }),
-                        prettierConfigPath
+                        reuse.prettierConfigPath ?? prettierConfigPath
                     )
                 );
                 this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));

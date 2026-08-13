@@ -2,10 +2,7 @@ import { mkdirSync } from 'fs';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { dirNameHelper, relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
-import type { OptionsSlice } from '../reuseStore';
-import { ReuseStore } from '../reuseStore';
 import { formatArtifactContent, type ReuseWriterContext, writeModelWithReuse } from '../reuseStore/reuseWriterHelpers';
-import type { SharedFolderWriter } from '../reuseStore/SharedFolderWriter';
 import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ModelsLayout } from '../types/enums/ModelsLayout.enum';
@@ -41,15 +38,7 @@ interface IWriteClientModels {
     modelsLayout?: ModelsLayout;
     outputCorePath?: string;
     prettierConfigPath?: string;
-    reuseStore?: ReuseStore;
-    optionsSlice?: OptionsSlice;
-    specInput?: string;
-    inputPath?: string;
-    modelSchemas?: Map<string, Record<string, unknown>>;
-    referencedArtifactKeys?: Set<string>;
-    onReuseStat?: (hit: boolean) => void;
-    reuseOnConflict?: 'fail' | 'namespace';
-    sharedFolderWriter?: SharedFolderWriter;
+    reuse?: ReuseWriterContext;
 }
 
 /**
@@ -61,27 +50,9 @@ interface IWriteClientModels {
  * @param useUnionTypes Use union types instead of enums
  */
 export async function writeClientModels(this: WriteClient, options: IWriteClientModels): Promise<void> {
-    const {
-        models,
-        templates,
-        outputModelsPath,
-        httpClient,
-        useUnionTypes,
-        modelsMode,
-        modelsLayout,
-        outputCorePath,
-        useOptions,
-        prettierConfigPath,
-        reuseStore,
-        optionsSlice,
-        specInput,
-        inputPath,
-        modelSchemas,
-        referencedArtifactKeys,
-        onReuseStat,
-        reuseOnConflict,
-        sharedFolderWriter,
-    } = options;
+    const { models, templates, outputModelsPath, httpClient, useUnionTypes, modelsMode, modelsLayout, outputCorePath, useOptions, prettierConfigPath, reuse } = options;
+
+    const effectivePrettierConfigPath = reuse?.prettierConfigPath ?? prettierConfigPath;
 
     this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_START);
 
@@ -96,7 +67,7 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             modelsMode,
             modelsLayout,
         });
-        const formattedValue = await formatArtifactContent(templateResult, prettierConfigPath);
+        const formattedValue = await formatArtifactContent(templateResult, effectivePrettierConfigPath);
         await this.writeOutputFile(file, formattedValue);
         this.registerLintTarget(file, outputModelsPath);
         this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
@@ -136,7 +107,7 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
                         modelsMode,
                         modelsLayout,
                     }),
-                    prettierConfigPath
+                    effectivePrettierConfigPath
                 );
             }
             return formatArtifactContent(
@@ -145,25 +116,16 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
                     httpClient,
                     useUnionTypes,
                 }),
-                prettierConfigPath
+                effectivePrettierConfigPath
             );
         };
 
-        const canReuse = reuseStore && optionsSlice && specInput && modelSchemas;
-        if (canReuse) {
-            const reuseCtx: ReuseWriterContext = {
-                reuseStore,
-                optionsSlice,
-                specInput,
-                inputPath: inputPath ?? specInput,
-                modelSchemas,
-                referencedArtifactKeys,
-                onReuseStat,
-                reuseOnConflict,
-                prettierConfigPath,
-                sharedFolderWriter,
+        if (reuse) {
+            const adapter = {
+                writeOutputFile: (path: string, content: string) => this.writeOutputFile(path, content),
+                registerLintTarget: (path: string, outputDir?: string) => this.registerLintTarget(path, outputDir ?? outputModelsPath),
             };
-            await writeModelWithReuse(this, model, file, outputModelsPath, reuseCtx, renderModel);
+            await writeModelWithReuse(adapter, model, file, outputModelsPath, reuse, renderModel);
             this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
             continue;
         }

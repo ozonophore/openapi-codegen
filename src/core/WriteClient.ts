@@ -2,8 +2,7 @@ import { ELogLevel, ELogOutput } from '../common/Enums';
 import { Logger } from '../common/Logger';
 import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
-import type { OptionsSlice, ReuseStore } from './reuseStore';
-import type { SharedFolderWriter } from './reuseStore/SharedFolderWriter';
+import type { ReuseWriterContext } from './reuseStore/reuseWriterHelpers';
 import { ClientArtifacts } from './types/base/ClientArtifacts.model';
 import { ExportedModel } from './types/base/ExportedModel.model';
 import { ExportedService } from './types/base/ExportedService.model';
@@ -70,15 +69,7 @@ type TWriteClientProps = {
     modelsMode?: ModelsMode;
     modelsLayout?: ModelsLayout;
     prettierConfigPath?: string;
-    reuseStore?: ReuseStore;
-    optionsSlice?: OptionsSlice;
-    specInput?: string;
-    inputPath?: string;
-    modelSchemas?: Map<string, Record<string, unknown>>;
-    referencedArtifactKeys?: Set<string>;
-    onReuseStat?: (hit: boolean) => void;
-    reuseOnConflict?: 'fail' | 'namespace';
-    sharedFolderWriter?: SharedFolderWriter;
+    reuse?: ReuseWriterContext;
 };
 
 type TAPIClientGeneratorConfig = Omit<TWriteClientProps, 'httpClient' | 'useOptions' | 'request' | 'useCancelableRequest' | 'useSeparatedIndexes'> & {
@@ -133,15 +124,7 @@ export class WriteClient {
             modelsMode,
             modelsLayout,
             prettierConfigPath,
-            reuseStore,
-            optionsSlice,
-            specInput,
-            inputPath,
-            modelSchemas,
-            referencedArtifactKeys,
-            onReuseStat,
-            reuseOnConflict,
-            sharedFolderWriter,
+            reuse,
         } = options;
 
         if (!excludeCoreServiceFiles) {
@@ -159,7 +142,7 @@ export class WriteClient {
                 useCancelableRequest,
                 customExecutorPath,
                 modelsMode,
-                sharedFolderWriter,
+                sharedFolderWriter: reuse?.sharedFolderWriter,
             });
             await this.writeClientCoreIndex({
                 templates,
@@ -203,13 +186,10 @@ export class WriteClient {
             });
         }
 
-        /**
-         * TODO: Нужно собирать импорты из всех вложенных моделей (link, properties в composition и т.д.) и передавать их в шаблон.
-         * Это делается в writeClientSchemas или в парсере моделей.
-         */
+        let schemaModels: Model[] = [];
         if (validationLibrary !== ValidationLibrary.NONE) {
             await fileSystemHelpers.mkdir(outputPaths.outputSchemas);
-            const schemaModels = await this.writeClientSchemas({
+            schemaModels = await this.writeClientSchemas({
                 models: client.models,
                 templates,
                 outputSchemasPath: outputPaths.outputSchemas,
@@ -218,13 +198,7 @@ export class WriteClient {
                 validationLibrary,
                 emptySchemaStrategy,
                 prettierConfigPath,
-                reuseStore,
-                optionsSlice,
-                specInput,
-                modelSchemas,
-                referencedArtifactKeys,
-                onReuseStat,
-                reuseOnConflict,
+                reuse,
             });
             await this.writeClientSchemasIndex({
                 models: schemaModels,
@@ -232,34 +206,6 @@ export class WriteClient {
                 outputSchemasPath: outputPaths.outputSchemas,
                 useSeparatedIndexes,
             });
-            await this.writeModelsAndFinalize({
-                client,
-                templates,
-                outputPaths,
-                httpClient,
-                useOptions,
-                useUnionTypes,
-                excludeCoreServiceFiles,
-                request,
-                customExecutorPath,
-                useCancelableRequest,
-                useSeparatedIndexes,
-                validationLibrary,
-                emptySchemaStrategy,
-                modelsMode,
-                modelsLayout,
-                schemaModels,
-                prettierConfigPath,
-                reuseStore,
-                optionsSlice,
-                specInput,
-                modelSchemas,
-                referencedArtifactKeys,
-                onReuseStat,
-                reuseOnConflict,
-                sharedFolderWriter,
-            });
-            return;
         }
         await this.writeModelsAndFinalize({
             client,
@@ -277,17 +223,9 @@ export class WriteClient {
             emptySchemaStrategy,
             modelsMode,
             modelsLayout,
-            schemaModels: [],
+            schemaModels,
             prettierConfigPath,
-            reuseStore,
-            optionsSlice,
-            specInput,
-            inputPath,
-            modelSchemas,
-            referencedArtifactKeys,
-            onReuseStat,
-            reuseOnConflict,
-            sharedFolderWriter,
+            reuse,
         });
     }
 
@@ -307,15 +245,7 @@ export class WriteClient {
             modelsLayout,
             schemaModels,
             prettierConfigPath,
-            reuseStore,
-            optionsSlice,
-            specInput,
-            inputPath,
-            modelSchemas,
-            referencedArtifactKeys,
-            onReuseStat,
-            reuseOnConflict,
-            sharedFolderWriter,
+            reuse,
         } = config;
 
         await fileSystemHelpers.mkdir(outputPaths.outputModels);
@@ -335,15 +265,7 @@ export class WriteClient {
             modelsLayout,
             outputCorePath: shouldInlineDtoCore ? './' : relativeHelper(outputPaths.outputModels, outputPaths.outputCore),
             prettierConfigPath,
-            reuseStore,
-            optionsSlice,
-            specInput,
-            inputPath,
-            modelSchemas,
-            referencedArtifactKeys,
-            onReuseStat,
-            reuseOnConflict,
-            sharedFolderWriter,
+            reuse,
         });
         await this.writeClientModelsIndex({
             models: client.models,
@@ -406,21 +328,8 @@ export class WriteClient {
      * @param content содержимое файла
      * @returns результат записи: written или unchanged
      */
-    public async writeOutputFile(filePath: string, content: string, options?: { expectedByteSize?: number }): Promise<WriteFileIfChangedResult> {
+    public async writeOutputFile(filePath: string, content: string): Promise<WriteFileIfChangedResult> {
         this.expectedOutputFiles.add(resolveHelper(process.cwd(), filePath));
-        if (options?.expectedByteSize !== undefined) {
-            try {
-                const fileSize = await fileSystemHelpers.getFileSize(filePath);
-                if (fileSize === options.expectedByteSize) {
-                    this.writeStats.unchanged += 1;
-                    return 'unchanged';
-                }
-            } catch (error: any) {
-                if (error?.code !== 'ENOENT') {
-                    throw error;
-                }
-            }
-        }
         const result = await writeFileIfChanged(filePath, content);
         this.writeStats[result] += 1;
         return result;

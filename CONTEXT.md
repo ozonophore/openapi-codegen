@@ -38,3 +38,15 @@ Policy for skipping a Spec item when GenerationCache hit is valid: fingerprint m
 - **Call sites:** `OpenApiClient.generateSingle` and session `shouldEntitySkip` callback; `getSpecItemName` shared (preAnalyze / AvatarSwarm use the same helper)
 - **Cache break:** bump to fingerprint version **3** (one-time warm miss)
 - **OpenSpec change:** `pdtch-191-entity-skip-fingerprint`
+
+## Reuse write session
+
+Opaque handle for applying ReuseStore policy while writing models/schemas.
+
+- **Type:** `ReuseWriterContext` in `reuseStore/reuseWriterHelpers.ts` (required when present: store, optionsSlice, specInput, inputPath, modelSchemas; optional keys/stats/conflict/shared/prettier)
+- **Write seam:** `WriteClient.writeClient` / `writeClientModels` / `writeClientSchemas` take `reuse?: ReuseWriterContext` — not a 9-field flat bag
+- **Output adapter:** `ReuseOutputAdapter = { writeOutputFile; registerLintTarget? }`; reuse helpers depend on the adapter, not the `WriteClient` class
+- **Assembly:** built once in `OpenApiClient.generateSingle` from `itemRunContext` + local slice/schemas/paths
+- **Write:** V2/V3 share one `writeProps`; single models-finalize so `inputPath` survives `validationLibrary !== NONE`
+- **Hit path:** `writeOutputFile` compares content, not `expectedByteSize`
+- **OpenSpec change:** `pdtch-191-reuse-write-session`
