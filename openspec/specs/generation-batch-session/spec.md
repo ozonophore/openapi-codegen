@@ -13,7 +13,7 @@ Multi-item Generation lifecycle owned by an internal `GenerationBatchSession` mo
 
 #### Scenario: Per-item generation stays outside session module
 - **WHEN** session обрабатывает очередной Spec item
-- **THEN** фактический parse→Client→Write MUST выполняться через injected callback `generateItem`, реализованный фасадом (`generateSingle`), а не кодом внутри session module
+- **THEN** фактический parse→Client→Write MUST выполняться через injected callback `generateItem`, реализованный фасадом как делегат в **Generation item session** (`itemSession.run`), а не кодом внутри batch session module и не методом `generateSingle` на фасаде
 
 ---
 
