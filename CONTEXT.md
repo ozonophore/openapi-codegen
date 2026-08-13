@@ -50,3 +50,23 @@ Opaque handle for applying ReuseStore policy while writing models/schemas.
 - **Write:** V2/V3 share one `writeProps`; single models-finalize so `inputPath` survives `validationLibrary !== NONE`
 - **Hit path:** `writeOutputFile` compares content, not `expectedByteSize`
 - **OpenSpec change:** `pdtch-191-reuse-write-session`
+
+## Plugin config injection
+
+Config entries may include `{ path, name?, config? }`. Fingerprints already hash `config`; runtime injects it too.
+
+- **Hook:** optional `configure?(config)` on `OpenApiGeneratorPlugin`
+- **When:** call only if `config` has at least one key after normalize
+- **Load:** `loadGeneratorPlugins` accepts entries (path+config); generate and preAnalyze pass `mergePluginPaths`, not stripped paths
+- **Errors:** `configure` throw fails generation (same as load failure)
+- **OpenSpec change:** `pdtch-191-resolved-context`
+
+## Resolved Context factory
+
+Normal generate/preAnalyze path must not hand-assemble a half-initialized Context.
+
+- **Factory:** `createResolvedContext(…)` in `src/core/createResolvedContext.ts` → `{ context, openApi }`
+- **Replaces:** two-step `getOpenApiSpec` + public `addRefs` / `initializeVirtualFileMap`; those steps are internal (`attachResolvedOpenApi`)
+- **Refs:** `_refs` stays unset until attach — `values()`/`get()` throw “must be initialized”, not a dummy `{}`
+- **WriteClient:** still does not receive Context
+- **OpenSpec change:** `pdtch-191-resolved-context`

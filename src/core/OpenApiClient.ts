@@ -12,6 +12,7 @@ import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
+import { createResolvedContext } from './createResolvedContext';
 import { GenerationBatchSession, type ItemRunContext } from './GenerationBatchSession';
 import {
     buildCacheKey,
@@ -25,7 +26,7 @@ import {
 } from './generationCache/EntitySkip';
 import { loadGovernanceConfig } from './governance/loadGovernanceConfig';
 import { loadGeneratorPlugins } from './plugins/loadGeneratorPlugins';
-import { extractPluginPaths } from './plugins/pluginEntries';
+import { mergePluginPaths } from './plugins/pluginEntries';
 import { buildModelSchemaMap } from './reuseStore';
 import { buildOptionsSlice } from './reuseStore/ArtifactFingerprinter';
 import { runSpecAnalysis } from './specAnalysis/runSpecAnalysis';
@@ -38,7 +39,6 @@ import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import type { Client } from './types/shared/Client.model';
 import { applyDiffReportToClient } from './utils/applyDiffReportToClient';
 import type { GenerationCache } from './utils/GenerationCache';
-import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
 import { DiffReport, loadDiffReport } from './utils/loadDiffReport';
@@ -311,10 +311,10 @@ export class OpenApiClient {
             }
         }
         const knownFilesBefore = new Set(this.writeClient.getExpectedOutputFilesArray());
-        const generatorPlugins = await loadGeneratorPlugins(extractPluginPaths(plugins), {
+        const generatorPlugins = await loadGeneratorPlugins(mergePluginPaths(plugins, null), {
             disableBuiltins: disableBuiltinPlugins,
         });
-        const context = new Context({
+        const { context, openApi } = await createResolvedContext({
             input: absoluteInput,
             output: outputPaths,
             prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix },
@@ -322,7 +322,6 @@ export class OpenApiClient {
             plugins: generatorPlugins,
             strictPluginMode,
         });
-        const openApi = await getOpenApiSpec(context, absoluteInput);
 
         if (specAnalysis?.enabled) {
             await runSpecAnalysis(openApi, { ...specAnalysis, enabled: true }, this.writeClient.logger, getSpecItemName(input), itemRunContext?.specAnalysisAccumulator ?? undefined, {

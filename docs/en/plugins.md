@@ -68,6 +68,26 @@ On **`generate`**, the same flag fails when `resolveSchemaTypeOverride` throws (
 
 `pluginsHash` in artifact fingerprints includes each entry’s `config` (keyed by `name ?? path`). Changing only `config` invalidates reuse/entity cache for affected options.
 
+### Runtime `configure`
+
+If a plugin exports optional `configure(config)`, the loader calls it **after** the module loads and **only when** the entry’s `config` object has at least one key (string path entries normalize to `{}` and do **not** call `configure`).
+
+```js
+module.exports = {
+  name: 'with-config',
+  apiVersion: '1',
+  configure(config) {
+    this._mode = config.mode;
+  },
+  resolveSchemaTypeOverride({ schema }) {
+    /* use this._mode if needed */
+    return schema['x-custom-type'];
+  },
+};
+```
+
+A throw inside `configure` fails plugin loading (same as a bad plugin file) on **generate** and **preAnalyze**.
+
 ## CLI
 
 ```bash

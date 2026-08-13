@@ -35,6 +35,11 @@ export interface OpenApiGeneratorPlugin {
     name: string;
     version?: string;
     apiVersion?: OpenApiCodegenPluginApiVersion;
+    /**
+     * Optional per-entry config from openapi config (`plugins[].config`).
+     * Called by the loader only when config has at least one key.
+     */
+    configure?: (config: Record<string, unknown>) => void | Promise<void>;
     resolveSchemaTypeOverride?: (input: SchemaTypeOverrideInput) => string | undefined;
     afterSemanticDiff?: (ctx: SemanticDiffPluginContext) => SemanticDiffReport | void | Promise<SemanticDiffReport | void>;
     mapRecommendation?: (ctx: RecommendationPluginContext) => SemanticDiffReport['recommendation'] | void | Promise<SemanticDiffReport['recommendation'] | void>;
