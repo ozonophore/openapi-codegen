@@ -20,9 +20,21 @@ Owns the **multi-item Generation lifecycle** for one `generate()` run: cache / R
 
 | Term | Role |
 |------|------|
-| **OpenApiClient** | Facade: options normalize/defaults, `generateSingle`, entity-skip/fingerprint helpers; constructs and runs the batch session |
+| **OpenApiClient** | Facade: options normalize/defaults, `generateSingle`; constructs and runs the batch session |
 | **WriteClient** | Output session: write artifacts, expected-file registry, lint targets, index combine |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
 | **GenerationCache** | Entity/content cache entries per output root |
 | **Context** | Parse-time Spec context (refs, virtual file map, plugins) — not passed to WriteClient |
 | **Generator plugins** | Loaded into Context during per-item generation / preAnalyze |
+
+## Entity skip / entity fingerprint
+
+Policy for skipping a Spec item when GenerationCache hit is valid: fingerprint match + files on disk. Applies when `cacheStrategy` is **`entity` or `reuse`** (hybrid skip). For `reuse`, skip also requires a Reuse manifest **presence** guard (`specItems[spec]` exists) — not per-artifact integrity hashing.
+
+- **Module:** `src/core/generationCache/EntitySkip.ts` (GenerationCache stays in `src/core/utils/GenerationCache.ts`)
+- **Interface:** `buildCacheKey`, `buildEntityFingerprint`, `shouldEntitySkip` — no `registerOutputFile` (Write side effect stays in `generateSingle`)
+- **Fingerprint (v3):** `cacheFingerprintVersion` + `generatorVersion` + `specHash` + **`optionsSliceHash`** (from `buildOptionsSlice` / reuse fingerprinter) + **residual** options not in `OptionsSlice` (`request`, `useOptions`, `includeSchemasFiles`, `excludeCoreServiceFiles`, `strictPluginMode`, `customExecutorPath`, `useCancelableRequest`, `useHistory`, `diffReport`, `strictOpenapi`, `failOnGovernanceErrors`). No raw `plugins` / `disableBuiltinPlugins` in residual (covered by slice).
+- **Serialization:** `stableStringify` + same hash helper as reuse fingerprints
+- **Call sites:** `OpenApiClient.generateSingle` and session `shouldEntitySkip` callback; `getSpecItemName` shared (preAnalyze / AvatarSwarm use the same helper)
+- **Cache break:** bump to fingerprint version **3** (one-time warm miss)
+- **OpenSpec change:** `pdtch-191-entity-skip-fingerprint`

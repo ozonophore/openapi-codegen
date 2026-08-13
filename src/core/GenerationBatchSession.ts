@@ -1,5 +1,4 @@
 import { promises as fsPromises } from 'fs';
-import { basename, extname } from 'path';
 
 import { COMMON_DEFAULT_OPTIONS_VALUES } from '../common/Consts';
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
@@ -11,6 +10,7 @@ import { resolveHelper } from '../common/utils/pathHelpers';
 import { resolveSpecAnalysisConfig } from '../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
 import { AvatarSwarmGenerator } from './avatarSwarm/AvatarSwarmGenerator';
 import { writeSwarmOutput } from './avatarSwarm/writeSwarmOutput';
+import { getSpecItemName } from './generationCache/EntitySkip';
 import { generateTrafficSplitterModule } from './migration/generateTrafficSplitterModule';
 import { ReuseStore } from './reuseStore';
 import type { GenerationReport, ReuseConflictRecord, SpecGenerationStats } from './reuseStore/GenerationReport';
@@ -68,7 +68,6 @@ export class GenerationBatchSession {
             const cacheEnabled = items[0]?.cache === true;
             const cacheStrategy = items[0]?.cacheStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheStrategy;
             const useReuseStore = cacheEnabled && cacheStrategy === 'reuse';
-            const needsEntityCacheFallback = cacheEnabled && items.some(item => isClassesBundleLayout(item.modelsMode, item.modelsLayout));
             const generationCaches = new Map<string, GenerationCache>();
             let reuseStore: ReuseStore | null = null;
             const referencedArtifactKeys = new Set<string>();
@@ -116,13 +115,16 @@ export class GenerationBatchSession {
                 }
             }
 
-            if (cacheEnabled && (cacheStrategy === 'entity' || needsEntityCacheFallback)) {
+            if (cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse')) {
                 for (const outputRoot of this.getUniqueResolvedOutputs(items)) {
                     const sampleItem = items.find(item => this.resolveOutputRoot(item.output) === outputRoot);
                     if (!sampleItem) {
                         continue;
                     }
-                    const cachePath = this.resolveCachePathForOutput(sampleItem.output, sampleItem.cachePath);
+                    const cachePath =
+                        cacheStrategy === 'reuse'
+                            ? resolveHelper(this.resolveOutputRoot(sampleItem.output), GenerationBatchSession.DEFAULT_CACHE_FILENAME)
+                            : this.resolveCachePathForOutput(sampleItem.output, sampleItem.cachePath);
                     const generationCache = new GenerationCache(cachePath);
                     await generationCache.load();
                     generationCaches.set(outputRoot, generationCache);
@@ -162,19 +164,17 @@ export class GenerationBatchSession {
             };
 
             const resolveItemGenerationCache = (option: TStrictFlatOptions): GenerationCache | null =>
-                cacheEnabled && (cacheStrategy === 'entity' || (cacheStrategy === 'reuse' && isClassesBundleLayout(option.modelsMode, option.modelsLayout)))
-                    ? (generationCaches.get(this.resolveOutputRoot(option.output)) ?? null)
-                    : null;
+                cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse') ? (generationCaches.get(this.resolveOutputRoot(option.output)) ?? null) : null;
 
             if (rawOptions.preAnalyze === true) {
                 const willEntitySkipSpecItems = new Set<string>();
                 for (const option of items) {
                     const generationCache = resolveItemGenerationCache(option);
                     if (await shouldEntitySkip(option, generationCache, useReuseStore ? reuseStore : null)) {
-                        willEntitySkipSpecItems.add(this.getSpecItemName(option.input));
+                        willEntitySkipSpecItems.add(getSpecItemName(option.input));
                     }
                 }
-                const itemsForPreAnalyze = items.filter(item => !willEntitySkipSpecItems.has(this.getSpecItemName(item.input)));
+                const itemsForPreAnalyze = items.filter(item => !willEntitySkipSpecItems.has(getSpecItemName(item.input)));
                 if (itemsForPreAnalyze.length === 0) {
                     writeClient.logger.forceInfo('[preAnalyze] Skipped — all items entity-cached');
                 } else {
@@ -221,7 +221,7 @@ export class GenerationBatchSession {
                 }
 
                 if (entitySkipped && reuseStore) {
-                    const manifestItem = reuseStore.getManifest().specItems[this.getSpecItemName(option.input)];
+                    const manifestItem = reuseStore.getManifest().specItems[getSpecItemName(option.input)];
                     for (const artifactKey of manifestItem?.artifactKeys ?? []) {
                         referencedArtifactKeys.add(artifactKey);
                     }
@@ -230,7 +230,7 @@ export class GenerationBatchSession {
                 const fileEnd = process.hrtime.bigint();
                 const fileDurationInSeconds = Number(fileEnd - fileStart) / 1e9;
                 specStats.push({
-                    specItem: this.getSpecItemName(option.input),
+                    specItem: getSpecItemName(option.input),
                     input: option.input,
                     durationMs: Math.round(fileDurationInSeconds * 1000),
                     reuseHits,
@@ -279,14 +279,14 @@ export class GenerationBatchSession {
             }
 
             await this.cleanupStaleOutputs(items, sharedFolderWriter?.lca);
-            if (cacheEnabled && (cacheStrategy === 'entity' || needsEntityCacheFallback)) {
+            if (cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse')) {
                 for (const generationCache of generationCaches.values()) {
                     await generationCache.save();
                 }
             }
             if (specAnalysisAccumulator && !allEntitySkipped) {
                 const crossSpecItems = items.map(item => ({
-                    name: this.getSpecItemName(item.input),
+                    name: getSpecItemName(item.input),
                     input: item.input,
                     outputModels: item.outputModels,
                     outputSchemas: item.outputSchemas,
@@ -373,11 +373,6 @@ export class GenerationBatchSession {
         return resolveHelper(this.resolveOutputRoot(output), cachePath || GenerationBatchSession.DEFAULT_CACHE_FILENAME);
     }
 
-    private getSpecItemName(input: string): string {
-        const absoluteInput = resolveHelper(process.cwd(), input);
-        return basename(absoluteInput, extname(absoluteInput));
-    }
-
     private validateConsistentCacheSettings(items: TStrictFlatOptions[]): void {
         if (items.length <= 1) {
             return;
@@ -426,7 +421,7 @@ export class GenerationBatchSession {
                 if (!countByPath.has(resolved)) {
                     countByPath.set(resolved, new Set());
                 }
-                countByPath.get(resolved)!.add(this.getSpecItemName(item.input));
+                countByPath.get(resolved)!.add(getSpecItemName(item.input));
             }
         }
 

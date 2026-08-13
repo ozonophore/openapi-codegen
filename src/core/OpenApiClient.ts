@@ -1,11 +1,8 @@
-import { basename, extname } from 'path';
-
 import { COMMON_DEFAULT_OPTIONS_VALUES, DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../common/Consts';
 import { Logger } from '../common/Logger';
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import { extractEslintFixOptions, TEslintFixOptions } from '../common/TEslintFixOptions';
 import { TFlatOptions, TRawOptions, TStrictFlatOptions } from '../common/TRawOptions';
-import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../common/utils/pathHelpers';
 import { normalizeMarauderBoolean } from '../common/VersionedSchema/Utils/createBooleanToObjectSchema';
 import { mergeMarauderBlockDeep } from '../common/VersionedSchema/Utils/mergeMarauderBlock';
@@ -16,10 +13,20 @@ import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
 import { Context } from './Context';
 import { GenerationBatchSession, type ItemRunContext } from './GenerationBatchSession';
+import {
+    buildCacheKey,
+    buildEntityFingerprint,
+    defaultFilesExist,
+    getSpecItemName,
+    resolveEntitySkipCandidate,
+    shouldEntitySkip,
+    usesEntityCache,
+    usesReuseStoreForItem,
+} from './generationCache/EntitySkip';
 import { loadGovernanceConfig } from './governance/loadGovernanceConfig';
 import { loadGeneratorPlugins } from './plugins/loadGeneratorPlugins';
 import { extractPluginPaths } from './plugins/pluginEntries';
-import { buildModelSchemaMap, ReuseStore } from './reuseStore';
+import { buildModelSchemaMap } from './reuseStore';
 import { buildOptionsSlice } from './reuseStore/ArtifactFingerprinter';
 import { runSpecAnalysis } from './specAnalysis/runSpecAnalysis';
 import { validateOpenApiStrict, validateWithSwaggerParser, writeOpenApiStrictReport } from './strict/validateOpenApiStrict';
@@ -30,12 +37,11 @@ import { ModelsMode } from './types/enums/ModelsMode.enum';
 import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import type { Client } from './types/shared/Client.model';
 import { applyDiffReportToClient } from './utils/applyDiffReportToClient';
-import { GenerationCache } from './utils/GenerationCache';
+import type { GenerationCache } from './utils/GenerationCache';
 import { getOpenApiSpec } from './utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
 import { DiffReport, loadDiffReport } from './utils/loadDiffReport';
-import { isClassesBundleLayout } from './utils/modelsLayoutHelpers';
 import { postProcessClient } from './utils/postProcessClient';
 import { prepareDtoModels } from './utils/prepareDtoModels';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
@@ -46,7 +52,6 @@ import { WriteClient } from './WriteClient';
  * Оркестратор генерации OpenAPI-клиента: парсинг спецификации, применение diff-отчёта и запись артефактов.
  */
 export class OpenApiClient {
-    private static readonly CACHE_FINGERPRINT_VERSION = 2;
     private _writeClient: WriteClient | null = null;
     /** ESLint paths from top-level rawOptions (not per items[] entry). */
     private eslintFixOptions: TEslintFixOptions = {};
@@ -274,15 +279,23 @@ export class OpenApiClient {
             outputSchemas,
         });
         const absoluteInput = resolveHelper(process.cwd(), input);
-        const cacheKey = this.getCacheKey(item, absoluteInput);
-        const useEntityCache =
-            item.cache && generationCache !== null && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && isClassesBundleLayout(item.modelsMode, item.modelsLayout)));
-        const useReuseStore = item.cache && item.cacheStrategy === 'reuse' && itemRunContext?.reuseStore != null && !isClassesBundleLayout(item.modelsMode, item.modelsLayout);
-        const cacheFingerprint = useEntityCache ? await this.getCacheFingerprint(item, absoluteInput) : '';
-        const specInput = this.getSpecItemName(item.input);
+        const cacheKey = buildCacheKey(item, absoluteInput);
+        const useEntityCache = usesEntityCache(item, generationCache);
+        const useReuseStore = usesReuseStoreForItem(item, itemRunContext?.reuseStore ?? null);
+        const cacheFingerprint = useEntityCache ? await buildEntityFingerprint(item, absoluteInput) : '';
+        const specInput = getSpecItemName(item.input);
         const optionsSlice = buildOptionsSlice(item);
         if (useEntityCache) {
-            const willEntitySkip = await this.resolveEntitySkipForItem(item, generationCache, itemRunContext?.reuseStore ?? null);
+            const willEntitySkip = await resolveEntitySkipCandidate({
+                useEntityCache,
+                generationCache,
+                cacheKey,
+                cacheFingerprint,
+                useReuseStore,
+                reuseStore: itemRunContext?.reuseStore ?? null,
+                specInput,
+                filesExist: defaultFilesExist,
+            });
             if (willEntitySkip) {
                 const cachedEntry = generationCache!.get(cacheKey)!;
                 for (const filePath of cachedEntry.files) {
@@ -312,7 +325,7 @@ export class OpenApiClient {
         const openApi = await getOpenApiSpec(context, absoluteInput);
 
         if (specAnalysis?.enabled) {
-            await runSpecAnalysis(openApi, { ...specAnalysis, enabled: true }, this.writeClient.logger, this.getSpecItemName(input), itemRunContext?.specAnalysisAccumulator ?? undefined, {
+            await runSpecAnalysis(openApi, { ...specAnalysis, enabled: true }, this.writeClient.logger, getSpecItemName(input), itemRunContext?.specAnalysisAccumulator ?? undefined, {
                 interface: interfacePrefix,
                 enum: enumPrefix,
                 type: typePrefix,
@@ -452,7 +465,7 @@ export class OpenApiClient {
             }
         }
         const generatedFiles = this.writeClient.getExpectedOutputFilesArray().filter(filePath => !knownFilesBefore.has(filePath));
-        if (item.cache && generationCache && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && isClassesBundleLayout(item.modelsMode, item.modelsLayout)))) {
+        if (item.cache && generationCache && (item.cacheStrategy === 'entity' || item.cacheStrategy === 'reuse')) {
             generationCache.set({
                 key: cacheKey,
                 fingerprint: cacheFingerprint,
@@ -462,90 +475,6 @@ export class OpenApiClient {
         }
 
         return { entitySkipped: false };
-    }
-
-    private getCacheKey(item: TStrictFlatOptions, absoluteInput: string): string {
-        return GenerationCache.hash(
-            JSON.stringify({
-                input: absoluteInput,
-                output: item.output,
-                outputCore: item.outputCore,
-                outputServices: item.outputServices,
-                outputModels: item.outputModels,
-                outputSchemas: item.outputSchemas,
-            })
-        );
-    }
-
-    private async getCacheFingerprint(item: TStrictFlatOptions, absoluteInput: string): Promise<string> {
-        const specContent = await fileSystemHelpers.readFile(absoluteInput, 'utf8');
-        const fingerprint = {
-            cacheFingerprintVersion: OpenApiClient.CACHE_FINGERPRINT_VERSION,
-            generatorVersion: process.env.npm_package_version || 'dev',
-            specHash: GenerationCache.hash(specContent),
-            options: {
-                httpClient: item.httpClient,
-                useOptions: item.useOptions,
-                useUnionTypes: item.useUnionTypes,
-                includeSchemasFiles: item.includeSchemasFiles,
-                excludeCoreServiceFiles: item.excludeCoreServiceFiles,
-                request: item.request,
-                plugins: item.plugins,
-                disableBuiltinPlugins: item.disableBuiltinPlugins,
-                strictPluginMode: item.strictPluginMode,
-                customExecutorPath: item.customExecutorPath,
-                interfacePrefix: item.interfacePrefix,
-                enumPrefix: item.enumPrefix,
-                typePrefix: item.typePrefix,
-                useCancelableRequest: item.useCancelableRequest,
-                sortByRequired: item.sortByRequired,
-                useSeparatedIndexes: item.useSeparatedIndexes,
-                validationLibrary: item.validationLibrary,
-                emptySchemaStrategy: item.emptySchemaStrategy,
-                useHistory: item.useHistory,
-                diffReport: item.diffReport,
-                modelsMode: item.modelsMode,
-                modelsLayout: item.modelsLayout,
-                strictOpenapi: item.strictOpenapi,
-                failOnGovernanceErrors: item.failOnGovernanceErrors,
-            },
-        };
-
-        return GenerationCache.hash(JSON.stringify(fingerprint));
-    }
-
-    private getSpecItemName(input: string): string {
-        const absoluteInput = resolveHelper(process.cwd(), input);
-        return basename(absoluteInput, extname(absoluteInput));
-    }
-
-    private async resolveEntitySkipForItem(item: TStrictFlatOptions, generationCache: GenerationCache | null, reuseStore: ReuseStore | null): Promise<boolean> {
-        void reuseStore;
-        const useEntityCache =
-            item.cache && generationCache !== null && (item.cacheStrategy === 'entity' || (item.cacheStrategy === 'reuse' && isClassesBundleLayout(item.modelsMode, item.modelsLayout)));
-        if (!useEntityCache || !generationCache) {
-            return false;
-        }
-
-        const absoluteInput = resolveHelper(process.cwd(), item.input);
-        const cacheKey = this.getCacheKey(item, absoluteInput);
-        const cacheFingerprint = await this.getCacheFingerprint(item, absoluteInput);
-        const cachedEntry = generationCache.get(cacheKey);
-        if (!cachedEntry || cachedEntry.fingerprint !== cacheFingerprint) {
-            return false;
-        }
-
-        return this.filesExist(cachedEntry.files);
-    }
-
-    private async filesExist(paths: string[]): Promise<boolean> {
-        for (const filePath of paths) {
-            const exists = await fileSystemHelpers.exists(filePath);
-            if (!exists) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private async loadDiffReportIfNeeded(params: { useHistory?: boolean; diffReport?: string; inputPath?: string }): Promise<DiffReport | null> {
@@ -598,7 +527,7 @@ export class OpenApiClient {
             writeClient: this.writeClient,
             eslintFixOptions: this.eslintFixOptions,
             generateItem: (item, generationCache, itemRunContext) => this.generateSingle(item, generationCache, itemRunContext),
-            shouldEntitySkip: (item, generationCache, reuseStore) => this.resolveEntitySkipForItem(item, generationCache, reuseStore),
+            shouldEntitySkip: (item, generationCache, reuseStore) => shouldEntitySkip({ item, generationCache, reuseStore }),
         });
         await session.run(items, rawOptions);
     }

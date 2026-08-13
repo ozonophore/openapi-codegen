@@ -4,6 +4,7 @@ import { resolveHelper } from '../../common/utils/pathHelpers';
 import { Parser as ParserV2 } from '../api/v2/Parser';
 import { Parser as ParserV3 } from '../api/v3/Parser';
 import { Context } from '../Context';
+import { getSpecItemName } from '../generationCache/EntitySkip';
 import { loadGeneratorPlugins } from '../plugins/loadGeneratorPlugins';
 import { extractPluginPaths } from '../plugins/pluginEntries';
 import { hashSchema } from '../reuseStore/ArtifactFingerprinter';
@@ -103,10 +104,4 @@ export async function runPreAnalyze(items: TStrictFlatOptions[], logger: Logger)
     }
 
     logger.forceInfo('[preAnalyze] ─────────────────────────────────────');
-}
-
-function getSpecItemName(input: string): string {
-    const parts = input.replace(/\\/g, '/').split('/');
-    const filename = parts[parts.length - 1] ?? input;
-    return filename.replace(/\.[^.]+$/, '');
 }
