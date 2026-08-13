@@ -4,8 +4,8 @@ import { describe, test } from 'node:test';
 import type { Context } from '../../Context';
 import type { Client } from '../../types/shared/Client.model';
 import type { Model } from '../../types/shared/Model.model';
+import { OpenApiVersion } from '../../utils/getOpenApiVersion';
 import { applyDiffReportToClient } from '../applyDiffReportToClient';
-import { OpenApiVersion } from '../getOpenApiVersion';
 import type { DiffReport } from '../loadDiffReport';
 
 const createPropertyModel = (name: string, type: string): Model => ({

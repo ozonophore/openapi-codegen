@@ -1,7 +1,7 @@
 import type { SemanticDiffChange } from '../semanticDiff/analyzeOpenApiDiff';
-import type { DiffReportEntry } from '../types/DiffReport.model';
 import type { DiffAction, DiffSeverity } from '../types/shared/DiffInfo.model';
-import { semanticPointerToJsonPath } from './semanticPointerToJsonPath';
+import { semanticPointerToJsonPath } from '../utils/semanticPointerToJsonPath';
+import type { DiffReportEntry } from './DiffReport.model';
 
 const REMOVED_CHANGE_TYPES = new Set(['model.removed', 'model.property.removed', 'model.enum.value.removed', 'operation.removed', 'operation.parameter.removed', 'operation.response.success.removed']);
 

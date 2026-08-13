@@ -33,6 +33,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **OpenApiClient** | Facade: constructs WriteClient, item/batch sessions; options meaning in `resolveGenerationOptions` |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
+| **Diff report** | Lifecycle home: adapt + persist/load + types → consumer `DiffReport`; produce in `semanticDiff`; apply via item-session thin wrappers |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
 | **GenerationCache** | Entity/content cache entries per output root |
 | **Context** | Parse-time Spec context (refs, virtual file map, plugins) — not passed to WriteClient |
@@ -102,3 +103,16 @@ Owns raw config → strict items: Zod validate (**throws**, no `process.exit`) �
 - **Call site:** `OpenApiClient.generate(rawOptions)` then `GenerationBatchSession.run(items, rawOptions)`
 - **Visibility:** internal (not re-exported from `src/core/index.ts`)
 - **OpenSpec change:** `pdtch-191-generation-options-resolve`
+
+## Diff report lifecycle
+
+First-cut deepen: home adapt + persist/load + apply + miracle build + types under **`src/core/diffReport/`**; produce stays in `semanticDiff`; Generation item session keeps thin load/apply wrappers.
+
+- **Package:** `src/core/diffReport/` with barrel `index.ts` (internal — not re-exported from `src/core/index.ts`)
+- **Moves:** `loadDiffReport`, adapters (`adaptSemanticToStructural` + related), `buildMiraclesFromSemanticChanges`, `applyDiffReportToClient`, `writeDiffReport` (renamed from `writeSemanticDiffReport`, **no** permanent alias — update call sites), types from `types/DiffReport.model.ts` → `diffReport/` + **shim re-export** at old types path (no `utils/adapters` shim — call sites import the package)
+- **Stays:** `analyzeOpenApiDiff` / miracle heuristics in `semanticDiff/`; CLI assemble Unified inline (import path updates only)
+- **Deletes:** `createSemanticDiffContext` + unused call in `analyzeDiff`
+- **Call shape:** `GenerationItemSession` `loadDiffReportIfNeeded` / `applyDiffReportIfNeeded` unchanged
+- **On-disk:** Unified 2.0 + Semantic 1.1 + legacy read compat unchanged
+- **OpenSpec change:** `pdtch-191-diff-report-lifecycle`
+- **Out of scope:** `produceUnifiedDiffReport` high-level, schema collapse, Unified-direct apply, dual Spec-load unify, plugin entry config, Session/options/WriteClient rethink

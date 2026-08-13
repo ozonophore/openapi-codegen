@@ -1,5 +1,5 @@
 import type { SemanticDiffReport } from '../../semanticDiff/analyzeOpenApiDiff';
-import type { StructuralDiffPart } from '../../types/DiffReport.model';
+import type { StructuralDiffPart } from '../DiffReport.model';
 import { semanticChangesToDiffEntries } from '../semanticChangesToDiffEntries';
 import { extractMiraclesFromSemantic } from './extractMiraclesFromSemantic';
 

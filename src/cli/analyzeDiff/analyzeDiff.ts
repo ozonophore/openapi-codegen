@@ -4,21 +4,18 @@ import crypto from 'crypto';
 import { APP_LOGGER, DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../../common/Consts';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { validateZodOptions } from '../../common/Validation';
+import { adaptSemanticToStructural, buildMiraclesFromSemanticChanges, UNIFIED_DIFF_REPORT_SCHEMA_VERSION, type UnifiedDiffReport, writeDiffReport } from '../../core/diffReport';
 import { evaluateGovernanceRules } from '../../core/governance/evaluateGovernanceRules';
 import { loadGovernanceConfig } from '../../core/governance/loadGovernanceConfig';
 import { applySemanticDiffPluginHooks } from '../../core/plugins/applySemanticDiffPluginHooks';
 import { loadGeneratorPlugins } from '../../core/plugins/loadGeneratorPlugins';
-import { analyzeOpenApiDiff, SemanticDiffReport, writeSemanticDiffReport } from '../../core/semanticDiff/analyzeOpenApiDiff';
-import { UNIFIED_DIFF_REPORT_SCHEMA_VERSION, type UnifiedDiffReport } from '../../core/types/DiffReport.model';
-import { adaptSemanticToStructural } from '../../core/utils/adapters';
-import { buildMiraclesFromSemanticChanges } from '../../core/utils/buildMiraclesFromSemanticChanges';
+import { analyzeOpenApiDiff, SemanticDiffReport } from '../../core/semanticDiff/analyzeOpenApiDiff';
 import { loadSemanticOpenApiObject, loadSemanticOpenApiSpec } from '../../core/utils/loadSemanticOpenApiSpec';
 import { AnalyzeDiffOptions, analyzeDiffOptionsSchema } from '../schemas';
 import { formatCiMarkdownSummary } from './ciSummary';
 import { loadIgnoreRules } from './ignoreRules';
 import { filterSemanticChangesByIgnoreRules } from './ignoreSemanticChanges';
 import { resolvePluginPaths } from './pluginPaths';
-import { createSemanticDiffContext } from './semanticDiffContext';
 import { readSpecFromGit } from './specParser';
 
 /**
@@ -94,7 +91,6 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
         const baseSourceLabel = oldSpecInput ? `compare-with:${oldSpecInput}` : `git:${gitRef}`;
         APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.STARTED(newSpecInput, baseSourceLabel));
 
-        createSemanticDiffContext(newSpecInput);
         const newSpec = await loadSemanticOpenApiSpec(newSpecInput);
         const oldSpec = oldSpecInput ? await loadSemanticOpenApiSpec(oldSpecInput) : await loadSemanticOpenApiObject(await readSpecFromGit(gitRef as string, newSpecInput), newSpecInput);
 
@@ -150,7 +146,7 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
             structural: adaptSemanticToStructural(semanticReport, ignored),
         };
 
-        const reportPath = await writeSemanticDiffReport(report, pluginHooksResult.reportPath);
+        const reportPath = await writeDiffReport(report, pluginHooksResult.reportPath);
 
         APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.REPORT_CREATED(reportPath));
         APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.SUMMARY(semanticReport, reportPath));

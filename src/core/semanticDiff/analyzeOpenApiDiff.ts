@@ -1,10 +1,4 @@
-import path from 'path';
-
-import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
-import { format } from '../../common/utils/format';
-import { resolveHelper } from '../../common/utils/pathHelpers';
 import { evaluateGovernanceRules, GovernancePolicyConfig, GovernanceReport } from '../governance/evaluateGovernanceRules';
-import type { UnifiedDiffReport } from '../types/DiffReport.model';
 import { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 import type { MiracleEntry } from '../types/shared/Miracle.model';
 import { forEachOperationInSpec, isExplicitSuccessResponseCode } from '../utils/openApiOperationWalker';
@@ -1012,25 +1006,4 @@ export function analyzeOpenApiDiff(oldSpec: CommonOpenApi, newSpec: CommonOpenAp
         governance,
         changes: normalizedChanges,
     };
-}
-
-/**
- * Записывает семантический или унифицированный diff-отчёт в JSON-файл.
- * @param report отчёт для сохранения
- * @param reportFilePath путь к файлу отчёта
- * @returns абсолютный путь к сохранённому файлу
- */
-export async function writeSemanticDiffReport(report: SemanticDiffReport | UnifiedDiffReport, reportFilePath: string): Promise<string> {
-    const resolvedPath = resolveHelper(process.cwd(), reportFilePath);
-    const directory = path.dirname(resolvedPath);
-
-    const directoryExists = await fileSystemHelpers.exists(directory);
-    if (!directoryExists) {
-        await fileSystemHelpers.mkdir(directory);
-    }
-
-    const reportContent = await format(JSON.stringify(report), 'json');
-    await fileSystemHelpers.writeFile(resolvedPath, reportContent);
-
-    return resolvedPath;
 }

@@ -1,8 +1,7 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 
-import { UNIFIED_DIFF_REPORT_SCHEMA_VERSION, type UnifiedDiffReport } from '../../types/DiffReport.model';
-import { adaptSemanticToStructural } from '../../utils/adapters';
+import { adaptSemanticToStructural, UNIFIED_DIFF_REPORT_SCHEMA_VERSION, type UnifiedDiffReport } from '../../diffReport';
 import { analyzeOpenApiDiff } from '../analyzeOpenApiDiff';
 import { validateSemanticDiffReportSchema } from '../semanticDiffReportSchema';
 

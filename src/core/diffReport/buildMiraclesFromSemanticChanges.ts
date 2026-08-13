@@ -3,7 +3,7 @@ import leven from 'leven';
 import type { SemanticDiffChange } from '../semanticDiff/analyzeOpenApiDiff';
 import { computeConfidence, descriptionSimilarityBonus, getTypeSignature, normalizeName, normalizeScalarType } from '../semanticDiff/miracleHeuristics';
 import type { MiracleEntry } from '../types/shared/Miracle.model';
-import { semanticPointerToJsonPath } from './semanticPointerToJsonPath';
+import { semanticPointerToJsonPath } from '../utils/semanticPointerToJsonPath';
 
 type SemanticPropertyChange = {
     schemaPath: string;

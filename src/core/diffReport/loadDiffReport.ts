@@ -4,8 +4,8 @@ import { DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../../common/Consts';
 import type { Logger } from '../../common/Logger';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { SEMANTIC_DIFF_REPORT_SCHEMA_VERSION, type SemanticDiffReport } from '../semanticDiff/analyzeOpenApiDiff';
-import { type DiffReport, type DiffReportEntry, UNIFIED_DIFF_REPORT_SCHEMA_VERSION, type UnifiedDiffReport } from '../types/DiffReport.model';
 import { adaptSemanticToStructural } from './adapters';
+import { type DiffReport, type DiffReportEntry, UNIFIED_DIFF_REPORT_SCHEMA_VERSION, type UnifiedDiffReport } from './DiffReport.model';
 
 /** Реэкспорт типов legacy diff-отчёта. */
 export type { DiffReport, DiffReportEntry };
