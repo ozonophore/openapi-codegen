@@ -32,7 +32,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 |------|------|
 | **OpenApiClient** | Facade: options normalize/defaults; constructs WriteClient, item session, and batch session |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
-| **WriteClient** | Output session: write artifacts, expected-file registry, lint targets, index combine |
+| **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
 | **GenerationCache** | Entity/content cache entries per output root |
 | **Context** | Parse-time Spec context (refs, virtual file map, plugins) — not passed to WriteClient |
@@ -81,3 +81,14 @@ Normal generate/preAnalyze path must not hand-assemble a half-initialized Contex
 - **Refs:** `_refs` stays unset until attach — `values()`/`get()` throw “must be initialized”, not a dummy `{}`
 - **WriteClient:** still does not receive Context
 - **OpenSpec change:** `pdtch-191-resolved-context`
+
+## WriteClient concern split
+
+WriteClient is a composing facade. Ownership:
+
+- **OutputFileSession** — `writeOutputFile` + expected-file registry + write stats
+- **LintTargetRegistry** — lint target files + include globs
+- **IndexCombineSession** — per-item config Map; `combineAndWrite` / `combineAndWrightSimple` (HEAD name)
+- **WriteClient** — logger, `writeClient()` orchestration, leaf `writeClient*` bindings, public delegates
+- **SharedFolderWriter** — LCA only (no WriteClient ctor arg)
+- **OpenSpec change:** `pdtch-191-write-client-concern-split`

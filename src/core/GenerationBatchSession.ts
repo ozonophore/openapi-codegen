@@ -91,7 +91,7 @@ export class GenerationBatchSession {
                 const absoluteOutputPaths = items.map(item => this.resolveOutputRoot(item.output));
                 const lca = resolveOutputGroups(absoluteOutputPaths);
                 if (lca) {
-                    sharedFolderWriter = new SharedFolderWriter(writeClient, lca);
+                    sharedFolderWriter = new SharedFolderWriter(lca);
                 } else {
                     writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.AUTO_GROUP_LCA_TRIVIAL_FALLBACK);
                 }

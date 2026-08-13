@@ -28,7 +28,7 @@ describe('@unit: writeSharedOrLocalCoreFile', () => {
         mkdirSync(path.join(itemB, 'executor'), { recursive: true });
 
         const writeClient = new WriteClient();
-        const sharedFolderWriter = new SharedFolderWriter(writeClient, lca);
+        const sharedFolderWriter = new SharedFolderWriter(lca);
         return { lca, itemA, itemB, writeClient, sharedFolderWriter };
     }
 
