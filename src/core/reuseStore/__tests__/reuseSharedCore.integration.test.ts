@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
 import { generateOpenApiClient } from '../../../cli/generateOpenApiClient/generateOpenApiClient';
+import { rmTempDir } from '../../../test/helpers/rmTempDir';
 import { installSilenceLoggers } from '../../../test/helpers/silenceLoggers';
 
 function createTempDir(t: TestContext, prefix: string): string {
@@ -11,7 +12,7 @@ function createTempDir(t: TestContext, prefix: string): string {
     mkdirSync(generatedRoot, { recursive: true });
     const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
     t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
+        rmTempDir(tempDir);
     });
     return tempDir;
 }

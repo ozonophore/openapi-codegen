@@ -1,5 +1,3 @@
-import { sep } from 'path';
-
 /**
  * Finds the Longest Common Ancestor (LCA) directory path for a set of absolute output paths.
  * Returns null when:
@@ -37,6 +35,5 @@ export function resolveOutputGroups(absoluteOutputPaths: string[]): string | nul
         return null;
     }
 
-    // Normalize to platform separator
-    return lca.replace(/\//g, sep);
+    return lca;
 }

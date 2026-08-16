@@ -22,9 +22,7 @@ if (process.cwd() !== repoRoot) {
 
 const v3Spec = path.join(__dirname, 'spec', 'v3.json');
 
-function defaultGenerateOptions(
-    overrides: Pick<TRawOptions, 'input' | 'output'> & Partial<TRawOptions>,
-): TRawOptions {
+function defaultGenerateOptions(overrides: Pick<TRawOptions, 'input' | 'output'> & Partial<TRawOptions>): TRawOptions {
     return {
         httpClient: HttpClient.FETCH,
         useOptions: false,
@@ -74,10 +72,12 @@ describe('@unit: generate', () => {
 
     test('v2: generated files match snapshots', async () => {
         const input = path.join(__dirname, 'spec', 'v2.json');
-        await generate(defaultGenerateOptions({
-            input,
-            output: './test/generated/v2/',
-        }));
+        await generate(
+            defaultGenerateOptions({
+                input,
+                output: './test/generated/v2/',
+            })
+        );
         const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v2');
         const files = sync(path.join(generatedDir, '**', '*.ts'));
 
@@ -90,12 +90,20 @@ describe('@unit: generate', () => {
     });
 
     test('v3: generated files match snapshots', async () => {
-        await generate(defaultGenerateOptions({
-            input: v3Spec,
-            output: './test/generated/v3/',
-        }));
+        await generate(
+            defaultGenerateOptions({
+                input: v3Spec,
+                output: './test/generated/v3/',
+            })
+        );
         const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v3');
         const files = sync(path.join(generatedDir, '**', '*.ts'));
+        const simpleRequestBodySnap = path.join(process.cwd(), 'test', '__snapshots__', 'v3', 'models', 'SimpleRequestBody.ts.snap');
+        const indexContent = readFileSync(path.join(generatedDir, 'index.ts'), 'utf8');
+
+        assert.ok(!files.some(file => file.includes('SimpleRequestBody')), 'SimpleRequestBody must not be generated as a Model');
+        assert.ok(!indexContent.includes('SimpleRequestBody'), 'index.ts must not re-export SimpleRequestBody');
+        assert.ok(!existsSync(simpleRequestBodySnap), 'SimpleRequestBody snapshot must stay deleted');
 
         files.forEach(file => {
             const rel = path.relative(generatedDir, file);
@@ -108,11 +116,13 @@ describe('@unit: generate', () => {
     test('v3: modelsMode=classes generates models.ts and BaseDto', async () => {
         const output = './test/generated/v3-classes/';
 
-        await generate(defaultGenerateOptions({
-            input: v3Spec,
-            output,
-            modelsMode: ModelsMode.CLASSES,
-        }));
+        await generate(
+            defaultGenerateOptions({
+                input: v3Spec,
+                output,
+                modelsMode: ModelsMode.CLASSES,
+            })
+        );
 
         const modelsFile = path.join(process.cwd(), 'test', 'generated', 'v3-classes', 'models', 'models.ts');
         const coreBaseDto = path.join(process.cwd(), 'test', 'generated', 'v3-classes', 'core', 'BaseDto.ts');
@@ -156,13 +166,15 @@ describe('@unit: generate', () => {
 
     test('v3withAlias: generated files match snapshots', async () => {
         const input = path.join(__dirname, 'spec', 'v3withAlias.yaml');
-        await generate(defaultGenerateOptions({
-            input,
-            output: './test/generated/v3withAlias/',
-        }));
+        await generate(
+            defaultGenerateOptions({
+                input,
+                output: './test/generated/v3withAlias/',
+            })
+        );
         const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v3withAlias');
         const files = sync(path.join(generatedDir, '**', '*.ts'));
-        
+
         files.forEach(file => {
             const rel = path.relative(generatedDir, file);
             const snapPath = path.join(process.cwd(), 'test', '__snapshots__', 'v3withAlias', rel + '.snap');
@@ -173,13 +185,31 @@ describe('@unit: generate', () => {
 
     test('v3_withDifferentRefs: generated files match snapshots', async () => {
         const input = path.join(__dirname, 'spec', 'v3.withDifferentRefs.yml');
-        await generate(defaultGenerateOptions({
-            input,
-            output: './test/generated/v3_withDifferentRefs/',
-        }));
+        await generate(
+            defaultGenerateOptions({
+                input,
+                output: './test/generated/v3_withDifferentRefs/',
+            })
+        );
         const generatedDir = path.join(process.cwd(), 'test', 'generated', 'v3_withDifferentRefs');
         const files = sync(path.join(generatedDir, '**', '*.ts'));
-        
+        const simpleRequestBodySnap = path.join(process.cwd(), 'test', '__snapshots__', 'v3_withDifferentRefs', 'models', 'SimpleRequestBody.ts.snap');
+        const indexContent = readFileSync(path.join(generatedDir, 'index.ts'), 'utf8');
+
+        assert.ok(!files.some(file => file.includes('SimpleRequestBody')), 'SimpleRequestBody must not be generated as a Model');
+        assert.ok(!indexContent.includes('SimpleRequestBody'), 'index.ts must not re-export SimpleRequestBody');
+        assert.ok(!existsSync(simpleRequestBodySnap), 'SimpleRequestBody snapshot must stay deleted');
+        assert.ok(indexContent.includes('export type { INested }'), 'INested from #/properties/… must still generate');
+        assert.ok(indexContent.includes('export type { TProp }'), 'TProp from #/properties/… must still generate');
+        assert.ok(
+            files.some(file => file.replace(/\\/g, '/').endsWith('/Nested.ts')),
+            'Nested.ts from #/properties/… must still generate'
+        );
+        assert.ok(
+            files.some(file => file.replace(/\\/g, '/').endsWith('/Prop.ts')),
+            'Prop.ts from #/properties/… must still generate'
+        );
+
         files.forEach(file => {
             const rel = path.relative(generatedDir, file);
             const snapPath = path.join(process.cwd(), 'test', '__snapshots__', 'v3_withDifferentRefs', rel + '.snap');
@@ -190,15 +220,17 @@ describe('@unit: generate', () => {
 
     test('lom_api: generated files match snapshots', async () => {
         const input = path.join(__dirname, 'spec', 'lom', 'lom_api.yaml');
-        await generate(defaultGenerateOptions({
-            input,
-            output: './test/generated/lom_api/',
-            validationLibrary: ValidationLibrary.JSONSCHEMA,
-            customExecutorPath: './example/executor.ts',
-        }));
+        await generate(
+            defaultGenerateOptions({
+                input,
+                output: './test/generated/lom_api/',
+                validationLibrary: ValidationLibrary.JSONSCHEMA,
+                customExecutorPath: './example/executor.ts',
+            })
+        );
         const generatedDir = path.join(process.cwd(), 'test', 'generated', 'lom_api');
         const files = sync(path.join(generatedDir, '**', '*.ts'));
-        
+
         files.forEach(file => {
             const rel = path.relative(generatedDir, file);
             const snapPath = path.join(process.cwd(), 'test', '__snapshots__', 'lom_api', rel + '.snap');
@@ -206,7 +238,6 @@ describe('@unit: generate', () => {
             toMatchSnapshot(content, snapPath);
         });
     });
-
 });
 
 describe('@unit: generate option variants', () => {
@@ -277,13 +308,15 @@ describe('@unit: generate option variants', () => {
 
     test('custom prefixes: applied to model names', async (t: TestContext) => {
         const output = createVariantOutputDir(t, 'custom-prefixes');
-        await generate(defaultGenerateOptions({
-            input: v3Spec,
-            output,
-            interfacePrefix: 'X',
-            enumPrefix: 'Y',
-            typePrefix: 'Z',
-        }));
+        await generate(
+            defaultGenerateOptions({
+                input: v3Spec,
+                output,
+                interfacePrefix: 'X',
+                enumPrefix: 'Y',
+                typePrefix: 'Z',
+            })
+        );
 
         const modelWithString = readFileSync(path.join(output, 'models', 'ModelWithString.ts'), 'utf8');
         const enumWithNumbers = readFileSync(path.join(output, 'models', 'EnumWithNumbers.ts'), 'utf8');
@@ -298,13 +331,15 @@ describe('@unit: generate option variants', () => {
         const outputCore = path.join(output, 'lib', 'core');
         const outputServices = path.join(output, 'lib', 'services');
         const outputModels = path.join(output, 'lib', 'models');
-        await generate(defaultGenerateOptions({
-            input: v3Spec,
-            output,
-            outputCore,
-            outputServices,
-            outputModels,
-        }));
+        await generate(
+            defaultGenerateOptions({
+                input: v3Spec,
+                output,
+                outputCore,
+                outputServices,
+                outputModels,
+            })
+        );
 
         assert.ok(existsSync(path.join(output, 'createClient.ts')));
         assert.ok(existsSync(path.join(outputCore, 'request.ts')));

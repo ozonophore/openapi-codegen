@@ -10,6 +10,7 @@ import type { SemanticRefResolver } from './expandOpenApiRefsForSemanticDiff';
 export type SwaggerRefsLike = {
     exists: (ref: string) => boolean;
     get: (ref: string) => unknown;
+    paths?: (...types: string[]) => string[];
 };
 
 export type ResolvedSwaggerRefs = Awaited<ReturnType<SwaggerParser['resolve']>>;
@@ -19,6 +20,7 @@ export function createSwaggerRefsResolver(refs: ResolvedSwaggerRefs | SwaggerRef
     return {
         exists: ref => like.exists(ref),
         get: ref => like.get(ref),
+        paths: typeof like.paths === 'function' ? () => like.paths!() : undefined,
     };
 }
 

@@ -12,7 +12,7 @@ import type { JsonValue } from './types';
  */
 export const readSpecFromGit = async (ref: string, specPath: string): Promise<JsonValue> => {
     const relativePath = path.isAbsolute(specPath) ? path.relative(process.cwd(), specPath) : specPath;
-    const normalizedPath = path.normalize(relativePath);
+    const normalizedPath = relativePath.replace(/\\/g, '/');
     const gitCommand = `git show ${ref}:${normalizedPath}`;
     let content: string;
     try {

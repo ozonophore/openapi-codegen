@@ -1,6 +1,8 @@
 import path from 'path';
 
-import { normalizeHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { normalizeHelper } from '../../common/utils/pathHelpers';
+import { REGEX_BACKSLASH } from '../types/Consts';
+import { findInternParserKey } from '../utils/parserKeyMatch';
 
 /**
  * Резолвер ссылок для семантического diff.
@@ -10,6 +12,8 @@ import { normalizeHelper, resolveHelper } from '../../common/utils/pathHelpers';
 export type SemanticRefResolver = {
     exists?: (ref: string) => boolean;
     get: (ref: string) => unknown;
+    /** Intern-exact `$Refs` keys so expand can call get/exists with the parser spelling. */
+    paths?: () => string[];
 };
 
 type RefTarget = {
@@ -33,7 +37,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isUrlLike(value: string): boolean {
-    return /^[a-z][a-z\d+\-.]*:/i.test(value);
+    return value.startsWith('http://') || value.startsWith('https://') || value.startsWith('file:');
+}
+
+/** Parent + relative Tree $ref file. POSIX join only — no path.resolve, no invented drive. */
+function joinRefFile(parentSourceFile: string, relativeFile: string): string {
+    const parent = parentSourceFile.replace(REGEX_BACKSLASH, '/');
+    const relative = relativeFile.replace(REGEX_BACKSLASH, '/');
+    return path.posix.normalize(path.posix.join(path.posix.dirname(parent), relative));
 }
 
 function normalizeSourceFile(sourceFile: string | undefined): string | undefined {
@@ -72,7 +83,7 @@ function normalizeRefFile(file: string | undefined, currentSourceFile: string | 
     }
 
     if (currentSourceFile && !isUrlLike(currentSourceFile)) {
-        return resolveHelper(path.dirname(currentSourceFile), file);
+        return joinRefFile(currentSourceFile, file);
     }
 
     return normalizeHelper(file);
@@ -130,13 +141,16 @@ function readRefFromResolver(refs: SemanticRefResolver | undefined, candidates: 
         return undefined;
     }
 
+    const parserKeys = refs.paths?.() ?? [];
+
     for (const candidate of candidates) {
+        const exact = findInternParserKey(parserKeys, candidate) ?? candidate;
         try {
-            if (refs.exists && !refs.exists(candidate)) {
+            if (refs.exists && !refs.exists(exact)) {
                 continue;
             }
 
-            const value = refs.get(candidate);
+            const value = refs.get(exact);
             if (value !== undefined) {
                 return value;
             }

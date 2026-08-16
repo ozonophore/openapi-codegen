@@ -1,6 +1,7 @@
 import path from 'path';
 
 import type { Model } from '../types/shared/Model.model';
+import { isModelPointer, splitCanonicalRef } from '../utils/canonicalRef';
 
 function normalizeModelPath(modelPath: string): string {
     return path.posix.normalize(modelPath.replace(/^\.\//, ''));
@@ -40,6 +41,9 @@ export function buildModelSchemaMap(context: { getAllCanonicalRefs(): string[]; 
     const schemaByComponentName = new Map<string, Record<string, unknown>>();
 
     for (const ref of context.getAllCanonicalRefs()) {
+        if (!isModelPointer(splitCanonicalRef(ref).pointer)) {
+            continue;
+        }
         const definition = context.get(ref);
         if (!definition || typeof definition !== 'object') {
             continue;

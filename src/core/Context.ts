@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
-import { basename, isAbsolute } from 'path';
+import { basename } from 'path';
 
 import { APP_LOGGER } from '../common/Consts';
 import { dirNameHelper, normalizeHelper, relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
@@ -8,10 +8,11 @@ import { OpenApiGeneratorPlugin, SchemaTypeOverrideContext } from './plugins/Gen
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
 import { $Root } from './types/base/Root.model';
+import { splitCanonicalRef } from './utils/canonicalRef';
 import { getFileName } from './utils/getFileName';
 import { isString } from './utils/isString';
-import { normalizeRef } from './utils/normalizeRef';
-import { parseRef, RefType } from './utils/parseRef';
+import { internParserKey } from './utils/parserKeyMatch';
+import { isRemoteSourceFile, RefLookup } from './utils/refLookup';
 
 type TContextProps = {
     input: string | Record<string, any>;
@@ -60,8 +61,9 @@ export class Context {
     private _strictPluginMode: boolean = false;
 
     private specRoot!: string;
-    private entryFile?: string;
     private virtualFiles: VirtualFileMap = new Map();
+    private canonicalRefs = new Set<string>();
+    private refLookup?: RefLookup;
 
     constructor({ input, output, prefix, sortByRequired, plugins, strictPluginMode }: TContextProps) {
         this._output = output;
@@ -89,7 +91,9 @@ export class Context {
      */
     attachResolvedOpenApi(refs: RefsLike, absoluteEntryFile: string): void {
         this.addRefs(refs);
-        this.initializeVirtualFileMap(absoluteEntryFile);
+        const entrySource = splitCanonicalRef(absoluteEntryFile).sourceFile;
+        this.refLookup = new RefLookup(refs.paths(), entrySource);
+        this.initializeVirtualFileMap();
     }
 
     private addRefs(refs: RefsLike): Context {
@@ -108,8 +112,7 @@ export class Context {
         if (!this._refs) {
             throw new Error('Context must be initialized');
         }
-        const normalizedRef = this.normalizeRefForLookup($ref, parentSourceFile);
-        return this._refs.get(normalizedRef);
+        return this._refs.get(this.toCanonicalRef($ref, parentSourceFile));
     }
 
     public paths(...types: string[]): string[] {
@@ -123,8 +126,12 @@ export class Context {
         if (!this._refs) {
             throw new Error('Context must be initialized');
         }
-        const normalizedRef = this.normalizeRefForLookup($ref, parentSourceFile);
-        return this._refs.exists(normalizedRef);
+        const canonicalRef = this.toCanonicalRef($ref, parentSourceFile);
+        const sourceFile = splitCanonicalRef(canonicalRef).sourceFile;
+        if (sourceFile && !isRemoteSourceFile(sourceFile) && !this.refLookup?.internExact(sourceFile)) {
+            return false;
+        }
+        return this._refs.exists(canonicalRef);
     }
 
     public fileName(): string {
@@ -173,31 +180,25 @@ export class Context {
         return undefined;
     }
 
-    private canonicalizeRef(ref: string, parentSourceFile: string): { sourceFile: string; fragment?: string } {
-        const parsed = parseRef(ref);
-
-        // LOCAL_FRAGMENT → тот же файл
-        if (parsed.type === RefType.LOCAL_FRAGMENT) {
-            return {
-                sourceFile: normalizeHelper(parentSourceFile),
-                fragment: parsed.fragment,
-            };
+    private posixNormalizeSource(sourceFile: string): string {
+        const file = splitCanonicalRef(sourceFile).sourceFile;
+        if (!file) {
+            return '';
         }
+        return normalizeHelper(file);
+    }
 
-        // Внешний ref
-        const parentDir = dirNameHelper(parentSourceFile);
-        const absSource = resolveHelper(parentDir, parsed.filePath!);
-
-        return {
-            sourceFile: normalizeHelper(absSource),
-            fragment: parsed.fragment,
-        };
+    private posixDirnameSource(sourceFile: string): string {
+        const file = splitCanonicalRef(sourceFile).sourceFile;
+        return dirNameHelper(file);
     }
 
     private mapSourceToOutput(sourceFile: string): string {
-        const relative = relativeHelper(this.specRoot, sourceFile);
+        const alignedRoot = internParserKey(this.specRoot);
+        const alignedSource = internParserKey(sourceFile);
+        const relative = relativeHelper(alignedRoot, alignedSource);
 
-        const dir = dirNameHelper(relative);
+        const dir = this.posixDirnameSource(relative);
         const baseName = basename(relative).replace(/\.(yaml|yml|json)$/i, '.ts');
 
         return resolveHelper(this.output.outputModels, dir, baseName);
@@ -207,20 +208,28 @@ export class Context {
         if (!obj || typeof obj !== 'object') return;
 
         if (typeof obj.$ref === 'string') {
-            const { sourceFile, fragment } = this.canonicalizeRef(obj.$ref, parentSourceFile);
+            const canonicalRef = this.toCanonicalRef(obj.$ref, parentSourceFile);
+            const { sourceFile, pointer } = splitCanonicalRef(canonicalRef);
 
-            let entry = this.virtualFiles.get(sourceFile);
-            if (!entry) {
-                entry = {
-                    sourceFile,
-                    outputFile: this.mapSourceToOutput(sourceFile),
-                    fragments: new Set(),
-                };
-                this.virtualFiles.set(sourceFile, entry);
-            }
-
-            if (fragment) {
-                entry.fragments.add(fragment);
+            if (isRemoteSourceFile(sourceFile)) {
+                this.canonicalRefs.add(canonicalRef);
+            } else {
+                const exact = this.refLookup?.internExact(sourceFile);
+                if (exact) {
+                    this.canonicalRefs.add(canonicalRef);
+                    let entry = this.virtualFiles.get(exact);
+                    if (!entry) {
+                        entry = {
+                            sourceFile: exact,
+                            outputFile: this.mapSourceToOutput(exact),
+                            fragments: new Set(),
+                        };
+                        this.virtualFiles.set(exact, entry);
+                    }
+                    if (pointer) {
+                        entry.fragments.add(pointer);
+                    }
+                }
             }
         }
 
@@ -234,13 +243,11 @@ export class Context {
         }
     }
 
-    private initializeVirtualFileMap(entryFile: string) {
-        this.specRoot = normalizeHelper(dirNameHelper(entryFile));
-        const normalizedEntry = normalizeHelper(entryFile);
-        this.entryFile = normalizedEntry;
+    private initializeVirtualFileMap() {
+        const normalizedEntry = this.refLookup?.entryFile || '';
+        this.specRoot = this.posixNormalizeSource(this.posixDirnameSource(normalizedEntry));
 
-        // Гарантируем, что entry файл тоже есть в карте
-        if (!this.virtualFiles.has(normalizedEntry)) {
+        if (normalizedEntry && !isRemoteSourceFile(normalizedEntry) && !this.virtualFiles.has(normalizedEntry)) {
             this.virtualFiles.set(normalizedEntry, {
                 sourceFile: normalizedEntry,
                 outputFile: this.mapSourceToOutput(normalizedEntry),
@@ -248,23 +255,23 @@ export class Context {
             });
         }
 
-        // 🔴 Вместо ручного обхода, использовать resolved.paths() от SwaggerParser
-        // это даст нам все файлы, которые парсер разрешил
         const allPaths = this._refs?.paths() || [];
 
         for (const refPath of allPaths) {
-            const normalizedPath = normalizeHelper(refPath);
+            const sourceFile = splitCanonicalRef(refPath).sourceFile;
+            if (!sourceFile || isRemoteSourceFile(sourceFile)) {
+                continue;
+            }
 
-            if (!this.virtualFiles.has(normalizedPath)) {
-                this.virtualFiles.set(normalizedPath, {
-                    sourceFile: normalizedPath,
-                    outputFile: this.mapSourceToOutput(normalizedPath),
+            if (!this.virtualFiles.has(sourceFile)) {
+                this.virtualFiles.set(sourceFile, {
+                    sourceFile,
+                    outputFile: this.mapSourceToOutput(sourceFile),
                     fragments: new Set(),
                 });
             }
         }
 
-        // Обходим каждый файл чтобы найти $ref с фрагментами (#)
         for (const [sourceFile] of this.virtualFiles) {
             try {
                 const schema = this._refs?.get(sourceFile);
@@ -282,19 +289,7 @@ export class Context {
     }
 
     public getAllCanonicalRefs(): string[] {
-        const result: string[] = [];
-
-        for (const file of this.virtualFiles.values()) {
-            if (file.fragments.size > 0) {
-                for (const fragment of file.fragments) {
-                    result.push(`${file.sourceFile}${fragment}`);
-                }
-            } else {
-                result.push(file.sourceFile);
-            }
-        }
-
-        return result;
+        return [...this.canonicalRefs];
     }
 
     public resolveCanonicalRef(
@@ -306,37 +301,28 @@ export class Context {
               fragment?: string;
           }
         | undefined {
-        const normalizedRef = this.normalizeRefForLookup(canonicalRef, parentSourceFile);
-        const parsed = parseRef(normalizedRef);
-
-        const sourceFile = normalizeHelper(parsed.filePath ?? '');
+        const lookupKey = this.toCanonicalRef(canonicalRef, parentSourceFile);
+        const { sourceFile, pointer } = splitCanonicalRef(lookupKey);
+        if (!sourceFile || isRemoteSourceFile(sourceFile)) {
+            return undefined;
+        }
 
         const file = this.virtualFiles.get(sourceFile);
         if (!file) return undefined;
 
         return {
             outputFile: file.outputFile,
-            fragment: parsed.fragment,
+            fragment: pointer,
         };
     }
 
-    private normalizeRefForLookup(ref: string, parentSourceFile?: string): string {
-        if (!ref) return ref;
-
-        // Prefer explicit parent if provided
-        if (parentSourceFile) {
-            const normalizedParent = isAbsolute(parentSourceFile) ? parentSourceFile : resolveHelper(this.specRoot, parentSourceFile);
-            return normalizeRef(ref, normalizedParent);
+    /**
+     * Tree $ref + Parent source file → Canonical Ref (`$Refs` lookup key).
+     */
+    public toCanonicalRef($ref: string, parentSourceFile?: string): string {
+        if (!this.refLookup) {
+            throw new Error('Context must be initialized');
         }
-
-        // If we can fall back to entry file, normalize relative refs against it
-        if (this.entryFile) {
-            const parsed = parseRef(ref);
-            if (parsed.type === RefType.LOCAL_FRAGMENT || parsed.type === RefType.EXTERNAL_FILE || parsed.type === RefType.EXTERNAL_FILE_FRAGMENT) {
-                return normalizeRef(ref, this.entryFile);
-            }
-        }
-
-        return ref;
+        return this.refLookup.toCanonicalRef($ref, parentSourceFile);
     }
 }

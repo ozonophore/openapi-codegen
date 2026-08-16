@@ -48,19 +48,7 @@ export class GenerationBatchSession {
 
         try {
             const setup = await setupGenerationBatch({ writeClient, shouldEntitySkip }, items, root);
-            const {
-                start,
-                cacheEnabled,
-                cacheStrategy,
-                useReuseStore,
-                generationCaches,
-                referencedArtifactKeys,
-                specStats,
-                reuseConflicts,
-                reportBasePath,
-                sharedFolderWriter,
-                state,
-            } = setup;
+            const { start, cacheEnabled, cacheStrategy, useReuseStore, generationCaches, referencedArtifactKeys, specStats, reuseConflicts, reportBasePath, sharedFolderWriter, state } = setup;
 
             const buildGenerationReport = (): GenerationReport => {
                 const report: GenerationReport = {

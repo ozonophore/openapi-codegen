@@ -44,3 +44,17 @@ export function resolveHelper(...pathSegments: string[]): string {
 export function normalizeHelper(p: string): string {
     return path.normalize(p).replace(REGEX_BACKSLASH, '/');
 }
+
+function isDriveRootPath(targetPath: string): boolean {
+    const normalized = normalizeHelper(targetPath).replace(/\/+$/, '');
+    if (!normalized || normalized === '/') {
+        return true;
+    }
+    return /^[A-Za-z]:$/.test(normalized);
+}
+
+export function assertNotDriveRoot(targetPath: string): void {
+    if (isDriveRootPath(targetPath)) {
+        throw new Error(`Refusing to mkdir or write the drive root: ${targetPath}`);
+    }
+}

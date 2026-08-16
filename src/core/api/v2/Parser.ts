@@ -1,4 +1,5 @@
 import { Context } from '../../Context';
+import { toParentSourceFile } from '../../utils/canonicalRef';
 import { getModelNameWithPrefix } from '../../utils/getModelNameWithPrefix';
 import { getModel } from '../v2/parser/getModel';
 import { getModelComposition } from './parser/getModelComposition';
@@ -26,7 +27,7 @@ export class Parser {
 
     public getTypeNameByRef(value: string, ref: string, parentSourceFile?: string): string {
         if (ref) {
-            const definition: any = this.context.get(ref, parentSourceFile);
+            const definition: any = this.context.get(ref, toParentSourceFile(parentSourceFile));
 
             return getModelNameWithPrefix(value, definition, this._context.prefix);
         }

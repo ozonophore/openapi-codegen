@@ -2,6 +2,47 @@
 
 Glossary for architecture and generation. Prefer these names over file/class nicknames when talking about seams.
 
+## Language
+
+**Tree $ref**:
+The `$ref` string as written in the YAML/JSON. A URI, not a disk path.
+_Avoid_: path, Canonical Ref, lookup key (before translation)
+
+**Entry file**:
+The root OpenAPI file given to Spec load. Absolute path, no Pointer.
+
+**Parent source file**:
+The file that contains the Tree $ref. Absolute path, no Pointer. If the Tree $ref is only a Pointer (`#/…`) and the caller omits parent, the Entry file is the parent. Relative file `$ref` without a parent is invalid.
+_Avoid_: parentRef, parentFileRef, parentFilePath
+
+**Pointer**:
+The `#/…` suffix. Never passed to filesystem path APIs.
+_Avoid_: fragment
+
+**$Refs lookup key**:
+The exact string given to `refs.get` / `refs.exists`. A file key from the parser plus an optional Pointer.
+_Avoid_: canonical path, normalized path, Virtual file map key as schema identity
+
+**Canonical Ref**:
+Identity of a place some Tree $ref pointed at: source file plus optional Pointer. Same string as the `$Refs` lookup key. A `$ref` to a whole file (no `#`) counts. A loaded file that nothing pointed at does not. A `http(s)` Tree $ref may be a Canonical Ref for lookup, but has no Output mapping.
+_Avoid_: a second “canonical path”; treating every loaded file as a Canonical Ref; this name for `.ts` output paths
+
+**$ref lookup**:
+(Parent source file, Tree $ref) → Canonical Ref, then read `$Refs`. Match the parser’s file name allowing only spelling of the same opened file (slashes, encoding, drive-letter case — a missing drive is not the current drive). If that file was never opened, the Tree $ref does not exist — do not pick another file by name, do not search the disk. `get` / `exists` stay strict; unresolved refs are a Spec/strict concern, not a lookup guess.
+_Avoid_: unqualified “resolve”; `dereference`; `PathApi.resolve` as the name of this operation; fuzzy filename repair
+
+**Virtual file map entry**:
+Where to write `.ts` for one spec file: source file (no Pointer) → output path, plus Pointers seen in that file. Not a schema store.
+_Avoid_: virtual file as schema cache; `exists` over seen Pointers only; `get` via the map
+
+**Output mapping**:
+Canonical Ref → generated `.ts` path via the Virtual file map. Not $ref lookup. Local spec files only.
+_Avoid_: resolveCanonicalRef
+
+**Remote $ref**:
+A Tree $ref whose file part is `http://` or `https://`. `$ref` lookup may still read `$Refs`. No Virtual file map entry and no Output mapping.
+_Avoid_: treating a URL as a disk path
+
 ## Generation batch session
 
 Owns the **multi-item Generation lifecycle** for one `generate()` run: **Generation batch setup** → per-item orchestration → **Generation batch finalize**.

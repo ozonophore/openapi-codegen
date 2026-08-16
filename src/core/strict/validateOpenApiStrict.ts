@@ -114,7 +114,7 @@ function collectUnresolvedRefIssues(context: StrictValidationContext): StrictIss
         const objectNode = node as Record<string, unknown>;
         if (typeof objectNode.$ref === 'string') {
             const ref = objectNode.$ref;
-            const isRefExists = context.exists(ref, sourceFile);
+            const isRefExists = context.exists(ref, getSourceFileFromRef(sourceFile));
 
             if (!isRefExists) {
                 const issuePath = `${sourceFile} ${pathSegments.join('.') || '$'}.$ref`;

@@ -6,6 +6,7 @@ import { describe, test, type TestContext } from 'node:test';
 import { ImportRule } from '../../../cli/analyzeUsage/rules/ImportRule';
 import type { Contract } from '../../../cli/analyzeUsage/types';
 import { createApiImportScope } from '../../../cli/analyzeUsage/utils/apiImportScope';
+import { joinHelper } from '../../../common/utils/pathHelpers';
 import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
 import { ProjectProbe } from '../ProjectProbe';
 
@@ -70,6 +71,10 @@ describe('@unit: ProjectProbe integration', () => {
         const findings = await new ImportRule().check(context, contract, stats, apiScope);
 
         assert.strictEqual(findings.length, 0);
-        assert.ok(profile.consumer.context.getConsumerSourceFiles().some(file => file.getFilePath() === consumerPath));
+        const expectedConsumer = joinHelper(srcDir, 'app.ts');
+        assert.ok(
+            profile.consumer.context.getConsumerSourceFiles().some(file => file.getFilePath().replace(/\\/g, '/') === expectedConsumer),
+            `expected consumer file ${expectedConsumer}`
+        );
     });
 });

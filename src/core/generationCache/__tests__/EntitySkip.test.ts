@@ -5,13 +5,23 @@ import { afterEach, describe, test } from 'node:test';
 
 import { COMMON_DEFAULT_OPTIONS_VALUES } from '../../../common/Consts';
 import type { TStrictFlatOptions } from '../../../common/TRawOptions';
+import { resolveHelper } from '../../../common/utils/pathHelpers';
 import { buildGenerationAffectingHash, GENERATION_AFFECTING_KEYS, REUSE_OPTIONS_SLICE_KEYS } from '../../generationAffectingOptions';
 import { GenerationCache } from '../../generationCache/GenerationCache';
 import { buildOptionsSlice, buildOptionsSliceHash } from '../../reuseStore/ArtifactFingerprinter';
 import type { ReuseStore } from '../../reuseStore/ReuseStore';
 import { ModelsLayout } from '../../types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../../types/enums/ModelsMode.enum';
-import { buildCacheKey, buildEntityFingerprint, ENTITY_CACHE_FINGERPRINT_VERSION, getSpecItemName, resolveEntitySkipCandidate, shouldEntitySkip, usesEntityCache, usesReuseStoreForItem } from '../EntitySkip';
+import {
+    buildCacheKey,
+    buildEntityFingerprint,
+    ENTITY_CACHE_FINGERPRINT_VERSION,
+    getSpecItemName,
+    resolveEntitySkipCandidate,
+    shouldEntitySkip,
+    usesEntityCache,
+    usesReuseStoreForItem,
+} from '../EntitySkip';
 
 const generatedRoot = path.join(__dirname, '../../../../test/generated');
 
@@ -277,7 +287,7 @@ describe('@unit: EntitySkip', () => {
         });
 
         const cache = new GenerationCache(path.join(tmpDir, 'cache.json'));
-        const absoluteInput = path.resolve(specPath);
+        const absoluteInput = resolveHelper(specPath);
         const cacheKey = buildCacheKey(item, absoluteInput);
         const fingerprint = await buildEntityFingerprint(item, absoluteInput);
         cache.set({ key: cacheKey, fingerprint, files: [path.join(tmpDir, 'x.ts')], updatedAt: Date.now() });

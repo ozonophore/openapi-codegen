@@ -1,5 +1,6 @@
 import { safeHasOwn } from '../../../../common/utils/safeHasOwn';
 import type { Service } from '../../../types/shared/Service.model';
+import { splitCanonicalRef, toParentSourceFile } from '../../../utils/canonicalRef';
 import { getClassName } from '../../../utils/getClassName';
 import { ensureService, finalizeServiceImports, forEachOperationInPath, mergeOperationImportsIntoService } from '../../../utils/serviceHelpers';
 import { Parser } from '../Parser';
@@ -17,9 +18,9 @@ export function getServices(this: Parser, openApi: OpenApi): Service[] {
         if (safeHasOwn(openApi.paths, url)) {
             // Grab path and parse any global path parameters
             const pathByUrl = openApi.paths[url];
-            const rootPath = this.context.root?.path || '';
+            const rootPath = toParentSourceFile(this.context.root?.path) || '';
             const path = (pathByUrl.$ref ? (this.context.get(pathByUrl.$ref, rootPath) as Record<string, any>) : pathByUrl) as OpenApiPath;
-            const parentFileRef = pathByUrl.$ref || rootPath;
+            const parentFileRef = pathByUrl.$ref ? splitCanonicalRef(this.context.toCanonicalRef(pathByUrl.$ref, rootPath)).sourceFile : rootPath;
             const pathParams = this.getOperationParameters(openApi, path.parameters || [], parentFileRef);
 
             // Parse all the methods for this path

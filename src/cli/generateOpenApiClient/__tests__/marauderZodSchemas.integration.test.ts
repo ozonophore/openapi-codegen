@@ -1,10 +1,11 @@
 import assert from 'node:assert';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
 import { DEFAULT_OPENAPI_CONFIG_FILENAME } from '../../../common/Consts';
 import { validateZodOptions } from '../../../common/Validation';
+import { rmTempDir } from '../../../test/helpers/rmTempDir';
 import { installSilenceLoggers } from '../../../test/helpers/silenceLoggers';
 import { generateOptionsSchema } from '../../schemas/generate';
 import { mergeNestedCliOptions } from '../../utils/parseNestedCliOptions';
@@ -37,7 +38,7 @@ function createTempDir(t: TestContext, prefix: string): string {
     mkdirSync(generatedRoot, { recursive: true });
     const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
     t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
+        rmTempDir(tempDir);
     });
     return tempDir;
 }

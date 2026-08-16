@@ -1,7 +1,7 @@
 import { mkdirSync } from 'fs';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
-import { dirNameHelper, relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { assertNotDriveRoot, dirNameHelper, relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { type CoreOutputAdapter, toReuseOutputAdapter } from '../CoreOutputAdapter';
 import { formatArtifactContent, type ReuseWriterContext, writeModelWithReuse } from '../reuseStore/reuseWriterHelpers';
 import { Templates } from '../types/base/Templates.model';
@@ -53,6 +53,7 @@ export async function writeClientModels(adapter: CoreOutputAdapter, options: IWr
     const { models, templates, outputModelsPath, httpClient, useUnionTypes, modelsMode, modelsLayout, outputCorePath, useOptions, prettierConfigPath, reuse } = options;
 
     const effectivePrettierConfigPath = reuse?.prettierConfigPath ?? prettierConfigPath;
+    assertNotDriveRoot(outputModelsPath);
 
     adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_START);
 
@@ -85,6 +86,7 @@ export async function writeClientModels(adapter: CoreOutputAdapter, options: IWr
         const dir = dirNameHelper(modelFolderPath);
         if (dir) {
             const directory = resolveHelper(outputModelsPath, dir);
+            assertNotDriveRoot(directory);
 
             adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DIRECTORY_CREATING(directory));
 
