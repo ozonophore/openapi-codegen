@@ -11,6 +11,7 @@ export type SpecGenerationStats = {
     durationMs: number;
     reuseHits: number;
     reuseMisses: number;
+    entitySkipped?: boolean;
 };
 
 export type ReuseConflictRecord = ReuseConflictErrorDetails & {

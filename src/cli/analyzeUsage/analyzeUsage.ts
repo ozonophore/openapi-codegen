@@ -3,8 +3,8 @@ import path from 'path';
 
 import { APP_LOGGER } from '../../common/Consts';
 import { validateZodOptions } from '../../common/Validation';
+import { loadDiffReport } from '../../core/diffReport';
 import { ProjectProbe } from '../../core/projectProbe';
-import { loadDiffReport } from '../../core/utils/loadDiffReport';
 import { AnalyzeUsageOptions, analyzeUsageOptionsSchema } from '../schemas';
 import { CLICommandResult } from '../types';
 import { Analyzer } from './core/Analyzer';

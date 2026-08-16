@@ -4,6 +4,7 @@ import { APP_LOGGER } from '../../common/Consts';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { OpenApiGeneratorPlugin } from './GeneratorPlugin.model';
 import { getBuiltinPlugins } from './getBuiltinPlugins';
+import { normalizePluginEntry, type PluginConfigEntry } from './pluginEntries';
 
 export type LoadGeneratorPluginsOptions = {
     disableBuiltins?: boolean;
@@ -70,19 +71,26 @@ function warnPluginApiVersion(plugin: OpenApiGeneratorPlugin): void {
 }
 
 /**
- * Loads user plugins and appends built-in plugins as fallback handlers.
+ * Loads user plugins (injecting non-empty entry config via `configure`) and appends built-ins.
  */
-export async function loadGeneratorPlugins(pluginPaths: string[], options?: LoadGeneratorPluginsOptions): Promise<OpenApiGeneratorPlugin[]> {
+export async function loadGeneratorPlugins(entries: readonly PluginConfigEntry[], options?: LoadGeneratorPluginsOptions): Promise<OpenApiGeneratorPlugin[]> {
     const loadedPlugins: OpenApiGeneratorPlugin[] = [];
 
-    for (const pluginPath of pluginPaths) {
-        const resolvedPath = resolveHelper(process.cwd(), pluginPath);
+    for (const rawEntry of entries) {
+        const entry = normalizePluginEntry(rawEntry);
+        if (!entry) {
+            continue;
+        }
+        const resolvedPath = resolveHelper(process.cwd(), entry.path);
         const moduleExports = await loadPluginModule(resolvedPath);
         const plugin = getPluginFromModule(moduleExports);
         if (!isOpenApiGeneratorPlugin(plugin)) {
-            throw new Error(`Invalid plugin at "${pluginPath}": expected export with shape { name: string }`);
+            throw new Error(`Invalid plugin at "${entry.path}": expected export with shape { name: string }`);
         }
         warnPluginApiVersion(plugin);
+        if (typeof plugin.configure === 'function' && Object.keys(entry.config).length > 0) {
+            await plugin.configure(entry.config);
+        }
         loadedPlugins.push(plugin);
     }
 

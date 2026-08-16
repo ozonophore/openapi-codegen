@@ -31,7 +31,7 @@ transport fingerprint (root vs per-item `request`).
 ---
 
 ### Requirement: эффективный request конфиг ограничивает шаринг request-sensitive core
-Генератор ДОЛЖЕН вычислять эффективный `request` каждого item как после `normalizeOptions` (`item.request ?? root.request`). Core-файлы, чьё содержимое зависит от custom request / executor / связанных флагов шаблона, ДОЛЖНЫ шариться только между items с одинаковым transport fingerprint. Fingerprint ДОЛЖЕН включать как минимум: эффективный `request` (или generated-default), `customExecutorPath` (или отсутствие), `httpClient`, `useCancelableRequest`, и факт экспорта `requestRaw` custom request при его наличии.
+Генератор MUST вычислять эффективный `request` каждого item как после `resolveGenerationOptions` (`item.request ?? root.request`). Core-файлы, чьё содержимое зависит от custom request / executor / связанных флагов шаблона, MUST шариться только между items с одинаковым transport fingerprint. Fingerprint MUST включать как минимум: эффективный `request` (или generated-default), `customExecutorPath` (или отсутствие), `httpClient`, `useCancelableRequest`, и факт экспорта `requestRaw` custom request при его наличии.
 
 #### Scenario: корневой request шарится между items
 - **WHEN** задан корневой `request`, ни один item не переопределяет `request`, и auto-group shared core активен

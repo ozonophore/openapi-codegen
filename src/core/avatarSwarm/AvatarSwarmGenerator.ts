@@ -1,4 +1,5 @@
 import type { TStrictFlatOptions } from '../../common/TRawOptions';
+import { getSpecItemName } from '../generationCache/EntitySkip';
 import type { SpecGenerationStats } from '../reuseStore/GenerationReport';
 import type { ReuseStore } from '../reuseStore/ReuseStore';
 import type { AvatarDescriptor, SwarmManifest, SwarmSharedModel } from './types';
@@ -8,7 +9,7 @@ export class AvatarSwarmGenerator {
         const statsBySpecItem = new Map<string, SpecGenerationStats>(specStats.map(s => [s.specItem, s]));
 
         const avatars: AvatarDescriptor[] = items.map(item => {
-            const specItem = this.getSpecItemName(item.input);
+            const specItem = getSpecItemName(item.input);
             const stats = statsBySpecItem.get(specItem);
             return {
                 specItem,
@@ -58,7 +59,7 @@ export class AvatarSwarmGenerator {
     private buildOperationIndex(items: TStrictFlatOptions[]): Record<string, string> {
         const index: Record<string, string> = {};
         for (const item of items) {
-            const specItem = this.getSpecItemName(item.input);
+            const specItem = getSpecItemName(item.input);
             // operationIds would come from parsed spec — for swarm manifest we track by specItem
             // Since we don't have parsed operations here, we register the specItem namespace
             if (!(specItem in index)) {
@@ -66,11 +67,5 @@ export class AvatarSwarmGenerator {
             }
         }
         return index;
-    }
-
-    private getSpecItemName(input: string): string {
-        const parts = input.replace(/\\/g, '/').split('/');
-        const filename = parts[parts.length - 1] ?? input;
-        return filename.replace(/\.[^.]+$/, '');
     }
 }

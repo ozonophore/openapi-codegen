@@ -65,7 +65,6 @@ export class Context {
 
     constructor({ input, output, prefix, sortByRequired, plugins, strictPluginMode }: TContextProps) {
         this._output = output;
-        this._refs = {} as RefsLike;
         if (isString(input)) {
             this._root = { dirName: dirNameHelper(input), path: input, fileName: getFileName(input) };
         } else {
@@ -85,7 +84,15 @@ export class Context {
         return this;
     }
 
-    public addRefs(refs: RefsLike): Context {
+    /**
+     * @internal Prefer `createResolvedContext` — binds Swagger refs + virtual file map in one step.
+     */
+    attachResolvedOpenApi(refs: RefsLike, absoluteEntryFile: string): void {
+        this.addRefs(refs);
+        this.initializeVirtualFileMap(absoluteEntryFile);
+    }
+
+    private addRefs(refs: RefsLike): Context {
         this._refs = refs;
         return this;
     }
@@ -227,7 +234,7 @@ export class Context {
         }
     }
 
-    public initializeVirtualFileMap(rootSchema: unknown, entryFile: string) {
+    private initializeVirtualFileMap(entryFile: string) {
         this.specRoot = normalizeHelper(dirNameHelper(entryFile));
         const normalizedEntry = normalizeHelper(entryFile);
         this.entryFile = normalizedEntry;

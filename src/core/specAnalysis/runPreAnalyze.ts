@@ -3,12 +3,12 @@ import type { TStrictFlatOptions } from '../../common/TRawOptions';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { Parser as ParserV2 } from '../api/v2/Parser';
 import { Parser as ParserV3 } from '../api/v3/Parser';
-import { Context } from '../Context';
+import { createResolvedContext } from '../createResolvedContext';
+import { getSpecItemName } from '../generationCache/EntitySkip';
 import { loadGeneratorPlugins } from '../plugins/loadGeneratorPlugins';
-import { extractPluginPaths } from '../plugins/pluginEntries';
+import { mergePluginPaths } from '../plugins/pluginEntries';
 import { hashSchema } from '../reuseStore/ArtifactFingerprinter';
 import { buildModelSchemaMap } from '../reuseStore/reuseHelpers';
-import { getOpenApiSpec } from '../utils/getOpenApiSpec';
 import { getOpenApiVersion, OpenApiVersion } from '../utils/getOpenApiVersion';
 import { buildManifestFromParsedSpecs, runCrossSpecAnalysis } from './CrossSpecAnalyzer';
 
@@ -22,10 +22,10 @@ export async function runPreAnalyze(items: TStrictFlatOptions[], logger: Logger)
         const specItem = getSpecItemName(item.input);
 
         try {
-            const generatorPlugins = await loadGeneratorPlugins(extractPluginPaths(item.plugins), {
+            const generatorPlugins = await loadGeneratorPlugins(mergePluginPaths(item.plugins, null), {
                 disableBuiltins: item.disableBuiltinPlugins,
             });
-            const context = new Context({
+            const { context, openApi } = await createResolvedContext({
                 input: absoluteInput,
                 output: {
                     output: item.output,
@@ -43,8 +43,6 @@ export async function runPreAnalyze(items: TStrictFlatOptions[], logger: Logger)
                 plugins: generatorPlugins,
                 strictPluginMode: item.strictPluginMode,
             });
-
-            const openApi = await getOpenApiSpec(context, absoluteInput);
             const version = getOpenApiVersion(openApi);
 
             if (version === OpenApiVersion.V2) {
@@ -103,10 +101,4 @@ export async function runPreAnalyze(items: TStrictFlatOptions[], logger: Logger)
     }
 
     logger.forceInfo('[preAnalyze] ─────────────────────────────────────');
-}
-
-function getSpecItemName(input: string): string {
-    const parts = input.replace(/\\/g, '/').split('/');
-    const filename = parts[parts.length - 1] ?? input;
-    return filename.replace(/\.[^.]+$/, '');
 }

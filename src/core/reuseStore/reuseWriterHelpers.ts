@@ -3,7 +3,6 @@ import { dirname, join } from 'path';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
 import type { Model } from '../types/shared/Model.model';
-import type { WriteClient } from '../WriteClient';
 import { buildOptionsSliceHash, hashSchema } from './ArtifactFingerprinter';
 import { computeStoreRelativeImport } from './computeStoreRelativeImport';
 import {
@@ -17,6 +16,12 @@ import { ReuseStore } from './ReuseStore';
 import type { SharedFolderWriter } from './SharedFolderWriter';
 import { SHARED_FOLDER_NAME } from './SharedFolderWriter';
 import type { ArtifactKind, OptionsSlice } from './types';
+
+/** Narrow write seam used by reuse helpers (no WriteClient class dependency). */
+export type ReuseOutputAdapter = {
+    writeOutputFile: (file: string, content: string) => Promise<unknown>;
+    registerLintTarget?: (file: string, outputDir?: string) => void;
+};
 
 export type ReuseWriterContext = {
     reuseStore: ReuseStore;
@@ -42,7 +47,7 @@ type ArtifactWriterConfig = {
     registerLintTarget?: (file: string) => void;
 };
 
-async function writeReusedArtifact(writeClient: WriteClient, ctx: ReuseWriterContext, config: ArtifactWriterConfig): Promise<void> {
+async function writeReusedArtifact(adapter: ReuseOutputAdapter, ctx: ReuseWriterContext, config: ArtifactWriterConfig): Promise<void> {
     const { reuseStore, optionsSlice, specInput, inputPath, modelSchemas, referencedArtifactKeys, onReuseStat, reuseOnConflict = 'fail' } = ctx;
     const { kind, file, model, renderArtifact, buildRelativePath, buildNamespacedPath, registerLintTarget } = config;
     const schema = resolveModelSchema(model, modelSchemas);
@@ -68,7 +73,7 @@ async function writeReusedArtifact(writeClient: WriteClient, ctx: ReuseWriterCon
                 byteSize: Buffer.byteLength(formattedValue, 'utf8'),
                 skipConflictCheck: true,
             });
-            await writeClient.writeOutputFile(file, formattedValue);
+            await adapter.writeOutputFile(file, formattedValue);
             referencedArtifactKeys?.add(entry.artifactKey);
             onReuseStat?.(false);
             registerLintTarget?.(file);
@@ -86,10 +91,10 @@ async function writeReusedArtifact(writeClient: WriteClient, ctx: ReuseWriterCon
                 await fileSystemHelpers.mkdir(dirname(canonicalPath));
                 const stubImport = computeStoreRelativeImport(file, canonicalPath);
                 const stubContent = `export * from '${stubImport}';\n`;
-                await writeClient.writeOutputFile(canonicalPath, content);
-                await writeClient.writeOutputFile(file, stubContent);
+                await adapter.writeOutputFile(canonicalPath, content);
+                await adapter.writeOutputFile(file, stubContent);
             } else {
-                await writeClient.writeOutputFile(file, content, { expectedByteSize: lookup.entry.byteSize });
+                await adapter.writeOutputFile(file, content);
             }
             reuseStore.markReferenced(
                 lookup.entry.artifactKey,
@@ -131,37 +136,37 @@ async function writeReusedArtifact(writeClient: WriteClient, ctx: ReuseWriterCon
         await fileSystemHelpers.mkdir(dirname(canonicalPath));
         const stubImport = computeStoreRelativeImport(file, canonicalPath);
         const stubContent = `export * from '${stubImport}';\n`;
-        await writeClient.writeOutputFile(canonicalPath, formattedValue);
-        await writeClient.writeOutputFile(file, stubContent);
+        await adapter.writeOutputFile(canonicalPath, formattedValue);
+        await adapter.writeOutputFile(file, stubContent);
         registerLintTarget?.(file);
         return;
     }
 
-    await writeClient.writeOutputFile(file, formattedValue);
+    await adapter.writeOutputFile(file, formattedValue);
     registerLintTarget?.(file);
 }
 
 export async function writeModelWithReuse(
-    writeClient: WriteClient,
+    adapter: ReuseOutputAdapter,
     model: Model,
     file: string,
     outputModelsPath: string,
     ctx: ReuseWriterContext,
     renderArtifact: () => Promise<string>
 ): Promise<void> {
-    await writeReusedArtifact(writeClient, ctx, {
+    await writeReusedArtifact(adapter, ctx, {
         kind: model.export === 'enum' ? 'enum' : 'model',
         file,
         model,
         renderArtifact,
         buildRelativePath: buildModelArtifactRelativePath,
         buildNamespacedPath: buildNamespacedModelArtifactRelativePath,
-        registerLintTarget: f => writeClient.registerLintTarget(f, outputModelsPath),
+        registerLintTarget: f => adapter.registerLintTarget?.(f, outputModelsPath),
     });
 }
 
-export async function writeSchemaWithReuse(writeClient: WriteClient, model: Model, file: string, ctx: ReuseWriterContext, renderArtifact: () => Promise<string>): Promise<void> {
-    await writeReusedArtifact(writeClient, ctx, {
+export async function writeSchemaWithReuse(adapter: ReuseOutputAdapter, model: Model, file: string, ctx: ReuseWriterContext, renderArtifact: () => Promise<string>): Promise<void> {
+    await writeReusedArtifact(adapter, ctx, {
         kind: 'schema',
         file,
         model,

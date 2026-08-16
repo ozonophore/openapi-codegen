@@ -7,19 +7,48 @@ Umbrella spec для cache strategies, ReuseStore orchestration и GenerationCac
 ## Requirements
 
 ### Requirement: Три cache strategies
-Поддерживаемые strategies: `content` (write-if-changed only), `entity` (per-output fingerprint cache), `reuse` (cross-spec artifact store). Strategy MUST быть consistent across all items в одном run.
+Поддерживаемые strategies: `content` (write-if-changed only), `entity` (per-output fingerprint cache), `reuse` (cross-spec artifact store). Strategy MUST быть consistent across all items в одном run. `reuse` MUST также участвовать в hybrid entity skip (GenerationCache fingerprint + files + manifest presence), не только в ReuseStore artifact hits.
 
 #### Scenario: Content strategy
 - **WHEN** cache=true и cacheStrategy=content
 - **THEN** entity cache не загружается, только writeFileIfChanged оптимизация
 
 #### Scenario: Entity cache hit
-- **WHEN** cacheStrategy=entity, fingerprint совпадает и все cached files exist on disk
-- **THEN** generateSingle skip write, register cached paths as outputs
+- **WHEN** cacheStrategy=entity, fingerprint (v3 envelope) совпадает и все cached files exist on disk
+- **THEN** Generation item session skip write, register cached paths as outputs
+
+#### Scenario: Hybrid reuse entity-skip hit
+- **WHEN** cacheStrategy=reuse, fingerprint (v3) совпадает, cached files exist, Reuse manifest содержит spec item, и store-артефакты spec item проходят integrity check
+- **THEN** Generation item session MUST skip parse/write этого item (`entitySkipped`)
+
+#### Scenario: Hybrid reuse skip denied without manifest entry
+- **WHEN** cacheStrategy=reuse, fingerprint и files совпадают, но spec item отсутствует в Reuse manifest
+- **THEN** entity skip MUST NOT применяться; item идёт в полную генерацию
+
+#### Scenario: Hybrid reuse skip denied when store artifact is corrupt
+- **WHEN** cacheStrategy=reuse, fingerprint и files совпадают, spec item есть в manifest, но store-артефакт не проходит contentHash integrity check
+- **THEN** entity skip MUST NOT применяться; item идёт в полную генерацию и store-артефакт MUST быть перезаписан
 
 #### Scenario: Entity cache miss on missing file
 - **WHEN** cache entry exists но файл на диске удалён
 - **THEN** cache miss, полная регенерация item
+
+#### Scenario: Entity cache miss on fingerprint version change
+- **WHEN** cache entry был записан с fingerprint version 2, а генератор считает version 3
+- **THEN** fingerprint mismatch, entity skip не применяется
+
+---
+
+### Requirement: Entity fingerprint uses options slice hash
+При `cacheStrategy` entity или reuse (hybrid entity skip) GenerationCache fingerprint MUST включать hash options slice (`optionsSliceHash`), согласованный с ReuseStore artifact options hashing (`buildOptionsSlice` / `buildOptionsSliceHash`), плюс residual non-slice generation options и versioned envelope. Fingerprint version MUST быть 3 после этого change.
+
+#### Scenario: Shared options influence entity and reuse
+- **WHEN** меняется options field, входящий в `OptionsSlice`
+- **THEN** и entity fingerprint (через `optionsSliceHash`), и reuse `optionsSliceHash` MUST отразить изменение
+
+#### Scenario: Residual-only field still affects entity skip
+- **WHEN** меняется residual field вне slice (например `request` или `strictOpenapi`)
+- **THEN** entity fingerprint MUST измениться даже если `optionsSliceHash` прежний
 
 ---
 
@@ -37,7 +66,20 @@ Reuse lookup MUST возвращать conflict когда name+kind совпа�
 
 #### Scenario: fail policy
 - **WHEN** reuseOnConflict=fail и conflict detected
-- **THEN** generation прерывается, generation report записывается с conflict record
+- **THEN** generation прерывается; early generation report записывается с conflict record (до Reuse GC/save, без требования полных phase timings)
+
+---
+
+### Requirement: Final Generation report after Reuse GC and save
+Когда `ReuseStore` активен в batch run, финальная запись Generation report MUST происходить **после** `reuseStore.gc` и (если dirty) `reuseStore.save`. При `cacheDebug` поле `phases` MUST отражать измеренные `manifestLoadMs`, `manifestSaveMs` и `gcMs` финального прохода (не нули из-за записи report до GC).
+
+#### Scenario: cacheDebug phases include gc and save
+- **WHEN** cacheStrategy=reuse, cacheDebug=true, run завершается успешно с активным ReuseStore
+- **THEN** generation report на диске содержит `phases.gcMs` и `phases.manifestSaveMs`, соответствующие выполненным GC/save (save может быть 0 только если store не dirty)
+
+#### Scenario: Early conflict dump still allowed before GC
+- **WHEN** mid-batch возникает `ReuseConflictError` и политика требует записать report с conflict record
+- **THEN** early generation report MAY быть записан до GC/save; такой dump MUST NOT требовать финальных phase timings
 
 ---
 

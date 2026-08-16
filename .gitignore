@@ -15,6 +15,7 @@ skills-lock.json
 .openapi-codegen-reports
 .openapi-codegen-store
 .agents
+.claude
 
 *.iml
 dist

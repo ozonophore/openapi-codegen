@@ -64,6 +64,25 @@ module.exports = {
 
 `pluginsHash` включает `config` каждой записи (ключ = `name ?? path`). Смена только `config` инвалидирует cache/reuse для options slice.
 
+### Runtime `configure`
+
+Если плагин экспортирует optional `configure(config)`, loader вызывает его **после** загрузки модуля и **только когда** у entry в `config` есть хотя бы один ключ (строковый path нормализуется в `{}` и **не** вызывает `configure`).
+
+```js
+module.exports = {
+  name: 'with-config',
+  apiVersion: '1',
+  configure(config) {
+    this._mode = config.mode;
+  },
+  resolveSchemaTypeOverride({ schema }) {
+    return schema['x-custom-type'];
+  },
+};
+```
+
+Throw внутри `configure` валит загрузку плагина (как битый файл) на **generate** и **preAnalyze**.
+
 ## CLI
 
 ```bash

@@ -1,6 +1,5 @@
 import { TRawOptions } from '../common/TRawOptions';
 import { OpenApiClient } from './OpenApiClient';
-import { validateRawOptions } from './utils/validateRawOptions';
 
 export type { Anomaly, AnomalyDetectionConfig, AnomalyReport, SpecAnalysisConfig } from './analysis';
 export { runAnomalyDetection } from './analysis';
@@ -31,8 +30,6 @@ export type { WorkspaceReport, WorkspaceReportConfig, WorkspaceSpecSummary } fro
 export { writeWorkspaceReport } from './workspaceReport/writeWorkspaceReport';
 
 export async function generate(rawOptions: TRawOptions): Promise<void> {
-    await validateRawOptions(rawOptions);
-
     const openApiClient = new OpenApiClient();
     await openApiClient.generate(rawOptions);
 }

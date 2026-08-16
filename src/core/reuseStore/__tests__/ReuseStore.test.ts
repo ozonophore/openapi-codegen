@@ -176,6 +176,40 @@ describe('@unit: ReuseStore', () => {
         }
     });
 
+    test('verifySpecItemIntegrity is false when a referenced store artifact is corrupt', async () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-codegen-reuse-store-'));
+        try {
+            const store = new ReuseStore(tmpDir);
+            await store.load();
+            const optionsSlice = buildOptionsSlice(COMMON_DEFAULT_OPTIONS_VALUES);
+            const optionsSliceHash = buildOptionsSliceHash(optionsSlice);
+            const schema = { type: 'object', properties: { id: { type: 'string' } } };
+            const relativeArtifactPath = buildModelArtifactRelativePath({ name: 'User', path: 'User', export: 'interface', alias: 'User', properties: [], enum: [] } as never, optionsSliceHash);
+            const content = 'export interface IUser {}';
+
+            store.register({
+                name: 'User',
+                kind: 'model',
+                schema,
+                optionsSlice,
+                relativeArtifactPath,
+                contentHash: ReuseStore.hashContent(content),
+                specItem: 'spec_a',
+                inputPath: './specs/spec_a.yaml',
+                outputPath: 'src/api/spec_a/models/User.ts',
+                byteSize: Buffer.byteLength(content, 'utf8'),
+            });
+            await store.writeArtifact(relativeArtifactPath, content);
+
+            assert.equal(await store.verifySpecItemIntegrity('spec_a'), true);
+            fs.writeFileSync(store.resolveArtifactPath(relativeArtifactPath), '/* corrupted artifact */', 'utf8');
+            assert.equal(await store.verifySpecItemIntegrity('spec_a'), false);
+            assert.equal(await store.verifySpecItemIntegrity('missing'), false);
+        } finally {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
+        }
+    });
+
     test('skips manifest save when nothing changed on warm lookup', async () => {
         const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'openapi-codegen-reuse-store-'));
         try {

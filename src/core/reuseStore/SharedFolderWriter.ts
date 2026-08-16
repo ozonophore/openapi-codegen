@@ -1,5 +1,3 @@
-import type { WriteClient } from '../WriteClient';
-
 export const SHARED_FOLDER_NAME = '__shared__';
 
 export type SharedCoreEntry = {
@@ -13,10 +11,7 @@ export class SharedFolderWriter {
     readonly lca: string;
     private readonly coreEntries = new Map<string, SharedCoreEntry>();
 
-    constructor(
-        private readonly writeClient: WriteClient,
-        lca: string
-    ) {
+    constructor(lca: string) {
         this.lca = lca;
     }
 

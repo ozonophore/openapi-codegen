@@ -116,4 +116,60 @@ describe('@unit: loadGeneratorPlugins', () => {
             rmSync(tempDir, { recursive: true, force: true });
         }
     });
+
+    test('calls configure when entry config is non-empty', async () => {
+        const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-configure-'));
+        const pluginPath = join(tempDir, 'configured.cjs');
+        writeFileSync(
+            pluginPath,
+            `module.exports = {
+                name: 'configured',
+                seen: null,
+                configure(config) { this.seen = config; },
+            };`
+        );
+        try {
+            const plugins = await loadGeneratorPlugins([{ path: pluginPath, config: { mode: 'strict' } }], { disableBuiltins: true });
+            assert.strictEqual(plugins[0]?.name, 'configured');
+            assert.deepStrictEqual((plugins[0] as { seen?: unknown }).seen, { mode: 'strict' });
+        } finally {
+            rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    test('does not call configure for string path entries', async () => {
+        const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-noconfig-'));
+        const pluginPath = join(tempDir, 'noconfig.cjs');
+        writeFileSync(
+            pluginPath,
+            `module.exports = {
+                name: 'noconfig',
+                called: false,
+                configure() { this.called = true; },
+            };`
+        );
+        try {
+            const plugins = await loadGeneratorPlugins([pluginPath], { disableBuiltins: true });
+            assert.strictEqual((plugins[0] as { called?: boolean }).called, false);
+        } finally {
+            rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    test('configure throw fails loading', async () => {
+        const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-configure-fail-'));
+        const pluginPath = join(tempDir, 'fail.cjs');
+        writeFileSync(
+            pluginPath,
+            `module.exports = {
+                name: 'fail-configure',
+                configure() { throw new Error('bad config'); },
+            };`
+        );
+        try {
+            await assert.rejects(() => loadGeneratorPlugins([{ path: pluginPath, config: { x: 1 } }], { disableBuiltins: true }), /bad config/);
+        } finally {
+            rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
 });
