@@ -40,6 +40,13 @@ paths:
       responses:
         '200':
           description: ok
+  /simple:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/SimpleRequestBody'
+      responses:
+        '200':
+          description: ok
   /inline:
     get:
       responses:
@@ -80,6 +87,12 @@ components:
         type: string
   requestBodies:
     ErrorResponse:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    SimpleRequestBody:
+      description: A reusable request body
       content:
         application/json:
           schema:
@@ -143,6 +156,8 @@ describe('@unit: Model Schema registry identity', () => {
         assert.equal(names.filter(name => name === 'IErrorResponse').length, 1);
         assert.equal(names.filter(name => name === 'ErrorResponse').length, 0);
         assert.equal(names.filter(name => name === 'TErrorResponse').length, 0);
+        assert.ok(!names.includes('SimpleRequestBody'));
+        assert.ok(!names.includes('ISimpleRequestBody'));
         assert.ok(!names.includes('InlineError'));
         assert.ok(!names.includes('IInlineError'));
 
@@ -158,6 +173,7 @@ describe('@unit: Model Schema registry identity', () => {
         assert.equal(mapped.type, 'object');
         assert.ok(!('content' in mapped));
         assert.ok(!('in' in mapped));
+        assert.equal(schemaMap.has('SimpleRequestBody'), false);
     });
 
     test('OAS2: #/definitions/ErrorResponse is a Model; #/responses/ and #/parameters/ are not', async () => {
@@ -182,5 +198,35 @@ describe('@unit: Model Schema registry identity', () => {
         assert.ok(mapped);
         assert.equal(mapped.type, 'object');
         assert.ok('properties' in mapped);
+    });
+
+    test('v3.withDifferentRefs.yml still yields INested and TProp and skips SimpleRequestBody', async () => {
+        mkdirSync(generatedRoot, { recursive: true });
+        tmpDir = mkdtempSync(path.join(generatedRoot, 'model-registry-refs-'));
+        const specPath = path.join(__dirname, '../../../test/spec/v3.withDifferentRefs.yml');
+
+        const { context, openApi } = await createResolvedContext({
+            input: specPath,
+            output: getOutputPaths({ output: path.join(tmpDir, 'out') }),
+        });
+
+        const models = new ParserV3(context).getModels(openApi as OpenApiV3);
+        const names = models.map(model => model.name);
+
+        assert.ok(names.includes('INested'), `missing INested in ${names.join(', ')}`);
+        assert.ok(names.includes('TProp'), `missing TProp in ${names.join(', ')}`);
+        assert.ok(!names.includes('SimpleRequestBody'));
+
+        const schemaMap = buildModelSchemaMap(context);
+        const nested = schemaMap.get('nested');
+        assert.ok(nested);
+        assert.equal(nested.type, 'object');
+        assert.ok(nested.properties && typeof nested.properties === 'object' && 'value' in nested.properties);
+        assert.ok(!('content' in nested));
+
+        const prop = schemaMap.get('prop');
+        assert.ok(prop);
+        assert.equal(prop.type, 'array');
+        assert.ok(!('content' in prop));
     });
 });
