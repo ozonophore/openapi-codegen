@@ -28,7 +28,6 @@ type RootOnlyKey =
     | 'logTarget'
     | 'validationLibrary'
     | 'emptySchemaStrategy'
-    | 'miracles'
     | 'strictOpenapi'
     | 'reportFile'
     | 'failOnGovernanceErrors'
@@ -54,7 +53,8 @@ type PerItemOverrideKey =
     | 'useHistory'
     | 'diffReport'
     | 'modelsMode'
-    | 'modelsLayout';
+    | 'modelsLayout'
+    | 'miracles';
 
 /** Root-only inherit keys (not in unifiedItemSchema). Optional `get` for special coercion. */
 const ROOT_ONLY_KEYS: ReadonlyArray<{
@@ -72,7 +72,6 @@ const ROOT_ONLY_KEYS: ReadonlyArray<{
     { key: 'logTarget' },
     { key: 'validationLibrary' },
     { key: 'emptySchemaStrategy' },
-    { key: 'miracles' },
     { key: 'strictOpenapi' },
     { key: 'reportFile' },
     { key: 'failOnGovernanceErrors' },
@@ -101,6 +100,7 @@ const PER_ITEM_OVERRIDE_KEYS: readonly PerItemOverrideKey[] = [
     'diffReport',
     'modelsMode',
     'modelsLayout',
+    'miracles',
 ];
 
 const ALIAS_KEYS = new Set<PerItemOverrideKey>(['modelsMode', 'modelsLayout', 'useHistory', 'diffReport']);

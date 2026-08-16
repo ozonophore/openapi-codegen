@@ -36,7 +36,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
-| **Diff report** | Lifecycle home: adapt + persist/load + types + `produceUnifiedDiffReport`; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
+| **Diff report** | Lifecycle home: adapt + persist/load + types + `enrichSemanticDiffReport` + `produceUnifiedDiffReport`; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
 | **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; string parse leaf `parseOpenApiContent`; git `show` stays in CLI |
 | **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
@@ -148,7 +148,7 @@ Owns raw config → strict items: Zod validate (**throws**, no `process.exit`) �
 Collapse triple parallel field lists inside `resolveGenerationOptions` into explicit tables (bit-identical).
 
 - **Home:** same module `src/core/resolveGenerationOptions.ts`
-- **Tables:** root-only inherit keys · per-item override keys · defaults with per-key rule `'or' | 'nullish' | 'custom'`
+- **Tables:** root-only inherit keys · per-item override keys (including `miracles`) · defaults with per-key rule `'or' | 'nullish' | 'custom'`
 - **Explicit (not in generic pick):** marauder merges (`specAnalysis`/`anomalyDetection`), aliases (`modelsMode`/`modelsLayout`/`useHistory`/`diffReport`), `resolveSpecAnalysisConfig`
 - **Shape:** bit-identical `TStrictFlatOptions[]` — no entity fingerprint bump
 - **OpenSpec change:** `generation-options-field-lists`
@@ -184,9 +184,20 @@ Move Unified assemble out of analyze-diff CLI into Diff report package.
 - **Module:** `src/core/diffReport/produceUnifiedDiffReport.ts` (+ `createSpecHash`); export from `diffReport/index.ts` (not `core/index`)
 - **Owns:** metadata + circular-safe hashes + semantic slice + `adaptSemanticToStructural`; optional `timestamp` override (default `toISOString()`)
 - **Input:** `{ semantic: SemanticDiffReport, base, target, baseSpec, targetSpec, ignored?, timestamp? }` → `UnifiedDiffReport`
-- **Stays in CLI:** load → analyze → hooks → ignore → governance/miracles enrich → **produce** → write; logging/CI
+- **Stays in CLI:** load → analyze → **enrich** → **produce** → write; logging/CI
 - **Out of scope:** governance/miracles/hooks inside produce; merge with write; Unified-direct apply; Spec-load git
 - **OpenSpec change:** `produce-unified-diff-report`
+
+## Diff report enrich
+
+Deepen analyze-diff middle block (hooks → ignore → governance → miracles) into Diff report; keep produce sibling.
+
+- **Module:** `src/core/diffReport/enrichSemanticDiffReport.ts` — `enrichSemanticDiffReport(input) → { report, ignored, reportPath }`
+- **Owns (order):** `applySemanticDiffPluginHooks` → `filterSemanticChangesByIgnoreRules` → `evaluateGovernanceRules` + `buildMiraclesFromSemanticChanges`
+- **Ignore move:** filter + `matchesIgnoreRule` + `IgnoreRule` into `diffReport/`; CLI keeps `loadIgnoreRules` only
+- **CLI:** validate · Spec load · load governance/ignore/plugins · `analyzeOpenApiDiff` · **enrich** · produce · write · logging/CI
+- **Export:** `diffReport/index.ts` (not `core/index`)
+- **OpenSpec change:** `diff-report-enrich-semantic`
 
 ## Spec load unify
 

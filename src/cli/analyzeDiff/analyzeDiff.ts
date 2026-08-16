@@ -3,17 +3,14 @@ import { OptionValues } from 'commander';
 import { APP_LOGGER, DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../../common/Consts';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { validateZodOptions } from '../../common/Validation';
-import { buildMiraclesFromSemanticChanges, produceUnifiedDiffReport, writeDiffReport } from '../../core/diffReport';
-import { evaluateGovernanceRules } from '../../core/governance/evaluateGovernanceRules';
+import { enrichSemanticDiffReport, produceUnifiedDiffReport, writeDiffReport } from '../../core/diffReport';
 import { loadGovernanceConfig } from '../../core/governance/loadGovernanceConfig';
-import { applySemanticDiffPluginHooks } from '../../core/plugins/applySemanticDiffPluginHooks';
 import { loadGeneratorPlugins } from '../../core/plugins/loadGeneratorPlugins';
-import { analyzeOpenApiDiff, SemanticDiffReport } from '../../core/semanticDiff/analyzeOpenApiDiff';
+import { analyzeOpenApiDiff } from '../../core/semanticDiff/analyzeOpenApiDiff';
 import { loadSemanticOpenApiObject, loadSemanticOpenApiSpec } from '../../core/utils/loadSemanticOpenApiSpec';
 import { AnalyzeDiffOptions, analyzeDiffOptionsSchema } from '../schemas';
 import { formatCiMarkdownSummary } from './ciSummary';
 import { loadIgnoreRules } from './ignoreRules';
-import { filterSemanticChangesByIgnoreRules } from './ignoreSemanticChanges';
 import { resolvePluginEntries } from './pluginPaths';
 import { readSpecFromGit } from './specParser';
 
@@ -86,10 +83,18 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
             allowBreaking: validatedOptions.allowBreaking ?? false,
             governanceConfig: governancePolicy,
         });
-        const pluginHooksResult = await applySemanticDiffPluginHooks({
-            report: baseReport,
+
+        const {
+            report: semanticReport,
+            ignored,
+            reportPath: enrichedReportPath,
+        } = await enrichSemanticDiffReport({
+            baseReport,
+            openApi: newSpec,
             reportPath: reportPathInput,
             plugins,
+            ignoreRules,
+            governanceConfig: governancePolicy,
             allowBreaking: validatedOptions.allowBreaking ?? false,
             strictPluginMode: validatedOptions.strictPluginMode ?? false,
             onDiagnostic: diagnostic => {
@@ -97,17 +102,6 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
             },
         });
 
-        const { report: reportAfterIgnore, ignored } = filterSemanticChangesByIgnoreRules(pluginHooksResult.report, ignoreRules);
-        const semanticReport: SemanticDiffReport = {
-            ...reportAfterIgnore,
-            governance: evaluateGovernanceRules({
-                openApi: newSpec,
-                breakingChangesCount: reportAfterIgnore.summary.breaking,
-                allowBreaking: validatedOptions.allowBreaking ?? false,
-                governanceConfig: governancePolicy,
-            }),
-            miracles: buildMiraclesFromSemanticChanges(reportAfterIgnore.changes),
-        };
         const report = produceUnifiedDiffReport({
             semantic: semanticReport,
             base: baseSourceLabel,
@@ -117,7 +111,7 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
             ignored,
         });
 
-        const reportPath = await writeDiffReport(report, pluginHooksResult.reportPath);
+        const reportPath = await writeDiffReport(report, enrichedReportPath);
 
         APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.REPORT_CREATED(reportPath));
         APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.SUMMARY(semanticReport, reportPath));
