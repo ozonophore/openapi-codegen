@@ -1,5 +1,7 @@
 import type { Model } from '../../../types/shared/Model.model';
+import { isSchemaRegistryPointer } from '../../../utils/isSchemaRegistryPointer';
 import { resolveModelImports, setDuplicateModelAliases } from '../../../utils/modelHelpers';
+import { parseRef } from '../../../utils/parseRef';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
 import { unique } from '../../../utils/unique';
 import { Parser } from '../Parser';
@@ -10,6 +12,9 @@ export function getModels(this: Parser, openApi: OpenApi): Model[] {
     const listOfModelsRef = this.context.getAllCanonicalRefs();
     if (listOfModelsRef) {
         for (const modelRef of listOfModelsRef) {
+            if (!isSchemaRegistryPointer(parseRef(modelRef).fragment)) {
+                continue;
+            }
             const definition: any = this.context.get(modelRef);
             const definitionType = this.getType(modelRef, '');
             const model = this.getModel({

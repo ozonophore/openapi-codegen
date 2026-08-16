@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
-import { basename, isAbsolute } from 'path';
+import path, { basename } from 'path';
 
 import { APP_LOGGER } from '../common/Consts';
 import { dirNameHelper, normalizeHelper, relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
@@ -11,7 +11,7 @@ import { $Root } from './types/base/Root.model';
 import { getFileName } from './utils/getFileName';
 import { isString } from './utils/isString';
 import { normalizeRef } from './utils/normalizeRef';
-import { parseRef, RefType } from './utils/parseRef';
+import { parseRef, type PathApi, RefType } from './utils/parseRef';
 
 type TContextProps = {
     input: string | Record<string, any>;
@@ -20,6 +20,8 @@ type TContextProps = {
     sortByRequired?: boolean;
     plugins?: OpenApiGeneratorPlugin[];
     strictPluginMode?: boolean;
+    /** Injectable path API for Canonical Ref lookup. Tests pass `path.win32`. */
+    pathApi?: PathApi;
 };
 
 type RefsLike = {
@@ -62,9 +64,11 @@ export class Context {
     private specRoot!: string;
     private entryFile?: string;
     private virtualFiles: VirtualFileMap = new Map();
+    private pathApi: PathApi;
 
-    constructor({ input, output, prefix, sortByRequired, plugins, strictPluginMode }: TContextProps) {
+    constructor({ input, output, prefix, sortByRequired, plugins, strictPluginMode, pathApi }: TContextProps) {
         this._output = output;
+        this.pathApi = pathApi ?? path;
         if (isString(input)) {
             this._root = { dirName: dirNameHelper(input), path: input, fileName: getFileName(input) };
         } else {
@@ -174,7 +178,7 @@ export class Context {
     }
 
     private canonicalizeRef(ref: string, parentSourceFile: string): { sourceFile: string; fragment?: string } {
-        const parsed = parseRef(ref);
+        const parsed = parseRef(ref, this.pathApi);
 
         // LOCAL_FRAGMENT → тот же файл
         if (parsed.type === RefType.LOCAL_FRAGMENT) {
@@ -307,7 +311,7 @@ export class Context {
           }
         | undefined {
         const normalizedRef = this.normalizeRefForLookup(canonicalRef, parentSourceFile);
-        const parsed = parseRef(normalizedRef);
+        const parsed = parseRef(normalizedRef, this.pathApi);
 
         const sourceFile = normalizeHelper(parsed.filePath ?? '');
 
@@ -323,18 +327,20 @@ export class Context {
     private normalizeRefForLookup(ref: string, parentSourceFile?: string): string {
         if (!ref) return ref;
 
-        // Prefer explicit parent if provided
+        // Prefer explicit parent if provided. Path APIs see only the source file.
         if (parentSourceFile) {
-            const normalizedParent = isAbsolute(parentSourceFile) ? parentSourceFile : resolveHelper(this.specRoot, parentSourceFile);
-            return normalizeRef(ref, normalizedParent);
+            const parentFile = parentSourceFile.split('#')[0];
+            const normalizedParent = this.pathApi.isAbsolute(parentFile) ? parentFile : resolveHelper(this.specRoot, parentFile);
+            return normalizeRef(ref, normalizedParent, this.pathApi);
         }
 
-        // If we can fall back to entry file, normalize relative refs against it
+        // If we can fall back to entry file, normalize against it (parse then operate on the pair).
         if (this.entryFile) {
-            const parsed = parseRef(ref);
-            if (parsed.type === RefType.LOCAL_FRAGMENT || parsed.type === RefType.EXTERNAL_FILE || parsed.type === RefType.EXTERNAL_FILE_FRAGMENT) {
-                return normalizeRef(ref, this.entryFile);
+            const parsed = parseRef(ref, this.pathApi);
+            if (parsed.type === RefType.HTTP_URL) {
+                return ref;
             }
+            return normalizeRef(ref, this.entryFile, this.pathApi);
         }
 
         return ref;

@@ -1,4 +1,4 @@
-import { isAbsolute } from 'path';
+import path from 'path';
 
 export enum RefType {
     LOCAL_FRAGMENT = 'local_fragment',
@@ -15,55 +15,58 @@ export interface ParsedRef {
     originalRef: string;
 }
 
+/** Injectable Node path API. Tests pass `path.win32`; production uses the platform default. */
+export type PathApi = Pick<typeof path, 'isAbsolute' | 'normalize' | 'dirname' | 'resolve'>;
+
 /**
- * Parse a $ref string to determine its type and components
+ * Parse a $ref string to determine its type and components.
+ * Always splits Pointer from source file first so path APIs never see `file#pointer`.
  */
-export function parseRef(ref: string): ParsedRef {
+export function parseRef(ref: string, pathApi: PathApi = path): ParsedRef {
     if (!ref || typeof ref !== 'string') {
         return { type: RefType.LOCAL_FRAGMENT, originalRef: ref };
     }
-    // HTTP URLs
-    if (ref.startsWith('http://') || ref.startsWith('https://')) {
+
+    const hashIndex = ref.indexOf('#');
+    const sourceFile = hashIndex === -1 ? ref : ref.slice(0, hashIndex);
+    const fragment = hashIndex === -1 ? undefined : ref.slice(hashIndex);
+
+    if (sourceFile.startsWith('http://') || sourceFile.startsWith('https://')) {
         return {
             type: RefType.HTTP_URL,
             originalRef: ref,
         };
     }
 
-    // Absolute paths (POSIX/Windows handled by path.isAbsolute)
-    if (isAbsolute(ref)) {
-        const [filePath, fragment] = ref.split('#');
-        return {
-            type: RefType.ABSOLUTE_PATH,
-            filePath,
-            fragment: fragment ? `#${fragment}` : undefined,
-            originalRef: ref,
-        };
-    }
-
-    // Local fragment
-    if (ref.startsWith('#/')) {
+    if (!sourceFile) {
         return {
             type: RefType.LOCAL_FRAGMENT,
-            fragment: ref,
+            fragment,
             originalRef: ref,
         };
     }
 
-    // External file references (may include fragment)
-    const [filePath, fragment] = ref.split('#');
+    if (pathApi.isAbsolute(sourceFile)) {
+        return {
+            type: RefType.ABSOLUTE_PATH,
+            filePath: sourceFile,
+            fragment,
+            originalRef: ref,
+        };
+    }
+
     if (fragment) {
         return {
             type: RefType.EXTERNAL_FILE_FRAGMENT,
-            filePath,
-            fragment: `#${fragment}`,
+            filePath: sourceFile,
+            fragment,
             originalRef: ref,
         };
     }
 
     return {
         type: RefType.EXTERNAL_FILE,
-        filePath,
+        filePath: sourceFile,
         originalRef: ref,
     };
 }

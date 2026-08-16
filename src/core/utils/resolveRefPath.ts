@@ -1,34 +1,34 @@
-import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
-import { ParsedRef, RefType } from './parseRef';
+import path from 'path';
+
+import { REGEX_BACKSLASH } from '../types/Consts';
+import { ParsedRef, type PathApi, RefType } from './parseRef';
 
 /**
  * Resolve a parsed reference to an absolute path (when applicable).
- * parentFilePath is expected to be a file path (absolute or relative).
+ * parentFilePath is expected to be a file path (absolute or relative); Pointer is stripped first.
  */
-export function resolveRefPath(parsedRef: ParsedRef, parentFilePath: string): string {
-    // For correct operation, parentDir must be the path to the directory, not the file.
-    const parentDir = dirNameHelper(parentFilePath.split('#')[0]);
+export function resolveRefPath(parsedRef: ParsedRef, parentFilePath: string, pathApi: PathApi = path): string {
+    const parentSourceFile = parentFilePath.split('#')[0];
+    const parentDir = pathApi.dirname(parentSourceFile).replace(REGEX_BACKSLASH, '/');
 
     switch (parsedRef.type) {
         case RefType.LOCAL_FRAGMENT:
-            // For local fragments, use the parent file path
-            return parentFilePath.split('#')[0];
+            return parentSourceFile;
 
         case RefType.EXTERNAL_FILE:
         case RefType.EXTERNAL_FILE_FRAGMENT:
-            // Resolve relative to parent file directory
             if (parsedRef.filePath) {
-                return resolveHelper(parentDir, parsedRef.filePath);
+                return pathApi.resolve(parentDir, parsedRef.filePath).replace(REGEX_BACKSLASH, '/');
             }
-            return parentFilePath;
+            return parentSourceFile;
 
         case RefType.ABSOLUTE_PATH:
-            return parsedRef.filePath || parentFilePath;
+            return parsedRef.filePath || parentSourceFile;
 
         case RefType.HTTP_URL:
             return parsedRef.originalRef;
 
         default:
-            return parentFilePath;
+            return parentSourceFile;
     }
 }
