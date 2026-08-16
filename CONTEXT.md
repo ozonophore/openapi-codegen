@@ -134,6 +134,16 @@ Owns raw config → strict items: Zod validate (**throws**, no `process.exit`) �
 - **Visibility:** internal (not re-exported from `src/core/index.ts`)
 - **OpenSpec change:** `pdtch-191-generation-options-resolve`
 
+## Generation options field lists
+
+Collapse triple parallel field lists inside `resolveGenerationOptions` into explicit tables (bit-identical).
+
+- **Home:** same module `src/core/resolveGenerationOptions.ts`
+- **Tables:** root-only inherit keys · per-item override keys · defaults with per-key rule `'or' | 'nullish' | 'custom'`
+- **Explicit (not in generic pick):** marauder merges (`specAnalysis`/`anomalyDetection`), aliases (`modelsMode`/`modelsLayout`/`useHistory`/`diffReport`), `resolveSpecAnalysisConfig`
+- **Shape:** bit-identical `TStrictFlatOptions[]` — no entity fingerprint bump
+- **OpenSpec change:** `generation-options-field-lists`
+
 ## Diff report lifecycle
 
 First-cut deepen: home adapt + persist/load + apply + miracle build + types under **`src/core/diffReport/`**; produce stays in `semanticDiff`; Generation item session keeps thin load/apply wrappers.
