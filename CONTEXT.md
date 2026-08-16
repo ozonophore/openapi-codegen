@@ -32,6 +32,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | Term | Role |
 |------|------|
 | **OpenApiClient** | Facade: constructs WriteClient, item/batch sessions; options meaning in `resolveGenerationOptions` |
+| **Generate CLI options adapter** | CLI → `TRawOptions` for `generate` (Zod + merge overrides + migrate) |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
@@ -143,6 +144,17 @@ Collapse triple parallel field lists inside `resolveGenerationOptions` into expl
 - **Explicit (not in generic pick):** marauder merges (`specAnalysis`/`anomalyDetection`), aliases (`modelsMode`/`modelsLayout`/`useHistory`/`diffReport`), `resolveSpecAnalysisConfig`
 - **Shape:** bit-identical `TStrictFlatOptions[]` — no entity fingerprint bump
 - **OpenSpec change:** `generation-options-field-lists`
+
+## Generate CLI options adapter
+
+Collapse dual Zod call sites in `generateOpenApiClient` into one CLI → `TRawOptions` adapter; keep override hand list + drift test.
+
+- **Module:** `generateCliOptionsAdapter.ts` with `resolveGenerateCliToRawOptions` (+ merge/pick/keys); former `generateCliOverrides.ts` removed
+- **Zod:** `generateOptionsSchema` once at entry; direct path flat refine (`generateCliFlatSchema`) **inside** adapter only
+- **Paths preserved:** direct (input+output) vs config+migrate; migrate stays in CLI
+- **Override keys:** keep `GENERATE_CLI_OVERRIDE_KEYS` hand list; unit drift test vs `keyof GenerateOptions`
+- **Caller:** `generateOpenApiClient` thin: validate Commander options → adapter → autoSelect → `OpenAPI.generate`
+- **OpenSpec change:** `generate-cli-options-adapter`
 
 ## Diff report lifecycle
 

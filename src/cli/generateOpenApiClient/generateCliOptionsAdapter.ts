@@ -1,11 +1,19 @@
+import { EMigrationMode } from '../../common/Enums';
 import { TRawOptions } from '../../common/TRawOptions';
+import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
+import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
+import { validateZodOptions } from '../../common/Validation';
+import { allMigrationPlans } from '../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
+import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
+import { flatOptionsSchema } from '../../common/VersionedSchema/AllVersionedSchemas/UnifiedVersionedSchemas';
 import { mergeMarauderBlockDeep } from '../../common/VersionedSchema/Utils/mergeMarauderBlock';
+import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import { resolveSpecAnalysisConfig } from '../../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
 import { mergePluginPaths, type PluginConfigEntry } from '../../core/plugins/pluginEntries';
 import { GenerateOptions } from '../schemas';
 
 /** Ключи опций generate, которые CLI может перекрыть поверх конфига (скалярные поля). */
-const GENERATE_CLI_OVERRIDE_KEYS = [
+export const GENERATE_CLI_OVERRIDE_KEYS = [
     'cache',
     'cachePath',
     'cacheStrategy',
@@ -41,6 +49,16 @@ const DIRECT_FLAT_CLI_EXCLUDE_KEYS = new Set([
     'input',
     'output',
 ]);
+
+const generateCliFlatSchema = flatOptionsSchema.strict().superRefine((data, ctx) => {
+    if (data.excludeCoreServiceFiles === true && data.request) {
+        ctx.addIssue({
+            code: 'custom',
+            message: '"request" can only be used when "excludeCoreServiceFiles" is false',
+            path: ['request'],
+        });
+    }
+});
 
 /**
  * Собирает вход для direct-mode валидации `flatOptionsSchema`.
@@ -113,4 +131,62 @@ export function mergeGenerateCliOverrides(config: TRawOptions, cli: GenerateOpti
     }
 
     return merged;
+}
+
+export type ResolveGenerateCliToRawInput = {
+    clientOptions: Record<string, unknown>;
+    validated: GenerateOptions;
+};
+
+export type ResolveGenerateCliToRawResult =
+    | { ok: true; raw: TRawOptions; deprecatedArrayConfig?: boolean }
+    | { ok: false; kind: 'direct_validation'; errors: string[] }
+    | { ok: false; kind: 'config_missing'; hasExplicitPath: boolean }
+    | { ok: false; kind: 'migration_failed' };
+
+/**
+ * CLI → TRawOptions for generate: direct (flat validate + merge) or config (load + migrate + merge).
+ * Flat Zod refine runs only here for the direct path.
+ */
+export function resolveGenerateCliToRawOptions(input: ResolveGenerateCliToRawInput): ResolveGenerateCliToRawResult {
+    const { clientOptions, validated } = input;
+    const hasMinimumRequiredOptions = !!validated.input && !!validated.output;
+
+    if (hasMinimumRequiredOptions) {
+        const directOptionsValidationResult = validateZodOptions(generateCliFlatSchema, pickDirectFlatCliInput(clientOptions, validated));
+
+        if (!directOptionsValidationResult.success) {
+            return { ok: false, kind: 'direct_validation', errors: directOptionsValidationResult.errors };
+        }
+
+        return {
+            ok: true,
+            raw: mergeGenerateCliOverrides(directOptionsValidationResult.data as TRawOptions, validated),
+        };
+    }
+
+    const configData = loadConfigIfExists(validated.openapiConfig);
+    if (!configData) {
+        return { ok: false, kind: 'config_missing', hasExplicitPath: !!validated.openapiConfig };
+    }
+
+    const deprecatedArrayConfig = Array.isArray(configData);
+    const preparedOptions = convertArrayToObject(configData);
+
+    const migratedOptions = migrateDataToLatestSchemaVersion({
+        rawInput: preparedOptions,
+        migrationPlans: allMigrationPlans,
+        versionedSchemas: allVersionedSchemas,
+        migrationMode: EMigrationMode.GENERATE_OPENAPI,
+    });
+
+    if (!migratedOptions) {
+        return { ok: false, kind: 'migration_failed' };
+    }
+
+    return {
+        ok: true,
+        raw: mergeGenerateCliOverrides(migratedOptions.value as TRawOptions, validated),
+        deprecatedArrayConfig,
+    };
 }
