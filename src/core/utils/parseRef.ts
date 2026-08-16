@@ -71,9 +71,27 @@ export function parseRef(ref: string, pathApi: { isAbsolute(value: string): bool
 }
 
 /**
+ * Non-schema component registries. A Canonical Ref is a Model unless its Pointer starts with one of these.
+ * Schema registry (`#/components/schemas/`, `#/definitions/`) and schema-document Pointers stay Models.
+ */
+export const NON_SCHEMA_COMPONENT_POINTER_PREFIXES = [
+    '#/components/responses/',
+    '#/components/parameters/',
+    '#/components/headers/',
+    '#/components/requestBodies/',
+    '#/components/examples/',
+    '#/components/securitySchemes/',
+    '#/components/links/',
+    '#/components/callbacks/',
+    '#/responses/',
+    '#/parameters/',
+    '#/securityDefinitions/',
+] as const;
+
+/**
  * Whole-file Canonical Ref (no Pointer) is a Model.
- * Response / Parameter / Header / Request Body pointers are not Models.
- * Other Pointers (Schema registry and schema fragments such as `#/properties/...`) stay Models.
+ * Pointers into non-schema component registries are not Models.
+ * Schema registry and schema-document Pointers (`#/properties`, `#/items`, `#/allOf/0`, …) stay Models.
  */
 export function isModelCanonicalRef(canonicalRef: string): boolean {
     const hashIndex = canonicalRef.indexOf('#');
@@ -81,12 +99,5 @@ export function isModelCanonicalRef(canonicalRef: string): boolean {
         return true;
     }
     const pointer = canonicalRef.slice(hashIndex);
-    return (
-        !pointer.startsWith('#/components/responses/') &&
-        !pointer.startsWith('#/components/parameters/') &&
-        !pointer.startsWith('#/components/headers/') &&
-        !pointer.startsWith('#/components/requestBodies/') &&
-        !pointer.startsWith('#/responses/') &&
-        !pointer.startsWith('#/parameters/')
-    );
+    return !NON_SCHEMA_COMPONENT_POINTER_PREFIXES.some(prefix => pointer.startsWith(prefix));
 }

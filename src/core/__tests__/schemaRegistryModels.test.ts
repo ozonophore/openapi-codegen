@@ -75,6 +75,25 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+  examples:
+    ErrorResponse:
+      value:
+        message: oops
+  securitySchemes:
+    ErrorResponse:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  links:
+    ErrorResponse:
+      operationId: unused
+  callbacks:
+    ErrorResponse:
+      '{$request.body#/url}':
+        post:
+          responses:
+            '200':
+              description: ok
 `;
 
 const OAS2_SPEC = `swagger: "2.0"
@@ -105,6 +124,11 @@ parameters:
     in: query
     name: q
     type: string
+securityDefinitions:
+  ErrorResponse:
+    type: apiKey
+    name: X-API-Key
+    in: header
 `;
 
 describe('@unit: schema registry Models', () => {
@@ -125,7 +149,7 @@ describe('@unit: schema registry Models', () => {
         return specPath;
     }
 
-    test('OAS3 getModels emits one IErrorResponse and ignores response/parameter/header/requestBody', async () => {
+    test('OAS3 getModels emits one IErrorResponse and ignores non-schema component registries', async () => {
         const specPath = writeSpec('v3.yaml', OAS3_SPEC);
         const { context, openApi } = await createResolvedContext({
             input: specPath,
@@ -149,9 +173,14 @@ describe('@unit: schema registry Models', () => {
         assert.ok(!names.includes('TErrorResponse'));
         assert.ok(!names.includes('InlineError'));
         assert.ok(!names.includes('IInlineError'));
+        assert.equal(
+            names.filter(name => /ErrorResponse/.test(name)).length,
+            1,
+            `unexpected extra ErrorResponse models: ${names.join(', ')}`
+        );
     });
 
-    test('OAS2 getModels keeps definitions ErrorResponse and drops responses/parameters', async () => {
+    test('OAS2 getModels keeps definitions ErrorResponse and drops responses/parameters/securityDefinitions', async () => {
         const specPath = writeSpec('v2.yaml', OAS2_SPEC);
         const { context, openApi } = await createResolvedContext({
             input: specPath,
@@ -164,6 +193,11 @@ describe('@unit: schema registry Models', () => {
         assert.equal(names.filter(name => name === 'IErrorResponse' || name === 'ErrorResponse').length, 1);
         assert.ok(!names.includes('ErrorResponse'));
         assert.ok(!names.includes('TErrorResponse'));
+        assert.equal(
+            names.filter(name => /ErrorResponse/.test(name)).length,
+            1,
+            `unexpected extra ErrorResponse models: ${names.join(', ')}`
+        );
     });
 
     test('buildModelSchemaMap keys ErrorResponse to the Schema Object', async () => {
@@ -179,5 +213,25 @@ describe('@unit: schema registry Models', () => {
         assert.equal(errorResponse.type, 'object');
         assert.ok(errorResponse.properties);
         assert.equal((errorResponse as { description?: string }).description, undefined);
+        assert.equal('content' in errorResponse, false);
+        assert.equal('in' in errorResponse, false);
+    });
+
+    test('v3.withDifferentRefs keeps INested and TProp and drops SimpleRequestBody', async () => {
+        mkdirSync(generatedRoot, { recursive: true });
+        tmpDir = mkdtempSync(path.join(generatedRoot, 'schema-registry-'));
+        const specPath = path.join(__dirname, '../../../test/spec/v3.withDifferentRefs.yml');
+        const { context, openApi } = await createResolvedContext({
+            input: specPath,
+            output: getOutputPaths({ output: path.join(tmpDir, 'out') }),
+        });
+
+        const models = new ParserV3(context).getModels(openApi as never);
+        const names = models.map(model => model.name);
+        assert.ok(names.includes('INested'), `missing INested in ${names.join(', ')}`);
+        assert.ok(names.includes('TProp'), `missing TProp in ${names.join(', ')}`);
+        assert.ok(!names.includes('SimpleRequestBody'));
+        assert.ok(!names.includes('ISimpleRequestBody'));
+        assert.ok(!names.some(name => name.includes('SimpleRequestBody')));
     });
 });

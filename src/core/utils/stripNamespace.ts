@@ -3,6 +3,9 @@ import { basename, extname } from 'path';
 import { dirNameHelper, joinHelper } from '../../common/utils/pathHelpers';
 import { getClassName } from './getClassName';
 import { hasMappedType } from './getMappedType';
+import { NON_SCHEMA_COMPONENT_POINTER_PREFIXES } from './parseRef';
+
+const SCHEMA_REGISTRY_POINTER_PREFIXES = ['#/components/schemas/', '#/definitions/'] as const;
 
 /**
  * Strip (OpenAPI) namespaces fom values.
@@ -20,21 +23,13 @@ export function stripNamespace(value: string): string {
         const baseName = extName ? getClassName(basename(value, extName)) : getClassName(basename(value));
         return directoryName ? joinHelper(directoryName, baseName) : baseName;
     }
-    const clearValue = value
-        .trim()
-        .replace(/^#\/components\/schemas\//, '')
-        .replace(/^#\/components\/responses\//, '')
-        .replace(/^#\/components\/parameters\//, '')
-        .replace(/^#\/components\/examples\//, '')
-        .replace(/^#\/components\/requestBodies\//, '')
-        .replace(/^#\/components\/headers\//, '')
-        .replace(/^#\/components\/securitySchemes\//, '')
-        .replace(/^#\/components\/links\//, '')
-        .replace(/^#\/components\/callbacks\//, '')
-        .replace(/^#\/definitions\//, '')
-        .replace(/^#\/parameters\//, '')
-        .replace(/^#\/responses\//, '')
-        .replace(/^#\/securityDefinitions\//, '');
+    let clearValue = value.trim();
+    for (const prefix of [...SCHEMA_REGISTRY_POINTER_PREFIXES, ...NON_SCHEMA_COMPONENT_POINTER_PREFIXES]) {
+        if (clearValue.startsWith(prefix)) {
+            clearValue = clearValue.slice(prefix.length);
+            break;
+        }
+    }
 
     const directoryName = dirNameHelper(clearValue);
     const baseName = getClassName(basename(clearValue));
