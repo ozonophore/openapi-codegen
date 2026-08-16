@@ -1,5 +1,6 @@
 import type { Operation } from '../../../types/shared/Operation.model';
 import type { OperationParameters } from '../../../types/shared/OperationParameters.model';
+import { toParentSourceFile } from '../../../utils/canonicalRef';
 import { getComment } from '../../../utils/getComment';
 import { getOperationErrors } from '../../../utils/getOperationErrors';
 import { getOperationName } from '../../../utils/getOperationName';
@@ -65,7 +66,7 @@ export function getOperation(
 
     if (op.requestBody) {
         const sortByRequired = this.context.sortByRequired ? sortByRequiredExtended : sortByRequiredSimple;
-        const requestBodyDef = (op.requestBody.$ref ? this.context.get(op.requestBody.$ref, parentFileRef) : op.requestBody) as OpenApiRequestBody;
+        const requestBodyDef = (op.requestBody.$ref ? this.context.get(op.requestBody.$ref, toParentSourceFile(parentFileRef)) : op.requestBody) as OpenApiRequestBody;
         const requestBody = this.getOperationRequestBody(openApi, requestBodyDef, parentFileRef);
         operation.imports.push(...requestBody.imports);
         operation.parameters.push(requestBody);

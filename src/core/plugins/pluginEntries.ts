@@ -47,6 +47,7 @@ export function normalizePluginEntry(entry: PluginConfigEntry): NormalizedPlugin
  * Merges config plugin entries with CLI paths: config first, then CLI; dedupe by path.
  */
 function pluginPathDedupeKey(path: string): string {
+    // CLI merge can run before normalizePathsToAbsolute; resolve so ./a and a collide.
     return resolveHelper(process.cwd(), path);
 }
 

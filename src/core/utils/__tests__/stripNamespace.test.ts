@@ -16,6 +16,7 @@ describe('@unit: stripNamespace', () => {
         assert.strictEqual(stripNamespace('#/components/securitySchemes/Item'), 'Item');
         assert.strictEqual(stripNamespace('#/components/links/Item'), 'Item');
         assert.strictEqual(stripNamespace('#/components/callbacks/Item'), 'Item');
+        assert.strictEqual(stripNamespace('#/components/pathItems/Item'), 'Item');
         assert.strictEqual(stripNamespace('/components/callbacks/item'), '/components/callbacks/Item');
         assert.strictEqual(stripNamespace('/components/callbacks/some_special_item'), '/components/callbacks/SomeSpecialItem');
         assert.strictEqual(stripNamespace('#/definitions/Item'), 'Item');

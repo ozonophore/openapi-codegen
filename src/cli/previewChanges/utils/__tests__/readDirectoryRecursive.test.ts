@@ -1,19 +1,10 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { describe, test } from 'node:test';
 
+import { createTempDir } from '../../../../test/helpers/createTempDir';
 import { readDirectoryRecursive } from '../readDirectoryRecursive';
-
-const createTempDir = (t: TestContext, prefix: string): string => {
-    const root = path.join(__dirname, 'generated');
-    fs.mkdirSync(root, { recursive: true });
-    const tempDir = fs.mkdtempSync(path.join(root, prefix));
-    t.after(() => {
-        fs.rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-};
 
 describe('@unit: readDirectoryRecursive', () => {
     test('returns relative paths for nested files', async t => {

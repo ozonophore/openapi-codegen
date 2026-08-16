@@ -114,7 +114,7 @@ function collectUnresolvedRefIssues(context: StrictValidationContext): StrictIss
         const objectNode = node as Record<string, unknown>;
         if (typeof objectNode.$ref === 'string') {
             const ref = objectNode.$ref;
-            const isRefExists = context.exists(ref, sourceFile);
+            const isRefExists = context.exists(ref, getSourceFileFromRef(sourceFile));
 
             if (!isRefExists) {
                 const issuePath = `${sourceFile} ${pathSegments.join('.') || '$'}.$ref`;
@@ -216,7 +216,7 @@ export function validateOpenApiStrict(params: ValidateOpenApiStrictParams): Stri
  * Creates target directory if it does not exist.
  */
 export async function writeOpenApiStrictReport(report: StrictOpenApiReport, reportFilePath: string): Promise<string> {
-    const resolvedReportPath = resolveHelper(process.cwd(), reportFilePath);
+    const resolvedReportPath = reportFilePath;
     const reportDir = path.dirname(resolvedReportPath);
 
     const isReportDirExists = await fileSystemHelpers.exists(reportDir);

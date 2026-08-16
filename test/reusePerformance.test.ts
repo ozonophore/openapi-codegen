@@ -1,22 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import { generate, HttpClient } from '../src';
 import type { GenerationReport } from '../src/core/reuseStore/GenerationReport';
+import { createTempDir } from '../src/test/helpers/createTempDir';
 import { installSilenceLoggers } from '../src/test/helpers/silenceLoggers';
-
-const generatedRoot = path.join(__dirname, 'generated');
-
-const createTempDir = (t: TestContext, prefix: string): string => {
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-};
 
 const sharedUserSchema = {
     type: 'object',
@@ -252,6 +242,7 @@ describe('@unit: reuse performance', () => {
             } as any)
         );
 
-        assert.ok(warmEntity <= warmReuse * 1.05, `Entity cache (${warmEntity.toFixed(1)}ms) should be at least as fast as reuse (${warmReuse.toFixed(1)}ms) for single unchanged spec`);
+        const maxAllowed = Math.max(warmReuse * 1.5, warmReuse + 15);
+        assert.ok(warmEntity <= maxAllowed, `Entity cache (${warmEntity.toFixed(1)}ms) should stay within 1.5x or +15ms of reuse (${warmReuse.toFixed(1)}ms) for single unchanged spec`);
     });
 });

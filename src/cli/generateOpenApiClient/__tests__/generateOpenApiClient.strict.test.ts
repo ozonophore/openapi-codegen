@@ -1,9 +1,10 @@
 import assert from 'node:assert';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import { DEFAULT_OPENAPI_CONFIG_FILENAME } from '../../../common/Consts';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import { installSilenceLoggers } from '../../../test/helpers/silenceLoggers';
 import type { CLICommandResult } from '../../types';
 import { generateOpenApiClient } from '../generateOpenApiClient';
@@ -53,16 +54,6 @@ const cliDefaults = {
     validationLibrary: 'none',
     emptySchemaStrategy: 'keep',
 } as const;
-
-function createTempDir(t: TestContext, prefix: string): string {
-    const generatedRoot = path.join(__dirname, 'generated');
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-}
 
 function runStrictGenerate(options: Record<string, unknown>): Promise<CLICommandResult> {
     return generateOpenApiClient({

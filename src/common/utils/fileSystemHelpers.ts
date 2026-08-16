@@ -14,7 +14,7 @@ import {
 import { dirname } from 'path';
 import { promisify } from 'util';
 
-import { normalizeHelper } from './pathHelpers';
+import { assertNotDriveRoot, normalizeHelper } from './pathHelpers';
 
 // Промисифицируем базовые функции fs
 const mkdirBase = promisify(__mkdir);
@@ -32,6 +32,7 @@ const cp = promisify(__cp);
 
 // Рекурсивное создание директорий (замена mkdirp)
 const mkdir = async (path: string): Promise<void> => {
+    assertNotDriveRoot(path);
     try {
         await mkdirBase(path);
     } catch (error: any) {

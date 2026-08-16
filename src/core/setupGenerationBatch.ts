@@ -24,7 +24,11 @@ export type SetupGenerationBatchDeps = {
     shouldEntitySkip: (item: TStrictFlatOptions, generationCache: GenerationCache | null, reuseStore: ReuseStore | null) => Promise<boolean>;
 };
 
-export type SetupGenerationBatchResult = {
+/**
+ * Единый контекст батча генерации — создаётся в setupGenerationBatch,
+ * мутируется в цикле по элементам, передаётся целиком в finalizeGenerationBatch.
+ */
+export type GenerationBatchContext = {
     start: bigint;
     cacheEnabled: boolean;
     cacheStrategy: string;
@@ -45,7 +49,7 @@ export type SetupGenerationBatchResult = {
 /**
  * Pre-item-loop generation batch bootstrap (cache/reuse/sharedFolder/preAnalyze).
  */
-export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items: TStrictFlatOptions[], root: GenerationRootOptions): Promise<SetupGenerationBatchResult> {
+export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items: TStrictFlatOptions[], root: GenerationRootOptions): Promise<GenerationBatchContext> {
     const { writeClient, shouldEntitySkip } = deps;
     const start = process.hrtime.bigint();
     validateConsistentCacheSettings(writeClient, items);
@@ -58,7 +62,7 @@ export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items
     const referencedArtifactKeys = new Set<string>();
     const specStats: SpecGenerationStats[] = [];
     const reuseConflicts: ReuseConflictRecord[] = [];
-    let reportBasePath = resolveOutputRoot(items[0]!.output);
+    let reportBasePath = items[0]!.output;
     let manifestLoadMs = 0;
 
     const state: FinalizeGenerationBatchState = {
@@ -67,7 +71,7 @@ export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items
         manifestSaveMs: 0,
     };
 
-    const result: SetupGenerationBatchResult = {
+    const result: GenerationBatchContext = {
         start,
         cacheEnabled,
         cacheStrategy: cacheStrategy!,
@@ -91,7 +95,7 @@ export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items
     }
 
     if (reuseMode === 'auto-group' && useReuseStore) {
-        const absoluteOutputPaths = items.map(item => resolveOutputRoot(item.output));
+        const absoluteOutputPaths = items.map(item => item.output);
         const lca = resolveOutputGroups(absoluteOutputPaths);
         if (lca) {
             result.sharedFolderWriter = new SharedFolderWriter(lca);
@@ -123,12 +127,11 @@ export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items
 
     if (cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse')) {
         for (const outputRoot of getUniqueResolvedOutputs(items)) {
-            const sampleItem = items.find(item => resolveOutputRoot(item.output) === outputRoot);
+            const sampleItem = items.find(item => item.output === outputRoot);
             if (!sampleItem) {
                 continue;
             }
-            const cachePath =
-                cacheStrategy === 'reuse' ? resolveHelper(resolveOutputRoot(sampleItem.output), DEFAULT_CACHE_FILENAME) : resolveCachePathForOutput(sampleItem.output, sampleItem.cachePath);
+            const cachePath = cacheStrategy === 'reuse' ? resolveHelper(sampleItem.output, DEFAULT_CACHE_FILENAME) : resolveCachePathForOutput(sampleItem.output, sampleItem.cachePath);
             const generationCache = new GenerationCache(cachePath);
             await generationCache.load();
             generationCaches.set(outputRoot, generationCache);
@@ -140,7 +143,7 @@ export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items
     if (root.preAnalyze === true) {
         const willEntitySkipSpecItems = new Set<string>();
         for (const option of items) {
-            const generationCache = cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse') ? (generationCaches.get(resolveOutputRoot(option.output)) ?? null) : null;
+            const generationCache = cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse') ? (generationCaches.get(option.output) ?? null) : null;
             if (await shouldEntitySkip(option, generationCache, useReuseStore ? result.reuseStore : null)) {
                 willEntitySkipSpecItems.add(getSpecItemName(option.input));
             }
@@ -157,11 +160,7 @@ export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items
 }
 
 function getUniqueResolvedOutputs(items: TStrictFlatOptions[]): string[] {
-    return Array.from(new Set(items.map(item => resolveOutputRoot(item.output))));
-}
-
-function resolveOutputRoot(output: string): string {
-    return resolveHelper(process.cwd(), output);
+    return Array.from(new Set(items.map(item => item.output)));
 }
 
 function resolveReuseStorePath(cachePath: string): string {
@@ -175,7 +174,7 @@ function resolveCachePathForOutput(output: string, cachePath: string): string {
     if (cachePath.startsWith('/') || /^[A-Za-z]:[\\/]/.test(cachePath)) {
         return cachePath;
     }
-    return resolveHelper(resolveOutputRoot(output), cachePath || DEFAULT_CACHE_FILENAME);
+    return resolveHelper(output, cachePath || DEFAULT_CACHE_FILENAME);
 }
 
 function validateConsistentCacheSettings(writeClient: WriteClient, items: TStrictFlatOptions[]): void {
@@ -197,7 +196,7 @@ function validateConsistentCacheSettings(writeClient: WriteClient, items: TStric
 function warnOnSharedOutputs(writeClient: WriteClient, items: TStrictFlatOptions[]): void {
     const countByOutput = new Map<string, number>();
     for (const item of items) {
-        const output = resolveOutputRoot(item.output);
+        const output = item.output;
         countByOutput.set(output, (countByOutput.get(output) ?? 0) + 1);
     }
     const duplicatedOutputs = Array.from(countByOutput.entries())

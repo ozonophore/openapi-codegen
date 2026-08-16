@@ -7,9 +7,11 @@ Owns raw config → strict items: Zod validate (throws) + flatten/inherit/defaul
 ### Requirement: Generation options resolve owns raw-to-strict items
 The system MUST run options meaning (Zod validate + flatten items|flat + inherit + defaults) through an internal **Generation options resolve** (`resolveGenerationOptions` in `src/core/resolveGenerationOptions.ts`), not through private methods on `OpenApiClient` and not through `validateRawOptions` with `process.exit`.
 
-#### Scenario: Facade calls resolve then batch
+After `resolveGenerationOptions`, `OpenApiClient.generate` MUST apply `normalizePathsToAbsolute(result, process.cwd())` before passing items to `GenerationBatchSession.run`.
+
+#### Scenario: Facade calls resolve, then normalize, then batch
 - **WHEN** `OpenApiClient.generate` runs
-- **THEN** it MUST obtain `TStrictFlatOptions[]` from `resolveGenerationOptions(rawOptions)` and pass them to `GenerationBatchSession.run` together with the original `rawOptions`
+- **THEN** it MUST obtain `TStrictFlatOptions[]` from `resolveGenerationOptions(rawOptions)`, then call `normalizePathsToAbsolute(result, process.cwd())`, and only then pass the normalized items to `GenerationBatchSession.run` together with `root`
 
 #### Scenario: Public generate does not validate separately
 - **WHEN** `core/index.ts` `generate(rawOptions)` is called

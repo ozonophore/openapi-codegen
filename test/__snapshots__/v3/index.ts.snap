@@ -21,7 +21,6 @@ export type { IModelWithDictionary } from '././models/ModelWithDictionary';
 export { IModelWithEnum } from '././models/ModelWithEnum';
 export type { IModelWithProperties } from '././models/ModelWithProperties';
 export type { IModelWithString } from '././models/ModelWithString';
-export type { SimpleRequestBody } from '././models/SimpleRequestBody';
 export type { TArrayWithArray } from '././models/ArrayWithArray';
 export type { TModelThatExtends } from '././models/ModelThatExtends';
 export type { TModelThatExtendsExtends } from '././models/ModelThatExtendsExtends';

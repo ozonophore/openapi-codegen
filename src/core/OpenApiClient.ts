@@ -5,7 +5,7 @@ import { TRawOptions } from '../common/TRawOptions';
 import { GenerationBatchSession } from './GenerationBatchSession';
 import { shouldEntitySkip } from './generationCache/EntitySkip';
 import { GenerationItemSession } from './GenerationItemSession';
-import { resolveGenerationOptions } from './resolveGenerationOptions';
+import { normalizePathsToAbsolute, resolveGenerationOptions } from './resolveGenerationOptions';
 import { WriteClient } from './write/WriteClient';
 
 /**
@@ -38,7 +38,7 @@ export class OpenApiClient {
         this._writeClient = new WriteClient(logger);
         this.eslintFixOptions = extractEslintFixOptions(rawOptions);
 
-        const { items, root } = resolveGenerationOptions(rawOptions);
+        const { items, root } = normalizePathsToAbsolute(resolveGenerationOptions(rawOptions), process.cwd());
         const itemSession = new GenerationItemSession({
             writeClient: this.writeClient,
             eslintFixOptions: this.eslintFixOptions,

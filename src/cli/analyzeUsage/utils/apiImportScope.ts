@@ -1,6 +1,6 @@
-import path from 'path';
 import type { ImportDeclaration } from 'ts-morph';
 
+import { dirNameHelper, resolveHelper } from '../../../common/utils/pathHelpers';
 import type { Contract } from '../types';
 
 export interface ApiImportScope {
@@ -9,13 +9,13 @@ export interface ApiImportScope {
 }
 
 export function createApiImportScope(sourcePath: string): ApiImportScope {
-    const entryFilePath = path.resolve(sourcePath);
-    const apiRootDir = path.dirname(entryFilePath) + path.sep;
+    const entryFilePath = resolveHelper(sourcePath);
+    const apiRootDir = `${dirNameHelper(entryFilePath)}/`;
     return { entryFilePath, apiRootDir };
 }
 
 function resolvePath(filePath: string): string {
-    return path.resolve(filePath);
+    return resolveHelper(filePath);
 }
 
 function isUnderApiRoot(resolvedPath: string, scope: ApiImportScope): boolean {

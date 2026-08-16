@@ -26,22 +26,9 @@
         "forceConsistentCasingInFileNames": true
     },
 
-    "files": [
-        "types/hbs.d.ts",
-        "types/camelcase.d.ts",
-    ],
+    "files": ["types/hbs.d.ts", "types/camelcase.d.ts"],
 
-    "include": [
-        "./src/**/*.ts",
-        "./types",
-        "./src/**/__tests__/*.test.ts"
-    ],
+    "include": ["./src/**/*.ts", "./types", "./src/**/__tests__/*.test.ts"],
 
-    "exclude": [
-        "node_modules",
-        "**/__mocks__",
-        "./dist",
-        "src/cli/analyzeDiff/diffEngine.ts"
-    ]
+    "exclude": ["node_modules", "**/__mocks__", "./dist", "src/cli/analyzeDiff/diffEngine.ts", "**/__tests__/generated/**"]
 }
-

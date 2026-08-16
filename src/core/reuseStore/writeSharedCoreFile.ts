@@ -1,4 +1,4 @@
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
@@ -54,7 +54,7 @@ export async function writeSharedOrLocalCoreFile(adapter: CoreOutputAdapter, opt
         });
     }
 
-    const canonicalPath = join(sharedFolderWriter.lca, SHARED_FOLDER_NAME, 'core', relativeCorePath);
+    const canonicalPath = resolveHelper(sharedFolderWriter.lca, SHARED_FOLDER_NAME, 'core', relativeCorePath);
     await fileSystemHelpers.mkdir(dirname(canonicalPath));
     const stubImport = computeStoreRelativeImport(localPath, canonicalPath);
     const stubContent = `export * from '${stubImport}';\n`;

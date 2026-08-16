@@ -1,6 +1,5 @@
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
-import { resolveHelper } from '../../common/utils/pathHelpers';
 import type { CoreOutputAdapter } from '../CoreOutputAdapter';
 import { buildCoreTransportFingerprint, detectCustomRequestRaw } from '../reuseStore/coreTransportFingerprint';
 import type { SharedFolderWriter } from '../reuseStore/SharedFolderWriter';
@@ -54,7 +53,7 @@ export async function writeClientCore(adapter: CoreOutputAdapter, options: IWrit
     let customExecutorContent: string | undefined;
 
     if (hasCustomRequest) {
-        const requestFile = resolveHelper(process.cwd(), request);
+        const requestFile = request;
         const requestFileExists = await fileSystemHelpers.exists(requestFile);
         if (!requestFileExists) {
             throw new Error(`Custom request file "${requestFile}" does not exists`);
@@ -64,7 +63,7 @@ export async function writeClientCore(adapter: CoreOutputAdapter, options: IWrit
     }
 
     if (hasCustomExecutor) {
-        const executorFile = resolveHelper(process.cwd(), customExecutorPath);
+        const executorFile = customExecutorPath;
         const executorFileExists = await fileSystemHelpers.exists(executorFile);
         if (!executorFileExists) {
             throw new Error(`Custom executor file "${executorFile}" does not exists`);

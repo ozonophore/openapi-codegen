@@ -1,23 +1,15 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import { generate, HttpClient } from '../src';
 import { Logger } from '../src/common/Logger';
+import { joinHelper } from '../src/common/utils/pathHelpers';
+import { createTempDir } from '../src/test/helpers/createTempDir';
 import { installSilenceLoggers } from '../src/test/helpers/silenceLoggers';
 
-const generatedRoot = path.join(__dirname, 'generated');
 const specDir = path.join(__dirname, 'spec');
-
-const createTempDir = (t: TestContext, prefix: string): string => {
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-};
 
 function setFileMtimeMs(filePath: string, mtimeMs: number): void {
     const mtime = new Date(mtimeMs);
@@ -48,7 +40,7 @@ describe('@unit: generation cache', () => {
             httpClient: HttpClient.FETCH,
         } as any);
 
-        const outputFiles = readdirSync(outputDir, { recursive: true, encoding: 'utf8' });
+        const outputFiles = readdirSync(outputDir, { recursive: true, encoding: 'utf8' }).map(file => String(file).replace(/\\/g, '/'));
         assert.ok(outputFiles.includes('core/OpenAPI.ts'), 'Generation should produce output files');
         assert.throws(() => readFileSync(defaultCachePath, 'utf8'), 'Cache file should not be written when cache is disabled');
     });
@@ -177,7 +169,7 @@ describe('@unit: generation cache', () => {
 
         const stableFile = path.join(outputDir, 'core', 'OpenAPI.ts');
         const firstMtime = statSync(stableFile).mtimeMs;
-        const filesBefore = readdirSync(outputDir, { recursive: true, encoding: 'utf8' });
+        const filesBefore = readdirSync(outputDir, { recursive: true, encoding: 'utf8' }).map(file => String(file).replace(/\\/g, '/'));
 
         await generate({
             httpClient: HttpClient.FETCH,
@@ -191,7 +183,7 @@ describe('@unit: generation cache', () => {
         } as any);
 
         const secondMtime = statSync(stableFile).mtimeMs;
-        const filesAfter = readdirSync(outputDir, { recursive: true, encoding: 'utf8' });
+        const filesAfter = readdirSync(outputDir, { recursive: true, encoding: 'utf8' }).map(file => String(file).replace(/\\/g, '/'));
         const cacheContent = JSON.parse(readFileSync(path.join(outputDir, cachePath), 'utf8')) as { entries?: Record<string, unknown> };
         const entriesCount = Object.keys(cacheContent.entries || {}).length;
 
@@ -204,7 +196,7 @@ describe('@unit: generation cache', () => {
 
     test('warns once for shared output when cache is disabled', async t => {
         const tmpDir = createTempDir(t, 'cache-warning-');
-        const outputDir = path.join(tmpDir, 'out');
+        const outputDir = joinHelper(tmpDir, 'out');
         const inputV2 = path.join(specDir, 'v2.json');
         const inputV3 = path.join(specDir, 'v3.json');
         const warnings: string[] = [];

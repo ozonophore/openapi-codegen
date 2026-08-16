@@ -10,13 +10,12 @@ import { resolveSpecAnalysisConfig } from '../common/VersionedSchema/Utils/resol
 import { AvatarSwarmGenerator } from './avatarSwarm/AvatarSwarmGenerator';
 import { writeSwarmOutput } from './avatarSwarm/writeSwarmOutput';
 import { getSpecItemName } from './generationCache/EntitySkip';
-import { GenerationCache } from './generationCache/GenerationCache';
 import { generateTrafficSplitterModule } from './migration/generateTrafficSplitterModule';
 import type { GenerationRootOptions } from './resolveGenerationOptions';
-import { ReuseStore } from './reuseStore';
-import type { GenerationReport, SpecGenerationStats } from './reuseStore/GenerationReport';
+import type { GenerationReport } from './reuseStore/GenerationReport';
 import { writeGenerationReport } from './reuseStore/GenerationReport';
 import { SHARED_FOLDER_NAME } from './reuseStore/SharedFolderWriter';
+import type { GenerationBatchContext } from './setupGenerationBatch';
 import { finalizeSpecAnalysis, mergeSpecAnalysisConfigAcrossItems, type SpecAnalysisAccumulator } from './specAnalysis/runSpecAnalysis';
 import type { SpecAnalysisReport } from './specAnalysis/types';
 import { buildWorkspaceReport } from './workspaceReport/buildWorkspaceReport';
@@ -30,47 +29,22 @@ export type FinalizeGenerationBatchState = {
     manifestSaveMs: number;
 };
 
-export type FinalizeGenerationBatchCtx = {
+export type FinalizeGenerationBatchParams = {
     writeClient: WriteClient;
     eslintFixOptions: TEslintFixOptions;
     items: TStrictFlatOptions[];
     root: GenerationRootOptions;
     allEntitySkipped: boolean;
-    cacheEnabled: boolean;
-    cacheStrategy: string;
-    generationCaches: Map<string, GenerationCache>;
-    reuseStore: ReuseStore | null;
-    referencedArtifactKeys: Set<string>;
-    specStats: SpecGenerationStats[];
-    reportBasePath: string;
-    sharedFolderLca?: string;
     buildGenerationReport: () => GenerationReport;
-    state: FinalizeGenerationBatchState;
-    start: bigint;
 };
 
 /**
  * Post-item-loop generation batch finalize (combine → … → ESLint → finished logs).
  */
-export async function finalizeGenerationBatch(ctx: FinalizeGenerationBatchCtx): Promise<void> {
-    const {
-        writeClient,
-        eslintFixOptions,
-        items,
-        root,
-        allEntitySkipped,
-        cacheEnabled,
-        cacheStrategy,
-        generationCaches,
-        reuseStore,
-        referencedArtifactKeys,
-        specStats,
-        reportBasePath,
-        sharedFolderLca,
-        buildGenerationReport,
-        state,
-        start,
-    } = ctx;
+export async function finalizeGenerationBatch(ctx: GenerationBatchContext, params: FinalizeGenerationBatchParams): Promise<void> {
+    const { cacheEnabled, cacheStrategy, generationCaches, reuseStore, referencedArtifactKeys, specStats, reportBasePath, state, start } = ctx;
+    const { writeClient, eslintFixOptions, items, root, allEntitySkipped, buildGenerationReport } = params;
+    const sharedFolderLca = ctx.sharedFolderWriter?.lca;
 
     if (!allEntitySkipped) {
         if (items[0]?.useSeparatedIndexes) {
@@ -181,7 +155,7 @@ function getOutputRoots(items: TStrictFlatOptions[]): string[] {
         const outputDirs = [item.output, item.outputCore, item.outputSchemas, item.outputModels, item.outputServices];
         for (const dir of outputDirs) {
             if (dir) {
-                roots.add(resolveHelper(process.cwd(), dir));
+                roots.add(dir);
             }
         }
     }
@@ -193,7 +167,7 @@ async function cleanupStaleOutputs(writeClient: WriteClient, items: TStrictFlatO
     if (sharedFolderLca) {
         outputRoots.push(resolveHelper(sharedFolderLca, SHARED_FOLDER_NAME));
     }
-    const expectedFiles = writeClient.getExpectedOutputFiles();
+    const expectedFiles = new Set(Array.from(writeClient.getExpectedOutputFiles(), filePath => resolveHelper(filePath)));
 
     for (const root of outputRoots) {
         await removeStaleFilesInDirectory(root, expectedFiles);
@@ -207,7 +181,7 @@ async function removeStaleFilesInDirectory(path: string, expectedFiles: Set<stri
     }
 
     if (stats.isFile()) {
-        if (!expectedFiles.has(path)) {
+        if (!expectedFiles.has(resolveHelper(path))) {
             await fileSystemHelpers.rmdir(path);
             return false;
         }

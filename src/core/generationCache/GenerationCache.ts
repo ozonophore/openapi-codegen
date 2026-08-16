@@ -2,7 +2,6 @@ import { createHash } from 'crypto';
 import { dirname } from 'path';
 
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
-import { resolveHelper } from '../../common/utils/pathHelpers';
 
 type CacheEntry = {
     key: string;
@@ -24,7 +23,7 @@ export class GenerationCache {
     private readonly accessedKeys = new Set<string>();
 
     constructor(cachePath: string) {
-        this.cachePath = resolveHelper(process.cwd(), cachePath);
+        this.cachePath = cachePath;
     }
 
     static hash(value: string): string {

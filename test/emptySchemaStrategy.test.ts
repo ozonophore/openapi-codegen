@@ -68,8 +68,8 @@ function createOutputPath(t: TestContext, label: string, strategy: EmptySchemaSt
     return outputDir;
 }
 
-function getLomSchemaPath(outputPath: string): string {
-    return path.join(outputPath, 'schemas', 'LomApiSchema.ts');
+function getEmptySchemaPath(outputPath: string): string {
+    return path.join(outputPath, 'schemas', 'EmptySchema.ts');
 }
 
 function getRootIndexPath(outputPath: string): string {
@@ -92,7 +92,7 @@ describe('@unit: emptySchemaStrategy', () => {
         test(`${testCase.label}: keep`, async (t: TestContext) => {
             const output = createOutputPath(t, testCase.label, EmptySchemaStrategy.KEEP);
             await generate({
-                input: path.join(__dirname, 'spec', 'lom', 'lom_api.yaml'),
+                input: path.join(__dirname, 'spec', 'emptySchema.yaml'),
                 output,
                 httpClient: HttpClient.FETCH,
                 useOptions: false,
@@ -108,14 +108,14 @@ describe('@unit: emptySchemaStrategy', () => {
                 useSeparatedIndexes: false,
             });
 
-            const content = readFileSync(getLomSchemaPath(output), 'utf8');
+            const content = readFileSync(getEmptySchemaPath(output), 'utf8');
             assert.ok(content.includes(testCase.keepNeedle));
         });
 
         test(`${testCase.label}: semantic`, async (t: TestContext) => {
             const output = createOutputPath(t, testCase.label, EmptySchemaStrategy.SEMANTIC);
             await generate({
-                input: path.join(__dirname, 'spec', 'lom', 'lom_api.yaml'),
+                input: path.join(__dirname, 'spec', 'emptySchema.yaml'),
                 output,
                 httpClient: HttpClient.FETCH,
                 useOptions: false,
@@ -131,14 +131,14 @@ describe('@unit: emptySchemaStrategy', () => {
                 useSeparatedIndexes: false,
             });
 
-            const content = readFileSync(getLomSchemaPath(output), 'utf8');
+            const content = readFileSync(getEmptySchemaPath(output), 'utf8');
             assert.ok(content.includes(testCase.semanticNeedle));
         });
 
         test(`${testCase.label}: skip`, async (t: TestContext) => {
             const output = createOutputPath(t, testCase.label, EmptySchemaStrategy.SKIP);
             await generate({
-                input: path.join(__dirname, 'spec', 'lom', 'lom_api.yaml'),
+                input: path.join(__dirname, 'spec', 'emptySchema.yaml'),
                 output,
                 httpClient: HttpClient.FETCH,
                 useOptions: false,
@@ -154,11 +154,11 @@ describe('@unit: emptySchemaStrategy', () => {
                 useSeparatedIndexes: false,
             });
 
-            const schemaPath = getLomSchemaPath(output);
+            const schemaPath = getEmptySchemaPath(output);
             assert.ok(!existsSync(schemaPath));
 
             const rootIndex = readFileSync(getRootIndexPath(output), 'utf8');
-            assert.ok(!rootIndex.includes('LomApiSchema'));
+            assert.ok(!rootIndex.includes('schemas/EmptySchema'));
         });
     }
 });

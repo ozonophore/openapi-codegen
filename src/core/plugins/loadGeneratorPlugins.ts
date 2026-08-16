@@ -1,7 +1,6 @@
 import { pathToFileURL } from 'node:url';
 
 import { APP_LOGGER } from '../../common/Consts';
-import { resolveHelper } from '../../common/utils/pathHelpers';
 import { OpenApiGeneratorPlugin } from './GeneratorPlugin.model';
 import { getBuiltinPlugins } from './getBuiltinPlugins';
 import { normalizePluginEntry, type PluginConfigEntry } from './pluginEntries';
@@ -81,7 +80,7 @@ export async function loadGeneratorPlugins(entries: readonly PluginConfigEntry[]
         if (!entry) {
             continue;
         }
-        const resolvedPath = resolveHelper(process.cwd(), entry.path);
+        const resolvedPath = entry.path;
         const moduleExports = await loadPluginModule(resolvedPath);
         const plugin = getPluginFromModule(moduleExports);
         if (!isOpenApiGeneratorPlugin(plugin)) {

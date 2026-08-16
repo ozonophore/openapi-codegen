@@ -36,3 +36,25 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV }}
+
+  windows:
+    name: Node in Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.15.0'
+          cache: 'npm'
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Build library
+        run: npm run release
+
+      - name: Run unit tests
+        run: npm run test:unit

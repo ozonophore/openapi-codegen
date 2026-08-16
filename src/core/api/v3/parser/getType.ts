@@ -1,5 +1,6 @@
 import { relativeHelper } from '../../../../common/utils/pathHelpers';
 import type { Type } from '../../../types/shared/Type.model';
+import { toParentSourceFile } from '../../../utils/canonicalRef';
 import { getMappedType, hasMappedType } from '../../../utils/getMappedType';
 import { getRelativeModelPath } from '../../../utils/getRelativeModelPath';
 import { getTypeName } from '../../../utils/getTypeName';
@@ -37,18 +38,19 @@ export function getType(this: Parser, value: string, parentRef: string): Type {
          * В этом случае надо брать непосредственно normalizedValue - это относительный путь или фрагмент.
          * Предполагаем, что в таком случае расчитывать нет нужды. Это путь от папки outputModels
          */
-        const canonicalValue = this.context.resolveCanonicalRef(normalizedValue, parentRef);
+        const parentSourceFile = toParentSourceFile(parentRef);
+        const canonicalValue = this.map.resolve(normalizedValue, parentSourceFile);
         let valuePath = valueClean;
 
         if (canonicalValue) {
             const refValuePath = canonicalValue?.fragment ? `${canonicalValue.outputFile}${canonicalValue.fragment}` : canonicalValue?.outputFile || '';
             const cleanedRefValuePath = stripNamespace(refValuePath);
-            valuePath = relativeHelper(this.context.output?.outputModels, cleanedRefValuePath);
+            valuePath = relativeHelper(this.map.output?.outputModels, cleanedRefValuePath);
         }
 
-        valuePath = getRelativeModelPath(this.context.output?.outputModels, valuePath);
+        valuePath = getRelativeModelPath(this.map.output?.outputModels, valuePath);
 
-        const type = this.getTypeNameByRef(getTypeName(valueClean), normalizedValue, parentRef);
+        const type = this.getTypeNameByRef(getTypeName(valueClean), normalizedValue, parentSourceFile);
         const valueImportPath = !valuePath.startsWith('./') ? `./${valuePath}` : valuePath;
         result.path = valuePath;
         result.type = type;

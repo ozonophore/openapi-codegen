@@ -1,7 +1,7 @@
 import { mkdirSync } from 'fs';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
-import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { assertNotDriveRoot, dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { type CoreOutputAdapter, toReuseOutputAdapter } from '../CoreOutputAdapter';
 import { formatArtifactContent, type ReuseWriterContext, writeSchemaWithReuse } from '../reuseStore/reuseWriterHelpers';
 import { Templates } from '../types/base/Templates.model';
@@ -44,6 +44,7 @@ function isEmptySchemaModel(model: Model): boolean {
 export async function writeClientSchemas(adapter: CoreOutputAdapter, options: IWriteClientSchemas): Promise<Model[]> {
     const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary, emptySchemaStrategy, prettierConfigPath, reuse } = options;
     if (templates.exports.schema) {
+        assertNotDriveRoot(outputSchemasPath);
         adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SCHEMAS_START);
 
         const modelsToWrite = emptySchemaStrategy === EmptySchemaStrategy.SKIP ? models.filter(model => !isEmptySchemaModel(model)) : models;
@@ -53,6 +54,7 @@ export async function writeClientSchemas(adapter: CoreOutputAdapter, options: IW
             const dir = dirNameHelper(modelFolderPath);
             if (dir) {
                 const directory = resolveHelper(outputSchemasPath, dir);
+                assertNotDriveRoot(directory);
 
                 adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DIRECTORY_CREATING(directory));
 
