@@ -10,6 +10,11 @@ export function normalizePath(path: string): string {
     // Remove any duplicate slashes
     let normalized = path.replace(/\/+/g, '/');
 
+    // Windows drive letter is already absolute — do not prepend `/` (`C:/...` must not become `/C:/...`)
+    if (/^[A-Za-z]:/.test(normalized)) {
+        return normalized;
+    }
+
     // Ensure it starts with / for absolute paths
     if (!normalized.startsWith('./') && !normalized.startsWith('/') && !normalized.startsWith('http')) {
         normalized = `/${normalized}`;

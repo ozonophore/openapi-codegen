@@ -1,9 +1,10 @@
 /* istanbul ignore file */
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
-import { basename, isAbsolute } from 'path';
+import path, { basename } from 'path';
 
 import { APP_LOGGER } from '../common/Consts';
 import { dirNameHelper, normalizeHelper, relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
+import { REGEX_BACKSLASH } from './types/Consts';
 import { OpenApiGeneratorPlugin, SchemaTypeOverrideContext } from './plugins/GeneratorPlugin.model';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
@@ -20,6 +21,8 @@ type TContextProps = {
     sortByRequired?: boolean;
     plugins?: OpenApiGeneratorPlugin[];
     strictPluginMode?: boolean;
+    /** Injectable path seam (tests pass `path.win32` on darwin). */
+    pathApi?: typeof path;
 };
 
 type RefsLike = {
@@ -62,11 +65,15 @@ export class Context {
     private specRoot!: string;
     private entryFile?: string;
     private virtualFiles: VirtualFileMap = new Map();
+    private pathApi: typeof path = path;
 
-    constructor({ input, output, prefix, sortByRequired, plugins, strictPluginMode }: TContextProps) {
+    constructor({ input, output, prefix, sortByRequired, plugins, strictPluginMode, pathApi }: TContextProps) {
         this._output = output;
+        if (pathApi) {
+            this.pathApi = pathApi;
+        }
         if (isString(input)) {
-            this._root = { dirName: dirNameHelper(input), path: input, fileName: getFileName(input) };
+            this._root = { dirName: dirNameHelper(input, this.pathApi), path: input, fileName: getFileName(input) };
         } else {
             this._root = { dirName: '', path: '' };
         }
@@ -174,22 +181,22 @@ export class Context {
     }
 
     private canonicalizeRef(ref: string, parentSourceFile: string): { sourceFile: string; fragment?: string } {
-        const parsed = parseRef(ref);
+        const parsed = parseRef(ref, this.pathApi);
 
         // LOCAL_FRAGMENT → тот же файл
         if (parsed.type === RefType.LOCAL_FRAGMENT) {
             return {
-                sourceFile: normalizeHelper(parentSourceFile),
+                sourceFile: normalizeHelper(parentSourceFile, this.pathApi),
                 fragment: parsed.fragment,
             };
         }
 
         // Внешний ref
-        const parentDir = dirNameHelper(parentSourceFile);
-        const absSource = resolveHelper(parentDir, parsed.filePath!);
+        const parentDir = dirNameHelper(parentSourceFile, this.pathApi);
+        const absSource = this.pathApi.resolve(parentDir, parsed.filePath!).replace(REGEX_BACKSLASH, '/');
 
         return {
-            sourceFile: normalizeHelper(absSource),
+            sourceFile: normalizeHelper(absSource, this.pathApi),
             fragment: parsed.fragment,
         };
     }
@@ -235,8 +242,8 @@ export class Context {
     }
 
     private initializeVirtualFileMap(entryFile: string) {
-        this.specRoot = normalizeHelper(dirNameHelper(entryFile));
-        const normalizedEntry = normalizeHelper(entryFile);
+        this.specRoot = normalizeHelper(dirNameHelper(entryFile, this.pathApi), this.pathApi);
+        const normalizedEntry = normalizeHelper(entryFile, this.pathApi);
         this.entryFile = normalizedEntry;
 
         // Гарантируем, что entry файл тоже есть в карте
@@ -253,7 +260,7 @@ export class Context {
         const allPaths = this._refs?.paths() || [];
 
         for (const refPath of allPaths) {
-            const normalizedPath = normalizeHelper(refPath);
+            const normalizedPath = normalizeHelper(refPath, this.pathApi);
 
             if (!this.virtualFiles.has(normalizedPath)) {
                 this.virtualFiles.set(normalizedPath, {
@@ -307,9 +314,9 @@ export class Context {
           }
         | undefined {
         const normalizedRef = this.normalizeRefForLookup(canonicalRef, parentSourceFile);
-        const parsed = parseRef(normalizedRef);
+        const parsed = parseRef(normalizedRef, this.pathApi);
 
-        const sourceFile = normalizeHelper(parsed.filePath ?? '');
+        const sourceFile = normalizeHelper(parsed.filePath ?? '', this.pathApi);
 
         const file = this.virtualFiles.get(sourceFile);
         if (!file) return undefined;
@@ -325,15 +332,20 @@ export class Context {
 
         // Prefer explicit parent if provided
         if (parentSourceFile) {
-            const normalizedParent = isAbsolute(parentSourceFile) ? parentSourceFile : resolveHelper(this.specRoot, parentSourceFile);
-            return normalizeRef(ref, normalizedParent);
+            const normalizedParent = this.pathApi.isAbsolute(parentSourceFile) ? parentSourceFile : resolveHelper(this.specRoot, parentSourceFile);
+            return normalizeRef(ref, normalizedParent, this.pathApi);
         }
 
         // If we can fall back to entry file, normalize relative refs against it
         if (this.entryFile) {
-            const parsed = parseRef(ref);
-            if (parsed.type === RefType.LOCAL_FRAGMENT || parsed.type === RefType.EXTERNAL_FILE || parsed.type === RefType.EXTERNAL_FILE_FRAGMENT) {
-                return normalizeRef(ref, this.entryFile);
+            const parsed = parseRef(ref, this.pathApi);
+            if (
+                parsed.type === RefType.LOCAL_FRAGMENT ||
+                parsed.type === RefType.EXTERNAL_FILE ||
+                parsed.type === RefType.EXTERNAL_FILE_FRAGMENT ||
+                parsed.type === RefType.ABSOLUTE_PATH
+            ) {
+                return normalizeRef(ref, this.entryFile, this.pathApi);
             }
         }
 

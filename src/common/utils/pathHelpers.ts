@@ -2,8 +2,8 @@ import path from 'path';
 
 import { REGEX_BACKSLASH } from '../../core/types/Consts';
 
-export function dirNameHelper(p: string): string {
-    return path.dirname(p).replace(REGEX_BACKSLASH, '/');
+export function dirNameHelper(p: string, pathApi: { dirname(value: string): string } = path): string {
+    return pathApi.dirname(p).replace(REGEX_BACKSLASH, '/');
 }
 
 export function joinHelper(...paths: string[]): string {
@@ -41,6 +41,6 @@ export function resolveHelper(...pathSegments: string[]): string {
     return path.resolve(...pathSegments).replace(REGEX_BACKSLASH, '/');
 }
 
-export function normalizeHelper(p: string): string {
-    return path.normalize(p).replace(REGEX_BACKSLASH, '/');
+export function normalizeHelper(p: string, pathApi: { normalize(value: string): string } = path): string {
+    return pathApi.normalize(p).replace(REGEX_BACKSLASH, '/');
 }

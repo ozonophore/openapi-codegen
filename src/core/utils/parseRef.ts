@@ -1,4 +1,4 @@
-import { isAbsolute } from 'path';
+import path from 'path';
 
 export enum RefType {
     LOCAL_FRAGMENT = 'local_fragment',
@@ -16,9 +16,10 @@ export interface ParsedRef {
 }
 
 /**
- * Parse a $ref string to determine its type and components
+ * Parse a $ref string to determine its type and components.
+ * Split sourceFile from Pointer before any path API sees the string.
  */
-export function parseRef(ref: string): ParsedRef {
+export function parseRef(ref: string, pathApi: { isAbsolute(value: string): boolean } = path): ParsedRef {
     if (!ref || typeof ref !== 'string') {
         return { type: RefType.LOCAL_FRAGMENT, originalRef: ref };
     }
@@ -26,17 +27,6 @@ export function parseRef(ref: string): ParsedRef {
     if (ref.startsWith('http://') || ref.startsWith('https://')) {
         return {
             type: RefType.HTTP_URL,
-            originalRef: ref,
-        };
-    }
-
-    // Absolute paths (POSIX/Windows handled by path.isAbsolute)
-    if (isAbsolute(ref)) {
-        const [filePath, fragment] = ref.split('#');
-        return {
-            type: RefType.ABSOLUTE_PATH,
-            filePath,
-            fragment: fragment ? `#${fragment}` : undefined,
             originalRef: ref,
         };
     }
@@ -50,13 +40,25 @@ export function parseRef(ref: string): ParsedRef {
         };
     }
 
-    // External file references (may include fragment)
-    const [filePath, fragment] = ref.split('#');
+    const hashIndex = ref.indexOf('#');
+    const filePath = hashIndex === -1 ? ref : ref.slice(0, hashIndex);
+    const fragment = hashIndex === -1 || hashIndex === ref.length - 1 ? undefined : ref.slice(hashIndex);
+
+    // Absolute paths (POSIX/Windows handled by injectable path.isAbsolute on sourceFile only)
+    if (pathApi.isAbsolute(filePath)) {
+        return {
+            type: RefType.ABSOLUTE_PATH,
+            filePath,
+            fragment,
+            originalRef: ref,
+        };
+    }
+
     if (fragment) {
         return {
             type: RefType.EXTERNAL_FILE_FRAGMENT,
             filePath,
-            fragment: `#${fragment}`,
+            fragment,
             originalRef: ref,
         };
     }
@@ -66,4 +68,25 @@ export function parseRef(ref: string): ParsedRef {
         filePath,
         originalRef: ref,
     };
+}
+
+/**
+ * Whole-file Canonical Ref (no Pointer) is a Model.
+ * Response / Parameter / Header / Request Body pointers are not Models.
+ * Other Pointers (Schema registry and schema fragments such as `#/properties/...`) stay Models.
+ */
+export function isModelCanonicalRef(canonicalRef: string): boolean {
+    const hashIndex = canonicalRef.indexOf('#');
+    if (hashIndex === -1) {
+        return true;
+    }
+    const pointer = canonicalRef.slice(hashIndex);
+    return (
+        !pointer.startsWith('#/components/responses/') &&
+        !pointer.startsWith('#/components/parameters/') &&
+        !pointer.startsWith('#/components/headers/') &&
+        !pointer.startsWith('#/components/requestBodies/') &&
+        !pointer.startsWith('#/responses/') &&
+        !pointer.startsWith('#/parameters/')
+    );
 }
