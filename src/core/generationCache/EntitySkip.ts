@@ -129,8 +129,13 @@ export async function resolveEntitySkipCandidate(params: {
         return false;
     }
 
-    if (useReuseStore && reuseStore!.getManifest().specItems[specInput] == null) {
-        return false;
+    if (useReuseStore) {
+        if (reuseStore!.getManifest().specItems[specInput] == null) {
+            return false;
+        }
+        if (!(await reuseStore!.verifySpecItemIntegrity(specInput))) {
+            return false;
+        }
     }
 
     return true;

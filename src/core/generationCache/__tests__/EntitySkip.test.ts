@@ -28,8 +28,11 @@ function baseItem(overrides: Partial<TStrictFlatOptions> = {}): TStrictFlatOptio
     return { ...COMMON_DEFAULT_OPTIONS_VALUES, input: 'spec.yaml', output: 'out', ...overrides } as TStrictFlatOptions;
 }
 
-function fakeReuseStore(specItems: Record<string, { input: string; lastGeneratedAt: string; artifactKeys: string[] }>): ReuseStore {
-    return { getManifest: () => ({ specItems }) } as unknown as ReuseStore;
+function fakeReuseStore(specItems: Record<string, { input: string; lastGeneratedAt: string; artifactKeys: string[] }>, specItemIntegrity = true): ReuseStore {
+    return {
+        getManifest: () => ({ specItems }),
+        verifySpecItemIntegrity: async () => specItemIntegrity,
+    } as unknown as ReuseStore;
 }
 
 describe('@unit: EntitySkip', () => {
@@ -198,6 +201,37 @@ describe('@unit: EntitySkip', () => {
                 cacheFingerprint: fingerprint,
                 useReuseStore: true,
                 reuseStore: fakeReuseStore({}),
+                specInput: 'api-a',
+                filesExist: async () => true,
+            }),
+            false
+        );
+    });
+
+    test('resolveEntitySkipCandidate denies skip when reuse store artifact integrity fails', async () => {
+        mkdirSync(generatedRoot, { recursive: true });
+        tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-integrity-deny-'));
+        const outputFile = path.join(tmpDir, 'out.ts');
+        writeFileSync(outputFile, 'export {}', 'utf8');
+
+        const cache = new GenerationCache(path.join(tmpDir, 'cache.json'));
+        const cacheKey = 'item-key';
+        const fingerprint = 'fp-match';
+        cache.set({ key: cacheKey, fingerprint, files: [outputFile], updatedAt: Date.now() });
+
+        assert.equal(
+            await resolveEntitySkipCandidate({
+                useEntityCache: true,
+                generationCache: cache,
+                cacheKey,
+                cacheFingerprint: fingerprint,
+                useReuseStore: true,
+                reuseStore: fakeReuseStore(
+                    {
+                        'api-a': { input: 'api-a.yaml', lastGeneratedAt: new Date().toISOString(), artifactKeys: ['k'] },
+                    },
+                    false
+                ),
                 specInput: 'api-a',
                 filesExist: async () => true,
             }),

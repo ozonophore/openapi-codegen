@@ -31,15 +31,19 @@ Entity skip MUST быть eligible, когда `cache` включён и `cacheS
 ---
 
 ### Requirement: Reuse manifest presence guard
-Когда item использует ReuseStore (`cacheStrategy=reuse` и не classes-bundle) и `reuseStore` передан, `shouldEntitySkip` MUST вернуть false, если `manifest.specItems[specItem]` отсутствует. Skip path MUST NOT выполнять per-artifact integrity hashing.
+Когда item использует ReuseStore (`cacheStrategy=reuse` и не classes-bundle) и `reuseStore` передан, `shouldEntitySkip` MUST вернуть false, если `manifest.specItems[specItem]` отсутствует. Skip path MUST NOT хешировать output files; для reuse MUST проверить целостность store-артефактов этого spec item (`contentHash` через ReuseStore).
 
 #### Scenario: Missing manifest entry denies skip
 - **WHEN** GenerationCache fingerprint и files совпадают, но spec item нет в Reuse manifest
 - **THEN** entity skip MUST NOT применяться
 
-#### Scenario: Present manifest entry allows skip
-- **WHEN** fingerprint и files совпадают и `specItems[specItem]` существует
-- **THEN** entity skip MAY применяться без проверки content hash каждого artifact
+#### Scenario: Present manifest entry allows skip when store artifacts are intact
+- **WHEN** fingerprint и files совпадают, `specItems[specItem]` существует, и store-артефакты spec item проходят integrity check
+- **THEN** entity skip MAY применяться без хеширования output files
+
+#### Scenario: Corrupt store artifact denies skip
+- **WHEN** fingerprint и files совпадают и spec item есть в manifest, но store-артефакт не проходит `contentHash` integrity check
+- **THEN** entity skip MUST NOT применяться, чтобы write path мог перегенерировать артефакт
 
 ---
 

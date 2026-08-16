@@ -236,6 +236,25 @@ export class ReuseStore {
         return content !== null;
     }
 
+    /**
+     * True when the spec item exists in the manifest and every referenced store artifact still matches contentHash.
+     */
+    async verifySpecItemIntegrity(specItem: string): Promise<boolean> {
+        const item = this.manifest.specItems[specItem];
+        if (!item) {
+            return false;
+        }
+
+        for (const artifactKey of item.artifactKeys) {
+            const entry = this.manifest.artifacts[artifactKey];
+            if (!entry || !(await this.verifyArtifactIntegrity(entry))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     async readArtifactIfIntegrityOk(entry: ManifestArtifact): Promise<string | null> {
         const absolutePath = this.resolveArtifactPath(entry.relativePath);
         const exists = await fileSystemHelpers.exists(absolutePath);

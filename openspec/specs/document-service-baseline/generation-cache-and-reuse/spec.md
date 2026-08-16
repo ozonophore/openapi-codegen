@@ -18,12 +18,16 @@ Umbrella spec для cache strategies, ReuseStore orchestration и GenerationCac
 - **THEN** Generation item session skip write, register cached paths as outputs
 
 #### Scenario: Hybrid reuse entity-skip hit
-- **WHEN** cacheStrategy=reuse, fingerprint (v3) совпадает, cached files exist, и Reuse manifest содержит spec item
+- **WHEN** cacheStrategy=reuse, fingerprint (v3) совпадает, cached files exist, Reuse manifest содержит spec item, и store-артефакты spec item проходят integrity check
 - **THEN** Generation item session MUST skip parse/write этого item (`entitySkipped`)
 
 #### Scenario: Hybrid reuse skip denied without manifest entry
 - **WHEN** cacheStrategy=reuse, fingerprint и files совпадают, но spec item отсутствует в Reuse manifest
 - **THEN** entity skip MUST NOT применяться; item идёт в полную генерацию
+
+#### Scenario: Hybrid reuse skip denied when store artifact is corrupt
+- **WHEN** cacheStrategy=reuse, fingerprint и files совпадают, spec item есть в manifest, но store-артефакт не проходит contentHash integrity check
+- **THEN** entity skip MUST NOT применяться; item идёт в полную генерацию и store-артефакт MUST быть перезаписан
 
 #### Scenario: Entity cache miss on missing file
 - **WHEN** cache entry exists но файл на диске удалён
