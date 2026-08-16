@@ -37,7 +37,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
 | **Diff report** | Lifecycle home: adapt + persist/load + types + `produceUnifiedDiffReport`; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
-| **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; git/`parseContent` stays in CLI |
+| **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; string parse leaf `parseOpenApiContent`; git `show` stays in CLI |
 | **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
 | **GenerationCache** | Entity/content cache entries per output root |
@@ -195,7 +195,17 @@ Shared Spec resolve prologue + two modes under `src/core/specLoad/`.
 - **Layout:** `resolveOpenApiRefs.ts` (path/exists/`SwaggerParser.resolve` + root) · `forContext.ts` · `forSemantic.ts` · `expandOpenApiRefsForSemanticDiff.ts` · shared minimal refs interface · barrel `index.ts` (internal, used surface only, not from `core/index`)
 - **Facades (thin, keep paths):** `createResolvedContext.ts` · `utils/loadSemanticOpenApiSpec.ts` (`loadSemanticOpenApiSpec` / `loadSemanticOpenApiObject`)
 - **Modes:** `forContext` → Context.attach + root; `forSemantic` → resolve + expand clone (file + in-memory object)
-- **Stays in CLI:** git `readSpecFromGit` / `parseSpecContent` (`SwaggerParser.parse`)
-- **Out of scope:** Context lazy-ref / virtual-map semantics change, Diff package, `validateWithSwaggerParser` merge, Session/Write/options, git parse absorb
+- **Stays in CLI:** git `readSpecFromGit` (`execSync` git show → core parse)
+- **Out of scope:** Context lazy-ref / virtual-map semantics change, Diff package, `validateWithSwaggerParser` merge, Session/Write/options
 - **OpenSpec change:** `pdtch-191-spec-load-unify`
+
+## Spec load parse content
+
+Move string→object OpenAPI parse from analyze-diff CLI into Spec-load; keep `git show` in CLI.
+
+- **Module:** `src/core/specLoad/parseOpenApiContent.ts` — `parseOpenApiContent(content, sourcePath): Promise<unknown>`
+- **Behavior (identical):** empty throw; JSON via `JSON.parse`; YAML via temp file + `SwaggerParser.parse` (ext from `sourcePath`)
+- **CLI:** `specParser.ts` keeps only `readSpecFromGit` (`execSync` git show → core parse)
+- **Export:** internal leaf only — not from `core/index`
+- **OpenSpec change:** `spec-load-parse-content`
 
