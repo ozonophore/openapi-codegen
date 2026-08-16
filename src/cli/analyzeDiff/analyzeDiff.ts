@@ -15,7 +15,7 @@ import { AnalyzeDiffOptions, analyzeDiffOptionsSchema } from '../schemas';
 import { formatCiMarkdownSummary } from './ciSummary';
 import { loadIgnoreRules } from './ignoreRules';
 import { filterSemanticChangesByIgnoreRules } from './ignoreSemanticChanges';
-import { resolvePluginPaths } from './pluginPaths';
+import { resolvePluginEntries } from './pluginPaths';
 import { readSpecFromGit } from './specParser';
 
 /**
@@ -100,7 +100,7 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
 
         const governancePolicy = await loadGovernanceConfig(validatedOptions.governanceConfig);
         const ignoreRules = loadIgnoreRules(validatedOptions.openapiConfig);
-        const plugins = await loadGeneratorPlugins(resolvePluginPaths(validatedOptions.openapiConfig, validatedOptions.plugins));
+        const plugins = await loadGeneratorPlugins(resolvePluginEntries(validatedOptions.openapiConfig, validatedOptions.plugins));
 
         const baseReport = analyzeOpenApiDiff(oldSpec, newSpec, {
             allowBreaking: validatedOptions.allowBreaking ?? false,

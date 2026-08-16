@@ -35,6 +35,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **Diff report** | Lifecycle home: adapt + persist/load + types → consumer `DiffReport`; produce in `semanticDiff`; apply via item-session thin wrappers |
 | **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; git/`parseContent` stays in CLI |
+| **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
 | **GenerationCache** | Entity/content cache entries per output root |
 | **Context** | Parse-time Spec context (refs, virtual file map, plugins) — not passed to WriteClient |
@@ -73,6 +74,17 @@ Config entries may include `{ path, name?, config? }`. Fingerprints already hash
 - **Load:** `loadGeneratorPlugins` accepts entries (path+config); generate and preAnalyze pass `mergePluginPaths`, not stripped paths
 - **Errors:** `configure` throw fails generation (same as load failure)
 - **OpenSpec change:** `pdtch-191-resolved-context`
+
+## Plugin entry assembly (analyze-diff)
+
+Close the residual from `plugin-config-inject`: analyze-diff must not strip entry `config` before load.
+
+- **Helper:** `resolvePluginEntries` (renamed from `resolvePluginPaths`) → `NormalizedPluginEntry[]` via `mergePluginPaths` (no `extractPluginPaths`)
+- **Scope:** union of root + all `items[]` plugins + CLI string paths (unchanged union semantics)
+- **Wire:** `analyzeDiff` → `loadGeneratorPlugins(resolvePluginEntries(…))` so `configure` runs for non-empty config
+- **Stays:** `extractPluginPaths` for check-config path warnings; CLI `--plugins` remain strings
+- **Out of scope:** active-item filter by `--input`; CLI object plugins; Plugin API v3
+- **OpenSpec change:** `plugin-entry-assembly`
 
 ## Resolved Context factory
 
