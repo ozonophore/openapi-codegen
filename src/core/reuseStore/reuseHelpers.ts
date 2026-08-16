@@ -1,6 +1,7 @@
 import path from 'path';
 
 import type { Model } from '../types/shared/Model.model';
+import { isModelCanonicalRef } from '../utils/isModelCanonicalRef';
 
 function normalizeModelPath(modelPath: string): string {
     return path.posix.normalize(modelPath.replace(/^\.\//, ''));
@@ -40,6 +41,10 @@ export function buildModelSchemaMap(context: { getAllCanonicalRefs(): string[]; 
     const schemaByComponentName = new Map<string, Record<string, unknown>>();
 
     for (const ref of context.getAllCanonicalRefs()) {
+        if (!isModelCanonicalRef(ref)) {
+            continue;
+        }
+
         const definition = context.get(ref);
         if (!definition || typeof definition !== 'object') {
             continue;

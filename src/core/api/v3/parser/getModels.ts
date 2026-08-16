@@ -1,4 +1,5 @@
 import type { Model } from '../../../types/shared/Model.model';
+import { isModelCanonicalRef } from '../../../utils/isModelCanonicalRef';
 import { resolveModelImports, setDuplicateModelAliases } from '../../../utils/modelHelpers';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
 import { unique } from '../../../utils/unique';
@@ -10,6 +11,9 @@ export function getModels(this: Parser, openApi: OpenApi): Model[] {
     const listOfModelsRef = this.context.getAllCanonicalRefs();
     if (listOfModelsRef) {
         for (const modelRef of listOfModelsRef) {
+            if (!isModelCanonicalRef(modelRef)) {
+                continue;
+            }
             const definition: any = this.context.get(modelRef);
             const definitionType = this.getType(modelRef, '');
             const model = this.getModel({

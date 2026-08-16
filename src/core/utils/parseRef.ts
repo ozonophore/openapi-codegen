@@ -1,4 +1,4 @@
-import { isAbsolute } from 'path';
+import { getPathAdapter, type PathAdapter } from '../../common/utils/pathAdapter';
 
 export enum RefType {
     LOCAL_FRAGMENT = 'local_fragment',
@@ -16,9 +16,10 @@ export interface ParsedRef {
 }
 
 /**
- * Parse a $ref string to determine its type and components
+ * Parse a $ref string to determine its type and components.
+ * Splits Canonical Ref (`sourceFile` + Pointer) before any path API.
  */
-export function parseRef(ref: string): ParsedRef {
+export function parseRef(ref: string, pathAdapter: PathAdapter = getPathAdapter()): ParsedRef {
     if (!ref || typeof ref !== 'string') {
         return { type: RefType.LOCAL_FRAGMENT, originalRef: ref };
     }
@@ -30,40 +31,41 @@ export function parseRef(ref: string): ParsedRef {
         };
     }
 
-    // Absolute paths (POSIX/Windows handled by path.isAbsolute)
-    if (isAbsolute(ref)) {
-        const [filePath, fragment] = ref.split('#');
-        return {
-            type: RefType.ABSOLUTE_PATH,
-            filePath,
-            fragment: fragment ? `#${fragment}` : undefined,
-            originalRef: ref,
-        };
-    }
+    const hashIndex = ref.indexOf('#');
+    const sourceFile = hashIndex === -1 ? ref : ref.slice(0, hashIndex);
+    const fragment = hashIndex === -1 ? undefined : ref.slice(hashIndex);
 
-    // Local fragment
-    if (ref.startsWith('#/')) {
+    // Local fragment (Pointer only)
+    if (!sourceFile) {
         return {
             type: RefType.LOCAL_FRAGMENT,
-            fragment: ref,
+            fragment,
             originalRef: ref,
         };
     }
 
-    // External file references (may include fragment)
-    const [filePath, fragment] = ref.split('#');
+    // Absolute paths — path API sees only sourceFile
+    if (pathAdapter.isAbsolute(sourceFile)) {
+        return {
+            type: RefType.ABSOLUTE_PATH,
+            filePath: sourceFile,
+            fragment,
+            originalRef: ref,
+        };
+    }
+
     if (fragment) {
         return {
             type: RefType.EXTERNAL_FILE_FRAGMENT,
-            filePath,
-            fragment: `#${fragment}`,
+            filePath: sourceFile,
+            fragment,
             originalRef: ref,
         };
     }
 
     return {
         type: RefType.EXTERNAL_FILE,
-        filePath,
+        filePath: sourceFile,
         originalRef: ref,
     };
 }

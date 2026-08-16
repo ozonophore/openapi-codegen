@@ -1,10 +1,12 @@
 /* istanbul ignore file */
 import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
-import { basename, isAbsolute } from 'path';
+import { basename } from 'path';
 
 import { APP_LOGGER } from '../common/Consts';
+import { getPathAdapter, type PathAdapter } from '../common/utils/pathAdapter';
 import { dirNameHelper, normalizeHelper, relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
 import { OpenApiGeneratorPlugin, SchemaTypeOverrideContext } from './plugins/GeneratorPlugin.model';
+import { REGEX_BACKSLASH } from './types/Consts';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
 import { $Root } from './types/base/Root.model';
@@ -20,6 +22,7 @@ type TContextProps = {
     sortByRequired?: boolean;
     plugins?: OpenApiGeneratorPlugin[];
     strictPluginMode?: boolean;
+    pathAdapter?: PathAdapter;
 };
 
 type RefsLike = {
@@ -62,11 +65,13 @@ export class Context {
     private specRoot!: string;
     private entryFile?: string;
     private virtualFiles: VirtualFileMap = new Map();
+    private pathAdapter: PathAdapter;
 
-    constructor({ input, output, prefix, sortByRequired, plugins, strictPluginMode }: TContextProps) {
+    constructor({ input, output, prefix, sortByRequired, plugins, strictPluginMode, pathAdapter }: TContextProps) {
+        this.pathAdapter = pathAdapter ?? getPathAdapter();
         this._output = output;
         if (isString(input)) {
-            this._root = { dirName: dirNameHelper(input), path: input, fileName: getFileName(input) };
+            this._root = { dirName: dirNameHelper(input, this.pathAdapter), path: input, fileName: getFileName(input) };
         } else {
             this._root = { dirName: '', path: '' };
         }
@@ -174,22 +179,22 @@ export class Context {
     }
 
     private canonicalizeRef(ref: string, parentSourceFile: string): { sourceFile: string; fragment?: string } {
-        const parsed = parseRef(ref);
+        const parsed = parseRef(ref, this.pathAdapter);
 
         // LOCAL_FRAGMENT → тот же файл
         if (parsed.type === RefType.LOCAL_FRAGMENT) {
             return {
-                sourceFile: normalizeHelper(parentSourceFile),
+                sourceFile: normalizeHelper(parentSourceFile, this.pathAdapter),
                 fragment: parsed.fragment,
             };
         }
 
         // Внешний ref
-        const parentDir = dirNameHelper(parentSourceFile);
-        const absSource = resolveHelper(parentDir, parsed.filePath!);
+        const parentDir = dirNameHelper(parentSourceFile, this.pathAdapter);
+        const absSource = this.pathAdapter.resolve(parentDir, parsed.filePath!).replace(REGEX_BACKSLASH, '/');
 
         return {
-            sourceFile: normalizeHelper(absSource),
+            sourceFile: normalizeHelper(absSource, this.pathAdapter),
             fragment: parsed.fragment,
         };
     }
@@ -235,8 +240,8 @@ export class Context {
     }
 
     private initializeVirtualFileMap(entryFile: string) {
-        this.specRoot = normalizeHelper(dirNameHelper(entryFile));
-        const normalizedEntry = normalizeHelper(entryFile);
+        this.specRoot = normalizeHelper(dirNameHelper(entryFile, this.pathAdapter), this.pathAdapter);
+        const normalizedEntry = normalizeHelper(entryFile, this.pathAdapter);
         this.entryFile = normalizedEntry;
 
         // Гарантируем, что entry файл тоже есть в карте
@@ -253,7 +258,7 @@ export class Context {
         const allPaths = this._refs?.paths() || [];
 
         for (const refPath of allPaths) {
-            const normalizedPath = normalizeHelper(refPath);
+            const normalizedPath = normalizeHelper(refPath, this.pathAdapter);
 
             if (!this.virtualFiles.has(normalizedPath)) {
                 this.virtualFiles.set(normalizedPath, {
@@ -307,9 +312,9 @@ export class Context {
           }
         | undefined {
         const normalizedRef = this.normalizeRefForLookup(canonicalRef, parentSourceFile);
-        const parsed = parseRef(normalizedRef);
+        const parsed = parseRef(normalizedRef, this.pathAdapter);
 
-        const sourceFile = normalizeHelper(parsed.filePath ?? '');
+        const sourceFile = normalizeHelper(parsed.filePath ?? '', this.pathAdapter);
 
         const file = this.virtualFiles.get(sourceFile);
         if (!file) return undefined;
@@ -325,16 +330,13 @@ export class Context {
 
         // Prefer explicit parent if provided
         if (parentSourceFile) {
-            const normalizedParent = isAbsolute(parentSourceFile) ? parentSourceFile : resolveHelper(this.specRoot, parentSourceFile);
-            return normalizeRef(ref, normalizedParent);
+            const normalizedParent = this.pathAdapter.isAbsolute(parentSourceFile) ? parentSourceFile : this.pathAdapter.resolve(this.specRoot, parentSourceFile).replace(REGEX_BACKSLASH, '/');
+            return normalizeRef(ref, normalizedParent, this.pathAdapter);
         }
 
         // If we can fall back to entry file, normalize relative refs against it
         if (this.entryFile) {
-            const parsed = parseRef(ref);
-            if (parsed.type === RefType.LOCAL_FRAGMENT || parsed.type === RefType.EXTERNAL_FILE || parsed.type === RefType.EXTERNAL_FILE_FRAGMENT) {
-                return normalizeRef(ref, this.entryFile);
-            }
+            return normalizeRef(ref, this.entryFile, this.pathAdapter);
         }
 
         return ref;

@@ -1,9 +1,10 @@
 import path from 'path';
 
 import { REGEX_BACKSLASH } from '../../core/types/Consts';
+import { getPathAdapter, type PathAdapter } from './pathAdapter';
 
-export function dirNameHelper(p: string): string {
-    return path.dirname(p).replace(REGEX_BACKSLASH, '/');
+export function dirNameHelper(p: string, pathAdapter: PathAdapter = getPathAdapter()): string {
+    return pathAdapter.dirname(p).replace(REGEX_BACKSLASH, '/');
 }
 
 export function joinHelper(...paths: string[]): string {
@@ -38,9 +39,11 @@ export function relativeHelper(from: string, to: string): string {
 }
 
 export function resolveHelper(...pathSegments: string[]): string {
-    return path.resolve(...pathSegments).replace(REGEX_BACKSLASH, '/');
+    return getPathAdapter()
+        .resolve(...pathSegments)
+        .replace(REGEX_BACKSLASH, '/');
 }
 
-export function normalizeHelper(p: string): string {
-    return path.normalize(p).replace(REGEX_BACKSLASH, '/');
+export function normalizeHelper(p: string, pathAdapter: PathAdapter = getPathAdapter()): string {
+    return pathAdapter.normalize(p).replace(REGEX_BACKSLASH, '/');
 }
