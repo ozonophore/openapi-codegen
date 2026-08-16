@@ -65,11 +65,19 @@ Policy for skipping a Spec item when GenerationCache hit is valid: fingerprint m
 
 - **Module:** `src/core/generationCache/EntitySkip.ts` (GenerationCache stays in `src/core/utils/GenerationCache.ts`)
 - **Interface:** `buildCacheKey`, `buildEntityFingerprint`, `shouldEntitySkip` — no `registerOutputFile` (Write side effect stays in Generation item session)
-- **Fingerprint (v3):** `cacheFingerprintVersion` + `generatorVersion` + `specHash` + **`optionsSliceHash`** (from `buildOptionsSlice` / reuse fingerprinter) + **residual** options not in `OptionsSlice` (`request`, `useOptions`, `includeSchemasFiles`, `excludeCoreServiceFiles`, `strictPluginMode`, `customExecutorPath`, `useCancelableRequest`, `useHistory`, `diffReport`, `strictOpenapi`, `failOnGovernanceErrors`). No raw `plugins` / `disableBuiltinPlugins` in residual (covered by slice).
+- **Fingerprint (v3):** `cacheFingerprintVersion` + `generatorVersion` + `specHash` + **`optionsSliceHash`** + **residual** derived from the affecting-keys allowlist (not a hand list)
 - **Serialization:** `stableStringify` + same hash helper as reuse fingerprints
 - **Call sites:** `GenerationItemSession.run` and batch session `shouldEntitySkip` callback; `getSpecItemName` shared (preAnalyze / AvatarSwarm use the same helper)
 - **Cache break:** bump to fingerprint version **3** (one-time warm miss)
 - **OpenSpec change:** `pdtch-191-entity-skip-fingerprint`
+
+## Entity skip residual derive
+
+Close hand-maintained residual drift vs OptionsSlice locality.
+
+- **Strategy:** `ENTITY_FINGERPRINT_AFFECTING_KEYS` allowlist in `EntitySkip.ts`; residual = affecting − OptionsSlice coverage (`OptionsSlice` Pick keys + `plugins` / `disableBuiltinPlugins`)
+- **Initial allowlist:** current residual 11 + slice/plugin keys so derived residual ≡ today’s hand list (bit-identical → keep **v3**)
+- **OpenSpec change:** `entity-skip-residual-derive`
 
 ## Reuse write session
 
