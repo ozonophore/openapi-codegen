@@ -28,15 +28,16 @@ describe('@unit: writeSharedOrLocalCoreFile', () => {
         mkdirSync(path.join(itemB, 'executor'), { recursive: true });
 
         const writeClient = new WriteClient();
+        const adapter = writeClient.toCoreOutputAdapter();
         const sharedFolderWriter = new SharedFolderWriter(lca);
-        return { lca, itemA, itemB, writeClient, sharedFolderWriter };
+        return { lca, itemA, itemB, adapter, sharedFolderWriter };
     }
 
     test('writes canonical under __shared__/core and stub for nested executor path', async () => {
-        const { lca, itemA, writeClient, sharedFolderWriter } = createFixture();
+        const { lca, itemA, adapter, sharedFolderWriter } = createFixture();
         const content = 'export const requestExecutor = true;\n';
 
-        const result = await writeSharedOrLocalCoreFile(writeClient, {
+        const result = await writeSharedOrLocalCoreFile(adapter, {
             sharedFolderWriter,
             outputCorePath: itemA,
             relativeCorePath: 'executor/requestExecutor.ts',
@@ -52,16 +53,16 @@ describe('@unit: writeSharedOrLocalCoreFile', () => {
     });
 
     test('second item with same content gets stub to shared canonical', async () => {
-        const { lca, itemA, itemB, writeClient, sharedFolderWriter } = createFixture();
+        const { lca, itemA, itemB, adapter, sharedFolderWriter } = createFixture();
         const content = 'export class ApiError {}\n';
 
-        await writeSharedOrLocalCoreFile(writeClient, {
+        await writeSharedOrLocalCoreFile(adapter, {
             sharedFolderWriter,
             outputCorePath: itemA,
             relativeCorePath: 'ApiError.ts',
             content,
         });
-        const result = await writeSharedOrLocalCoreFile(writeClient, {
+        const result = await writeSharedOrLocalCoreFile(adapter, {
             sharedFolderWriter,
             outputCorePath: itemB,
             relativeCorePath: 'ApiError.ts',
@@ -74,15 +75,15 @@ describe('@unit: writeSharedOrLocalCoreFile', () => {
     });
 
     test('content hash conflict keeps full local file', async () => {
-        const { itemA, itemB, writeClient, sharedFolderWriter } = createFixture();
+        const { itemA, itemB, adapter, sharedFolderWriter } = createFixture();
 
-        await writeSharedOrLocalCoreFile(writeClient, {
+        await writeSharedOrLocalCoreFile(adapter, {
             sharedFolderWriter,
             outputCorePath: itemA,
             relativeCorePath: 'ApiRequestOptions.ts',
             content: 'export type ApiRequestOptions = { a: 1 };\n',
         });
-        const result = await writeSharedOrLocalCoreFile(writeClient, {
+        const result = await writeSharedOrLocalCoreFile(adapter, {
             sharedFolderWriter,
             outputCorePath: itemB,
             relativeCorePath: 'ApiRequestOptions.ts',
@@ -96,18 +97,18 @@ describe('@unit: writeSharedOrLocalCoreFile', () => {
     });
 
     test('request-sensitive fingerprint mismatch keeps local request.ts', async () => {
-        const { itemA, itemB, writeClient, sharedFolderWriter } = createFixture();
+        const { itemA, itemB, adapter, sharedFolderWriter } = createFixture();
         const fpA = buildCoreTransportFingerprint({ request: './a.ts', httpClient: 'fetch' });
         const fpB = buildCoreTransportFingerprint({ request: './b.ts', httpClient: 'fetch' });
 
-        await writeSharedOrLocalCoreFile(writeClient, {
+        await writeSharedOrLocalCoreFile(adapter, {
             sharedFolderWriter,
             outputCorePath: itemA,
             relativeCorePath: 'request.ts',
             content: 'export async function request() { return "a"; }\n',
             transportFingerprint: fpA,
         });
-        const result = await writeSharedOrLocalCoreFile(writeClient, {
+        const result = await writeSharedOrLocalCoreFile(adapter, {
             sharedFolderWriter,
             outputCorePath: itemB,
             relativeCorePath: 'request.ts',
@@ -120,8 +121,8 @@ describe('@unit: writeSharedOrLocalCoreFile', () => {
     });
 
     test('without sharedFolderWriter writes local full file only', async () => {
-        const { itemA, writeClient } = createFixture();
-        const result = await writeSharedOrLocalCoreFile(writeClient, {
+        const { itemA, adapter } = createFixture();
+        const result = await writeSharedOrLocalCoreFile(adapter, {
             outputCorePath: itemA,
             relativeCorePath: 'ApiError.ts',
             content: 'export class ApiError {}\n',

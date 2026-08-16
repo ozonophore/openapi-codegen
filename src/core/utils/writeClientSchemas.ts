@@ -2,13 +2,13 @@ import { mkdirSync } from 'fs';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { dirNameHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { type CoreOutputAdapter, toReuseOutputAdapter } from '../CoreOutputAdapter';
 import { formatArtifactContent, type ReuseWriterContext, writeSchemaWithReuse } from '../reuseStore/reuseWriterHelpers';
 import { Templates } from '../types/base/Templates.model';
 import { EmptySchemaStrategy } from '../types/enums/EmptySchemaStrategy.enum';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ValidationLibrary } from '../types/enums/ValidationLibrary.enum';
 import type { Model } from '../types/shared/Model.model';
-import { WriteClient } from '../WriteClient';
 
 /**
  * @param models Array of Models to write
@@ -41,10 +41,10 @@ function isEmptySchemaModel(model: Model): boolean {
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useUnionTypes Use union types instead of enums
  */
-export async function writeClientSchemas(this: WriteClient, options: IWriteClientSchemas): Promise<Model[]> {
+export async function writeClientSchemas(adapter: CoreOutputAdapter, options: IWriteClientSchemas): Promise<Model[]> {
     const { models, templates, outputSchemasPath, httpClient, useUnionTypes, validationLibrary, emptySchemaStrategy, prettierConfigPath, reuse } = options;
     if (templates.exports.schema) {
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SCHEMAS_START);
+        adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SCHEMAS_START);
 
         const modelsToWrite = emptySchemaStrategy === EmptySchemaStrategy.SKIP ? models.filter(model => !isEmptySchemaModel(model)) : models;
 
@@ -54,19 +54,16 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
             if (dir) {
                 const directory = resolveHelper(outputSchemasPath, dir);
 
-                this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DIRECTORY_CREATING(directory));
+                adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DIRECTORY_CREATING(directory));
 
                 mkdirSync(directory, { recursive: true });
             }
             const file = resolveHelper(outputSchemasPath, `${modelFolderPath}Schema.ts`);
 
-            this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
+            adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
 
             if (reuse) {
-                const adapter = {
-                    writeOutputFile: (path: string, content: string) => this.writeOutputFile(path, content),
-                };
-                await writeSchemaWithReuse(adapter, model, file, reuse, async () =>
+                await writeSchemaWithReuse(toReuseOutputAdapter(adapter, outputSchemasPath), model, file, reuse, async () =>
                     formatArtifactContent(
                         templates.exports.schema({
                             ...model,
@@ -78,7 +75,7 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
                         reuse.prettierConfigPath ?? prettierConfigPath
                     )
                 );
-                this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
+                adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
                 continue;
             }
 
@@ -90,12 +87,12 @@ export async function writeClientSchemas(this: WriteClient, options: IWriteClien
                 emptySchemaStrategy,
             });
             const formattedValue = await formatArtifactContent(templateResult, prettierConfigPath);
-            await this.writeOutputFile(file, formattedValue);
+            await adapter.writeOutputFile(file, formattedValue);
 
-            this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
+            adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
         }
 
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SCHEMAS_FINISH);
+        adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SCHEMAS_FINISH);
 
         return modelsToWrite;
     }

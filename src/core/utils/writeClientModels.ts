@@ -2,13 +2,13 @@ import { mkdirSync } from 'fs';
 
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { dirNameHelper, relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { type CoreOutputAdapter, toReuseOutputAdapter } from '../CoreOutputAdapter';
 import { formatArtifactContent, type ReuseWriterContext, writeModelWithReuse } from '../reuseStore/reuseWriterHelpers';
 import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ModelsLayout } from '../types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../types/enums/ModelsMode.enum';
 import type { Model } from '../types/shared/Model.model';
-import { WriteClient } from '../WriteClient';
 import { isClassesBundleLayout, isClassesPerFileLayout } from './modelsLayoutHelpers';
 
 /** Relative path from a per-file model directory to core (from models root). */
@@ -49,12 +49,12 @@ interface IWriteClientModels {
  * @param httpClient The selected httpClient (fetch, xhr or node)
  * @param useUnionTypes Use union types instead of enums
  */
-export async function writeClientModels(this: WriteClient, options: IWriteClientModels): Promise<void> {
+export async function writeClientModels(adapter: CoreOutputAdapter, options: IWriteClientModels): Promise<void> {
     const { models, templates, outputModelsPath, httpClient, useUnionTypes, modelsMode, modelsLayout, outputCorePath, useOptions, prettierConfigPath, reuse } = options;
 
     const effectivePrettierConfigPath = reuse?.prettierConfigPath ?? prettierConfigPath;
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_START);
+    adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_START);
 
     if (isClassesBundleLayout(modelsMode, modelsLayout)) {
         const file = resolveHelper(outputModelsPath, 'models.ts');
@@ -68,10 +68,10 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             modelsLayout,
         });
         const formattedValue = await formatArtifactContent(templateResult, effectivePrettierConfigPath);
-        await this.writeOutputFile(file, formattedValue);
-        this.registerLintTarget(file, outputModelsPath);
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_FINISH);
+        await adapter.writeOutputFile(file, formattedValue);
+        adapter.registerLintTarget(file, outputModelsPath);
+        adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
+        adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_FINISH);
         return;
     }
 
@@ -86,13 +86,13 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
         if (dir) {
             const directory = resolveHelper(outputModelsPath, dir);
 
-            this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DIRECTORY_CREATING(directory));
+            adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DIRECTORY_CREATING(directory));
 
             mkdirSync(directory, { recursive: true });
         }
         const file = resolveHelper(outputModelsPath, `${modelFolderPath}.ts`);
 
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
+        adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
 
         const renderModel = async () => {
             if (isClassesPerFileLayout(modelsMode, modelsLayout)) {
@@ -120,22 +120,19 @@ export async function writeClientModels(this: WriteClient, options: IWriteClient
             );
         };
 
-        if (reuse) {
-            const adapter = {
-                writeOutputFile: (path: string, content: string) => this.writeOutputFile(path, content),
-                registerLintTarget: (path: string, outputDir?: string) => this.registerLintTarget(path, outputDir ?? outputModelsPath),
-            };
-            await writeModelWithReuse(adapter, model, file, outputModelsPath, reuse, renderModel);
-            this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
+        const canReuse = Boolean(reuse);
+        if (canReuse && reuse) {
+            await writeModelWithReuse(toReuseOutputAdapter(adapter, outputModelsPath), model, file, outputModelsPath, reuse, renderModel);
+            adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
             continue;
         }
 
         const formattedValue = await renderModel();
-        await this.writeOutputFile(file, formattedValue);
-        this.registerLintTarget(file, outputModelsPath);
+        await adapter.writeOutputFile(file, formattedValue);
+        adapter.registerLintTarget(file, outputModelsPath);
 
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
+        adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
     }
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_FINISH);
+    adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.MODELS_FINISH);
 }

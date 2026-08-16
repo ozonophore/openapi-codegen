@@ -1,11 +1,11 @@
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
+import type { CoreOutputAdapter } from '../CoreOutputAdapter';
 import { Templates } from '../types/base/Templates.model';
 import { ModelsLayout } from '../types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../types/enums/ModelsMode.enum';
 import { Model } from '../types/shared/Model.model';
-import { WriteClient } from '../WriteClient';
 
 interface IOptionsProps {
     models: Model[];
@@ -16,7 +16,7 @@ interface IOptionsProps {
     modelsLayout?: ModelsLayout;
 }
 
-export async function writeClientModelsIndex(this: WriteClient, options: IOptionsProps) {
+export async function writeClientModelsIndex(adapter: CoreOutputAdapter, options: IOptionsProps) {
     const { models, templates, outputModelsPath, useSeparatedIndexes, modelsMode, modelsLayout } = options;
 
     if (!useSeparatedIndexes) {
@@ -24,7 +24,7 @@ export async function writeClientModelsIndex(this: WriteClient, options: IOption
     }
     const filePath = resolveHelper(outputModelsPath, 'index.ts');
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.INDEX_DATA_WRITTEN(filePath));
+    adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.INDEX_DATA_WRITTEN(filePath));
 
     const content = templates.indexes.models({ models, modelsMode, modelsLayout });
     let existingContent = '';
@@ -36,7 +36,7 @@ export async function writeClientModelsIndex(this: WriteClient, options: IOption
     const dataLines = content.split(/\r?\n/).filter(Boolean);
     const linesToAdd = dataLines.filter(line => !existingLines.includes(line.trim()));
     const updatedContent = linesToAdd.length > 0 ? existingContent + linesToAdd.join('\n') + '\n' : existingContent;
-    await this.writeOutputFile(filePath, updatedContent);
+    await adapter.writeOutputFile(filePath, updatedContent);
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.INDEX_WRITE_COMPLETED(filePath));
+    adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.INDEX_WRITE_COMPLETED(filePath));
 }

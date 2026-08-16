@@ -33,6 +33,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **OpenApiClient** | Facade: constructs WriteClient, item/batch sessions; options meaning in `resolveGenerationOptions` |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
+| **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
 | **Diff report** | Lifecycle home: adapt + persist/load + types → consumer `DiffReport`; produce in `semanticDiff`; apply via item-session thin wrappers |
 | **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; git/`parseContent` stays in CLI |
 | **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
@@ -40,6 +41,21 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **GenerationCache** | Entity/content cache entries per output root |
 | **Context** | Parse-time Spec context (refs, virtual file map, plugins) — not passed to WriteClient |
 | **Generator plugins** | Loaded into Context during per-item generation / preAnalyze |
+
+## WriteClient leaf adapters
+
+Deepen residual from concern split: remove `this: WriteClient` from leaves; shared-core stops taking the class.
+
+- **Type:** `CoreOutputAdapter` in `src/core/CoreOutputAdapter.ts`
+  - `writeOutputFile(file, content)`
+  - `registerLintTarget(file, outputRoot)` — `outputRoot` required (matches WriteClient)
+  - `logger: { info; warn }` — duck, not full `Logger`
+- **Relation to reuse:** `ReuseOutputAdapter` stays narrow (write + optional lint); `toReuseOutputAdapter(core, defaultLintRoot?)` lives in `CoreOutputAdapter.ts`
+- **Helpers:** free `toCoreOutputAdapter(host)` + `WriteClient.toCoreOutputAdapter()` method
+- **Leaf shape:** `writeClient*(adapter, options)` — first-arg adapter; all `writeClient*` + `writeSharedOrLocalCoreFile`
+- **Facade:** thin public methods remain (`writeClientModels(opts)` → `writeClientModels(this.toCoreOutputAdapter(), opts)`) for tests / orchestration / IndexCombine host
+- **Visibility:** internal — not from `src/core/index.ts`
+- **OpenSpec change:** `write-client-leaf-adapters`
 
 ## Entity skip / entity fingerprint
 
@@ -103,7 +119,7 @@ WriteClient is a composing facade. Ownership:
 - **OutputFileSession** — `writeOutputFile` + expected-file registry + write stats
 - **LintTargetRegistry** — lint target files + include globs
 - **IndexCombineSession** — per-item config Map; `combineAndWrite` / `combineAndWrightSimple` (HEAD name)
-- **WriteClient** — logger, `writeClient()` orchestration, leaf `writeClient*` bindings, public delegates
+- **WriteClient** — logger, `writeClient()` orchestration, leaf `writeClient*` via `CoreOutputAdapter`, public delegates
 - **SharedFolderWriter** — LCA only (no WriteClient ctor arg)
 - **OpenSpec change:** `pdtch-191-write-client-concern-split`
 

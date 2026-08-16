@@ -1,8 +1,8 @@
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
+import type { CoreOutputAdapter } from '../CoreOutputAdapter';
 import { Templates } from '../types/base/Templates.model';
-import { WriteClient } from '../WriteClient';
 
 interface IOptionsProps {
     templates: Templates;
@@ -12,7 +12,7 @@ interface IOptionsProps {
     modelsMode?: import('../types/enums/ModelsMode.enum').ModelsMode;
 }
 
-export async function writeClientCoreIndex(this: WriteClient, options: IOptionsProps) {
+export async function writeClientCoreIndex(adapter: CoreOutputAdapter, options: IOptionsProps) {
     const { templates, outputCorePath, useCancelableRequest, useSeparatedIndexes, modelsMode } = options;
 
     if (!useSeparatedIndexes) {
@@ -20,7 +20,7 @@ export async function writeClientCoreIndex(this: WriteClient, options: IOptionsP
     }
     const filePath = resolveHelper(outputCorePath, 'index.ts');
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.INDEX_DATA_WRITTEN(filePath));
+    adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.INDEX_DATA_WRITTEN(filePath));
 
     const content = templates.indexes.core({ useCancelableRequest, modelsMode });
     let existingContent = '';
@@ -32,7 +32,7 @@ export async function writeClientCoreIndex(this: WriteClient, options: IOptionsP
     const dataLines = content.split(/\r?\n/).filter(Boolean);
     const linesToAdd = dataLines.filter(line => !existingLines.includes(line.trim()));
     const updatedContent = linesToAdd.length > 0 ? existingContent + linesToAdd.join('\n') + '\n' : existingContent;
-    await this.writeOutputFile(filePath, updatedContent);
+    await adapter.writeOutputFile(filePath, updatedContent);
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.INDEX_WRITE_COMPLETED(filePath));
+    adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.INDEX_WRITE_COMPLETED(filePath));
 }
