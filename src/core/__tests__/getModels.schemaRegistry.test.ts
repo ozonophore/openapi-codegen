@@ -68,6 +68,31 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
 `;
 
+const OAS3_REQUEST_BODY = `openapi: "3.0.0"
+info:
+  title: RequestBodyOnly
+  version: "1.0.0"
+paths:
+  /example:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/SimpleRequestBody'
+      responses:
+        '200':
+          description: ok
+components:
+  requestBodies:
+    SimpleRequestBody:
+      description: A reusable request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+`;
+
 const OAS3_INLINE_RESPONSE = `openapi: "3.0.0"
 info:
   title: InlineResponse
@@ -114,7 +139,7 @@ responses:
       $ref: '#/definitions/ErrorResponse'
 `;
 
-describe('@unit: getModels Schema registry', () => {
+describe('@unit: getModels Model denylist', () => {
     let tmpDir = '';
 
     afterEach(() => {
@@ -157,6 +182,22 @@ describe('@unit: getModels Schema registry', () => {
         assert.ok(mapped.properties);
         assert.ok(!('content' in mapped));
         assert.notEqual(mapped.description, 'Error');
+        assert.equal(schemaByName.size, 1);
+    });
+
+    test('OAS3 requestBodies Pointer is not an exported Model', async () => {
+        const specPath = await writeSpec(OAS3_REQUEST_BODY, 'request-body.yaml');
+        const { context, openApi } = await createResolvedContext({
+            input: specPath,
+            output: getOutputPaths({ output: path.join(tmpDir, 'out') }),
+        });
+
+        const canonicalRefs = context.getAllCanonicalRefs();
+        assert.ok(canonicalRefs.some(ref => ref.includes('#/components/requestBodies/SimpleRequestBody')));
+
+        const models = new ParserV3(context).getModels(openApi as OpenApiV3);
+        assert.ok(!models.some(model => model.name === 'SimpleRequestBody'));
+        assert.equal(buildModelSchemaMap(context).has('SimpleRequestBody'), false);
     });
 
     test('OAS2 definition is a Model and #/responses/ is not', async () => {
@@ -184,5 +225,32 @@ describe('@unit: getModels Schema registry', () => {
 
         const models = new ParserV3(context).getModels(openApi as OpenApiV3);
         assert.ok(!models.some(model => model.name === 'ErrorResponse' || model.name === 'IErrorResponse'));
+    });
+
+    test('v3.withDifferentRefs.yml keeps INested and TProp from schema-document Pointers', async () => {
+        mkdirSync(generatedRoot, { recursive: true });
+        tmpDir = mkdtempSync(path.join(generatedRoot, 'models-registry-'));
+        const specPath = path.join(__dirname, '../../../test/spec/v3.withDifferentRefs.yml');
+        const { context, openApi } = await createResolvedContext({
+            input: specPath,
+            output: getOutputPaths({ output: path.join(tmpDir, 'out') }),
+        });
+
+        const models = new ParserV3(context).getModels(openApi as OpenApiV3);
+        const names = models.map(model => model.name);
+        assert.ok(names.includes('INested'), `expected INested in ${names.join(', ')}`);
+        assert.ok(names.includes('TProp'), `expected TProp in ${names.join(', ')}`);
+        assert.ok(!names.includes('SimpleRequestBody'));
+
+        const schemaByName = buildModelSchemaMap(context);
+        const mapKeys = [...schemaByName.keys()];
+        assert.ok(
+            mapKeys.some(key => key.toLowerCase() === 'nested'),
+            `expected nested in buildModelSchemaMap keys: ${mapKeys.join(', ')}`
+        );
+        assert.ok(
+            mapKeys.some(key => key.toLowerCase() === 'prop'),
+            `expected prop in buildModelSchemaMap keys: ${mapKeys.join(', ')}`
+        );
     });
 });

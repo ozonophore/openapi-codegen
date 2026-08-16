@@ -26,7 +26,6 @@ export type { IModelWithString as IModelWithString$1 } from '././models/schemas/
 export type { IModelWithStringLocal } from '././models/ModelWithStringLocal';
 export type { INested } from '././models/schemas/compositions/Nested';
 export type { Properties } from '././models/schemas/compositions/Properties';
-export type { SimpleRequestBody } from '././models/SimpleRequestBody';
 export type { TModelThatExtends } from '././models/schemas/compositions/ModelThatExtends';
 export type { TProp } from '././models/schemas/collections/Prop';
 export type { TPropExtendsA } from '././models/schemas/compositions/PropExtendsA';

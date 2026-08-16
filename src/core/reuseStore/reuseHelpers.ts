@@ -1,7 +1,7 @@
 import path from 'path';
 
 import type { Model } from '../types/shared/Model.model';
-import { isSchemaRegistryPointer } from '../utils/isSchemaRegistryPointer';
+import { isModelPointer } from '../utils/isModelPointer';
 import { parseRef } from '../utils/parseRef';
 
 function normalizeModelPath(modelPath: string): string {
@@ -42,7 +42,7 @@ export function buildModelSchemaMap(context: { getAllCanonicalRefs(): string[]; 
     const schemaByComponentName = new Map<string, Record<string, unknown>>();
 
     for (const ref of context.getAllCanonicalRefs()) {
-        if (!isSchemaRegistryPointer(parseRef(ref).fragment)) {
+        if (!isModelPointer(parseRef(ref).fragment)) {
             continue;
         }
 
