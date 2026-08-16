@@ -35,7 +35,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
-| **Diff report** | Lifecycle home: adapt + persist/load + types → consumer `DiffReport`; produce in `semanticDiff`; apply via item-session thin wrappers |
+| **Diff report** | Lifecycle home: adapt + persist/load + types + `produceUnifiedDiffReport`; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
 | **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; git/`parseContent` stays in CLI |
 | **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
@@ -140,12 +140,23 @@ First-cut deepen: home adapt + persist/load + apply + miracle build + types unde
 
 - **Package:** `src/core/diffReport/` with barrel `index.ts` (internal — not re-exported from `src/core/index.ts`)
 - **Moves:** `loadDiffReport`, adapters (`adaptSemanticToStructural` + related), `buildMiraclesFromSemanticChanges`, `applyDiffReportToClient`, `writeDiffReport` (renamed from `writeSemanticDiffReport`, **no** permanent alias — update call sites), types from `types/DiffReport.model.ts` → `diffReport/` + **shim re-export** at old types path (no `utils/adapters` shim — call sites import the package)
-- **Stays:** `analyzeOpenApiDiff` / miracle heuristics in `semanticDiff/`; CLI assemble Unified inline (import path updates only)
+- **Stays:** `analyzeOpenApiDiff` / miracle heuristics in `semanticDiff/`
 - **Deletes:** `createSemanticDiffContext` + unused call in `analyzeDiff`
 - **Call shape:** `GenerationItemSession` `loadDiffReportIfNeeded` / `applyDiffReportIfNeeded` unchanged
 - **On-disk:** Unified 2.0 + Semantic 1.1 + legacy read compat unchanged
 - **OpenSpec change:** `pdtch-191-diff-report-lifecycle`
-- **Out of scope:** `produceUnifiedDiffReport` high-level, schema collapse, Unified-direct apply, plugin entry config, Session/options/WriteClient rethink
+- **Out of scope (lifecycle cut):** schema collapse, Unified-direct apply, Session/options/WriteClient rethink
+
+## produceUnifiedDiffReport
+
+Move Unified assemble out of analyze-diff CLI into Diff report package.
+
+- **Module:** `src/core/diffReport/produceUnifiedDiffReport.ts` (+ `createSpecHash`); export from `diffReport/index.ts` (not `core/index`)
+- **Owns:** metadata + circular-safe hashes + semantic slice + `adaptSemanticToStructural`; optional `timestamp` override (default `toISOString()`)
+- **Input:** `{ semantic: SemanticDiffReport, base, target, baseSpec, targetSpec, ignored?, timestamp? }` → `UnifiedDiffReport`
+- **Stays in CLI:** load → analyze → hooks → ignore → governance/miracles enrich → **produce** → write; logging/CI
+- **Out of scope:** governance/miracles/hooks inside produce; merge with write; Unified-direct apply; Spec-load git
+- **OpenSpec change:** `produce-unified-diff-report`
 
 ## Spec load unify
 

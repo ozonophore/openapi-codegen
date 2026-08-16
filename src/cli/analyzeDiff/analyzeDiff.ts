@@ -1,10 +1,9 @@
 import { OptionValues } from 'commander';
-import crypto from 'crypto';
 
 import { APP_LOGGER, DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../../common/Consts';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { validateZodOptions } from '../../common/Validation';
-import { adaptSemanticToStructural, buildMiraclesFromSemanticChanges, UNIFIED_DIFF_REPORT_SCHEMA_VERSION, type UnifiedDiffReport, writeDiffReport } from '../../core/diffReport';
+import { buildMiraclesFromSemanticChanges, produceUnifiedDiffReport, writeDiffReport } from '../../core/diffReport';
 import { evaluateGovernanceRules } from '../../core/governance/evaluateGovernanceRules';
 import { loadGovernanceConfig } from '../../core/governance/loadGovernanceConfig';
 import { applySemanticDiffPluginHooks } from '../../core/plugins/applySemanticDiffPluginHooks';
@@ -41,25 +40,6 @@ export type AnalyzeDiffResult = {
  */
 export function toAnalyzeDiffExitCode(result: AnalyzeDiffResult): number {
     return result.success ? 0 : 1;
-}
-
-function createSpecHash(spec: unknown): string {
-    const seen = new WeakSet<object>();
-    const serializedSpec = JSON.stringify(spec, (_key, value) => {
-        if (value && typeof value === 'object') {
-            if (seen.has(value)) {
-                return '[Circular]';
-            }
-            seen.add(value);
-        }
-
-        return value;
-    });
-
-    return crypto
-        .createHash('md5')
-        .update(serializedSpec ?? '')
-        .digest('hex');
 }
 
 /**
@@ -128,23 +108,14 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
             }),
             miracles: buildMiraclesFromSemanticChanges(reportAfterIgnore.changes),
         };
-        const report: UnifiedDiffReport = {
-            schemaVersion: UNIFIED_DIFF_REPORT_SCHEMA_VERSION,
-            timestamp: new Date().toISOString(),
-            metadata: {
-                base: baseSourceLabel,
-                target: newSpecInput,
-                baseHash: createSpecHash(oldSpec),
-                targetHash: createSpecHash(newSpec),
-            },
-            semantic: {
-                changes: semanticReport.changes,
-                governance: semanticReport.governance,
-                recommendation: semanticReport.recommendation,
-                summary: semanticReport.summary,
-            },
-            structural: adaptSemanticToStructural(semanticReport, ignored),
-        };
+        const report = produceUnifiedDiffReport({
+            semantic: semanticReport,
+            base: baseSourceLabel,
+            target: newSpecInput,
+            baseSpec: oldSpec,
+            targetSpec: newSpec,
+            ignored,
+        });
 
         const reportPath = await writeDiffReport(report, pluginHooksResult.reportPath);
 
