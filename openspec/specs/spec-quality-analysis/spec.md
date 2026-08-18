@@ -2,7 +2,7 @@
 
 Spec quality analysis (`specAnalysis` / legacy `anomalyDetection`) и pre-generation cross-spec scan (`preAnalyze`).
 
-**Related:** `document-service-baseline/code-generation` (preAnalyze trigger).
+**Related:** `code-generation` (preAnalyze trigger), `generator-plugins` (preAnalyze plugin load).
 
 ## Requirements
 

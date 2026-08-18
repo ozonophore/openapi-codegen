@@ -2,7 +2,7 @@
 
 Парсинг OpenAPI 2.x/3.x в internal Client model.
 
-**Related delta:** `models-classes-layout` (classes layout, DTO wiring, imports).
+**Related delta:** `spec-load-unify`, `context-resolved-factory`, `models-classes-layout` (classes layout, DTO wiring, imports).
 
 ## Requirements
 

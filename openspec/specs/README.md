@@ -1,6 +1,6 @@
-# document-service-baseline
+# Domain specs
 
-Main domain specs (reverse-spec baseline) для `ts-openapi-codegen`.
+First-class OpenSpec capabilities (`openspec/specs/<domain>/spec.md`). Reverse-spec of product/CLI behavior.
 
 ## Domains
 
@@ -22,13 +22,15 @@ Main domain specs (reverse-spec baseline) для `ts-openapi-codegen`.
 | [avatar-swarm](avatar-swarm/spec.md) | `--swarm` |
 | [workspace-reporting](workspace-reporting/spec.md) | `--workspace-report` |
 
-## Delta specs (sibling folders in `openspec/specs/`)
+## Delta specs
 
-Implementation-detail specs referenced from baseline Purpose sections:
+Implementation-detail specs. They complement domains via `**Baseline:**` in Purpose — do not merge into domain files.
 
-- `generate-cli-validation`, `generate-cli-marauder-flags`, `example-marauder-config`
-- `artifact-fingerprint-correctness`, `reuse-auto-group-core`, `reuse-shared-core`, `reuse-namespace-paths`
-- `models-classes-layout`, `yup-boolean-coercion`, `miracles-config-runtime`
-- `logger-messages-english`
-
-Source change (not archived): `openspec/changes/document-service-baseline/`
+- CLI / config: `generate-cli-validation`, `generate-cli-marauder-flags`, `generate-cli-plugins`, `analyze-diff-cli-plugins`, `example-marauder-config`
+- Generation lifecycle: `generation-options-resolve`, `generation-batch-session`, `generation-item-session`
+- Parse / context: `spec-load-unify`, `context-resolved-factory`
+- Write: `write-client-concern-split`, `reuse-write-session`, `models-classes-layout`, `yup-boolean-coercion`
+- Cache / reuse: `artifact-fingerprint-correctness`, `entity-skip-fingerprint`, `reuse-auto-group-core`, `reuse-shared-core`, `reuse-namespace-paths`
+- Plugins: `plugin-config-entries`, `plugin-docs-restore`
+- Diff / quality: `diff-report-lifecycle`, `miracles-config-runtime`
+- Cross-cutting: `logger-messages-english`

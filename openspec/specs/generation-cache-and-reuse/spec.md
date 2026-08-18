@@ -2,7 +2,7 @@
 
 Umbrella spec для cache strategies, ReuseStore orchestration и GenerationCache entity-fallback.
 
-**Related delta specs:** `artifact-fingerprint-correctness`, `reuse-auto-group-core`, `reuse-shared-core`, `reuse-namespace-paths`.
+**Related delta specs:** `artifact-fingerprint-correctness`, `entity-skip-fingerprint`, `reuse-auto-group-core`, `reuse-shared-core`, `reuse-namespace-paths`, `reuse-write-session`.
 
 ## Requirements
 

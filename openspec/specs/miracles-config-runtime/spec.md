@@ -3,7 +3,7 @@
 Runtime application of `miracles.{enabled,confidence,types}` (plus root→items inheritance)
 when generating with history/diff reports.
 
-**Baseline:** `document-service-baseline/code-generation`, `document-service-baseline/semantic-diff-analysis`.
+**Baseline:** `code-generation`, `semantic-diff-analysis`.
 
 ## Requirements
 

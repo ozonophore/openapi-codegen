@@ -2,7 +2,7 @@
 
 Workspace report после multi-spec generation run.
 
-**Related:** `document-service-baseline/generation-cache-and-reuse` (reuse manifest для crossSpec).
+**Related:** `generation-cache-and-reuse` (reuse manifest для crossSpec).
 
 ## Requirements
 
@@ -33,11 +33,24 @@ When reuse store active, report MUST include crossSpec from analyzeCrossSpecMani
 ---
 
 ### Requirement: Per-spec summary fields
-Each spec entry MUST include name, input, durationMs, reuseHits, reuseMisses (PDD §2.4 / types.ts).
+Each spec entry MUST include name, input, durationMs, reuseHits, reuseMisses.
 
 #### Scenario: Spec with no reuse
 - **WHEN** item generated without reuse store
 - **THEN** reuseHits=0, reuseMisses=0 for that spec entry
+
+---
+
+### Requirement: Report types contract
+Workspace report MUST match the types contract: `WorkspaceReport` has ISO `generatedAt`, `specs`, `crossSpec` (`null` without reuse store — not an empty array), and `summary`. `WorkspaceSpecSummary` MUST include `name`, `input`, `durationMs`, `reuseHits`, `reuseMisses`. `WorkspaceReportSummary` MUST include `totalSpecs`, `totalDurationMs`, `totalReuseHits`, `totalReuseMisses`, `totalSharedModels`. `WorkspaceReportConfig` MUST accept optional `enabled`, `path`, and `format` (`json` | `markdown` | `both`).
+
+#### Scenario: WorkspaceSpecSummary содержит все обязательные поля
+- **WHEN** specStats passed into workspace report build
+- **THEN** each `specs` entry has all five fields with correct types
+
+#### Scenario: Summary counters present
+- **WHEN** report is built for N items
+- **THEN** `summary.totalSpecs` equals N and duration/reuse totals equal the sums of per-spec fields
 
 ---
 

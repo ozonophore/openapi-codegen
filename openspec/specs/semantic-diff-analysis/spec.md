@@ -2,7 +2,7 @@
 
 CLI-команда `analyze-diff`: семантическое сравнение OpenAPI specs и JSON report.
 
-**Related:** `miracles-config-runtime` (apply-time filter), `document-service-baseline/consumer-usage-analysis` (rename post-check consumer).
+**Related:** `analyze-diff-cli-plugins`, `diff-report-lifecycle`, `miracles-config-runtime` (apply-time filter), `consumer-usage-analysis` (rename post-check consumer).
 
 ## Requirements
 

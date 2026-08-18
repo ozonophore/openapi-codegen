@@ -2,7 +2,7 @@
 
 CLI flag surface for Marauder blocks (`--workspace-report`, `--traffic-splitter`, etc.).
 
-**Baseline:** `document-service-baseline/code-generation`.
+**Baseline:** `code-generation`.
 
 ## Requirements
 

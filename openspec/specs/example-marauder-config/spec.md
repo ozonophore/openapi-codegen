@@ -2,7 +2,7 @@
 
 Example config artifact for Marauder multi-spec options.
 
-**Baseline:** `document-service-baseline/code-generation`. Example: `reuseMode: auto-group` requires `cacheStrategy: reuse`.
+**Baseline:** `code-generation`. Example: `reuseMode: auto-group` requires `cacheStrategy: reuse`.
 
 ## Requirements
 

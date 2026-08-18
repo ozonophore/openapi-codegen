@@ -40,11 +40,15 @@ Swarm manifest MUST include version=1 and ISO generatedAt timestamp.
 ---
 
 ### Requirement: Operation index by specItem namespace
-operationIndex MUST map specItem names to themselves as namespace placeholders. Operations NOT parsed at swarm build time; operationIds in avatars remain empty arrays.
+operationIndex MUST map specItem names to themselves as namespace placeholders (`Record<specItem, specItem>`). Operations NOT parsed at swarm build time; `operationIds` in avatars remain empty arrays. When two items resolve to the same specItem name, the first item in config order MUST win.
 
 #### Scenario: Two specs
 - **WHEN** items for pet.yaml and store.yaml
 - **THEN** operationIndex keys include pet and store spec item names mapping to themselves
+
+#### Scenario: Duplicate specItem first-wins
+- **WHEN** two items resolve to the same specItem name
+- **THEN** operationIndex has a single key for that name mapping to itself
 
 ---
 

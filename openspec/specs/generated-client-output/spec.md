@@ -2,7 +2,7 @@
 
 Запись generated artifacts и post-generation output lifecycle.
 
-**Related deltas:** `models-classes-layout`, `yup-boolean-coercion`.
+**Related deltas:** `models-classes-layout`, `yup-boolean-coercion`, `write-client-concern-split`, `reuse-write-session`.
 
 ## Requirements
 

@@ -2,7 +2,7 @@
 
 Оркестрация CLI-команды `generate`: direct vs config mode, multi-spec inheritance, post-generation modules.
 
-**Related delta specs:** `generate-cli-validation`, `generate-cli-marauder-flags`, `example-marauder-config`, `miracles-config-runtime`, `document-service-baseline/semantic-diff-analysis`.
+**Related delta specs:** `generate-cli-validation`, `generate-cli-marauder-flags`, `generate-cli-plugins`, `example-marauder-config`, `generation-options-resolve`, `generation-batch-session`, `generation-item-session`, `miracles-config-runtime`, `semantic-diff-analysis`.
 
 ## Requirements
 
@@ -55,7 +55,7 @@
 ---
 
 ### Requirement: reuseMode requires reuse cache for auto-group
-reuseMode=auto-group MUST быть meaningful только при cacheStrategy=reuse (см. `document-service-baseline/generation-cache-and-reuse`).
+reuseMode=auto-group MUST быть meaningful только при cacheStrategy=reuse (см. `generation-cache-and-reuse`).
 
 #### Scenario: auto-group without reuse cache
 - **WHEN** reuseMode=auto-group и cacheStrategy=entity
@@ -64,7 +64,7 @@ reuseMode=auto-group MUST быть meaningful только при cacheStrategy=
 ---
 
 ### Requirement: Pre-analyze до записи файлов
-Когда `preAnalyze: true`, cross-spec анализ MUST выполняться до генерации любого spec item (см. `document-service-baseline/spec-quality-analysis`).
+Когда `preAnalyze: true`, cross-spec анализ MUST выполняться до генерации любого spec item (см. `spec-quality-analysis`).
 
 #### Scenario: Pre-analyze с несколькими specs
 - **WHEN** конфиг содержит два items и `preAnalyze: true`
@@ -91,7 +91,7 @@ Post-generation ESLint fix MUST выполняться только когда �
 ---
 
 ### Requirement: Diff report apply pipeline
-При useHistory=true generate MUST загрузить diff report и применить annotations; miracles apply-time filter — см. `miracles-config-runtime`; report construction — см. `document-service-baseline/semantic-diff-analysis`.
+При useHistory=true generate MUST загрузить diff report и применить annotations; miracles apply-time filter — см. `miracles-config-runtime`; report construction — см. `semantic-diff-analysis`.
 
 #### Scenario: useHistory without report file
 - **WHEN** useHistory=true но diff report файл отсутствует
