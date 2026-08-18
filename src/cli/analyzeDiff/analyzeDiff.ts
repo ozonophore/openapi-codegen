@@ -3,10 +3,9 @@ import { OptionValues } from 'commander';
 import { APP_LOGGER, DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../../common/Consts';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { validateZodOptions } from '../../common/Validation';
-import { enrichSemanticDiffReport, produceUnifiedDiffReport, writeDiffReport } from '../../core/diffReport';
+import { runAnalyzeDiffPipeline } from '../../core/diffReport';
 import { loadGovernanceConfig } from '../../core/governance/loadGovernanceConfig';
 import { loadGeneratorPlugins } from '../../core/plugins/loadGeneratorPlugins';
-import { analyzeOpenApiDiff } from '../../core/semanticDiff/analyzeOpenApiDiff';
 import { loadSemanticOpenApiObject, loadSemanticOpenApiSpec } from '../../core/utils/loadSemanticOpenApiSpec';
 import { AnalyzeDiffOptions, analyzeDiffOptionsSchema } from '../schemas';
 import { formatCiMarkdownSummary } from './ciSummary';
@@ -79,39 +78,22 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
         const ignoreRules = loadIgnoreRules(validatedOptions.openapiConfig);
         const plugins = await loadGeneratorPlugins(resolvePluginEntries(validatedOptions.openapiConfig, validatedOptions.plugins));
 
-        const baseReport = analyzeOpenApiDiff(oldSpec, newSpec, {
-            allowBreaking: validatedOptions.allowBreaking ?? false,
-            governanceConfig: governancePolicy,
-        });
-
-        const {
-            report: semanticReport,
-            ignored,
-            reportPath: enrichedReportPath,
-        } = await enrichSemanticDiffReport({
-            baseReport,
-            openApi: newSpec,
+        const { reportPath, ignored, semanticReport, report, ciFailed } = await runAnalyzeDiffPipeline({
+            oldSpec,
+            newSpec,
+            base: baseSourceLabel,
+            target: newSpecInput,
             reportPath: reportPathInput,
             plugins,
             ignoreRules,
             governanceConfig: governancePolicy,
             allowBreaking: validatedOptions.allowBreaking ?? false,
+            ci: validatedOptions.ci ?? false,
             strictPluginMode: validatedOptions.strictPluginMode ?? false,
             onDiagnostic: diagnostic => {
                 APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.PLUGIN_DIAGNOSTIC(diagnostic));
             },
         });
-
-        const report = produceUnifiedDiffReport({
-            semantic: semanticReport,
-            base: baseSourceLabel,
-            target: newSpecInput,
-            baseSpec: oldSpec,
-            targetSpec: newSpec,
-            ignored,
-        });
-
-        const reportPath = await writeDiffReport(report, enrichedReportPath);
 
         APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.REPORT_CREATED(reportPath));
         APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.SUMMARY(semanticReport, reportPath));
@@ -124,7 +106,7 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
             APP_LOGGER.info(LOGGER_MESSAGES.ANALYZE_DIFF.CI_MARKDOWN_SUMMARY(formatCiMarkdownSummary(report, reportPath)));
         }
 
-        if (validatedOptions.ci && semanticReport.governance.summary.errors > 0) {
+        if (ciFailed) {
             return { success: false, reportPath, error: LOGGER_MESSAGES.ANALYZE_DIFF.CI_FAILURE };
         }
 

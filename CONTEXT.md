@@ -115,7 +115,8 @@ DRY config load prep ahead of migrate (architecture #6 residual).
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
 | **WriteClient artifacts write** | Per-item write order (`src/core/write/writeClientArtifacts.ts`): mkdir/core/services/schemas/models + IndexCombine `register`; facade `WriteClient.writeClient` thin delegate; OpenSpec `write-client-artifacts-orchestration` |
 | **IndexCombineSession** | Accumulates per-item generator configs; batch flush via `combineAndWrite(adapter)` / `combineAndWrightSimple(adapter)` on `CoreOutputAdapter`; OpenSpec `index-combine-core-adapter` |
-| **Diff report** | Lifecycle home: adapt + persist/load + types + `enrichSemanticDiffReport` + `produceUnifiedDiffReport`; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
+| **Diff report** | Lifecycle home: adapt + persist/load + types + `enrichSemanticDiffReport` + `produceUnifiedDiffReport` + **Analyze Diff pipeline**; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
+| **Analyze Diff pipeline** | Core orchestration for analyze-diff success path: `analyze → enrich → produce → write` + CI governance gate (`runAnalyzeDiffPipeline`); OpenSpec `analyze-diff-pipeline` |
 | **Strict OpenAPI gate** | When `strictOpenapi`: parser validate + load governance + strict diagnostics + write report + fail gates (`runStrictOpenApiGate`); OpenSpec `strict-openapi-gate` |
 | **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; string parse leaf `parseOpenApiContent`; git `show` stays in CLI |
 | **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
@@ -364,7 +365,7 @@ Move Unified assemble out of analyze-diff CLI into Diff report package.
 - **Module:** `src/core/diffReport/produceUnifiedDiffReport.ts` (+ `createSpecHash`); export from `diffReport/index.ts` (not `core/index`)
 - **Owns:** metadata + circular-safe hashes + semantic slice + `adaptSemanticToStructural`; optional `timestamp` override (default `toISOString()`)
 - **Input:** `{ semantic: SemanticDiffReport, base, target, baseSpec, targetSpec, ignored?, timestamp? }` → `UnifiedDiffReport`
-- **Stays in CLI:** load → analyze → **enrich** → **produce** → write; logging/CI
+- **Stays in CLI (superseded by Analyze Diff pipeline):** load Spec / gov / ignore / plugins; logging; CI markdown
 - **Out of scope:** governance/miracles/hooks inside produce; merge with write; Unified-direct apply; Spec-load git
 - **OpenSpec change:** `produce-unified-diff-report`
 
@@ -375,9 +376,22 @@ Deepen analyze-diff middle block (hooks → ignore → governance → miracles) 
 - **Module:** `src/core/diffReport/enrichSemanticDiffReport.ts` — `enrichSemanticDiffReport(input) → { report, ignored, reportPath }`
 - **Owns (order):** `applySemanticDiffPluginHooks` → `filterSemanticChangesByIgnoreRules` → `evaluateGovernanceRules` + `buildMiraclesFromSemanticChanges`
 - **Ignore move:** filter + `matchesIgnoreRule` + `IgnoreRule` into `diffReport/`; CLI keeps `loadIgnoreRules` only
-- **CLI:** validate · Spec load · load governance/ignore/plugins · `analyzeOpenApiDiff` · **enrich** · produce · write · logging/CI
+- **CLI (superseded by Analyze Diff pipeline for analyze→write):** validate · Spec load · load governance/ignore/plugins · **pipeline** · logging / CI markdown / exit map
 - **Export:** `diffReport/index.ts` (not `core/index`)
 - **OpenSpec change:** `diff-report-enrich-semantic`
+
+## Analyze Diff pipeline
+
+Deepen analyze-diff success-path orchestration out of CLI into one Diff report module (architecture review residual after enrich/produce leaves).
+
+- **Module:** `src/core/diffReport/runAnalyzeDiffPipeline.ts` — `runAnalyzeDiffPipeline(input) → { reportPath, ignored, semanticReport, report, ciFailed }`
+- **Owns (order):** `analyzeOpenApiDiff` → `enrichSemanticDiffReport` → `produceUnifiedDiffReport` → `writeDiffReport` → CI governance gate (`ci && semanticReport.governance.summary.errors > 0` → `ciFailed: true`; report already on disk)
+- **Does not own:** Zod / `OptionValues`; Spec load (+ git `show`); `loadGovernanceConfig` / `loadIgnoreRules` / `resolvePluginEntries` + `loadGeneratorPlugins`; INFO logs; CI markdown; skip-no-base; `AnalyzeDiffResult` / exit-code map; `process.exit`
+- **Input:** `{ oldSpec, newSpec, base, target, reportPath, plugins, ignoreRules, governanceConfig, allowBreaking, ci, strictPluginMode?, onDiagnostic? }` — specs and policy already loaded by caller
+- **Errors:** unexpected failures **throw**; CI-fail is **not** throw — `ciFailed: true` with `reportPath` / reports populated
+- **Export:** `diffReport/index.ts` only — not `core/index`
+- **CLI adapter:** validate · Spec load · load gov/ignore/plugins · `runAnalyzeDiffPipeline` · log (incl. CI markdown from returned `report`) · map `ciFailed` / catch → `AnalyzeDiffResult`
+- **OpenSpec change:** `analyze-diff-pipeline`
 
 ## Spec load unify
 
