@@ -12,13 +12,12 @@ import { createResolvedContext } from './createResolvedContext';
 import { applyDiffReportToClient, DiffReport, loadDiffReport } from './diffReport';
 import type { ItemRunContext } from './GenerationBatchSession';
 import { buildCacheKey, buildEntityFingerprint, defaultFilesExist, getSpecItemName, resolveEntitySkipCandidate, usesEntityCache, usesReuseStoreForItem } from './generationCache/EntitySkip';
-import { loadGovernanceConfig } from './governance/loadGovernanceConfig';
 import { loadGeneratorPlugins } from './plugins/loadGeneratorPlugins';
 import { mergePluginPaths } from './plugins/pluginEntries';
 import { buildModelSchemaMap } from './reuseStore';
 import { buildOptionsSlice } from './reuseStore/ArtifactFingerprinter';
 import { runSpecAnalysis } from './specAnalysis/runSpecAnalysis';
-import { validateOpenApiStrict, validateWithSwaggerParser, writeOpenApiStrictReport } from './strict/validateOpenApiStrict';
+import { runStrictOpenApiGate } from './strict/runStrictOpenApiGate';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { EmptySchemaStrategy } from './types/enums/EmptySchemaStrategy.enum';
 import { ModelsLayout } from './types/enums/ModelsLayout.enum';
@@ -145,24 +144,15 @@ export class GenerationItemSession {
         }
 
         if (strictOpenapi) {
-            const parserValidationIssues = await validateWithSwaggerParser(absoluteInput);
-            const governancePolicy = await loadGovernanceConfig(governanceConfig);
-            const strictReport = validateOpenApiStrict({
+            await runStrictOpenApiGate({
+                absoluteInput,
                 openApi,
                 context,
-                preIssues: parserValidationIssues,
-                governanceConfig: governancePolicy,
+                reportFile,
+                governanceConfig,
+                failOnGovernanceErrors,
+                logger: writeClient.logger,
             });
-            const reportPath = await writeOpenApiStrictReport(strictReport, reportFile);
-            writeClient.logger.forceInfo(LOGGER_MESSAGES.GENERATION.STRICT_REPORT_CREATED(reportPath));
-
-            if (strictReport.summary.errors > 0) {
-                throw new Error(`Strict OpenAPI validation failed with ${strictReport.summary.errors} error(s). Report: ${reportPath}`);
-            }
-
-            if (failOnGovernanceErrors && strictReport.governance.summary.errors > 0) {
-                throw new Error(`Governance validation failed with ${strictReport.governance.summary.errors} error(s). Report: ${reportPath}`);
-            }
         }
 
         const openApiVersion = getOpenApiVersion(openApi);

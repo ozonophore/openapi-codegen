@@ -23,6 +23,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 - **Module:** `GenerationItemSession` (`src/core/GenerationItemSession.ts`)
 - **Deps:** `{ writeClient, eslintFixOptions }`; `run(item, generationCache, itemRunContext)` with required `ItemRunContext`
 - **Wiring:** facade constructs it inside `generate(rawOptions)` and passes `generateItem: (item, cache, ctx) => itemSession.run(...)`
+- **Strict:** when `strictOpenapi`, delegates to **Strict OpenAPI gate** (`runStrictOpenApiGate`) — see below
 - **V2/V3:** shared prepare via private `prepareClientFromOpenApi` (parse callback → applyDiff → postProcess → DTO); switch only selects Parser + `WRITING_V2`/`WRITING_V3` logs
 - **Visibility:** internal (not re-exported from `src/core/index.ts`)
 - **OpenSpec change:** `pdtch-191-generation-item-session`
@@ -37,6 +38,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
 | **Diff report** | Lifecycle home: adapt + persist/load + types + `enrichSemanticDiffReport` + `produceUnifiedDiffReport`; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
+| **Strict OpenAPI gate** | When `strictOpenapi`: parser validate + load governance + strict diagnostics + write report + fail gates (`runStrictOpenApiGate`); OpenSpec `strict-openapi-gate` |
 | **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; string parse leaf `parseOpenApiContent`; git `show` stays in CLI |
 | **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
@@ -90,6 +92,20 @@ Opaque handle for applying ReuseStore policy while writing models/schemas.
 - **Write:** V2/V3 share one `writeProps`; single models-finalize so `inputPath` survives `validationLibrary !== NONE`
 - **Hit path:** `writeOutputFile` compares content, not `expectedByteSize`
 - **OpenSpec change:** `pdtch-191-reuse-write-session`
+
+## Strict OpenAPI gate
+
+Deepen Generation item session `strictOpenapi` block into one Strict module.
+
+- **Module:** `src/core/strict/runStrictOpenApiGate.ts` — `runStrictOpenApiGate(…) → Promise<{ reportPath; report }>`
+- **Owns:** `validateWithSwaggerParser` → `loadGovernanceConfig` → `validateOpenApiStrict` → `writeOpenApiStrictReport` → log `STRICT_REPORT_CREATED` → throw on summary.errors / optional `failOnGovernanceErrors`
+- **Input:** `{ absoluteInput, openApi, context, reportFile, governanceConfig?, failOnGovernanceErrors?, logger: { forceInfo } }`
+- **Caller:** Generation item session — `if (strictOpenapi) await runStrictOpenApiGate(…)` only
+- **Leaves stay:** `validateOpenApiStrict` / `validateWithSwaggerParser` / `writeOpenApiStrictReport` as separate exports
+- **Export:** leaf only — not `core/index`
+- **Out of scope:** Spec-load merge of swagger validate; issue-code / governance semantics change; Diff/analyze-diff; public API / options
+- **Tests:** unit fail gates + success reportPath; existing strict suite preserve
+- **OpenSpec change:** `strict-openapi-gate`
 
 ## Plugin config injection
 
