@@ -2,8 +2,8 @@ import path from 'path';
 
 import { Import } from '../types/shared/Import.model';
 import type { Model } from '../types/shared/Model.model';
-import { sort } from './sort';
-import { unique } from './unique';
+import { sort } from '../utils/sort';
+import { unique } from '../utils/unique';
 
 function normalizePath(value: string): string {
     return value.startsWith('./') ? value.slice(2) : value;

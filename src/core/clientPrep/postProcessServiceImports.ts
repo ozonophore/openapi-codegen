@@ -1,7 +1,7 @@
 import { Import } from '../types/shared/Import.model';
 import type { Service } from '../types/shared/Service.model';
-import { sort } from './sort';
-import { unique } from './unique';
+import { sort } from '../utils/sort';
+import { unique } from '../utils/unique';
 
 /**
  * Set unique imports, sorted by name

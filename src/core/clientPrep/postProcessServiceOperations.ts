@@ -1,6 +1,6 @@
 import type { Operation } from '../types/shared/Operation.model';
 import type { Service } from '../types/shared/Service.model';
-import { flatMap } from './flatMap';
+import { flatMap } from '../utils/flatMap';
 
 export function postProcessServiceOperations(service: Service): Operation[] {
     const names = new Map<string, number>();

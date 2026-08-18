@@ -7,6 +7,10 @@ import { Parser as ParserV2 } from './api/v2/Parser';
 import { OpenApi as OpenApiV2 } from './api/v2/types/OpenApi.model';
 import { Parser as ParserV3 } from './api/v3/Parser';
 import { OpenApi as OpenApiV3 } from './api/v3/types/OpenApi.model';
+import { postProcessClient } from './clientPrep/postProcessClient';
+import { prepareDtoModels } from './clientPrep/prepareDtoModels';
+import { registerHandlebarTemplates } from './clientPrep/registerHandlebarTemplates';
+import { resolveClassesModeTypes } from './clientPrep/resolveClassesModeTypes';
 import { Context } from './Context';
 import { createResolvedContext } from './createResolvedContext';
 import { applyDiffReportToClient, DiffReport, loadDiffReport } from './diffReport';
@@ -27,10 +31,6 @@ import { ValidationLibrary } from './types/enums/ValidationLibrary.enum';
 import type { Client } from './types/shared/Client.model';
 import { getOpenApiVersion, OpenApiVersion } from './utils/getOpenApiVersion';
 import { getOutputPaths } from './utils/getOutputPaths';
-import { postProcessClient } from './utils/postProcessClient';
-import { prepareDtoModels } from './utils/prepareDtoModels';
-import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
-import { resolveClassesModeTypes } from './utils/resolveClassesModeTypes';
 import type { WriteClient } from './write/WriteClient';
 
 export type GenerationItemSessionDeps = {

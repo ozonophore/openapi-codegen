@@ -1,7 +1,7 @@
 import type { Service } from '../types/shared/Service.model';
+import { unique } from '../utils/unique';
 import { postProcessServiceImports } from './postProcessServiceImports';
 import { postProcessServiceOperations } from './postProcessServiceOperations';
-import { unique } from './unique';
 
 export function postProcessService(service: Service): Service {
     const clone = { ...service };

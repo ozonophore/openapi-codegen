@@ -55,6 +55,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 - **Wiring:** facade constructs it inside `generate(rawOptions)` and passes `generateItem: (item, cache, ctx) => itemSession.run(...)`
 - **Strict:** when `strictOpenapi`, delegates to **Strict OpenAPI gate** (`runStrictOpenApiGate`) — see below
 - **V2/V3:** shared prepare via private `prepareClientFromOpenApi` (parse callback → applyDiff → postProcess → DTO); switch only selects Parser + `WRITING_V2`/`WRITING_V3` logs
+- **Client prep:** templates / postProcess / DTO+classes → **ClientPrep** package (`src/core/clientPrep/`) — OpenSpec `client-prep-home`
 - **Visibility:** internal (not re-exported from `src/core/index.ts`)
 - **OpenSpec change:** `pdtch-191-generation-item-session`
 
@@ -109,6 +110,7 @@ DRY config load prep ahead of migrate (architecture #6 residual).
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **Generation batch finalize** | Post-loop phases: combine → traffic/swarm → stale → cache save → specAnalysis → reuse GC/save → report → workspace → ESLint (`finalizeGenerationBatch`); OpenSpec `generation-batch-finalize` |
 | **Generation batch setup** | Pre-loop bootstrap: cache/reuse/sharedFolder/preAnalyze (`setupGenerationBatch`); OpenSpec `generation-batch-setup` |
+| **ClientPrep** | Handlebars registration + Client postProcess cluster + DTO/classes prepare under `src/core/clientPrep/`; OpenSpec `client-prep-home` |
 | **WriteClient** | Thin facade in `src/core/write/WriteClient.ts` over OutputFileSession, LintTargetRegistry, IndexCombineSession; per-item write → `writeClientArtifacts`; OpenSpec `write-client-leaves-home` |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
 | **WriteClient artifacts write** | Per-item write order (`src/core/write/writeClientArtifacts.ts`): mkdir/core/services/schemas/models + IndexCombine `register`; facade `WriteClient.writeClient` thin delegate; OpenSpec `write-client-artifacts-orchestration` |
@@ -167,6 +169,17 @@ Colocate Write facade + artifacts orchestration + free-function leaves under one
 - **Surface:** no barrel / no shim at old `src/core/WriteClient.ts` or `utils/writeClient*` paths
 - **Out of scope:** leaf behavior change; move CoreOutputAdapter; IndexCombine rethink
 - **OpenSpec change:** `write-client-leaves-home`
+
+## ClientPrep package home
+
+Colocate item-session Client prepare (templates + postProcess + DTO/classes) under one package (architecture #7).
+
+- **Package:** `src/core/clientPrep/` — `registerHandlebarTemplates` / `registerHandlebarHelpers`, `prepareDtoModels`, `resolveClassesModeTypes`, all `postProcess*`; tests in `clientPrep/__tests__/`
+- **Stays outside:** `utils/precompileTemplates.ts`, CLI `initOpenApiConfig` Handlebars, `templatesCompiled/` layout, shared utils helpers (`unique`/`sort`/`flatMap`/`escapeName`)
+- **Caller:** Generation item session only (generation path)
+- **Surface:** no barrel / no shim at old `utils/` paths
+- **Out of scope:** template/prepare semantics; CLI init templates merge
+- **OpenSpec change:** `client-prep-home`
 
 ## IndexCombine core adapter
 

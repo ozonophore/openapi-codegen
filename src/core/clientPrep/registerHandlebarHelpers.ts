@@ -5,7 +5,7 @@ import { REGEX_BACKSLASH, REGEX_DOT_SLASH, REGEX_LEADING_DOT_SLASH, REGEX_MULTIP
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { Enum } from '../types/shared/Enum.model';
 import { Model } from '../types/shared/Model.model';
-import { unique } from './unique';
+import { unique } from '../utils/unique';
 
 export function registerHandlebarHelpers(root: { httpClient: HttpClient; useOptions: boolean; useUnionTypes: boolean; useBatchEslintFix?: boolean }): void {
     Handlebars.registerHelper('equals', function (this: any, a: string, b: string, options: Handlebars.HelperOptions): string {
