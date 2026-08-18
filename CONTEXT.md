@@ -69,7 +69,7 @@ Typed root bag for batch/finalize (architecture #1 residual after options resolv
 - **Facade:** `OpenApiClient.generate(rawOptions)` still takes full `TRawOptions` (resolve + logger/eslint)
 - **Surface:** internal — not `core/index`
 - **Tests:** field-lists golden on `.items` + thin root assert
-- **Out of scope:** batch setup extract; GenerationCache move; inherit into items; widen bag
+- **Out of scope:** inherit into items; widen bag
 - **OpenSpec change:** `generation-root-options`
 
 ## Migrate loaded config helper
@@ -105,7 +105,7 @@ DRY VersionedSchema migrate wiring (architecture #7 migrate-in-core Speculative 
 | **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; string parse leaf `parseOpenApiContent`; git `show` stays in CLI |
 | **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
-| **GenerationCache** | Entity/content cache entries per output root |
+| **GenerationCache** | Entity/content cache store under `src/core/generationCache/GenerationCache.ts`; OpenSpec `generation-cache-home` |
 | **Generation affecting options** | Allowlist + projections: reuse `OptionsSlice` ⊂ affecting; entity fingerprint v4 uses single `optionsAffectingHash`; OpenSpec `generation-affecting-options` |
 | **Context** | Parse-time Spec context (refs, virtual file map, plugins) — not passed to WriteClient |
 | **Generator plugins** | Loaded into Context during per-item generation / preAnalyze |
@@ -161,12 +161,13 @@ Flush IndexCombine via `CoreOutputAdapter` instead of WriteClient-shaped `IndexC
 
 Policy for skipping a Spec item when GenerationCache hit is valid: fingerprint match + files on disk. Applies when `cacheStrategy` is **`entity` or `reuse`** (hybrid skip). For `reuse`, skip also requires a Reuse manifest **presence** guard (`specItems[spec]` exists) **and** store-artifact integrity (`verifySpecItemIntegrity`) — not hashing of output files.
 
-- **Module:** `src/core/generationCache/EntitySkip.ts` (GenerationCache stays in `src/core/utils/GenerationCache.ts`)
+- **Module:** `src/core/generationCache/EntitySkip.ts` (+ `GenerationCache.ts` in same package)
 - **Interface:** `buildCacheKey`, `buildEntityFingerprint`, `shouldEntitySkip` — no `registerOutputFile` (Write side effect stays in Generation item session)
 - **Fingerprint (v4):** `cacheFingerprintVersion` + `generatorVersion` + `specHash` + **`optionsAffectingHash`** (see **Generation affecting options**)
 - **Serialization:** `stableStringify` + same hash helper as reuse fingerprints
 - **Call sites:** `GenerationItemSession.run` and batch session `shouldEntitySkip` callback; `getSpecItemName` shared (preAnalyze / AvatarSwarm use the same helper)
 - **Cache break:** bump to fingerprint version **4** (one-time warm miss on affecting-options fold; reuse unchanged)
+- **Store home:** `generationCache/GenerationCache.ts` — OpenSpec `generation-cache-home`
 - **OpenSpec change:** `pdtch-191-entity-skip-fingerprint`
 
 ## Entity skip residual derive

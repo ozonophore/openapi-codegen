@@ -10,6 +10,7 @@ import { resolveSpecAnalysisConfig } from '../common/VersionedSchema/Utils/resol
 import { AvatarSwarmGenerator } from './avatarSwarm/AvatarSwarmGenerator';
 import { writeSwarmOutput } from './avatarSwarm/writeSwarmOutput';
 import { getSpecItemName } from './generationCache/EntitySkip';
+import { GenerationCache } from './generationCache/GenerationCache';
 import { generateTrafficSplitterModule } from './migration/generateTrafficSplitterModule';
 import type { GenerationRootOptions } from './resolveGenerationOptions';
 import { ReuseStore } from './reuseStore';
@@ -18,7 +19,6 @@ import { writeGenerationReport } from './reuseStore/GenerationReport';
 import { SHARED_FOLDER_NAME } from './reuseStore/SharedFolderWriter';
 import { finalizeSpecAnalysis, mergeSpecAnalysisConfigAcrossItems, type SpecAnalysisAccumulator } from './specAnalysis/runSpecAnalysis';
 import type { SpecAnalysisReport } from './specAnalysis/types';
-import { GenerationCache } from './utils/GenerationCache';
 import { buildWorkspaceReport } from './workspaceReport/buildWorkspaceReport';
 import { writeWorkspaceReport } from './workspaceReport/writeWorkspaceReport';
 import type { WriteClient } from './WriteClient';

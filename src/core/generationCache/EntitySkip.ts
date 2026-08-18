@@ -6,8 +6,8 @@ import { resolveHelper } from '../../common/utils/pathHelpers';
 import { buildGenerationAffectingHash } from '../generationAffectingOptions';
 import { hashFingerprint, stableStringify } from '../reuseStore/ArtifactFingerprinter';
 import type { ReuseStore } from '../reuseStore/ReuseStore';
-import { GenerationCache } from '../utils/GenerationCache';
 import { isClassesBundleLayout } from '../utils/modelsLayoutHelpers';
+import { GenerationCache } from './GenerationCache';
 
 /** Entity GenerationCache fingerprint envelope version (bump on shape change). */
 export const ENTITY_CACHE_FINGERPRINT_VERSION = 4;

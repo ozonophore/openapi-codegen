@@ -5,6 +5,7 @@ import { resolveHelper } from '../common/utils/pathHelpers';
 import { resolveSpecAnalysisConfig } from '../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
 import { finalizeGenerationBatch } from './finalizeGenerationBatch';
 import { getSpecItemName } from './generationCache/EntitySkip';
+import type { GenerationCache } from './generationCache/GenerationCache';
 import type { GenerationRootOptions } from './resolveGenerationOptions';
 import type { ReuseStore } from './reuseStore';
 import type { GenerationReport } from './reuseStore/GenerationReport';
@@ -13,7 +14,6 @@ import type { SharedFolderWriter } from './reuseStore/SharedFolderWriter';
 import { ReuseConflictError } from './reuseStore/types';
 import { setupGenerationBatch } from './setupGenerationBatch';
 import type { SpecAnalysisAccumulator } from './specAnalysis/runSpecAnalysis';
-import type { GenerationCache } from './utils/GenerationCache';
 import type { WriteClient } from './WriteClient';
 
 export type ItemRunContext = {
