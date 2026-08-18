@@ -9,6 +9,7 @@ import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
 import { Model } from '../../types/shared/Model.model';
 import { templates } from '../../utils/__mocks__/templates';
 import { WriteClient } from '../WriteClient';
+import { writeClientSchemas } from '../writeClientSchemas';
 
 describe('@unit: writeClientSchemas', () => {
     test('writes to filesystem', async () => {
@@ -42,9 +43,9 @@ describe('@unit: writeClientSchemas', () => {
             },
         ];
 
-        const writeClient = new WriteClient();
+        const adapter = new WriteClient().toCoreOutputAdapter();
 
-        await writeClient.writeClientSchemas({
+        await writeClientSchemas(adapter, {
             models,
             templates,
             outputSchemasPath: '/',

@@ -7,6 +7,7 @@ import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { Client } from '../../types/shared/Client.model';
 import { templates } from '../../utils/__mocks__/templates';
 import { WriteClient } from '../WriteClient';
+import { writeClientCore } from '../writeClientCore';
 
 describe('@unit: writeClientCore', () => {
     test('writes to filesystem', async () => {
@@ -27,9 +28,9 @@ describe('@unit: writeClientCore', () => {
 
         const useCancelableRequest = true;
 
-        const writeClient = new WriteClient();
+        const adapter = new WriteClient().toCoreOutputAdapter();
 
-        await writeClient.writeClientCore({ client, templates, outputCorePath: '/', httpClient: HttpClient.FETCH, useCancelableRequest });
+        await writeClientCore(adapter, { client, templates, outputCorePath: '/', httpClient: HttpClient.FETCH, useCancelableRequest });
 
         assert.ok(
             writeFileCalls.some(([filePath, content]) => filePath.toString().includes('OpenAPI.ts') && content.toString().includes('settings')),

@@ -7,6 +7,7 @@ import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { Service } from '../../types/shared/Service.model';
 import { templates } from '../../utils/__mocks__/templates';
 import { WriteClient } from '../WriteClient';
+import { writeClientServices } from '../writeClientServices';
 
 describe('@unit: writeClientServices', () => {
     test('writes to filesystem', async () => {
@@ -27,8 +28,8 @@ describe('@unit: writeClientServices', () => {
             },
         ];
 
-        const writeClient = new WriteClient();
-        await writeClient.writeClientServices({
+        const adapter = new WriteClient().toCoreOutputAdapter();
+        await writeClientServices(adapter, {
             services,
             templates,
             outputPaths: {

@@ -6,19 +6,11 @@ import { LintTargetRegistry } from '../LintTargetRegistry';
 import { OutputFileSession } from '../OutputFileSession';
 import { WriteFileIfChangedResult } from '../utils/writeFileIfChanged';
 import { type TWriteClientProps, writeClientArtifacts } from './writeClientArtifacts';
-import { writeClientCore } from './writeClientCore';
-import { writeClientCoreIndex } from './writeClientCoreIndex';
-import { writeClientExecutor } from './writeClientExecutor';
-import { writeClientModels } from './writeClientModels';
-import { writeClientModelsIndex } from './writeClientModelsIndex';
-import { writeClientSchemas } from './writeClientSchemas';
-import { writeClientSchemasIndex } from './writeClientSchemasIndex';
-import { writeClientServices } from './writeClientServices';
-import { writeClientServicesIndex } from './writeClientServicesIndex';
 
 /**
  * Thin facade over OutputFileSession, LintTargetRegistry, and IndexCombineSession.
  * Per-item write order lives in writeClientArtifacts; combine* flushes via CoreOutputAdapter.
+ * Leaf writers are free functions — call with `toCoreOutputAdapter()`, not methods on this class.
  */
 export class WriteClient {
     private readonly outputFiles: OutputFileSession;
@@ -101,23 +93,4 @@ export class WriteClient {
     public toCoreOutputAdapter(): CoreOutputAdapter {
         return toCoreOutputAdapter(this);
     }
-
-    /** Делегирует запись core-части клиента. */
-    public writeClientCore = (options: Parameters<typeof writeClientCore>[1]) => writeClientCore(this.toCoreOutputAdapter(), options);
-    /** Делегирует запись index core-части. */
-    public writeClientCoreIndex = (options: Parameters<typeof writeClientCoreIndex>[1]) => writeClientCoreIndex(this.toCoreOutputAdapter(), options);
-    /** Делегирует запись моделей клиента. */
-    public writeClientModels = (options: Parameters<typeof writeClientModels>[1]) => writeClientModels(this.toCoreOutputAdapter(), options);
-    /** Делегирует запись index моделей. */
-    public writeClientModelsIndex = (options: Parameters<typeof writeClientModelsIndex>[1]) => writeClientModelsIndex(this.toCoreOutputAdapter(), options);
-    /** Делегирует запись схем клиента. */
-    public writeClientSchemas = (options: Parameters<typeof writeClientSchemas>[1]) => writeClientSchemas(this.toCoreOutputAdapter(), options);
-    /** Делегирует запись index схем. */
-    public writeClientSchemasIndex = (options: Parameters<typeof writeClientSchemasIndex>[1]) => writeClientSchemasIndex(this.toCoreOutputAdapter(), options);
-    /** Делегирует запись сервисов клиента. */
-    public writeClientServices = (options: Parameters<typeof writeClientServices>[1]) => writeClientServices(this.toCoreOutputAdapter(), options);
-    /** Делегирует запись index сервисов. */
-    public writeClientServicesIndex = (options: Parameters<typeof writeClientServicesIndex>[1]) => writeClientServicesIndex(this.toCoreOutputAdapter(), options);
-    /** Делегирует запись executor клиента. */
-    public writeClientExecutor = (options: Parameters<typeof writeClientExecutor>[1]) => writeClientExecutor(this.toCoreOutputAdapter(), options);
 }

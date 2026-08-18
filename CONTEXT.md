@@ -112,7 +112,7 @@ DRY config load prep ahead of migrate (architecture #6 residual).
 | **Generation batch finalize** | Post-loop phases: combine → traffic/swarm → stale → cache save → specAnalysis → reuse GC/save → report → workspace → ESLint (`finalizeGenerationBatch`); OpenSpec `generation-batch-finalize` |
 | **Generation batch setup** | Pre-loop bootstrap: cache/reuse/sharedFolder/preAnalyze (`setupGenerationBatch`); OpenSpec `generation-batch-setup` |
 | **ClientPrep** | Handlebars registration + Client postProcess cluster + DTO/classes prepare under `src/core/clientPrep/`; OpenSpec `client-prep-home` |
-| **WriteClient** | Thin facade in `src/core/write/WriteClient.ts` over OutputFileSession, LintTargetRegistry, IndexCombineSession; per-item write → `writeClientArtifacts`; OpenSpec `write-client-leaves-home` |
+| **WriteClient** | Thin facade in `src/core/write/WriteClient.ts` over OutputFileSession, LintTargetRegistry, IndexCombineSession; per-item write → `writeClientArtifacts`; no leaf method bindings — OpenSpec `write-client-drop-leaf-bindings` / `write-client-leaves-home` |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
 | **WriteClient artifacts write** | Per-item write order (`src/core/write/writeClientArtifacts.ts`): mkdir/core/services/schemas/models + IndexCombine `register`; facade `WriteClient.writeClient` thin delegate; OpenSpec `write-client-artifacts-orchestration` |
 | **IndexCombineSession** | Accumulates per-item generator configs; batch flush via `combineAndWrite(adapter)` / `combineAndWrightSimple(adapter)` on `CoreOutputAdapter`; OpenSpec `index-combine-core-adapter` |
@@ -139,11 +139,23 @@ Deepen residual from concern split: remove `this: WriteClient` from leaves; shar
 - **Relation to reuse:** `ReuseOutputAdapter` stays narrow (write + optional lint); `toReuseOutputAdapter(core, defaultLintRoot?)` lives in `CoreOutputAdapter.ts`
 - **Helpers:** free `toCoreOutputAdapter(host)` + `WriteClient.toCoreOutputAdapter()` method
 - **Leaf shape:** `writeClient*(adapter, options)` — first-arg adapter; all `writeClient*` + `writeSharedOrLocalCoreFile`
-- **Facade:** thin public methods remain for non-index leaves / tests (`writeClientModels(opts)` → …); Full/Simple index bindings removed in **IndexCombine core adapter**
+- **Facade:** no public leaf methods — tests call free `writeClient*(adapter, …)`; Full/Simple index bindings removed in **IndexCombine core adapter**
 - **Visibility:** internal — not from `src/core/index.ts`
+- **Follow-up (done):** drop leaf bindings — see **WriteClient drop leaf bindings** below
 - **Follow-up (locked):** per-item write order → **WriteClient artifacts write** below
 - **Follow-up (locked):** IndexCombine flush on CoreOutputAdapter → **IndexCombine core adapter**
 - **OpenSpec change:** `write-client-leaf-adapters`
+
+## WriteClient drop leaf bindings
+
+YAGNI residual after leaf adapters: remove nine pass-through facade methods (zero production callers).
+
+- **Deletes from `WriteClient`:** `writeClientCore` / `CoreIndex` / `Models` / `ModelsIndex` / `Schemas` / `SchemasIndex` / `Services` / `ServicesIndex` / `Executor` (+ leaf imports on the class)
+- **Keeps:** `writeClient` · `combineAndWrite*` · output/lint registry · `logger` · `toCoreOutputAdapter`
+- **Tests:** leaf suites call `writeClient*(new WriteClient().toCoreOutputAdapter(), opts)` inline — no shared helper
+- **Spec:** delta on `write-client-leaf-adapters` — remove «Facade preserves public leaf methods»
+- **Out of scope:** expected-files delta; narrow item/batch deps; separated-index collapse; change leaf behavior
+- **OpenSpec change:** `write-client-drop-leaf-bindings`
 
 ## WriteClient artifacts write
 
@@ -240,7 +252,7 @@ Unify generation-affecting option locality: one allowlist, two projections (reus
 Opaque handle for applying ReuseStore policy while writing models/schemas.
 
 - **Type:** `ReuseWriterContext` in `reuseStore/reuseWriterHelpers.ts` (required when present: store, optionsSlice, specInput, inputPath, modelSchemas; optional keys/stats/conflict/shared/prettier)
-- **Write seam:** `WriteClient.writeClient` / `writeClientModels` / `writeClientSchemas` take `reuse?: ReuseWriterContext` — not a 9-field flat bag
+- **Write seam:** `WriteClient.writeClient` / free `writeClientModels` / `writeClientSchemas` take `reuse?: ReuseWriterContext` — not a 9-field flat bag
 - **Output adapter:** `ReuseOutputAdapter = { writeOutputFile; registerLintTarget? }`; reuse helpers depend on the adapter, not the `WriteClient` class
 - **Assembly:** built once in `GenerationItemSession.run` from `itemRunContext` + local slice/schemas/paths
 - **Write:** V2/V3 share one `writeProps`; single models-finalize so `inputPath` survives `validationLibrary !== NONE`

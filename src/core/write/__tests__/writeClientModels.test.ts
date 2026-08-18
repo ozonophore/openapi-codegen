@@ -12,7 +12,7 @@ import { ModelsMode } from '../../types/enums/ModelsMode.enum';
 import { Model } from '../../types/shared/Model.model';
 import { templates } from '../../utils/__mocks__/templates';
 import { WriteClient } from '../WriteClient';
-import { resolvePerFileOutputCore } from '../writeClientModels';
+import { resolvePerFileOutputCore, writeClientModels } from '../writeClientModels';
 
 describe('@unit: writeClientModels', () => {
     test('resolvePerFileOutputCore nests ../ for deeper model paths', () => {
@@ -51,9 +51,9 @@ describe('@unit: writeClientModels', () => {
             },
         ];
 
-        const writeClient = new WriteClient();
+        const adapter = new WriteClient().toCoreOutputAdapter();
 
-        await writeClient.writeClientModels({
+        await writeClientModels(adapter, {
             models,
             templates,
             outputModelsPath: '/',
@@ -103,9 +103,9 @@ describe('@unit: writeClientModels', () => {
             },
         ];
 
-        const writeClient = new WriteClient();
+        const adapter = new WriteClient().toCoreOutputAdapter();
 
-        await writeClient.writeClientModels({
+        await writeClientModels(adapter, {
             models,
             templates,
             outputModelsPath: '/',
@@ -179,9 +179,9 @@ describe('@unit: writeClientModels', () => {
             },
         ];
 
-        const writeClient = new WriteClient();
+        const adapter = new WriteClient().toCoreOutputAdapter();
 
-        await writeClient.writeClientModels({
+        await writeClientModels(adapter, {
             models,
             templates,
             outputModelsPath: '/',
@@ -239,9 +239,9 @@ describe('@unit: writeClientModels', () => {
         ];
 
         const outputModelsPath = mkdtempSync(join(tmpdir(), 'openapi-codegen-models-'));
-        const writeClient = new WriteClient();
+        const adapter = new WriteClient().toCoreOutputAdapter();
         try {
-            await writeClient.writeClientModels({
+            await writeClientModels(adapter, {
                 models,
                 templates,
                 outputModelsPath,
