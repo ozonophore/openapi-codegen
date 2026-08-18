@@ -37,6 +37,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
+| **WriteClient artifacts write** | Per-item write order (`writeClientArtifacts`): mkdir/core/services/schemas/models + IndexCombine `register`; facade `WriteClient.writeClient` thin delegate; OpenSpec `write-client-artifacts-orchestration` |
 | **Diff report** | Lifecycle home: adapt + persist/load + types + `enrichSemanticDiffReport` + `produceUnifiedDiffReport`; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
 | **Strict OpenAPI gate** | When `strictOpenapi`: parser validate + load governance + strict diagnostics + write report + fail gates (`runStrictOpenApiGate`); OpenSpec `strict-openapi-gate` |
 | **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; string parse leaf `parseOpenApiContent`; git `show` stays in CLI |
@@ -59,7 +60,24 @@ Deepen residual from concern split: remove `this: WriteClient` from leaves; shar
 - **Leaf shape:** `writeClient*(adapter, options)` — first-arg adapter; all `writeClient*` + `writeSharedOrLocalCoreFile`
 - **Facade:** thin public methods remain (`writeClientModels(opts)` → `writeClientModels(this.toCoreOutputAdapter(), opts)`) for tests / orchestration / IndexCombine host
 - **Visibility:** internal — not from `src/core/index.ts`
+- **Follow-up (locked):** per-item write order → **WriteClient artifacts write** below
 - **OpenSpec change:** `write-client-leaf-adapters`
+
+## WriteClient artifacts write
+
+Deepen residual WriteClient `writeClient` / `writeModelsAndFinalize` orchestration into a free function on `CoreOutputAdapter`.
+
+- **Module:** `src/core/writeClientArtifacts.ts` — `writeClientArtifacts(adapter, indexCombine, options)`
+- **Owns:** mkdir order + core/services/executor/schemas/models writes + inline BaseDto when classes+excludeCore + `indexCombine.register`
+- **Leaves:** call free `writeClient*(adapter, …)` directly (not WriteClient method bindings)
+- **IndexCombine:** duck `{ register }` only
+- **Props:** `TWriteClientProps` lives next to orchestration; WriteClient imports it
+- **Facade:** `WriteClient.writeClient(opts)` → `writeClientArtifacts(this.toCoreOutputAdapter(), this.indexCombine, opts)`; leaf bindings + combine* unchanged
+- **Internal:** private `writeModelsAndFinalize` helper in same file
+- **Export:** internal leaf — not `core/index`
+- **Out of scope:** IndexCombineWriteHost / combine flush rethink; write-order semantics change; nested-model-imports TODO; item/batch deps away from WriteClient; batch finalize
+- **Tests:** behavioral preserve `WriteClient.test.ts`
+- **OpenSpec change:** `write-client-artifacts-orchestration`
 
 ## Entity skip / entity fingerprint
 
@@ -145,7 +163,7 @@ WriteClient is a composing facade. Ownership:
 - **OutputFileSession** — `writeOutputFile` + expected-file registry + write stats
 - **LintTargetRegistry** — lint target files + include globs
 - **IndexCombineSession** — per-item config Map; `combineAndWrite` / `combineAndWrightSimple` (HEAD name)
-- **WriteClient** — logger, `writeClient()` orchestration, leaf `writeClient*` via `CoreOutputAdapter`, public delegates
+- **WriteClient** — logger, `writeClient()` → `writeClientArtifacts`, leaf `writeClient*` via `CoreOutputAdapter`, public delegates
 - **SharedFolderWriter** — LCA only (no WriteClient ctor arg)
 - **OpenSpec change:** `pdtch-191-write-client-concern-split`
 
