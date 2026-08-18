@@ -128,7 +128,7 @@ describe('@unit: GenerationBatchSession', () => {
             shouldEntitySkip: async () => false,
         });
 
-        await session.run([item], { input: item.input, output: item.output } as GenerationRootOptions);
+        await session.run([item], {} as GenerationRootOptions);
 
         assert.ok(!tracker.calls.includes('combineAndWrite'));
         assert.ok(!tracker.calls.includes('combineAndWrightSimple'));
@@ -154,7 +154,7 @@ describe('@unit: GenerationBatchSession', () => {
             shouldEntitySkip: async () => false,
         });
 
-        await session.run([item], { input: item.input, output: item.output } as GenerationRootOptions);
+        await session.run([item], {} as GenerationRootOptions);
 
         const reportPath = path.join(ws.cachePath, 'reports', 'latest.json');
         assert.ok(fs.existsSync(reportPath), 'expected generation report');
@@ -192,7 +192,7 @@ describe('@unit: GenerationBatchSession', () => {
             },
         });
 
-        await session.run([item], { input: item.input, output: item.output, preAnalyze: true } as GenerationRootOptions);
+        await session.run([item], { preAnalyze: true } as GenerationRootOptions);
 
         assert.equal(shouldSkipCalls, 1);
         assert.equal(generateCalls, 1);
@@ -222,7 +222,7 @@ describe('@unit: GenerationBatchSession', () => {
             shouldEntitySkip: async () => false,
         });
 
-        await session.run([item], { input: item.input, output: item.output } as GenerationRootOptions);
+        await session.run([item], {} as GenerationRootOptions);
         assert.equal(sawAccumulator, true);
     });
 
@@ -249,7 +249,7 @@ describe('@unit: GenerationBatchSession', () => {
             shouldEntitySkip: async () => false,
         });
 
-        await assert.rejects(() => session.run([item], { input: item.input, output: item.output } as GenerationRootOptions), ReuseConflictError);
+        await assert.rejects(() => session.run([item], {} as GenerationRootOptions), ReuseConflictError);
 
         const reportPath = path.join(ws.cachePath, 'reports', 'latest.json');
         assert.ok(fs.existsSync(reportPath), 'expected early conflict report');
@@ -276,7 +276,7 @@ describe('@unit: GenerationBatchSession', () => {
             shouldEntitySkip: async () => false,
         });
 
-        await session.run([item], { input: item.input, output: item.output } as GenerationRootOptions);
+        await session.run([item], {} as GenerationRootOptions);
         assert.ok(tracker.calls.includes('combineAndWrite'));
     });
 
@@ -299,7 +299,7 @@ describe('@unit: GenerationBatchSession', () => {
             shouldEntitySkip: async () => false,
         });
 
-        await session.run([item], { input: item.input, output: item.output } as GenerationRootOptions);
+        await session.run([item], {} as GenerationRootOptions);
 
         const manifest = JSON.parse(fs.readFileSync(path.join(ws.cachePath, 'manifest.json'), 'utf8')) as {
             artifacts: Record<string, unknown>;

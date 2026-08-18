@@ -4,12 +4,13 @@ Glossary for architecture and generation. Prefer these names over file/class nic
 
 ## Generation batch session
 
-Owns the **multi-item Generation lifecycle** for one `generate()` run: cache / ReuseStore setup, warm preAnalyze entity-skip pass, per-item orchestration, then **Generation batch finalize**.
+Owns the **multi-item Generation lifecycle** for one `generate()` run: **Generation batch setup** → per-item orchestration → **Generation batch finalize**.
 
 - **Module:** `GenerationBatchSession` (`src/core/GenerationBatchSession.ts`)
 - **Deps:** `writeClient`, `eslintFixOptions`, `generateItem`, `shouldEntitySkip`
-- **Does not own:** per-item parse → Client → Write (`GenerationItemSession`, wired as `generateItem`); post-loop phases (`finalizeGenerationBatch`)
-- **Seam to per-item:** callbacks (`generateItem` → `{ entitySkipped }`, `shouldEntitySkip`); Spec analysis accumulator lives on the session and is passed inside **`itemRunContext`** (reuse fields + accumulator) — not a separate argument
+- **Does not own:** per-item parse → Client → Write (`GenerationItemSession`, wired as `generateItem`); pre-loop bootstrap (`setupGenerationBatch`); post-loop phases (`finalizeGenerationBatch`)
+- **Seam to per-item:** callbacks (`generateItem` → `{ entitySkipped }`, `shouldEntitySkip`); Spec analysis accumulator lives on setup `state` and is passed inside **`itemRunContext`**
+- **Setup seam:** before item loop → `setupGenerationBatch(deps, items, root)` — see **Generation batch setup**
 - **Finalize seam:** after item loop → `finalizeGenerationBatch(ctx)` — see **Generation batch finalize**
 - **Visibility:** internal module (not re-exported from `src/core/index.ts`), same as `OpenApiClient`
 - **Logger:** `shutdownLogger` stays at the end of the session success path (behavioral preserve)
@@ -24,14 +25,26 @@ Deepen post-item-loop phases out of `GenerationBatchSession.run` into one free f
 - **Module:** `src/core/finalizeGenerationBatch.ts` — `finalizeGenerationBatch(ctx)`
 - **Owns (order):** combine* (unless `allEntitySkipped`) → traffic/swarm → stale cleanup → cache save → specAnalysis finalize → reuse GC/save → generation report → workspace → write-stats log → batch ESLint (or clear lint) → finished logs
 - **Input:** single ctx bag (`writeClient`, `eslintFixOptions`, `items`, `root`, `allEntitySkipped`, caches/reuse/stats, `buildGenerationReport` closure, mutable `state`)
-- **Stale:** move `cleanupStaleOutputs` + `getOutputRoots` + `removeStaleFilesInDirectory` into finalize module; path helpers for setup stay on session
+- **Stale:** move `cleanupStaleOutputs` + `getOutputRoots` + `removeStaleFilesInDirectory` into finalize module; path helpers for setup live in setup module
 - **ESLint:** batch eslint logic moves into finalize (not session private method)
 - **Report factory:** session keeps the local `buildGenerationReport` closure (no `buildGenerationReport.ts` / `postGenerationSteps` on this lineage)
-- **Stays on session:** setup, item loop, early reuse-conflict report dump, `shutdownLogger` after try/catch
+- **Stays on session:** item loop, early reuse-conflict report dump, `shutdownLogger` after try/catch
 - **Export:** internal leaf — not `core/index`
 - **Out of scope:** setup/preAnalyze/loop rethink; IndexCombine host; write order; finalize order/semantics change
 - **Tests:** behavioral preserve batch suites; optional thin unit for `allEntitySkipped` guards
 - **OpenSpec change:** `generation-batch-finalize`
+
+## Generation batch setup
+
+Deepen pre-item-loop bootstrap out of `GenerationBatchSession.run` into one free function (pair to finalize).
+
+- **Module:** `src/core/setupGenerationBatch.ts` — `setupGenerationBatch(deps, items, root) → SetupGenerationBatchResult`
+- **Owns:** cache settings warn · reuse/sharedFolder · specAnalysis accumulator · cache load · preAnalyze skip pass
+- **Result bag:** caches, reuseStore, stats accumulators, `state`, `start`, `manifestLoadMs`
+- **Report factory:** stays on session (`buildGenerationReport` closure reads setup + state)
+- **Stays on session:** item loop, early conflict dump, finalize call, `shutdownLogger`
+- **Export:** internal leaf — not `core/index`
+- **OpenSpec change:** `generation-batch-setup`
 
 ## Generation item session
 
@@ -82,6 +95,7 @@ DRY VersionedSchema migrate wiring (architecture #7 migrate-in-core Speculative 
 | **Migrate loaded config helper** | `migrateLoadedConfigToLatest` binds default plans/schemas; OpenSpec `migrate-loaded-config-helper` |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **Generation batch finalize** | Post-loop phases: combine → traffic/swarm → stale → cache save → specAnalysis → reuse GC/save → report → workspace → ESLint (`finalizeGenerationBatch`); OpenSpec `generation-batch-finalize` |
+| **Generation batch setup** | Pre-loop bootstrap: cache/reuse/sharedFolder/preAnalyze (`setupGenerationBatch`); OpenSpec `generation-batch-setup` |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
 | **WriteClient artifacts write** | Per-item write order (`writeClientArtifacts`): mkdir/core/services/schemas/models + IndexCombine `register`; facade `WriteClient.writeClient` thin delegate; OpenSpec `write-client-artifacts-orchestration` |
