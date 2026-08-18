@@ -56,6 +56,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
 | **WriteClient artifacts write** | Per-item write order (`writeClientArtifacts`): mkdir/core/services/schemas/models + IndexCombine `register`; facade `WriteClient.writeClient` thin delegate; OpenSpec `write-client-artifacts-orchestration` |
+| **IndexCombineSession** | Accumulates per-item generator configs; batch flush via `combineAndWrite(adapter)` / `combineAndWrightSimple(adapter)` on `CoreOutputAdapter`; OpenSpec `index-combine-core-adapter` |
 | **Diff report** | Lifecycle home: adapt + persist/load + types + `enrichSemanticDiffReport` + `produceUnifiedDiffReport`; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
 | **Strict OpenAPI gate** | When `strictOpenapi`: parser validate + load governance + strict diagnostics + write report + fail gates (`runStrictOpenApiGate`); OpenSpec `strict-openapi-gate` |
 | **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; string parse leaf `parseOpenApiContent`; git `show` stays in CLI |
@@ -76,9 +77,10 @@ Deepen residual from concern split: remove `this: WriteClient` from leaves; shar
 - **Relation to reuse:** `ReuseOutputAdapter` stays narrow (write + optional lint); `toReuseOutputAdapter(core, defaultLintRoot?)` lives in `CoreOutputAdapter.ts`
 - **Helpers:** free `toCoreOutputAdapter(host)` + `WriteClient.toCoreOutputAdapter()` method
 - **Leaf shape:** `writeClient*(adapter, options)` — first-arg adapter; all `writeClient*` + `writeSharedOrLocalCoreFile`
-- **Facade:** thin public methods remain (`writeClientModels(opts)` → `writeClientModels(this.toCoreOutputAdapter(), opts)`) for tests / orchestration / IndexCombine host
+- **Facade:** thin public methods remain for non-index leaves / tests (`writeClientModels(opts)` → …); Full/Simple index bindings removed in **IndexCombine core adapter**
 - **Visibility:** internal — not from `src/core/index.ts`
 - **Follow-up (locked):** per-item write order → **WriteClient artifacts write** below
+- **Follow-up (locked):** IndexCombine flush on CoreOutputAdapter → **IndexCombine core adapter**
 - **OpenSpec change:** `write-client-leaf-adapters`
 
 ## WriteClient artifacts write
@@ -90,12 +92,26 @@ Deepen residual WriteClient `writeClient` / `writeModelsAndFinalize` orchestrati
 - **Leaves:** call free `writeClient*(adapter, …)` directly (not WriteClient method bindings)
 - **IndexCombine:** duck `{ register }` only
 - **Props:** `TWriteClientProps` lives next to orchestration; WriteClient imports it
-- **Facade:** `WriteClient.writeClient(opts)` → `writeClientArtifacts(this.toCoreOutputAdapter(), this.indexCombine, opts)`; leaf bindings + combine* unchanged
+- **Facade:** `WriteClient.writeClient(opts)` → `writeClientArtifacts(this.toCoreOutputAdapter(), this.indexCombine, opts)`; combine* thin (see IndexCombine core adapter)
 - **Internal:** private `writeModelsAndFinalize` helper in same file
 - **Export:** internal leaf — not `core/index`
-- **Out of scope:** IndexCombineWriteHost / combine flush rethink; write-order semantics change; nested-model-imports TODO; item/batch deps away from WriteClient; batch finalize
+- **Out of scope:** write-order semantics change; nested-model-imports TODO; item/batch deps away from WriteClient; batch finalize
+- **Follow-up (locked):** IndexCombine flush → **IndexCombine core adapter**
 - **Tests:** behavioral preserve `WriteClient.test.ts`
 - **OpenSpec change:** `write-client-artifacts-orchestration`
+
+## IndexCombine core adapter
+
+Flush IndexCombine via `CoreOutputAdapter` instead of WriteClient-shaped `IndexCombineWriteHost`.
+
+- **Change:** `combineAndWrite(adapter)` / `combineAndWrightSimple(adapter)` call free `writeClientFullIndex` / `writeClientSimpleIndex`
+- **Delete:** `IndexCombineWriteHost` type; WriteClient `writeClientFullIndex` / `writeClientSimpleIndex` method bindings
+- **Facade:** `WriteClient.combineAndWrite*` → `this.indexCombine.combine*(this.toCoreOutputAdapter())` — batch/finalize call shape unchanged
+- **Leaves:** free functions remain in `utils/writeClient*Index.ts`
+- **Tests:** FullIndex unit → free function + adapter; no Simple dedicated suite today
+- **Export:** internal — not `core/index`
+- **Out of scope:** combine merge/alias/sort logic; finalize away from `writeClient.combine*`; artifacts/OptionsSlice/migrate
+- **OpenSpec change:** `index-combine-core-adapter`
 
 ## Entity skip / entity fingerprint
 

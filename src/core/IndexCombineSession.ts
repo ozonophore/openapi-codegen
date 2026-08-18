@@ -1,4 +1,5 @@
 import { relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
+import type { CoreOutputAdapter } from './CoreOutputAdapter';
 import { ClientArtifacts } from './types/base/ClientArtifacts.model';
 import { ExportedModel } from './types/base/ExportedModel.model';
 import { ExportedService } from './types/base/ExportedService.model';
@@ -14,6 +15,8 @@ import type { Model } from './types/shared/Model.model';
 import { prepareAlias } from './utils/prepareAlias';
 import { sortModelByName } from './utils/sortModelByName';
 import { unique } from './utils/unique';
+import { writeClientFullIndex } from './utils/writeClientFullIndex';
+import { writeClientSimpleIndex } from './utils/writeClientSimpleIndex';
 
 /** Per-item generator config accumulated for batch index combine. */
 export type APIClientGeneratorConfig = {
@@ -27,12 +30,6 @@ export type APIClientGeneratorConfig = {
     schemaModels: Model[];
     modelsMode?: ModelsMode;
     modelsLayout?: ModelsLayout;
-};
-
-/** Narrow host for writing index artifacts (WriteClient leaf bindings). */
-export type IndexCombineWriteHost = {
-    writeClientFullIndex: (value: ClientArtifacts) => Promise<unknown>;
-    writeClientSimpleIndex: (value: SimpleClientArtifacts) => Promise<unknown>;
 };
 
 /**
@@ -51,14 +48,14 @@ export class IndexCombineSession {
         }
     }
 
-    async combineAndWrite(host: IndexCombineWriteHost): Promise<void> {
+    async combineAndWrite(adapter: CoreOutputAdapter): Promise<void> {
         const result = this.buildClientIndexMap();
-        await this.finalizeAndWrite(result, host);
+        await this.finalizeAndWrite(result, adapter);
     }
 
-    async combineAndWrightSimple(host: IndexCombineWriteHost): Promise<void> {
+    async combineAndWrightSimple(adapter: CoreOutputAdapter): Promise<void> {
         const result = this.buildSimpleClientIndexMap();
-        await this.simpledFinalizeAndWrite(result, host);
+        await this.simpledFinalizeAndWrite(result, adapter);
     }
 
     private buildSimpleClientIndexMap(): Map<string, SimpleClientArtifacts> {
@@ -171,19 +168,19 @@ export class IndexCombineSession {
         return result;
     }
 
-    private async finalizeAndWrite(result: Map<string, ClientArtifacts>, host: IndexCombineWriteHost): Promise<void> {
+    private async finalizeAndWrite(result: Map<string, ClientArtifacts>, adapter: CoreOutputAdapter): Promise<void> {
         for (const value of result.values()) {
             value.models = value.models.filter(unique).sort(sortModelByName);
             prepareAlias(value.models);
             value.schemas = value.schemas.filter(unique).sort(sortModelByName);
             prepareAlias(value.schemas);
-            await host.writeClientFullIndex(value);
+            await writeClientFullIndex(adapter, value);
         }
     }
 
-    private async simpledFinalizeAndWrite(result: Map<string, SimpleClientArtifacts>, host: IndexCombineWriteHost): Promise<void> {
+    private async simpledFinalizeAndWrite(result: Map<string, SimpleClientArtifacts>, adapter: CoreOutputAdapter): Promise<void> {
         for (const value of result.values()) {
-            await host.writeClientSimpleIndex(value);
+            await writeClientSimpleIndex(adapter, value);
         }
     }
 

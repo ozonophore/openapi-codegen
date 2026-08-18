@@ -7,20 +7,18 @@ import { OutputFileSession } from './OutputFileSession';
 import { writeClientCore } from './utils/writeClientCore';
 import { writeClientCoreIndex } from './utils/writeClientCoreIndex';
 import { writeClientExecutor } from './utils/writeClientExecutor';
-import { writeClientFullIndex } from './utils/writeClientFullIndex';
 import { writeClientModels } from './utils/writeClientModels';
 import { writeClientModelsIndex } from './utils/writeClientModelsIndex';
 import { writeClientSchemas } from './utils/writeClientSchemas';
 import { writeClientSchemasIndex } from './utils/writeClientSchemasIndex';
 import { writeClientServices } from './utils/writeClientServices';
 import { writeClientServicesIndex } from './utils/writeClientServicesIndex';
-import { writeClientSimpleIndex } from './utils/writeClientSimpleIndex';
 import { WriteFileIfChangedResult } from './utils/writeFileIfChanged';
 import { type TWriteClientProps, writeClientArtifacts } from './writeClientArtifacts';
 
 /**
  * Thin facade over OutputFileSession, LintTargetRegistry, and IndexCombineSession.
- * Per-item write order lives in writeClientArtifacts; leaf writeClient* bindings remain for IndexCombine/tests.
+ * Per-item write order lives in writeClientArtifacts; combine* flushes via CoreOutputAdapter.
  */
 export class WriteClient {
     private readonly outputFiles: OutputFileSession;
@@ -54,12 +52,12 @@ export class WriteClient {
 
     /** Собирает и записывает полный index клиента. */
     async combineAndWrite() {
-        await this.indexCombine.combineAndWrite(this);
+        await this.indexCombine.combineAndWrite(this.toCoreOutputAdapter());
     }
 
     /** Собирает и записывает упрощённый index клиента. */
     async combineAndWrightSimple() {
-        await this.indexCombine.combineAndWrightSimple(this);
+        await this.indexCombine.combineAndWrightSimple(this.toCoreOutputAdapter());
     }
 
     /** Логгер записи клиента. */
@@ -108,8 +106,6 @@ export class WriteClient {
     public writeClientCore = (options: Parameters<typeof writeClientCore>[1]) => writeClientCore(this.toCoreOutputAdapter(), options);
     /** Делегирует запись index core-части. */
     public writeClientCoreIndex = (options: Parameters<typeof writeClientCoreIndex>[1]) => writeClientCoreIndex(this.toCoreOutputAdapter(), options);
-    /** Делегирует запись полного index клиента. */
-    public writeClientFullIndex = (options: Parameters<typeof writeClientFullIndex>[1]) => writeClientFullIndex(this.toCoreOutputAdapter(), options);
     /** Делегирует запись моделей клиента. */
     public writeClientModels = (options: Parameters<typeof writeClientModels>[1]) => writeClientModels(this.toCoreOutputAdapter(), options);
     /** Делегирует запись index моделей. */
@@ -122,8 +118,6 @@ export class WriteClient {
     public writeClientServices = (options: Parameters<typeof writeClientServices>[1]) => writeClientServices(this.toCoreOutputAdapter(), options);
     /** Делегирует запись index сервисов. */
     public writeClientServicesIndex = (options: Parameters<typeof writeClientServicesIndex>[1]) => writeClientServicesIndex(this.toCoreOutputAdapter(), options);
-    /** Делегирует запись упрощённого index клиента. */
-    public writeClientSimpleIndex = (options: Parameters<typeof writeClientSimpleIndex>[1]) => writeClientSimpleIndex(this.toCoreOutputAdapter(), options);
     /** Делегирует запись executor клиента. */
     public writeClientExecutor = (options: Parameters<typeof writeClientExecutor>[1]) => writeClientExecutor(this.toCoreOutputAdapter(), options);
 }
