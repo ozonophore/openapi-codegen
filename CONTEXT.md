@@ -63,6 +63,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
 | **GenerationCache** | Entity/content cache entries per output root |
+| **Generation affecting options** | Allowlist + projections: reuse `OptionsSlice` ⊂ affecting; entity fingerprint v4 uses single `optionsAffectingHash`; OpenSpec `generation-affecting-options` |
 | **Context** | Parse-time Spec context (refs, virtual file map, plugins) — not passed to WriteClient |
 | **Generator plugins** | Loaded into Context during per-item generation / preAnalyze |
 
@@ -119,10 +120,10 @@ Policy for skipping a Spec item when GenerationCache hit is valid: fingerprint m
 
 - **Module:** `src/core/generationCache/EntitySkip.ts` (GenerationCache stays in `src/core/utils/GenerationCache.ts`)
 - **Interface:** `buildCacheKey`, `buildEntityFingerprint`, `shouldEntitySkip` — no `registerOutputFile` (Write side effect stays in Generation item session)
-- **Fingerprint (v3):** `cacheFingerprintVersion` + `generatorVersion` + `specHash` + **`optionsSliceHash`** + **residual** derived from the affecting-keys allowlist (not a hand list)
+- **Fingerprint (v4):** `cacheFingerprintVersion` + `generatorVersion` + `specHash` + **`optionsAffectingHash`** (see **Generation affecting options**)
 - **Serialization:** `stableStringify` + same hash helper as reuse fingerprints
 - **Call sites:** `GenerationItemSession.run` and batch session `shouldEntitySkip` callback; `getSpecItemName` shared (preAnalyze / AvatarSwarm use the same helper)
-- **Cache break:** bump to fingerprint version **3** (one-time warm miss)
+- **Cache break:** bump to fingerprint version **4** (one-time warm miss on affecting-options fold; reuse unchanged)
 - **OpenSpec change:** `pdtch-191-entity-skip-fingerprint`
 
 ## Entity skip residual derive
@@ -131,8 +132,26 @@ Close hand-maintained residual drift vs OptionsSlice locality.
 
 - **Strategy:** `ENTITY_FINGERPRINT_AFFECTING_KEYS` allowlist in `EntitySkip.ts`; residual = affecting − OptionsSlice coverage (`OptionsSlice` Pick keys + `plugins` / `disableBuiltinPlugins`)
 - **Initial allowlist:** current residual 11 + slice/plugin keys so derived residual ≡ today’s hand list (bit-identical → keep **v3**)
+- **Follow-up (locked):** fold → **Generation affecting options**
 - **OpenSpec change:** `entity-skip-residual-derive`
 
+## Generation affecting options
+
+Unify generation-affecting option locality: one allowlist, two projections (reuse narrow / entity full).
+
+- **Module:** `src/core/generationAffectingOptions.ts`
+  - `GENERATION_AFFECTING_KEYS` (today’s slice coverage ∪ residual)
+  - `REUSE_OPTIONS_SLICE_KEYS` ⊆ affecting (current OptionsSlice Pick keys; plugins via `pluginsHash` as today)
+  - `buildGenerationAffectingHash(item)` — plugins normalized like `buildOptionsSlice`
+- **Reuse:** `OptionsSlice` shape **unchanged**; drift test `REUSE ⊆ AFFECTING`; no reuse artifact invalidation
+- **Entity fingerprint v4:** `{ cacheFingerprintVersion: 4, generatorVersion, specHash, optionsAffectingHash }` — drop `residual` + entity `optionsSliceHash`
+- **Deletes:** `buildEntityFingerprintResidual`, `ENTITY_FINGERPRINT_RESIDUAL_*`, slice-coverage constants from EntitySkip (affecting keys live in new module; EntitySkip may re-export)
+- **Out of scope:** expanding affecting set; migrate-in-core; reuse path layout; options field-lists
+- **Tests:** EntitySkip v4 + ⊆ drift + residual-only flip via affecting hash; reuse OptionsSlice suites preserve
+- **Warm cache:** one-time entity miss (v4); reuse unchanged
+- **OpenSpec change:** `generation-affecting-options`
+
+## Reuse write session
 ## Reuse write session
 
 Opaque handle for applying ReuseStore policy while writing models/schemas.
