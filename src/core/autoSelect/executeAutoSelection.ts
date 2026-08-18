@@ -1,10 +1,14 @@
 import * as path from 'path';
 
-import { Logger } from '../../common/Logger';
 import { TFlatOptions, TRawOptions } from '../../common/TRawOptions';
 import { normalizeMarauderBoolean } from '../../common/VersionedSchema/Utils/createBooleanToObjectSchema';
-import { AutoSelector } from '../../core/autoSelect';
-import type { AutoSelectResult } from '../../core/autoSelect/types';
+import { AutoSelector } from './AutoSelector';
+import type { AutoSelectResult } from './types';
+
+export type AutoSelectLogger = {
+    info: (message: string) => void;
+    warn: (message: string) => void;
+};
 
 function isUrlLike(value: string): boolean {
     return /^[a-z][a-z\d+\-.]*:/i.test(value);
@@ -12,8 +16,6 @@ function isUrlLike(value: string): boolean {
 
 /**
  * Resolves the project directory for AutoSelector analysis.
- * @param options плоские опции генерации
- * @returns абсолютный путь к директории анализа
  */
 export function resolveProjectAnalysisDir(options: TFlatOptions): string {
     if (options.output) {
@@ -99,7 +101,7 @@ function recommendationsMatch(first: AutoSelectResult, other: AutoSelectResult):
     return first.validator === other.validator && first.httpClient === other.httpClient;
 }
 
-function logAutoSelectResult(result: AutoSelectResult, logger: Logger): void {
+function logAutoSelectResult(result: AutoSelectResult, logger: AutoSelectLogger): void {
     logger.info(`✨ AutoSelector recommendations:`);
     logger.info(`  Validator: ${result.validator}`);
     logger.info(`  HTTP Client: ${result.httpClient}`);
@@ -118,12 +120,9 @@ function resolveResultForOutput(output: string, probeOptionsList: TFlatOptions[]
 }
 
 /**
- * Выполняет AutoSelector при включённом autoSelect и возвращает рекомендованные опции.
- * @param options плоские или multi-item опции генерации
- * @param logger логгер CLI
- * @returns частичные опции для merge перед generate
+ * Runs AutoSelector when autoSelect is enabled and returns recommended options to merge before generate.
  */
-export function executeAutoSelection(options: TRawOptions, logger: Logger): Partial<TRawOptions> {
+export function executeAutoSelection(options: TRawOptions, logger: AutoSelectLogger): Partial<TRawOptions> {
     const autoSelect = normalizeMarauderBoolean(options.autoSelect);
     if (!autoSelect?.enabled) {
         return {};

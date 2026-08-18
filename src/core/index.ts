@@ -4,7 +4,7 @@ import { OpenApiClient } from './OpenApiClient';
 export type { Anomaly, AnomalyDetectionConfig, AnomalyReport, SpecAnalysisConfig } from './analysis';
 export { runAnomalyDetection } from './analysis';
 export type { AutoSelectConfig, AutoSelectResult, ProjectAnalysis, Recommendation } from './autoSelect';
-export { AutoSelector } from './autoSelect';
+export { AutoSelector, executeAutoSelection } from './autoSelect';
 export { AvatarSwarmGenerator } from './avatarSwarm/AvatarSwarmGenerator';
 export type { AvatarDescriptor, SwarmConfig, SwarmManifest, SwarmSharedModel } from './avatarSwarm/types';
 export { writeSwarmOutput } from './avatarSwarm/writeSwarmOutput';

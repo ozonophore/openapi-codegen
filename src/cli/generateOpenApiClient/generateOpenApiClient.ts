@@ -5,9 +5,9 @@ import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { TRawOptions } from '../../common/TRawOptions';
 import { validateZodOptions } from '../../common/Validation';
 import * as OpenAPI from '../../core';
+import { executeAutoSelection } from '../../core/autoSelect';
 import { GenerateOptions, generateOptionsSchema } from '../schemas';
 import { CLICommandResult } from '../types';
-import { executeAutoSelection } from './autoSelectHelpers';
 import { resolveGenerateCliToRawOptions } from './generateCliOptionsAdapter';
 
 /**

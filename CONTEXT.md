@@ -92,6 +92,7 @@ DRY VersionedSchema migrate wiring (architecture #7 migrate-in-core Speculative 
 | **OpenApiClient** | Facade: constructs WriteClient, item/batch sessions; options meaning in `resolveGenerationOptions` |
 | **Generate CLI options adapter** | CLI → `TRawOptions` for `generate` (Zod + merge overrides + migrate) |
 | **Generation root options** | Narrow batch/finalize root Pick (`reuseMode` / `preAnalyze` / traffic / swarm / workspace); OpenSpec `generation-root-options` |
+| **AutoSelect execute** | Probe fan-out + option patch (`executeAutoSelection`) in `core/autoSelect/`; OpenSpec `autoselect-execute-core` |
 | **Migrate loaded config helper** | `migrateLoadedConfigToLatest` binds default plans/schemas; OpenSpec `migrate-loaded-config-helper` |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **Generation batch finalize** | Post-loop phases: combine → traffic/swarm → stale → cache save → specAnalysis → reuse GC/save → report → workspace → ESLint (`finalizeGenerationBatch`); OpenSpec `generation-batch-finalize` |
@@ -302,8 +303,21 @@ Collapse dual Zod call sites in `generateOpenApiClient` into one CLI → `TRawOp
 - **Zod:** `generateOptionsSchema` once at entry; direct path flat refine (`generateCliFlatSchema`) **inside** adapter only
 - **Paths preserved:** direct (input+output) vs config+migrate; migrate wiring via **Migrate loaded config helper**
 - **Override keys:** keep `GENERATE_CLI_OVERRIDE_KEYS` hand list; unit drift test vs `keyof GenerateOptions`
-- **Caller:** `generateOpenApiClient` thin: validate Commander options → adapter → autoSelect → `OpenAPI.generate`
+- **Caller:** `generateOpenApiClient` thin: validate Commander options → adapter → **AutoSelect execute** → `OpenAPI.generate`
 - **OpenSpec change:** `generate-cli-options-adapter`
+
+## AutoSelect execute
+
+Move CLI AutoSelect probe/orchestration into core (architecture #5).
+
+- **Module:** `src/core/autoSelect/executeAutoSelection.ts` — `executeAutoSelection(raw, loggerDuck)` + file-local probe helpers
+- **Owns:** unique-output probes, `AutoSelector.selectOptimal` fan-out, mismatch warn + per-item patch, primary recommendation return
+- **Logger:** duck `{ info; warn }` (CLI passes `APP_LOGGER`)
+- **Export:** `executeAutoSelection` from `autoSelect/index` + `core/index`; probe helpers not on `core/index`
+- **CLI:** thin call only; `autoSelectHelpers.ts` deleted
+- **Tests:** `core/autoSelect/__tests__/executeAutoSelection.test.ts`
+- **Out of scope:** detection rules; fold into `OpenApiClient.generate`; CLI Zod
+- **OpenSpec change:** `autoselect-execute-core`
 
 ## Diff report lifecycle
 

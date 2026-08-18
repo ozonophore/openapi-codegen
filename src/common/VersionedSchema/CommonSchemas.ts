@@ -164,7 +164,7 @@ const anomalyDetectionConfigSchema = specAnalysisConfigSchema.extend({
  *
  * Consolidation: Uses createBooleanToObjectSchema utility instead of inline duplicated logic.
  * This eliminates the per-schema copy-paste pattern that was repeated 3 times here,
- * plus 3 more times in autoSelectHelpers and normalizeMarauderConfigBlocks.
+ * plus 3 more times in executeAutoSelection and normalizeMarauderConfigBlocks.
  */
 export const autoSelectConfigSchemaOrBoolean = createBooleanToObjectSchema(autoSelectConfigSchema);
 export const specAnalysisConfigSchemaOrBoolean = createBooleanToObjectSchema(specAnalysisConfigSchema);

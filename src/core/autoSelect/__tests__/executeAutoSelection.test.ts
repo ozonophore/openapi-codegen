@@ -2,13 +2,12 @@ import assert from 'node:assert';
 import path from 'node:path';
 import { describe, test } from 'node:test';
 
-import { Logger } from '../../../common/Logger';
-import { AutoSelector } from '../../../core/autoSelect';
-import { HttpClient } from '../../../core/types/enums/HttpClient.enum';
-import { ValidationLibrary } from '../../../core/types/enums/ValidationLibrary.enum';
-import { executeAutoSelection, resolveAutoSelectProbeOptions, resolveProjectAnalysisDir } from '../autoSelectHelpers';
+import { HttpClient } from '../../types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
+import { AutoSelector } from '../AutoSelector';
+import { executeAutoSelection, resolveAutoSelectProbeOptions, resolveProjectAnalysisDir } from '../executeAutoSelection';
 
-describe('@unit: autoSelectHelpers', () => {
+describe('@unit: executeAutoSelection', () => {
     test('resolveProjectAnalysisDir prefers output directory', () => {
         const targetDir = resolveProjectAnalysisDir({
             input: './specs/api.yaml',
@@ -80,7 +79,7 @@ describe('@unit: autoSelectHelpers', () => {
             warn: (message: string) => {
                 warnings.push(message);
             },
-        } as unknown as Logger;
+        };
 
         try {
             const result = executeAutoSelection(
