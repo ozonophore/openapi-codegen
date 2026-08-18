@@ -50,6 +50,11 @@ export type WriteClientArtifactsIndexCombine = {
     register: (config: APIClientGeneratorConfig) => void;
 };
 
+/** Expected-files registry view for per-item set-diff (not part of CoreOutputAdapter). */
+export type WriteClientArtifactsExpectedFiles = {
+    getExpectedOutputFilesArray: () => string[];
+};
+
 /** Leaf writers; defaults are the free writeClient* functions. Overridable in tests. */
 export type WriteClientArtifactsLeaves = {
     writeClientCore: typeof writeClientCore;
@@ -77,13 +82,17 @@ const defaultLeaves: WriteClientArtifactsLeaves = {
 
 /**
  * Per-item client artifact write order: mkdir + core/services/schemas/models + IndexCombine register.
+ * @returns paths newly present in the expected-files registry after this write (set-diff)
  */
 export async function writeClientArtifacts(
     adapter: CoreOutputAdapter,
     indexCombine: WriteClientArtifactsIndexCombine,
     options: TWriteClientProps,
+    expectedFiles: WriteClientArtifactsExpectedFiles,
     leaves: WriteClientArtifactsLeaves = defaultLeaves
-): Promise<void> {
+): Promise<string[]> {
+    const knownFilesBefore = new Set(expectedFiles.getExpectedOutputFilesArray());
+
     const {
         client,
         templates,
@@ -208,6 +217,8 @@ export async function writeClientArtifacts(
         prettierConfigPath,
         reuse,
     });
+
+    return expectedFiles.getExpectedOutputFilesArray().filter(filePath => !knownFilesBefore.has(filePath));
 }
 
 async function writeModelsAndFinalize(

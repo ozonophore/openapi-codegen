@@ -121,7 +121,6 @@ export class GenerationItemSession {
                 writeClient.logger.info(LOGGER_MESSAGES.GENERATION.CACHE_MISS(input));
             }
         }
-        const knownFilesBefore = new Set(writeClient.getExpectedOutputFilesArray());
         const generatorPlugins = await loadGeneratorPlugins(mergePluginPaths(plugins, null), {
             disableBuiltins: disableBuiltinPlugins,
         });
@@ -215,7 +214,7 @@ export class GenerationItemSession {
                       sharedFolderWriter: itemRunContext.sharedFolderWriter,
                   }
                 : undefined;
-        await writeClient.writeClient({
+        const writeProps = {
             client: clientPrepared,
             templates,
             outputPaths,
@@ -233,8 +232,8 @@ export class GenerationItemSession {
             modelsLayout,
             prettierConfigPath,
             reuse,
-        });
-        const generatedFiles = writeClient.getExpectedOutputFilesArray().filter(filePath => !knownFilesBefore.has(filePath));
+        };
+        const generatedFiles = await writeClient.writeClient(writeProps);
         if (item.cache && generationCache && (item.cacheStrategy === 'entity' || item.cacheStrategy === 'reuse')) {
             generationCache.set({
                 key: cacheKey,

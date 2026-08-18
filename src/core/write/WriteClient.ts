@@ -37,9 +37,12 @@ export class WriteClient {
     /**
      * Записывает OpenAPI-клиент по шаблонам в выходные директории.
      * @param options параметры записи клиента
+     * @returns пути, зарегистрированные этим вызовом (expected-files set-diff)
      */
-    async writeClient(options: TWriteClientProps): Promise<void> {
-        await writeClientArtifacts(this.toCoreOutputAdapter(), this.indexCombine, options);
+    async writeClient(options: TWriteClientProps): Promise<string[]> {
+        return writeClientArtifacts(this.toCoreOutputAdapter(), this.indexCombine, options, {
+            getExpectedOutputFilesArray: () => this.getExpectedOutputFilesArray(),
+        });
     }
 
     /** Собирает и записывает полный index клиента. */

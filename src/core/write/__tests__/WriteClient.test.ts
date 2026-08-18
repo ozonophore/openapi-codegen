@@ -70,6 +70,7 @@ describe('@unit: writeClientArtifacts — reuse context', () => {
                     modelSchemas: new Map(),
                 },
             },
+            { getExpectedOutputFilesArray: () => [] },
             {
                 writeClientCore: noop as never,
                 writeClientCoreIndex: noop as never,

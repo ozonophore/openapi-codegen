@@ -48,7 +48,7 @@ Deepen pre-item-loop bootstrap out of `GenerationBatchSession.run` into one free
 
 ## Generation item session
 
-Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached outputs on hit) → plugins / `createResolvedContext` → Spec analysis / strict → templates → Diff load/apply → V2/V3 parse / postProcess / DTO → `ReuseWriterContext` → `WriteClient.writeClient` → GenerationCache.set.
+Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached outputs on hit) → plugins / `createResolvedContext` → Spec analysis / strict → templates → Diff load/apply → V2/V3 parse / postProcess / DTO → `ReuseWriterContext` → `WriteClient.writeClient` (returns files delta) → GenerationCache.set.
 
 - **Module:** `GenerationItemSession` (`src/core/GenerationItemSession.ts`)
 - **Deps:** `{ writeClient, eslintFixOptions }`; `run(item, generationCache, itemRunContext)` with required `ItemRunContext`
@@ -114,7 +114,7 @@ DRY config load prep ahead of migrate (architecture #6 residual).
 | **ClientPrep** | Handlebars registration + Client postProcess cluster + DTO/classes prepare under `src/core/clientPrep/`; OpenSpec `client-prep-home` |
 | **WriteClient** | Thin facade in `src/core/write/WriteClient.ts` over OutputFileSession, LintTargetRegistry, IndexCombineSession; per-item write → `writeClientArtifacts`; no leaf method bindings — OpenSpec `write-client-drop-leaf-bindings` / `write-client-leaves-home` |
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
-| **WriteClient artifacts write** | Per-item write order (`src/core/write/writeClientArtifacts.ts`): mkdir/core/services/schemas/models + IndexCombine `register`; facade `WriteClient.writeClient` thin delegate; OpenSpec `write-client-artifacts-orchestration` |
+| **WriteClient artifacts write** | Per-item write order (`src/core/write/writeClientArtifacts.ts`); returns expected-files delta `string[]`; facade `writeClient` propagates; OpenSpec `write-client-artifacts-orchestration` + `write-client-expected-files-delta` |
 | **IndexCombineSession** | Accumulates per-item generator configs; batch flush via `combineAndWrite(adapter)` / `combineAndWrightSimple(adapter)` on `CoreOutputAdapter`; OpenSpec `index-combine-core-adapter` |
 | **Diff report** | Lifecycle home: adapt + persist/load + types + `enrichSemanticDiffReport` + `produceUnifiedDiffReport` + **Analyze Diff pipeline** + **Generation history Diff**; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
 | **Analyze Diff pipeline** | Core orchestration for analyze-diff success path: `analyze → enrich → produce → write` + CI governance gate (`runAnalyzeDiffPipeline`); OpenSpec `analyze-diff-pipeline` |
@@ -154,8 +154,20 @@ YAGNI residual after leaf adapters: remove nine pass-through facade methods (zer
 - **Keeps:** `writeClient` · `combineAndWrite*` · output/lint registry · `logger` · `toCoreOutputAdapter`
 - **Tests:** leaf suites call `writeClient*(new WriteClient().toCoreOutputAdapter(), opts)` inline — no shared helper
 - **Spec:** delta on `write-client-leaf-adapters` — remove «Facade preserves public leaf methods»
-- **Out of scope:** expected-files delta; narrow item/batch deps; separated-index collapse; change leaf behavior
+- **Out of scope:** expected-files delta (→ **WriteClient expected-files delta**); narrow item/batch deps; separated-index collapse; change leaf behavior
 - **OpenSpec change:** `write-client-drop-leaf-bindings`
+
+## WriteClient expected-files delta
+
+Hide per-item expected-files delta inside the write seam (architecture review residual).
+
+- **Change:** `writeClientArtifacts(adapter, indexCombine, options, expectedFiles) → Promise<string[]>` — snapshot expected set → write → return set-diff (bit-identical to former item-session filter)
+- **Facade:** `WriteClient.writeClient(opts): Promise<string[]>` — thin propagate
+- **Caller:** `GenerationItemSession` — `const generatedFiles = await writeClient.writeClient(writeProps)`; delete `knownFilesBefore` snapshot/filter
+- **Keeps:** entity-skip `registerOutputFile` on item session; finalize `getExpectedOutputFiles` for stale cleanup; call name/args `writeClient.writeClient(…)`
+- **Tests:** unit on artifacts/facade return delta; WriteClient / generation behavioral preserve
+- **Out of scope:** narrow item/batch deps; remove getExpected* from item entirely beyond delta; change register semantics; sort for fingerprint
+- **OpenSpec change:** `write-client-expected-files-delta`
 
 ## WriteClient artifacts write
 
@@ -166,7 +178,8 @@ Deepen residual WriteClient `writeClient` / `writeModelsAndFinalize` orchestrati
 - **Leaves:** call free `writeClient*(adapter, …)` directly (not WriteClient method bindings)
 - **IndexCombine:** duck `{ register }` only
 - **Props:** `TWriteClientProps` lives next to orchestration; WriteClient imports it
-- **Facade:** `WriteClient.writeClient(opts)` → `writeClientArtifacts(this.toCoreOutputAdapter(), this.indexCombine, opts)`; combine* thin (see IndexCombine core adapter)
+- **Facade:** `WriteClient.writeClient(opts): Promise<string[]>` → `writeClientArtifacts(…)` (expected-files delta); combine* thin (see IndexCombine core adapter)
+- **Follow-up (done):** expected-files delta — see **WriteClient expected-files delta**
 - **Internal:** private `writeModelsAndFinalize` helper in same file
 - **Export:** internal leaf — not `core/index`
 - **Out of scope:** write-order semantics change; nested-model-imports TODO; item/batch deps away from WriteClient; batch finalize
