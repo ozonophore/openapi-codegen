@@ -1,4 +1,3 @@
-import { DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../common/Consts';
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import type { TEslintFixOptions } from '../common/TEslintFixOptions';
 import type { TStrictFlatOptions } from '../common/TRawOptions';
@@ -13,7 +12,7 @@ import { registerHandlebarTemplates } from './clientPrep/registerHandlebarTempla
 import { resolveClassesModeTypes } from './clientPrep/resolveClassesModeTypes';
 import { Context } from './Context';
 import { createResolvedContext } from './createResolvedContext';
-import { applyDiffReportToClient, DiffReport, loadDiffReport } from './diffReport';
+import { applyHistoryDiffToClient } from './diffReport';
 import type { ItemRunContext } from './GenerationBatchSession';
 import { buildCacheKey, buildEntityFingerprint, defaultFilesExist, getSpecItemName, resolveEntitySkipCandidate, usesEntityCache, usesReuseStoreForItem } from './generationCache/EntitySkip';
 import { GenerationCache } from './generationCache/GenerationCache';
@@ -163,15 +162,6 @@ export class GenerationItemSession {
             validationLibrary,
             useBatchEslintFix: Boolean(eslintFixOptions.tsconfigPath && eslintFixOptions.eslintConfigPath),
         });
-        const diffReportData = await this.loadDiffReportIfNeeded({
-            useHistory,
-            diffReport,
-            inputPath: absoluteInput,
-        });
-        if (useHistory && !diffReportData) {
-            const reportPath = diffReport || DEFAULT_ANALYZE_DIFF_REPORT_PATH;
-            writeClient.logger.warn(LOGGER_MESSAGES.DIFF_REPORT.USE_HISTORY_NO_REPORT(reportPath));
-        }
         writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.DEFINING_VERSION);
         let clientPrepared: Client;
         switch (openApiVersion) {
@@ -180,10 +170,13 @@ export class GenerationItemSession {
                     parse: () => new ParserV2(context).parse(openApi as OpenApiV2),
                     openApi,
                     openApiVersion,
-                    diffReport: diffReportData,
                     context,
                     miracles,
                     modelsMode,
+                    useHistory,
+                    diffReport,
+                    inputPath: absoluteInput,
+                    logger: writeClient.logger,
                 });
                 writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V2);
                 break;
@@ -194,10 +187,13 @@ export class GenerationItemSession {
                     parse: () => new ParserV3(context).parse(openApi as OpenApiV3),
                     openApi,
                     openApiVersion,
-                    diffReport: diffReportData,
                     context,
                     miracles,
                     modelsMode,
+                    useHistory,
+                    diffReport,
+                    inputPath: absoluteInput,
+                    logger: writeClient.logger,
                 });
                 writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V3);
                 break;
@@ -252,59 +248,33 @@ export class GenerationItemSession {
     }
 
     /**
-     * Shared V2/V3 prepare: parse → optional Diff apply → postProcess → optional classes/DTO.
+     * Shared V2/V3 prepare: parse → history Diff → postProcess → optional classes/DTO.
      */
     private prepareClientFromOpenApi(params: {
         parse: () => Client;
         openApi: unknown;
         openApiVersion: OpenApiVersion;
-        diffReport: DiffReport | null;
         context: Context;
         miracles?: TStrictFlatOptions['miracles'];
         modelsMode?: ModelsMode;
+        useHistory?: boolean;
+        diffReport?: string;
+        inputPath?: string;
+        logger: WriteClient['logger'];
     }): Client {
         const client = params.parse();
-        const clientWithDiff = this.applyDiffReportIfNeeded({
+        const clientWithDiff = applyHistoryDiffToClient({
             client,
             openApi: params.openApi as Record<string, unknown>,
             openApiVersion: params.openApiVersion,
-            diffReport: params.diffReport,
             context: params.context,
             miracles: params.miracles,
-        });
-        const clientFinal = postProcessClient(clientWithDiff);
-        return params.modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
-    }
-
-    private async loadDiffReportIfNeeded(params: { useHistory?: boolean; diffReport?: string; inputPath?: string }): Promise<DiffReport | null> {
-        return loadDiffReport({
             useHistory: params.useHistory,
             diffReport: params.diffReport,
             inputPath: params.inputPath,
-            logger: this.deps.writeClient.logger,
+            logger: params.logger,
         });
-    }
-
-    private applyDiffReportIfNeeded(params: {
-        client: Client;
-        openApi: Record<string, unknown>;
-        openApiVersion: OpenApiVersion;
-        diffReport: DiffReport | null;
-        context: Context;
-        miracles?: TStrictFlatOptions['miracles'];
-    }): Client {
-        if (!params.diffReport) {
-            return params.client;
-        }
-
-        return applyDiffReportToClient({
-            client: params.client,
-            openApi: params.openApi,
-            openApiVersion: params.openApiVersion,
-            diffReport: params.diffReport,
-            prefix: params.context.prefix,
-            context: params.context,
-            miraclesConfig: params.miracles,
-        });
+        const clientFinal = postProcessClient(clientWithDiff);
+        return params.modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
     }
 }

@@ -54,7 +54,8 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 - **Deps:** `{ writeClient, eslintFixOptions }`; `run(item, generationCache, itemRunContext)` with required `ItemRunContext`
 - **Wiring:** facade constructs it inside `generate(rawOptions)` and passes `generateItem: (item, cache, ctx) => itemSession.run(...)`
 - **Strict:** when `strictOpenapi`, delegates to **Strict OpenAPI gate** (`runStrictOpenApiGate`) — see below
-- **V2/V3:** shared prepare via private `prepareClientFromOpenApi` (parse callback → applyDiff → postProcess → DTO); switch only selects Parser + `WRITING_V2`/`WRITING_V3` logs
+- **Diff:** generation-path history → **Generation history Diff** (`applyHistoryDiffToClient`); private load/apply wrappers deleted
+- **V2/V3:** shared prepare via private `prepareClientFromOpenApi` (parse → history Diff → postProcess → DTO); switch only selects Parser + `WRITING_V2`/`WRITING_V3` logs
 - **Client prep:** templates / postProcess / DTO+classes → **ClientPrep** package (`src/core/clientPrep/`) — OpenSpec `client-prep-home`
 - **Visibility:** internal (not re-exported from `src/core/index.ts`)
 - **OpenSpec change:** `pdtch-191-generation-item-session`
@@ -115,8 +116,9 @@ DRY config load prep ahead of migrate (architecture #6 residual).
 | **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
 | **WriteClient artifacts write** | Per-item write order (`src/core/write/writeClientArtifacts.ts`): mkdir/core/services/schemas/models + IndexCombine `register`; facade `WriteClient.writeClient` thin delegate; OpenSpec `write-client-artifacts-orchestration` |
 | **IndexCombineSession** | Accumulates per-item generator configs; batch flush via `combineAndWrite(adapter)` / `combineAndWrightSimple(adapter)` on `CoreOutputAdapter`; OpenSpec `index-combine-core-adapter` |
-| **Diff report** | Lifecycle home: adapt + persist/load + types + `enrichSemanticDiffReport` + `produceUnifiedDiffReport` + **Analyze Diff pipeline**; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
+| **Diff report** | Lifecycle home: adapt + persist/load + types + `enrichSemanticDiffReport` + `produceUnifiedDiffReport` + **Analyze Diff pipeline** + **Generation history Diff**; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
 | **Analyze Diff pipeline** | Core orchestration for analyze-diff success path: `analyze → enrich → produce → write` + CI governance gate (`runAnalyzeDiffPipeline`); OpenSpec `analyze-diff-pipeline` |
+| **Generation history Diff** | Generation-path `useHistory`: load + missing-report warn + apply (`applyHistoryDiffToClient`); OpenSpec `generation-history-diff` |
 | **Strict OpenAPI gate** | When `strictOpenapi`: parser validate + load governance + strict diagnostics + write report + fail gates (`runStrictOpenApiGate`); OpenSpec `strict-openapi-gate` |
 | **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; string parse leaf `parseOpenApiContent`; git `show` stays in CLI |
 | **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
@@ -392,6 +394,17 @@ Deepen analyze-diff success-path orchestration out of CLI into one Diff report m
 - **Export:** `diffReport/index.ts` only — not `core/index`
 - **CLI adapter:** validate · Spec load · load gov/ignore/plugins · `runAnalyzeDiffPipeline` · log (incl. CI markdown from returned `report`) · map `ciFailed` / catch → `AnalyzeDiffResult`
 - **OpenSpec change:** `analyze-diff-pipeline`
+
+## Generation history Diff
+
+Generation-path `useHistory`: load Diff report, warn if missing, apply to Client. Deletes empty item-session wrappers.
+
+- **Module:** `src/core/diffReport/applyHistoryDiffToClient.ts` — `applyHistoryDiffToClient(input) → Client`
+- **Owns:** `loadDiffReport` + missing-report warn + `applyDiffReportToClient`
+- **Does not own:** parse / postProcess / DTO; analyze-diff pipeline
+- **Caller:** `GenerationItemSession.prepareClientFromOpenApi`
+- **Export:** `diffReport/index.ts` (not `core/index`)
+- **OpenSpec change:** `generation-history-diff`
 
 ## Spec load unify
 
