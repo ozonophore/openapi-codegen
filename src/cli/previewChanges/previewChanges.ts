@@ -10,9 +10,7 @@ import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { dirNameHelper, joinHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { validateZodOptions } from '../../common/Validation';
-import { allMigrationPlans } from '../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
-import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
-import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
+import { migrateLoadedConfigToLatest } from '../../common/VersionedSchema/Utils/migrateLoadedConfigToLatest';
 import * as OpenAPI from '../../core';
 import { previewChangesSchema, TPreviewChangesOptions } from '../schemas';
 import { CLICommandResult } from '../types';
@@ -167,12 +165,7 @@ export async function previewChanges(options: OptionValues): Promise<CLICommandR
         const preparedOptions = convertArrayToObject(configData);
 
         // Миграция опций
-        const migratedOptions = migrateDataToLatestSchemaVersion({
-            rawInput: preparedOptions,
-            migrationPlans: allMigrationPlans,
-            versionedSchemas: allVersionedSchemas,
-            migrationMode: EMigrationMode.GENERATE_OPENAPI,
-        });
+        const migratedOptions = migrateLoadedConfigToLatest(preparedOptions, EMigrationMode.GENERATE_OPENAPI);
 
         if (!migratedOptions) {
             APP_LOGGER.errorWithHint({

@@ -45,12 +45,26 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 - **Visibility:** internal (not re-exported from `src/core/index.ts`)
 - **OpenSpec change:** `pdtch-191-generation-item-session`
 
+## Migrate loaded config helper
+
+DRY VersionedSchema migrate wiring (architecture #7 migrate-in-core Speculative → helper, not fold into resolve).
+
+- **Module:** `src/common/VersionedSchema/Utils/migrateLoadedConfigToLatest.ts` — `migrateLoadedConfigToLatest(rawInput, migrationMode)` binds `allMigrationPlans` + `allVersionedSchemas`
+- **Semantics:** returns `MigrateToLatestResult | null` (same as engine); no throw policy
+- **Does not own:** `convertArrayToObject`, `omitUndefined`, stripDefaults (stay at callers)
+- **Call sites:** `generateCliOptionsAdapter`, `previewChanges`, `validateAndMigrateConfigData`
+- **Surface:** internal (CLI imports path; not `core/index` / public API)
+- **Out of scope:** programmatic `generate(raw)` migrate; fold into `resolveGenerationOptions`; public signature change; EntitySkip/fingerprint
+- **Tests:** thin unit on wiring + existing CLI suites
+- **OpenSpec change:** `migrate-loaded-config-helper`
+
 ## Related terms
 
 | Term | Role |
 |------|------|
 | **OpenApiClient** | Facade: constructs WriteClient, item/batch sessions; options meaning in `resolveGenerationOptions` |
 | **Generate CLI options adapter** | CLI → `TRawOptions` for `generate` (Zod + merge overrides + migrate) |
+| **Migrate loaded config helper** | `migrateLoadedConfigToLatest` binds default plans/schemas; OpenSpec `migrate-loaded-config-helper` |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **Generation batch finalize** | Post-loop phases: combine → traffic/swarm → stale → cache save → specAnalysis → reuse GC/save → report → workspace → ESLint (`finalizeGenerationBatch`); OpenSpec `generation-batch-finalize` |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
@@ -146,12 +160,11 @@ Unify generation-affecting option locality: one allowlist, two projections (reus
 - **Reuse:** `OptionsSlice` shape **unchanged**; drift test `REUSE ⊆ AFFECTING`; no reuse artifact invalidation
 - **Entity fingerprint v4:** `{ cacheFingerprintVersion: 4, generatorVersion, specHash, optionsAffectingHash }` — drop `residual` + entity `optionsSliceHash`
 - **Deletes:** `buildEntityFingerprintResidual`, `ENTITY_FINGERPRINT_RESIDUAL_*`, slice-coverage constants from EntitySkip (affecting keys live in new module; EntitySkip may re-export)
-- **Out of scope:** expanding affecting set; migrate-in-core; reuse path layout; options field-lists
+- **Out of scope:** expanding affecting set; fold migrate into resolve; reuse path layout; options field-lists
 - **Tests:** EntitySkip v4 + ⊆ drift + residual-only flip via affecting hash; reuse OptionsSlice suites preserve
 - **Warm cache:** one-time entity miss (v4); reuse unchanged
 - **OpenSpec change:** `generation-affecting-options`
 
-## Reuse write session
 ## Reuse write session
 
 Opaque handle for applying ReuseStore policy while writing models/schemas.
@@ -246,7 +259,7 @@ Collapse dual Zod call sites in `generateOpenApiClient` into one CLI → `TRawOp
 
 - **Module:** `generateCliOptionsAdapter.ts` with `resolveGenerateCliToRawOptions` (+ merge/pick/keys); former `generateCliOverrides.ts` removed
 - **Zod:** `generateOptionsSchema` once at entry; direct path flat refine (`generateCliFlatSchema`) **inside** adapter only
-- **Paths preserved:** direct (input+output) vs config+migrate; migrate stays in CLI
+- **Paths preserved:** direct (input+output) vs config+migrate; migrate wiring via **Migrate loaded config helper**
 - **Override keys:** keep `GENERATE_CLI_OVERRIDE_KEYS` hand list; unit drift test vs `keyof GenerateOptions`
 - **Caller:** `generateOpenApiClient` thin: validate Commander options → adapter → autoSelect → `OpenAPI.generate`
 - **OpenSpec change:** `generate-cli-options-adapter`
