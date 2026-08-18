@@ -2,7 +2,7 @@ import { promises as fsPromises } from 'fs';
 
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import type { TEslintFixOptions } from '../common/TEslintFixOptions';
-import type { TRawOptions, TStrictFlatOptions } from '../common/TRawOptions';
+import type { TStrictFlatOptions } from '../common/TRawOptions';
 import { eslintFixBatch } from '../common/utils/eslintFix';
 import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../common/utils/pathHelpers';
@@ -11,6 +11,7 @@ import { AvatarSwarmGenerator } from './avatarSwarm/AvatarSwarmGenerator';
 import { writeSwarmOutput } from './avatarSwarm/writeSwarmOutput';
 import { getSpecItemName } from './generationCache/EntitySkip';
 import { generateTrafficSplitterModule } from './migration/generateTrafficSplitterModule';
+import type { GenerationRootOptions } from './resolveGenerationOptions';
 import { ReuseStore } from './reuseStore';
 import type { GenerationReport, SpecGenerationStats } from './reuseStore/GenerationReport';
 import { writeGenerationReport } from './reuseStore/GenerationReport';
@@ -33,7 +34,7 @@ export type FinalizeGenerationBatchCtx = {
     writeClient: WriteClient;
     eslintFixOptions: TEslintFixOptions;
     items: TStrictFlatOptions[];
-    rawOptions: TRawOptions;
+    root: GenerationRootOptions;
     allEntitySkipped: boolean;
     cacheEnabled: boolean;
     cacheStrategy: string;
@@ -56,7 +57,7 @@ export async function finalizeGenerationBatch(ctx: FinalizeGenerationBatchCtx): 
         writeClient,
         eslintFixOptions,
         items,
-        rawOptions,
+        root,
         allEntitySkipped,
         cacheEnabled,
         cacheStrategy,
@@ -79,7 +80,7 @@ export async function finalizeGenerationBatch(ctx: FinalizeGenerationBatchCtx): 
         }
     }
 
-    const trafficSplitterConfig = rawOptions.trafficSplitter;
+    const trafficSplitterConfig = root.trafficSplitter;
     const trafficSplitterEnabled = trafficSplitterConfig && typeof trafficSplitterConfig === 'object' ? trafficSplitterConfig.enabled : trafficSplitterConfig === true;
     if (trafficSplitterEnabled) {
         if (items.length > 1) {
@@ -94,7 +95,7 @@ export async function finalizeGenerationBatch(ctx: FinalizeGenerationBatchCtx): 
         }
     }
 
-    const swarmConfig = rawOptions.swarm;
+    const swarmConfig = root.swarm;
     const swarmEnabled = swarmConfig && typeof swarmConfig === 'object' ? swarmConfig.enabled : swarmConfig === true;
     if (swarmEnabled) {
         const cfg = typeof swarmConfig === 'object' ? swarmConfig : {};
@@ -147,7 +148,7 @@ export async function finalizeGenerationBatch(ctx: FinalizeGenerationBatchCtx): 
         await writeGenerationReport(reportBasePath, buildGenerationReport());
     }
 
-    const workspaceReportConfig = rawOptions.workspaceReport;
+    const workspaceReportConfig = root.workspaceReport;
     const workspaceReportEnabled = workspaceReportConfig && typeof workspaceReportConfig === 'object' ? workspaceReportConfig.enabled : workspaceReportConfig === true;
     if (workspaceReportEnabled) {
         const cfg = typeof workspaceReportConfig === 'object' ? workspaceReportConfig : {};

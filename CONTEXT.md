@@ -23,7 +23,7 @@ Deepen post-item-loop phases out of `GenerationBatchSession.run` into one free f
 
 - **Module:** `src/core/finalizeGenerationBatch.ts` — `finalizeGenerationBatch(ctx)`
 - **Owns (order):** combine* (unless `allEntitySkipped`) → traffic/swarm → stale cleanup → cache save → specAnalysis finalize → reuse GC/save → generation report → workspace → write-stats log → batch ESLint (or clear lint) → finished logs
-- **Input:** single ctx bag (`writeClient`, `eslintFixOptions`, `items`, `rawOptions`, `allEntitySkipped`, caches/reuse/stats, `buildGenerationReport` closure, mutable `state`)
+- **Input:** single ctx bag (`writeClient`, `eslintFixOptions`, `items`, `root`, `allEntitySkipped`, caches/reuse/stats, `buildGenerationReport` closure, mutable `state`)
 - **Stale:** move `cleanupStaleOutputs` + `getOutputRoots` + `removeStaleFilesInDirectory` into finalize module; path helpers for setup stay on session
 - **ESLint:** batch eslint logic moves into finalize (not session private method)
 - **Report factory:** session keeps the local `buildGenerationReport` closure (no `buildGenerationReport.ts` / `postGenerationSteps` on this lineage)
@@ -45,6 +45,20 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 - **Visibility:** internal (not re-exported from `src/core/index.ts`)
 - **OpenSpec change:** `pdtch-191-generation-item-session`
 
+## Generation root options
+
+Typed root bag for batch/finalize (architecture #1 residual after options resolve).
+
+- **Type:** `GenerationRootOptions` in `resolveGenerationOptions.ts` — Pick: `reuseMode`, `preAnalyze`, `trafficSplitter`, `swarm`, `workspaceReport` (raw-as-is, no defaults fold)
+- **Resolve:** `resolveGenerationOptions(raw) → { items, root }`; project helper private
+- **Callers:** `GenerationBatchSession.run(items, root)`; finalize ctx.`root` (no `rawOptions`)
+- **Items:** these 5 stay **out** of `ROOT_ONLY_KEYS` inherit (bit-identical items)
+- **Facade:** `OpenApiClient.generate(rawOptions)` still takes full `TRawOptions` (resolve + logger/eslint)
+- **Surface:** internal — not `core/index`
+- **Tests:** field-lists golden on `.items` + thin root assert
+- **Out of scope:** batch setup extract; GenerationCache move; inherit into items; widen bag
+- **OpenSpec change:** `generation-root-options`
+
 ## Migrate loaded config helper
 
 DRY VersionedSchema migrate wiring (architecture #7 migrate-in-core Speculative → helper, not fold into resolve).
@@ -64,6 +78,7 @@ DRY VersionedSchema migrate wiring (architecture #7 migrate-in-core Speculative 
 |------|------|
 | **OpenApiClient** | Facade: constructs WriteClient, item/batch sessions; options meaning in `resolveGenerationOptions` |
 | **Generate CLI options adapter** | CLI → `TRawOptions` for `generate` (Zod + merge overrides + migrate) |
+| **Generation root options** | Narrow batch/finalize root Pick (`reuseMode` / `preAnalyze` / traffic / swarm / workspace); OpenSpec `generation-root-options` |
 | **Migrate loaded config helper** | `migrateLoadedConfigToLatest` binds default plans/schemas; OpenSpec `migrate-loaded-config-helper` |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **Generation batch finalize** | Post-loop phases: combine → traffic/swarm → stale → cache save → specAnalysis → reuse GC/save → report → workspace → ESLint (`finalizeGenerationBatch`); OpenSpec `generation-batch-finalize` |
@@ -235,11 +250,11 @@ WriteClient is a composing facade. Ownership:
 
 ## Generation options resolve
 
-Owns raw config → strict items: Zod validate (**throws**, no `process.exit`) → flatten items|flat → inherit → defaults.
+Owns raw config → `{ items, root }`: Zod validate (**throws**, no `process.exit`) → flatten items|flat → inherit → defaults + project `GenerationRootOptions`.
 
 - **Module:** `resolveGenerationOptions` (`src/core/resolveGenerationOptions.ts`)
 - **Item overrides:** `item.X ?? root.X` for `interfacePrefix`, `enumPrefix`, `typePrefix`, `useCancelableRequest`, `sortByRequired`, `useSeparatedIndexes` (plus existing request/plugins/history/models/miracles)
-- **Call site:** `OpenApiClient.generate(rawOptions)` then `GenerationBatchSession.run(items, rawOptions)`
+- **Call site:** `OpenApiClient.generate(rawOptions)` then `GenerationBatchSession.run(items, root)`
 - **Visibility:** internal (not re-exported from `src/core/index.ts`)
 - **OpenSpec change:** `pdtch-191-generation-options-resolve`
 

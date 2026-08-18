@@ -7,7 +7,7 @@ import { HttpClient } from '../types/enums/HttpClient.enum';
 
 describe('@unit: resolveGenerationOptions', () => {
     test('item prefix and flags override root', () => {
-        const items = resolveGenerationOptions({
+        const { items } = resolveGenerationOptions({
             httpClient: HttpClient.FETCH,
             interfacePrefix: 'I',
             enumPrefix: 'E',
@@ -38,7 +38,7 @@ describe('@unit: resolveGenerationOptions', () => {
     });
 
     test('missing item fields inherit root then defaults', () => {
-        const items = resolveGenerationOptions({
+        const { items } = resolveGenerationOptions({
             httpClient: HttpClient.FETCH,
             interfacePrefix: 'Api',
             sortByRequired: true,
@@ -51,7 +51,7 @@ describe('@unit: resolveGenerationOptions', () => {
     });
 
     test('item miracles override root', () => {
-        const items = resolveGenerationOptions({
+        const { items } = resolveGenerationOptions({
             httpClient: HttpClient.FETCH,
             miracles: { enabled: false },
             items: [{ input: './a.yaml', output: './out-a', miracles: { enabled: true } } as never],

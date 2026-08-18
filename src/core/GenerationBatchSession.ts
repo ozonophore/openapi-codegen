@@ -1,11 +1,12 @@
 import { COMMON_DEFAULT_OPTIONS_VALUES } from '../common/Consts';
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import type { TEslintFixOptions } from '../common/TEslintFixOptions';
-import type { TRawOptions, TStrictFlatOptions } from '../common/TRawOptions';
+import type { TStrictFlatOptions } from '../common/TRawOptions';
 import { resolveHelper } from '../common/utils/pathHelpers';
 import { resolveSpecAnalysisConfig } from '../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
 import { finalizeGenerationBatch, type FinalizeGenerationBatchState } from './finalizeGenerationBatch';
 import { getSpecItemName } from './generationCache/EntitySkip';
+import type { GenerationRootOptions } from './resolveGenerationOptions';
 import { ReuseStore } from './reuseStore';
 import type { GenerationReport, ReuseConflictRecord, SpecGenerationStats } from './reuseStore/GenerationReport';
 import { analyzeCrossSpecManifest, writeGenerationReport } from './reuseStore/GenerationReport';
@@ -44,7 +45,7 @@ export class GenerationBatchSession {
 
     constructor(private readonly deps: GenerationBatchSessionDeps) {}
 
-    async run(items: TStrictFlatOptions[], rawOptions: TRawOptions): Promise<void> {
+    async run(items: TStrictFlatOptions[], root: GenerationRootOptions): Promise<void> {
         if (items.length === 0) {
             throw new Error(LOGGER_MESSAGES.GENERATION.NO_OPTIONS);
         }
@@ -73,7 +74,7 @@ export class GenerationBatchSession {
             let reportBasePath = this.resolveOutputRoot(items[0]!.output);
             let manifestLoadMs = 0;
 
-            const reuseMode = rawOptions.reuseMode ?? 'copy';
+            const reuseMode = root.reuseMode ?? 'copy';
             if (reuseMode === 'auto-group' && cacheStrategy !== 'reuse') {
                 writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.AUTO_GROUP_REQUIRES_REUSE_CACHE);
             }
@@ -158,7 +159,7 @@ export class GenerationBatchSession {
             const resolveItemGenerationCache = (option: TStrictFlatOptions): GenerationCache | null =>
                 cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse') ? (generationCaches.get(this.resolveOutputRoot(option.output)) ?? null) : null;
 
-            if (rawOptions.preAnalyze === true) {
+            if (root.preAnalyze === true) {
                 const willEntitySkipSpecItems = new Set<string>();
                 for (const option of items) {
                     const generationCache = resolveItemGenerationCache(option);
@@ -238,7 +239,7 @@ export class GenerationBatchSession {
                 writeClient,
                 eslintFixOptions,
                 items,
-                rawOptions,
+                root,
                 allEntitySkipped,
                 cacheEnabled,
                 cacheStrategy,

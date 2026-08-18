@@ -16,6 +16,14 @@ type RootAliases = {
     diffReport: TRawOptions['diffReport'];
 };
 
+/** Root-lived fields consumed by batch/finalize (not inherited into items). */
+export type GenerationRootOptions = Pick<TRawOptions, 'reuseMode' | 'preAnalyze' | 'trafficSplitter' | 'swarm' | 'workspaceReport'>;
+
+export type ResolveGenerationOptionsResult = {
+    items: TStrictFlatOptions[];
+    root: GenerationRootOptions;
+};
+
 type RootOnlyKey =
     | 'httpClient'
     | 'autoSelect'
@@ -270,9 +278,9 @@ function addDefaultValues(item: TFlatOptions): TStrictFlatOptions {
 }
 
 /**
- * Owns options meaning: Zod validate (throws) → flatten/inherit → defaults → TStrictFlatOptions[].
+ * Owns options meaning: Zod validate (throws) → flatten/inherit → defaults → `{ items, root }`.
  */
-export function resolveGenerationOptions(rawOptions: TRawOptions): TStrictFlatOptions[] {
+export function resolveGenerationOptions(rawOptions: TRawOptions): ResolveGenerationOptionsResult {
     const currentSchema = rawOptionsSchema.superRefine(dependentOptionsRefinement);
     const validationResult = validateZodOptions(currentSchema, rawOptions);
 
@@ -280,5 +288,18 @@ export function resolveGenerationOptions(rawOptions: TRawOptions): TStrictFlatOp
         throw new Error(validationResult.errors.join('\n'));
     }
 
-    return normalizeOptions(rawOptions).map(item => addDefaultValues(item));
+    return {
+        items: normalizeOptions(rawOptions).map(item => addDefaultValues(item)),
+        root: projectGenerationRootOptions(rawOptions),
+    };
+}
+
+function projectGenerationRootOptions(raw: TRawOptions): GenerationRootOptions {
+    return {
+        reuseMode: raw.reuseMode,
+        preAnalyze: raw.preAnalyze,
+        trafficSplitter: raw.trafficSplitter,
+        swarm: raw.swarm,
+        workspaceReport: raw.workspaceReport,
+    };
 }
