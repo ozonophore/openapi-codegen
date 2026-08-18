@@ -14,7 +14,7 @@ import type { SharedFolderWriter } from './reuseStore/SharedFolderWriter';
 import { ReuseConflictError } from './reuseStore/types';
 import { setupGenerationBatch } from './setupGenerationBatch';
 import type { SpecAnalysisAccumulator } from './specAnalysis/runSpecAnalysis';
-import type { WriteClient } from './WriteClient';
+import type { WriteClient } from './write/WriteClient';
 
 export type ItemRunContext = {
     reuseStore: ReuseStore | null;

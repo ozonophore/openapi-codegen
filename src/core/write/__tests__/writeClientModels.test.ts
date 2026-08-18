@@ -10,8 +10,8 @@ import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { ModelsLayout } from '../../types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../../types/enums/ModelsMode.enum';
 import { Model } from '../../types/shared/Model.model';
-import { WriteClient } from '../../WriteClient';
-import { templates } from '../__mocks__/templates';
+import { templates } from '../../utils/__mocks__/templates';
+import { WriteClient } from '../WriteClient';
 import { resolvePerFileOutputCore } from '../writeClientModels';
 
 describe('@unit: writeClientModels', () => {

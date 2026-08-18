@@ -6,7 +6,7 @@ import { GenerationBatchSession } from './GenerationBatchSession';
 import { shouldEntitySkip } from './generationCache/EntitySkip';
 import { GenerationItemSession } from './GenerationItemSession';
 import { resolveGenerationOptions } from './resolveGenerationOptions';
-import { WriteClient } from './WriteClient';
+import { WriteClient } from './write/WriteClient';
 
 /**
  * Facade: constructs WriteClient, Generation item/batch sessions; wires generateItem.

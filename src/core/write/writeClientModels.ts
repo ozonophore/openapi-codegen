@@ -9,7 +9,7 @@ import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ModelsLayout } from '../types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../types/enums/ModelsMode.enum';
 import type { Model } from '../types/shared/Model.model';
-import { isClassesBundleLayout, isClassesPerFileLayout } from './modelsLayoutHelpers';
+import { isClassesBundleLayout, isClassesPerFileLayout } from '../utils/modelsLayoutHelpers';
 
 /** Relative path from a per-file model directory to core (from models root). */
 export function resolvePerFileOutputCore(outputCoreFromModelsRoot: string, modelPath: string): string {

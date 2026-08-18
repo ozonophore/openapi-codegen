@@ -5,8 +5,8 @@ import { describe, test } from 'node:test';
 import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { Client } from '../../types/shared/Client.model';
-import { WriteClient } from '../../WriteClient';
-import { templates } from '../__mocks__/templates';
+import { templates } from '../../utils/__mocks__/templates';
+import { WriteClient } from '../WriteClient';
 
 describe('@unit: writeClientCore', () => {
     test('writes to filesystem', async () => {

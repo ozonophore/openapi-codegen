@@ -1,20 +1,20 @@
-import { ELogLevel, ELogOutput } from '../common/Enums';
-import { Logger } from '../common/Logger';
-import { type CoreOutputAdapter, toCoreOutputAdapter } from './CoreOutputAdapter';
-import { IndexCombineSession } from './IndexCombineSession';
-import { LintTargetRegistry } from './LintTargetRegistry';
-import { OutputFileSession } from './OutputFileSession';
-import { writeClientCore } from './utils/writeClientCore';
-import { writeClientCoreIndex } from './utils/writeClientCoreIndex';
-import { writeClientExecutor } from './utils/writeClientExecutor';
-import { writeClientModels } from './utils/writeClientModels';
-import { writeClientModelsIndex } from './utils/writeClientModelsIndex';
-import { writeClientSchemas } from './utils/writeClientSchemas';
-import { writeClientSchemasIndex } from './utils/writeClientSchemasIndex';
-import { writeClientServices } from './utils/writeClientServices';
-import { writeClientServicesIndex } from './utils/writeClientServicesIndex';
-import { WriteFileIfChangedResult } from './utils/writeFileIfChanged';
+import { ELogLevel, ELogOutput } from '../../common/Enums';
+import { Logger } from '../../common/Logger';
+import { type CoreOutputAdapter, toCoreOutputAdapter } from '../CoreOutputAdapter';
+import { IndexCombineSession } from '../IndexCombineSession';
+import { LintTargetRegistry } from '../LintTargetRegistry';
+import { OutputFileSession } from '../OutputFileSession';
+import { WriteFileIfChangedResult } from '../utils/writeFileIfChanged';
 import { type TWriteClientProps, writeClientArtifacts } from './writeClientArtifacts';
+import { writeClientCore } from './writeClientCore';
+import { writeClientCoreIndex } from './writeClientCoreIndex';
+import { writeClientExecutor } from './writeClientExecutor';
+import { writeClientModels } from './writeClientModels';
+import { writeClientModelsIndex } from './writeClientModelsIndex';
+import { writeClientSchemas } from './writeClientSchemas';
+import { writeClientSchemasIndex } from './writeClientSchemasIndex';
+import { writeClientServices } from './writeClientServices';
+import { writeClientServicesIndex } from './writeClientServicesIndex';
 
 /**
  * Thin facade over OutputFileSession, LintTargetRegistry, and IndexCombineSession.

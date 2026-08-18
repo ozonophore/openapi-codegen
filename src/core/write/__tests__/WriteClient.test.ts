@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import { PathOrFileDescriptor } from 'node:fs';
 import { describe, mock, test } from 'node:test';
 
-import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
-import { Templates } from '../types/base/Templates.model';
-import { EmptySchemaStrategy } from '../types/enums/EmptySchemaStrategy.enum';
-import { HttpClient } from '../types/enums/HttpClient.enum';
-import { ValidationLibrary } from '../types/enums/ValidationLibrary.enum';
-import type { Client } from '../types/shared/Client.model';
-import { getOutputPaths } from '../utils/getOutputPaths';
+import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
+import { Templates } from '../../types/base/Templates.model';
+import { EmptySchemaStrategy } from '../../types/enums/EmptySchemaStrategy.enum';
+import { HttpClient } from '../../types/enums/HttpClient.enum';
+import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
+import type { Client } from '../../types/shared/Client.model';
+import { getOutputPaths } from '../../utils/getOutputPaths';
 import { WriteClient } from '../WriteClient';
 import { writeClientArtifacts } from '../writeClientArtifacts';
 

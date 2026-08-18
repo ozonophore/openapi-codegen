@@ -7,8 +7,8 @@ import { EmptySchemaStrategy } from '../../types/enums/EmptySchemaStrategy.enum'
 import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
 import { Model } from '../../types/shared/Model.model';
-import { WriteClient } from '../../WriteClient';
-import { templates } from '../__mocks__/templates';
+import { templates } from '../../utils/__mocks__/templates';
+import { WriteClient } from '../WriteClient';
 
 describe('@unit: writeClientSchemas', () => {
     test('writes to filesystem', async () => {

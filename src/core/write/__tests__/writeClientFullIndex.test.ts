@@ -4,7 +4,7 @@ import { describe, test } from 'node:test';
 
 import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
 import type { CoreOutputAdapter } from '../../CoreOutputAdapter';
-import { templates } from '../__mocks__/templates';
+import { templates } from '../../utils/__mocks__/templates';
 import { writeClientFullIndex } from '../writeClientFullIndex';
 
 describe('@unit: writeClientFullIndex', () => {

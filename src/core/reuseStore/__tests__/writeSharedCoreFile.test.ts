@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, test } from 'node:test';
 
-import { WriteClient } from '../../WriteClient';
+import { WriteClient } from '../../write/WriteClient';
 import { buildCoreTransportFingerprint } from '../coreTransportFingerprint';
 import { SharedFolderWriter } from '../SharedFolderWriter';
 import { writeSharedOrLocalCoreFile } from '../writeSharedCoreFile';

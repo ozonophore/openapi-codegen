@@ -8,7 +8,7 @@ import { GenerationBatchSession } from '../GenerationBatchSession';
 import type { GenerationRootOptions } from '../resolveGenerationOptions';
 import type { GenerationReport } from '../reuseStore/GenerationReport';
 import { ReuseConflictError } from '../reuseStore/types';
-import type { WriteClient } from '../WriteClient';
+import type { WriteClient } from '../write/WriteClient';
 
 const generatedRoot = path.join(__dirname, '../../../test/generated');
 

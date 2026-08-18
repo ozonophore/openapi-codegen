@@ -31,7 +31,7 @@ import { postProcessClient } from './utils/postProcessClient';
 import { prepareDtoModels } from './utils/prepareDtoModels';
 import { registerHandlebarTemplates } from './utils/registerHandlebarTemplates';
 import { resolveClassesModeTypes } from './utils/resolveClassesModeTypes';
-import type { WriteClient } from './WriteClient';
+import type { WriteClient } from './write/WriteClient';
 
 export type GenerationItemSessionDeps = {
     writeClient: WriteClient;
