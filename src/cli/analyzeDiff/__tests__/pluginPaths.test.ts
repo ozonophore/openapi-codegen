@@ -6,7 +6,7 @@ import { describe, test } from 'node:test';
 
 import { analyzeDiffOptionsSchema } from '../../schemas/analyzeDiff';
 import { generateOptionsSchema } from '../../schemas/generate';
-import { resolvePluginPaths } from '../pluginPaths';
+import { resolvePluginEntries } from '../pluginPaths';
 
 describe('@unit: analyze-diff / generate plugin CLI schemas', () => {
     test('generateOptionsSchema accepts plugins array', () => {
@@ -36,20 +36,48 @@ describe('@unit: analyze-diff / generate plugin CLI schemas', () => {
         }
     });
 
-    test('resolvePluginPaths merges config and CLI', () => {
+    test('resolvePluginEntries merges config and CLI', () => {
         const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-paths-'));
         const configPath = join(tempDir, 'openapi.config.json');
         writeFileSync(configPath, JSON.stringify({ plugins: ['./from-config.cjs'] }));
 
         try {
-            const paths = resolvePluginPaths(configPath, ['./from-cli.cjs', './from-config.cjs']);
-            assert.deepEqual(paths, ['./from-config.cjs', './from-cli.cjs']);
+            const entries = resolvePluginEntries(configPath, ['./from-cli.cjs', './from-config.cjs']);
+            assert.deepEqual(
+                entries.map(e => e.path),
+                ['./from-config.cjs', './from-cli.cjs']
+            );
+            assert.deepEqual(entries[0]?.config, {});
+            assert.deepEqual(entries[1]?.config, {});
         } finally {
             rmSync(tempDir, { recursive: true, force: true });
         }
     });
 
-    test('resolvePluginPaths collects plugins from items', () => {
+    test('resolvePluginEntries preserves object config', () => {
+        const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-entries-config-'));
+        const configPath = join(tempDir, 'openapi.config.json');
+        writeFileSync(
+            configPath,
+            JSON.stringify({
+                plugins: [{ path: './hooks.cjs', name: 'hooks', config: { mode: 'strict' } }],
+            })
+        );
+
+        try {
+            const entries = resolvePluginEntries(configPath, ['./from-cli.cjs']);
+            assert.equal(entries.length, 2);
+            assert.equal(entries[0]?.path, './hooks.cjs');
+            assert.equal(entries[0]?.name, 'hooks');
+            assert.deepEqual(entries[0]?.config, { mode: 'strict' });
+            assert.equal(entries[1]?.path, './from-cli.cjs');
+            assert.deepEqual(entries[1]?.config, {});
+        } finally {
+            rmSync(tempDir, { recursive: true, force: true });
+        }
+    });
+
+    test('resolvePluginEntries collects plugins from items', () => {
         const tempDir = mkdtempSync(join(tmpdir(), 'openapi-plugin-paths-items-'));
         const configPath = join(tempDir, 'openapi.config.json');
         writeFileSync(
@@ -63,8 +91,11 @@ describe('@unit: analyze-diff / generate plugin CLI schemas', () => {
         );
 
         try {
-            const paths = resolvePluginPaths(configPath, ['./from-cli.cjs']);
-            assert.deepEqual(paths, ['./item-a.cjs', './item-b.cjs', './from-cli.cjs']);
+            const entries = resolvePluginEntries(configPath, ['./from-cli.cjs']);
+            assert.deepEqual(
+                entries.map(e => e.path),
+                ['./item-a.cjs', './item-b.cjs', './from-cli.cjs']
+            );
         } finally {
             rmSync(tempDir, { recursive: true, force: true });
         }

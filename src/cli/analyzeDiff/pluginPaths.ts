@@ -1,6 +1,6 @@
 import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
-import { extractPluginPaths, mergePluginPaths, type PluginConfigEntry } from '../../core/plugins/pluginEntries';
+import { mergePluginPaths, type NormalizedPluginEntry, type PluginConfigEntry } from '../../core/plugins/pluginEntries';
 
 /**
  * Collects plugin entries from root config and per-item overrides.
@@ -36,11 +36,12 @@ function collectConfigPluginEntries(config: Record<string, unknown>): PluginConf
 }
 
 /**
- * Reads plugin paths from openapi config and optional CLI paths for semantic diff hooks.
+ * Reads plugin entries from openapi config and optional CLI paths for semantic diff hooks.
+ * Preserves object `config` so `loadGeneratorPlugins` can call `configure`.
  */
-export function resolvePluginPaths(openapiConfig?: string, cliPlugins?: string[]): string[] {
+export function resolvePluginEntries(openapiConfig?: string, cliPlugins?: string[]): NormalizedPluginEntry[] {
     const configData = loadConfigIfExists(openapiConfig);
     const config = convertArrayToObject(configData) as Record<string, unknown>;
     const configEntries = collectConfigPluginEntries(config);
-    return extractPluginPaths(mergePluginPaths(configEntries.length > 0 ? configEntries : undefined, cliPlugins));
+    return mergePluginPaths(configEntries.length > 0 ? configEntries : undefined, cliPlugins);
 }

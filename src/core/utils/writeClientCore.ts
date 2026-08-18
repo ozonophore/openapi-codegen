@@ -1,6 +1,7 @@
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
+import type { CoreOutputAdapter } from '../CoreOutputAdapter';
 import { buildCoreTransportFingerprint, detectCustomRequestRaw } from '../reuseStore/coreTransportFingerprint';
 import type { SharedFolderWriter } from '../reuseStore/SharedFolderWriter';
 import { writeSharedOrLocalCoreFile } from '../reuseStore/writeSharedCoreFile';
@@ -8,7 +9,6 @@ import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ModelsMode } from '../types/enums/ModelsMode.enum';
 import type { Client } from '../types/shared/Client.model';
-import { WriteClient } from '../WriteClient';
 
 /**
  * @param client Client object, containing, models, schemas and services
@@ -35,7 +35,7 @@ interface IWriteClientCore {
 /**
  * Generate OpenAPI core files, this includes the basic boilerplate code to handle requests.
  */
-export async function writeClientCore(this: WriteClient, options: IWriteClientCore): Promise<void> {
+export async function writeClientCore(adapter: CoreOutputAdapter, options: IWriteClientCore): Promise<void> {
     const { client, templates, outputCorePath, httpClient, request, useCancelableRequest, useSeparatedIndexes, customExecutorPath, modelsMode, sharedFolderWriter } = options;
     const context = {
         httpClient,
@@ -45,7 +45,7 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
         useSeparatedIndexes,
     };
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.CORE_START);
+    adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.CORE_START);
 
     const hasCustomRequest = !!request;
     const hasCustomExecutor = !!customExecutorPath;
@@ -81,7 +81,7 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
     });
 
     const writeCore = async (relativeCorePath: string, content: string) => {
-        await writeSharedOrLocalCoreFile(this, {
+        await writeSharedOrLocalCoreFile(adapter, {
             sharedFolderWriter,
             outputCorePath,
             relativeCorePath,
@@ -110,5 +110,5 @@ export async function writeClientCore(this: WriteClient, options: IWriteClientCo
     await writeCore('interceptors/apiErrorInterceptor.ts', templates.core.apiErrorInterceptor({}));
     await writeCore('interceptors/withInterceptors.ts', templates.core.withInterceptors({}));
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.CORE_FINISH);
+    adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.CORE_FINISH);
 }

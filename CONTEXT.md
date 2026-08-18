@@ -23,6 +23,7 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 - **Module:** `GenerationItemSession` (`src/core/GenerationItemSession.ts`)
 - **Deps:** `{ writeClient, eslintFixOptions }`; `run(item, generationCache, itemRunContext)` with required `ItemRunContext`
 - **Wiring:** facade constructs it inside `generate(rawOptions)` and passes `generateItem: (item, cache, ctx) => itemSession.run(...)`
+- **V2/V3:** shared prepare via private `prepareClientFromOpenApi` (parse callback → applyDiff → postProcess → DTO); switch only selects Parser + `WRITING_V2`/`WRITING_V3` logs
 - **Visibility:** internal (not re-exported from `src/core/index.ts`)
 - **OpenSpec change:** `pdtch-191-generation-item-session`
 
@@ -31,14 +32,32 @@ Owns the **per-item Generation lifecycle**: EntitySkip (+ register cached output
 | Term | Role |
 |------|------|
 | **OpenApiClient** | Facade: constructs WriteClient, item/batch sessions; options meaning in `resolveGenerationOptions` |
+| **Generate CLI options adapter** | CLI → `TRawOptions` for `generate` (Zod + merge overrides + migrate) |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **WriteClient** | Thin write facade over OutputFileSession, LintTargetRegistry, IndexCombineSession |
-| **Diff report** | Lifecycle home: adapt + persist/load + types → consumer `DiffReport`; produce in `semanticDiff`; apply via item-session thin wrappers |
-| **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; git/`parseContent` stays in CLI |
+| **CoreOutputAdapter** | Narrow write/lint/log seam for `writeClient*` leaves and `writeSharedOrLocalCoreFile`; projects to `ReuseOutputAdapter` |
+| **Diff report** | Lifecycle home: adapt + persist/load + types + `enrichSemanticDiffReport` + `produceUnifiedDiffReport`; produce-analyze stays in `semanticDiff`; apply via item-session thin wrappers |
+| **Spec load** | Shared Spec resolve prologue + modes `forContext` / `forSemantic` under `src/core/specLoad/`; thin facades `createResolvedContext` / `loadSemanticOpenApi*`; string parse leaf `parseOpenApiContent`; git `show` stays in CLI |
+| **Plugin entry assembly** | Shared path+config entries into `loadGeneratorPlugins` for generate, preAnalyze, and analyze-diff (`resolvePluginEntries`); OpenSpec `plugin-entry-assembly` |
 | **ReuseStore** | Artifact reuse manifest under cache strategy `reuse` |
 | **GenerationCache** | Entity/content cache entries per output root |
 | **Context** | Parse-time Spec context (refs, virtual file map, plugins) — not passed to WriteClient |
 | **Generator plugins** | Loaded into Context during per-item generation / preAnalyze |
+
+## WriteClient leaf adapters
+
+Deepen residual from concern split: remove `this: WriteClient` from leaves; shared-core stops taking the class.
+
+- **Type:** `CoreOutputAdapter` in `src/core/CoreOutputAdapter.ts`
+  - `writeOutputFile(file, content)`
+  - `registerLintTarget(file, outputRoot)` — `outputRoot` required (matches WriteClient)
+  - `logger: { info; warn }` — duck, not full `Logger`
+- **Relation to reuse:** `ReuseOutputAdapter` stays narrow (write + optional lint); `toReuseOutputAdapter(core, defaultLintRoot?)` lives in `CoreOutputAdapter.ts`
+- **Helpers:** free `toCoreOutputAdapter(host)` + `WriteClient.toCoreOutputAdapter()` method
+- **Leaf shape:** `writeClient*(adapter, options)` — first-arg adapter; all `writeClient*` + `writeSharedOrLocalCoreFile`
+- **Facade:** thin public methods remain (`writeClientModels(opts)` → `writeClientModels(this.toCoreOutputAdapter(), opts)`) for tests / orchestration / IndexCombine host
+- **Visibility:** internal — not from `src/core/index.ts`
+- **OpenSpec change:** `write-client-leaf-adapters`
 
 ## Entity skip / entity fingerprint
 
@@ -46,11 +65,19 @@ Policy for skipping a Spec item when GenerationCache hit is valid: fingerprint m
 
 - **Module:** `src/core/generationCache/EntitySkip.ts` (GenerationCache stays in `src/core/utils/GenerationCache.ts`)
 - **Interface:** `buildCacheKey`, `buildEntityFingerprint`, `shouldEntitySkip` — no `registerOutputFile` (Write side effect stays in Generation item session)
-- **Fingerprint (v3):** `cacheFingerprintVersion` + `generatorVersion` + `specHash` + **`optionsSliceHash`** (from `buildOptionsSlice` / reuse fingerprinter) + **residual** options not in `OptionsSlice` (`request`, `useOptions`, `includeSchemasFiles`, `excludeCoreServiceFiles`, `strictPluginMode`, `customExecutorPath`, `useCancelableRequest`, `useHistory`, `diffReport`, `strictOpenapi`, `failOnGovernanceErrors`). No raw `plugins` / `disableBuiltinPlugins` in residual (covered by slice).
+- **Fingerprint (v3):** `cacheFingerprintVersion` + `generatorVersion` + `specHash` + **`optionsSliceHash`** + **residual** derived from the affecting-keys allowlist (not a hand list)
 - **Serialization:** `stableStringify` + same hash helper as reuse fingerprints
 - **Call sites:** `GenerationItemSession.run` and batch session `shouldEntitySkip` callback; `getSpecItemName` shared (preAnalyze / AvatarSwarm use the same helper)
 - **Cache break:** bump to fingerprint version **3** (one-time warm miss)
 - **OpenSpec change:** `pdtch-191-entity-skip-fingerprint`
+
+## Entity skip residual derive
+
+Close hand-maintained residual drift vs OptionsSlice locality.
+
+- **Strategy:** `ENTITY_FINGERPRINT_AFFECTING_KEYS` allowlist in `EntitySkip.ts`; residual = affecting − OptionsSlice coverage (`OptionsSlice` Pick keys + `plugins` / `disableBuiltinPlugins`)
+- **Initial allowlist:** current residual 11 + slice/plugin keys so derived residual ≡ today’s hand list (bit-identical → keep **v3**)
+- **OpenSpec change:** `entity-skip-residual-derive`
 
 ## Reuse write session
 
@@ -74,6 +101,17 @@ Config entries may include `{ path, name?, config? }`. Fingerprints already hash
 - **Errors:** `configure` throw fails generation (same as load failure)
 - **OpenSpec change:** `pdtch-191-resolved-context`
 
+## Plugin entry assembly (analyze-diff)
+
+Close the residual from `plugin-config-inject`: analyze-diff must not strip entry `config` before load.
+
+- **Helper:** `resolvePluginEntries` (renamed from `resolvePluginPaths`) → `NormalizedPluginEntry[]` via `mergePluginPaths` (no `extractPluginPaths`)
+- **Scope:** union of root + all `items[]` plugins + CLI string paths (unchanged union semantics)
+- **Wire:** `analyzeDiff` → `loadGeneratorPlugins(resolvePluginEntries(…))` so `configure` runs for non-empty config
+- **Stays:** `extractPluginPaths` for check-config path warnings; CLI `--plugins` remain strings
+- **Out of scope:** active-item filter by `--input`; CLI object plugins; Plugin API v3
+- **OpenSpec change:** `plugin-entry-assembly`
+
 ## Resolved Context factory
 
 Normal generate/preAnalyze path must not hand-assemble a half-initialized Context.
@@ -91,7 +129,7 @@ WriteClient is a composing facade. Ownership:
 - **OutputFileSession** — `writeOutputFile` + expected-file registry + write stats
 - **LintTargetRegistry** — lint target files + include globs
 - **IndexCombineSession** — per-item config Map; `combineAndWrite` / `combineAndWrightSimple` (HEAD name)
-- **WriteClient** — logger, `writeClient()` orchestration, leaf `writeClient*` bindings, public delegates
+- **WriteClient** — logger, `writeClient()` orchestration, leaf `writeClient*` via `CoreOutputAdapter`, public delegates
 - **SharedFolderWriter** — LCA only (no WriteClient ctor arg)
 - **OpenSpec change:** `pdtch-191-write-client-concern-split`
 
@@ -105,18 +143,61 @@ Owns raw config → strict items: Zod validate (**throws**, no `process.exit`) �
 - **Visibility:** internal (not re-exported from `src/core/index.ts`)
 - **OpenSpec change:** `pdtch-191-generation-options-resolve`
 
+## Generation options field lists
+
+Collapse triple parallel field lists inside `resolveGenerationOptions` into explicit tables (bit-identical).
+
+- **Home:** same module `src/core/resolveGenerationOptions.ts`
+- **Tables:** root-only inherit keys · per-item override keys (including `miracles`) · defaults with per-key rule `'or' | 'nullish' | 'custom'`
+- **Explicit (not in generic pick):** marauder merges (`specAnalysis`/`anomalyDetection`), aliases (`modelsMode`/`modelsLayout`/`useHistory`/`diffReport`), `resolveSpecAnalysisConfig`
+- **Shape:** bit-identical `TStrictFlatOptions[]` — no entity fingerprint bump
+- **OpenSpec change:** `generation-options-field-lists`
+
+## Generate CLI options adapter
+
+Collapse dual Zod call sites in `generateOpenApiClient` into one CLI → `TRawOptions` adapter; keep override hand list + drift test.
+
+- **Module:** `generateCliOptionsAdapter.ts` with `resolveGenerateCliToRawOptions` (+ merge/pick/keys); former `generateCliOverrides.ts` removed
+- **Zod:** `generateOptionsSchema` once at entry; direct path flat refine (`generateCliFlatSchema`) **inside** adapter only
+- **Paths preserved:** direct (input+output) vs config+migrate; migrate stays in CLI
+- **Override keys:** keep `GENERATE_CLI_OVERRIDE_KEYS` hand list; unit drift test vs `keyof GenerateOptions`
+- **Caller:** `generateOpenApiClient` thin: validate Commander options → adapter → autoSelect → `OpenAPI.generate`
+- **OpenSpec change:** `generate-cli-options-adapter`
+
 ## Diff report lifecycle
 
 First-cut deepen: home adapt + persist/load + apply + miracle build + types under **`src/core/diffReport/`**; produce stays in `semanticDiff`; Generation item session keeps thin load/apply wrappers.
 
 - **Package:** `src/core/diffReport/` with barrel `index.ts` (internal — not re-exported from `src/core/index.ts`)
 - **Moves:** `loadDiffReport`, adapters (`adaptSemanticToStructural` + related), `buildMiraclesFromSemanticChanges`, `applyDiffReportToClient`, `writeDiffReport` (renamed from `writeSemanticDiffReport`, **no** permanent alias — update call sites), types from `types/DiffReport.model.ts` → `diffReport/` + **shim re-export** at old types path (no `utils/adapters` shim — call sites import the package)
-- **Stays:** `analyzeOpenApiDiff` / miracle heuristics in `semanticDiff/`; CLI assemble Unified inline (import path updates only)
+- **Stays:** `analyzeOpenApiDiff` / miracle heuristics in `semanticDiff/`
 - **Deletes:** `createSemanticDiffContext` + unused call in `analyzeDiff`
 - **Call shape:** `GenerationItemSession` `loadDiffReportIfNeeded` / `applyDiffReportIfNeeded` unchanged
 - **On-disk:** Unified 2.0 + Semantic 1.1 + legacy read compat unchanged
 - **OpenSpec change:** `pdtch-191-diff-report-lifecycle`
-- **Out of scope:** `produceUnifiedDiffReport` high-level, schema collapse, Unified-direct apply, plugin entry config, Session/options/WriteClient rethink
+- **Out of scope (lifecycle cut):** schema collapse, Unified-direct apply, Session/options/WriteClient rethink
+
+## produceUnifiedDiffReport
+
+Move Unified assemble out of analyze-diff CLI into Diff report package.
+
+- **Module:** `src/core/diffReport/produceUnifiedDiffReport.ts` (+ `createSpecHash`); export from `diffReport/index.ts` (not `core/index`)
+- **Owns:** metadata + circular-safe hashes + semantic slice + `adaptSemanticToStructural`; optional `timestamp` override (default `toISOString()`)
+- **Input:** `{ semantic: SemanticDiffReport, base, target, baseSpec, targetSpec, ignored?, timestamp? }` → `UnifiedDiffReport`
+- **Stays in CLI:** load → analyze → **enrich** → **produce** → write; logging/CI
+- **Out of scope:** governance/miracles/hooks inside produce; merge with write; Unified-direct apply; Spec-load git
+- **OpenSpec change:** `produce-unified-diff-report`
+
+## Diff report enrich
+
+Deepen analyze-diff middle block (hooks → ignore → governance → miracles) into Diff report; keep produce sibling.
+
+- **Module:** `src/core/diffReport/enrichSemanticDiffReport.ts` — `enrichSemanticDiffReport(input) → { report, ignored, reportPath }`
+- **Owns (order):** `applySemanticDiffPluginHooks` → `filterSemanticChangesByIgnoreRules` → `evaluateGovernanceRules` + `buildMiraclesFromSemanticChanges`
+- **Ignore move:** filter + `matchesIgnoreRule` + `IgnoreRule` into `diffReport/`; CLI keeps `loadIgnoreRules` only
+- **CLI:** validate · Spec load · load governance/ignore/plugins · `analyzeOpenApiDiff` · **enrich** · produce · write · logging/CI
+- **Export:** `diffReport/index.ts` (not `core/index`)
+- **OpenSpec change:** `diff-report-enrich-semantic`
 
 ## Spec load unify
 
@@ -125,7 +206,17 @@ Shared Spec resolve prologue + two modes under `src/core/specLoad/`.
 - **Layout:** `resolveOpenApiRefs.ts` (path/exists/`SwaggerParser.resolve` + root) · `forContext.ts` · `forSemantic.ts` · `expandOpenApiRefsForSemanticDiff.ts` · shared minimal refs interface · barrel `index.ts` (internal, used surface only, not from `core/index`)
 - **Facades (thin, keep paths):** `createResolvedContext.ts` · `utils/loadSemanticOpenApiSpec.ts` (`loadSemanticOpenApiSpec` / `loadSemanticOpenApiObject`)
 - **Modes:** `forContext` → Context.attach + root; `forSemantic` → resolve + expand clone (file + in-memory object)
-- **Stays in CLI:** git `readSpecFromGit` / `parseSpecContent` (`SwaggerParser.parse`)
-- **Out of scope:** Context lazy-ref / virtual-map semantics change, Diff package, `validateWithSwaggerParser` merge, Session/Write/options, git parse absorb
+- **Stays in CLI:** git `readSpecFromGit` (`execSync` git show → core parse)
+- **Out of scope:** Context lazy-ref / virtual-map semantics change, Diff package, `validateWithSwaggerParser` merge, Session/Write/options
 - **OpenSpec change:** `pdtch-191-spec-load-unify`
+
+## Spec load parse content
+
+Move string→object OpenAPI parse from analyze-diff CLI into Spec-load; keep `git show` in CLI.
+
+- **Module:** `src/core/specLoad/parseOpenApiContent.ts` — `parseOpenApiContent(content, sourcePath): Promise<unknown>`
+- **Behavior (identical):** empty throw; JSON via `JSON.parse`; YAML via temp file + `SwaggerParser.parse` (ext from `sourcePath`)
+- **CLI:** `specParser.ts` keeps only `readSpecFromGit` (`execSync` git show → core parse)
+- **Export:** internal leaf only — not from `core/index`
+- **OpenSpec change:** `spec-load-parse-content`
 

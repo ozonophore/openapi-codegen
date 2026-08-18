@@ -7,6 +7,181 @@ import { normalizeMarauderBoolean } from '../common/VersionedSchema/Utils/create
 import { mergeMarauderBlockDeep } from '../common/VersionedSchema/Utils/mergeMarauderBlock';
 import { resolveSpecAnalysisConfig } from '../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
 
+type DefaultRule = 'or' | 'nullish' | 'custom';
+
+type RootAliases = {
+    modelsMode: TRawOptions['modelsMode'];
+    modelsLayout: TRawOptions['modelsLayout'];
+    useHistory: TRawOptions['useHistory'];
+    diffReport: TRawOptions['diffReport'];
+};
+
+type RootOnlyKey =
+    | 'httpClient'
+    | 'autoSelect'
+    | 'customExecutorPath'
+    | 'useOptions'
+    | 'useUnionTypes'
+    | 'includeSchemasFiles'
+    | 'excludeCoreServiceFiles'
+    | 'logLevel'
+    | 'logTarget'
+    | 'validationLibrary'
+    | 'emptySchemaStrategy'
+    | 'strictOpenapi'
+    | 'reportFile'
+    | 'failOnGovernanceErrors'
+    | 'governanceConfig'
+    | 'cache'
+    | 'cachePath'
+    | 'cacheStrategy'
+    | 'cacheDebug'
+    | 'reuseOnConflict'
+    | 'prettierConfigPath';
+
+type PerItemOverrideKey =
+    | 'request'
+    | 'plugins'
+    | 'disableBuiltinPlugins'
+    | 'strictPluginMode'
+    | 'interfacePrefix'
+    | 'enumPrefix'
+    | 'typePrefix'
+    | 'useCancelableRequest'
+    | 'sortByRequired'
+    | 'useSeparatedIndexes'
+    | 'useHistory'
+    | 'diffReport'
+    | 'modelsMode'
+    | 'modelsLayout'
+    | 'miracles';
+
+/** Root-only inherit keys (not in unifiedItemSchema). Optional `get` for special coercion. */
+const ROOT_ONLY_KEYS: ReadonlyArray<{
+    key: RootOnlyKey;
+    get?: (root: TRawOptions) => TFlatOptions[RootOnlyKey];
+}> = [
+    { key: 'httpClient' },
+    { key: 'autoSelect', get: root => normalizeMarauderBoolean(root.autoSelect) },
+    { key: 'customExecutorPath' },
+    { key: 'useOptions' },
+    { key: 'useUnionTypes' },
+    { key: 'includeSchemasFiles' },
+    { key: 'excludeCoreServiceFiles' },
+    { key: 'logLevel' },
+    { key: 'logTarget' },
+    { key: 'validationLibrary' },
+    { key: 'emptySchemaStrategy' },
+    { key: 'strictOpenapi' },
+    { key: 'reportFile' },
+    { key: 'failOnGovernanceErrors' },
+    { key: 'governanceConfig' },
+    { key: 'cache' },
+    { key: 'cachePath' },
+    { key: 'cacheStrategy' },
+    { key: 'cacheDebug' },
+    { key: 'reuseOnConflict' },
+    { key: 'prettierConfigPath' },
+];
+
+/** Per-item overridable keys; the four alias fields resolve via `RootAliases`. */
+const PER_ITEM_OVERRIDE_KEYS: readonly PerItemOverrideKey[] = [
+    'request',
+    'plugins',
+    'disableBuiltinPlugins',
+    'strictPluginMode',
+    'interfacePrefix',
+    'enumPrefix',
+    'typePrefix',
+    'useCancelableRequest',
+    'sortByRequired',
+    'useSeparatedIndexes',
+    'useHistory',
+    'diffReport',
+    'modelsMode',
+    'modelsLayout',
+    'miracles',
+];
+
+const ALIAS_KEYS = new Set<PerItemOverrideKey>(['modelsMode', 'modelsLayout', 'useHistory', 'diffReport']);
+
+/** Flat-local fields copied from raw (identity / nested models bag). */
+const FLAT_LOCAL_KEYS = ['input', 'output', 'outputCore', 'outputServices', 'outputModels', 'outputSchemas', 'models'] as const;
+
+/**
+ * Defaults table: every key formerly listed in addDefaultValues.
+ * Insertion order matches prior hand-written object (bit-identical JSON key order).
+ */
+const DEFAULT_RULES = {
+    input: 'or',
+    output: 'or',
+    outputCore: 'or',
+    outputServices: 'or',
+    outputModels: 'or',
+    outputSchemas: 'or',
+    httpClient: 'or',
+    useOptions: 'nullish',
+    useUnionTypes: 'nullish',
+    includeSchemasFiles: 'nullish',
+    excludeCoreServiceFiles: 'nullish',
+    request: 'or',
+    plugins: 'or',
+    disableBuiltinPlugins: 'nullish',
+    strictPluginMode: 'nullish',
+    customExecutorPath: 'or',
+    interfacePrefix: 'or',
+    enumPrefix: 'or',
+    typePrefix: 'or',
+    useCancelableRequest: 'nullish',
+    logLevel: 'or',
+    logTarget: 'or',
+    sortByRequired: 'nullish',
+    useSeparatedIndexes: 'nullish',
+    validationLibrary: 'nullish',
+    emptySchemaStrategy: 'nullish',
+    useHistory: 'nullish',
+    diffReport: 'or',
+    modelsMode: 'nullish',
+    modelsLayout: 'custom',
+    models: 'or',
+    analyze: 'or',
+    miracles: 'or',
+    strictOpenapi: 'nullish',
+    reportFile: 'or',
+    failOnGovernanceErrors: 'nullish',
+    prettierConfigPath: 'nullish',
+    governanceConfig: 'or',
+    cache: 'nullish',
+    cachePath: 'or',
+    cacheStrategy: 'nullish',
+    cacheDebug: 'nullish',
+    reuseOnConflict: 'nullish',
+    autoSelect: 'nullish',
+    specAnalysis: 'custom',
+    anomalyDetection: 'nullish',
+    workspaceReport: 'nullish',
+    trafficSplitter: 'nullish',
+    swarm: 'nullish',
+    preAnalyze: 'nullish',
+    reuseMode: 'nullish',
+} as const satisfies Record<keyof TStrictFlatOptions, DefaultRule>;
+
+const CUSTOM_DEFAULTS: {
+    [K in keyof TStrictFlatOptions]?: (item: TFlatOptions) => TStrictFlatOptions[K];
+} = {
+    modelsLayout: item => item.modelsLayout ?? item.models?.layout ?? COMMON_DEFAULT_OPTIONS_VALUES.modelsLayout,
+    specAnalysis: item => resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection) ?? COMMON_DEFAULT_OPTIONS_VALUES.specAnalysis,
+};
+
+function resolveRootAliases(raw: TRawOptions): RootAliases {
+    return {
+        modelsMode: raw.modelsMode ?? raw.models?.mode,
+        modelsLayout: raw.modelsLayout ?? raw.models?.layout,
+        useHistory: raw.useHistory ?? raw.analyze?.useHistory,
+        diffReport: raw.diffReport ?? raw.analyze?.reportPath,
+    };
+}
+
 function mergeItemMarauderBlock<T extends Record<string, unknown>>(root: T | boolean | undefined, item: T | boolean | undefined): T | undefined {
     if (item === undefined) {
         return normalizeMarauderBoolean(root);
@@ -18,161 +193,80 @@ function mergeItemMarauderBlock<T extends Record<string, unknown>>(root: T | boo
     return mergeMarauderBlockDeep(normalizeMarauderBoolean(root), normalizeMarauderBoolean(item)) as T;
 }
 
+function pickRootOnlyFields(root: TRawOptions): Pick<TFlatOptions, RootOnlyKey> {
+    const out: Record<string, unknown> = {};
+    for (const { key, get } of ROOT_ONLY_KEYS) {
+        out[key] = get ? get(root) : root[key];
+    }
+    return out as Pick<TFlatOptions, RootOnlyKey>;
+}
+
+function pickPerItemOverrides(item: Partial<TFlatOptions>, root: TRawOptions, aliases: RootAliases): Pick<TFlatOptions, PerItemOverrideKey> {
+    const out: Record<string, unknown> = {};
+    for (const key of PER_ITEM_OVERRIDE_KEYS) {
+        const rootVal = ALIAS_KEYS.has(key) ? aliases[key as keyof RootAliases] : root[key as keyof TRawOptions];
+        out[key] = item[key] ?? rootVal;
+    }
+    return out as Pick<TFlatOptions, PerItemOverrideKey>;
+}
+
+function pickFlatLocalFields(raw: TRawOptions): Pick<TFlatOptions, (typeof FLAT_LOCAL_KEYS)[number]> {
+    const out: Record<string, unknown> = {};
+    for (const key of FLAT_LOCAL_KEYS) {
+        if (key === 'input') {
+            out.input = raw.input ?? '';
+        } else if (key === 'output') {
+            out.output = raw.output ?? '';
+        } else {
+            out[key] = raw[key];
+        }
+    }
+    return out as Pick<TFlatOptions, (typeof FLAT_LOCAL_KEYS)[number]>;
+}
+
 function normalizeOptions(rawOptions: TRawOptions): TFlatOptions[] {
-    const modelsMode = rawOptions.modelsMode ?? rawOptions.models?.mode;
-    const modelsLayout = rawOptions.modelsLayout ?? rawOptions.models?.layout;
-    const useHistory = rawOptions.useHistory ?? rawOptions.analyze?.useHistory;
-    const diffReport = rawOptions.diffReport ?? rawOptions.analyze?.reportPath;
-    const rootMiracles = rawOptions.miracles;
+    const aliases = resolveRootAliases(rawOptions);
     if (rawOptions.items && rawOptions.items.length > 0) {
-        return rawOptions.items.map(item => ({
-            ...item,
-            httpClient: rawOptions.httpClient,
-            autoSelect: normalizeMarauderBoolean(rawOptions.autoSelect),
-            specAnalysis: mergeItemMarauderBlock(rawOptions.specAnalysis, (item as TFlatOptions).specAnalysis),
-            anomalyDetection: mergeItemMarauderBlock(rawOptions.anomalyDetection, (item as TFlatOptions).anomalyDetection),
-            request: item.request ?? rawOptions.request,
-            plugins: item.plugins ?? rawOptions.plugins,
-            disableBuiltinPlugins: (item as TFlatOptions).disableBuiltinPlugins ?? rawOptions.disableBuiltinPlugins,
-            strictPluginMode: (item as TFlatOptions).strictPluginMode ?? rawOptions.strictPluginMode,
-            customExecutorPath: rawOptions.customExecutorPath,
-            useOptions: rawOptions.useOptions,
-            useUnionTypes: rawOptions.useUnionTypes,
-            includeSchemasFiles: rawOptions.includeSchemasFiles,
-            excludeCoreServiceFiles: rawOptions.excludeCoreServiceFiles,
-            interfacePrefix: item.interfacePrefix ?? rawOptions.interfacePrefix,
-            enumPrefix: item.enumPrefix ?? rawOptions.enumPrefix,
-            typePrefix: item.typePrefix ?? rawOptions.typePrefix,
-            useCancelableRequest: item.useCancelableRequest ?? rawOptions.useCancelableRequest,
-            logLevel: rawOptions.logLevel,
-            logTarget: rawOptions.logTarget,
-            sortByRequired: item.sortByRequired ?? rawOptions.sortByRequired,
-            useSeparatedIndexes: item.useSeparatedIndexes ?? rawOptions.useSeparatedIndexes,
-            validationLibrary: rawOptions.validationLibrary,
-            emptySchemaStrategy: rawOptions.emptySchemaStrategy,
-            useHistory: item.useHistory ?? useHistory,
-            diffReport: item.diffReport ?? diffReport,
-            modelsMode: item.modelsMode ?? modelsMode,
-            modelsLayout: item.modelsLayout ?? modelsLayout,
-            miracles: (item as TFlatOptions).miracles ?? rootMiracles,
-            strictOpenapi: rawOptions.strictOpenapi,
-            reportFile: rawOptions.reportFile,
-            failOnGovernanceErrors: rawOptions.failOnGovernanceErrors,
-            governanceConfig: rawOptions.governanceConfig,
-            cache: rawOptions.cache,
-            cachePath: rawOptions.cachePath,
-            cacheStrategy: rawOptions.cacheStrategy,
-            cacheDebug: rawOptions.cacheDebug,
-            reuseOnConflict: rawOptions.reuseOnConflict,
-            prettierConfigPath: rawOptions.prettierConfigPath,
-        }));
+        const rootOnly = pickRootOnlyFields(rawOptions);
+        return rawOptions.items.map(item => {
+            const flatItem = item as TFlatOptions;
+            return {
+                ...flatItem,
+                ...rootOnly,
+                // explicit marauder merges (not generic pick)
+                specAnalysis: mergeItemMarauderBlock(rawOptions.specAnalysis, flatItem.specAnalysis),
+                anomalyDetection: mergeItemMarauderBlock(rawOptions.anomalyDetection, flatItem.anomalyDetection),
+                ...pickPerItemOverrides(flatItem, rawOptions, aliases),
+            };
+        });
     }
 
+    // Flat format (CLI / legacy config): one item from raw + aliases + marauder normalize
+    const rootOnly = pickRootOnlyFields(rawOptions);
     return [
         {
-            input: rawOptions.input ?? '',
-            output: rawOptions.output ?? '',
-            outputCore: rawOptions.outputCore,
-            outputServices: rawOptions.outputServices,
-            outputModels: rawOptions.outputModels,
-            outputSchemas: rawOptions.outputSchemas,
-            httpClient: rawOptions.httpClient,
-            autoSelect: normalizeMarauderBoolean(rawOptions.autoSelect),
+            ...pickFlatLocalFields(rawOptions),
+            ...rootOnly,
             specAnalysis: normalizeMarauderBoolean(rawOptions.specAnalysis),
             anomalyDetection: normalizeMarauderBoolean(rawOptions.anomalyDetection),
-            useOptions: rawOptions.useOptions,
-            useUnionTypes: rawOptions.useUnionTypes,
-            includeSchemasFiles: rawOptions.includeSchemasFiles,
-            excludeCoreServiceFiles: rawOptions.excludeCoreServiceFiles,
-            request: rawOptions.request,
-            plugins: rawOptions.plugins,
-            disableBuiltinPlugins: rawOptions.disableBuiltinPlugins,
-            strictPluginMode: rawOptions.strictPluginMode,
-            customExecutorPath: rawOptions.customExecutorPath,
-            interfacePrefix: rawOptions.interfacePrefix,
-            enumPrefix: rawOptions.enumPrefix,
-            typePrefix: rawOptions.typePrefix,
-            useCancelableRequest: rawOptions.useCancelableRequest,
-            logLevel: rawOptions.logLevel,
-            logTarget: rawOptions.logTarget,
-            sortByRequired: rawOptions.sortByRequired,
-            useSeparatedIndexes: rawOptions.useSeparatedIndexes,
-            validationLibrary: rawOptions.validationLibrary,
-            emptySchemaStrategy: rawOptions.emptySchemaStrategy,
-            useHistory,
-            diffReport,
-            modelsMode,
-            modelsLayout,
-            miracles: rootMiracles,
-            models: rawOptions.models,
-            strictOpenapi: rawOptions.strictOpenapi,
-            reportFile: rawOptions.reportFile,
-            failOnGovernanceErrors: rawOptions.failOnGovernanceErrors,
-            governanceConfig: rawOptions.governanceConfig,
-            cache: rawOptions.cache,
-            cachePath: rawOptions.cachePath,
-            cacheStrategy: rawOptions.cacheStrategy,
-            cacheDebug: rawOptions.cacheDebug,
-            reuseOnConflict: rawOptions.reuseOnConflict,
-            prettierConfigPath: rawOptions.prettierConfigPath,
+            ...pickPerItemOverrides(rawOptions as TFlatOptions, rawOptions, aliases),
         },
     ];
 }
 
 function addDefaultValues(item: TFlatOptions): TStrictFlatOptions {
-    return {
-        input: item.input || COMMON_DEFAULT_OPTIONS_VALUES.input,
-        output: item.output || COMMON_DEFAULT_OPTIONS_VALUES.output,
-        outputCore: item.outputCore || COMMON_DEFAULT_OPTIONS_VALUES.outputCore,
-        outputServices: item.outputServices || COMMON_DEFAULT_OPTIONS_VALUES.outputServices,
-        outputModels: item.outputModels || COMMON_DEFAULT_OPTIONS_VALUES.outputModels,
-        outputSchemas: item.outputSchemas || COMMON_DEFAULT_OPTIONS_VALUES.outputSchemas,
-        httpClient: item.httpClient || COMMON_DEFAULT_OPTIONS_VALUES.httpClient,
-        useOptions: item.useOptions ?? COMMON_DEFAULT_OPTIONS_VALUES.useOptions,
-        useUnionTypes: item.useUnionTypes ?? COMMON_DEFAULT_OPTIONS_VALUES.useUnionTypes,
-        includeSchemasFiles: item.includeSchemasFiles ?? COMMON_DEFAULT_OPTIONS_VALUES.includeSchemasFiles,
-        excludeCoreServiceFiles: item.excludeCoreServiceFiles ?? COMMON_DEFAULT_OPTIONS_VALUES.excludeCoreServiceFiles,
-        request: item.request || COMMON_DEFAULT_OPTIONS_VALUES.request,
-        plugins: item.plugins || COMMON_DEFAULT_OPTIONS_VALUES.plugins,
-        disableBuiltinPlugins: item.disableBuiltinPlugins ?? COMMON_DEFAULT_OPTIONS_VALUES.disableBuiltinPlugins,
-        strictPluginMode: item.strictPluginMode ?? COMMON_DEFAULT_OPTIONS_VALUES.strictPluginMode,
-        customExecutorPath: item.customExecutorPath || COMMON_DEFAULT_OPTIONS_VALUES.customExecutorPath,
-        interfacePrefix: item.interfacePrefix || COMMON_DEFAULT_OPTIONS_VALUES.interfacePrefix,
-        enumPrefix: item.enumPrefix || COMMON_DEFAULT_OPTIONS_VALUES.enumPrefix,
-        typePrefix: item.typePrefix || COMMON_DEFAULT_OPTIONS_VALUES.typePrefix,
-        useCancelableRequest: item.useCancelableRequest ?? COMMON_DEFAULT_OPTIONS_VALUES.useCancelableRequest,
-        logLevel: item.logLevel || COMMON_DEFAULT_OPTIONS_VALUES.logLevel,
-        logTarget: item.logTarget || COMMON_DEFAULT_OPTIONS_VALUES.logTarget,
-        sortByRequired: item.sortByRequired ?? COMMON_DEFAULT_OPTIONS_VALUES.sortByRequired,
-        useSeparatedIndexes: item.useSeparatedIndexes ?? COMMON_DEFAULT_OPTIONS_VALUES.useSeparatedIndexes,
-        validationLibrary: item.validationLibrary ?? COMMON_DEFAULT_OPTIONS_VALUES.validationLibrary,
-        emptySchemaStrategy: item.emptySchemaStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.emptySchemaStrategy,
-        useHistory: item.useHistory ?? COMMON_DEFAULT_OPTIONS_VALUES.useHistory,
-        diffReport: item.diffReport || COMMON_DEFAULT_OPTIONS_VALUES.diffReport,
-        modelsMode: item.modelsMode ?? COMMON_DEFAULT_OPTIONS_VALUES.modelsMode,
-        modelsLayout: item.modelsLayout ?? item.models?.layout ?? COMMON_DEFAULT_OPTIONS_VALUES.modelsLayout,
-        models: item.models || COMMON_DEFAULT_OPTIONS_VALUES.models,
-        analyze: item.analyze || COMMON_DEFAULT_OPTIONS_VALUES.analyze,
-        miracles: item.miracles || COMMON_DEFAULT_OPTIONS_VALUES.miracles,
-        strictOpenapi: item.strictOpenapi ?? COMMON_DEFAULT_OPTIONS_VALUES.strictOpenapi,
-        reportFile: item.reportFile || COMMON_DEFAULT_OPTIONS_VALUES.reportFile,
-        failOnGovernanceErrors: item.failOnGovernanceErrors ?? COMMON_DEFAULT_OPTIONS_VALUES.failOnGovernanceErrors,
-        prettierConfigPath: item.prettierConfigPath ?? COMMON_DEFAULT_OPTIONS_VALUES.prettierConfigPath,
-        governanceConfig: item.governanceConfig || COMMON_DEFAULT_OPTIONS_VALUES.governanceConfig,
-        cache: item.cache ?? COMMON_DEFAULT_OPTIONS_VALUES.cache,
-        cachePath: item.cachePath || COMMON_DEFAULT_OPTIONS_VALUES.cachePath,
-        cacheStrategy: item.cacheStrategy ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheStrategy,
-        cacheDebug: item.cacheDebug ?? COMMON_DEFAULT_OPTIONS_VALUES.cacheDebug,
-        reuseOnConflict: item.reuseOnConflict ?? COMMON_DEFAULT_OPTIONS_VALUES.reuseOnConflict,
-        autoSelect: item.autoSelect ?? COMMON_DEFAULT_OPTIONS_VALUES.autoSelect,
-        specAnalysis: resolveSpecAnalysisConfig(item.specAnalysis, item.anomalyDetection) ?? COMMON_DEFAULT_OPTIONS_VALUES.specAnalysis,
-        anomalyDetection: item.anomalyDetection ?? COMMON_DEFAULT_OPTIONS_VALUES.anomalyDetection,
-        workspaceReport: item.workspaceReport ?? COMMON_DEFAULT_OPTIONS_VALUES.workspaceReport,
-        trafficSplitter: item.trafficSplitter ?? COMMON_DEFAULT_OPTIONS_VALUES.trafficSplitter,
-        swarm: item.swarm ?? COMMON_DEFAULT_OPTIONS_VALUES.swarm,
-        preAnalyze: item.preAnalyze ?? COMMON_DEFAULT_OPTIONS_VALUES.preAnalyze,
-        reuseMode: item.reuseMode ?? COMMON_DEFAULT_OPTIONS_VALUES.reuseMode,
-    };
+    const result: Record<string, unknown> = {};
+    for (const key of Object.keys(DEFAULT_RULES) as (keyof typeof DEFAULT_RULES)[]) {
+        const rule = DEFAULT_RULES[key];
+        if (rule === 'custom') {
+            result[key] = CUSTOM_DEFAULTS[key]!(item);
+            continue;
+        }
+        const value = item[key as keyof TFlatOptions];
+        const fallback = COMMON_DEFAULT_OPTIONS_VALUES[key];
+        result[key] = rule === 'or' ? value || fallback : (value ?? fallback);
+    }
+    return result as TStrictFlatOptions;
 }
 
 /**

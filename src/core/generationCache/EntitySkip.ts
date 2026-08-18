@@ -5,11 +5,59 @@ import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
 import { buildOptionsSlice, buildOptionsSliceHash, hashFingerprint, stableStringify } from '../reuseStore/ArtifactFingerprinter';
 import type { ReuseStore } from '../reuseStore/ReuseStore';
+import type { OptionsSlice } from '../reuseStore/types';
 import { GenerationCache } from '../utils/GenerationCache';
 import { isClassesBundleLayout } from '../utils/modelsLayoutHelpers';
 
 /** Entity GenerationCache fingerprint envelope version (bump on shape change). */
 export const ENTITY_CACHE_FINGERPRINT_VERSION = 3;
+
+/**
+ * OptionsSlice Pick keys — covered by optionsSliceHash (not residual).
+ * Keep in sync with `OptionsSlice` in reuseStore/types.ts.
+ */
+const OPTIONS_SLICE_PICK_KEYS = [
+    'validationLibrary',
+    'useUnionTypes',
+    'interfacePrefix',
+    'enumPrefix',
+    'typePrefix',
+    'modelsMode',
+    'modelsLayout',
+    'sortByRequired',
+    'emptySchemaStrategy',
+    'useSeparatedIndexes',
+    'httpClient',
+    'prettierConfigPath',
+    'disableBuiltinPlugins',
+] as const satisfies readonly (keyof OptionsSlice)[];
+
+/** Covered by optionsSliceHash / pluginsHash — excluded from residual. */
+export const ENTITY_FINGERPRINT_SLICE_COVERAGE_KEYS = ['plugins', ...OPTIONS_SLICE_PICK_KEYS] as const;
+
+/**
+ * Generation-affecting keys for entity fingerprint: OptionsSlice coverage ∪ residual fields.
+ * Residual = affecting − coverage (must stay bit-identical to the former hand residual list).
+ */
+export const ENTITY_FINGERPRINT_AFFECTING_KEYS = [
+    ...ENTITY_FINGERPRINT_SLICE_COVERAGE_KEYS,
+    'request',
+    'useOptions',
+    'includeSchemasFiles',
+    'excludeCoreServiceFiles',
+    'strictPluginMode',
+    'customExecutorPath',
+    'useCancelableRequest',
+    'useHistory',
+    'diffReport',
+    'strictOpenapi',
+    'failOnGovernanceErrors',
+] as const satisfies readonly (keyof TStrictFlatOptions)[];
+
+const SLICE_COVERAGE_SET = new Set<string>(ENTITY_FINGERPRINT_SLICE_COVERAGE_KEYS);
+
+/** Residual keys in stable insertion order (former hand list order). */
+export const ENTITY_FINGERPRINT_RESIDUAL_KEYS = ENTITY_FINGERPRINT_AFFECTING_KEYS.filter(key => !SLICE_COVERAGE_SET.has(key));
 
 export function getSpecItemName(input: string): string {
     const absoluteInput = resolveHelper(process.cwd(), input);
@@ -38,23 +86,15 @@ export function buildCacheKey(item: TStrictFlatOptions, absoluteInput: string): 
 }
 
 /**
- * Residual generation options that influence entity skip but are not part of OptionsSlice.
- * Plugins / disableBuiltinPlugins are covered by optionsSliceHash.
+ * Residual generation options that influence entity skip but are not part of OptionsSlice coverage.
+ * Derived: ENTITY_FINGERPRINT_AFFECTING_KEYS − slice/plugin coverage.
  */
 export function buildEntityFingerprintResidual(item: TStrictFlatOptions): Record<string, unknown> {
-    return {
-        request: item.request,
-        useOptions: item.useOptions,
-        includeSchemasFiles: item.includeSchemasFiles,
-        excludeCoreServiceFiles: item.excludeCoreServiceFiles,
-        strictPluginMode: item.strictPluginMode,
-        customExecutorPath: item.customExecutorPath,
-        useCancelableRequest: item.useCancelableRequest,
-        useHistory: item.useHistory,
-        diffReport: item.diffReport,
-        strictOpenapi: item.strictOpenapi,
-        failOnGovernanceErrors: item.failOnGovernanceErrors,
-    };
+    const residual: Record<string, unknown> = {};
+    for (const key of ENTITY_FINGERPRINT_RESIDUAL_KEYS) {
+        residual[key] = item[key];
+    }
+    return residual;
 }
 
 export async function buildEntityFingerprint(item: TStrictFlatOptions, absoluteInput: string): Promise<string> {

@@ -1,6 +1,6 @@
-import { SemanticDiffReport } from '../../core/semanticDiff/analyzeOpenApiDiff';
-import { matchesIgnoreRule } from './ignoreRules';
-import { DiffEntry, IgnoreRule } from './types';
+import type { SemanticDiffReport } from '../semanticDiff/analyzeOpenApiDiff';
+import type { IgnoreRule } from './ignoreRule.model';
+import { matchesIgnoreRule } from './matchesIgnoreRule';
 
 type RecommendationReason = 'HAS_BREAKING_CHANGES' | 'HAS_BACKWARD_COMPATIBLE_CHANGES' | 'HAS_INFORMATIONAL_ONLY_CHANGES' | 'NO_API_SURFACE_CHANGES';
 
@@ -54,7 +54,7 @@ function rebuildRecommendation(summary: SemanticDiffReport['summary']): Semantic
 }
 
 /**
- * Applies legacy analyze.ignore rules to semantic changes and returns ignored count.
+ * Applies analyze.ignore rules to semantic changes and returns ignored count.
  */
 export function filterSemanticChangesByIgnoreRules(report: SemanticDiffReport, ignoreRules: IgnoreRule[]): { report: SemanticDiffReport; ignored: number } {
     if (!ignoreRules.length) {
@@ -63,12 +63,7 @@ export function filterSemanticChangesByIgnoreRules(report: SemanticDiffReport, i
 
     let ignored = 0;
     const filteredChanges = report.changes.filter(change => {
-        const diffEntry: DiffEntry = {
-            action: 'changed',
-            path: change.path,
-            severity: 'info',
-        };
-        const ignoredByRule = ignoreRules.some(rule => matchesIgnoreRule(diffEntry, rule));
+        const ignoredByRule = ignoreRules.some(rule => matchesIgnoreRule({ path: change.path }, rule));
         if (ignoredByRule) {
             ignored += 1;
             return false;

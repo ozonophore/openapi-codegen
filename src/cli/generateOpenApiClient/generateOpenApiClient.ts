@@ -1,31 +1,14 @@
 import { OptionValues } from 'commander';
 
 import { APP_LOGGER } from '../../common/Consts';
-import { EMigrationMode } from '../../common/Enums';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { TRawOptions } from '../../common/TRawOptions';
-import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
-import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { validateZodOptions } from '../../common/Validation';
-import { allMigrationPlans } from '../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
-import { allVersionedSchemas } from '../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
-import { flatOptionsSchema } from '../../common/VersionedSchema/AllVersionedSchemas/UnifiedVersionedSchemas';
-import { migrateDataToLatestSchemaVersion } from '../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
 import * as OpenAPI from '../../core';
 import { GenerateOptions, generateOptionsSchema } from '../schemas';
 import { CLICommandResult } from '../types';
 import { executeAutoSelection } from './autoSelectHelpers';
-import { mergeGenerateCliOverrides, pickDirectFlatCliInput } from './generateCliOverrides';
-
-const generateCliFlatSchema = flatOptionsSchema.strict().superRefine((data, ctx) => {
-    if (data.excludeCoreServiceFiles === true && data.request) {
-        ctx.addIssue({
-            code: 'custom',
-            message: '"request" can only be used when "excludeCoreServiceFiles" is false',
-            path: ['request'],
-        });
-    }
-});
+import { resolveGenerateCliToRawOptions } from './generateCliOptionsAdapter';
 
 /**
  * Runs OpenAPI client generation and returns a process exit code.
@@ -50,52 +33,25 @@ export async function generateOpenApiClient(options: OptionValues): Promise<CLIC
         }
 
         const validatedOptions = validationResult.data as GenerateOptions;
+        const resolved = resolveGenerateCliToRawOptions({ clientOptions, validated: validatedOptions });
 
-        const hasMinimumRequiredOptions = !!validatedOptions.input && !!validatedOptions.output;
-        if (hasMinimumRequiredOptions) {
-            const directOptionsValidationResult = validateZodOptions(generateCliFlatSchema, pickDirectFlatCliInput(clientOptions, validatedOptions));
-
-            if (!directOptionsValidationResult.success) {
+        if (!resolved.ok) {
+            if (resolved.kind === 'direct_validation') {
                 APP_LOGGER.errorWithHint({
                     code: 'NO_OPTIONS_PROVIDED',
-                    message: LOGGER_MESSAGES.ERROR.GENERIC(directOptionsValidationResult.errors.join('\n')),
+                    message: LOGGER_MESSAGES.ERROR.GENERIC(resolved.errors.join('\n')),
                 });
                 await APP_LOGGER.shutdownLoggerAsync();
-                return { success: false, error: directOptionsValidationResult.errors.join('\n') };
+                return { success: false, error: resolved.errors.join('\n') };
             }
-
-            const directOptions: TRawOptions = mergeGenerateCliOverrides(directOptionsValidationResult.data as TRawOptions, validatedOptions);
-            const directAutoSelectResult = executeAutoSelection(directOptions, APP_LOGGER);
-            const mergedDirectOptions: TRawOptions = directAutoSelectResult.items ? { ...directOptions, items: directAutoSelectResult.items } : { ...directOptions, ...directAutoSelectResult };
-            await OpenAPI.generate(mergedDirectOptions);
-            await APP_LOGGER.shutdownLoggerAsync();
-            return { success: true };
-        }
-
-        const configData = loadConfigIfExists(validatedOptions.openapiConfig);
-        if (!configData) {
-            APP_LOGGER.errorWithHint({
-                code: validatedOptions.openapiConfig ? 'CONFIG_FILE_NOT_FOUND_AT' : 'CONFIG_FILE_MISSING',
-                message: `${LOGGER_MESSAGES.CONFIG.FILE_MISSING}\n${LOGGER_MESSAGES.CONFIG.FILE_MISSING_HINT}`,
-            });
-            await APP_LOGGER.shutdownLoggerAsync();
-            return { success: false, error: LOGGER_MESSAGES.CONFIG.FILE_MISSING };
-        }
-
-        if (Array.isArray(configData)) {
-            APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.ARRAY_DEPRECATED);
-        }
-
-        const preparedOptions = convertArrayToObject(configData);
-
-        const migratedOptions = migrateDataToLatestSchemaVersion({
-            rawInput: preparedOptions,
-            migrationPlans: allMigrationPlans,
-            versionedSchemas: allVersionedSchemas,
-            migrationMode: EMigrationMode.GENERATE_OPENAPI,
-        });
-
-        if (!migratedOptions) {
+            if (resolved.kind === 'config_missing') {
+                APP_LOGGER.errorWithHint({
+                    code: resolved.hasExplicitPath ? 'CONFIG_FILE_NOT_FOUND_AT' : 'CONFIG_FILE_MISSING',
+                    message: `${LOGGER_MESSAGES.CONFIG.FILE_MISSING}\n${LOGGER_MESSAGES.CONFIG.FILE_MISSING_HINT}`,
+                });
+                await APP_LOGGER.shutdownLoggerAsync();
+                return { success: false, error: LOGGER_MESSAGES.CONFIG.FILE_MISSING };
+            }
             APP_LOGGER.errorWithHint({
                 code: 'NO_VALID_SPEC_FILES_FOUND',
                 message: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED,
@@ -104,11 +60,12 @@ export async function generateOpenApiClient(options: OptionValues): Promise<CLIC
             return { success: false, error: LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED };
         }
 
-        const { value } = migratedOptions;
-        const mergedOptions: TRawOptions = mergeGenerateCliOverrides(value as TRawOptions, validatedOptions);
+        if (resolved.deprecatedArrayConfig) {
+            APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.ARRAY_DEPRECATED);
+        }
 
-        const autoSelectResult = executeAutoSelection(mergedOptions, APP_LOGGER);
-        const finalOptions: TRawOptions = autoSelectResult.items ? { ...mergedOptions, items: autoSelectResult.items } : { ...mergedOptions, ...autoSelectResult };
+        const autoSelectResult = executeAutoSelection(resolved.raw, APP_LOGGER);
+        const finalOptions: TRawOptions = autoSelectResult.items ? { ...resolved.raw, items: autoSelectResult.items } : { ...resolved.raw, ...autoSelectResult };
 
         await OpenAPI.generate(finalOptions);
         await APP_LOGGER.shutdownLoggerAsync();

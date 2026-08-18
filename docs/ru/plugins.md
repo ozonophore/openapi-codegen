@@ -81,7 +81,7 @@ module.exports = {
 };
 ```
 
-Throw внутри `configure` валит загрузку плагина (как битый файл) на **generate** и **preAnalyze**.
+Throw внутри `configure` валит загрузку плагина (как битый файл) на **generate**, **preAnalyze** и **analyze-diff**.
 
 ## CLI
 

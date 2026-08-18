@@ -8,7 +8,7 @@ import { validateZodOptions } from '../../../common/Validation';
 import { installSilenceLoggers } from '../../../test/helpers/silenceLoggers';
 import { generateOptionsSchema } from '../../schemas/generate';
 import { mergeNestedCliOptions } from '../../utils/parseNestedCliOptions';
-import { mergeGenerateCliOverrides } from '../generateCliOverrides';
+import { mergeGenerateCliOverrides } from '../generateCliOptionsAdapter';
 import { generateOpenApiClient } from '../generateOpenApiClient';
 
 const repoRoot = path.join(__dirname, '..', '..', '..', '..');

@@ -86,7 +86,7 @@ module.exports = {
 };
 ```
 
-A throw inside `configure` fails plugin loading (same as a bad plugin file) on **generate** and **preAnalyze**.
+A throw inside `configure` fails plugin loading (same as a bad plugin file) on **generate**, **preAnalyze**, and **analyze-diff**.
 
 ## CLI
 

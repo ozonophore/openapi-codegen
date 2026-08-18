@@ -3,7 +3,7 @@ import { dirname, join } from 'path';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { resolveHelper } from '../../common/utils/pathHelpers';
-import type { WriteClient } from '../WriteClient';
+import type { CoreOutputAdapter } from '../CoreOutputAdapter';
 import { computeStoreRelativeImport } from './computeStoreRelativeImport';
 import { isRequestSensitiveCorePath } from './coreTransportFingerprint';
 import { ReuseStore } from './ReuseStore';
@@ -26,12 +26,12 @@ export type WriteSharedOrLocalCoreFileOptions = {
  * `{LCA}/__shared__/core/{rel}` + stub under the item `outputCore`.
  * On content/fingerprint conflict with an existing shared entry, keeps a full local file.
  */
-export async function writeSharedOrLocalCoreFile(writeClient: WriteClient, options: WriteSharedOrLocalCoreFileOptions): Promise<WriteSharedCoreResult> {
+export async function writeSharedOrLocalCoreFile(adapter: CoreOutputAdapter, options: WriteSharedOrLocalCoreFileOptions): Promise<WriteSharedCoreResult> {
     const { sharedFolderWriter, outputCorePath, relativeCorePath, content, transportFingerprint } = options;
     const localPath = resolveHelper(outputCorePath, relativeCorePath);
 
     if (!sharedFolderWriter) {
-        await writeClient.writeOutputFile(localPath, content);
+        await adapter.writeOutputFile(localPath, content);
         return 'local';
     }
 
@@ -43,8 +43,8 @@ export async function writeSharedOrLocalCoreFile(writeClient: WriteClient, optio
         const fingerprintMismatch = sensitive && existing.transportFingerprint !== transportFingerprint;
         const hashMismatch = existing.contentHash !== contentHash;
         if (fingerprintMismatch || hashMismatch) {
-            writeClient.logger.warn(LOGGER_MESSAGES.GENERATION.SHARED_CORE_CONTENT_CONFLICT(relativeCorePath));
-            await writeClient.writeOutputFile(localPath, content);
+            adapter.logger.warn(LOGGER_MESSAGES.GENERATION.SHARED_CORE_CONTENT_CONFLICT(relativeCorePath));
+            await adapter.writeOutputFile(localPath, content);
             return 'conflict-local';
         }
     } else {
@@ -58,7 +58,7 @@ export async function writeSharedOrLocalCoreFile(writeClient: WriteClient, optio
     await fileSystemHelpers.mkdir(dirname(canonicalPath));
     const stubImport = computeStoreRelativeImport(localPath, canonicalPath);
     const stubContent = `export * from '${stubImport}';\n`;
-    await writeClient.writeOutputFile(canonicalPath, content);
-    await writeClient.writeOutputFile(localPath, stubContent);
+    await adapter.writeOutputFile(canonicalPath, content);
+    await adapter.writeOutputFile(localPath, stubContent);
     return 'shared';
 }

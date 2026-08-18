@@ -1,13 +1,13 @@
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { format } from '../../common/utils/format';
 import { resolveHelper } from '../../common/utils/pathHelpers';
+import type { CoreOutputAdapter } from '../CoreOutputAdapter';
 import { OutputPaths } from '../types/base/OutputPaths.model';
 import { Templates } from '../types/base/Templates.model';
 import { HttpClient } from '../types/enums/HttpClient.enum';
 import { ModelsLayout } from '../types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../types/enums/ModelsMode.enum';
 import type { Service } from '../types/shared/Service.model';
-import { WriteClient } from '../WriteClient';
 
 type TServeceOutputsPath = Omit<OutputPaths, 'output' | 'outputSchemas'>;
 
@@ -41,15 +41,15 @@ interface IWriteClientServices {
  * Генерирует сервисы по Handlebars-шаблону и записывает их на диск.
  * @param options параметры записи сервисов
  */
-export async function writeClientServices(this: WriteClient, options: IWriteClientServices): Promise<void> {
+export async function writeClientServices(adapter: CoreOutputAdapter, options: IWriteClientServices): Promise<void> {
     const { services, templates, outputPaths, httpClient, useUnionTypes, useOptions, useCancelableRequest, modelsMode, modelsLayout, prettierConfigPath } = options;
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SERVICES_START);
+    adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SERVICES_START);
 
     for (const service of services) {
         const file = resolveHelper(outputPaths.outputServices, `${service.name}.ts`);
 
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
+        adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.DATA_WRITE_START(file));
 
         const templateResult = templates.exports.service({
             ...service,
@@ -63,11 +63,11 @@ export async function writeClientServices(this: WriteClient, options: IWriteClie
             modelsLayout,
         });
         const formattedValue = await format(templateResult, undefined, prettierConfigPath);
-        await this.writeOutputFile(file, formattedValue);
-        this.registerLintTarget(file, outputPaths.outputServices);
+        await adapter.writeOutputFile(file, formattedValue);
+        adapter.registerLintTarget(file, outputPaths.outputServices);
 
-        this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
+        adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.FILE_RECORDED(file));
     }
 
-    this.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SERVICES_FINISH);
+    adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.SERVICES_FINISH);
 }

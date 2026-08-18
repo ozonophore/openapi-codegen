@@ -1,0 +1,440 @@
+{
+  "flatMinimal": [
+    {
+      "input": "./a.yaml",
+      "output": "./out",
+      "outputCore": "",
+      "outputServices": "",
+      "outputModels": "",
+      "outputSchemas": "",
+      "httpClient": "fetch",
+      "useOptions": false,
+      "useUnionTypes": false,
+      "includeSchemasFiles": false,
+      "excludeCoreServiceFiles": false,
+      "request": "",
+      "plugins": [],
+      "disableBuiltinPlugins": false,
+      "strictPluginMode": false,
+      "customExecutorPath": "",
+      "interfacePrefix": "I",
+      "enumPrefix": "E",
+      "typePrefix": "T",
+      "useCancelableRequest": false,
+      "logLevel": "error",
+      "logTarget": "console",
+      "sortByRequired": false,
+      "useSeparatedIndexes": false,
+      "validationLibrary": "none",
+      "emptySchemaStrategy": "keep",
+      "useHistory": false,
+      "diffReport": "./.openapi-codegen-reports/openapi-diff-report.json",
+      "modelsMode": "interfaces",
+      "modelsLayout": "bundle",
+      "models": {
+        "layout": "bundle"
+      },
+      "analyze": {},
+      "miracles": {},
+      "strictOpenapi": false,
+      "reportFile": "./.openapi-codegen-reports/openapi-report.json",
+      "failOnGovernanceErrors": false,
+      "prettierConfigPath": "",
+      "governanceConfig": "",
+      "cache": false,
+      "cachePath": ".openapi-codegen-store",
+      "cacheStrategy": "reuse",
+      "cacheDebug": false,
+      "reuseOnConflict": "fail",
+      "autoSelect": {
+        "enabled": false,
+        "strict": false,
+        "preferSmallBundles": false,
+        "preferStandards": false
+      },
+      "specAnalysis": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnHigh": false,
+        "crossSpec": true,
+        "maxNestingDepth": 5
+      },
+      "anomalyDetection": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnAnomalies": false,
+        "maxNestingDepth": 5
+      },
+      "workspaceReport": {
+        "enabled": false,
+        "path": "./workspace-report",
+        "format": "json"
+      },
+      "trafficSplitter": {
+        "enabled": false,
+        "strategy": "weighted"
+      },
+      "swarm": {
+        "enabled": false,
+        "output": "./swarm-manifest.json"
+      },
+      "preAnalyze": false,
+      "reuseMode": "copy"
+    }
+  ],
+  "flatWithFalsyStrings": [
+    {
+      "input": "./a.yaml",
+      "output": "./out",
+      "outputCore": "",
+      "outputServices": "",
+      "outputModels": "",
+      "outputSchemas": "",
+      "httpClient": "fetch",
+      "useOptions": false,
+      "useUnionTypes": false,
+      "includeSchemasFiles": false,
+      "excludeCoreServiceFiles": false,
+      "request": "",
+      "plugins": [],
+      "disableBuiltinPlugins": false,
+      "strictPluginMode": false,
+      "customExecutorPath": "",
+      "interfacePrefix": "I",
+      "enumPrefix": "E",
+      "typePrefix": "T",
+      "useCancelableRequest": false,
+      "logLevel": "error",
+      "logTarget": "console",
+      "sortByRequired": false,
+      "useSeparatedIndexes": false,
+      "validationLibrary": "none",
+      "emptySchemaStrategy": "keep",
+      "useHistory": false,
+      "diffReport": "./.openapi-codegen-reports/openapi-diff-report.json",
+      "modelsMode": "interfaces",
+      "modelsLayout": "bundle",
+      "models": {
+        "layout": "bundle"
+      },
+      "analyze": {},
+      "miracles": {},
+      "strictOpenapi": false,
+      "reportFile": "./.openapi-codegen-reports/openapi-report.json",
+      "failOnGovernanceErrors": false,
+      "prettierConfigPath": "",
+      "governanceConfig": "",
+      "cache": false,
+      "cachePath": ".openapi-codegen-store",
+      "cacheStrategy": "reuse",
+      "cacheDebug": false,
+      "reuseOnConflict": "fail",
+      "autoSelect": {
+        "enabled": false,
+        "strict": false,
+        "preferSmallBundles": false,
+        "preferStandards": false
+      },
+      "specAnalysis": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnHigh": false,
+        "crossSpec": true,
+        "maxNestingDepth": 5
+      },
+      "anomalyDetection": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnAnomalies": false,
+        "maxNestingDepth": 5
+      },
+      "workspaceReport": {
+        "enabled": false,
+        "path": "./workspace-report",
+        "format": "json"
+      },
+      "trafficSplitter": {
+        "enabled": false,
+        "strategy": "weighted"
+      },
+      "swarm": {
+        "enabled": false,
+        "output": "./swarm-manifest.json"
+      },
+      "preAnalyze": false,
+      "reuseMode": "copy"
+    }
+  ],
+  "itemsInherit": [
+    {
+      "input": "./a.yaml",
+      "output": "./out-a",
+      "outputCore": "",
+      "outputServices": "",
+      "outputModels": "",
+      "outputSchemas": "",
+      "httpClient": "xhr",
+      "useOptions": true,
+      "useUnionTypes": false,
+      "includeSchemasFiles": false,
+      "excludeCoreServiceFiles": false,
+      "request": "./root-req.ts",
+      "plugins": [
+        "./root.cjs"
+      ],
+      "disableBuiltinPlugins": false,
+      "strictPluginMode": true,
+      "customExecutorPath": "",
+      "interfacePrefix": "RI",
+      "enumPrefix": "E",
+      "typePrefix": "T",
+      "useCancelableRequest": false,
+      "logLevel": "error",
+      "logTarget": "console",
+      "sortByRequired": false,
+      "useSeparatedIndexes": false,
+      "validationLibrary": "none",
+      "emptySchemaStrategy": "keep",
+      "useHistory": true,
+      "diffReport": "./root-diff.json",
+      "modelsMode": "classes",
+      "modelsLayout": "per-file",
+      "models": {
+        "layout": "bundle"
+      },
+      "analyze": {},
+      "miracles": {},
+      "strictOpenapi": false,
+      "reportFile": "./.openapi-codegen-reports/openapi-report.json",
+      "failOnGovernanceErrors": false,
+      "prettierConfigPath": "",
+      "governanceConfig": "",
+      "cache": false,
+      "cachePath": ".openapi-codegen-store",
+      "cacheStrategy": "reuse",
+      "cacheDebug": false,
+      "reuseOnConflict": "fail",
+      "autoSelect": {
+        "enabled": false,
+        "strict": false,
+        "preferSmallBundles": false,
+        "preferStandards": false
+      },
+      "specAnalysis": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnHigh": false,
+        "crossSpec": true,
+        "maxNestingDepth": 5
+      },
+      "anomalyDetection": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnAnomalies": false,
+        "maxNestingDepth": 5
+      },
+      "workspaceReport": {
+        "enabled": false,
+        "path": "./workspace-report",
+        "format": "json"
+      },
+      "trafficSplitter": {
+        "enabled": false,
+        "strategy": "weighted"
+      },
+      "swarm": {
+        "enabled": false,
+        "output": "./swarm-manifest.json"
+      },
+      "preAnalyze": false,
+      "reuseMode": "copy"
+    },
+    {
+      "input": "./b.yaml",
+      "output": "./out-b",
+      "outputCore": "",
+      "outputServices": "",
+      "outputModels": "",
+      "outputSchemas": "",
+      "httpClient": "xhr",
+      "useOptions": true,
+      "useUnionTypes": false,
+      "includeSchemasFiles": false,
+      "excludeCoreServiceFiles": false,
+      "request": "./b-req.ts",
+      "plugins": [
+        "./b.cjs"
+      ],
+      "disableBuiltinPlugins": false,
+      "strictPluginMode": false,
+      "customExecutorPath": "",
+      "interfacePrefix": "BI",
+      "enumPrefix": "E",
+      "typePrefix": "T",
+      "useCancelableRequest": false,
+      "logLevel": "error",
+      "logTarget": "console",
+      "sortByRequired": false,
+      "useSeparatedIndexes": false,
+      "validationLibrary": "none",
+      "emptySchemaStrategy": "keep",
+      "useHistory": true,
+      "diffReport": "./root-diff.json",
+      "modelsMode": "interfaces",
+      "modelsLayout": "per-file",
+      "models": {
+        "layout": "bundle"
+      },
+      "analyze": {},
+      "miracles": {},
+      "strictOpenapi": false,
+      "reportFile": "./.openapi-codegen-reports/openapi-report.json",
+      "failOnGovernanceErrors": false,
+      "prettierConfigPath": "",
+      "governanceConfig": "",
+      "cache": false,
+      "cachePath": ".openapi-codegen-store",
+      "cacheStrategy": "reuse",
+      "cacheDebug": false,
+      "reuseOnConflict": "fail",
+      "autoSelect": {
+        "enabled": false,
+        "strict": false,
+        "preferSmallBundles": false,
+        "preferStandards": false
+      },
+      "specAnalysis": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnHigh": false,
+        "crossSpec": true,
+        "maxNestingDepth": 5
+      },
+      "anomalyDetection": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnAnomalies": false,
+        "maxNestingDepth": 5
+      },
+      "workspaceReport": {
+        "enabled": false,
+        "path": "./workspace-report",
+        "format": "json"
+      },
+      "trafficSplitter": {
+        "enabled": false,
+        "strategy": "weighted"
+      },
+      "swarm": {
+        "enabled": false,
+        "output": "./swarm-manifest.json"
+      },
+      "preAnalyze": false,
+      "reuseMode": "copy"
+    }
+  ],
+  "nestedAliases": [
+    {
+      "input": "./a.yaml",
+      "output": "./out",
+      "outputCore": "",
+      "outputServices": "",
+      "outputModels": "",
+      "outputSchemas": "",
+      "httpClient": "fetch",
+      "useOptions": false,
+      "useUnionTypes": false,
+      "includeSchemasFiles": false,
+      "excludeCoreServiceFiles": false,
+      "request": "",
+      "plugins": [],
+      "disableBuiltinPlugins": false,
+      "strictPluginMode": false,
+      "customExecutorPath": "",
+      "interfacePrefix": "I",
+      "enumPrefix": "E",
+      "typePrefix": "T",
+      "useCancelableRequest": false,
+      "logLevel": "error",
+      "logTarget": "console",
+      "sortByRequired": false,
+      "useSeparatedIndexes": false,
+      "validationLibrary": "none",
+      "emptySchemaStrategy": "keep",
+      "useHistory": true,
+      "diffReport": "./from-analyze.json",
+      "modelsMode": "classes",
+      "modelsLayout": "per-file",
+      "models": {
+        "mode": "classes",
+        "layout": "per-file"
+      },
+      "analyze": {},
+      "miracles": {},
+      "strictOpenapi": false,
+      "reportFile": "./.openapi-codegen-reports/openapi-report.json",
+      "failOnGovernanceErrors": false,
+      "prettierConfigPath": "",
+      "governanceConfig": "",
+      "cache": false,
+      "cachePath": ".openapi-codegen-store",
+      "cacheStrategy": "reuse",
+      "cacheDebug": false,
+      "reuseOnConflict": "fail",
+      "autoSelect": {
+        "enabled": false,
+        "strict": false,
+        "preferSmallBundles": false,
+        "preferStandards": false
+      },
+      "specAnalysis": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnHigh": false,
+        "crossSpec": true,
+        "maxNestingDepth": 5
+      },
+      "anomalyDetection": {
+        "enabled": false,
+        "severity": "medium",
+        "reportFormat": "json",
+        "reportPath": "./.openapi-codegen-reports/anomaly-report.json",
+        "failOnAnomalies": false,
+        "maxNestingDepth": 5
+      },
+      "workspaceReport": {
+        "enabled": false,
+        "path": "./workspace-report",
+        "format": "json"
+      },
+      "trafficSplitter": {
+        "enabled": false,
+        "strategy": "weighted"
+      },
+      "swarm": {
+        "enabled": false,
+        "output": "./swarm-manifest.json"
+      },
+      "preAnalyze": false,
+      "reuseMode": "copy"
+    }
+  ]
+}

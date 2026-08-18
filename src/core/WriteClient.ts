@@ -2,6 +2,7 @@ import { ELogLevel, ELogOutput } from '../common/Enums';
 import { Logger } from '../common/Logger';
 import { fileSystemHelpers } from '../common/utils/fileSystemHelpers';
 import { relativeHelper, resolveHelper } from '../common/utils/pathHelpers';
+import { type CoreOutputAdapter, toCoreOutputAdapter } from './CoreOutputAdapter';
 import { IndexCombineSession } from './IndexCombineSession';
 import { LintTargetRegistry } from './LintTargetRegistry';
 import { OutputFileSession } from './OutputFileSession';
@@ -330,26 +331,31 @@ export class WriteClient {
         this.lintTargets.clearLintTargets();
     }
 
+    /** Narrow write/lint/log seam for leaf utils (no class leak). */
+    public toCoreOutputAdapter(): CoreOutputAdapter {
+        return toCoreOutputAdapter(this);
+    }
+
     /** Делегирует запись core-части клиента. */
-    public writeClientCore = writeClientCore;
+    public writeClientCore = (options: Parameters<typeof writeClientCore>[1]) => writeClientCore(this.toCoreOutputAdapter(), options);
     /** Делегирует запись index core-части. */
-    public writeClientCoreIndex = writeClientCoreIndex;
+    public writeClientCoreIndex = (options: Parameters<typeof writeClientCoreIndex>[1]) => writeClientCoreIndex(this.toCoreOutputAdapter(), options);
     /** Делегирует запись полного index клиента. */
-    public writeClientFullIndex = writeClientFullIndex;
+    public writeClientFullIndex = (options: Parameters<typeof writeClientFullIndex>[1]) => writeClientFullIndex(this.toCoreOutputAdapter(), options);
     /** Делегирует запись моделей клиента. */
-    public writeClientModels = writeClientModels;
+    public writeClientModels = (options: Parameters<typeof writeClientModels>[1]) => writeClientModels(this.toCoreOutputAdapter(), options);
     /** Делегирует запись index моделей. */
-    public writeClientModelsIndex = writeClientModelsIndex;
+    public writeClientModelsIndex = (options: Parameters<typeof writeClientModelsIndex>[1]) => writeClientModelsIndex(this.toCoreOutputAdapter(), options);
     /** Делегирует запись схем клиента. */
-    public writeClientSchemas = writeClientSchemas;
+    public writeClientSchemas = (options: Parameters<typeof writeClientSchemas>[1]) => writeClientSchemas(this.toCoreOutputAdapter(), options);
     /** Делегирует запись index схем. */
-    public writeClientSchemasIndex = writeClientSchemasIndex;
+    public writeClientSchemasIndex = (options: Parameters<typeof writeClientSchemasIndex>[1]) => writeClientSchemasIndex(this.toCoreOutputAdapter(), options);
     /** Делегирует запись сервисов клиента. */
-    public writeClientServices = writeClientServices;
+    public writeClientServices = (options: Parameters<typeof writeClientServices>[1]) => writeClientServices(this.toCoreOutputAdapter(), options);
     /** Делегирует запись index сервисов. */
-    public writeClientServicesIndex = writeClientServicesIndex;
+    public writeClientServicesIndex = (options: Parameters<typeof writeClientServicesIndex>[1]) => writeClientServicesIndex(this.toCoreOutputAdapter(), options);
     /** Делегирует запись упрощённого index клиента. */
-    public writeClientSimpleIndex = writeClientSimpleIndex;
+    public writeClientSimpleIndex = (options: Parameters<typeof writeClientSimpleIndex>[1]) => writeClientSimpleIndex(this.toCoreOutputAdapter(), options);
     /** Делегирует запись executor клиента. */
-    public writeClientExecutor = writeClientExecutor;
+    public writeClientExecutor = (options: Parameters<typeof writeClientExecutor>[1]) => writeClientExecutor(this.toCoreOutputAdapter(), options);
 }

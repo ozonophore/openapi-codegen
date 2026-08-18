@@ -15,6 +15,9 @@ import {
     buildEntityFingerprint,
     buildEntityFingerprintResidual,
     ENTITY_CACHE_FINGERPRINT_VERSION,
+    ENTITY_FINGERPRINT_AFFECTING_KEYS,
+    ENTITY_FINGERPRINT_RESIDUAL_KEYS,
+    ENTITY_FINGERPRINT_SLICE_COVERAGE_KEYS,
     getSpecItemName,
     resolveEntitySkipCandidate,
     shouldEntitySkip,
@@ -47,6 +50,35 @@ describe('@unit: EntitySkip', () => {
 
     test('ENTITY_CACHE_FINGERPRINT_VERSION is 3', () => {
         assert.equal(ENTITY_CACHE_FINGERPRINT_VERSION, 3);
+    });
+
+    test('derived residual keys match former hand list (bit-identical snapshot)', () => {
+        assert.deepEqual(
+            [...ENTITY_FINGERPRINT_RESIDUAL_KEYS],
+            [
+                'request',
+                'useOptions',
+                'includeSchemasFiles',
+                'excludeCoreServiceFiles',
+                'strictPluginMode',
+                'customExecutorPath',
+                'useCancelableRequest',
+                'useHistory',
+                'diffReport',
+                'strictOpenapi',
+                'failOnGovernanceErrors',
+            ]
+        );
+    });
+
+    test('every affecting key is in coverage XOR residual', () => {
+        const coverage = new Set<string>(ENTITY_FINGERPRINT_SLICE_COVERAGE_KEYS);
+        const residual = new Set<string>(ENTITY_FINGERPRINT_RESIDUAL_KEYS);
+        for (const key of ENTITY_FINGERPRINT_AFFECTING_KEYS) {
+            const inCoverage = coverage.has(key);
+            const inResidual = residual.has(key);
+            assert.equal(inCoverage !== inResidual, true, `"${key}" must be in coverage XOR residual`);
+        }
     });
 
     test('residual omits OptionsSlice fields and plugins', () => {

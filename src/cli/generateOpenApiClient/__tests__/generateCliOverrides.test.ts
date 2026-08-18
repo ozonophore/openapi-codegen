@@ -1,8 +1,9 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 
+import { generateOptionsSchema } from '../../schemas/generate';
 import { mergeNestedCliOptions } from '../../utils/parseNestedCliOptions';
-import { mergeGenerateCliOverrides, pickDirectFlatCliInput } from '../generateCliOverrides';
+import { GENERATE_CLI_OVERRIDE_KEYS, mergeGenerateCliOverrides, pickDirectFlatCliInput } from '../generateCliOptionsAdapter';
 
 describe('@unit: generateCliOverrides', () => {
     test('pickDirectFlatCliInput excludes root-only keys and uses Zod-validated Marauder fields', () => {
@@ -180,5 +181,14 @@ describe('@unit: generateCliOverrides', () => {
             ['./item-a.cjs', './from-cli.cjs']
         );
         assert.strictEqual(merged.items![1].plugins, undefined);
+    });
+});
+
+describe('@unit: GENERATE_CLI_OVERRIDE_KEYS drift', () => {
+    test('every override key exists on generateOptionsSchema.shape', () => {
+        const shapeKeys = new Set(Object.keys(generateOptionsSchema.shape));
+        for (const key of GENERATE_CLI_OVERRIDE_KEYS) {
+            assert.ok(shapeKeys.has(key), `GENERATE_CLI_OVERRIDE_KEYS includes "${key}" missing from generateOptionsSchema.shape`);
+        }
     });
 });

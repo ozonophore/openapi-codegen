@@ -186,37 +186,29 @@ export class GenerationItemSession {
         let clientPrepared: Client;
         switch (openApiVersion) {
             case OpenApiVersion.V2: {
-                const client = new ParserV2(context).parse(openApi as OpenApiV2);
-                const clientWithDiff = this.applyDiffReportIfNeeded({
-                    client,
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
+                clientPrepared = this.prepareClientFromOpenApi({
+                    parse: () => new ParserV2(context).parse(openApi as OpenApiV2),
                     openApi,
                     openApiVersion,
                     diffReport: diffReportData,
                     context,
                     miracles,
+                    modelsMode,
                 });
-                const clientFinal = postProcessClient(clientWithDiff);
-                clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
                 writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V2);
                 break;
             }
 
             case OpenApiVersion.V3: {
-                const client = new ParserV3(context).parse(openApi as OpenApiV3);
-                const clientWithDiff = this.applyDiffReportIfNeeded({
-                    client,
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
+                clientPrepared = this.prepareClientFromOpenApi({
+                    parse: () => new ParserV3(context).parse(openApi as OpenApiV3),
                     openApi,
                     openApiVersion,
                     diffReport: diffReportData,
                     context,
                     miracles,
+                    modelsMode,
                 });
-                const clientFinal = postProcessClient(clientWithDiff);
-                clientPrepared = modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
                 writeClient.logger.info(LOGGER_MESSAGES.OPENAPI.WRITING_V3);
                 break;
             }
@@ -267,6 +259,31 @@ export class GenerationItemSession {
         }
 
         return { entitySkipped: false };
+    }
+
+    /**
+     * Shared V2/V3 prepare: parse → optional Diff apply → postProcess → optional classes/DTO.
+     */
+    private prepareClientFromOpenApi(params: {
+        parse: () => Client;
+        openApi: unknown;
+        openApiVersion: OpenApiVersion;
+        diffReport: DiffReport | null;
+        context: Context;
+        miracles?: TStrictFlatOptions['miracles'];
+        modelsMode?: ModelsMode;
+    }): Client {
+        const client = params.parse();
+        const clientWithDiff = this.applyDiffReportIfNeeded({
+            client,
+            openApi: params.openApi as Record<string, unknown>,
+            openApiVersion: params.openApiVersion,
+            diffReport: params.diffReport,
+            context: params.context,
+            miracles: params.miracles,
+        });
+        const clientFinal = postProcessClient(clientWithDiff);
+        return params.modelsMode === ModelsMode.CLASSES ? resolveClassesModeTypes(prepareDtoModels(clientFinal)) : clientFinal;
     }
 
     private async loadDiffReportIfNeeded(params: { useHistory?: boolean; diffReport?: string; inputPath?: string }): Promise<DiffReport | null> {
