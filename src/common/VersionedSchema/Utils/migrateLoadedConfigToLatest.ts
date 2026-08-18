@@ -5,7 +5,7 @@ import { migrateDataToLatestSchemaVersion } from './migrateDataToLatestSchemaVer
 
 /**
  * Migrate a prepared config record to the latest schema using default plans/schemas.
- * Callers MUST prep input first (`convertArrayToObject`, optional `omitUndefined`).
+ * Prefer `prepareAndMigrateLoadedConfig` for loaded object/array configs.
  */
 export function migrateLoadedConfigToLatest(rawInput: Record<string, any>, migrationMode: EMigrationMode) {
     return migrateDataToLatestSchemaVersion({

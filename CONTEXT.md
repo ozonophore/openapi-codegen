@@ -77,13 +77,24 @@ Typed root bag for batch/finalize (architecture #1 residual after options resolv
 DRY VersionedSchema migrate wiring (architecture #7 migrate-in-core Speculative → helper, not fold into resolve).
 
 - **Module:** `src/common/VersionedSchema/Utils/migrateLoadedConfigToLatest.ts` — `migrateLoadedConfigToLatest(rawInput, migrationMode)` binds `allMigrationPlans` + `allVersionedSchemas`
-- **Semantics:** returns `MigrateToLatestResult | null` (same as engine); no throw policy
-- **Does not own:** `convertArrayToObject`, `omitUndefined`, stripDefaults (stay at callers)
-- **Call sites:** `generateCliOptionsAdapter`, `previewChanges`, `validateAndMigrateConfigData`
+- **Semantics:** returns engine result `| null`; no throw policy
+- **Prep:** prefer **Prepare and migrate loaded config** for object/array loads; bind-only helper remains for already-prepared records
 - **Surface:** internal (CLI imports path; not `core/index` / public API)
 - **Out of scope:** programmatic `generate(raw)` migrate; fold into `resolveGenerationOptions`; public signature change; EntitySkip/fingerprint
 - **Tests:** thin unit on wiring + existing CLI suites
 - **OpenSpec change:** `migrate-loaded-config-helper`
+
+## Prepare and migrate loaded config
+
+DRY config load prep ahead of migrate (architecture #6 residual).
+
+- **Module:** `prepareAndMigrateLoadedConfig.ts` — convertArray → optional omit → `migrateLoadedConfigToLatest`
+- **Omit:** `common/utils/omitUndefinedValues.ts` (shared; validate uses `{ omitUndefined: true }`)
+- **Call sites:** generate adapter, preview, `validateAndMigrateConfigData`
+- **Stays at callers:** array-deprecated warn; stripDefaults after migrate (validate)
+- **Out of scope:** analyze-diff pluginPaths; fold into resolve; public core export
+- **Tests:** omit unit + prepare array/omit paths; validateAndMigrate suite preserve
+- **OpenSpec change:** `prepare-and-migrate-loaded-config`
 
 ## Related terms
 
@@ -94,6 +105,7 @@ DRY VersionedSchema migrate wiring (architecture #7 migrate-in-core Speculative 
 | **Generation root options** | Narrow batch/finalize root Pick (`reuseMode` / `preAnalyze` / traffic / swarm / workspace); OpenSpec `generation-root-options` |
 | **AutoSelect execute** | Probe fan-out + option patch (`executeAutoSelection`) in `core/autoSelect/`; OpenSpec `autoselect-execute-core` |
 | **Migrate loaded config helper** | `migrateLoadedConfigToLatest` binds default plans/schemas; OpenSpec `migrate-loaded-config-helper` |
+| **Prepare and migrate loaded config** | convert (+ optional omit) then migrate; OpenSpec `prepare-and-migrate-loaded-config` |
 | **GenerationItemSession** | Per-item lifecycle: EntitySkip → parse → Client → Write → cache set |
 | **Generation batch finalize** | Post-loop phases: combine → traffic/swarm → stale → cache save → specAnalysis → reuse GC/save → report → workspace → ESLint (`finalizeGenerationBatch`); OpenSpec `generation-batch-finalize` |
 | **Generation batch setup** | Pre-loop bootstrap: cache/reuse/sharedFolder/preAnalyze (`setupGenerationBatch`); OpenSpec `generation-batch-setup` |
@@ -301,7 +313,7 @@ Collapse dual Zod call sites in `generateOpenApiClient` into one CLI → `TRawOp
 
 - **Module:** `generateCliOptionsAdapter.ts` with `resolveGenerateCliToRawOptions` (+ merge/pick/keys); former `generateCliOverrides.ts` removed
 - **Zod:** `generateOptionsSchema` once at entry; direct path flat refine (`generateCliFlatSchema`) **inside** adapter only
-- **Paths preserved:** direct (input+output) vs config+migrate; migrate wiring via **Migrate loaded config helper**
+- **Paths preserved:** direct (input+output) vs config+migrate; migrate wiring via **Prepare and migrate loaded config**
 - **Override keys:** keep `GENERATE_CLI_OVERRIDE_KEYS` hand list; unit drift test vs `keyof GenerateOptions`
 - **Caller:** `generateOpenApiClient` thin: validate Commander options → adapter → **AutoSelect execute** → `OpenAPI.generate`
 - **OpenSpec change:** `generate-cli-options-adapter`
