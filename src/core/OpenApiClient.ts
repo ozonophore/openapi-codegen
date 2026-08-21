@@ -38,7 +38,7 @@ export class OpenApiClient {
         this._writeClient = new WriteClient(logger);
         this.eslintFixOptions = extractEslintFixOptions(rawOptions);
 
-        const items = resolveGenerationOptions(rawOptions);
+        const { items, root } = resolveGenerationOptions(rawOptions);
         const itemSession = new GenerationItemSession({
             writeClient: this.writeClient,
             eslintFixOptions: this.eslintFixOptions,
@@ -49,6 +49,6 @@ export class OpenApiClient {
             generateItem: (item, generationCache, itemRunContext) => itemSession.run(item, generationCache, itemRunContext),
             shouldEntitySkip: (item, generationCache, reuseStore) => shouldEntitySkip({ item, generationCache, reuseStore }),
         });
-        await session.run(items, rawOptions);
+        await session.run(items, root);
     }
 }

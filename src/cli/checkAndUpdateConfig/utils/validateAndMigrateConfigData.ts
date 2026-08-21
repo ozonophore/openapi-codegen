@@ -2,9 +2,8 @@ import { APP_LOGGER } from '../../../common/Consts';
 import { EMigrationMode } from '../../../common/Enums';
 import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
 import { convertArrayToObject } from '../../../common/utils/convertArrayToObject';
-import { allMigrationPlans } from '../../../common/VersionedSchema/AllVersionedSchemas/AllMigrationPlans';
 import { allVersionedSchemas } from '../../../common/VersionedSchema/AllVersionedSchemas/AllVersionedSchemas';
-import { migrateDataToLatestSchemaVersion } from '../../../common/VersionedSchema/Utils/migrateDataToLatestSchemaVersion';
+import { migrateLoadedConfigToLatest } from '../../../common/VersionedSchema/Utils/migrateLoadedConfigToLatest';
 import { IConfigValidationResult } from '../types';
 import { isDeepEqual, removeDefaultConfigValues } from './removeDefaultConfigValues';
 
@@ -52,12 +51,7 @@ export function validateAndMigrateConfigData(configData: Record<string, unknown>
 
     const normalizedData = omitUndefinedValues(convertArrayToObject(configData));
 
-    const migrationResult = migrateDataToLatestSchemaVersion({
-        rawInput: normalizedData,
-        migrationPlans: allMigrationPlans,
-        versionedSchemas: allVersionedSchemas,
-        migrationMode: EMigrationMode.VALIDATE_CONFIG,
-    });
+    const migrationResult = migrateLoadedConfigToLatest(normalizedData, EMigrationMode.VALIDATE_CONFIG);
     if (!migrationResult) {
         throw new Error(LOGGER_MESSAGES.CONFIG.CONVERSION_FAILED);
     }

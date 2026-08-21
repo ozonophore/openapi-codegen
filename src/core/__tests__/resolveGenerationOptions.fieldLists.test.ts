@@ -57,7 +57,27 @@ describe('@unit: resolveGenerationOptions field lists', () => {
     for (const name of Object.keys(fixtureInputs)) {
         test(`golden: ${name}`, () => {
             const actual = resolveGenerationOptions(fixtureInputs[name] as Parameters<typeof resolveGenerationOptions>[0]);
-            assert.deepEqual(actual, golden[name]);
+            assert.deepEqual(actual.items, golden[name]);
         });
     }
+
+    test('projects generation root options from raw', () => {
+        const { items, root } = resolveGenerationOptions({
+            input: './a.yaml',
+            output: './out',
+            httpClient: 'fetch',
+            reuseMode: 'auto-group',
+            preAnalyze: true,
+            trafficSplitter: { enabled: true },
+            swarm: false,
+            workspaceReport: { enabled: false },
+        } as unknown as Parameters<typeof resolveGenerationOptions>[0]);
+
+        assert.equal(root.reuseMode, 'auto-group');
+        assert.equal(root.preAnalyze, true);
+        assert.deepEqual(root.trafficSplitter, { enabled: true });
+        assert.equal(root.swarm, false);
+        assert.deepEqual(root.workspaceReport, { enabled: false });
+        assert.equal(items.length, 1);
+    });
 });

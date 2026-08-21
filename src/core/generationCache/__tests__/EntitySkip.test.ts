@@ -5,25 +5,13 @@ import { afterEach, describe, test } from 'node:test';
 
 import { COMMON_DEFAULT_OPTIONS_VALUES } from '../../../common/Consts';
 import type { TStrictFlatOptions } from '../../../common/TRawOptions';
+import { buildGenerationAffectingHash, GENERATION_AFFECTING_KEYS, REUSE_OPTIONS_SLICE_KEYS } from '../../generationAffectingOptions';
+import { GenerationCache } from '../../generationCache/GenerationCache';
 import { buildOptionsSlice, buildOptionsSliceHash } from '../../reuseStore/ArtifactFingerprinter';
 import type { ReuseStore } from '../../reuseStore/ReuseStore';
 import { ModelsLayout } from '../../types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../../types/enums/ModelsMode.enum';
-import { GenerationCache } from '../../utils/GenerationCache';
-import {
-    buildCacheKey,
-    buildEntityFingerprint,
-    buildEntityFingerprintResidual,
-    ENTITY_CACHE_FINGERPRINT_VERSION,
-    ENTITY_FINGERPRINT_AFFECTING_KEYS,
-    ENTITY_FINGERPRINT_RESIDUAL_KEYS,
-    ENTITY_FINGERPRINT_SLICE_COVERAGE_KEYS,
-    getSpecItemName,
-    resolveEntitySkipCandidate,
-    shouldEntitySkip,
-    usesEntityCache,
-    usesReuseStoreForItem,
-} from '../EntitySkip';
+import { buildCacheKey, buildEntityFingerprint, ENTITY_CACHE_FINGERPRINT_VERSION, getSpecItemName, resolveEntitySkipCandidate, shouldEntitySkip, usesEntityCache, usesReuseStoreForItem } from '../EntitySkip';
 
 const generatedRoot = path.join(__dirname, '../../../../test/generated');
 
@@ -48,59 +36,38 @@ describe('@unit: EntitySkip', () => {
         }
     });
 
-    test('ENTITY_CACHE_FINGERPRINT_VERSION is 3', () => {
-        assert.equal(ENTITY_CACHE_FINGERPRINT_VERSION, 3);
+    test('ENTITY_CACHE_FINGERPRINT_VERSION is 4', () => {
+        assert.equal(ENTITY_CACHE_FINGERPRINT_VERSION, 4);
     });
 
-    test('derived residual keys match former hand list (bit-identical snapshot)', () => {
-        assert.deepEqual(
-            [...ENTITY_FINGERPRINT_RESIDUAL_KEYS],
-            [
-                'request',
-                'useOptions',
-                'includeSchemasFiles',
-                'excludeCoreServiceFiles',
-                'strictPluginMode',
-                'customExecutorPath',
-                'useCancelableRequest',
-                'useHistory',
-                'diffReport',
-                'strictOpenapi',
-                'failOnGovernanceErrors',
-            ]
-        );
+    test('reuse OptionsSlice keys are a subset of generation-affecting keys', () => {
+        const affecting = new Set<string>(GENERATION_AFFECTING_KEYS);
+        for (const key of REUSE_OPTIONS_SLICE_KEYS) {
+            assert.equal(affecting.has(key), true, `"${key}" must be in GENERATION_AFFECTING_KEYS`);
+        }
+        assert.equal(affecting.has('plugins'), true);
     });
 
-    test('every affecting key is in coverage XOR residual', () => {
-        const coverage = new Set<string>(ENTITY_FINGERPRINT_SLICE_COVERAGE_KEYS);
-        const residual = new Set<string>(ENTITY_FINGERPRINT_RESIDUAL_KEYS);
-        for (const key of ENTITY_FINGERPRINT_AFFECTING_KEYS) {
-            const inCoverage = coverage.has(key);
-            const inResidual = residual.has(key);
-            assert.equal(inCoverage !== inResidual, true, `"${key}" must be in coverage XOR residual`);
+    test('former residual-only keys remain in affecting allowlist', () => {
+        const affecting = new Set<string>(GENERATION_AFFECTING_KEYS);
+        for (const key of [
+            'request',
+            'useOptions',
+            'includeSchemasFiles',
+            'excludeCoreServiceFiles',
+            'strictPluginMode',
+            'customExecutorPath',
+            'useCancelableRequest',
+            'useHistory',
+            'diffReport',
+            'strictOpenapi',
+            'failOnGovernanceErrors',
+        ]) {
+            assert.equal(affecting.has(key), true, `"${key}" must remain affecting`);
         }
     });
 
-    test('residual omits OptionsSlice fields and plugins', () => {
-        const residual = buildEntityFingerprintResidual(
-            baseItem({
-                plugins: [{ path: './p.cjs', config: { a: 1 } }],
-                disableBuiltinPlugins: true,
-                interfacePrefix: 'I',
-                request: './req.ts',
-                strictOpenapi: true,
-            })
-        );
-        assert.equal(residual.request, './req.ts');
-        assert.equal(residual.strictOpenapi, true);
-        assert.equal('plugins' in residual, false);
-        assert.equal('disableBuiltinPlugins' in residual, false);
-        assert.equal('interfacePrefix' in residual, false);
-        assert.equal('httpClient' in residual, false);
-        assert.equal('prettierConfigPath' in residual, false);
-    });
-
-    test('fingerprint embeds optionsSliceHash and changes with slice field', async () => {
+    test('fingerprint changes with OptionsSlice field via affecting hash', async () => {
         mkdirSync(generatedRoot, { recursive: true });
         tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-fp-'));
         const specPath = path.join(tmpDir, 'api.yaml');
@@ -111,13 +78,10 @@ describe('@unit: EntitySkip', () => {
         const fpA = await buildEntityFingerprint(a, specPath);
         const fpB = await buildEntityFingerprint(b, specPath);
         assert.notEqual(fpA, fpB);
-
-        const sliceHashA = buildOptionsSliceHash(buildOptionsSlice(a));
-        const sliceHashB = buildOptionsSliceHash(buildOptionsSlice(b));
-        assert.notEqual(sliceHashA, sliceHashB);
+        assert.notEqual(buildGenerationAffectingHash(a), buildGenerationAffectingHash(b));
     });
 
-    test('fingerprint changes with plugin config via slice only', async () => {
+    test('fingerprint changes with plugin config via affecting hash', async () => {
         mkdirSync(generatedRoot, { recursive: true });
         tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-plugin-'));
         const specPath = path.join(tmpDir, 'api.yaml');
@@ -128,7 +92,7 @@ describe('@unit: EntitySkip', () => {
         assert.notEqual(await buildEntityFingerprint(a, specPath), await buildEntityFingerprint(b, specPath));
     });
 
-    test('fingerprint changes with residual-only field', async () => {
+    test('fingerprint changes with former residual-only field while reuse slice hash stays equal', async () => {
         mkdirSync(generatedRoot, { recursive: true });
         tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-res-'));
         const specPath = path.join(tmpDir, 'api.yaml');
@@ -137,6 +101,7 @@ describe('@unit: EntitySkip', () => {
         const a = baseItem({ request: undefined });
         const b = baseItem({ request: './custom-request.ts' });
         assert.notEqual(await buildEntityFingerprint(a, specPath), await buildEntityFingerprint(b, specPath));
+        assert.notEqual(buildGenerationAffectingHash(a), buildGenerationAffectingHash(b));
         assert.equal(buildOptionsSliceHash(buildOptionsSlice(a)), buildOptionsSliceHash(buildOptionsSlice(b)));
     });
 
