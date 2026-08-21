@@ -21,7 +21,7 @@ import { finalizeSpecAnalysis, mergeSpecAnalysisConfigAcrossItems, type SpecAnal
 import type { SpecAnalysisReport } from './specAnalysis/types';
 import { buildWorkspaceReport } from './workspaceReport/buildWorkspaceReport';
 import { writeWorkspaceReport } from './workspaceReport/writeWorkspaceReport';
-import type { WriteClient } from './WriteClient';
+import type { WriteClient } from './write/WriteClient';
 
 export type FinalizeGenerationBatchState = {
     specAnalysisAccumulator: SpecAnalysisAccumulator | null;

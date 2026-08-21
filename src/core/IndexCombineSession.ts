@@ -15,8 +15,8 @@ import type { Model } from './types/shared/Model.model';
 import { prepareAlias } from './utils/prepareAlias';
 import { sortModelByName } from './utils/sortModelByName';
 import { unique } from './utils/unique';
-import { writeClientFullIndex } from './utils/writeClientFullIndex';
-import { writeClientSimpleIndex } from './utils/writeClientSimpleIndex';
+import { writeClientFullIndex } from './write/writeClientFullIndex';
+import { writeClientSimpleIndex } from './write/writeClientSimpleIndex';
 
 /** Per-item generator config accumulated for batch index combine. */
 export type APIClientGeneratorConfig = {

@@ -4,7 +4,7 @@ Namespaced ReuseStore artifact paths under `reuseOnConflict: "namespace"` must i
 `schemaHash` so repeated conflicts for the same `specItem` and `optionsSliceHash` do not
 collide in `assertPathAvailable` (false `ReuseConflictError` «spec vs same spec»).
 
-**Baseline:** `document-service-baseline/generation-cache-and-reuse`.
+**Baseline:** `generation-cache-and-reuse`.
 
 ## Requirements
 

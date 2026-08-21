@@ -2,7 +2,7 @@
 
 Zod validation and CLI merge plumbing for `generate` command flags.
 
-**Baseline:** `document-service-baseline/code-generation`.
+**Baseline:** `code-generation`.
 
 ## Requirements
 

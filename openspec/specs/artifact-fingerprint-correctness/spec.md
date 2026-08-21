@@ -3,7 +3,7 @@
 Correct artifact fingerprints: full schema-hash field whitelist, cycle-safe `$ref`
 normalization, order-independent `required`/`enum`, and plugin config in options slice hash.
 
-**Baseline:** `document-service-baseline/generation-cache-and-reuse`.
+**Baseline:** `generation-cache-and-reuse`.
 
 ## Requirements
 

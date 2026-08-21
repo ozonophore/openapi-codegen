@@ -1,11 +1,10 @@
 import { EMigrationMode } from '../../common/Enums';
 import { TRawOptions } from '../../common/TRawOptions';
-import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { validateZodOptions } from '../../common/Validation';
 import { flatOptionsSchema } from '../../common/VersionedSchema/AllVersionedSchemas/UnifiedVersionedSchemas';
 import { mergeMarauderBlockDeep } from '../../common/VersionedSchema/Utils/mergeMarauderBlock';
-import { migrateLoadedConfigToLatest } from '../../common/VersionedSchema/Utils/migrateLoadedConfigToLatest';
+import { prepareAndMigrateLoadedConfig } from '../../common/VersionedSchema/Utils/prepareAndMigrateLoadedConfig';
 import { resolveSpecAnalysisConfig } from '../../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
 import { mergePluginPaths, type PluginConfigEntry } from '../../core/plugins/pluginEntries';
 import { GenerateOptions } from '../schemas';
@@ -169,9 +168,7 @@ export function resolveGenerateCliToRawOptions(input: ResolveGenerateCliToRawInp
     }
 
     const deprecatedArrayConfig = Array.isArray(configData);
-    const preparedOptions = convertArrayToObject(configData);
-
-    const migratedOptions = migrateLoadedConfigToLatest(preparedOptions, EMigrationMode.GENERATE_OPENAPI);
+    const migratedOptions = prepareAndMigrateLoadedConfig(configData, EMigrationMode.GENERATE_OPENAPI);
 
     if (!migratedOptions) {
         return { ok: false, kind: 'migration_failed' };

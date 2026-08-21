@@ -15,7 +15,7 @@ import { runPreAnalyze } from './specAnalysis/runPreAnalyze';
 import { createSpecAnalysisAccumulator } from './specAnalysis/runSpecAnalysis';
 import { getOutputPaths } from './utils/getOutputPaths';
 import { isClassesBundleLayout } from './utils/modelsLayoutHelpers';
-import type { WriteClient } from './WriteClient';
+import type { WriteClient } from './write/WriteClient';
 
 const DEFAULT_CACHE_FILENAME = '.openapi-codegen-cache.json';
 

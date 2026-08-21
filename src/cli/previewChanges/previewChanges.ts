@@ -5,12 +5,11 @@ import { APP_LOGGER } from '../../common/Consts';
 import { EMigrationMode } from '../../common/Enums';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { TRawOptions } from '../../common/TRawOptions';
-import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
 import { dirNameHelper, joinHelper, resolveHelper } from '../../common/utils/pathHelpers';
 import { validateZodOptions } from '../../common/Validation';
-import { migrateLoadedConfigToLatest } from '../../common/VersionedSchema/Utils/migrateLoadedConfigToLatest';
+import { prepareAndMigrateLoadedConfig } from '../../common/VersionedSchema/Utils/prepareAndMigrateLoadedConfig';
 import * as OpenAPI from '../../core';
 import { previewChangesSchema, TPreviewChangesOptions } from '../schemas';
 import { CLICommandResult } from '../types';
@@ -162,10 +161,8 @@ export async function previewChanges(options: OptionValues): Promise<CLICommandR
             APP_LOGGER.warn(LOGGER_MESSAGES.CONFIG.ARRAY_DEPRECATED);
         }
 
-        const preparedOptions = convertArrayToObject(configData);
-
         // Миграция опций
-        const migratedOptions = migrateLoadedConfigToLatest(preparedOptions, EMigrationMode.GENERATE_OPENAPI);
+        const migratedOptions = prepareAndMigrateLoadedConfig(configData, EMigrationMode.GENERATE_OPENAPI);
 
         if (!migratedOptions) {
             APP_LOGGER.errorWithHint({

@@ -2,7 +2,7 @@
 
 Auto-group reuse: LCA resolution, `__shared__` folder, stubs, barrel integration.
 
-**Baseline:** `document-service-baseline/generation-cache-and-reuse`.
+**Baseline:** `generation-cache-and-reuse`.
 
 ## Requirements
 
