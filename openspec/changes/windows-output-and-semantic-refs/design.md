@@ -31,7 +31,7 @@
 
    *Альтернатива:* дублировать intern-орфографию в expand. Отвергнута: две орфографии разъедутся (уже Windows-промах).
 
-2. **Конвейер expand остаётся локальным; intern-совпадение — шаг lookup.** Expand по-прежнему разбирает Tree `$ref`, склеивает файловую часть **local slash-join** (свёртка слешей + `path.posix.dirname` / `join` / `normalize`, без `path.resolve` / `resolveHelper` / `pathToFileURL`) и обходит JSON Pointers. Склейка MUST NOT изобретать букву диска, которой не было у родителя. `isUrlLike` MUST быть только `http://` / `https://` / `file:` — буква диска (`D:`) не схема. После склейки он MUST intern-совпадать с ключами парсера до `get` / `exists`. `createSwaggerRefsResolver` MAY отдавать `refs.paths()` (или эквивалентные intern-точные ключи), чтобы expand мог выбрать intern-точную строку для `refs.get`. Expand MUST NOT импортировать класс `RefLookup`. Intern MUST NOT считать `D:/tmp/foo` и `/tmp/foo` одной орфографией.
+2. **Конвейер expand остаётся локальным; склейка файла — общая.** Expand по-прежнему разбирает Tree `$ref`, обходит JSON Pointers и при промахе оставляет объект `$ref`. Файловую часть склеивает **`joinTreeRefFile`** (ручной `file://` + `new URL`; не `path.resolve` / `resolveHelper` / `pathToFileURL`) — тот же модуль, что `RefLookup.toCanonicalRef`. Склейка MUST NOT изобретать букву диска, которой не было у родителя. `isUrlLike` MUST быть только `http://` / `https://` / `file:` — буква диска (`D:`) не схема. После склейки expand MUST intern-совпадать с ключами парсера до `get` / `exists`. Expand MUST NOT импортировать класс `RefLookup`. Intern MUST NOT считать `D:/tmp/foo` и `/tmp/foo` одной орфографией.
 
    *Альтернатива:* intern-совпадение только внутри обёртки резолвера, чтобы expand оставался на точном совпадении строк. Отвергнута: proposal требует, чтобы expand сам вызывал общий модуль.
 
@@ -52,7 +52,7 @@
 - **[Риск] Intern-совпадение без `paths()` не может восстановить точный ключ парсера для `refs.get`.** → Митигация: шов резолвера отдаёт intern-точные ключи (`paths()` или intern-таблица); в `get` по-прежнему уходит строка парсера, не ключ сравнения.
 - **[Риск] Считать Nested.ts CRLF или багом RefLookup.** → Митигация: сначала воспроизвести; тесты RefLookup уже проходят; исходы дизайна (1) vs (2) взаимоисключающие для фикса Output mapping vs идентичности.
 - **[Риск] Тихо слить expand в `RefLookup`.** → Митигация: явный пункт Non-Goals; ревью кода отвергает `import { RefLookup }` из specLoad expand.
-- **[Компромисс] Expand склеивает local slash-join (`path.posix`), не URI.** → `path.resolve` изобретал текущий диск на `/tmp`; URI/`pathToFileURL` делает то же. Intern не расширяем. URI-склейка остаётся в `$ref` lookup.
+- **[Компромисс] Expand не импортирует класс `RefLookup`.** → Общая только склейка файла (`joinTreeRefFile`). Таблица intern, ошибка «нет родителя» и `toCanonicalRef` остаются у `$ref` lookup.
 - **[Компромисс] Исход (1) vs (2) неизвестен до воспроизведения.** → Первая задача — диагностика; в поставку идёт только один из двух фиксов.
 
 ## Migration Plan

@@ -1,6 +1,6 @@
 import { REGEX_BACKSLASH } from '../types/Consts';
 
-function isRemoteOrFileUrl(value: string): boolean {
+export function isRemoteOrFileUrl(value: string): boolean {
     return value.startsWith('http://') || value.startsWith('https://') || value.startsWith('file:');
 }
 

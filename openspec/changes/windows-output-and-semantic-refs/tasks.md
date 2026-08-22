@@ -33,3 +33,10 @@
 - [x] 6.2 `isUrlLike` MUST NOT считать букву диска (`D:`) схемой URL — иначе склейка на Windows не выполняется
 - [x] 6.3 Юнит-тесты expand (`/tmp` + intern `\tmp\...` + parent `D:/…`) проходят на Windows
 - [ ] 6.4 Gate: оба снапшота `v3.withDifferentRefs` на Windows CI без ложного +1 breaking. Если +1 остаётся — не архивировать, не расширять intern
+
+## 7. Единая склейка файла после парсера
+
+- [x] 7.1 Вынести URI-склейку (`file://` + `new URL`, не `path.resolve` / `pathToFileURL`) в `src/core/utils/joinTreeRefFile.ts`
+- [x] 7.2 `RefLookup.toCanonicalRef` и `expandOpenApiRefsForSemanticDiff` вызывают `joinTreeRefFile`. Expand MUST NOT импортировать класс `RefLookup`
+- [x] 7.3 Юнит-тесты join: `/tmp` без изобретённого диска; Parent `D:/…` сохраняет диск; `\` → `/`; `..`
+- [x] 7.4 Обновить ADR 0001: свой обход дерева у semantic-diff; склейка файла общая. Существующие сьюты RefLookup + expand проходят

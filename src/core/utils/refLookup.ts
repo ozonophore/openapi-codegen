@@ -1,5 +1,5 @@
-import { REGEX_BACKSLASH } from '../types/Consts';
 import { joinCanonicalRef, splitCanonicalRef } from './canonicalRef';
+import { fileUrlToFilePath, isAbsoluteSourceFile, isFileUrl, joinTreeRefFile, toPosixSlashes } from './joinTreeRefFile';
 import { internParserKey } from './parserKeyMatch';
 
 /**
@@ -15,56 +15,6 @@ export class RefLookupError extends Error {
 
 export function isRemoteSourceFile(file: string): boolean {
     return file.startsWith('http://') || file.startsWith('https://');
-}
-
-function isFileUrl(file: string): boolean {
-    return file.startsWith('file:');
-}
-
-function isWindowsDrivePath(file: string): boolean {
-    return /^[A-Za-z]:[\\/]/.test(file);
-}
-
-function isAbsoluteSourceFile(file: string): boolean {
-    if (!file) {
-        return false;
-    }
-    if (file.startsWith('/')) {
-        return true;
-    }
-    return isWindowsDrivePath(file);
-}
-
-function toPosixSlashes(filePath: string): string {
-    return filePath.replace(REGEX_BACKSLASH, '/');
-}
-
-function filePathToFileUrl(absolutePath: string): string {
-    const posix = toPosixSlashes(absolutePath);
-    if (isWindowsDrivePath(posix)) {
-        return `file:///${posix}`;
-    }
-    if (posix.startsWith('/')) {
-        return `file://${posix}`;
-    }
-    throw new RefLookupError(`Cannot build file URL from non-absolute path: ${absolutePath}`);
-}
-
-function fileUrlToFilePath(fileUrl: URL): string {
-    let pathname = decodeURIComponent(fileUrl.pathname);
-    if (/^\/[A-Za-z]:/.test(pathname)) {
-        pathname = pathname.slice(1);
-    }
-    return pathname;
-}
-
-function joinRelativeFile(parentAbsolute: string, treeFile: string): string {
-    const base = filePathToFileUrl(parentAbsolute);
-    const url = new URL(toPosixSlashes(treeFile), base);
-    if (url.protocol !== 'file:') {
-        return url.href;
-    }
-    return fileUrlToFilePath(url);
 }
 
 function assertParentSourceFile(parentSourceFile: string): void {
@@ -146,7 +96,7 @@ export class RefLookup {
             throw new RefLookupError(`Relative Tree $ref requires a Parent source file: ${treeRef}`);
         }
 
-        const joined = joinRelativeFile(parentSourceFile, slashFile);
+        const joined = joinTreeRefFile(parentSourceFile, slashFile);
         if (isRemoteSourceFile(joined)) {
             return joinCanonicalRef({ sourceFile: joined, pointer });
         }

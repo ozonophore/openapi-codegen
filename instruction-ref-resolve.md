@@ -164,7 +164,7 @@ Windows в каноне парсера обычно `C:/...`, не `C:\...`. Т�
 
 ## Реализация
 
-Один хозяин перевода: `RefLookup.toCanonicalRef`. Context.`get` / `exists` только делегируют. Сбор Pointers для карты — тот же перевод.
+Один хозяин перевода для Context: `RefLookup.toCanonicalRef`. Context.`get` / `exists` только делегируют. Сбор Pointers для карты — тот же перевод. Склейка файла — `joinTreeRefFile`; её же вызывает semantic expand. Expand не импортирует класс `RefLookup` и не бросает `RefLookupError`: неразрешённый `$ref` остаётся объектом.
 
 Не тащить сюда плагины и расчёт output-пути (это Output mapping в Context).
 

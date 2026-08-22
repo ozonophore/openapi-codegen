@@ -1,6 +1,6 @@
 # `$ref` lookup uses parser keys and URI join, not `path.resolve`
 
-After `SwaggerParser.resolve()`, files are already in `$Refs`. `$ref` lookup must turn a Tree `$ref` plus Parent source file into that parser key (Canonical Ref), not invent a POSIX path and hope it matches. Join with `new URL` against a hand-built `file://` base; match `refs.paths()` allowing only spelling of the same opened file (slashes, encoding, drive-letter case). `pathHelpers` stay for CLI and writing `.ts`, not for `$ref`. `PathApi` is removed.
+After `SwaggerParser.resolve()`, files are already in `$Refs`. `$ref` lookup must turn a Tree `$ref` plus Parent source file into that parser key (Canonical Ref), not invent a POSIX path and hope it matches. File join is `joinTreeRefFile` (`new URL` against a hand-built `file://` base — not `path.resolve`, not `pathToFileURL`). `RefLookup` and semantic expand both call it. Expand still walks the tree itself and MUST NOT import the `RefLookup` class. Match `refs.paths()` allowing only spelling of the same opened file (slashes, encoding, drive-letter case — a missing drive is not the current drive). `pathHelpers` stay for CLI and writing `.ts`, not for `$ref`. `PathApi` is removed.
 
 Terms: `CONTEXT.md` (Language). Steps: `instruction-ref-resolve.md`.
 
@@ -14,4 +14,4 @@ Terms: `CONTEXT.md` (Language). Steps: `instruction-ref-resolve.md`.
 
 - Callers pass an absolute Parent source file with no Pointer. A Pointer-only Tree `$ref` with no parent uses the Entry file. Relative file `$ref` without a parent is invalid.
 - UNC (`\\server\share`) is out of scope until a real spec needs it.
-- Semantic diff keeps its own pipeline.
+- Semantic diff keeps its own tree walk and “unresolved stays a `$ref` object” contract. File join after the parser is `joinTreeRefFile`, shared with `$ref` lookup. Expand MUST NOT import the `RefLookup` class.

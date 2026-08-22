@@ -19,6 +19,10 @@
 - **WHEN** Parent source file равен `/tmp/openapi/api.yaml`, а Tree `$ref` равен `./schemas/User.yaml`
 - **THEN** склеенный кандидат MUST быть `/tmp/openapi/schemas/User.yaml` и MUST NOT получать букву текущего диска (`D:/tmp/…`)
 
+#### Scenario: Expand и RefLookup склеивают одним модулем
+- **WHEN** expand склеивает относительный файловый Tree `$ref` с Parent source file
+- **THEN** склейка MUST идти через `joinTreeRefFile` (тот же модуль, что `$ref` lookup) и MUST NOT импортировать класс `RefLookup`
+
 #### Scenario: Буква диска не URL
 - **WHEN** Parent source file равен `D:/tmp/openapi/api.yaml`, а Tree `$ref` равен `./schemas/User.yaml`
 - **THEN** expand MUST склеить в `D:/tmp/openapi/schemas/User.yaml` и MUST NOT считать `D:` схемой URL
