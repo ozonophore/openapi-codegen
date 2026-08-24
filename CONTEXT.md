@@ -35,9 +35,13 @@ _Avoid_: unqualified “resolve”; `dereference`; `PathApi.resolve` as the name
 Where to write `.ts` for one spec file: source file (no Pointer) → output path, plus Pointers seen in that file. Not a schema store.
 _Avoid_: virtual file as schema cache; `exists` over seen Pointers only; `get` via the map
 
+**VirtualFileMap**:
+Module (`src/core/specLoad/VirtualFileMap.ts`) that owns Output mapping for one generation item: built once at Spec load time from refs + entry file + output paths, then passed independently to callers that need output-path resolution. Exposes `resolve(canonicalRef, parent?) → { outputFile, fragment } | undefined`, `getCanonicalRefs() → string[]`, and `output: OutputPaths`. Does not own $ref lookup — holds a `RefLookup` only for the `resolve()` translation step.
+_Avoid_: calling it "Context's virtual file map"; treating it as a schema store; constructing it outside of specLoad
+
 **Output mapping**:
-Canonical Ref → generated `.ts` path via the Virtual file map. Not $ref lookup. Local spec files only.
-_Avoid_: resolveCanonicalRef
+Canonical Ref → generated `.ts` path via the VirtualFileMap module. Not $ref lookup. Local spec files only.
+_Avoid_: resolveCanonicalRef on Context (moved to VirtualFileMap)
 
 **Remote $ref**:
 A Tree $ref whose file part is `http://` or `https://`. `$ref` lookup may still read `$Refs`. No Virtual file map entry and no Output mapping.

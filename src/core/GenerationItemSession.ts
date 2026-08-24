@@ -124,7 +124,7 @@ export class GenerationItemSession {
         const generatorPlugins = await loadGeneratorPlugins(mergePluginPaths(plugins, null), {
             disableBuiltins: disableBuiltinPlugins,
         });
-        const { context, openApi } = await createResolvedContext({
+        const { context, map, openApi } = await createResolvedContext({
             input: absoluteInput,
             output: outputPaths,
             prefix: { interface: interfacePrefix, enum: enumPrefix, type: typePrefix },
@@ -166,7 +166,7 @@ export class GenerationItemSession {
         switch (openApiVersion) {
             case OpenApiVersion.V2: {
                 clientPrepared = this.prepareClientFromOpenApi({
-                    parse: () => new ParserV2(context).parse(openApi as OpenApiV2),
+                    parse: () => new ParserV2(context, map).parse(openApi as OpenApiV2),
                     openApi,
                     openApiVersion,
                     context,
@@ -183,7 +183,7 @@ export class GenerationItemSession {
 
             case OpenApiVersion.V3: {
                 clientPrepared = this.prepareClientFromOpenApi({
-                    parse: () => new ParserV3(context).parse(openApi as OpenApiV3),
+                    parse: () => new ParserV3(context, map).parse(openApi as OpenApiV3),
                     openApi,
                     openApiVersion,
                     context,

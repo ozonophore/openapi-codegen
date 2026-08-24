@@ -39,16 +39,16 @@ export function getType(this: Parser, value: string, parentRef: string): Type {
          * Предполагаем, что в таком случае расчитывать нет нужды. Это путь от папки outputModels
          */
         const parentSourceFile = toParentSourceFile(parentRef);
-        const canonicalValue = this.context.resolveCanonicalRef(normalizedValue, parentSourceFile);
+        const canonicalValue = this.map.resolve(normalizedValue, parentSourceFile);
         let valuePath = valueClean;
 
         if (canonicalValue) {
             const refValuePath = canonicalValue?.fragment ? `${canonicalValue.outputFile}${canonicalValue.fragment}` : canonicalValue?.outputFile || '';
             const cleanedRefValuePath = stripNamespace(refValuePath);
-            valuePath = relativeHelper(this.context.output?.outputModels, cleanedRefValuePath);
+            valuePath = relativeHelper(this.map.output?.outputModels, cleanedRefValuePath);
         }
 
-        valuePath = getRelativeModelPath(this.context.output?.outputModels, valuePath);
+        valuePath = getRelativeModelPath(this.map.output?.outputModels, valuePath);
 
         const type = this.getTypeNameByRef(getTypeName(valueClean), normalizedValue, parentSourceFile);
 

@@ -6,7 +6,6 @@ import { afterEach, describe, test } from 'node:test';
 import { Context } from '../Context';
 import { createResolvedContext } from '../createResolvedContext';
 import { getOutputPaths } from '../utils/getOutputPaths';
-import { internParserKey } from '../utils/parserKeyMatch';
 
 const WINDOWS_FILE = 'C:/proj/api.yaml';
 const POINTER = '#/components/schemas/Foo';
@@ -155,9 +154,9 @@ components:
             '/tmp/spec/api.yaml'
         );
 
-        const userFile = [...context.getVirtualFiles().values()].find(file => internParserKey(file.sourceFile).endsWith('/schemas/User.yaml'));
-        assert.ok(userFile, 'expected virtual file for User.yaml');
-        const outputFile = userFile!.outputFile.replace(/\\/g, '/');
+        const result = context.map.resolve('/tmp/spec/schemas/User.yaml');
+        assert.ok(result, 'expected virtual file for User.yaml');
+        const outputFile = result!.outputFile.replace(/\\/g, '/');
         assert.ok(outputFile.startsWith(output.outputModels.replace(/\\/g, '/')), outputFile);
         assert.ok(outputFile.endsWith('/schemas/User.ts'), outputFile);
         assert.ok(!outputFile.includes('..'), outputFile);

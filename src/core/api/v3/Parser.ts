@@ -1,4 +1,5 @@
 import { Context } from '../../Context';
+import type { VirtualFileMap } from '../../specLoad/VirtualFileMap';
 import { toParentSourceFile } from '../../utils/canonicalRef';
 import { getModelNameWithPrefix } from '../../utils/getModelNameWithPrefix';
 import { getModel } from '../v3/parser/getModel';
@@ -17,13 +18,19 @@ import { parse } from './parserV3';
 
 export class Parser {
     private _context: Context;
+    private _mapOverride?: VirtualFileMap;
 
-    constructor(context: Context) {
+    constructor(context: Context, map?: VirtualFileMap) {
         this._context = context;
+        this._mapOverride = map;
     }
 
     get context(): Context {
         return this._context;
+    }
+
+    get map(): VirtualFileMap {
+        return this._mapOverride ?? this._context.map;
     }
 
     public getTypeNameByRef(value: string, ref: string, parentSourceFile?: string): string {

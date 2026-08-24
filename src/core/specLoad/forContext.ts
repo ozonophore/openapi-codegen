@@ -4,6 +4,7 @@ import type { OutputPaths } from '../types/base/OutputPaths.model';
 import type { PrefixArtifacts } from '../types/base/PrefixArtifacts.model';
 import type { CommonOpenApi } from '../types/shared/CommonOpenApi.model';
 import { resolveOpenApiRefsFromFile } from './resolveOpenApiRefs';
+import type { VirtualFileMap } from './VirtualFileMap';
 
 export type ForContextProps = {
     input: string;
@@ -17,7 +18,7 @@ export type ForContextProps = {
 /**
  * Spec-load mode for generation / preAnalyze: Context + attached refs + root document.
  */
-export async function loadOpenApiForContext(props: ForContextProps): Promise<{ context: Context; openApi: CommonOpenApi }> {
+export async function loadOpenApiForContext(props: ForContextProps): Promise<{ context: Context; map: VirtualFileMap; openApi: CommonOpenApi }> {
     const { absoluteInput, refs, raw } = await resolveOpenApiRefsFromFile(props.input);
 
     const context = new Context({
@@ -27,5 +28,5 @@ export async function loadOpenApiForContext(props: ForContextProps): Promise<{ c
 
     context.attachResolvedOpenApi(refs, absoluteInput);
 
-    return { context, openApi: raw as unknown as CommonOpenApi };
+    return { context, map: context.map, openApi: raw as unknown as CommonOpenApi };
 }
