@@ -48,7 +48,7 @@ export class GenerationBatchSession {
 
         try {
             const setup = await setupGenerationBatch({ writeClient, shouldEntitySkip }, items, root);
-            const { start, cacheEnabled, cacheStrategy, useReuseStore, generationCaches, referencedArtifactKeys, specStats, reuseConflicts, reportBasePath, sharedFolderWriter, state } = setup;
+            const { cacheEnabled, cacheStrategy, useReuseStore, generationCaches, referencedArtifactKeys, specStats, reuseConflicts, reportBasePath, sharedFolderWriter, state } = setup;
 
             const buildGenerationReport = (): GenerationReport => {
                 const report: GenerationReport = {
@@ -140,23 +140,13 @@ export class GenerationBatchSession {
 
             const allEntitySkipped = specStats.length > 0 && specStats.every(entry => entry.entitySkipped);
 
-            await finalizeGenerationBatch({
+            await finalizeGenerationBatch(setup, {
                 writeClient,
                 eslintFixOptions,
                 items,
                 root,
                 allEntitySkipped,
-                cacheEnabled,
-                cacheStrategy,
-                generationCaches,
-                reuseStore: setup.reuseStore,
-                referencedArtifactKeys,
-                specStats,
-                reportBasePath,
-                sharedFolderLca: sharedFolderWriter?.lca,
                 buildGenerationReport,
-                state,
-                start,
             });
         } catch (error: any) {
             writeClient.logger.error(LOGGER_MESSAGES.ERROR.GENERIC(error.message));

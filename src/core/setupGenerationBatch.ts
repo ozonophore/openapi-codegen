@@ -24,7 +24,11 @@ export type SetupGenerationBatchDeps = {
     shouldEntitySkip: (item: TStrictFlatOptions, generationCache: GenerationCache | null, reuseStore: ReuseStore | null) => Promise<boolean>;
 };
 
-export type SetupGenerationBatchResult = {
+/**
+ * Единый контекст батча генерации — создаётся в setupGenerationBatch,
+ * мутируется в цикле по элементам, передаётся целиком в finalizeGenerationBatch.
+ */
+export type GenerationBatchContext = {
     start: bigint;
     cacheEnabled: boolean;
     cacheStrategy: string;
@@ -45,7 +49,7 @@ export type SetupGenerationBatchResult = {
 /**
  * Pre-item-loop generation batch bootstrap (cache/reuse/sharedFolder/preAnalyze).
  */
-export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items: TStrictFlatOptions[], root: GenerationRootOptions): Promise<SetupGenerationBatchResult> {
+export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items: TStrictFlatOptions[], root: GenerationRootOptions): Promise<GenerationBatchContext> {
     const { writeClient, shouldEntitySkip } = deps;
     const start = process.hrtime.bigint();
     validateConsistentCacheSettings(writeClient, items);
@@ -67,7 +71,7 @@ export async function setupGenerationBatch(deps: SetupGenerationBatchDeps, items
         manifestSaveMs: 0,
     };
 
-    const result: SetupGenerationBatchResult = {
+    const result: GenerationBatchContext = {
         start,
         cacheEnabled,
         cacheStrategy: cacheStrategy!,
