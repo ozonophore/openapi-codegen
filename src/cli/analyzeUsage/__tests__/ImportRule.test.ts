@@ -1,22 +1,13 @@
 import assert from 'node:assert';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { ProjectContext } from '../../../core/projectProbe';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import { ImportRule } from '../rules/ImportRule';
 import type { Contract } from '../types';
 import { createApiImportScope } from '../utils/apiImportScope';
-
-function createTempDir(t: TestContext, prefix: string): string {
-    const generatedRoot = path.join(__dirname, 'generated');
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-}
 
 describe('@unit: ImportRule', () => {
     test('reports invalid import name for unresolved export from generated entry', async t => {

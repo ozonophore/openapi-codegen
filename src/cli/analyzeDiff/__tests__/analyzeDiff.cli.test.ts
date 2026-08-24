@@ -1,26 +1,17 @@
 import assert from 'node:assert';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
 import { validateSemanticDiffReportSchema } from '../../../core/semanticDiff/semanticDiffReportSchema';
 import type { UnifiedDiffReport } from '../../../core/types/DiffReport.model';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import { installSilenceAppLogger } from '../../../test/helpers/silenceLoggers';
 import { analyzeDiff, type AnalyzeDiffResult, toAnalyzeDiffExitCode } from '../analyzeDiff';
 import { formatCiMarkdownSummary } from '../ciSummary';
 
 const repoRoot = path.join(__dirname, '..', '..', '..', '..');
-
-function createTempDir(t: TestContext, prefix: string): string {
-    const generatedRoot = path.join(__dirname, 'generated');
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-}
 
 async function runAnalyzeDiffCli(options: {
     input: string;

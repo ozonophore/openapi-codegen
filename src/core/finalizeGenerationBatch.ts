@@ -155,7 +155,7 @@ function getOutputRoots(items: TStrictFlatOptions[]): string[] {
         const outputDirs = [item.output, item.outputCore, item.outputSchemas, item.outputModels, item.outputServices];
         for (const dir of outputDirs) {
             if (dir) {
-                roots.add(resolveHelper(process.cwd(), dir));
+                roots.add(dir);
             }
         }
     }

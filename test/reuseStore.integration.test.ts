@@ -1,23 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import { generate, HttpClient } from '../src';
 import { ReuseStore } from '../src/core/reuseStore/ReuseStore';
 import { ReuseConflictError } from '../src/core/reuseStore/types';
+import { createTempDir } from '../src/test/helpers/createTempDir';
 import { installSilenceLoggers } from '../src/test/helpers/silenceLoggers';
-
-const generatedRoot = path.join(__dirname, 'generated');
-
-const createTempDir = (t: TestContext, prefix: string): string => {
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-};
 
 const sharedUserSchema = {
     type: 'object',

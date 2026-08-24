@@ -2,7 +2,6 @@ import { basename, extname } from 'path';
 
 import type { TStrictFlatOptions } from '../../common/TRawOptions';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
-import { resolveHelper } from '../../common/utils/pathHelpers';
 import { buildGenerationAffectingHash } from '../generationAffectingOptions';
 import { hashFingerprint, stableStringify } from '../reuseStore/ArtifactFingerprinter';
 import type { ReuseStore } from '../reuseStore/ReuseStore';
@@ -13,8 +12,7 @@ import { GenerationCache } from './GenerationCache';
 export const ENTITY_CACHE_FINGERPRINT_VERSION = 4;
 
 export function getSpecItemName(input: string): string {
-    const absoluteInput = resolveHelper(process.cwd(), input);
-    return basename(absoluteInput, extname(absoluteInput));
+    return basename(input, extname(input));
 }
 
 export function usesEntityCache(item: TStrictFlatOptions, generationCache: GenerationCache | null): boolean {
@@ -68,7 +66,7 @@ export async function shouldEntitySkip(params: {
     const { item, generationCache, reuseStore } = params;
     const filesExist = params.filesExist ?? defaultFilesExist;
     const useEntityCache = usesEntityCache(item, generationCache);
-    const absoluteInput = resolveHelper(process.cwd(), item.input);
+    const absoluteInput = item.input;
 
     return resolveEntitySkipCandidate({
         useEntityCache,

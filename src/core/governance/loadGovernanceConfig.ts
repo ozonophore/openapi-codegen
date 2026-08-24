@@ -1,7 +1,6 @@
 import { ZodError } from 'zod';
 
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
-import { resolveHelper } from '../../common/utils/pathHelpers';
 import { GovernancePolicyConfig } from './evaluateGovernanceRules';
 import { governancePolicyConfigSchema } from './governanceConfigSchema';
 
@@ -43,7 +42,7 @@ export async function loadGovernanceConfig(governanceConfigPath?: string): Promi
         return undefined;
     }
 
-    const resolvedPath = resolveHelper(process.cwd(), governanceConfigPath);
+    const resolvedPath = governanceConfigPath;
     const exists = await fileSystemHelpers.exists(resolvedPath);
     if (!exists) {
         throw new Error(`Governance config file does not exist: ${resolvedPath}`);

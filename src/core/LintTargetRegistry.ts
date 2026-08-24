@@ -1,5 +1,3 @@
-import { resolveHelper } from '../common/utils/pathHelpers';
-
 /**
  * Owns lint target files and include globs for the batch ESLint pass.
  */
@@ -8,7 +6,7 @@ export class LintTargetRegistry {
     private lintIncludeGlobs = new Set<string>();
 
     registerLintTarget(filePath: string, outputRoot: string): void {
-        this.lintTargetFiles.add(resolveHelper(process.cwd(), filePath));
+        this.lintTargetFiles.add(filePath);
         this.lintIncludeGlobs.add(`${outputRoot.replace(/\\/g, '/')}/**/*.ts`);
     }
 

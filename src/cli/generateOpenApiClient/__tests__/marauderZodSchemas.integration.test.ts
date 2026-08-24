@@ -1,11 +1,11 @@
 import assert from 'node:assert';
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
 import { DEFAULT_OPENAPI_CONFIG_FILENAME } from '../../../common/Consts';
 import { validateZodOptions } from '../../../common/Validation';
-import { rmTempDir } from '../../../test/helpers/rmTempDir';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import { installSilenceLoggers } from '../../../test/helpers/silenceLoggers';
 import { generateOptionsSchema } from '../../schemas/generate';
 import { mergeNestedCliOptions } from '../../utils/parseNestedCliOptions';
@@ -32,16 +32,6 @@ const cliDefaults = {
     validationLibrary: 'none',
     emptySchemaStrategy: 'keep',
 } as const;
-
-function createTempDir(t: TestContext, prefix: string): string {
-    const generatedRoot = path.join(__dirname, 'generated');
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmTempDir(tempDir);
-    });
-    return tempDir;
-}
 
 function useTempWorkDir(t: TestContext, tempDir: string): void {
     const previousCwd = process.cwd();

@@ -40,11 +40,12 @@ export type ResolvedOpenApiFromFile = {
  * Shared Spec-load prologue: empty/exists checks + `SwaggerParser.resolve` + root get.
  */
 export async function resolveOpenApiRefsFromFile(input: string): Promise<ResolvedOpenApiFromFile> {
-    const absoluteInput = resolveHelper(process.cwd(), input);
-
     if (!input) {
         throw new Error(`OpenAPI spec path is empty`);
     }
+
+    // Spec-load boundary: swagger-parser keys refs by absolute path; relative input breaks refs.get.
+    const absoluteInput = resolveHelper(process.cwd(), input);
 
     const exists = await fileSystemHelpers.exists(absoluteInput);
     if (!exists) {

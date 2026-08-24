@@ -43,7 +43,7 @@ export class ReuseStore {
     private readonly nameKindIndex = new Map<string, ManifestArtifact[]>();
 
     constructor(storeRootPath: string) {
-        this.rootPath = resolveHelper(process.cwd(), storeRootPath);
+        this.rootPath = storeRootPath;
         this.manifest = this.createEmptyManifest();
     }
 

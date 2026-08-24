@@ -216,7 +216,7 @@ export function validateOpenApiStrict(params: ValidateOpenApiStrictParams): Stri
  * Creates target directory if it does not exist.
  */
 export async function writeOpenApiStrictReport(report: StrictOpenApiReport, reportFilePath: string): Promise<string> {
-    const resolvedReportPath = resolveHelper(process.cwd(), reportFilePath);
+    const resolvedReportPath = reportFilePath;
     const reportDir = path.dirname(resolvedReportPath);
 
     const isReportDirExists = await fileSystemHelpers.exists(reportDir);

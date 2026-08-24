@@ -1,23 +1,14 @@
 import assert from 'node:assert';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { Project } from 'ts-morph';
 
 import { resolveHelper } from '../../../common/utils/pathHelpers';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import type { Contract } from '../types';
 import { createApiImportScope, getAllowedExportsForImport, isApiImport } from '../utils/apiImportScope';
-
-function createTempDir(t: TestContext, prefix: string): string {
-    const generatedRoot = path.join(__dirname, 'generated');
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-}
 
 describe('@unit: apiImportScope', () => {
     test('createApiImportScope resolves entry file and api root directory', () => {

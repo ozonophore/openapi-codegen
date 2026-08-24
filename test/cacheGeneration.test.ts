@@ -1,25 +1,15 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync, utimesSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import { generate, HttpClient } from '../src';
 import { Logger } from '../src/common/Logger';
 import { joinHelper } from '../src/common/utils/pathHelpers';
-import { rmTempDir } from '../src/test/helpers/rmTempDir';
+import { createTempDir } from '../src/test/helpers/createTempDir';
 import { installSilenceLoggers } from '../src/test/helpers/silenceLoggers';
 
-const generatedRoot = path.join(__dirname, 'generated');
 const specDir = path.join(__dirname, 'spec');
-
-const createTempDir = (t: TestContext, prefix: string): string => {
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmTempDir(tempDir);
-    });
-    return tempDir;
-};
 
 function setFileMtimeMs(filePath: string, mtimeMs: number): void {
     const mtime = new Date(mtimeMs);

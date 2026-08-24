@@ -1,7 +1,6 @@
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import type { TEslintFixOptions } from '../common/TEslintFixOptions';
 import type { TStrictFlatOptions } from '../common/TRawOptions';
-import { resolveHelper } from '../common/utils/pathHelpers';
 import { resolveSpecAnalysisConfig } from '../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
 import { finalizeGenerationBatch } from './finalizeGenerationBatch';
 import { getSpecItemName } from './generationCache/EntitySkip';
@@ -82,7 +81,7 @@ export class GenerationBatchSession {
 
             for (const option of items) {
                 const fileStart = process.hrtime.bigint();
-                const generationCache = cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse') ? (generationCaches.get(resolveOutputRoot(option.output)) ?? null) : null;
+                const generationCache = cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse') ? (generationCaches.get(option.output) ?? null) : null;
                 let reuseHits = 0;
                 let reuseMisses = 0;
                 let entitySkipped = false;
@@ -155,8 +154,4 @@ export class GenerationBatchSession {
 
         writeClient.logger.shutdownLogger();
     }
-}
-
-function resolveOutputRoot(output: string): string {
-    return resolveHelper(process.cwd(), output);
 }

@@ -1,7 +1,6 @@
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import type { TEslintFixOptions } from '../common/TEslintFixOptions';
 import type { TStrictFlatOptions } from '../common/TRawOptions';
-import { resolveHelper } from '../common/utils/pathHelpers';
 import { postProcessClient } from './clientPrep/postProcessClient';
 import { prepareDtoModels } from './clientPrep/prepareDtoModels';
 import { registerHandlebarTemplates } from './clientPrep/registerHandlebarTemplates';
@@ -39,7 +38,7 @@ export class GenerationItemSession {
     async run(item: TStrictFlatOptions, generationCache: GenerationCache | null, itemRunContext: ItemRunContext): Promise<{ entitySkipped: boolean }> {
         const { writeClient, eslintFixOptions } = this.deps;
         const outputPaths = getOutputPaths(item);
-        const absoluteInput = resolveHelper(process.cwd(), item.input);
+        const absoluteInput = item.input;
         const specInput = getSpecItemName(item.input);
         const optionsSlice = buildOptionsSlice(item);
         const cacheKey = buildCacheKey(item, absoluteInput);
