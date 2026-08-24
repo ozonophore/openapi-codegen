@@ -1,7 +1,8 @@
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
 import { format } from '../../common/utils/format';
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import type { Model } from '../types/shared/Model.model';
 import { buildOptionsSliceHash, hashSchema } from './ArtifactFingerprinter';
 import { computeStoreRelativeImport } from './computeStoreRelativeImport';
@@ -87,7 +88,7 @@ async function writeReusedArtifact(adapter: ReuseOutputAdapter, ctx: ReuseWriter
         if (content !== null) {
             if (ctx.sharedFolderWriter) {
                 const kindDir = kind === 'schema' ? 'schemas' : kind === 'enum' ? 'enums' : 'models';
-                const canonicalPath = join(ctx.sharedFolderWriter.lca, SHARED_FOLDER_NAME, kindDir, `${model.name}.ts`);
+                const canonicalPath = resolveHelper(ctx.sharedFolderWriter.lca, SHARED_FOLDER_NAME, kindDir, `${model.name}.ts`);
                 await fileSystemHelpers.mkdir(dirname(canonicalPath));
                 const stubImport = computeStoreRelativeImport(file, canonicalPath);
                 const stubContent = `export * from '${stubImport}';\n`;
@@ -132,7 +133,7 @@ async function writeReusedArtifact(adapter: ReuseOutputAdapter, ctx: ReuseWriter
 
     if (ctx.sharedFolderWriter) {
         const kindDir = kind === 'schema' ? 'schemas' : kind === 'enum' ? 'enums' : 'models';
-        const canonicalPath = join(ctx.sharedFolderWriter.lca, SHARED_FOLDER_NAME, kindDir, `${model.name}.ts`);
+        const canonicalPath = resolveHelper(ctx.sharedFolderWriter.lca, SHARED_FOLDER_NAME, kindDir, `${model.name}.ts`);
         await fileSystemHelpers.mkdir(dirname(canonicalPath));
         const stubImport = computeStoreRelativeImport(file, canonicalPath);
         const stubContent = `export * from '${stubImport}';\n`;

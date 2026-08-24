@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, test } from 'node:test';
 
+import { resolveHelper } from '../../../common/utils/pathHelpers';
 import { WriteClient } from '../../write/WriteClient';
 import { buildCoreTransportFingerprint } from '../coreTransportFingerprint';
 import { SharedFolderWriter } from '../SharedFolderWriter';
@@ -30,7 +31,7 @@ describe('@unit: writeSharedOrLocalCoreFile', () => {
         const writeClient = new WriteClient();
         const adapter = writeClient.toCoreOutputAdapter();
         const sharedFolderWriter = new SharedFolderWriter(lca);
-        return { lca, itemA, itemB, adapter, sharedFolderWriter };
+        return { lca, itemA, itemB, adapter, sharedFolderWriter, writeClient };
     }
 
     test('writes canonical under __shared__/core and stub for nested executor path', async () => {
@@ -129,5 +130,18 @@ describe('@unit: writeSharedOrLocalCoreFile', () => {
         });
         assert.equal(result, 'local');
         assert.equal(readFileSync(path.join(itemA, 'ApiError.ts'), 'utf8'), 'export class ApiError {}\n');
+    });
+
+    test('registers canonical path in resolveHelper form so stale cleanup can keep it', async () => {
+        const { lca, itemA, adapter, sharedFolderWriter, writeClient } = createFixture();
+        await writeSharedOrLocalCoreFile(adapter, {
+            sharedFolderWriter,
+            outputCorePath: itemA,
+            relativeCorePath: 'ApiError.ts',
+            content: 'export class ApiError {}\n',
+        });
+
+        const canonical = resolveHelper(lca, '__shared__', 'core', 'ApiError.ts');
+        assert.ok(writeClient.getExpectedOutputFiles().has(canonical));
     });
 });

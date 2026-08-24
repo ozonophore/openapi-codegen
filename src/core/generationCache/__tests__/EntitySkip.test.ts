@@ -274,6 +274,12 @@ describe('@unit: EntitySkip', () => {
         );
     });
 
+    test('buildCacheKey is stable for native join vs resolveHelper input', () => {
+        const specPath = path.join('/tmp', 'entity-skip-key', 'api.yaml');
+        const item = baseItem({ input: specPath, output: path.join('/tmp', 'entity-skip-key', 'out') });
+        assert.equal(buildCacheKey(item, specPath), buildCacheKey(item, resolveHelper(specPath)));
+    });
+
     test('shouldEntitySkip uses injectable filesExist', async () => {
         mkdirSync(generatedRoot, { recursive: true });
         tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-should-'));

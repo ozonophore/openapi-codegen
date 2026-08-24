@@ -167,7 +167,7 @@ async function cleanupStaleOutputs(writeClient: WriteClient, items: TStrictFlatO
     if (sharedFolderLca) {
         outputRoots.push(resolveHelper(sharedFolderLca, SHARED_FOLDER_NAME));
     }
-    const expectedFiles = writeClient.getExpectedOutputFiles();
+    const expectedFiles = new Set(Array.from(writeClient.getExpectedOutputFiles(), filePath => resolveHelper(filePath)));
 
     for (const root of outputRoots) {
         await removeStaleFilesInDirectory(root, expectedFiles);
@@ -181,7 +181,7 @@ async function removeStaleFilesInDirectory(path: string, expectedFiles: Set<stri
     }
 
     if (stats.isFile()) {
-        if (!expectedFiles.has(path)) {
+        if (!expectedFiles.has(resolveHelper(path))) {
             await fileSystemHelpers.rmdir(path);
             return false;
         }

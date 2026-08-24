@@ -2,6 +2,7 @@ import { basename, extname } from 'path';
 
 import type { TStrictFlatOptions } from '../../common/TRawOptions';
 import { fileSystemHelpers } from '../../common/utils/fileSystemHelpers';
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { buildGenerationAffectingHash } from '../generationAffectingOptions';
 import { hashFingerprint, stableStringify } from '../reuseStore/ArtifactFingerprinter';
 import type { ReuseStore } from '../reuseStore/ReuseStore';
@@ -26,7 +27,7 @@ export function usesReuseStoreForItem(item: TStrictFlatOptions, reuseStore: Reus
 export function buildCacheKey(item: TStrictFlatOptions, absoluteInput: string): string {
     return GenerationCache.hash(
         JSON.stringify({
-            input: absoluteInput,
+            input: resolveHelper(absoluteInput),
             output: item.output,
             outputCore: item.outputCore,
             outputServices: item.outputServices,
@@ -37,7 +38,7 @@ export function buildCacheKey(item: TStrictFlatOptions, absoluteInput: string): 
 }
 
 export async function buildEntityFingerprint(item: TStrictFlatOptions, absoluteInput: string): Promise<string> {
-    const specContent = await fileSystemHelpers.readFile(absoluteInput, 'utf8');
+    const specContent = await fileSystemHelpers.readFile(resolveHelper(absoluteInput), 'utf8');
     const envelope = {
         cacheFingerprintVersion: ENTITY_CACHE_FINGERPRINT_VERSION,
         generatorVersion: process.env.npm_package_version || 'dev',
@@ -66,7 +67,7 @@ export async function shouldEntitySkip(params: {
     const { item, generationCache, reuseStore } = params;
     const filesExist = params.filesExist ?? defaultFilesExist;
     const useEntityCache = usesEntityCache(item, generationCache);
-    const absoluteInput = item.input;
+    const absoluteInput = resolveHelper(item.input);
 
     return resolveEntitySkipCandidate({
         useEntityCache,

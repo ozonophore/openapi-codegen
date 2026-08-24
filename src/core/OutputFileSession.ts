@@ -1,3 +1,4 @@
+import { resolveHelper } from '../common/utils/pathHelpers';
 import { writeFileIfChanged, WriteFileIfChangedResult } from './utils/writeFileIfChanged';
 
 /**
@@ -9,14 +10,15 @@ export class OutputFileSession {
     private writeStats = { written: 0, unchanged: 0 };
 
     async writeOutputFile(filePath: string, content: string): Promise<WriteFileIfChangedResult> {
-        this.expectedOutputFiles.add(filePath);
-        const result = await writeFileIfChanged(filePath, content);
+        const normalizedPath = resolveHelper(filePath);
+        this.expectedOutputFiles.add(normalizedPath);
+        const result = await writeFileIfChanged(normalizedPath, content);
         this.writeStats[result] += 1;
         return result;
     }
 
     registerOutputFile(filePath: string): void {
-        this.expectedOutputFiles.add(filePath);
+        this.expectedOutputFiles.add(resolveHelper(filePath));
     }
 
     getExpectedOutputFiles(): Set<string> {
