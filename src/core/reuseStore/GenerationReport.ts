@@ -72,7 +72,7 @@ export function analyzeCrossSpecManifest(manifest: ReuseStoreManifest): CrossSpe
 }
 
 export async function writeGenerationReport(storePath: string, report: GenerationReport): Promise<string> {
-    const reportsDir = resolveHelper(process.cwd(), storePath, 'reports');
+    const reportsDir = resolveHelper(storePath, 'reports');
     const latestPath = resolveHelper(reportsDir, 'latest.json');
     await fileSystemHelpers.mkdir(dirname(latestPath));
     await fileSystemHelpers.writeFile(latestPath, JSON.stringify(report, null, 2));

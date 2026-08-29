@@ -1,27 +1,31 @@
 ## Purpose
 
-Factory that returns a fully initialized Context (`{ context, openApi }`) so generate/preAnalyze never hand-assemble half-initialized refs.
+Factory that returns a fully initialized Context plus VirtualFileMap (`{ context, map, openApi }`) so generate/preAnalyze never hand-assemble half-initialized refs.
 
 ## Requirements
 
 ### Requirement: Resolved Context factory
-The system MUST provide `createResolvedContext` that, given a spec file path and Context construction props, loads and resolves the OpenAPI document, initializes refs and the virtual file map internally, and returns `{ context, openApi }` ready for parsing. Production generate and preAnalyze paths MUST use this factory and MUST NOT call public two-step init. `getOpenApiSpec` MUST NOT remain as a production helper.
+Система ДОЛЖНА предоставлять `createResolvedContext`, которая при заданном пути spec-файла и параметрах конструктора Context загружает и разрешает OpenAPI-документ, инициализирует refs и VirtualFileMap внутри, и возвращает `{ context, map: VirtualFileMap, openApi }` готовым для парсеров. Производственные пути generate и preAnalyze ДОЛЖНЫ использовать эту фабрику и НЕ ДОЛЖНЫ вызывать публичную двухшаговую инициализацию. `getOpenApiSpec` НЕ ДОЛЖЕН оставаться как производственный хелпер.
 
 #### Scenario: Successful resolve
-- **WHEN** caller invokes `createResolvedContext` with an existing spec path
-- **THEN** returned context is ready for parsers (refs + virtual map initialized) and `openApi` is the root document
+- **WHEN** вызывающий вызывает `createResolvedContext` с существующим путём spec-файла
+- **THEN** возвращённый `context` готов для парсеров (refs инициализированы), `map` готов для маппинга выходных путей, `openApi` — корневой документ
+
+#### Scenario: Map available separately
+- **WHEN** вызывающий деструктурирует результат `createResolvedContext`
+- **THEN** `map: VirtualFileMap` доступен как самостоятельный объект и может быть передан в `getType.ts` без передачи всего `context`
 
 #### Scenario: Missing file
-- **WHEN** spec path does not exist
-- **THEN** factory fails with a clear error before returning a Context
+- **WHEN** путь spec-файла не существует
+- **THEN** фабрика завершается ошибкой до возврата Context
 
 #### Scenario: Empty path
-- **WHEN** spec path is empty
-- **THEN** factory fails with a clear empty-path error
+- **WHEN** путь spec-файла пуст
+- **THEN** фабрика завершается ошибкой с явным сообщением об пустом пути
 
 #### Scenario: Half-init not part of public API
-- **WHEN** application code uses the supported generation path
-- **THEN** it MUST NOT need to call `addRefs` or `initializeVirtualFileMap` as separate public steps
+- **WHEN** код приложения использует поддерживаемый путь генерации
+- **THEN** он НЕ ДОЛЖЕН вызывать `addRefs` или `initializeVirtualFileMap` как отдельные публичные шаги
 
 ---
 

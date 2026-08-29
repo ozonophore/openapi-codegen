@@ -1,5 +1,6 @@
 import { COMMON_DEFAULT_OPTIONS_VALUES } from '../common/Consts';
 import { TFlatOptions, TRawOptions, TStrictFlatOptions } from '../common/TRawOptions';
+import { resolveHelper } from '../common/utils/pathHelpers';
 import { validateZodOptions } from '../common/Validation';
 import { rawOptionsSchema } from '../common/VersionedSchema/AllVersionedSchemas/UnifiedVersionedSchemas';
 import { dependentOptionsRefinement } from '../common/VersionedSchema/refinements/dependentOptionsRefinement';
@@ -301,5 +302,66 @@ function projectGenerationRootOptions(raw: TRawOptions): GenerationRootOptions {
         trafficSplitter: raw.trafficSplitter,
         swarm: raw.swarm,
         workspaceReport: raw.workspaceReport,
+    };
+}
+
+/**
+ * Path fields in TStrictFlatOptions that are always resolved relative to CWD.
+ * Note: `cachePath` is intentionally excluded — for `cacheStrategy: 'entity'` it is
+ * resolved relative to the output directory, not CWD (handled inside setupGenerationBatch).
+ */
+const PATH_FIELDS_IN_ITEM = [
+    'input',
+    'output',
+    'outputCore',
+    'outputModels',
+    'outputServices',
+    'outputSchemas',
+    'request',
+    'customExecutorPath',
+    'prettierConfigPath',
+    'governanceConfig',
+    'reportFile',
+] as const satisfies ReadonlyArray<keyof TStrictFlatOptions>;
+
+function normalizePlugins(plugins: TStrictFlatOptions['plugins'], cwd: string): TStrictFlatOptions['plugins'] {
+    if (!plugins || !Array.isArray(plugins)) {
+        return plugins;
+    }
+    return plugins.map(entry => {
+        if (typeof entry === 'string') {
+            return entry ? resolveHelper(cwd, entry) : entry;
+        }
+        if (entry && typeof entry === 'object' && typeof (entry as { path?: unknown }).path === 'string') {
+            const path = (entry as { path: string }).path;
+            return path ? { ...entry, path: resolveHelper(cwd, path) } : entry;
+        }
+        return entry;
+    }) as TStrictFlatOptions['plugins'];
+}
+
+/**
+ * Resolves all path fields in TStrictFlatOptions items to absolute POSIX paths.
+ *
+ * MUST be called after resolveGenerationOptions, before passing items to any core function.
+ * After normalization the following fields are guaranteed to be absolute (or empty string if
+ * they were empty before): input, output, outputCore, outputModels, outputServices,
+ * outputSchemas, request, customExecutorPath, prettierConfigPath, governanceConfig,
+ * reportFile, and plugins[].path.
+ */
+export function normalizePathsToAbsolute(result: ResolveGenerationOptionsResult, cwd: string): ResolveGenerationOptionsResult {
+    return {
+        ...result,
+        items: result.items.map(item => {
+            const normalized = { ...item };
+            for (const field of PATH_FIELDS_IN_ITEM) {
+                const value = normalized[field];
+                if (value && typeof value === 'string') {
+                    (normalized as Record<string, unknown>)[field] = resolveHelper(cwd, value);
+                }
+            }
+            normalized.plugins = normalizePlugins(item.plugins, cwd);
+            return normalized;
+        }),
     };
 }

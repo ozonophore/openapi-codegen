@@ -1,7 +1,6 @@
 import { LOGGER_MESSAGES } from '../common/LoggerMessages';
 import type { TEslintFixOptions } from '../common/TEslintFixOptions';
 import type { TStrictFlatOptions } from '../common/TRawOptions';
-import { resolveHelper } from '../common/utils/pathHelpers';
 import { resolveSpecAnalysisConfig } from '../common/VersionedSchema/Utils/resolveSpecAnalysisConfig';
 import { finalizeGenerationBatch } from './finalizeGenerationBatch';
 import { getSpecItemName } from './generationCache/EntitySkip';
@@ -48,19 +47,7 @@ export class GenerationBatchSession {
 
         try {
             const setup = await setupGenerationBatch({ writeClient, shouldEntitySkip }, items, root);
-            const {
-                start,
-                cacheEnabled,
-                cacheStrategy,
-                useReuseStore,
-                generationCaches,
-                referencedArtifactKeys,
-                specStats,
-                reuseConflicts,
-                reportBasePath,
-                sharedFolderWriter,
-                state,
-            } = setup;
+            const { cacheEnabled, cacheStrategy, useReuseStore, generationCaches, referencedArtifactKeys, specStats, reuseConflicts, reportBasePath, sharedFolderWriter, state } = setup;
 
             const buildGenerationReport = (): GenerationReport => {
                 const report: GenerationReport = {
@@ -94,7 +81,7 @@ export class GenerationBatchSession {
 
             for (const option of items) {
                 const fileStart = process.hrtime.bigint();
-                const generationCache = cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse') ? (generationCaches.get(resolveOutputRoot(option.output)) ?? null) : null;
+                const generationCache = cacheEnabled && (cacheStrategy === 'entity' || cacheStrategy === 'reuse') ? (generationCaches.get(option.output) ?? null) : null;
                 let reuseHits = 0;
                 let reuseMisses = 0;
                 let entitySkipped = false;
@@ -152,23 +139,13 @@ export class GenerationBatchSession {
 
             const allEntitySkipped = specStats.length > 0 && specStats.every(entry => entry.entitySkipped);
 
-            await finalizeGenerationBatch({
+            await finalizeGenerationBatch(setup, {
                 writeClient,
                 eslintFixOptions,
                 items,
                 root,
                 allEntitySkipped,
-                cacheEnabled,
-                cacheStrategy,
-                generationCaches,
-                reuseStore: setup.reuseStore,
-                referencedArtifactKeys,
-                specStats,
-                reportBasePath,
-                sharedFolderLca: sharedFolderWriter?.lca,
                 buildGenerationReport,
-                state,
-                start,
             });
         } catch (error: any) {
             writeClient.logger.error(LOGGER_MESSAGES.ERROR.GENERIC(error.message));
@@ -177,8 +154,4 @@ export class GenerationBatchSession {
 
         writeClient.logger.shutdownLogger();
     }
-}
-
-function resolveOutputRoot(output: string): string {
-    return resolveHelper(process.cwd(), output);
 }

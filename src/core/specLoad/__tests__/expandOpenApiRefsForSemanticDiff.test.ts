@@ -172,4 +172,134 @@ describe('@unit: expandOpenApiRefsForSemanticDiff', () => {
         assert.deepStrictEqual(child.properties.child, { $ref: '#/components/schemas/Node' });
         assert.doesNotThrow(() => JSON.stringify(expanded));
     });
+
+    test('joins a drive-letter parent without treating it as a URL', () => {
+        const driveSource = 'D:/tmp/openapi/api.yaml';
+        const spec = {
+            openapi: '3.0.0',
+            info: { title: 'Test', version: '1.0.0' },
+            paths: {},
+            components: {
+                schemas: {
+                    User: { $ref: './schemas/User.yaml' },
+                },
+            },
+        };
+        const resolver = createResolver({
+            'D:/tmp/openapi/schemas/User.yaml': {
+                type: 'object',
+                properties: {
+                    name: { type: 'string' },
+                },
+            },
+        });
+
+        const expanded = expandOpenApiRefsForSemanticDiff(spec, { refs: resolver, sourceFile: driveSource });
+
+        assert.deepStrictEqual(expanded.components.schemas.User, {
+            type: 'object',
+            properties: {
+                name: { type: 'string' },
+            },
+        });
+    });
+
+    test('intern-matches Windows parser keys for ./schemas/User.yaml', () => {
+        const spec = {
+            openapi: '3.0.0',
+            info: { title: 'Test', version: '1.0.0' },
+            paths: {},
+            components: {
+                schemas: {
+                    User: { $ref: './schemas/User.yaml' },
+                },
+            },
+        };
+        const parserKey = '\\tmp\\openapi\\schemas\\User.yaml';
+        const entries: Record<string, unknown> = {
+            [parserKey]: {
+                type: 'object',
+                properties: {
+                    name: { type: 'string' },
+                },
+            },
+        };
+        const resolver: SemanticRefResolver = {
+            exists: ref => Object.prototype.hasOwnProperty.call(entries, ref),
+            get: ref => entries[ref],
+            paths: () => Object.keys(entries),
+        };
+
+        const expanded = expandOpenApiRefsForSemanticDiff(spec, { refs: resolver, sourceFile });
+
+        assert.deepStrictEqual(expanded.components.schemas.User, {
+            type: 'object',
+            properties: {
+                name: { type: 'string' },
+            },
+        });
+    });
+
+    test('intern-matches Windows parser keys for ./schemas/common.yaml#/…', () => {
+        const spec = {
+            openapi: '3.0.0',
+            info: { title: 'Test', version: '1.0.0' },
+            paths: {},
+            components: {
+                schemas: {
+                    User: { $ref: './schemas/common.yaml#/components/schemas/User' },
+                },
+            },
+        };
+        const parserKey = '\\tmp\\openapi\\schemas\\common.yaml#/components/schemas/User';
+        const entries: Record<string, unknown> = {
+            [parserKey]: {
+                type: 'object',
+                required: ['id'],
+                properties: {
+                    id: { type: 'string' },
+                },
+            },
+        };
+        const resolver: SemanticRefResolver = {
+            exists: ref => Object.prototype.hasOwnProperty.call(entries, ref),
+            get: ref => entries[ref],
+            paths: () => Object.keys(entries),
+        };
+
+        const expanded = expandOpenApiRefsForSemanticDiff(spec, { refs: resolver, sourceFile });
+
+        assert.deepStrictEqual(expanded.components.schemas.User, {
+            type: 'object',
+            required: ['id'],
+            properties: {
+                id: { type: 'string' },
+            },
+        });
+    });
+
+    test('keeps intern-unmatched file $ref as a stable $ref object', () => {
+        const spec = {
+            openapi: '3.0.0',
+            info: { title: 'Test', version: '1.0.0' },
+            paths: {},
+            components: {
+                schemas: {
+                    Missing: { $ref: './schemas/User.yaml' },
+                },
+            },
+        };
+        const entries: Record<string, unknown> = {
+            '\\tmp\\other\\Pet.yaml': { type: 'object' },
+        };
+        const resolver: SemanticRefResolver = {
+            exists: ref => Object.prototype.hasOwnProperty.call(entries, ref),
+            get: ref => entries[ref],
+            paths: () => Object.keys(entries),
+        };
+
+        const expanded = expandOpenApiRefsForSemanticDiff(spec, { refs: resolver, sourceFile });
+
+        assert.deepStrictEqual(expanded.components.schemas.Missing, { $ref: './schemas/User.yaml' });
+    });
 });

@@ -25,6 +25,7 @@ tmp
 test/generated
 test/e2e/generated
 samples/generated
+**/__tests__/generated/
 samples/swagger-codegen-cli-v2.jar
 samples/swagger-codegen-cli-v3.jar
 generated

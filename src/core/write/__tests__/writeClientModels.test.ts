@@ -1,11 +1,12 @@
 import assert from 'node:assert';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync } from 'node:fs';
 import { PathOrFileDescriptor } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, test } from 'node:test';
 
 import { fileSystemHelpers } from '../../../common/utils/fileSystemHelpers';
+import { rmTempDir } from '../../../test/helpers/rmTempDir';
 import { HttpClient } from '../../types/enums/HttpClient.enum';
 import { ModelsLayout } from '../../types/enums/ModelsLayout.enum';
 import { ModelsMode } from '../../types/enums/ModelsMode.enum';
@@ -52,22 +53,25 @@ describe('@unit: writeClientModels', () => {
         ];
 
         const adapter = new WriteClient().toCoreOutputAdapter();
+        const outputModelsPath = mkdtempSync(join(tmpdir(), 'openapi-codegen-models-'));
 
-        await writeClientModels(adapter, {
-            models,
-            templates,
-            outputModelsPath: '/',
-            httpClient: HttpClient.FETCH,
-            useUnionTypes: false,
-        });
+        try {
+            await writeClientModels(adapter, {
+                models,
+                templates,
+                outputModelsPath,
+                httpClient: HttpClient.FETCH,
+                useUnionTypes: false,
+            });
 
-        assert.ok(
-            writeFileCalls.some(([filePath, content]) => filePath.toString().includes('MyModel.ts') && content.toString().includes('model')),
-            'Expected writeFile to be called with model content for MyModel.ts'
-        );
-
-        // Restoring the original function
-        fileSystemHelpers.writeFile = originalWriteFile;
+            assert.ok(
+                writeFileCalls.some(([filePath, content]) => filePath.toString().includes('MyModel.ts') && content.toString().includes('model')),
+                'Expected writeFile to be called with model content for MyModel.ts'
+            );
+        } finally {
+            fileSystemHelpers.writeFile = originalWriteFile;
+            rmTempDir(outputModelsPath);
+        }
     });
 
     test('writes models.ts for classes mode', async () => {
@@ -104,16 +108,21 @@ describe('@unit: writeClientModels', () => {
         ];
 
         const adapter = new WriteClient().toCoreOutputAdapter();
+        const outputModelsPath = mkdtempSync(join(tmpdir(), 'openapi-codegen-models-'));
 
-        await writeClientModels(adapter, {
-            models,
-            templates,
-            outputModelsPath: '/',
-            httpClient: HttpClient.FETCH,
-            useUnionTypes: false,
-            modelsMode: ModelsMode.CLASSES,
-            outputCorePath: '../core',
-        });
+        try {
+            await writeClientModels(adapter, {
+                models,
+                templates,
+                outputModelsPath,
+                httpClient: HttpClient.FETCH,
+                useUnionTypes: false,
+                modelsMode: ModelsMode.CLASSES,
+                outputCorePath: '../core',
+            });
+        } finally {
+            rmTempDir(outputModelsPath);
+        }
 
         const wroteModels = writeFileCalls.some(([filePath, content]) => {
             const file = filePath.toString();
@@ -180,17 +189,22 @@ describe('@unit: writeClientModels', () => {
         ];
 
         const adapter = new WriteClient().toCoreOutputAdapter();
+        const outputModelsPath = mkdtempSync(join(tmpdir(), 'openapi-codegen-models-'));
 
-        await writeClientModels(adapter, {
-            models,
-            templates,
-            outputModelsPath: '/',
-            httpClient: HttpClient.FETCH,
-            useUnionTypes: false,
-            modelsMode: ModelsMode.CLASSES,
-            modelsLayout: ModelsLayout.PER_FILE,
-            outputCorePath: '../core',
-        });
+        try {
+            await writeClientModels(adapter, {
+                models,
+                templates,
+                outputModelsPath,
+                httpClient: HttpClient.FETCH,
+                useUnionTypes: false,
+                modelsMode: ModelsMode.CLASSES,
+                modelsLayout: ModelsLayout.PER_FILE,
+                outputCorePath: '../core',
+            });
+        } finally {
+            rmTempDir(outputModelsPath);
+        }
 
         const wroteUser = writeFileCalls.some(([filePath, content]) => {
             return filePath.toString().endsWith('User.ts') && content.toString().includes('// classesModel:User:IUserRaw:IUserDto');
@@ -257,7 +271,37 @@ describe('@unit: writeClientModels', () => {
             assert.ok(wrote![1].toString().includes('core=../../../core'), `Expected nested outputCore, got: ${wrote![1].toString()}`);
         } finally {
             fileSystemHelpers.writeFile = originalWriteFile;
-            rmSync(outputModelsPath, { recursive: true, force: true });
+            rmTempDir(outputModelsPath);
         }
+    });
+
+    test('refuses POSIX drive-root output path', async () => {
+        const adapter = new WriteClient().toCoreOutputAdapter();
+        await assert.rejects(
+            () =>
+                writeClientModels(adapter, {
+                    models: [],
+                    templates,
+                    outputModelsPath: '/',
+                    httpClient: HttpClient.FETCH,
+                    useUnionTypes: false,
+                }),
+            /drive root/
+        );
+    });
+
+    test('refuses Windows drive-root output path', async () => {
+        const adapter = new WriteClient().toCoreOutputAdapter();
+        await assert.rejects(
+            () =>
+                writeClientModels(adapter, {
+                    models: [],
+                    templates,
+                    outputModelsPath: 'D:\\',
+                    httpClient: HttpClient.FETCH,
+                    useUnionTypes: false,
+                }),
+            /drive root/
+        );
     });
 });

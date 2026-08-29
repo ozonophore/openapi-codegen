@@ -55,7 +55,10 @@ export class ProjectContext {
     }
 
     public getConsumerSourceFiles() {
-        const srcRoot = path.resolve(this.projectPath, 'src') + path.sep;
-        return this.project.getSourceFiles().filter(file => file.getFilePath().startsWith(srcRoot));
+        const srcRoot = path.resolve(this.projectPath, 'src').replace(/\\/g, '/');
+        return this.project.getSourceFiles().filter(file => {
+            const filePath = file.getFilePath().replace(/\\/g, '/');
+            return filePath === srcRoot || filePath.startsWith(`${srcRoot}/`);
+        });
     }
 }

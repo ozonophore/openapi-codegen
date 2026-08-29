@@ -1,6 +1,7 @@
-import path from 'path';
-
-import { normalizeHelper, resolveHelper } from '../../common/utils/pathHelpers';
+import { normalizeHelper } from '../../common/utils/pathHelpers';
+import { joinCanonicalRef, splitCanonicalRef } from '../utils/canonicalRef';
+import { isAbsoluteSourceFile, joinTreeRefFile } from '../utils/joinTreeRefFile';
+import { findInternParserKey, isRemoteOrFileUrl } from '../utils/parserKeyMatch';
 
 /**
  * Резолвер ссылок для семантического diff.
@@ -10,17 +11,14 @@ import { normalizeHelper, resolveHelper } from '../../common/utils/pathHelpers';
 export type SemanticRefResolver = {
     exists?: (ref: string) => boolean;
     get: (ref: string) => unknown;
+    /** Intern-exact `$Refs` keys so expand can call get/exists with the parser spelling. */
+    paths?: () => string[];
 };
 
 type RefTarget = {
     canonicalRef: string;
     sourceFile?: string;
     value: unknown;
-};
-
-type ParsedRef = {
-    file?: string;
-    pointer?: string;
 };
 
 type ExpandOptions = {
@@ -32,30 +30,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
-function isUrlLike(value: string): boolean {
-    return /^[a-z][a-z\d+\-.]*:/i.test(value);
-}
-
 function normalizeSourceFile(sourceFile: string | undefined): string | undefined {
-    if (!sourceFile || isUrlLike(sourceFile)) {
+    if (!sourceFile || isRemoteOrFileUrl(sourceFile)) {
         return sourceFile;
     }
 
     return normalizeHelper(sourceFile);
-}
-
-function parseRef(ref: string): ParsedRef {
-    const fragmentIndex = ref.indexOf('#');
-    if (fragmentIndex === -1) {
-        return { file: ref || undefined };
-    }
-
-    const file = ref.slice(0, fragmentIndex);
-    const pointer = ref.slice(fragmentIndex);
-    return {
-        file: file || undefined,
-        pointer: pointer || '#',
-    };
 }
 
 function normalizeRefFile(file: string | undefined, currentSourceFile: string | undefined): string | undefined {
@@ -63,24 +43,24 @@ function normalizeRefFile(file: string | undefined, currentSourceFile: string | 
         return normalizeSourceFile(currentSourceFile);
     }
 
-    if (isUrlLike(file)) {
+    if (isRemoteOrFileUrl(file)) {
         return file;
     }
 
-    if (path.isAbsolute(file)) {
+    if (isAbsoluteSourceFile(file)) {
         return normalizeHelper(file);
     }
 
-    if (currentSourceFile && !isUrlLike(currentSourceFile)) {
-        return resolveHelper(path.dirname(currentSourceFile), file);
+    if (currentSourceFile && !isRemoteOrFileUrl(currentSourceFile)) {
+        return joinTreeRefFile(currentSourceFile, file);
     }
 
     return normalizeHelper(file);
 }
 
 function createCanonicalRef(ref: string, currentSourceFile: string | undefined): { canonicalRef: string; sourceFile?: string; pointer?: string } {
-    const parsed = parseRef(ref);
-    const sourceFile = normalizeRefFile(parsed.file, currentSourceFile);
+    const parsed = splitCanonicalRef(ref);
+    const sourceFile = normalizeRefFile(parsed.sourceFile || undefined, currentSourceFile);
     const pointer = parsed.pointer;
 
     if (!sourceFile) {
@@ -88,7 +68,7 @@ function createCanonicalRef(ref: string, currentSourceFile: string | undefined):
     }
 
     return {
-        canonicalRef: `${sourceFile}${pointer ?? ''}`,
+        canonicalRef: joinCanonicalRef({ sourceFile, pointer }),
         sourceFile,
         pointer,
     };
@@ -130,13 +110,16 @@ function readRefFromResolver(refs: SemanticRefResolver | undefined, candidates: 
         return undefined;
     }
 
+    const parserKeys = refs.paths?.() ?? [];
+
     for (const candidate of candidates) {
+        const exact = findInternParserKey(parserKeys, candidate) ?? candidate;
         try {
-            if (refs.exists && !refs.exists(candidate)) {
+            if (refs.exists && !refs.exists(exact)) {
                 continue;
             }
 
-            const value = refs.get(candidate);
+            const value = refs.get(exact);
             if (value !== undefined) {
                 return value;
             }

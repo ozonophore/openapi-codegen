@@ -1,6 +1,5 @@
 import type { Logger } from '../../common/Logger';
 import type { TStrictFlatOptions } from '../../common/TRawOptions';
-import { resolveHelper } from '../../common/utils/pathHelpers';
 import { Parser as ParserV2 } from '../api/v2/Parser';
 import { Parser as ParserV3 } from '../api/v3/Parser';
 import { createResolvedContext } from '../createResolvedContext';
@@ -18,7 +17,7 @@ export async function runPreAnalyze(items: TStrictFlatOptions[], logger: Logger)
     const parsedEntries: Array<{ specItem: string; schemas: Record<string, Record<string, unknown>> }> = [];
 
     for (const item of items) {
-        const absoluteInput = resolveHelper(process.cwd(), item.input);
+        const absoluteInput = item.input;
         const specItem = getSpecItemName(item.input);
 
         try {

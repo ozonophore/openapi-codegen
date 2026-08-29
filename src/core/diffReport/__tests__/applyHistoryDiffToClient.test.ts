@@ -1,26 +1,17 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../../../common/Consts';
 import { ELogLevel, ELogOutput } from '../../../common/Enums';
 import { Logger } from '../../../common/Logger';
 import { LOGGER_MESSAGES } from '../../../common/LoggerMessages';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import type { Context } from '../../Context';
 import type { Client } from '../../types/shared/Client.model';
 import { OpenApiVersion } from '../../utils/getOpenApiVersion';
 import { applyHistoryDiffToClient } from '../applyHistoryDiffToClient';
-
-const createTempDir = (t: TestContext, prefix: string): string => {
-    const root = path.join(__dirname, 'generated');
-    fs.mkdirSync(root, { recursive: true });
-    const tempDir = fs.mkdtempSync(path.join(root, prefix));
-    t.after(() => {
-        fs.rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-};
 
 const createLogger = (): Logger =>
     new Logger({

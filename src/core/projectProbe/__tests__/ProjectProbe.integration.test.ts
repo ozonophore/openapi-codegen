@@ -1,23 +1,15 @@
 import assert from 'node:assert';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { ImportRule } from '../../../cli/analyzeUsage/rules/ImportRule';
 import type { Contract } from '../../../cli/analyzeUsage/types';
 import { createApiImportScope } from '../../../cli/analyzeUsage/utils/apiImportScope';
+import { joinHelper } from '../../../common/utils/pathHelpers';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import { ValidationLibrary } from '../../types/enums/ValidationLibrary.enum';
 import { ProjectProbe } from '../ProjectProbe';
-
-function createTempDir(t: TestContext, prefix: string): string {
-    const generatedRoot = path.join(__dirname, 'generated');
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-}
 
 describe('@unit: ProjectProbe integration', () => {
     test('detects zod in package.json and loads consumer imports from generated entry', async t => {
@@ -70,6 +62,10 @@ describe('@unit: ProjectProbe integration', () => {
         const findings = await new ImportRule().check(context, contract, stats, apiScope);
 
         assert.strictEqual(findings.length, 0);
-        assert.ok(profile.consumer.context.getConsumerSourceFiles().some(file => file.getFilePath() === consumerPath));
+        const expectedConsumer = joinHelper(srcDir, 'app.ts');
+        assert.ok(
+            profile.consumer.context.getConsumerSourceFiles().some(file => file.getFilePath().replace(/\\/g, '/') === expectedConsumer),
+            `expected consumer file ${expectedConsumer}`
+        );
     });
 });

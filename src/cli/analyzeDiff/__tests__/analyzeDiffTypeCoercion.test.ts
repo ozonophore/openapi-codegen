@@ -1,9 +1,10 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import type { UnifiedDiffReport } from '../../../core/types/DiffReport.model';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import { installSilenceAppLogger } from '../../../test/helpers/silenceLoggers';
 import { analyzeDiff } from '../analyzeDiff';
 
@@ -11,17 +12,6 @@ const writeSpec = (dir: string, filename: string, payload: unknown): string => {
     const filePath = path.join(dir, filename);
     fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf-8');
     return filePath;
-};
-
-const generatedRoot = path.join(__dirname, 'generated');
-
-const createTempDir = (t: TestContext, prefix: string): string => {
-    fs.mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = fs.mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        fs.rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
 };
 
 describe('@unit: analyzeDiff TYPE_COERCION miracles', () => {

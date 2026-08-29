@@ -1,6 +1,8 @@
-import path from 'path';
-
 import { relativeHelper, resolveHelper } from '../../common/utils/pathHelpers';
+
+function isSlashAbsolute(relative: string): boolean {
+    return relative.startsWith('/') || /^[A-Za-z]:\//.test(relative);
+}
 
 /**
  * Checks whether `child` is a subdirectory of `parent`
@@ -11,5 +13,8 @@ export function isSubDirectory(parent: string, child: string) {
     const parentNormalized = resolveHelper(parent);
     const childNormalized = resolveHelper(parentNormalized, child);
     const relative = relativeHelper(parentNormalized, childNormalized);
-    return relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative);
+    if (relative === '' || relative === './') {
+        return false;
+    }
+    return !relative.startsWith('..') && !isSlashAbsolute(relative);
 }

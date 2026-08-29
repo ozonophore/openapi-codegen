@@ -1,20 +1,11 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
 import { generateOpenApiClient } from '../../../cli/generateOpenApiClient/generateOpenApiClient';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import { installSilenceLoggers } from '../../../test/helpers/silenceLoggers';
-
-function createTempDir(t: TestContext, prefix: string): string {
-    const generatedRoot = path.join(__dirname, 'generated');
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-}
 
 function writeMinimalSpec(filePath: string, serverUrl: string, title: string): void {
     writeFileSync(

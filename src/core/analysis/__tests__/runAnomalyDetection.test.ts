@@ -1,22 +1,20 @@
 import assert from 'node:assert';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
 import { ELogLevel, ELogOutput } from '../../../common/Enums';
 import { Logger } from '../../../common/Logger';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import { installSilenceLoggers } from '../../../test/helpers/silenceLoggers';
 import { runAnomalyDetection } from '../runAnomalyDetection';
 
-function createTempDir(t: TestContext): string {
-    const generatedRoot = path.join(__dirname, 'generated');
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, 'anomaly-'));
+function createTempWorkDir(t: TestContext): string {
+    const tempDir = createTempDir(t, 'anomaly-');
     const previousCwd = process.cwd();
     process.chdir(tempDir);
     t.after(() => {
         process.chdir(previousCwd);
-        rmSync(tempDir, { recursive: true, force: true });
     });
     return tempDir;
 }
@@ -33,7 +31,7 @@ describe('@unit: runAnomalyDetection', () => {
     });
 
     test('writes json report to configured path', async t => {
-        createTempDir(t);
+        createTempWorkDir(t);
         const logger = new Logger({
             instanceId: 'test',
             level: ELogLevel.ERROR,
@@ -76,7 +74,7 @@ describe('@unit: runAnomalyDetection', () => {
     });
 
     test('throws when failOnAnomalies is enabled and high severity findings exist', async t => {
-        createTempDir(t);
+        createTempWorkDir(t);
         const logger = new Logger({
             instanceId: 'test',
             level: ELogLevel.ERROR,
@@ -110,7 +108,7 @@ describe('@unit: runAnomalyDetection', () => {
     });
 
     test('passes custom prefixes to spec analysis', async t => {
-        createTempDir(t);
+        createTempWorkDir(t);
         const logger = new Logger({
             instanceId: 'test',
             level: ELogLevel.ERROR,

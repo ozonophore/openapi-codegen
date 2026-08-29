@@ -20,13 +20,17 @@ describe('@unit: createResolvedContext', () => {
     });
 
     test('resolves existing fixture and returns usable context', async () => {
-        const { context, openApi } = await createResolvedContext({
+        const { context, map, openApi } = await createResolvedContext({
             input: 'test/spec/v3.yml',
             output: getOutputPaths({ output: './generated' }),
         });
         assert.ok(openApi && typeof openApi === 'object');
         assert.doesNotThrow(() => context.values());
         assert.ok(context.getAllCanonicalRefs().length >= 0);
+        assert.ok(map, 'map should be returned');
+        assert.ok(typeof map.resolve === 'function');
+        assert.ok(typeof map.getCanonicalRefs === 'function');
+        assert.ok(map.output && typeof map.output === 'object');
     });
 
     test('fails when spec file is missing', async () => {
@@ -71,11 +75,12 @@ paths: {}
             'utf8'
         );
 
-        const { context, openApi } = await createResolvedContext({
+        const { context, map, openApi } = await createResolvedContext({
             input: specPath,
             output: getOutputPaths({ output: path.join(tmpDir, 'out') }),
         });
         assert.equal((openApi as { info?: { title?: string } }).info?.title, 'Mini');
         assert.doesNotThrow(() => context.values());
+        assert.ok(map, 'map should be returned');
     });
 });

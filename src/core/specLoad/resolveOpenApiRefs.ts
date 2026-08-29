@@ -10,6 +10,7 @@ import type { SemanticRefResolver } from './expandOpenApiRefsForSemanticDiff';
 export type SwaggerRefsLike = {
     exists: (ref: string) => boolean;
     get: (ref: string) => unknown;
+    paths?: (...types: string[]) => string[];
 };
 
 export type ResolvedSwaggerRefs = Awaited<ReturnType<SwaggerParser['resolve']>>;
@@ -19,6 +20,7 @@ export function createSwaggerRefsResolver(refs: ResolvedSwaggerRefs | SwaggerRef
     return {
         exists: ref => like.exists(ref),
         get: ref => like.get(ref),
+        paths: typeof like.paths === 'function' ? () => like.paths!() : undefined,
     };
 }
 
@@ -38,11 +40,12 @@ export type ResolvedOpenApiFromFile = {
  * Shared Spec-load prologue: empty/exists checks + `SwaggerParser.resolve` + root get.
  */
 export async function resolveOpenApiRefsFromFile(input: string): Promise<ResolvedOpenApiFromFile> {
-    const absoluteInput = resolveHelper(process.cwd(), input);
-
     if (!input) {
         throw new Error(`OpenAPI spec path is empty`);
     }
+
+    // Spec-load boundary: swagger-parser keys refs by absolute path; relative input breaks refs.get.
+    const absoluteInput = resolveHelper(process.cwd(), input);
 
     const exists = await fileSystemHelpers.exists(absoluteInput);
     if (!exists) {

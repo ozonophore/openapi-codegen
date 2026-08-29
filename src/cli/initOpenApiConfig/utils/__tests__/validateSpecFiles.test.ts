@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, test, type TestContext } from 'node:test';
 
+import { createTempDir } from '../../../../test/helpers/createTempDir';
 import { installSilenceAppLogger } from '../../../../test/helpers/silenceLoggers';
 import { validateSpecFile } from '../validateSpecFile';
 import { validateSpecFiles } from '../validateSpecFiles';
@@ -14,14 +15,9 @@ const minimalOpenApi = {
 };
 
 const createSpecFile = (t: TestContext, content: unknown): string => {
-    const root = path.join(__dirname, 'generated');
-    fs.mkdirSync(root, { recursive: true });
-    const dir = fs.mkdtempSync(path.join(root, 'spec-'));
+    const dir = createTempDir(t, 'spec-');
     const filePath = path.join(dir, 'spec.json');
     fs.writeFileSync(filePath, JSON.stringify(content), 'utf-8');
-    t.after(() => {
-        fs.rmSync(dir, { recursive: true, force: true });
-    });
     return filePath;
 };
 

@@ -1,22 +1,13 @@
 import assert from 'node:assert';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, test, type TestContext } from 'node:test';
+import { describe, test } from 'node:test';
 
 import { ProjectContext } from '../../../core/projectProbe';
+import { createTempDir } from '../../../test/helpers/createTempDir';
 import { Scanner } from '../core/Scanner';
 import { ServiceRule } from '../rules/ServiceRule';
 import { createApiImportScope } from '../utils/apiImportScope';
-
-function createTempDir(t: TestContext, prefix: string): string {
-    const generatedRoot = path.join(__dirname, 'generated');
-    mkdirSync(generatedRoot, { recursive: true });
-    const tempDir = mkdtempSync(path.join(generatedRoot, prefix));
-    t.after(() => {
-        rmSync(tempDir, { recursive: true, force: true });
-    });
-    return tempDir;
-}
 
 /** Minimal fixture shaped like v3 snapshot output: barrel index, createClient, class-based services. */
 function writeV3StyleGeneratedApi(apiDir: string): { entryPath: string; servicePath: string; createClientPath: string } {
