@@ -99,6 +99,8 @@ Use this table to find the keys you need for your use case:
 }
 ```
 
+`items[]` may override (root is fallback): `interfacePrefix`, `enumPrefix`, `typePrefix`, `useCancelableRequest`, `sortByRequired`, `useSeparatedIndexes`, `modelsMode`, `modelsLayout`, `miracles`, `plugins`, `strictPluginMode`, `disableBuiltinPlugins`. Cache keys (`cache`, `cachePath`, `cacheStrategy`, `cacheDebug`, `reuseOnConflict`) stay root-only.
+
 ---
 
 ### Tier 1 — Essential
@@ -143,15 +145,15 @@ Naming and formatting conventions for the generated output.
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
-| `interfacePrefix` | string | `I` | Prefix for interface models |
-| `enumPrefix` | string | `E` | Prefix for enum models |
-| `typePrefix` | string | `T` | Prefix for type models |
+| `interfacePrefix` | string | `I` | Prefix for interface models (root or per `items[]`) |
+| `enumPrefix` | string | `E` | Prefix for enum models (root or per `items[]`) |
+| `typePrefix` | string | `T` | Prefix for type models (root or per `items[]`) |
 | `modelsMode` | string | `interfaces` | Models generation mode: `interfaces` or `classes` |
 | `modelsLayout` | string | `bundle` | File layout for `classes`: `bundle` (single `models.ts`) or `per-file` (one Raw+Dto file per `model.path`). Nested: `models.layout` |
 | `validationLibrary` | string | `none` | Validation library: `none`, `zod`, `joi`, `yup`, or `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Strategy for empty schemas: `keep`, `semantic`, or `skip` |
-| `useCancelableRequest` | boolean | `false` | Use cancelable promise as return type |
-| `sortByRequired` | boolean | `false` | Extended sorting strategy for arguments |
+| `useCancelableRequest` | boolean | `false` | Use cancelable promise as return type (root or per `items[]`) |
+| `sortByRequired` | boolean | `false` | Extended sorting strategy for arguments (root or per `items[]`) |
 | `prettierConfigPath` | string | — | Path to a Prettier config file for formatting generated output |
 | `tsconfigPath` | string | — | Path to `tsconfig.json` for batch ESLint fix (used together with `eslintConfigPath`) |
 | `eslintConfigPath` | string | — | Path to ESLint config for batch ESLint fix (used together with `tsconfigPath`) |
@@ -173,8 +175,10 @@ Options for CI quality gates, spec validation, and breaking-change tracking.
 | `useHistory` | boolean | `false` | Apply diff report annotations during generation |
 | `diffReport` | string | `./.openapi-codegen-reports/openapi-diff-report.json` | Path to diff report JSON |
 | `analyze` | object | — | Analyze config section (reportPath, useHistory, ignore) |
-| `miracles` | object | — | Miracles filter applied at generate time: `enabled`, `confidence` threshold, `types` allowlist (`RENAME`, `TYPE_COERCION`). Default without block: `confirmed` or `confidence === 1` |
-| `plugins` | string[] | `[]` | Paths to generator plugins |
+| `miracles` | object | — | Miracles filter at generate time (`enabled`, `confidence`, `types`); root or per `items[]`. Default without block: `confirmed` or `confidence === 1` |
+| `plugins` | `string \| { path, name?, config? }[]` | `[]` | Generator plugins (string paths stay valid). Non-empty `config` is passed to optional `configure(config)` on `generate` / `preAnalyze` / `analyze-diff` |
+| `strictPluginMode` | boolean | `false` | Fail when `resolveSchemaTypeOverride` throws (root or per `items[]`) |
+| `disableBuiltinPlugins` | boolean | `false` | Skip builtin `x-typescript-type` (root or per `items[]`) |
 
 ---
 
@@ -191,6 +195,8 @@ Incremental generation strategies. Start with `entity` for a single spec, use `r
 | `cacheStrategy` | string | `reuse` (current schema) | Cache strategy: `entity`, `reuse`, or `content` |
 | `reuseOnConflict` | string | `fail` | Reuse store conflict policy: `fail` or `namespace` |
 | `cacheDebug` | boolean | `false` | Show cache hit/miss debug logs |
+
+`reuse` also uses entity skip (fingerprint **v4**). The first warm run after upgrade may regenerate all entities once; reuse artifacts stay valid. Changing plugins / prettier / prefixes / models options invalidates skip. Skip is denied if ReuseStore `contentHash` fails. Entity skip under `reuse` works for all `modelsMode`/`modelsLayout` when fingerprint + output files + Reuse manifest entry match.
 
 ---
 
@@ -272,7 +278,9 @@ Some keys can be set at both the root level and within nested config sections. H
 
 Generator plugins can override schema type mapping (for example via `x-typescript-type`) and extend generation behavior.
 
-- Configuration key: `plugins` (array of module paths)
+- Configuration key: `plugins` — `string | { path, name?, config? }[]` (string paths stay valid)
+- Non-empty `config` is passed to optional `configure(config)` on load (`generate`, `preAnalyze`, `analyze-diff`)
+- Also: `disableBuiltinPlugins`, `strictPluginMode` (root and `items[]`)
 - Supported module formats: CJS, ESM, and TS (when runtime supports TS imports)
 - Full guide: [Plugins](plugins.md)
 - Short anchors: [features.md#plugin-system](features.md#plugin-system), [Plugin API v2](features.md#plugin-api-v2-rfc)

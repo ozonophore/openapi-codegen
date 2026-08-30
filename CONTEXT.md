@@ -47,6 +47,26 @@ _Avoid_: resolveCanonicalRef on Context (moved to VirtualFileMap)
 A Tree $ref whose file part is `http://` or `https://`. `$ref` lookup may still read `$Refs`. No Virtual file map entry and no Output mapping.
 _Avoid_: treating a URL as a disk path
 
+**Plugin factory API**:
+Author contract whose wire version is `apiVersion: '3'`. A module is either `{ meta, createPlugin }` or a `createPlugin` function with `.meta`. `createPlugin` receives PluginApi; after registration the runtime value is an OpenApiGeneratorPlugin.
+_Avoid_: Plugin API v3 as the name; Resolved Context factory; OpenAPI 3; a flat `{ name, apiVersion: '3', … }` object
+
+**Legacy wrap**:
+In-place adaptation of a v1/v2 OpenApiGeneratorPlugin to runtime `apiVersion: '3'` after `configure`. Same object; hook `this` stays the author instance. Factory plugins (`apiVersion` already `'3'`) are not rewritten.
+_Avoid_: cloning into a second plugin object; treating wrap as a change to the file authors export
+
+**PluginApi**:
+Registration surface passed into `createPlugin`: plugin meta, `onConfigure`, and one `on*` per hook (`onSchemaTypeOverride`, `onAfterSemanticDiff`, `onMapRecommendation`, `onBeforeReportWrite`). Each `on*` may be called at most once.
+_Avoid_: treating PluginApi as the object stored on Context; composing multiple handlers per hook
+
+**PluginRuntimeContext**:
+Second argument to hook calls: cwd, `executionMode` (`generate` | `analyze-diff`), optional `emitDiagnostic`. `preAnalyze` uses `generate`.
+_Avoid_: a third mode `preAnalyze`
+
+**OpenApiGeneratorPlugin**:
+Runtime plugin object: name, optional hooks, optional `configure`. v1/v2 modules export it; Plugin factory API produces it after `createPlugin`.
+_Avoid_: storing factory modules (`meta` + `createPlugin`) on Context as if they were this object
+
 ## Generation batch session
 
 Owns the **multi-item Generation lifecycle** for one `generate()` run: **Generation batch setup** → per-item orchestration → **Generation batch finalize**.

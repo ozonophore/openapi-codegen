@@ -166,7 +166,7 @@ openapi-codegen-cli analyze-diff \
   --input ./openapi/spec.yaml \
   --compare-with ./openapi/spec.base.yaml \
   --governance-config ./governance.json \
-  --check
+  --ci
 
 # 2. Generate with strict diagnostics
 openapi-codegen-cli generate \
@@ -188,7 +188,7 @@ tsc --noEmit
 
 | Step | Command | Purpose | Fails If |
 |------|---------|---------|----------|
-| 1 | `analyze-diff` | Detect breaking API changes vs. baseline | Breaking changes detected or governance violations |
+| 1 | `analyze-diff` | Detect breaking API changes vs. baseline | Governance errors (`--ci`; breaking changes fail only if a rule treats them as errors) |
 | 2 | `generate` | Generate client with strict validation | OpenAPI spec invalid or governance errors |
 | 3 | `analyze-usage` | Verify generated code is consumed correctly | Usage mismatches or type errors in consumer code |
 | 4 | `tsc --noEmit` | TypeScript compilation check | Type errors in generated or consumer code |
@@ -235,7 +235,7 @@ jobs:
           openapi-codegen-cli analyze-diff \
             --input ./openapi/spec.yaml \
             --compare-with ./openapi/spec.base.yaml \
-            --check
+            --ci
       
       - name: Generate client
         run: openapi-codegen-cli generate --strict-openapi

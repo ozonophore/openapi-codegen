@@ -1,17 +1,17 @@
-# `$ref` lookup uses parser keys and URI join, not `path.resolve`
+# Lookup `$ref` идёт по ключам парсера и URI-склейке, не через `path.resolve`
 
-After `SwaggerParser.resolve()`, files are already in `$Refs`. `$ref` lookup must turn a Tree `$ref` plus Parent source file into that parser key (Canonical Ref), not invent a POSIX path and hope it matches. File join is `joinTreeRefFile` (`new URL` against a hand-built `file://` base — not `path.resolve`, not `pathToFileURL`). `RefLookup` and semantic expand both call it. Expand still walks the tree itself and MUST NOT import the `RefLookup` class. Match `refs.paths()` allowing only spelling of the same opened file (slashes, encoding, drive-letter case — a missing drive is not the current drive). `pathHelpers` stay for CLI and writing `.ts`, not for `$ref`. `PathApi` is removed.
+После `SwaggerParser.resolve()` файлы уже лежат в `$Refs`. Lookup `$ref` MUST превратить Tree `$ref` плюс Parent source file в этот ключ парсера (Canonical Ref), а не изобретать POSIX-путь и надеяться на совпадение. Склейка файла — `joinTreeRefFile` (`new URL` против вручную собранной базы `file://` — не `path.resolve`, не `pathToFileURL`). Её вызывают и `RefLookup`, и semantic expand. Expand по-прежнему сам обходит дерево и MUST NOT импортировать класс `RefLookup`. Сопоставление с `refs.paths()` MUST допускать только орфографию того же открытого файла (слеши, кодировка, регистр буквы диска — отсутствующий диск это не текущий диск). `pathHelpers` остаются для CLI и записи `.ts`, не для `$ref`. `PathApi` удалён.
 
-Terms: `CONTEXT.md` (Language). Steps: `instruction-ref-resolve.md`.
+Термины: `CONTEXT.md` (Language).
 
 ## Considered Options
 
-- **`path.resolve` + `PathApi` (current):** looks right in tests that inject `path.win32` on macOS; production on darwin still treats `C:/...` as relative. Rejected.
-- **URI join without matching parser keys:** a second “canonical path” that still drifts from `$Refs`. Rejected.
-- **Guess another opened file by filename, or search disk:** hides broken specs and can attach the wrong file. Rejected; unresolved refs stay strict (`get` / `exists`); reporting is Spec/strict, not lookup.
+- **`path.resolve` + `PathApi` (тогдашний код):** выглядит правильно в тестах, которые подставляют `path.win32` на macOS; в production на darwin `C:/...` всё равно относительный. Отклонено.
+- **URI-склейка без совпадения с ключами парсера:** второй «канонический путь», который снова расходится с `$Refs`. Отклонено.
+- **Угадать другой открытый файл по имени или искать на диске:** прячет сломанные спеки и может привязать не тот файл. Отклонено; неразрешённые refs остаются строгими (`get` / `exists`); отчётность — Spec/strict, не lookup.
 
 ## Consequences
 
-- Callers pass an absolute Parent source file with no Pointer. A Pointer-only Tree `$ref` with no parent uses the Entry file. Relative file `$ref` without a parent is invalid.
-- UNC (`\\server\share`) is out of scope until a real spec needs it.
-- Semantic diff keeps its own tree walk and “unresolved stays a `$ref` object” contract. File join after the parser is `joinTreeRefFile`, shared with `$ref` lookup. Expand MUST NOT import the `RefLookup` class.
+- Вызывающие передают абсолютный Parent source file без Pointer. Tree `$ref` только из Pointer без родителя берёт Entry file. Относительный файловый `$ref` без родителя невалиден.
+- UNC (`\\server\share`) вне скоупа, пока не понадобится реальной спеке.
+- Semantic diff сохраняет свой обход дерева и контракт «неразрешённый остаётся объектом `$ref`». Склейка файла после парсера — `joinTreeRefFile`, общая с lookup `$ref`. Expand MUST NOT импортировать класс `RefLookup`.

@@ -2,7 +2,7 @@
 
 Lookup `$ref` после `SwaggerParser.resolve()` должен попадать в ключ `$Refs`, а не строить «свой POSIX-путь». Сейчас Context склеивает Tree `$ref` через `path.resolve` / `PathApi`, иногда после передачи `file#/Pointer` в path API. Тесты подставляли `path.win32` на macOS и скрывали баг: на darwin `C:/` — относительный путь. `getModels` считает Model’ом каждый Canonical Ref, поэтому одноимённые `components.requestBodies` / `responses` сталкиваются со Schema Object (`SimpleRequestBody`, пустой `ErrorResponse`).
 
-Происхождение (перенести в `research/` этого change; не второй источник требований): `instruction-ref-resolve.md`, `report-1-context-path-handling.md`, `report-2-normalize-ref.md`, `report-3-ref-resolver-cross-os.md`. Решение: `docs/adr/0001-ref-lookup-uri-and-parser-keys.md`. Термины — `CONTEXT.md` (Language).
+Решение: `docs/adr/0001-ref-lookup-uri-and-parser-keys.md`. Термины — `CONTEXT.md` (Language). Исследовательские заметки (`instruction-ref-resolve.md`, `report-1|2|3-*.md`) не входят в change и не являются источником требований.
 
 ## Goals / Non-Goals
 
@@ -36,7 +36,7 @@ Lookup `$ref` после `SwaggerParser.resolve()` должен попадать
 - **[Риск] Вызывающий передаёт `file#pointer` как родителя** → `RefLookupError`; точки Parser используют `toParentSourceFile`.
 - **[Риск] Промах intern на необычных ключах парсера (UNC, варианты `file://`)** → строгий miss; UNC вне скоупа; тесты покрывают `%20`, обратный слеш, регистр буквы диска, `C:/` на любой ОС процесса.
 - **[Компромисс] Denylist vs allowlist** → denylist сохраняет Models с `#/properties`; новый OAS-реестр потребует явного префикса.
-- **[Компромисс] Research сейчас в корне репозитория** → перенести в `research/`, чтобы архив унёс его с change; ADR остаётся в `docs/adr/`.
+- **[Компромисс] Исследовательские заметки не архивируются с change** → источник истины — ADR и Language в `CONTEXT.md`; черновики `instruction-ref-resolve.md` / `report-*.md` не переносятся.
 
 ## Migration Plan
 

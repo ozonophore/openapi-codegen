@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.16] — 2026-08-30
+
+Core generation pipeline extracted; this release also ships `$ref` / reuse and plugin-config fixes that landed with that split.
+
+### Added
+
+- Optional plugin **`configure(config)`** hook: non-empty `plugins[].config` is injected at load on `generate` and `preAnalyze`. See `docs/en/plugins.md`.
+- **Plugin factory API** (`apiVersion: '3'`): `{ meta, createPlugin }` or a function with `.meta`; `PluginApi` registers hooks (and `onConfigure`) at most once. Flat `{ name, apiVersion: '3' }` objects fail load. See `docs/en/plugins.md`.
+- **Legacy wrap:** after load, v1/v2 plugin objects are runtime `apiVersion: '3'` (same instance). Builtin `x-typescript-type` is a factory plugin.
+
+### Fixed
+
+- **`$ref` / Canonical Ref lookup**: tree `$ref` via URI join and SwaggerParser key interning instead of `path.resolve` — Windows drive paths (`C:/…`) and slash/encoding mismatches when resolving on non-Windows hosts.
+- **`getModels` / reuse schema map**: skip non-schema component registries (`requestBodies`, `responses`, `parameters`, `headers`, examples, securitySchemes, links, callbacks, pathItems; OAS2 responses/parameters/securityDefinitions) so names like `SimpleRequestBody` are not emitted as empty model/schema files.
+- `analyze-diff` now passes full plugin entries so `configure()` receives config from `openapi.config.json` (parity with `generate`).
+- Multi-item configs honor per-item `interfacePrefix`, `enumPrefix`, `typePrefix`, `useCancelableRequest`, `sortByRequired`, `useSeparatedIndexes` (previously always root).
+- **`cacheStrategy: reuse` / entity skip**: deny skip when ReuseStore artifacts fail `contentHash` integrity (full item regen + store rewrite); keep `inputPath` when a validation library is enabled; update files on reuse hits when content differs but byte size matches; GC no longer deletes artifacts still referenced by entity-cache-skipped specs.
+- Fully entity-cache-skipped batches skip index combine/write and batch ESLint; `preAnalyze` skips those specs. Generation report spec stats include `entitySkipped`; `cacheDebug` writes `phases.gcMs` / `phases.manifestSaveMs` after ReuseStore GC/save.
+
+### Changed
+
+- Entity skip fingerprint **v3 → v4** (`optionsAffectingHash`): first warm run after upgrade may regenerate all entities once; reuse artifacts stay valid. Reuse skip now works for all `modelsMode`/`modelsLayout` when fingerprint + output files + Reuse manifest entry match. Missing manifest entry forces regen. OptionsSlice fields (plugins, prettier, prefixes, models options) invalidate entity cache.
+- `miracles` can be overridden per generation item in multi-item configs.
+- Programmatic: invalid generation options throw `Error` instead of `process.exit(1)`.
+
+### Breaking Changes
+
+- Regenerating may drop previously emitted models/schemas that came only from non-schema OpenAPI component registries; update imports (e.g. `SimpleRequestBody`). If those types are needed, put schemas in `components.schemas`.
+- Programmatic `Context`: `resolveCanonicalRef()` / `getVirtualFiles()` removed; use `toCanonicalRef($ref, parentSourceFile?)` and `context.map.resolve()`. Public export: `normalizePathsToAbsolute()`.
+- Path fields in resolved options are normalized to absolute before generation.
+- Plugin files that export a flat object with `apiVersion: '3'` no longer load (use Plugin factory API). Loaded v1/v2 instances report runtime `apiVersion: '3'`.
+
 ## [2.1.0-beta.15] — 2026-08-01
 
 ### Added

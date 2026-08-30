@@ -37,11 +37,11 @@ Generation cache is **opt-in** (disabled by default). Enable it with `--cache` o
 | No cache or minimal overhead | `cache: false` or `content` | No store manifest; `content` still skips unchanged file writes |
 | Fair reuse benchmark | `example/openapi.reuse.bench.config.json` | Same items as base config + only `cache`/`reuse`; unlike `openapi.reuse.config.json`, no Marauder extras (`autoSelect`, `specAnalysis`) |
 
-Reuse always parses the spec and generates core/services; it does not skip generation like entity cache. Warm reuse wins when shared schemas dominate (multi-item configs). Cold reuse may be slower than no-cache while populating the store.
+`cacheStrategy: reuse` still copies shared model/schema artifacts, but it also uses entity skip. On a warm hit (fingerprint + output files; plus ReuseStore manifest entry and `contentHash` when the store applies), the item is skipped — no parse/write. A missing manifest entry or failed `contentHash` forces a full regen. Artifact sharing still requires `interfaces` or `classes` + `per-file` (`classes` + `bundle` falls back to entity cache). Warm reuse wins when shared schemas dominate (multi-item configs). Cold reuse may be slower than no-cache while populating the store.
 
-For perf regression checks, see `test/reusePerformance.test.ts`. Enable `cacheDebug: true` to include manifest phase timings in `{cachePath}/reports/latest.json`.
+For perf regression checks, see `test/reusePerformance.test.ts`. Enable `cacheDebug: true` to include manifest phase timings (`phases.gcMs`, `phases.manifestSaveMs`) in `{cachePath}/reports/latest.json` after ReuseStore GC/save. Generation report spec stats include `entitySkipped`. Fully entity-skipped batches skip index combine/write and batch ESLint.
 
-Reuse store fingerprints use MD5 (`manifest.json` version 2). Upgrading from version 1 invalidates the existing store on the next generate (artifacts are recreated; orphans are removed by GC).
+Reuse store fingerprints use MD5 (`manifest.json` version 2). Upgrading from version 1 invalidates the existing store on the next generate (artifacts are recreated; orphans are removed by GC). Entity skip fingerprint is **v4** (`optionsAffectingHash`: plugins, prettier, prefixes, models options). The first warm run after upgrade may regenerate all entities once; reuse store artifacts stay valid.
 
 When `cache` or `specAnalysis` is enabled, a unified generation report is written to `{output}/reports/latest.json` (or `<cachePath>/reports/latest.json` in reuse mode).
 
@@ -54,7 +54,7 @@ Opt-in features during `generate` (current config schema):
 - **`--workspace-report` / `workspaceReport`** — multi-spec workspace summary (JSON and/or Markdown).
 - **`--traffic-splitter` / `trafficSplitter`** — generates a standalone `TrafficSplitter.ts` helper (no live traffic).
 - **`--swarm` / `swarm`** — writes an Avatar Swarm **manifest** only (top-level `swarm` / `heal` / `migrate` commands stay removed).
-- **`--pre-analyze` / `preAnalyze`** — cross-spec shared-model / conflict summary to stdout before any files are written.
+- **`--pre-analyze` / `preAnalyze`** — cross-spec shared-model / conflict summary to stdout before any files are written. Entity-cached items are omitted; if every item is cached, logs `[preAnalyze] Skipped — all items entity-cached`.
 - **`--reuse-mode` / `reuseMode`** — `copy` (default) or `auto-group` shared models **and compatible client core** under `{LCA}/__shared__/`.
 - Dot-notation CLI flags: `--auto-select.strict`, `--spec-analysis.fail-on-high`, `--workspace-report.format`, `--traffic-splitter.strategy`, `--swarm.output`, inline JSON objects.
 
@@ -591,8 +591,12 @@ OpenAPI.TOKEN = getToken;
 
 ### References
 
-Local references to schema definitions (those beginning with `#/definitions/schemas/`)
+Local references to schema objects (OAS3 `#/components/schemas/`, OAS2 `#/definitions/`)
 will be converted to type references to the equivalent, generated top-level type.
+Models are emitted only from those schema registries — not from `requestBodies`, `responses`,
+`parameters`, `headers`, examples, securitySchemes, links, callbacks, or pathItems.
+If you need a type for a request body or response, put the schema in `components.schemas`
+(or `#/definitions`) and `$ref` it.
 
 The OpenAPI generator also supports external references, which allows you to break
 down your openapi.yml into multiple sub-files, or incorporate third-party schemas
@@ -1021,7 +1025,7 @@ openapi-codegen-cli generate -ocn openapi.config.json --swarm.output=./reports/s
 
 ### 7. `generate --pre-analyze`
 
-Before any client files are written: parses items, runs cross-spec analysis, prints shared-model / conflict summary to stdout. Non-blocking; individual parse failures are warnings.
+Before any client files are written: parses items that would not be entity-skipped, runs cross-spec analysis, prints shared-model / conflict summary to stdout. If every item is entity-cached, prints `[preAnalyze] Skipped — all items entity-cached` and does not parse. Non-blocking; individual parse failures are warnings.
 
 ```bash
 openapi-codegen-cli generate -ocn openapi.config.json --pre-analyze
@@ -1077,7 +1081,7 @@ See the canonical guide: [Plugins](plugins.md).
 - Config `plugins` (string or `{ path, name?, config? }`)
 - CLI: `generate --plugins` / `analyze-diff --plugins`
 - Builtin `x-typescript-type`; opt out with `disableBuiltinPlugins`
-- **Plugin API v3 factory is not shipped**
+- Plugin factory API (`apiVersion: '3'`): `{ meta, createPlugin }` or function with `.meta` — see [Plugins](plugins.md#plugin-factory-api-apiversion-3)
 
 ## Plugin API v2 (RFC)
 

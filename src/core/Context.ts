@@ -4,6 +4,7 @@ import { JSONSchema4Type, JSONSchema6Type, JSONSchema7Type } from 'json-schema';
 import { APP_LOGGER } from '../common/Consts';
 import { dirNameHelper } from '../common/utils/pathHelpers';
 import { OpenApiGeneratorPlugin, SchemaTypeOverrideContext } from './plugins/GeneratorPlugin.model';
+import { wrapLegacyPlugin } from './plugins/wrapLegacyPlugin';
 import { buildVirtualFileMap, VirtualFileMap } from './specLoad/VirtualFileMap';
 import { OutputPaths } from './types/base/OutputPaths.model';
 import { PrefixArtifacts } from './types/base/PrefixArtifacts.model';
@@ -64,7 +65,7 @@ export class Context {
             this._sortByRequired = sortByRequired;
         }
 
-        this._plugins = plugins || [];
+        this._plugins = (plugins || []).map(wrapLegacyPlugin);
         this._strictPluginMode = strictPluginMode ?? false;
 
         return this;
@@ -151,7 +152,7 @@ export class Context {
                 continue;
             }
             try {
-                const override = plugin.resolveSchemaTypeOverride({ schema, context });
+                const override = plugin.resolveSchemaTypeOverride({ schema, context }, { cwd: process.cwd(), executionMode: 'generate' });
                 if (typeof override === 'string' && override.trim()) {
                     return override.trim();
                 }

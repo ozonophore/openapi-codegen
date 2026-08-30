@@ -46,7 +46,7 @@ function createBaseReport(): SemanticDiffReport {
 }
 
 describe('@unit: applySemanticDiffPluginHooks', () => {
-    test('applies v2 hooks in deterministic order', async () => {
+    test('применяет v2-хуки в детерминированном порядке', async () => {
         const pluginA: OpenApiGeneratorPlugin = {
             name: 'plugin-a',
             apiVersion: '2',
@@ -81,7 +81,7 @@ describe('@unit: applySemanticDiffPluginHooks', () => {
         assert.ok(result.diagnostics.every(item => item.status === 'applied'));
     });
 
-    test('beforeReportWrite empty result is skipped', async () => {
+    test('пустой результат beforeReportWrite — skipped', async () => {
         const plugin: OpenApiGeneratorPlugin = {
             name: 'noop-before-write',
             apiVersion: '2',
@@ -100,7 +100,7 @@ describe('@unit: applySemanticDiffPluginHooks', () => {
         assert.ok(result.diagnostics.some(item => item.hook === 'beforeReportWrite' && item.status === 'skipped'));
     });
 
-    test('non-strict mode keeps working when plugin hook fails', async () => {
+    test('non-strict mode продолжает работу, если хук падает', async () => {
         const faultyPlugin: OpenApiGeneratorPlugin = {
             name: 'faulty-plugin',
             apiVersion: '2',
@@ -121,7 +121,7 @@ describe('@unit: applySemanticDiffPluginHooks', () => {
         assert.ok(result.diagnostics.some(item => item.pluginName === 'faulty-plugin' && item.status === 'failed'));
     });
 
-    test('strict mode throws when plugin hook fails', async () => {
+    test('strict mode бросает, если хук плагина падает', async () => {
         const faultyPlugin: OpenApiGeneratorPlugin = {
             name: 'faulty-plugin',
             apiVersion: '2',
@@ -141,5 +141,27 @@ describe('@unit: applySemanticDiffPluginHooks', () => {
                 }),
             (error: unknown) => error instanceof Error && error.message.includes('faulty-plugin')
         );
+    });
+
+    test('afterSemanticDiff получает runtime-контекст analyze-diff', async () => {
+        let seenMode: string | undefined;
+        const plugin: OpenApiGeneratorPlugin = {
+            name: 'runtime-plugin',
+            apiVersion: '2',
+            afterSemanticDiff: (ctx, runtime) => {
+                seenMode = runtime?.executionMode;
+                return ctx.report;
+            },
+        };
+
+        await applySemanticDiffPluginHooks({
+            report: createBaseReport(),
+            reportPath: './report.json',
+            plugins: [plugin],
+            allowBreaking: false,
+            strictPluginMode: false,
+        });
+
+        assert.strictEqual(seenMode, 'analyze-diff');
     });
 });
