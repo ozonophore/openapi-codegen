@@ -15,7 +15,7 @@ function createContext(plugins: OpenApiGeneratorPlugin[], strictPluginMode?: boo
 }
 
 describe('@unit: Context strictPluginMode', () => {
-    test('soft mode skips failing plugin and tries the next one', () => {
+    test('soft mode пропускает падающий плагин и пробует следующий', () => {
         const faultyPlugin: OpenApiGeneratorPlugin = {
             name: 'faulty-plugin',
             resolveSchemaTypeOverride: () => {
@@ -33,7 +33,7 @@ describe('@unit: Context strictPluginMode', () => {
         assert.equal(override, 'CustomType');
     });
 
-    test('soft mode returns undefined when all plugins fail', () => {
+    test('soft mode возвращает undefined, если все плагины падают', () => {
         const faultyPlugin: OpenApiGeneratorPlugin = {
             name: 'faulty-plugin',
             resolveSchemaTypeOverride: () => {
@@ -47,7 +47,7 @@ describe('@unit: Context strictPluginMode', () => {
         assert.equal(override, undefined);
     });
 
-    test('strict mode throws when plugin fails', () => {
+    test('strict mode бросает, если плагин падает', () => {
         const faultyPlugin: OpenApiGeneratorPlugin = {
             name: 'faulty-plugin',
             resolveSchemaTypeOverride: () => {
@@ -61,5 +61,20 @@ describe('@unit: Context strictPluginMode', () => {
             () => context.resolveSchemaTypeOverride({ type: 'string' }, { openApiVersion: 'v3', parentRef: '' }),
             (error: unknown) => error instanceof Error && error.message.includes('faulty-plugin')
         );
+    });
+
+    test('override-хук получает runtime-контекст generate', () => {
+        let seenMode: string | undefined;
+        const plugin: OpenApiGeneratorPlugin = {
+            name: 'runtime-plugin',
+            resolveSchemaTypeOverride: (_input, runtime) => {
+                seenMode = runtime?.executionMode;
+                return 'T';
+            },
+        };
+        const context = createContext([plugin], false);
+        const override = context.resolveSchemaTypeOverride({ type: 'string' }, { openApiVersion: 'v3', parentRef: '' });
+        assert.equal(override, 'T');
+        assert.equal(seenMode, 'generate');
     });
 });

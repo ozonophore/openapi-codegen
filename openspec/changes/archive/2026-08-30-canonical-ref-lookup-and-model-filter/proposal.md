@@ -9,7 +9,6 @@
 - Context.`get` / `exists` / обход Pointers только делегируют в тот же перевод. `PathApi`, `normalizeRef`, `parseRef`, `resolveRefPath`, `createNormalizedRef` удаляются. `pathHelpers` остаются для CLI и записи `.ts`.
 - **BREAKING (generated output):** Model — только Canonical Ref, чей Pointer не в denylist non-schema registries (OAS3 components кроме schemas; OAS2 responses / parameters / securityDefinitions). Идентичность целого файла и `#/properties` / `#/items` / `#/allOf` остаются Models. `getModels` (v2/v3) и `buildModelSchemaMap` пропускают denylist; `stripNamespace` по-прежнему срезает префиксы реестров только для имён.
 - Конвейер semantic diff не трогаем. UNC `\\server\share` вне скоупа.
-- Исследовательские файлы с корня репозитория (`instruction-ref-resolve.md`, `report-1|2|3-*.md`) переносятся в `research/` этого change (конвенция `openspec/config.yaml`).
 
 ## Capabilities
 

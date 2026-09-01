@@ -1,6 +1,10 @@
-## ADDED Requirements
+## Purpose
 
-### Requirement: Intern-key comparison is shared spelling, not path.resolve
+Общее intern-сравнение ключей парсера `$Refs` (свёртка слешей, percent-encoding, регистр буквы диска) для `$ref` lookup и semantic expand. Равенство — intern-орфография того же открытого файла, не `path.resolve`.
+
+## Requirements
+
+### Requirement: Intern-сравнение ключей — общая орфография, не path.resolve
 Система MUST сравнивать файловые ключи парсера `$Refs` одним helper intern-ключа (свёртка слешей `\` → `/`, декодирование percent-encoding, регистр буквы диска). `RefLookup` и `expandOpenApiRefsForSemanticDiff` MUST оба вызывать этот helper. Helper MUST NOT использовать `path.resolve`, `path.join` или `path.normalize`, чтобы определять равенство. Совпадение MUST означать intern-орфографию того же открытого файла, а не другой basename на диске.
 
 #### Scenario: Ключ парсера с обратным слешем совпадает с intern-орфографией со слешем `/`

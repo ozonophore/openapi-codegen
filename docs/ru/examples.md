@@ -216,21 +216,11 @@ npx tsc --noEmit
 
 ```json
 {
-    "rules": [
-        {
-            "name": "no-breaking-changes",
-            "severity": "error"
-        },
-        {
-            "name": "required-description",
-            "severity": "warn"
-        },
-        {
-            "name": "schema-validation",
-            "severity": "error"
-        }
-    ],
-    "failOnErrors": true
+    "rules": {
+        "NO_BREAKING_WITHOUT_FLAG": { "enabled": true, "severity": "error" },
+        "REQUIRE_OPERATION_ID": { "severity": "warning" },
+        "NO_DEFAULT_WITHOUT_2XX": { "severity": "error" }
+    }
 }
 ```
 

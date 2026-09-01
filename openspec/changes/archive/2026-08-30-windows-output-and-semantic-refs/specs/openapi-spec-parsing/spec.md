@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-### Requirement: Output mapping intern parser keys to generated .ts
+### Requirement: Output mapping intern-ключи парсера в сгенерированный .ts
 Output mapping MUST отображать intern-точный source file локального Canonical Ref в сгенерированный путь `.ts` под Virtual file map. Когда `specRoot` нормализован в POSIX, а ключ парсера использует `\`, Output mapping MUST всё равно класть файл под `outputModels`. Output mapping MUST NOT быть `$ref` lookup и MUST NOT применяться к Remote `$ref`. Отсутствие `Nested.ts` из `#/properties/…` MUST NOT считаться шумом CRLF-снимков.
 
 #### Scenario: POSIX specRoot vs ключ парсера с обратными слешами

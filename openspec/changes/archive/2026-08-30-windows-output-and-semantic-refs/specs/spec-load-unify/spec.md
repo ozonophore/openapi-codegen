@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-### Requirement: Semantic expand intern-matches resolver keys
+### Requirement: Semantic expand intern-совпадает с ключами резолвера
 `expandOpenApiRefsForSemanticDiff` MUST intern-сопоставлять склеенные файловые `$ref` с ключами резолвера парсера (общее intern-сравнение ключей: свёртка слешей, percent-encoding, регистр буквы диска) до `get` / `exists`. Expand MUST сохранять свой конвейер expand `$ref` и MUST NOT импортировать класс `RefLookup`. В `refs.get` / `refs.exists` MUST уходить intern-точный ключ парсера, не только ключ сравнения. Неразрешённые `$ref`, у которых нет intern-эквивалентного ключа парсера, MUST оставаться стабильными объектами `$ref`.
 
 #### Scenario: Склеенный на Windows User.yaml разворачивается
@@ -31,7 +31,7 @@
 
 ## MODIFIED Requirements
 
-### Requirement: Behavioral preserve
+### Requirement: Поведение сохраняется
 Семантика lazy-ref и attach Virtual file map в Context MUST остаться как в Spec-load unify. Semantic expand MUST сохранять свой конвейер (без импорта `RefLookup`), но MUST intern-совпадать с ключами парсера, как задано в требовании intern-совпадения expand; промах по точному совпадению строк для intern-эквивалентных ключей больше не сохраняется. Entity-skip / Diff / options MUST NOT меняться из-за intern-совпадения ключей.
 
 #### Scenario: Существующие сьюты остаются гейтом

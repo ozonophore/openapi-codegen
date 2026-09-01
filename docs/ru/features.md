@@ -37,11 +37,11 @@
 | Без кэша или минимальный overhead | `cache: false` или `content` | Без manifest store; `content` всё равно пропускает неизменённые файлы |
 | Честный бенчмарк reuse | `example/openapi.reuse.bench.config.json` | Те же items, что в базовом конфиге + только `cache`/`reuse`; в отличие от `openapi.reuse.config.json`, без Marauder (`autoSelect`, `specAnalysis`) |
 
-Reuse всегда парсит спеку и генерирует core/services; не пропускает генерацию как entity cache. Warm reuse выигрывает при доминировании shared schemas (multi-item). Cold reuse может быть медленнее no-cache при заполнении store.
+`cacheStrategy: reuse` по-прежнему копирует общие model/schema артефакты, но также использует entity skip. На warm hit (fingerprint + файлы в output; плюс запись в ReuseStore manifest и `contentHash`, когда store применяется) item пропускается — без parse/write. Нет записи в манифесте или провал `contentHash` — полная регенерация. Шаринг артефактов по-прежнему требует `interfaces` или `classes` + `per-file` (`classes` + `bundle` — fallback на entity cache). Warm reuse выигрывает при доминировании shared schemas (multi-item). Cold reuse может быть медленнее no-cache при заполнении store.
 
-Для регрессионных perf-проверок см. `test/reusePerformance.test.ts`. Включите `cacheDebug: true`, чтобы в `{cachePath}/reports/latest.json` попали тайминги фаз manifest.
+Для регрессионных perf-проверок см. `test/reusePerformance.test.ts`. Включите `cacheDebug: true`, чтобы в `{cachePath}/reports/latest.json` попали тайминги фаз (`phases.gcMs`, `phases.manifestSaveMs`) после GC/save ReuseStore. В статистике спек отчёта — `entitySkipped`. При полном entity-skip не пересобираются индексы и не запускается batch ESLint.
 
-Reuse store использует MD5 для fingerprint (`manifest.json` version 2). При апгрейде с version 1 существующий store инвалидируется на следующем `generate` (артеfacts пересоздаются; orphans удаляет GC).
+Reuse store использует MD5 для fingerprint (`manifest.json` version 2). При апгрейде с version 1 существующий store инвалидируется на следующем `generate` (артефакты пересоздаются; orphans удаляет GC). Отпечаток entity skip — **v4** (`optionsAffectingHash`: плагины, prettier, prefixes, models). После обновления возможен один полный warm-прогон сущностей; reuse-артефакты остаются валидными.
 
 При включённых `cache` или `specAnalysis` unified-отчёт генерации пишется в `{output}/reports/latest.json` (или `<cachePath>/reports/latest.json` в режиме reuse).
 
@@ -54,7 +54,7 @@ Opt-in возможности во время `generate` (актуальная �
 - **`--workspace-report` / `workspaceReport`** — multi-spec сводка workspace (JSON и/или Markdown).
 - **`--traffic-splitter` / `trafficSplitter`** — генерирует автономный helper `TrafficSplitter.ts` (без live traffic).
 - **`--swarm` / `swarm`** — пишет только Avatar Swarm **манифест** (top-level команды `swarm` / `heal` / `migrate` по-прежнему удалены).
-- **`--pre-analyze` / `preAnalyze`** — cross-spec сводка shared-моделей / конфликтов в stdout до записи файлов.
+- **`--pre-analyze` / `preAnalyze`** — cross-spec сводка shared-моделей / конфликтов в stdout до записи файлов. Entity-cached items пропускаются; если все items в кэше — лог `[preAnalyze] Skipped — all items entity-cached`.
 - **`--reuse-mode` / `reuseMode`** — `copy` (по умолчанию) или `auto-group` общих моделей **и совместимого client core** в `{LCA}/__shared__/`.
 - Dot-notation CLI: `--auto-select.strict`, `--spec-analysis.fail-on-high`, `--workspace-report.format`, `--traffic-splitter.strategy`, `--swarm.output`, inline JSON.
 
@@ -592,8 +592,12 @@ OpenAPI.TOKEN = getToken;
 
 ### Ссылки
 
-Локальные ссылки на определения схем (начинающиеся с `#/definitions/schemas/`)
+Локальные ссылки на объекты схем (OAS3 `#/components/schemas/`, OAS2 `#/definitions/`)
 будут преобразованы в ссылки на типы к эквивалентному сгенерированному типу верхнего уровня.
+Модели эмитятся только из этих schema registries — не из `requestBodies`, `responses`,
+`parameters`, `headers`, examples, securitySchemes, links, callbacks или pathItems.
+Если нужен тип для request body или response, положите схему в `components.schemas`
+(или `#/definitions`) и сошлитесь через `$ref`.
 
 Генератор OpenAPI также поддерживает внешние ссылки, что позволяет разбить
 ваш openapi.yml на несколько подфайлов или включить сторонние схемы
@@ -1012,7 +1016,7 @@ openapi-codegen-cli generate -ocn openapi.config.json --swarm.output=./swarm-man
 
 **Какую проблему решает:** Хочется увидеть shared-модели / конфликты **до** записи файлов.
 
-Root-only. До записи: парсит items, запускает `CrossSpecAnalyzer`, печатает сводку в stdout. Не блокирует генерацию; ошибки парсинга отдельных спек — warn. Отдельный report-файл не пишет.
+Root-only. До записи: парсит items, которые не будут entity-skipped, запускает `CrossSpecAnalyzer`, печатает сводку в stdout. Если все items в entity-кэше — `[preAnalyze] Skipped — all items entity-cached`, парсинг не выполняется. Не блокирует генерацию; ошибки парсинга отдельных спек — warn. Отдельный report-файл не пишет.
 
 ```bash
 openapi-codegen-cli generate -ocn openapi.config.json --pre-analyze
@@ -1067,7 +1071,7 @@ import { AutoSelector, ProjectProbe } from 'ts-openapi-codegen';
 - Config `plugins` (строка или `{ path, name?, config? }`)
 - CLI: `generate --plugins` / `analyze-diff --plugins`
 - Builtin `x-typescript-type`; отключение через `disableBuiltinPlugins`
-- **Plugin API v3 factory не shipped**
+- Plugin factory API (`apiVersion: '3'`): `{ meta, createPlugin }` или функция с `.meta` — [Плагины](plugins.md#plugin-factory-api-apiversion-3)
 
 ## Plugin API v2 (RFC)
 

@@ -39,7 +39,7 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 
 **Все доступные опции:**
 
-> **Примечание:** Каждый флаг CLI может быть также установлен в конфиге `openapi.config.json`. Флаги CLI переопределяют значения из конфига.
+> **Примечание:** Каждый флаг CLI может быть также установлен в конфиге `openapi.config.json`. Флаги CLI переопределяют значения из конфига. Исключение: `--plugins` **мержится** с config `plugins` (сначала конфиг, дедуп по path). В multi-item конфиге `items[]` может переопределить `interfacePrefix`, `enumPrefix`, `typePrefix`, `useCancelableRequest`, `sortByRequired`, `useSeparatedIndexes`, `miracles` и `plugins`.
 
 | Опция | Короткая | Тип | По умолчанию | Описание |
 |-------|----------|-----|--------------|----------|
@@ -77,18 +77,20 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 | `--prettierConfigPath` | - | string | - | Путь к файлу конфигурации Prettier; если файл существует, сгенерированный код форматируется по нему, иначе используются встроенные настройки |
 | `--tsconfigPath` | - | string | - | Путь к `tsconfig.json` для пакетного ESLint `--fix` после генерации (нужен `--eslintConfigPath`) |
 | `--eslintConfigPath` | - | string | - | Путь к конфигу ESLint для пакетного `--fix` после генерации (нужен `--tsconfigPath`) |
+| `--plugins` | - | `string[]` | — | Пути к модулям плагинов; мержатся с config `plugins` (сначала конфиг, дедуп по path) |
+| `--strict-plugin-mode` | - | boolean | `false` | Fail при throw в `resolveSchemaTypeOverride` (по умолчанию: warn и продолжение; ошибки load/`configure` всегда fatal). Конфиг: `strictPluginMode` |
 | `--cache` | - | boolean | `false` | Включить кэш генерации (по умолчанию кэш выключен) |
 | `--cachePath` | - | string | `.openapi-codegen-store` | Путь к store кэша (относительно output для `entity`; корень global store для `reuse`) |
 | `--cacheStrategy` | - | string | из конфига | Стратегия кэша: `entity`, `reuse` или `content` (без флага сохраняется значение из конфига) |
 | `--reuseOnConflict` | - | string | из конфига | Политика конфликтов reuse store: `fail` или `namespace` (при `cacheStrategy: "reuse"`) |
-| `--cacheDebug` | - | boolean | `false` | Показывать debug-логи cache hit/miss |
+| `--cacheDebug` | - | boolean | `false` | Показывать debug-логи cache hit/miss; в отчёте генерации — `entitySkipped` и при `cacheStrategy: reuse` тайминги `phases.gcMs` / `phases.manifestSaveMs` после GC/save ReuseStore |
 | `--auto-select` | - | boolean \| object | `false` | Проектно-зависимый выбор HTTP-клиента и библиотеки валидации (*preview*) |
 | `--spec-analysis` | - | boolean \| object | `false` | Анализ качества OpenAPI spec во время генерации (*preview*) |
 | `--anomaly-detection` | - | boolean \| object | `false` | Устаревший alias для `--spec-analysis` |
 | `--workspace-report` | - | boolean \| object | `false` | Multi-spec сводка workspace после generate (*preview*; `path`, `format`: `json` \| `markdown` \| `both`) |
 | `--traffic-splitter` | - | boolean \| object | `false` | Пишет helper `TrafficSplitter.ts` в output первого item (*preview*; без live traffic) |
 | `--swarm` | - | boolean \| object | `false` | Пишет только Swarm-манифест (*preview*; top-level `swarm` / `heal` / `migrate` удалены) |
-| `--pre-analyze` | - | boolean | `false` | Cross-spec анализ в stdout до записи файлов (*preview*; non-blocking) |
+| `--pre-analyze` | - | boolean | `false` | Cross-spec анализ в stdout до записи файлов (*preview*; non-blocking). Entity-cached specs пропускаются; если все items в кэше: `[preAnalyze] Skipped — all items entity-cached` |
 | `--reuse-mode` | - | string | `copy` | Layout reuse: `copy` \| `auto-group` (*preview*; для `auto-group` нужен `cacheStrategy: "reuse"`) |
 
 **Marauder preview flags (dot-notation):** `--auto-select`, `--auto-select.strict`, `--spec-analysis.fail-on-high`, `--workspace-report.format`, `--traffic-splitter.strategy`, `--swarm.output`, `--pre-analyze`, `--reuse-mode`, inline JSON (`--auto-select='{"strict":true}'`). Обрабатываются до Commander; см. [Marauder preview features](features.md#marauder-preview-features).
@@ -206,12 +208,13 @@ openapi-codegen-cli analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 - `--git` - Git ref для чтения предыдущей версии спецификации (например, `HEAD~1`)
 - `--output-report` - Путь для сохранения diff‑отчёта (по умолчанию: `./.openapi-codegen-reports/openapi-diff-report.json`)
 - `--openapi-config` / `-ocn` - Путь к файлу конфигурации (по умолчанию: `openapi.config.json`); v2-хуки плагинов читают `plugins` из этого файла
+- `--plugins` - Пути к модулям плагинов; merge с config `plugins` (сначала конфиг, дедуп по path)
 - `--governance-config` - Путь к JSON-файлу правил governance
 - `--strict-plugin-mode` - Завершать с ошибкой при throw в hook (`analyze-diff`) или в `resolveSchemaTypeOverride` (`generate`; по умолчанию: лог и продолжение)
 - `--ci` - Код выхода 1 при ошибках governance
 - `--allow-breaking` - Разрешить breaking changes в проверках governance
 
-**Хуки плагинов (v2):** укажите пути к модулям в `plugins` внутри `openapi.config.json` или передайте `--plugins` для `analyze-diff` / `generate`. См. [Плагины](plugins.md) и [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
+**Хуки плагинов (v2):** `plugins` в `openapi.config.json` — строки или `{ path, name?, config? }`. Непустой `config` уходит в optional `configure(config)` при load для `generate` и `analyze-diff`. CLI `--plugins` мержится с конфигом (сначала конфиг). См. [Плагины](plugins.md) и [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
 
 #### Miracles и подтверждение
 

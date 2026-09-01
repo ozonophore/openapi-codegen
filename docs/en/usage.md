@@ -32,7 +32,7 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 > **How to read this table:**
 > - **Required vs Optional:** Options without a default value are required. Others are optional and inherit defaults from `openapi.config.json` if not overridden.
 > - **Global vs Command-specific:** Global options (like `--openapi-config`) apply to most commands. Command-specific options (like `--httpClient`, `--cache`) apply only to `generate`.
-> - **Config file relationship:** Most CLI flags map directly to configuration file keys: `--httpClient fetch` on CLI equals `"httpClient": "fetch"` in config. When both are set, CLI flags take precedence.
+> - **Config file relationship:** Most CLI flags map directly to configuration file keys: `--httpClient fetch` on CLI equals `"httpClient": "fetch"` in config. When both are set, CLI flags take precedence. Exception: `--plugins` **merges** with config `plugins` (config first, path dedupe). In multi-item configs, `items[]` may override `interfacePrefix`, `enumPrefix`, `typePrefix`, `useCancelableRequest`, `sortByRequired`, `useSeparatedIndexes`, `miracles`, and `plugins`.
 > - **Preview flags:** Marauder preview flags (like `--auto-select`, `--spec-analysis`, `--workspace-report`, `--traffic-splitter`, `--swarm`) use dot-notation for sub-options (e.g., `--auto-select.strict`, `--workspace-report.format`) or inline JSON (e.g., `--auto-select='{"strict":true}'`). Scalars: `--pre-analyze`, `--reuse-mode`.
 
 | Option | Short | Type | Default | Description |
@@ -76,13 +76,15 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 | `--prettierConfigPath` | - | string | - | Path to a Prettier config file; when the file exists, generated code is formatted with it, otherwise built-in defaults are used |
 | `--tsconfigPath` | - | string | - | Path to project `tsconfig.json` for batch ESLint `--fix` after generation (requires `--eslintConfigPath`) |
 | `--eslintConfigPath` | - | string | - | Path to project ESLint config for batch ESLint `--fix` after generation (requires `--tsconfigPath`) |
+| `--plugins` | - | `string[]` | — | Generator plugin module paths; merged with config `plugins` (config first, path dedupe) |
+| `--strict-plugin-mode` | - | boolean | `false` | Fail when `resolveSchemaTypeOverride` throws (default: warn and continue; load/`configure` errors always fatal). Config: `strictPluginMode` |
 | `--cache` | - | boolean | `false` | Enable generation cache (disabled by default) |
 | | | | | **When to use:** Enable on slow CI systems to skip regeneration of unchanged specs. Use `entity` strategy for multi-spec projects or `reuse` for shared model caching. Adds disk overhead; profile before enabling in frequent local dev. |
 | `--cachePath` | - | string | `.openapi-codegen-store` | Cache store path (relative to output for `entity`; global store root for `reuse`) |
 | `--cacheStrategy` | - | string | from config | Cache strategy: `entity`, `reuse`, or `content` (omit flag to keep config value) |
 | | | | | **Strategy selection:** Use `entity` for per-spec caching (fast, isolated). Use `reuse` when sharing models across multiple specs (requires conflict resolution via `--reuseOnConflict`). Use `content` for minimal caching (content-hash based). |
 | `--reuseOnConflict` | - | string | from config | Reuse store conflict policy: `fail` or `namespace` (when `cacheStrategy` is `reuse`) |
-| `--cacheDebug` | - | boolean | `false` | Show cache hit/miss debug logs |
+| `--cacheDebug` | - | boolean | `false` | Show cache hit/miss debug logs; generation report includes `entitySkipped` and, with `cacheStrategy: reuse`, `phases.gcMs` / `phases.manifestSaveMs` after ReuseStore GC/save |
 | `--auto-select` | - | boolean \| object | `false` | Project-aware HTTP client and validation library selection (*preview*) |
 | | | | | **Marauder auto-select (preview):** Automatically detects your project's dependencies (package.json, imports) and selects compatible `--httpClient` and `--validationLibrary`. Use `--auto-select.strict` to fail if no match. See [Marauder preview features](features.md#marauder-preview-features). |
 | `--spec-analysis` | - | boolean \| object | `false` | OpenAPI spec quality analysis during generation (*preview*) |
@@ -94,7 +96,7 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 | | | | | Dot-notation: `--traffic-splitter.strategy`, weights, sticky sessions, headers. |
 | `--swarm` | - | boolean \| object | `false` | Write Avatar Swarm **manifest** only (*preview*; top-level `swarm` command stays removed) |
 | | | | | Dot-notation: `--swarm.output` (default `./swarm-manifest.json`). |
-| `--pre-analyze` | - | boolean | `false` | Cross-spec stdout analysis before writing files (*preview*) |
+| `--pre-analyze` | - | boolean | `false` | Cross-spec stdout analysis before writing files (*preview*). Entity-cached items are skipped; if every item is cached: `[preAnalyze] Skipped — all items entity-cached` |
 | `--reuse-mode` | - | string | from config | Reuse layout when `cacheStrategy` is `reuse`: `copy` \| `auto-group` (*preview*) |
 
 **Marauder preview flags (dot-notation):** `--auto-select`, `--auto-select.strict`, `--spec-analysis.fail-on-high`, `--workspace-report.format`, `--traffic-splitter.strategy`, `--swarm.output`, inline JSON (`--auto-select='{"strict":true}'`), plus `--pre-analyze` and `--reuse-mode`. Parsed before Commander; see [Marauder preview features](features.md#marauder-preview-features).
@@ -212,12 +214,13 @@ openapi-codegen-cli analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 - `--git` - Git ref to read previous specification version from (e.g. `HEAD~1`)
 - `--output-report` - Path to save JSON diff report (default: `./.openapi-codegen-reports/openapi-diff-report.json`)
 - `--openapi-config` / `-ocn` - Path to configuration file (default: `openapi.config.json`); v2 plugin hooks load `plugins` from this file
+- `--plugins` - Plugin module paths; merged with config `plugins` (config first, path dedupe)
 - `--governance-config` - Path to governance rules JSON config file
 - `--strict-plugin-mode` - Fail when a plugin hook throws on `analyze-diff`, or when `resolveSchemaTypeOverride` throws on `generate` (default: log and continue)
 - `--ci` - Exit with code 1 when governance errors are found
 - `--allow-breaking` - Allow breaking changes in governance checks
 
-**Plugin hooks (v2):** register plugin module paths in `plugins` inside `openapi.config.json`, or pass `--plugins` on `analyze-diff` / `generate`. See [Plugins](plugins.md) and [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
+**Plugin hooks (v2):** `plugins` in `openapi.config.json` may be strings or `{ path, name?, config? }`. Non-empty `config` is passed to optional `configure(config)` on load for both `generate` and `analyze-diff`. CLI `--plugins` merges with config (config first). See [Plugins](plugins.md) and [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
 
 #### Miracles and confirmation
 

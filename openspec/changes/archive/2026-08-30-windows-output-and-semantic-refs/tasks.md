@@ -32,7 +32,7 @@
 - [x] 6.1 В expand заменить `resolveHelper` на local slash-join (`path.posix` после свёртки слешей). Не `path.resolve`, не `pathToFileURL`, intern не расширять
 - [x] 6.2 `isUrlLike` MUST NOT считать букву диска (`D:`) схемой URL — иначе склейка на Windows не выполняется
 - [x] 6.3 Юнит-тесты expand (`/tmp` + intern `\tmp\...` + parent `D:/…`) проходят на Windows
-- [ ] 6.4 Gate: оба снапшота `v3.withDifferentRefs` на Windows CI без ложного +1 breaking. Если +1 остаётся — не архивировать, не расширять intern
+- [x] 6.4 Gate: оба снапшота `v3.withDifferentRefs` на Windows CI без ложного +1 breaking. Если +1 остаётся — не архивировать, не расширять intern
 
 ## 7. Единая склейка файла после парсера
 

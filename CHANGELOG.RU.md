@@ -4,6 +4,38 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.1.0-beta.16] — 2026-08-30
+
+Хук плагина `configure()`, исправления Canonical Ref / `$ref` и фильтрации non-schema registries, hardening reuse/entity-skip и per-item опции в multi-item конфиге.
+
+### Добавлено
+
+- Опциональный хук плагина `configure(config)`: непустой `plugins[].config` передаётся при загрузке плагинов в `generate` и `preAnalyze`. Документация: `docs/ru/plugins.md`.
+- **Plugin factory API** (`apiVersion: '3'`): `{ meta, createPlugin }` или функция с `.meta`; `PluginApi` регистрирует хуки (и `onConfigure`) не больше одного раза. Плоский `{ name, apiVersion: '3' }` не загружается. См. `docs/ru/plugins.md`.
+- **Legacy wrap:** после загрузки объекты v1/v2 получают runtime `apiVersion: '3'` (тот же инстанс). Builtin `x-typescript-type` — factory-плагин.
+
+### Исправлено
+
+- **Lookup `$ref` / Canonical Ref**: Tree `$ref` через URI-склейку и intern-ключи SwaggerParser вместо `path.resolve` — пути с буквой диска (`C:/…`) и расхождения слешей/кодирования при резолве на не-Windows хостах.
+- **`getModels` / reuse schema map**: пропуск non-schema component registries (`requestBodies`, `responses`, `parameters`, `headers` и т.д.) — имена вроде `SimpleRequestBody` больше не эмитятся как пустые model/schema файлы.
+- `analyze-diff` передаёт полные plugin entries, `configure()` получает config из `openapi.config.json` (паритет с `generate`).
+- Multi-item конфиги учитывают per-item `interfacePrefix`, `enumPrefix`, `typePrefix`, `useCancelableRequest`, `sortByRequired`, `useSeparatedIndexes` (раньше всегда root).
+- **`cacheStrategy: reuse`**: entity skip не срабатывает, если артефакты ReuseStore не проходят `contentHash` — spec item полностью перегенерируется, store-артефакт перезаписывается. Кэш больше не теряет `inputPath` при включённой validation library; reuse hit обновляет файлы, если содержимое отличается при том же размере в байтах.
+- **ReuseStore GC / полный entity-cache skip**: GC не удаляет артефакты, на которые ссылаются entity-cache-skipped спеки. При полном skip не пересобираются индексы и не запускается batch ESLint; `preAnalyze` пропускает такие спеки. В статистике спек отчёта — `entitySkipped`; `cacheDebug`: `phases.gcMs` / `phases.manifestSaveMs` пишутся после GC/save ReuseStore.
+
+### Изменено
+
+- Отпечаток entity skip v3 затем v4 (`optionsAffectingHash`): после обновления возможен один полный warm-прогон сущностей; reuse-артефакты валидны. Reuse skip для всех `modelsMode`/`modelsLayout` при совпадении fingerprint + файлов + записи в Reuse manifest. Нет записи в манифесте → полная генерация. Поля OptionsSlice (плагины, prettier, prefixes, models) инвалидируют entity-кэш.
+- `miracles` можно переопределять per item в multi-item конфиге.
+- Программный API: невалидные generation options бросают `Error` вместо `process.exit(1)`.
+
+### Breaking Changes
+
+- После регенерации могут исчезнуть models/schemas, которые шли только из non-schema component registries; обновите импорты (например `SimpleRequestBody`). Нужные типы кладите в `components.schemas`.
+- Программный `Context`: удалены `resolveCanonicalRef()` / `getVirtualFiles()`; используйте `toCanonicalRef($ref, parentSourceFile?)` и `context.map.resolve()`. Публичный export: `normalizePathsToAbsolute()`.
+- Path-поля в resolved options нормализуются в абсолютные до генерации.
+- Плагин-файл с плоским объектом `apiVersion: '3'` больше не загружается (нужен Plugin factory API). У загруженных v1/v2 инстансов runtime `apiVersion: '3'`.
+
 ## [2.1.0-beta.15] — 2026-08-01
 
 ### Добавлено

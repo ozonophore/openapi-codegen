@@ -99,6 +99,8 @@
 }
 ```
 
+`items[]` может переопределить (root — fallback): `interfacePrefix`, `enumPrefix`, `typePrefix`, `useCancelableRequest`, `sortByRequired`, `useSeparatedIndexes`, `modelsMode`, `modelsLayout`, `miracles`, `plugins`, `strictPluginMode`, `disableBuiltinPlugins`. Ключи кэша (`cache`, `cachePath`, `cacheStrategy`, `cacheDebug`, `reuseOnConflict`) — только root.
+
 ---
 
 ### Уровень 1 — Базовые
@@ -141,15 +143,15 @@
 
 | Имя | Тип | По умолчанию | Описание |
 |-----|-----|--------------|----------|
-| `interfacePrefix` | string | `I` | Префикс для интерфейсов моделей |
-| `enumPrefix` | string | `E` | Префикс для enum моделей |
-| `typePrefix` | string | `T` | Префикс для type моделей |
+| `interfacePrefix` | string | `I` | Префикс для интерфейсов моделей (root или per `items[]`) |
+| `enumPrefix` | string | `E` | Префикс для enum моделей (root или per `items[]`) |
+| `typePrefix` | string | `T` | Префикс для type моделей (root или per `items[]`) |
 | `modelsMode` | string | `interfaces` | Режим генерации моделей: `interfaces` или `classes` |
 | `modelsLayout` | string | `bundle` | Раскладка файлов для `classes`: `bundle` (один `models.ts`) или `per-file` (один Raw+Dto на `model.path`). Nested: `models.layout` |
 | `validationLibrary` | string | `none` | Библиотека валидации: `none`, `zod`, `joi`, `yup`, или `jsonschema` |
 | `emptySchemaStrategy` | string | `keep` | Стратегия для пустых схем: `keep`, `semantic`, или `skip` |
-| `useCancelableRequest` | boolean | `false` | Использовать отменяемый promise как тип возврата |
-| `sortByRequired` | boolean | `false` | Расширенная стратегия сортировки для аргументов |
+| `useCancelableRequest` | boolean | `false` | Использовать отменяемый promise как тип возврата (root или per `items[]`) |
+| `sortByRequired` | boolean | `false` | Расширенная стратегия сортировки для аргументов (root или per `items[]`) |
 | `prettierConfigPath` | string | — | Путь к файлу конфигурации Prettier для форматирования сгенерированного кода |
 | `tsconfigPath` | string | — | Путь к `tsconfig.json` для пакетного ESLint fix (вместе с `eslintConfigPath`) |
 | `eslintConfigPath` | string | — | Путь к конфигу ESLint для пакетного ESLint fix (вместе с `tsconfigPath`) |
@@ -169,8 +171,10 @@
 | `useHistory` | boolean | `false` | Применять diff-отчёт при генерации |
 | `diffReport` | string | `./.openapi-codegen-reports/openapi-diff-report.json` | Путь к diff-отчёту |
 | `analyze` | object | — | Секция анализа (reportPath, useHistory, ignore) |
-| `miracles` | object | — | Фильтр miracles при generate: `enabled`, порог `confidence`, allowlist `types` (`RENAME`, `TYPE_COERCION`). Без блока — default: `confirmed` или `confidence === 1` |
-| `plugins` | string[] | `[]` | Пути к плагинам генератора |
+| `miracles` | object | — | Фильтр miracles при generate (`enabled`, `confidence`, `types`); root или per `items[]`. Без блока — default: `confirmed` или `confidence === 1` |
+| `plugins` | `string \| { path, name?, config? }[]` | `[]` | Плагины генератора (string paths валидны). Непустой `config` уходит в optional `configure(config)` на `generate` / `preAnalyze` / `analyze-diff` |
+| `strictPluginMode` | boolean | `false` | Fail при throw в `resolveSchemaTypeOverride` (root или per `items[]`) |
+| `disableBuiltinPlugins` | boolean | `false` | Отключить builtin `x-typescript-type` (root или per `items[]`) |
 
 ---
 
@@ -185,6 +189,8 @@
 | `cacheStrategy` | string | `reuse` (актуальная схема); `entity` после миграции конфигурации | Стратегия кэша: `entity`, `reuse` или `content` |
 | `reuseOnConflict` | string | `fail` | Политика конфликтов reuse store: `fail` или `namespace` |
 | `cacheDebug` | boolean | `false` | Показывать debug-логи cache hit/miss |
+
+`reuse` также использует entity skip (отпечаток **v4**). После обновления возможен один полный warm-прогон сущностей; reuse-артефакты валидны. Смена plugins / prettier / prefixes / models options инвалидирует skip. Skip не срабатывает, если ReuseStore не проходит `contentHash`. Entity skip при `reuse` работает для всех `modelsMode`/`modelsLayout` при совпадении fingerprint + файлов + записи в Reuse manifest.
 
 ---
 
@@ -225,7 +231,9 @@ Opt-in возможности, добавленные в актуальную с
 
 Плагины генератора позволяют переопределять маппинг типов схем (например через `x-typescript-type`) и расширять поведение генерации.
 
-- Ключ конфигурации: `plugins` (массив путей к модулям)
+- Ключ конфигурации: `plugins` — `string | { path, name?, config? }[]` (string paths валидны)
+- Непустой `config` передаётся в optional `configure(config)` при load (`generate`, `preAnalyze`, `analyze-diff`)
+- Также: `disableBuiltinPlugins`, `strictPluginMode` (root и `items[]`)
 - Поддерживаемые форматы модулей: CJS, ESM и TS (если рантайм поддерживает импорт TS)
 - Подробное руководство: [Плагины](plugins.md)
 - Короткие якоря: [features.md#plugin-system](features.md#plugin-system), [Plugin API v2](features.md#plugin-api-v2-rfc)

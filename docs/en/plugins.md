@@ -88,6 +88,39 @@ module.exports = {
 
 A throw inside `configure` fails plugin loading (same as a bad plugin file) on **generate**, **preAnalyze**, and **analyze-diff**.
 
+## Plugin factory API (`apiVersion: '3'`)
+
+Register hooks through `PluginApi` instead of exporting a flat object. Wire version is `apiVersion: '3'` on `meta` only — a flat `{ name, apiVersion: '3', … }` object is a load error.
+
+Module shape:
+
+```js
+module.exports = {
+  meta: { name: 'factory-type', apiVersion: '3' },
+  createPlugin(api) {
+    api.onConfigure(config => {
+      /* optional; called only when plugins[].config is non-empty */
+    });
+    api.onSchemaTypeOverride(({ schema }, runtime) => {
+      if (runtime.executionMode !== 'generate') {
+        return undefined;
+      }
+      return schema['x-custom-type'];
+    });
+    api.onAfterSemanticDiff((ctx, runtime) => {
+      /* analyze-diff; runtime.executionMode === 'analyze-diff' */
+      return ctx.report;
+    });
+  },
+};
+```
+
+Equivalent: a function export with `.meta` (`createPlugin.meta = { name, apiVersion: '3' }`). Each `on*` (including `onConfigure`) may be called at most once.
+
+`preAnalyze` uses the same override path as `generate` (`executionMode: 'generate'`). v1/v2 object plugins still work as **author** exports; after load they are wrapped in place to runtime `apiVersion: '3'` (same object, hooks keep `this`). They may ignore the second hook argument.
+
+Built-in `x-typescript-type` is a Plugin factory API plugin (`apiVersion: '3'`).
+
 ## CLI
 
 ```bash
@@ -115,7 +148,6 @@ import { loadGeneratorPlugins, applySemanticDiffPluginHooks, mergePluginPaths } 
 ## Limitations
 
 - `resolveSchemaTypeOverride` is invoked only on the `definition.type` branch in `getModel` (object/enum/$ref-only / typeless schemas may skip plugins).
-- **Plugin API v3 factory is not shipped** (deferred; do not rely on `apiVersion: '3'`).
 
 ## See also
 

@@ -83,6 +83,37 @@ module.exports = {
 
 Throw внутри `configure` валит загрузку плагина (как битый файл) на **generate**, **preAnalyze** и **analyze-diff**.
 
+## Plugin factory API (`apiVersion: '3'`)
+
+Хуки регистрируются через `PluginApi`, а не плоским объектом. `apiVersion: '3'` только в `meta`. Плоский `{ name, apiVersion: '3', … }` — ошибка загрузки.
+
+```js
+module.exports = {
+  meta: { name: 'factory-type', apiVersion: '3' },
+  createPlugin(api) {
+    api.onConfigure(config => {
+      /* опционально; вызывается только если plugins[].config непустой */
+    });
+    api.onSchemaTypeOverride(({ schema }, runtime) => {
+      if (runtime.executionMode !== 'generate') {
+        return undefined;
+      }
+      return schema['x-custom-type'];
+    });
+    api.onAfterSemanticDiff((ctx, runtime) => {
+      /* analyze-diff; runtime.executionMode === 'analyze-diff' */
+      return ctx.report;
+    });
+  },
+};
+```
+
+Эквивалент: функция с `.meta` (`createPlugin.meta = { name, apiVersion: '3' }`). Каждый `on*` (включая `onConfigure`) — не больше одного раза.
+
+`preAnalyze` использует тот же override, что и `generate` (`executionMode: 'generate'`). Объекты v1/v2 по-прежнему валидный **авторский** export; после загрузки они in-place получают runtime `apiVersion: '3'` (тот же объект, хуки сохраняют `this`). Второй аргумент хука можно игнорировать.
+
+Builtin `x-typescript-type` — плагин Plugin factory API (`apiVersion: '3'`).
+
 ## CLI
 
 ```bash
@@ -109,7 +140,6 @@ import { loadGeneratorPlugins, applySemanticDiffPluginHooks, mergePluginPaths } 
 ## Ограничения
 
 - `resolveSchemaTypeOverride` вызывается только на ветке `definition.type` в `getModel`.
-- **Plugin API v3 factory не shipped** (отложено; не полагайтесь на `apiVersion: '3'`).
 
 ## См. также
 
