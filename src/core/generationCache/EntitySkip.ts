@@ -78,6 +78,7 @@ export async function shouldEntitySkip(params: {
         reuseStore,
         specInput: getSpecItemName(item.input),
         filesExist,
+        historyBound: item.useHistory === true,
     });
 }
 
@@ -91,8 +92,13 @@ export async function resolveEntitySkipCandidate(params: {
     reuseStore: ReuseStore | null;
     specInput: string;
     filesExist: (paths: string[]) => Promise<boolean>;
+    historyBound?: boolean;
 }): Promise<boolean> {
-    const { useEntityCache, generationCache, cacheKey, cacheFingerprint, useReuseStore, reuseStore, specInput, filesExist } = params;
+    const { useEntityCache, generationCache, cacheKey, cacheFingerprint, useReuseStore, reuseStore, specInput, filesExist, historyBound } = params;
+
+    if (historyBound) {
+        return false;
+    }
 
     if (!useEntityCache || !generationCache) {
         return false;

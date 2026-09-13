@@ -168,6 +168,7 @@ export async function writeClientArtifacts(
             services: client.services,
             templates,
             request,
+            customExecutorPath,
             prettierConfigPath,
         });
     }

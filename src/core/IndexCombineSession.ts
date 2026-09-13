@@ -14,7 +14,7 @@ import type { Client } from './types/shared/Client.model';
 import type { Model } from './types/shared/Model.model';
 import { prepareAlias } from './utils/prepareAlias';
 import { sortModelByName } from './utils/sortModelByName';
-import { unique } from './utils/unique';
+import { uniqueByKey } from './utils/unique';
 import { writeClientFullIndex } from './write/writeClientFullIndex';
 import { writeClientSimpleIndex } from './write/writeClientSimpleIndex';
 
@@ -170,9 +170,9 @@ export class IndexCombineSession {
 
     private async finalizeAndWrite(result: Map<string, ClientArtifacts>, adapter: CoreOutputAdapter): Promise<void> {
         for (const value of result.values()) {
-            value.models = value.models.filter(unique).sort(sortModelByName);
+            value.models = uniqueByKey(value.models, model => `${model.path}\0${model.name}`).sort(sortModelByName);
             prepareAlias(value.models);
-            value.schemas = value.schemas.filter(unique).sort(sortModelByName);
+            value.schemas = uniqueByKey(value.schemas, model => `${model.path}\0${model.name}`).sort(sortModelByName);
             prepareAlias(value.schemas);
             await writeClientFullIndex(adapter, value);
         }

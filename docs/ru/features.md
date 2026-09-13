@@ -452,8 +452,9 @@ await service.getCallWithoutParametersAndResponse({ timeout: 5000 });
 
 #### Использование сгенерированного `createClient` с `customExecutorPath` и `executorFactory`
 
-Если в конфигурации генерации задан `customExecutorPath`, в `createClient.ts` будет импортирован ваш
-пользовательский `createExecutorAdapter`, и он станет базовым executor по умолчанию.
+Если в конфигурации генерации задан `customExecutorPath`, этот модуль **копируется в сгенерированный
+клиент в момент generate**, и `createClient.ts` использует копию как executor по умолчанию. Исходный
+путь в runtime не импортируется.
 
 Дополнительно в runtime можно передать `executorFactory`, чтобы обернуть/расширить этот базовый executor
 (retry, tracing, metrics и т.д.) без изменения сгенерированных сервисов.
@@ -970,9 +971,9 @@ openapi-codegen-cli generate -ocn openapi.config.json --workspace-report.format=
 
 ### 5. `generate --traffic-splitter`
 
-**Какую проблему решает:** Нужен canary/routing helper между двумя клиентами без live cutover.
+**Какую проблему решает:** Preview-хелпер маршрутизации между двумя клиентами без live cutover.
 
-Root-only. Пишет автономный `TrafficSplitter.ts` в output **первого** item (без внешних import). Стратегии: `weighted` | `round-robin` | `header-based` | `header-and-weighted`. **Не** переключает live traffic и не деплоит клиенты. При multi-item — предупреждение; файл всё равно генерируется.
+Root-only. Пишет автономный `TrafficSplitter.ts` в output **первого** item (без внешних import). Стратегии: `weighted` | `round-robin` | `header-based` | `header-and-weighted`. Weighted считает только `newClientWeight` (0–100); пара old/new весов — не рабочий сплит 80/20. **Не** переключает live traffic. При multi-item — предупреждение; файл всё равно генерируется.
 
 ```bash
 openapi-codegen-cli generate -ocn openapi.config.json --traffic-splitter
@@ -1073,6 +1074,6 @@ import { AutoSelector, ProjectProbe } from 'ts-openapi-codegen';
 - Builtin `x-typescript-type`; отключение через `disableBuiltinPlugins`
 - Plugin factory API (`apiVersion: '3'`): `{ meta, createPlugin }` или функция с `.meta` — [Плагины](plugins.md#plugin-factory-api-apiversion-3)
 
-## Plugin API v2 (RFC)
+## Хуки плагинов (v2)
 
-Хуки semantic-diff для `analyze-diff`: `afterSemanticDiff`, `mapRecommendation`, `beforeReportWrite`. Подробности: [Плагины — API v2](plugins.md#plugin-api-v2-analyze-diff).
+Хуки semantic-diff для `analyze-diff`: `afterSemanticDiff`, `mapRecommendation`, `beforeReportWrite`. Подробности: [Плагины — API v2](plugins.md#plugin-api-v2-analyze-diff). Авторский контракт — Plugin factory API; файлы v1/v2 остаются валидными. См. [Плагины](plugins.md).

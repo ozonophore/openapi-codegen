@@ -1,3 +1,4 @@
+import { lookupAndFollow } from '../../../follow/lookupAndFollow';
 import type { Operation } from '../../../types/shared/Operation.model';
 import type { OperationParameters } from '../../../types/shared/OperationParameters.model';
 import { toParentSourceFile } from '../../../utils/canonicalRef';
@@ -12,7 +13,6 @@ import { sortByRequiredSimple } from '../../../utils/sortByRequiredSimple';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import type { OpenApiOperation } from '../types/OpenApiOperation.model';
-import type { OpenApiRequestBody } from '../types/OpenApiRequestBody.model';
 
 export function getOperation(
     this: Parser,
@@ -66,8 +66,9 @@ export function getOperation(
 
     if (op.requestBody) {
         const sortByRequired = this.context.sortByRequired ? sortByRequiredExtended : sortByRequiredSimple;
-        const requestBodyDef = (op.requestBody.$ref ? this.context.get(op.requestBody.$ref, toParentSourceFile(parentFileRef)) : op.requestBody) as OpenApiRequestBody;
-        const requestBody = this.getOperationRequestBody(openApi, requestBodyDef, parentFileRef);
+        const parentSourceFile = toParentSourceFile(parentFileRef) || '';
+        const { value: requestBodyDef, parent: requestBodyParent } = lookupAndFollow(this.context, op.requestBody, parentSourceFile);
+        const requestBody = this.getOperationRequestBody(openApi, requestBodyDef, requestBodyParent);
         operation.imports.push(...requestBody.imports);
         operation.parameters.push(requestBody);
         operation.parameters = operation.parameters.sort(sortByRequired);

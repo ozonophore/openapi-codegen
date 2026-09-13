@@ -103,7 +103,10 @@ export async function writeClientCore(adapter: CoreOutputAdapter, options: IWrit
     await writeCore('HttpStatusCode.ts', templates.core.httpStatusCode({}));
     await writeCore('request.ts', hasCustomRequest && customRequestContent !== undefined ? customRequestContent : templates.core.request(context));
     await writeCore('executor/requestExecutor.ts', templates.core.requestExecutor({ useCancelableRequest }));
-    await writeCore('executor/createExecutorAdapter.ts', hasCustomExecutor && customExecutorContent !== undefined ? customExecutorContent : templates.core.createExecutorAdapter({}));
+    await writeCore(
+        'executor/createExecutorAdapter.ts',
+        hasCustomExecutor && customExecutorContent !== undefined ? customExecutorContent : templates.core.createExecutorAdapter({ omitRequestRaw: hasCustomRequest && !useCustomRequestRaw })
+    );
     await writeCore('executor/legacyRequestAdapter.ts', templates.core.legacyRequestAdapter({ useCustomRequestRaw }));
     await writeCore('interceptors/interceptors.ts', templates.core.interceptors({}));
     await writeCore('interceptors/apiErrorInterceptor.ts', templates.core.apiErrorInterceptor({}));

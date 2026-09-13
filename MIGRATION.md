@@ -1,14 +1,72 @@
-# Migration Guide: 1.0.0 -> 2.1.0
+# Migration Guide: 2.0.0 -> 2.1.0
 
-This guide describes how to migrate from `1.0.0` to `2.1.0` based on the repository diff.
+This is the **Upgrade page** for `2.0.0` → `2.1.0`: what to do on upgrade, not a changelog. The timeline of when each item landed is in `CHANGELOG.md`.
 
-## Scope
+Coming from `1.0.0`? The notes below the Contract changes section still apply (validation library, empty schemas, and the rest of the 1.x jump).
 
-This migration includes:
-- CLI validation and config model changes.
-- Runtime/core architecture updates (executor/interceptors).
-- Schema generation option changes.
-- Config versioning and migration behavior updates.
+## Contract changes (2.0.0 → 2.1.0)
+
+### DiffReport 2.0
+
+`analyze-diff` writes `schemaVersion: "2.0.0"` with nested `semantic` and `structural` blocks. Confirm miracles in `structural.miracles` (`status: "confirmed"`). External parsers that read `report.changes` or root `report.miracles` must move to `report.semantic.changes` and `report.structural.miracles`. `generate --useHistory` still loads 2.0.0, 1.1.0, and legacy 1.0.0 via an adapter.
+
+### Schema Model (empty `SimpleRequestBody` etc.)
+
+Models are emitted only from schema registries (`components.schemas` / OAS2 `definitions`). Empty types from `requestBodies`, `responses`, `parameters`, and other non-schema registries are gone. That empty-shell emit was a 2.0.0 Defect; do not expect those files back. Put needed types in `components.schemas` and update imports.
+
+### Context API and absolute option paths
+
+`resolveCanonicalRef()` and `getVirtualFiles()` were removed from `Context`. Use `toCanonicalRef($ref, parentSourceFile?)` and `context.map.resolve()`. `Context` was never a package barrel export. Option paths (`input`, `output`, plugin paths, report files, …) are normalized to absolute paths internally. **`cachePath` is not in that list** — reuse store paths stay as configured (cwd-relative for the default reuse store). `normalizePathsToAbsolute()` is an internal helper, not a public package export.
+
+### Plugin factory API
+
+Author contract is Plugin factory API (`{ meta, createPlugin }` or a function with `.meta`, `apiVersion: '3'` on `meta` only). A flat `{ name, apiVersion: '3', … }` object fails to load. v1/v2 **files stay valid**; after load, the same object has runtime `apiVersion: '3'`. Do not rewrite working v1/v2 files. See [Plugins](docs/en/plugins.md).
+
+### ESLint / Prettier flags
+
+`useEslintFix` and `useProjectPrettier` are gone. Prettier: existing `prettierConfigPath`. ESLint: both root `tsconfigPath` and `eslintConfigPath`. There is no implicit search of cwd.
+
+### Default report paths
+
+Omitted report paths go under `./.openapi-codegen-reports/` (not the repo root). Explicit CLI/config paths are unchanged. Add `.openapi-codegen-reports/` and `.openapi-codegen-store/` to `.gitignore`.
+
+### `--cache` without a strategy
+
+Cache stays default-off. `generate --cache` on a new or empty config uses strategy `reuse` and writes `.openapi-codegen-store` from **cwd**, not from output. Pass `--cacheStrategy` (or set it in config). After `update-config`, older configs usually keep `entity` inside output.
+
+### Custom HTTP / slim `ApiError.request`
+
+After regen, a custom `request(RequestConfig, options)` module is no longer called with that signature. Three paths:
+
+1. Rewrite the transport to `request(ApiRequestOptions, OpenAPI)` and export `requestRaw`; keep `"request"` in config. `createClient` uses `createLegacyRequestAdapter` as the default executor.
+2. Point `customExecutorPath` at a module that exports `createExecutorAdapter` (the file is **copied at generate time**, not imported from your path at runtime). Use this for a `request(RequestConfig, options)` transport.
+3. Override with `executorFactory` if the default is wrong: `createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) })`. The helper is generated either way.
+
+`ApiError.request` is slim (`method`, `path`, `headers`, `query`, `body`). Response payload is `ApiError.body`.
+
+### One-time cache miss
+
+Opt-in cache only. Three fingerprint waves can each force one cold regen: PDTCH-185 (wider reuse hash + MD5 keys), PDTCH-191 (envelope v3), PDTCH-193 (v4 + deny skip on a corrupt store). After one successful write, hits resume. Not a permanent miss.
+
+### Canary weight (Preview)
+
+Traffic splitter is a generated helper, not live traffic. Routing uses **`newClientWeight` only** (0–100) and **`headerValues.new` only**. `oldClientWeight` and `headerValues.old` are rejected. `80` / `20` was never an 80/20 split.
+
+## Known limitations (2.1.0)
+
+These are accepted edges, not generate bugs:
+
+- Range status `2XX` maps to `200` (intended).
+- Without JSON, `getContent` may take the first media type in object order.
+- Entity skip checks that cached files **exist**, not their contents, when `useHistory` is off. Manual edits do not invalidate cache. A History-bound item (`useHistory`) never takes Entity skip.
+- Several items sharing one output: last write wins on the same relative path. `auto-group` does not turn on for a single shared folder.
+- A model output path that starts with `../` has those segments stripped so the file stays under the models folder. Two source files can then share one path (last write wins). If the path is still outside that folder after the strip, the model is skipped and not written.
+- `analyze-usage` JSON has no `schemaVersion`.
+- Marauder workspace report, traffic splitter, and swarm are **Preview**. Swarm writes a stub manifest, not a multi-service generator.
+- CLI `--plugins` is string paths only. Object `{ path, config }` lives in the config file.
+- `analyze-diff` loads root plugins + the Active item (absolute `--input` match) + CLI `--plugins`. No match → root + CLI. Several items with the same absolute input → merge those plugins and warn.
+
+## Notes that still apply (including the 1.0.0 jump)
 
 ## Breaking Changes
 
@@ -72,7 +130,7 @@ Service generation moved to `RequestExecutor`-based runtime.
 
 - `request` in config still points at your transport module (legacy `ApiRequestOptions` signature); it is copied to `core/request.ts` during generation.
 - `customExecutorPath` points at a module exporting `createExecutorAdapter`; it is copied to `core/executor/createExecutorAdapter.ts` during generation (not imported at runtime).
-- `createLegacyRequestAdapter(openApiConfig, mapOptions?)` — generated helper for projects keeping a legacy custom `request()` without rewriting to `RequestExecutor` directly. Use via `createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) })`.
+- `createLegacyRequestAdapter(openApiConfig, mapOptions?)` — generated helper for a legacy custom `request()`. `createClient` uses it as the default when `"request"` is set and `customExecutorPath` is not. Override via `executorFactory` if needed.
 - If your custom transport exports `requestRaw`, the legacy adapter delegates to it; otherwise `requestRaw` synthesizes a minimal `ApiResult` from `request()` (status 200).
 
 #### Interceptor pipeline
@@ -321,7 +379,6 @@ Example CI chain:
 ```bash
 openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml --ci
 openapi generate --openapi-config ./openapi.config.json --strict-openapi --fail-on-governance-errors
-openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --check --diff-report ./.openapi-codegen-reports/openapi-diff-report.json
 ```
 
 #### Deprecated aliases
@@ -464,7 +521,7 @@ Regenerate clients and check:
 
 If you use custom adapter module, set `customExecutorPath` (file is copied into generated core on regen).
 
-If you keep a legacy custom `request()` and do not want a full executor rewrite, regenerate and use `createLegacyRequestAdapter` via `executorFactory`, or set `"request"` in config so the default `createExecutorAdapter` maps `RequestConfig` automatically.
+If you keep a legacy custom `request()` and do not want a full executor rewrite, set `"request"` in config and regenerate — `createClient` uses `createLegacyRequestAdapter` as the default. Override with `executorFactory` if needed.
 
 Run `check-config` to surface missing `request` / `customExecutorPath` files and invalid `createExecutorAdapter` exports.
 

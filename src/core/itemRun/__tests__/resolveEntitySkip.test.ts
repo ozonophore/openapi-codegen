@@ -81,6 +81,60 @@ describe('@unit: resolveEntitySkip', () => {
         }
     });
 
+    test('returns skipped:false when useHistory is true on a warm hit', async () => {
+        mkdirSync(generatedRoot, { recursive: true });
+        tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-history-bound-'));
+        const specPath = path.join(tmpDir, 'spec.yaml');
+        writeFileSync(specPath, 'openapi: 3.0.0\ninfo: {title: t, version: 1}\npaths: {}', 'utf8');
+        const outputFile = path.join(tmpDir, 'out', 'index.ts');
+        mkdirSync(path.dirname(outputFile), { recursive: true });
+        writeFileSync(outputFile, 'export {}', 'utf8');
+
+        const item = baseItem({
+            input: specPath,
+            output: path.join(tmpDir, 'out'),
+            cache: true,
+            cacheStrategy: 'entity',
+            useHistory: true,
+        });
+        const specInput = getSpecItemName(specPath);
+        const cacheKey = buildCacheKey(item, specPath);
+        const fingerprint = await buildEntityFingerprint(item, specPath);
+
+        const cache = new GenerationCache(path.join(tmpDir, 'cache.json'));
+        cache.set({ key: cacheKey, fingerprint, files: [outputFile], updatedAt: Date.now() });
+
+        const result = await resolveEntitySkip(item, specPath, cache, null, specInput);
+        assert.deepEqual(result, { skipped: false });
+    });
+
+    test('returns skipped:true when useHistory is false on a warm hit', async () => {
+        mkdirSync(generatedRoot, { recursive: true });
+        tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-history-off-'));
+        const specPath = path.join(tmpDir, 'spec.yaml');
+        writeFileSync(specPath, 'openapi: 3.0.0\ninfo: {title: t, version: 1}\npaths: {}', 'utf8');
+        const outputFile = path.join(tmpDir, 'out', 'index.ts');
+        mkdirSync(path.dirname(outputFile), { recursive: true });
+        writeFileSync(outputFile, 'export {}', 'utf8');
+
+        const item = baseItem({
+            input: specPath,
+            output: path.join(tmpDir, 'out'),
+            cache: true,
+            cacheStrategy: 'entity',
+            useHistory: false,
+        });
+        const specInput = getSpecItemName(specPath);
+        const cacheKey = buildCacheKey(item, specPath);
+        const fingerprint = await buildEntityFingerprint(item, specPath);
+
+        const cache = new GenerationCache(path.join(tmpDir, 'cache.json'));
+        cache.set({ key: cacheKey, fingerprint, files: [outputFile], updatedAt: Date.now() });
+
+        const result = await resolveEntitySkip(item, specPath, cache, null, specInput);
+        assert.ok(result.skipped);
+    });
+
     test('cacheDebug flag is reflected in result', async () => {
         mkdirSync(generatedRoot, { recursive: true });
         tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-debug-'));

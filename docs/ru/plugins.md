@@ -143,5 +143,6 @@ import { loadGeneratorPlugins, applySemanticDiffPluginHooks, mergePluginPaths } 
 
 ## См. также
 
-- [features.md#plugin-system](features.md#plugin-system), [features.md#plugin-api-v2-rfc](features.md#plugin-api-v2-rfc)
+- [features.md#plugin-system](features.md#plugin-system), [Plugin factory API](#plugin-factory-api-apiversion-3)
+- Factory-пример: [`example/plugins/factory-type.plugin.cjs`](../../example/plugins/factory-type.plugin.cjs)
 - [Конфигурация](configuration.md) · [Использование](usage.md)

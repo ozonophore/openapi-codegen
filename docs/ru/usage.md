@@ -214,7 +214,7 @@ openapi-codegen-cli analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 - `--ci` - Код выхода 1 при ошибках governance
 - `--allow-breaking` - Разрешить breaking changes в проверках governance
 
-**Хуки плагинов (v2):** `plugins` в `openapi.config.json` — строки или `{ path, name?, config? }`. Непустой `config` уходит в optional `configure(config)` при load для `generate` и `analyze-diff`. CLI `--plugins` мержится с конфигом (сначала конфиг). См. [Плагины](plugins.md) и [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
+**Плагины:** `plugins` в `openapi.config.json` — строки или `{ path, name?, config? }`. Авторский контракт — Plugin factory API; файлы v1/v2 остаются валидными. Непустой `config` уходит в optional `configure(config)` при load для `generate` и `analyze-diff`. CLI `--plugins` — только пути (мержится с конфигом, сначала конфиг). См. [Плагины](plugins.md).
 
 #### Miracles и подтверждение
 
@@ -244,7 +244,7 @@ openapi-codegen-cli analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 
 ### Команда: `analyze-usage`
 
-> **Когда использовать:** После `generate` в CI для проверки, что приложение по-прежнему импортирует и вызывает все эндпоинты сгенерированного клиента. Используйте `--check` для завершения CI с ошибкой при несоответствиях уровня ERROR. Комбинируйте с `--diff-report` для кросс-валидации RENAME miracles.
+> **Когда использовать:** После `generate`, чтобы увидеть, как consumer использует клиент. Комбинируйте с `--diff-report` для кросс-валидации RENAME miracles. `--check` опционален: код `1` на любой finding с severity ERROR, включая ошибки TypeScript в consumer-файлах с импортом клиента — не только «рассинхрон контракта API». UNUSED — WARNING и `--check` не валит.
 
 Анализирует, как TypeScript consumer-проект использует экспорты generated API, и формирует JSON-отчёт. Импорты резолвятся **path-based** от `--sourcePath`: любой import, который через TypeScript module resolution попадает в entry-файл generated API или файл в его директории, считается API-импортом. Поддерживаются aliases вроде `@my-org/api`, если они резолвятся в этот путь.
 
@@ -259,7 +259,7 @@ openapi-codegen-cli analyze-usage --sourcePath ./src/api/index.ts --projectPath 
 - `--projectPath` / `-p` - Корневая директория consumer TypeScript-проекта (обязательно)
 - `--tsconfigPath` / `-t` - Опциональный путь к `tsconfig.json`
 - `--output` / `-o` - Путь к выходному JSON-отчету (по умолчанию: `./.openapi-codegen-reports/openapi-usage-report.json`)
-- `--check` / `-c` - CI-режим: завершает команду с кодом `1`, если найдены несоответствия уровня ERROR
+- `--check` / `-c` - Код `1`, если есть finding с severity ERROR (включая ошибки TypeScript в consumer). Только WARNING (в том числе UNUSED) команду не валят.
 - `--diff-report` - Путь к JSON `analyze-diff` для проверки RENAME miracles против кода потребителя
 
 Команда выводит сводку в консоль и сохраняет JSON-отчёт с найденными проблемами и метрикой покрытия.
@@ -283,15 +283,18 @@ openapi-codegen-cli generate \
   --governance-config ./governance.json \
   --fail-on-governance-errors
 
-# 3. Проверка consumer (опционально — cross-check RENAME miracles)
+# 3. Typecheck
+tsc --noEmit
+```
+
+Опционально (не обязательный gate): `analyze-usage --check` завершается с кодом `1` на любой ERROR, включая диагностику TypeScript в consumer-файлах с импортом клиента. UNUSED — WARNING и не валит команду.
+
+```bash
 openapi-codegen-cli analyze-usage \
   --sourcePath ./generated/index.ts \
   --projectPath . \
   --check \
   --diff-report ./.openapi-codegen-reports/openapi-diff-report.json
-
-# 4. Typecheck
-tsc --noEmit
 ```
 
 **Карта серьёзности (общая диагностика):** отсутствие `operationId` отображается как **info** в strict `issues[]` и **warning** в `governance.violations` (можно переопределить на `error` через config governance). Используй `--fail-on-governance-errors` при generate для блокирования на governance-ошибках, когда включен `--strict-openapi`.
@@ -299,6 +302,5 @@ tsc --noEmit
 Рекомендуемая минимальная цепочка после generate:
 ```bash
 openapi-codegen-cli generate --input ./openapi/spec.yaml --output ./generated
-openapi-codegen-cli analyze-usage --sourcePath ./generated/index.ts --projectPath . --check
 tsc --noEmit
 ```

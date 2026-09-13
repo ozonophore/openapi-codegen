@@ -57,6 +57,46 @@ describe('@unit: generateOptionsSchema', () => {
         assert.strictEqual(parsed.success, false);
     });
 
+    test('accepts trafficSplitter with newClientWeight and headerValues.new', () => {
+        const parsed = generateOptionsSchema.safeParse({
+            openapiConfig: './openapi.config.json',
+            trafficSplitter: {
+                enabled: true,
+                strategy: 'header-based',
+                newClientWeight: 20,
+                headerName: 'X-Version',
+                headerValues: { new: 'v2' },
+            },
+        });
+        assert.strictEqual(parsed.success, true);
+    });
+
+    test('rejects trafficSplitter.oldClientWeight', () => {
+        const parsed = generateOptionsSchema.safeParse({
+            openapiConfig: './openapi.config.json',
+            trafficSplitter: {
+                enabled: true,
+                strategy: 'weighted',
+                oldClientWeight: 80,
+                newClientWeight: 20,
+            },
+        });
+        assert.strictEqual(parsed.success, false);
+    });
+
+    test('rejects trafficSplitter.headerValues.old', () => {
+        const parsed = generateOptionsSchema.safeParse({
+            openapiConfig: './openapi.config.json',
+            trafficSplitter: {
+                enabled: true,
+                strategy: 'header-based',
+                headerName: 'X-Version',
+                headerValues: { old: 'v1', new: 'v2' },
+            },
+        });
+        assert.strictEqual(parsed.success, false);
+    });
+
     test('accepts cache-related flags with config path', () => {
         const parsed = generateOptionsSchema.safeParse({
             openapiConfig: './openapi.config.json',

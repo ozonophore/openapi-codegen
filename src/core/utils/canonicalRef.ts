@@ -41,6 +41,14 @@ export function toParentSourceFile(parent: string | undefined): string | undefin
 }
 
 /**
+ * Follow: Parent source file for nested Tree $refs after $ref lookup.
+ * Source file of the Canonical Ref, or the caller parent when that source file is empty.
+ */
+export function sourceFileAfterRef(canonicalRef: string, fallbackParent: string): string {
+    return splitCanonicalRef(canonicalRef).sourceFile || fallbackParent;
+}
+
+/**
  * Non-schema component registries (OAS3 + OAS2).
  * A Canonical Ref is a Model unless its Pointer starts with one of these.
  * Schema registry prefixes (`#/components/schemas/`, `#/definitions/`) must not appear here —

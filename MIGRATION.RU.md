@@ -1,14 +1,72 @@
-# Руководство по миграции: 1.0.0 -> 2.1.0
+# Руководство по миграции: 2.0.0 -> 2.1.0
 
-Этот документ описывает переход с `1.0.0` на `2.1.0` на основе diff изменений в репозитории.
+Это **страница апгрейда** `2.0.0` → `2.1.0`: что делать при переходе, а не changelog. Когда что село — в `CHANGELOG.RU.md`.
 
-## Область миграции
+Идёте с `1.0.0`? Заметки ниже секции Contract changes по-прежнему нужны (библиотека валидации, пустые схемы и остальной прыжок 1.x).
 
-Переход включает:
-- изменения валидации CLI и формата конфигурации;
-- изменения runtime/core архитектуры (executor/interceptors);
-- изменения параметров генерации схем;
-- обновления системы версионирования и миграции конфигов.
+## Изменения контракта (2.0.0 → 2.1.0)
+
+### DiffReport 2.0
+
+`analyze-diff` пишет `schemaVersion: "2.0.0"` с блоками `semantic` и `structural`. Чудеса подтверждайте в `structural.miracles` (`status: "confirmed"`). Внешние парсеры с `report.changes` или корневым `report.miracles` должны перейти на `report.semantic.changes` и `report.structural.miracles`. `generate --useHistory` по-прежнему читает 2.0.0, 1.1.0 и legacy 1.0.0 через адаптер.
+
+### Schema Model (пустой `SimpleRequestBody` и т.п.)
+
+Модели эмитятся только из реестров схем (`components.schemas` / OAS2 `definitions`). Пустые типы из `requestBodies`, `responses`, `parameters` и других не-schema реестров больше не создаются. Это был Defect 2.0.0; файлы не вернут. Нужные типы кладите в `components.schemas` и поправьте импорты.
+
+### Context API и абсолютные пути
+
+С `Context` сняты `resolveCanonicalRef()` и `getVirtualFiles()`. Используйте `toCanonicalRef($ref, parentSourceFile?)` и `context.map.resolve()`. `Context` из барреля пакета не экспортировался. Пути в опциях (`input`, `output`, плагины, отчёты, …) внутри нормализуются в абсолютные. **`cachePath` в этот список не входит** — путь reuse-store остаётся как в конфиге (дефолтный store — от cwd). `normalizePathsToAbsolute()` — внутренний хелпер, не публичный export пакета.
+
+### Plugin factory API
+
+Авторский контракт — Plugin factory API (`{ meta, createPlugin }` или функция с `.meta`, `apiVersion: '3'` только в `meta`). Плоский `{ name, apiVersion: '3', … }` не грузится. Файлы v1/v2 **остаются валидными**; после load у того же объекта runtime `apiVersion: '3'`. Рабочие v1/v2 не переписывайте. См. [Плагины](docs/ru/plugins.md).
+
+### Флаги ESLint / Prettier
+
+`useEslintFix` и `useProjectPrettier` сняты. Prettier: существующий `prettierConfigPath`. ESLint: оба корневых `tsconfigPath` и `eslintConfigPath`. Неявного поиска в cwd больше нет.
+
+### Дефолтные пути отчётов
+
+Если путь не задан, отчёты пишутся в `./.openapi-codegen-reports/` (не в корень репозитория). Явные пути CLI/конфига не меняются. Добавьте `.openapi-codegen-reports/` и `.openapi-codegen-store/` в `.gitignore`.
+
+### `--cache` без стратегии
+
+Кэш по умолчанию выключен. `generate --cache` на новом или пустом конфиге берёт стратегию `reuse` и пишет `.openapi-codegen-store` от **cwd**, не от output. Передайте `--cacheStrategy` (или поле в конфиге). После `update-config` старые конфиги обычно остаются на `entity` внутри output.
+
+### Кастомный HTTP / slim `ApiError.request`
+
+После regen кастомный `request(RequestConfig, options)` с этой сигнатурой больше не вызывается. Три пути:
+
+1. Переписать транспорт на `request(ApiRequestOptions, OpenAPI)` и экспортировать `requestRaw`; оставить `"request"` в конфиге. `createClient` берёт `createLegacyRequestAdapter` как default executor.
+2. Указать `customExecutorPath` на модуль с `createExecutorAdapter` (файл **копируется при generate**, не импортируется с вашего пути в runtime). Этот путь — для транспорта `request(RequestConfig, options)`.
+3. Переопределить через `executorFactory`, если default не подходит: `createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) })`. Helper генерируется в любом случае.
+
+`ApiError.request` — slim (`method`, `path`, `headers`, `query`, `body`). Тело ответа — `ApiError.body`.
+
+### Одноразовый cache miss
+
+Только opt-in кэш. Три волны отпечатка могут дать по одному холодному прогону: PDTCH-185 (шире reuse hash + ключи MD5), PDTCH-191 (конверт v3), PDTCH-193 (v4 + запрет skip на битом store). После первой успешной записи hit возвращается. Это не вечный miss.
+
+### Canary weight (Preview)
+
+Traffic splitter — сгенерированный хелпер, не live-трафик. Маршрут считает только **`newClientWeight`** (0–100) и только **`headerValues.new`**. `oldClientWeight` и `headerValues.old` отвергаются. Пара `80` / `20` никогда не была сплитом 80/20.
+
+## Известные ограничения (2.1.0)
+
+Это принятые края, не баги generate:
+
+- Диапазон `2XX` схлопывается в `200` (задумано).
+- Без JSON `getContent` может взять первый media type в порядке ключей объекта.
+- Entity skip смотрит, что файлы **есть**, а не их содержимое, когда `useHistory` выключен. Ручная правка кэш не сбрасывает. History-bound item (`useHistory`) в Entity skip не уходит.
+- Несколько items в один output: при коллизии пути побеждает последняя запись. `auto-group` на одну общую папку не включается.
+- Путь модели в output, начинающийся с `../`, теряет эти сегменты, чтобы файл остался в папке моделей. Два исходных файла могут тогда получить один путь (побеждает последняя запись). Если после среза путь всё ещё снаружи этой папки, модель не пишется.
+- У JSON `analyze-usage` нет `schemaVersion`.
+- Workspace report, traffic splitter и swarm — **Preview**. Swarm пишет манифест-заглушку, не мультисервисный генератор.
+- CLI `--plugins` — только строки. Объект `{ path, config }` живёт в файле конфига.
+- `analyze-diff` грузит root-плагины + Active item (абсолютный `--input`) + CLI `--plugins`. Нет совпадения → root + CLI. Несколько items с одним абсолютным input → merge их плагинов и предупреждение.
+
+## Заметки, которые всё ещё нужны (включая прыжок с 1.0.0)
 
 ## Ломающие изменения (Breaking Changes)
 
@@ -72,7 +130,7 @@
 
 - `request` в конфиге по-прежнему указывает на транспортный модуль (legacy-сигнатура `ApiRequestOptions`); при генерации копируется в `core/request.ts`.
 - `customExecutorPath` указывает на модуль с экспортом `createExecutorAdapter`; при генерации копируется в `core/executor/createExecutorAdapter.ts` (не импортируется в runtime).
-- `createLegacyRequestAdapter(openApiConfig, mapOptions?)` — сгенерированный helper для проектов с legacy custom `request()` без полного переписывания на `RequestExecutor`. Используйте через `createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) })`.
+- `createLegacyRequestAdapter(openApiConfig, mapOptions?)` — сгенерированный helper для legacy custom `request()`. `createClient` берёт его как default, если задан `"request"` и нет `customExecutorPath`. Переопределение — через `executorFactory`.
 - Если кастомный транспорт экспортирует `requestRaw`, legacy adapter делегирует в него; иначе `requestRaw` синтезирует минимальный `ApiResult` из `request()` (status 200).
 
 #### Цепочка interceptors
@@ -321,7 +379,6 @@ CLI: `--reuseOnConflict namespace` (опционально; без флага с
 ```bash
 openapi analyze-diff --input ./openapi/current.yaml --compare-with ./openapi/previous.yaml --ci
 openapi generate --openapi-config ./openapi.config.json --strict-openapi --fail-on-governance-errors
-openapi analyze-usage --sourcePath ./generated/index.ts --projectPath . --check --diff-report ./.openapi-codegen-reports/openapi-diff-report.json
 ```
 
 #### Устаревшие алиасы
@@ -464,7 +521,7 @@ Top-level CLI-команды `heal`, `migrate` и `swarm` по-прежнему 
 
 Если используете кастомный executor-модуль, задайте `customExecutorPath` (файл копируется в generated core при регенерации).
 
-Если сохраняете legacy custom `request()` и не хотите полностью переписывать на `RequestExecutor`, перегенерируйте клиент и используйте `createLegacyRequestAdapter` через `executorFactory`, либо задайте `"request"` в конфиге — дефолтный `createExecutorAdapter` сопоставит `RequestConfig` автоматически.
+Если сохраняете legacy custom `request()` и не хотите полностью переписывать на `RequestExecutor`, задайте `"request"` в конфиге и перегенерируйте — `createClient` берёт `createLegacyRequestAdapter` как default. При необходимости переопределите через `executorFactory`.
 
 Запустите `check-config`, чтобы увидеть предупреждения об отсутствующих файлах `request` / `customExecutorPath` и некорректном экспорте `createExecutorAdapter`.
 

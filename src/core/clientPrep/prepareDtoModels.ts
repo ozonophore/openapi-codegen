@@ -92,10 +92,24 @@ const resolveTypeFactory = (nameMap: Map<string, NameMapEntry>, kind: 'raw' | 'd
 };
 
 const finalizeDtoType = (property: Model, dtoType: string): string => {
-    if (!property.isRequired && !property.default && !property.isNullable) {
+    if (property.isNullable) {
+        return `${dtoType} | null`;
+    }
+    if (!property.isRequired && !property.default) {
         return `${dtoType} | undefined`;
     }
     return dtoType;
+};
+
+/** Wrap a class-ref construct so null does not reach `new` / `.toJSON()`. */
+const absentClassRef = (construct: string, property: Model, accessor: string): string => {
+    if (property.isNullable) {
+        return `${accessor} != null ? ${construct} : null`;
+    }
+    if (!property.isRequired) {
+        return `${accessor} ? ${construct} : undefined`;
+    }
+    return construct;
 };
 
 const applyCoercion = (expr: string, property: Model, accessor: string): string => {
@@ -146,11 +160,7 @@ const buildDtoInit = (property: Model, nameMap: Map<string, NameMapEntry>): stri
             return applyCoercion(`${accessor}${defaultSuffix}`, property, accessor);
         }
         const dtoName = mapped.dtoName;
-        if (property.isRequired) {
-            return applyCoercion(`new ${dtoName}(${accessor})`, property, accessor);
-        }
-        const expr = `${accessor} ? new ${dtoName}(${accessor}) : undefined`;
-        return applyCoercion(expr, property, accessor);
+        return applyCoercion(absentClassRef(`new ${dtoName}(${accessor})`, property, accessor), property, accessor);
     }
 
     if (property.export === 'array') {
@@ -158,11 +168,7 @@ const buildDtoInit = (property: Model, nameMap: Map<string, NameMapEntry>): stri
         const classRef = itemModel.export === 'reference' ? resolveClassRef(itemModel.type, nameMap) : undefined;
         if (classRef) {
             const dtoName = classRef.dtoName;
-            if (property.isRequired) {
-                return applyCoercion(`fromArray(${dtoName}, ${accessor})`, property, accessor);
-            }
-            const expr = `${accessor} ? fromArray(${dtoName}, ${accessor}) : undefined`;
-            return applyCoercion(expr, property, accessor);
+            return applyCoercion(absentClassRef(`fromArray(${dtoName}, ${accessor})`, property, accessor), property, accessor);
         }
         return applyCoercion(`${accessor}${defaultSuffix}`, property, accessor);
     }
@@ -173,11 +179,7 @@ const buildDtoInit = (property: Model, nameMap: Map<string, NameMapEntry>): stri
         if (classRef) {
             const dtoName = classRef.dtoName;
             const mapExpr = `Object.fromEntries(Object.entries(${accessor}).map(([key, value]) => [key, new ${dtoName}(value)]))`;
-            if (property.isRequired) {
-                return applyCoercion(mapExpr, property, accessor);
-            }
-            const expr = `${accessor} ? ${mapExpr} : undefined`;
-            return applyCoercion(expr, property, accessor);
+            return applyCoercion(absentClassRef(mapExpr, property, accessor), property, accessor);
         }
         return applyCoercion(`${accessor}${defaultSuffix}`, property, accessor);
     }
@@ -193,20 +195,14 @@ const buildDtoToJson = (property: Model, nameMap: Map<string, NameMapEntry>): st
         if (mapped.dtoKind !== 'class') {
             return undefined;
         }
-        if (property.isRequired) {
-            return `${accessor}.toJSON()`;
-        }
-        return `${accessor} ? ${accessor}.toJSON() : undefined`;
+        return absentClassRef(`${accessor}.toJSON()`, property, accessor);
     }
 
     if (property.export === 'array') {
         const itemModel = property.link ?? { ...property, export: 'reference' as const, link: null };
         const classRef = itemModel.export === 'reference' ? resolveClassRef(itemModel.type, nameMap) : undefined;
         if (classRef) {
-            if (property.isRequired) {
-                return `${accessor}.map(item => item.toJSON())`;
-            }
-            return `${accessor} ? ${accessor}.map(item => item.toJSON()) : undefined`;
+            return absentClassRef(`${accessor}.map(item => item.toJSON())`, property, accessor);
         }
     }
 
@@ -215,10 +211,7 @@ const buildDtoToJson = (property: Model, nameMap: Map<string, NameMapEntry>): st
         const classRef = itemModel.export === 'reference' ? resolveClassRef(itemModel.type, nameMap) : undefined;
         if (classRef) {
             const mapExpr = `Object.fromEntries(Object.entries(${accessor}).map(([key, value]) => [key, value.toJSON()]))`;
-            if (property.isRequired) {
-                return mapExpr;
-            }
-            return `${accessor} ? ${mapExpr} : undefined`;
+            return absentClassRef(mapExpr, property, accessor);
         }
     }
 

@@ -87,8 +87,7 @@ Frontend-команды любят OpenAPI-контракты, но ненави
 - [Примеры](docs/ru/examples.md)
 - [Возможности](docs/ru/features.md)
 - [Руководство по миграции](MIGRATION.RU.md)
-- [Плагины](docs/ru/features.md#plugin-system)
-- [Plugin API v2 (RFC)](docs/ru/features.md#plugin-api-v2-rfc)
+- [Плагины](docs/ru/plugins.md) (factory API; файлы v1/v2 остаются валидными)
 - [English README](README.md)
 - [English docs](docs/en/usage.md)
 

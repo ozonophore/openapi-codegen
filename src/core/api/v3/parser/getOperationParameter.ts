@@ -52,7 +52,7 @@ export function getOperationParameter(this: Parser, openApi: OpenApi, parameter:
             operationParameter.default = getModelDefault(parameter.schema);
             return operationParameter;
         } else {
-            const model = this.getModel({ openApi: openApi, definition: parameter.schema, parentRef: '' });
+            const model = this.getModel({ openApi: openApi, definition: parameter.schema, parentRef: parentRef });
             operationParameter.export = model.export;
             operationParameter.type = model.type;
             operationParameter.base = model.base;

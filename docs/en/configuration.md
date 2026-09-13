@@ -234,7 +234,7 @@ Use `customExecutorPath` to provide a path to your custom `createExecutorAdapter
 }
 ```
 
-See [RequestExecutor Migration Guide](./request-executor-migration.md) for details.
+See the executor section on the [Upgrade page](../../MIGRATION.md#custom-http--slim-apierrorrequest) for migration paths.
 
 #### Legacy: Custom request function
 
@@ -283,4 +283,4 @@ Generator plugins can override schema type mapping (for example via `x-typescrip
 - Also: `disableBuiltinPlugins`, `strictPluginMode` (root and `items[]`)
 - Supported module formats: CJS, ESM, and TS (when runtime supports TS imports)
 - Full guide: [Plugins](plugins.md)
-- Short anchors: [features.md#plugin-system](features.md#plugin-system), [Plugin API v2](features.md#plugin-api-v2-rfc)
+- Short anchors: [features.md#plugin-system](features.md#plugin-system), [Plugins](plugins.md)

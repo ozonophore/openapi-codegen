@@ -96,7 +96,7 @@ program
     .option('--tsconfigPath <value>', 'Path to project tsconfig.json for batch ESLint fix (requires --eslintConfigPath)')
     .option('--eslintConfigPath <value>', 'Path to project ESLint config for batch ESLint fix (requires --tsconfigPath)')
     .option('--cache', 'Enable generation cache (default: disabled)')
-    .option('--cachePath <value>', 'Path to generation cache file relative to output directory (default: .openapi-codegen-store)')
+    .option('--cachePath <value>', 'Path to the cache/store. For cacheStrategy reuse this is resolved from cwd (default: .openapi-codegen-store). For entity, the sidecar stays under output.')
     .addOption(new Option('--cacheStrategy <value>', 'Cache strategy').choices(['content', 'entity', 'reuse']))
     .addOption(new Option('--reuseOnConflict <value>', 'Reuse store conflict policy when cacheStrategy is reuse').choices(['fail', 'namespace']))
     .option('--cacheDebug', 'Show cache hit/miss debug logs (default: false)')
@@ -109,7 +109,7 @@ program
     .option('--workspace-report', 'Enable workspace report generation for multi-spec runs. Supports dot-notation: --workspace-report.format, --workspace-report.path (default: false)')
     .option(
         '--traffic-splitter',
-        'Enable traffic splitter module generation for canary migrations. Supports dot-notation: --traffic-splitter.strategy, --traffic-splitter.old-client-weight, etc. (default: false)'
+        'Preview: write a TrafficSplitter helper module (not live canary traffic). Supports dot-notation: --traffic-splitter.strategy, --traffic-splitter.new-client-weight, etc. (default: false)'
     )
     .option('--swarm', 'Enable AvatarSwarm manifest generation. Supports dot-notation: --swarm.output (default: false)')
     .option('--pre-analyze', 'Run cross-spec pre-generation analysis and print findings to stdout before writing any files (default: false)')

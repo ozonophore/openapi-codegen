@@ -1,10 +1,10 @@
 import { safeHasOwn } from '../../../../common/utils/safeHasOwn';
+import { lookupAndFollow } from '../../../follow/lookupAndFollow';
 import type { OperationResponse } from '../../../types/shared/OperationResponse.model';
-import { splitCanonicalRef, toParentSourceFile } from '../../../utils/canonicalRef';
+import { toParentSourceFile } from '../../../utils/canonicalRef';
 import { getOperationResponseCode } from '../../../utils/getOperationResponseCode';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
-import type { OpenApiResponse } from '../types/OpenApiResponse.model';
 import type { OpenApiResponses } from '../types/OpenApiResponses.model';
 
 export function getOperationResponses(this: Parser, openApi: OpenApi, responses: OpenApiResponses, parentRef: string): OperationResponse[] {
@@ -14,11 +14,8 @@ export function getOperationResponses(this: Parser, openApi: OpenApi, responses:
     for (const code in responses) {
         if (safeHasOwn(responses, code)) {
             const responseOrReference = responses[code];
-            const response = (responseOrReference.$ref ? (this.context.get(responseOrReference.$ref, parentSourceFile) as Record<string, any>) : responseOrReference) as OpenApiResponse;
+            const { value: response, parent: responseParentRef } = lookupAndFollow(this.context, responseOrReference, parentSourceFile);
             const responseCode = getOperationResponseCode(code);
-            const responseParentRef = responseOrReference.$ref
-                ? splitCanonicalRef(this.context.toCanonicalRef(responseOrReference.$ref, parentSourceFile)).sourceFile || parentSourceFile
-                : parentSourceFile;
 
             if (responseCode) {
                 const operationResponse = this.getOperationResponse(openApi, response, responseCode, responseParentRef);

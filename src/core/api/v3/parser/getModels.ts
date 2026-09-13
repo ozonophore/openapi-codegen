@@ -2,7 +2,7 @@ import type { Model } from '../../../types/shared/Model.model';
 import { isModelPointer, splitCanonicalRef } from '../../../utils/canonicalRef';
 import { resolveModelImports, setDuplicateModelAliases } from '../../../utils/modelHelpers';
 import { sortModelsByName } from '../../../utils/sortModelsByName';
-import { unique } from '../../../utils/unique';
+import { uniqueByKey } from '../../../utils/unique';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 
@@ -26,9 +26,9 @@ export function getModels(this: Parser, openApi: OpenApi): Model[] {
             });
             models.push(model);
         }
-        models = sortModelsByName(models.filter(unique));
+        models = sortModelsByName(uniqueByKey(models, model => `${model.path}\0${model.name}`));
         setDuplicateModelAliases(models);
         resolveModelImports(models, this.context.output.outputModels);
     }
-    return models.filter(unique);
+    return uniqueByKey(models, model => `${model.path}\0${model.name}`);
 }
