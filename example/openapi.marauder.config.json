@@ -14,7 +14,6 @@
     "trafficSplitter": {
         "enabled": true,
         "strategy": "weighted",
-        "oldClientWeight": 80,
         "newClientWeight": 20,
         "stickySessions": true,
         "sessionDuration": "1h"

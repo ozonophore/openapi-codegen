@@ -451,8 +451,9 @@ await service.getCallWithoutParametersAndResponse({ timeout: 5000 });
 
 #### Using generated `createClient` with `customExecutorPath` and `executorFactory`
 
-If you set `customExecutorPath` in generation config, `createClient.ts` imports your custom
-`createExecutorAdapter` and uses it as the default executor.
+If you set `customExecutorPath` in generation config, that module is **copied into the generated
+client at generate time** and `createClient.ts` uses the copy as the default executor. It is not
+imported from your original path at runtime.
 
 You can additionally pass `executorFactory` at runtime to wrap/extend this default executor
 (for retry, tracing, metrics, etc.) without changing generated services.
@@ -980,7 +981,7 @@ Root-oriented. Write failures are warnings; generation is not blocked.
 
 ### 5. `generate --traffic-splitter`
 
-Writes a standalone `TrafficSplitter.ts` into the **first** item’s output for canary-style routing helpers. Does **not** switch live traffic or deploy clients.
+Preview. Writes a standalone `TrafficSplitter.ts` into the **first** item’s output. Does **not** switch live traffic. Weighted routing uses `newClientWeight` only (0–100); do not treat a pair of old/new weights as an 80/20 split.
 
 ```bash
 openapi-codegen-cli generate -ocn openapi.config.json --traffic-splitter
@@ -992,7 +993,6 @@ openapi-codegen-cli generate -ocn openapi.config.json --traffic-splitter.strateg
   "trafficSplitter": {
     "enabled": true,
     "strategy": "weighted",
-    "oldClientWeight": 80,
     "newClientWeight": 20,
     "stickySessions": true
   }
@@ -1083,6 +1083,6 @@ See the canonical guide: [Plugins](plugins.md).
 - Builtin `x-typescript-type`; opt out with `disableBuiltinPlugins`
 - Plugin factory API (`apiVersion: '3'`): `{ meta, createPlugin }` or function with `.meta` — see [Plugins](plugins.md#plugin-factory-api-apiversion-3)
 
-## Plugin API v2 (RFC)
+## Plugin hooks (v2)
 
-Semantic-diff hooks for `analyze-diff`: `afterSemanticDiff`, `mapRecommendation`, `beforeReportWrite`. Full details: [Plugins — API v2](plugins.md#plugin-api-v2-analyze-diff).
+Semantic-diff hooks for `analyze-diff`: `afterSemanticDiff`, `mapRecommendation`, `beforeReportWrite`. Full details: [Plugins — API v2](plugins.md#plugin-api-v2-analyze-diff). Author contract is the Plugin factory API; v1/v2 files stay valid. See [Plugins](plugins.md).

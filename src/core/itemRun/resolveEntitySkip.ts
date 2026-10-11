@@ -34,6 +34,7 @@ export async function resolveEntitySkip(
         reuseStore,
         specInput,
         filesExist: defaultFilesExist,
+        historyBound: item.useHistory === true,
     });
 
     if (!willSkip) {

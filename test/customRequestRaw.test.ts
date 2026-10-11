@@ -47,6 +47,9 @@ describe('@unit: custom request + requestRaw', () => {
 
         assert.ok(createClient.includes('withInterceptors'));
         assert.ok(createClient.includes('apiErrorInterceptor'));
+        assert.ok(createClient.includes('createLegacyRequestAdapter'));
+        assert.ok(createClient.includes('createLegacyRequestAdapter<TExecutorOptions>(openApiConfig)'));
+        assert.ok(!createClient.includes("from './core/executor/createExecutorAdapter'"));
         assert.ok(responseService.includes('requestRaw<'));
         assert.ok(createExecutorAdapter.includes('toApiRequestOptions'));
         assert.ok(createExecutorAdapter.includes('__requestRaw<TResponse>(toMergedOptions(config, options), openApiConfig)'));
@@ -92,5 +95,45 @@ describe('@unit: customExecutorPath wiring', () => {
         assert.ok(createClient.includes('createExecutorAdapter<TExecutorOptions>(openApiConfig)'));
         assert.ok(copiedAdapter.includes('transportRequestRaw<TResponse>(toMergedOptions(config, options), openApiConfig)'));
         assert.ok(!copiedAdapter.includes('__requestRaw'));
+    });
+});
+
+describe('@unit: custom request without requestRaw', () => {
+    test('auto-wires createLegacyRequestAdapter and compiles createExecutorAdapter without requestRaw import', async (t: TestContext) => {
+        silenceLoggers(t);
+
+        const input = path.join(__dirname, 'spec', 'v3.json');
+        const outputDir = path.join(process.cwd(), 'test', 'generated', 'custom_request_no_raw');
+        t.after(() => {
+            rmSync(outputDir, { recursive: true, force: true });
+        });
+
+        await generate({
+            input,
+            output: outputDir,
+            request: './test/custom/requestNoRaw.ts',
+            httpClient: HttpClient.FETCH,
+            useOptions: false,
+            useUnionTypes: false,
+            validationLibrary: ValidationLibrary.NONE,
+            enumPrefix: 'E',
+            excludeCoreServiceFiles: false,
+            interfacePrefix: 'I',
+            sortByRequired: true,
+            typePrefix: 'T',
+            useCancelableRequest: false,
+            useSeparatedIndexes: false,
+        });
+
+        const createClient = readFileSync(path.join(outputDir, 'createClient.ts'), 'utf8');
+        const createExecutorAdapter = readFileSync(path.join(outputDir, 'core', 'executor', 'createExecutorAdapter.ts'), 'utf8');
+        const legacyAdapter = readFileSync(path.join(outputDir, 'core', 'executor', 'legacyRequestAdapter.ts'), 'utf8');
+
+        assert.ok(createClient.includes('createLegacyRequestAdapter<TExecutorOptions>(openApiConfig)'));
+        assert.ok(!createClient.includes("from './core/executor/createExecutorAdapter'"));
+        assert.ok(!createExecutorAdapter.includes('requestRaw as __requestRaw'));
+        assert.ok(createExecutorAdapter.includes("ok: true"));
+        assert.ok(!legacyAdapter.includes('legacyRequestRaw'));
+        assert.ok(legacyAdapter.includes("status: 200"));
     });
 });

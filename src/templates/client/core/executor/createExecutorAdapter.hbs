@@ -5,7 +5,11 @@ import type { RequestExecutor, RequestConfig } from './requestExecutor';
 import type { ApiRequestOptions } from '../ApiRequestOptions';
 import type { TOpenAPIConfig } from '../OpenAPI';
 import { OpenAPI } from '../OpenAPI';
+{{#if omitRequestRaw}}
+import { request as __request } from '../request';
+{{else}}
 import { request as __request, requestRaw as __requestRaw } from '../request';
+{{/if}}
 
 function toApiRequestOptions(config: RequestConfig): ApiRequestOptions {
     return {
@@ -37,7 +41,17 @@ export function createExecutorAdapter<TRequestOptions extends Record<string, any
 
     return {
         requestRaw<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<ApiResult<TResponse>> {
+            {{#if omitRequestRaw}}
+            return __request<TResponse>(toMergedOptions(config, options), openApiConfig).then((body) => ({
+                url: `${openApiConfig.BASE}${config.path}`,
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                body: body as TResponse,
+            }));
+            {{else}}
             return __requestRaw<TResponse>(toMergedOptions(config, options), openApiConfig);
+            {{/if}}
         },
         request<TResponse>(config: RequestConfig, options?: TRequestOptions): Promise<TResponse> {
             return __request<TResponse>(toMergedOptions(config, options), openApiConfig);

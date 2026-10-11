@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-beta.17] — 2026-10-11
+
+### Changed
+
+- Docs: Upgrade page is 2.0.0 → 2.1.0 (`MIGRATION.md` / `MIGRATION.RU.md`). Entry pages no longer present «Plugin API v2 (RFC)» as the current contract; author contract is the Plugin factory API. Factory example: `example/plugins/factory-type.plugin.cjs`.
+- Docs: `analyze-usage --check` is an ERROR gate including consumer TypeScript; UNUSED is a warning. The required Unified CI example keeps `analyze-usage` and does not pass `--check`.
+- Docs: Upgrade page names Model path collapse (leading `../` on a model output path is stripped) as a 2.1.0 Known limitation — name collision or skip if still outside the models folder.
+- Custom `request` without `customExecutorPath`: `createClient` uses `createLegacyRequestAdapter` as the default executor. Generated `createExecutorAdapter` compiles when the transport has no `requestRaw` (synthetic `ApiResult`).
+- CLI help: `--cachePath` reuse-store path is from cwd; `--traffic-splitter` is Preview (`newClientWeight` only).
+- Preview Traffic Splitter: schema/CLI reject `oldClientWeight` and `headerValues.old`. Canary weight is `newClientWeight` only.
+
+### Fixed
+
+- Changelog for **2.1.0-beta.16** incorrectly listed `normalizePathsToAbsolute()` as a public package export. It is internal; option paths are normalized inside the generator.
+- Follow after `$ref` lookup for operation parameters, OAS3 requestBody, and inline parameter schemas: nested Tree `$refs` join from the component file, not the operation file.
+- Classes mode: nested DTO constructors and `toJSON` skip `null`; nullable properties get `| null` on `dtoType`.
+
 ## [2.1.0-beta.16] — 2026-08-30
 
 Core generation pipeline extracted; this release also ships `$ref` / reuse and plugin-config fixes that landed with that split.

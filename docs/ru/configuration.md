@@ -236,4 +236,4 @@ Opt-in возможности, добавленные в актуальную с
 - Также: `disableBuiltinPlugins`, `strictPluginMode` (root и `items[]`)
 - Поддерживаемые форматы модулей: CJS, ESM и TS (если рантайм поддерживает импорт TS)
 - Подробное руководство: [Плагины](plugins.md)
-- Короткие якоря: [features.md#plugin-system](features.md#plugin-system), [Plugin API v2](features.md#plugin-api-v2-rfc)
+- Короткие якоря: [features.md#plugin-system](features.md#plugin-system), [Плагины](plugins.md)

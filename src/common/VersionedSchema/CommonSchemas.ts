@@ -183,16 +183,17 @@ export const workspaceReportConfigSchemaOrBoolean = createBooleanToObjectSchema(
 
 /** Phase 2: Traffic Splitter — canary migration helper */
 
-const trafficSplitterConfigSchema = z.object({
-    enabled: z.boolean().optional(),
-    strategy: z.enum(['weighted', 'round-robin', 'header-based', 'header-and-weighted']).optional(),
-    oldClientWeight: z.number().optional(),
-    newClientWeight: z.number().optional(),
-    stickySessions: z.boolean().optional(),
-    sessionDuration: z.string().optional(),
-    headerName: z.string().optional(),
-    headerValues: z.object({ old: z.string(), new: z.string() }).optional(),
-});
+const trafficSplitterConfigSchema = z
+    .object({
+        enabled: z.boolean().optional(),
+        strategy: z.enum(['weighted', 'round-robin', 'header-based', 'header-and-weighted']).optional(),
+        newClientWeight: z.number().optional(),
+        stickySessions: z.boolean().optional(),
+        sessionDuration: z.string().optional(),
+        headerName: z.string().optional(),
+        headerValues: z.object({ new: z.string() }).strict().optional(),
+    })
+    .strict();
 
 export const trafficSplitterConfigSchemaOrBoolean = createBooleanToObjectSchema(trafficSplitterConfigSchema);
 

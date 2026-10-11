@@ -1,17 +1,15 @@
+import { APP_LOGGER } from '../../common/Consts';
+import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
 import { convertArrayToObject } from '../../common/utils/convertArrayToObject';
 import { loadConfigIfExists } from '../../common/utils/loadConfigIfExists';
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { mergePluginPaths, type NormalizedPluginEntry, type PluginConfigEntry } from '../../core/plugins/pluginEntries';
 
 /**
- * Collects plugin entries from root config and per-item overrides.
- *
- * Entries from all items are merged together (with dedupe by resolved path in the caller).
- * analyze-diff receives --input for a single spec but has no way to match it to a specific
- * config item at this layer, so the union of all item plugins is used as a safe superset.
- * If a future change resolves the active item by input path, this function should accept
- * an optional `activeInput` filter to narrow the set.
+ * Collects plugin entries from root config plus the Active item (absolute `--input` match).
+ * Omitting `activeInput` or missing a match yields root plugins only — not the union of every item.
  */
-function collectConfigPluginEntries(config: Record<string, unknown>): PluginConfigEntry[] {
+function collectConfigPluginEntries(config: Record<string, unknown>, activeInput?: string): PluginConfigEntry[] {
     const collected: PluginConfigEntry[] = [];
 
     const append = (plugins: unknown): void => {
@@ -23,25 +21,44 @@ function collectConfigPluginEntries(config: Record<string, unknown>): PluginConf
     append(config.plugins);
 
     const items = config.items;
-    if (Array.isArray(items)) {
-        for (const item of items) {
-            if (item && typeof item === 'object') {
-                append((item as Record<string, unknown>).plugins);
-            }
+    if (!activeInput || !Array.isArray(items)) {
+        return collected;
+    }
+
+    const absoluteActive = resolveHelper(activeInput);
+    const matches: Record<string, unknown>[] = [];
+    for (const item of items) {
+        if (!item || typeof item !== 'object') {
+            continue;
+        }
+        const record = item as Record<string, unknown>;
+        if (typeof record.input !== 'string') {
+            continue;
+        }
+        if (resolveHelper(record.input) === absoluteActive) {
+            matches.push(record);
         }
     }
 
-    // Duplicates across root and items are deduped by resolved path inside mergePluginPaths.
+    if (matches.length > 1) {
+        APP_LOGGER.warn(LOGGER_MESSAGES.ANALYZE_DIFF.DUPLICATE_ACTIVE_ITEM(absoluteActive, matches.length));
+    }
+
+    for (const match of matches) {
+        append(match.plugins);
+    }
+
     return collected;
 }
 
 /**
  * Reads plugin entries from openapi config and optional CLI paths for semantic diff hooks.
  * Preserves object `config` so `loadGeneratorPlugins` can call `configure`.
+ * `activeInput` is the analyze-diff `--input` (absolute); Git / `--compare-with` are not used.
  */
-export function resolvePluginEntries(openapiConfig?: string, cliPlugins?: string[]): NormalizedPluginEntry[] {
+export function resolvePluginEntries(openapiConfig?: string, cliPlugins?: string[], activeInput?: string): NormalizedPluginEntry[] {
     const configData = loadConfigIfExists(openapiConfig);
     const config = convertArrayToObject(configData) as Record<string, unknown>;
-    const configEntries = collectConfigPluginEntries(config);
+    const configEntries = collectConfigPluginEntries(config, activeInput);
     return mergePluginPaths(configEntries.length > 0 ? configEntries : undefined, cliPlugins);
 }

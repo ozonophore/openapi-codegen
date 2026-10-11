@@ -51,7 +51,7 @@ openapi-codegen-cli generate --input ./spec.json --output ./dist
 | `--useUnionTypes` | - | boolean | `false` | Use union types instead of enums |
 | `--excludeCoreServiceFiles` | - | boolean | `false` | Exclude generation of core and service files |
 | `--request` | - | string | - | Path to custom request file |
-| | | | | **Legacy HTTP customization:** Use `--request` only if you have a legacy custom transport (pre-2.0.0 RequestExecutor). For modern projects, use `--customExecutorPath` instead. See [RequestExecutor migration](features.md#request-executor-migration-guide) in features.md. |
+| | | | | **Legacy HTTP customization:** Use `--request` only if you have a legacy custom transport (pre-2.0.0 RequestExecutor). For modern projects, use `--customExecutorPath` instead. See the [Upgrade page](../../MIGRATION.md#custom-http--slim-apierrorrequest). |
 | `--customExecutorPath` | - | string | - | Path to custom `createExecutorAdapter` module |
 | | | | | **Modern HTTP customization:** Recommended approach for projects on 2.0.0+. Accepts a module exporting `createExecutorAdapter` or compatible executor factory. Enables request/response interceptors, retries, and middleware. See [RequestExecutor features](features.md#request-executor-features) in features.md. |
 | `--interfacePrefix` | - | string | `I` | Prefix for interface models |
@@ -220,7 +220,7 @@ openapi-codegen-cli analyze-diff --input ./openapi/spec.yaml --git HEAD~1
 - `--ci` - Exit with code 1 when governance errors are found
 - `--allow-breaking` - Allow breaking changes in governance checks
 
-**Plugin hooks (v2):** `plugins` in `openapi.config.json` may be strings or `{ path, name?, config? }`. Non-empty `config` is passed to optional `configure(config)` on load for both `generate` and `analyze-diff`. CLI `--plugins` merges with config (config first). See [Plugins](plugins.md) and [Plugin API v2 (RFC)](features.md#plugin-api-v2-rfc).
+**Plugins:** `plugins` in `openapi.config.json` may be strings or `{ path, name?, config? }`. Author contract is the Plugin factory API; v1/v2 files stay valid. Non-empty `config` is passed to optional `configure(config)` on load for both `generate` and `analyze-diff`. CLI `--plugins` is string paths only (merged with config, config first). See [Plugins](plugins.md).
 
 #### Miracles and confirmation
 
@@ -250,7 +250,7 @@ Example (excerpt):
 
 ### Command: `analyze-usage`
 
-> **When to use:** After `generate` in CI to verify that your application still imports and calls every endpoint in the generated client. Use `--check` to fail CI when ERROR-level mismatches are found. Pair with `--diff-report` to cross-validate RENAME miracles.
+> **When to use:** After `generate` to see how the consumer project uses the generated client. Pair with `--diff-report` to cross-validate RENAME miracles. `--check` is optional: it exits `1` on any finding with severity ERROR, including TypeScript diagnostics in consumer files that import the client — not only “API contract” mismatches. UNUSED coverage findings are WARNING and do not fail `--check`.
 
 Analyzes how a TypeScript consumer project uses generated API exports and writes a JSON report. Imports are resolved **path-based** from `--sourcePath`: any import that resolves (via TypeScript module resolution) to the generated entry file or a file under its directory is treated as an API import. Module aliases such as `@my-org/api` are supported when they resolve to that path.
 
@@ -265,7 +265,7 @@ openapi-codegen-cli analyze-usage --sourcePath ./src/api/index.ts --projectPath 
 - `--projectPath` / `-p` - Root path of consumer TypeScript project (required)
 - `--tsconfigPath` / `-t` - Optional path to `tsconfig.json`
 - `--output` / `-o` - Output JSON report file path (default: `./.openapi-codegen-reports/openapi-usage-report.json`)
-- `--check` / `-c` - CI mode: exits with code `1` when ERROR-level mismatches are found
+- `--check` / `-c` - Exit `1` when any finding has severity ERROR (including consumer TypeScript errors). WARNING-only findings (including UNUSED) do not fail.
 - `--diff-report` - Path to `analyze-diff` JSON report for RENAME miracle validation against consumer code
 
 The command prints a usage summary to console and writes a JSON report with findings and coverage details.
@@ -291,15 +291,18 @@ openapi-codegen-cli generate \
   --governance-config ./governance.json \
   --fail-on-governance-errors
 
-# 3. Consumer contract check (optional RENAME miracle cross-check)
+# 3. Typecheck
+tsc --noEmit
+```
+
+Optional extra (not part of the required gate): `analyze-usage --check` exits `1` on any ERROR, including TypeScript diagnostics in consumer files that import the client. UNUSED findings are WARNING and do not fail.
+
+```bash
 openapi-codegen-cli analyze-usage \
   --sourcePath ./generated/index.ts \
   --projectPath . \
   --check \
   --diff-report ./.openapi-codegen-reports/openapi-diff-report.json
-
-# 4. Typecheck
-tsc --noEmit
 ```
 
 **Severity mapping (shared diagnostics):** missing `operationId` appears as **info** in strict `issues[]` and **warning** in `governance.violations` (override to `error` via governance config). Use `--fail-on-governance-errors` on generate to block on governance errors when `--strict-openapi` is enabled.
@@ -307,6 +310,5 @@ tsc --noEmit
 Recommended minimal post-generate chain:
 ```bash
 openapi-codegen-cli generate --input ./openapi/spec.yaml --output ./generated
-openapi-codegen-cli analyze-usage --sourcePath ./generated/index.ts --projectPath . --check
 tsc --noEmit
 ```

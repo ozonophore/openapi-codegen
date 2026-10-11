@@ -280,6 +280,79 @@ describe('@unit: EntitySkip', () => {
         assert.equal(buildCacheKey(item, specPath), buildCacheKey(item, resolveHelper(specPath)));
     });
 
+    test('resolveEntitySkipCandidate denies skip when historyBound even on reuse integrity hit', async () => {
+        mkdirSync(generatedRoot, { recursive: true });
+        tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-history-bound-'));
+        const outputFile = path.join(tmpDir, 'out.ts');
+        writeFileSync(outputFile, 'export {}', 'utf8');
+
+        const cache = new GenerationCache(path.join(tmpDir, 'cache.json'));
+        const cacheKey = 'item-key';
+        const fingerprint = 'fp-match';
+        cache.set({ key: cacheKey, fingerprint, files: [outputFile], updatedAt: Date.now() });
+
+        assert.equal(
+            await resolveEntitySkipCandidate({
+                useEntityCache: true,
+                generationCache: cache,
+                cacheKey,
+                cacheFingerprint: fingerprint,
+                useReuseStore: true,
+                reuseStore: fakeReuseStore({
+                    'api-a': { input: 'api-a.yaml', lastGeneratedAt: new Date().toISOString(), artifactKeys: ['k'] },
+                }),
+                specInput: 'api-a',
+                filesExist: async () => true,
+                historyBound: true,
+            }),
+            false
+        );
+    });
+
+    test('shouldEntitySkip denies skip when useHistory is true on a warm hit', async () => {
+        mkdirSync(generatedRoot, { recursive: true });
+        tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-should-history-'));
+        const specPath = path.join(tmpDir, 'api.yaml');
+        writeFileSync(specPath, 'openapi: 3.0.0\ninfo: { title: t, version: 1 }\npaths: {}', 'utf8');
+        const item = baseItem({
+            cache: true,
+            cacheStrategy: 'entity',
+            useHistory: true,
+            input: specPath,
+            output: path.join('test', 'generated', path.basename(tmpDir), 'out'),
+        });
+
+        const cache = new GenerationCache(path.join(tmpDir, 'cache.json'));
+        const absoluteInput = resolveHelper(specPath);
+        const cacheKey = buildCacheKey(item, absoluteInput);
+        const fingerprint = await buildEntityFingerprint(item, absoluteInput);
+        cache.set({ key: cacheKey, fingerprint, files: [path.join(tmpDir, 'x.ts')], updatedAt: Date.now() });
+
+        assert.equal(await shouldEntitySkip({ item, generationCache: cache, reuseStore: null, filesExist: async () => true }), false);
+    });
+
+    test('shouldEntitySkip still skips when useHistory is false on a warm hit', async () => {
+        mkdirSync(generatedRoot, { recursive: true });
+        tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-should-no-history-'));
+        const specPath = path.join(tmpDir, 'api.yaml');
+        writeFileSync(specPath, 'openapi: 3.0.0\ninfo: { title: t, version: 1 }\npaths: {}', 'utf8');
+        const item = baseItem({
+            cache: true,
+            cacheStrategy: 'entity',
+            useHistory: false,
+            input: specPath,
+            output: path.join('test', 'generated', path.basename(tmpDir), 'out'),
+        });
+
+        const cache = new GenerationCache(path.join(tmpDir, 'cache.json'));
+        const absoluteInput = resolveHelper(specPath);
+        const cacheKey = buildCacheKey(item, absoluteInput);
+        const fingerprint = await buildEntityFingerprint(item, absoluteInput);
+        cache.set({ key: cacheKey, fingerprint, files: [path.join(tmpDir, 'x.ts')], updatedAt: Date.now() });
+
+        assert.equal(await shouldEntitySkip({ item, generationCache: cache, reuseStore: null, filesExist: async () => true }), true);
+    });
+
     test('shouldEntitySkip uses injectable filesExist', async () => {
         mkdirSync(generatedRoot, { recursive: true });
         tmpDir = mkdtempSync(path.join(generatedRoot, 'entity-skip-should-'));

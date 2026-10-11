@@ -31,6 +31,10 @@ _Avoid_: a second “canonical path”; treating every loaded file as a Canonica
 (Parent source file, Tree $ref) → Canonical Ref, then read `$Refs`. Match the parser’s file name allowing only spelling of the same opened file (slashes, encoding, drive-letter case — a missing drive is not the current drive). If that file was never opened, the Tree $ref does not exist — do not pick another file by name, do not search the disk. `get` / `exists` stay strict; unresolved refs are a Spec/strict concern, not a lookup guess.
 _Avoid_: unqualified “resolve”; `dereference`; `PathApi.resolve` as the name of this operation; fuzzy filename repair
 
+**Follow**:
+The Parent source file for Tree $refs nested inside an object reached by $ref lookup: the source file of that Canonical Ref, not the caller’s file. An empty parent is not a Follow.
+_Avoid_: keeping the caller’s Parent source file after `get`; `parentRef: ''` as “inline means no parent”; inlining `get` + `toCanonicalRef` + `sourceFileAfterRef` at parsers
+
 **Virtual file map entry**:
 Where to write `.ts` for one spec file: source file (no Pointer) → output path, plus Pointers seen in that file. Not a schema store.
 _Avoid_: virtual file as schema cache; `exists` over seen Pointers only; `get` via the map
@@ -42,6 +46,10 @@ _Avoid_: calling it "Context's virtual file map"; treating it as a schema store;
 **Output mapping**:
 Canonical Ref → generated `.ts` path via the VirtualFileMap module. Not $ref lookup. Local spec files only.
 _Avoid_: resolveCanonicalRef on Context (moved to VirtualFileMap)
+
+**Model path collapse**:
+Intended Output mapping rule: leading `../` on a path relative to the models folder is stripped so the `.ts` stays under that folder. Known limitation for 2.1.0: two Canonical Refs may share one output path (last write wins), or the model is not written if the path is still outside the folder after the strip.
+_Avoid_: calling the strip a Defect; `getRelativeModelPath` as the domain name; failing generate because of `../`
 
 **Remote $ref**:
 A Tree $ref whose file part is `http://` or `https://`. `$ref` lookup may still read `$Refs`. No Virtual file map entry and no Output mapping.
@@ -66,6 +74,52 @@ _Avoid_: a third mode `preAnalyze`
 **OpenApiGeneratorPlugin**:
 Runtime plugin object: name, optional hooks, optional `configure`. v1/v2 modules export it; Plugin factory API produces it after `createPlugin`.
 _Avoid_: storing factory modules (`meta` + `createPlugin`) on Context as if they were this object
+
+**Schema Model**:
+A generated type whose Canonical Ref sits in a schema registry (`components.schemas` or OAS2 `definitions`). Names from `requestBodies`, `responses`, and other non-schema registries are not Schema Models.
+_Avoid_: emitting an empty type for a Request Body / Response Object name; treating `SimpleRequestBody` as a Model
+
+**Range status code**:
+An OpenAPI response key like `2XX`. Generation maps it to the first code of the range (`200`). Intended.
+_Avoid_: calling this a Defect; emitting a 200–299 union
+
+## Release classification (2.0.0 → 2.1.0)
+
+**Defect**:
+A violation of the intended *stable* 2.1.0 contract: default generate, entry documentation, or `--useHistory`. Blocks the 2.1.0 release.
+_Avoid_: leftover, risk, issue; treating a Preview seam or an analyze-diff multi-item mismatch as an automatic release blocker
+
+**Should-fix**:
+A cheap, clearly right correction that is not a Defect of the stable layer. We still do it in the 2.1.0 window; it does not hold the tag.
+_Avoid_: calling this a Defect so it silently becomes a release blocker; calling this a Known limitation when we do intend to touch it
+
+**Upgrade page**:
+The 2.0.0 → 2.1.0 migration document (`MIGRATION.md` and `MIGRATION.RU.md`). The single list of Contract changes and Known limitations for that jump.
+_Avoid_: treating changelog or features as the upgrade list; a 1.0.0 → 2.1.0 title as current
+
+**Contract change**:
+Intended behavior that differs from 2.0.0. Ships as-is; the delta is written into migration and changelog.
+_Avoid_: using “breaking” as the bucket name; calling a corrected 2.0.0 Defect a remaining Defect
+
+**Known limitation**:
+Incomplete or sharp-edged behavior accepted for 2.1.0 and named in docs. Does not block the release.
+_Avoid_: calling this a Defect so it silently becomes a code blocker
+
+**Active item** (analyze-diff):
+The `items[]` entry whose `input` matches `analyze-diff --input` after both paths are made absolute. Plugins = root + that item + CLI `--plugins`. No match → root + CLI only. Several items with the same input → merge their plugins and warn. Git / `--compare-with` do not change the match.
+_Avoid_: union of every `items[].plugins`
+
+**History-bound item**:
+A generation item with `useHistory` on. Entity skip must not apply — the Diff report is an input and is read every run.
+_Avoid_: skipping because the spec hash and report *path* are unchanged
+
+**Canary weight**:
+Share of helper-routed requests treated as new (0–100): `newClientWeight` only.
+_Avoid_: oldClientWeight
+
+**Canary header value**:
+The header value that means new: `headerValues.new` only.
+_Avoid_: requiring `headerValues.old`
 
 ## Generation batch session
 
@@ -289,7 +343,7 @@ Flush IndexCombine via `CoreOutputAdapter` instead of WriteClient-shaped `IndexC
 
 ## Entity skip / entity fingerprint
 
-Policy for skipping a Spec item when GenerationCache hit is valid: fingerprint match + files on disk. Applies when `cacheStrategy` is **`entity` or `reuse`** (hybrid skip). For `reuse`, skip also requires a Reuse manifest **presence** guard (`specItems[spec]` exists) **and** store-artifact integrity (`verifySpecItemIntegrity`) — not hashing of output files.
+Policy for skipping a Spec item when GenerationCache hit is valid: fingerprint match + files on disk. Applies when `cacheStrategy` is **`entity` or `reuse`** (hybrid skip). For `reuse`, skip also requires a Reuse manifest **presence** guard (`specItems[spec]` exists) **and** store-artifact integrity (`verifySpecItemIntegrity`) — not hashing of output files. A **History-bound item** is never skipped.
 
 - **Module:** `src/core/generationCache/EntitySkip.ts` (+ `GenerationCache.ts` in same package)
 - **Interface:** `buildCacheKey`, `buildEntityFingerprint`, `shouldEntitySkip` — no `registerOutputFile` (Write side effect stays in Generation item session)

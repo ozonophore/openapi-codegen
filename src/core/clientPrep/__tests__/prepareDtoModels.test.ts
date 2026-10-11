@@ -405,4 +405,52 @@ describe('@unit: prepareDtoModels', () => {
         assert.strictEqual(property?.dtoInit, "data['weird-name'] ?? undefined");
         assert.strictEqual(property?.dtoTarget, "['weird-name']");
     });
+
+    test('required nullable class ref does not construct or serialize null', () => {
+        const profile = createInterfaceModel('IProfile', [createPrimitiveModel('bio', 'string')]);
+        const profileRef: Model = {
+            ...createPrimitiveModel('profile', 'IProfile'),
+            export: 'reference',
+            type: 'IProfile',
+            isRequired: true,
+            isNullable: true,
+        };
+        const user = createInterfaceModel('IUser', [profileRef]);
+
+        const prepared = prepareDtoModels({
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [user, profile],
+            services: [],
+        });
+        const property = prepared.models.find(model => model.name === 'IUser')?.properties[0];
+
+        assert.strictEqual(property?.dtoType, 'IProfileDto | null');
+        assert.strictEqual(property?.dtoInit, 'data.profile != null ? new IProfileDto(data.profile) : null');
+        assert.strictEqual(property?.dtoToJSON, 'this.profile != null ? this.profile.toJSON() : null');
+    });
+
+    test('optional nullable class ref is FooDto | null, not a bare type', () => {
+        const profile = createInterfaceModel('IProfile', [createPrimitiveModel('bio', 'string')]);
+        const profileRef: Model = {
+            ...createPrimitiveModel('profile', 'IProfile'),
+            export: 'reference',
+            type: 'IProfile',
+            isRequired: false,
+            isNullable: true,
+        };
+        const user = createInterfaceModel('IUser', [profileRef]);
+
+        const prepared = prepareDtoModels({
+            version: '1.0.0',
+            server: 'http://localhost',
+            models: [user, profile],
+            services: [],
+        });
+        const property = prepared.models.find(model => model.name === 'IUser')?.properties[0];
+
+        assert.strictEqual(property?.dtoType, 'IProfileDto | null');
+        assert.strictEqual(property?.dtoInit, 'data.profile != null ? new IProfileDto(data.profile) : null');
+        assert.strictEqual(property?.dtoToJSON, 'this.profile != null ? this.profile.toJSON() : null');
+    });
 });

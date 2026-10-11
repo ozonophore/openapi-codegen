@@ -173,16 +173,17 @@ openapi-codegen-cli generate \
   --strict-openapi \
   --fail-on-governance-errors
 
-# 3. Verify consumer imports (fails CI on ERROR-level mismatches)
+# 3. Verify consumer imports (report; does not fail CI)
 openapi-codegen-cli analyze-usage \
   --sourcePath ./src/generated/index.ts \
   --projectPath . \
-  --check \
   --diff-report ./.openapi-codegen-reports/openapi-diff-report.json
 
 # 4. TypeScript type check
 tsc --noEmit
 ```
+
+Optional extra (not part of the required gate): add `--check` to `analyze-usage` to exit `1` on any ERROR, including TypeScript diagnostics in consumer files that import the client. UNUSED findings are WARNING and do not fail.
 
 **What each step does:**
 
@@ -190,7 +191,7 @@ tsc --noEmit
 |------|---------|---------|----------|
 | 1 | `analyze-diff` | Detect breaking API changes vs. baseline | Governance errors (`--ci`; breaking changes fail only if a rule treats them as errors) |
 | 2 | `generate` | Generate client with strict validation | OpenAPI spec invalid or governance errors |
-| 3 | `analyze-usage` | Verify generated code is consumed correctly | Usage mismatches or type errors in consumer code |
+| 3 | `analyze-usage` | Verify generated code is consumed correctly | Does not fail the required gate (no `--check`); UNUSED is warning |
 | 4 | `tsc --noEmit` | TypeScript compilation check | Type errors in generated or consumer code |
 
 **CI-ready configuration:**
@@ -244,8 +245,7 @@ jobs:
         run: |
           openapi-codegen-cli analyze-usage \
             --sourcePath ./src/generated/index.ts \
-            --projectPath . \
-            --check
+            --projectPath .
       
       - name: Type check
         run: npx tsc --noEmit
@@ -306,7 +306,7 @@ openapi-codegen-cli generate --openapi-config ./openapi.config.json \
 openapi-codegen-cli generate -ocn example/openapi.marauder.config.json
 ```
 
-**Consumer usage check with diff cross-validation:**
+**Optional consumer usage check** (`--check` fails on any ERROR, including consumer TypeScript):
 ```bash
 openapi-codegen-cli analyze-usage \
   --sourcePath ./generated/index.ts \

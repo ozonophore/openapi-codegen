@@ -1,3 +1,4 @@
+import { lookupAndFollow } from '../../../follow/lookupAndFollow';
 import type { OperationParameters } from '../../../types/shared/OperationParameters.model';
 import { toParentSourceFile } from '../../../utils/canonicalRef';
 import { sortByRequiredExtended } from '../../../utils/sortByRequiredExtended';
@@ -20,9 +21,9 @@ export function getOperationParameters(this: Parser, openApi: OpenApi, parameter
 
     // Iterate over the parameters
     parameters.forEach(parameterOrReference => {
-        const parentSourceFile = toParentSourceFile(parentRef);
-        const parameterDef = (parameterOrReference.$ref ? (this.context.get(parameterOrReference.$ref, parentSourceFile) as Record<string, any>) : parameterOrReference) as OpenApiParameter;
-        const parameter = this.getOperationParameter(openApi, parameterDef, parentRef);
+        const parentSourceFile = toParentSourceFile(parentRef) || '';
+        const { value: parameterDef, parent: parameterParent } = lookupAndFollow(this.context, parameterOrReference, parentSourceFile);
+        const parameter = this.getOperationParameter(openApi, parameterDef, parameterParent);
 
         // We ignore the "api-version" param, since we do not want to add this
         // as the first / default parameter for each of the service calls.

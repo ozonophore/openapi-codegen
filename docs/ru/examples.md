@@ -201,16 +201,17 @@ npx openapi-codegen-cli generate \
   --governance-config ./governance.json \
   --fail-on-governance-errors
 
-# 3. Проверить импорты consumer (CI упадёт при несоответствиях уровня ERROR)
+# 3. Проверить импорты consumer (отчёт; CI не валит)
 npx openapi-codegen-cli analyze-usage \
   --sourcePath ./src/generated/index.ts \
   --projectPath . \
-  --check \
   --diff-report ./.openapi-codegen-reports/openapi-diff-report.json
 
 # 4. Проверка TypeScript типов
 npx tsc --noEmit
 ```
+
+Опционально (не обязательный gate): добавьте `--check` к `analyze-usage`, чтобы падать на любой ERROR, включая TypeScript в consumer-файлах с импортом клиента. UNUSED — WARNING и не валит команду.
 
 **Конфигурация качества (governance.json):**
 
@@ -261,7 +262,6 @@ jobs:
         run: npx openapi-codegen-cli analyze-usage \
           --sourcePath ./src/generated/index.ts \
           --projectPath . \
-          --check \
           --diff-report ./.openapi-codegen-reports/openapi-diff-report.json
       
       - name: "Step 4: TypeScript type check"
@@ -329,7 +329,7 @@ openapi-codegen-cli generate --openapi-config ./openapi.config.json \
 openapi-codegen-cli generate -ocn example/openapi.marauder.config.json
 ```
 
-**Проверка consumer usage с cross-validation diff:**
+**Опциональная проверка consumer usage** (`--check` падает на любой ERROR, включая TypeScript в consumer):
 ```bash
 openapi-codegen-cli analyze-usage \
   --sourcePath ./generated/index.ts \

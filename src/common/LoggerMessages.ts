@@ -187,6 +187,7 @@ export const LOGGER_MESSAGES = {
         CI_FAILURE: 'CI mode failed because governance errors were found.',
         IGNORED_CHANGES: (count: number) => `[openapi-codegen] IGNORED: ${count} semantic change(s) filtered by analyze.ignore`,
         EXECUTION_ERROR: (message: string) => `Analyze-diff execution failed: ${message}`,
+        DUPLICATE_ACTIVE_ITEM: (absoluteInput: string, matchCount: number) => `analyze-diff: ${matchCount} config items share input "${absoluteInput}"; merging their plugins.`,
         LEGACY_BASE: (base: string) => `Base: ${base}`,
         LEGACY_TARGET: (target: string) => `Target: ${target}`,
         LEGACY_STABILITY_SCORE: (score: number) => `Stability score: ${score}%`,

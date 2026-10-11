@@ -1,12 +1,12 @@
 import { safeHasOwn } from '../../../../common/utils/safeHasOwn';
+import { lookupAndFollow } from '../../../follow/lookupAndFollow';
 import type { Service } from '../../../types/shared/Service.model';
-import { splitCanonicalRef, toParentSourceFile } from '../../../utils/canonicalRef';
+import { toParentSourceFile } from '../../../utils/canonicalRef';
 import { getClassName } from '../../../utils/getClassName';
 import { ensureService, finalizeServiceImports, forEachOperationInPath, mergeOperationImportsIntoService } from '../../../utils/serviceHelpers';
 import { Parser } from '../Parser';
 import type { OpenApi } from '../types/OpenApi.model';
 import { OpenApiOperation } from '../types/OpenApiOperation.model';
-import { OpenApiPath } from '../types/OpenApiPath.model';
 import { getServiceName } from './getServiceName';
 
 /**
@@ -19,8 +19,7 @@ export function getServices(this: Parser, openApi: OpenApi): Service[] {
             // Grab path and parse any global path parameters
             const pathByUrl = openApi.paths[url];
             const rootPath = toParentSourceFile(this.context.root?.path) || '';
-            const path = (pathByUrl.$ref ? (this.context.get(pathByUrl.$ref, rootPath) as Record<string, any>) : pathByUrl) as OpenApiPath;
-            const parentFileRef = pathByUrl.$ref ? splitCanonicalRef(this.context.toCanonicalRef(pathByUrl.$ref, rootPath)).sourceFile : rootPath;
+            const { value: path, parent: parentFileRef } = lookupAndFollow(this.context, pathByUrl, rootPath);
             const pathParams = this.getOperationParameters(openApi, path.parameters || [], parentFileRef);
 
             // Parse all the methods for this path

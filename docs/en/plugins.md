@@ -151,5 +151,6 @@ import { loadGeneratorPlugins, applySemanticDiffPluginHooks, mergePluginPaths } 
 
 ## See also
 
-- Short anchors: [features.md#plugin-system](features.md#plugin-system), [features.md#plugin-api-v2-rfc](features.md#plugin-api-v2-rfc)
+- Short anchors: [features.md#plugin-system](features.md#plugin-system), [Plugin factory API](#plugin-factory-api-apiversion-3)
+- Factory example: [`example/plugins/factory-type.plugin.cjs`](../../example/plugins/factory-type.plugin.cjs)
 - [Configuration](configuration.md) · [Usage](usage.md)

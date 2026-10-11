@@ -2,6 +2,7 @@ import { OptionValues } from 'commander';
 
 import { APP_LOGGER, DEFAULT_ANALYZE_DIFF_REPORT_PATH } from '../../common/Consts';
 import { LOGGER_MESSAGES } from '../../common/LoggerMessages';
+import { resolveHelper } from '../../common/utils/pathHelpers';
 import { validateZodOptions } from '../../common/Validation';
 import { runAnalyzeDiffPipeline } from '../../core/diffReport';
 import { loadGovernanceConfig } from '../../core/governance/loadGovernanceConfig';
@@ -76,7 +77,7 @@ export async function analyzeDiff(options: OptionValues): Promise<AnalyzeDiffRes
 
         const governancePolicy = await loadGovernanceConfig(validatedOptions.governanceConfig);
         const ignoreRules = loadIgnoreRules(validatedOptions.openapiConfig);
-        const plugins = await loadGeneratorPlugins(resolvePluginEntries(validatedOptions.openapiConfig, validatedOptions.plugins));
+        const plugins = await loadGeneratorPlugins(resolvePluginEntries(validatedOptions.openapiConfig, validatedOptions.plugins, resolveHelper(newSpecInput)));
 
         const { reportPath, ignored, semanticReport, report, ciFailed } = await runAnalyzeDiffPipeline({
             oldSpec,

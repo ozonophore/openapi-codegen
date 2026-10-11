@@ -28,7 +28,8 @@ function toApiRequestOptions(config: RequestConfig): ApiRequestOptions {
 
 /**
  * Adapts legacy request(options, config) transport to the RequestExecutor contract.
- * Use via createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) }).
+ * Default createClient executor when config `request` is set and `customExecutorPath` is not.
+ * Override via createClient({ executorFactory: ({ openApiConfig }) => createLegacyRequestAdapter(openApiConfig) }).
  */
 export function createLegacyRequestAdapter<TRequestOptions extends Record<string, any>>(
     openApiConfig: TOpenAPIConfig = OpenAPI,

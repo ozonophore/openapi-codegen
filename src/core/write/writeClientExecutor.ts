@@ -9,6 +9,7 @@ interface WriteClientExecutor {
     outputPath: string;
     outputCorePath: string;
     request?: string;
+    customExecutorPath?: string;
     services: Service[];
     templates: Templates;
     prettierConfigPath?: string;
@@ -26,15 +27,15 @@ function deduplicateServicesByName(services: Service[]): Service[] {
 }
 
 export async function writeClientExecutor(adapter: CoreOutputAdapter, options: WriteClientExecutor): Promise<void> {
-    const { outputPath, outputCorePath, templates, services, request, prettierConfigPath } = options;
+    const { outputPath, outputCorePath, templates, services, request, customExecutorPath, prettierConfigPath } = options;
     const file = resolveHelper(outputPath, 'createClient.ts');
     const uniqueServices = deduplicateServicesByName(services);
-    const hasCustomRequest = !!request;
+    const useLegacyRequestAdapter = !!request && !customExecutorPath;
 
     adapter.logger.info(LOGGER_MESSAGES.WRITE_CLIENT.EXECUTOR_START(file));
     const templateResult = templates.exports.client({
         outputCore: outputCorePath,
-        useCustomRequest: hasCustomRequest,
+        useLegacyRequestAdapter,
         services: uniqueServices,
     });
     const formattedValue = await format(templateResult, undefined, prettierConfigPath);

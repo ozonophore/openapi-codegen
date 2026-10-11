@@ -4,6 +4,23 @@
 
 Формат основан на Keep a Changelog, и проект следует правилам семантического версионирования.
 
+## [2.1.0-beta.17] — 2026-10-11
+
+### Изменено
+
+- Документация: страница Upgrade — 2.0.0 → 2.1.0 (`MIGRATION.md` / `MIGRATION.RU.md`). Входные страницы больше не называют текущий контракт «Plugin API v2 (RFC)»; канон — Plugin factory API. Пример factory: `example/plugins/factory-type.plugin.cjs`.
+- Документация: `analyze-usage --check` — gate по ERROR, включая TypeScript в consumer; UNUSED — warning. В обязательном Unified CI остаётся `analyze-usage` без `--check`.
+- Документация: страница Upgrade называет Model path collapse (срез ведущих `../` у пути модели в output) известным ограничением 2.1.0 — коллизия имён или пропуск записи, если путь всё ещё снаружи папки моделей.
+- Кастомный `request` без `customExecutorPath`: `createClient` берёт `createLegacyRequestAdapter` как default executor. Сгенерированный `createExecutorAdapter` компилируется без `requestRaw` (синтетический `ApiResult`).
+- CLI help: `--cachePath` (reuse-store от cwd); `--traffic-splitter` — Preview (только `newClientWeight`).
+- Preview Traffic Splitter: схема/CLI отвергают `oldClientWeight` и `headerValues.old`. Canary weight — только `newClientWeight`.
+
+### Исправлено
+
+- В описании **2.1.0-beta.16** ошибочно указан публичный export `normalizePathsToAbsolute()`. Функция внутренняя; пути в опциях нормализуются внутри генератора.
+- Follow после `$ref` lookup для parameters, OAS3 requestBody и inline schema параметра: вложенные Tree `$ref` склеиваются от файла компонента, не от файла операции.
+- Режим classes: вложенный DTO ctor и `toJSON` не вызываются на `null`; у nullable свойств в `dtoType` есть `| null`.
+
 ## [2.1.0-beta.16] — 2026-08-30
 
 Хук плагина `configure()`, исправления Canonical Ref / `$ref` и фильтрации non-schema registries, hardening reuse/entity-skip и per-item опции в multi-item конфиге.
